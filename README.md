@@ -1,9 +1,5 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-![Running on iPhone SE](repoImages/notepad.gif)
-
-Really strained for mobile friendliness where I could (dragging still causes issues, it should look a good bit better one Chrome for Desktop)
-
 # Things this site currently does
 
 - Recreation of Windows 98 UI via [Packard Belle](https://www.npmjs.com/package/packard-belle)
@@ -82,8 +78,6 @@ The answer is probably Start -> Settings -> Control Panel
 - [ ] server side rendering is more feasible (usage of window currently makes that hard)
 - [ ] writable features communicate with server (allowing users to log in)
 
-If you'd like me to focus on any of these please consider donating https://www.buymeacoffee.com/padraig I will give most of this away to charity if anyone actually does donate. If you'd like to add them yourself I'd love to help make it happen!
-
 # Logging Hacks
 
 Hack styles should either be flagged or placed within the root css file
@@ -103,5 +97,3 @@ Internet Explorer is a mess now and whenever I get around to it it'll need docum
 - all the people I've forgotten
 
 ![Launch Screen iPhone SE](repoImages/launch.gif)
-
-![Background edits iPhone SE](repoImages/background.gif)
