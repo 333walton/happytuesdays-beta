@@ -1,10 +1,11 @@
 import * as icons from "../icons";
 import google1999 from "./textFiles/google1999";
-import facepalm from "./textFiles/facepalm";
 import squirtel from "./textFiles/squirtel";
 import rollin from "./textFiles/rollin";
-import sunscreen from "./textFiles/sunscreen";
 import allStarTabs from "./textFiles/allStarTabs";
+import blue from "./textFiles/blue"; // Ensure this line is correct
+import blueLyrics from "./textFiles/blue";
+import allstarLyrics from "./textFiles/allStar";
 
 const accessories = [
   { title: "Entertainment", icon: icons.folderProgram16, options: [] },
@@ -149,7 +150,7 @@ const startMenuData = [
             // }
           },
           {
-            title: "squirtel",
+            title: "Squirtel",
             icon: icons.notepadFile32,
             component: "Notepad",
             data: {
@@ -163,19 +164,19 @@ const startMenuData = [
         title: "Lyrics",
         options: [
           {
-            title: "sunscreen",
+            title: "Blue (Da Ba Dee)",
             icon: icons.notepadFile32,
             component: "Notepad",
             data: {
-              content: sunscreen
+              content: blueLyrics // Ensure this line is correct
             }
           },
           {
-            title: "all star lyrics",
+            title: "All Star",
             icon: icons.notepadFile32,
             component: "Notepad",
             data: {
-              content: allStarTabs
+              content: allstarLyrics
             }
           }
         ],
@@ -185,7 +186,7 @@ const startMenuData = [
         title: "Guitar Tabs",
         options: [
           {
-            title: "rollin guitar tabs",
+            title: "Rollin",
             icon: icons.notepadFile32,
             component: "Notepad",
             data: {
@@ -193,7 +194,7 @@ const startMenuData = [
             }
           },
           {
-            title: "all star",
+            title: "All Star",
             icon: icons.notepadFile32,
             component: "Notepad",
             data: {
