@@ -7,7 +7,7 @@ Hydra98 is a web-based Windows 98-style desktop, built with React and modern web
 ## 🖥️ What Can Hydra98 Do?
 
 → **Windows 98 UI recreation** with resizable, draggable windows<br>
-→ Emulates classic Windows **'Start' & 'Shutdown' sequences**<br>
+→ **Emulates classic Windows** 'Start' & 'Shutdown' sequences<br>
 → **Customizable desktop** (change wallpapers, save files, and tweak settings)<br>
 → **Notepad recreation** with original font + file saving<br>
 → **Basic MS-DOS simulator** (very, very basic)<br>
@@ -17,8 +17,8 @@ Hydra98 is a web-based Windows 98-style desktop, built with React and modern web
 
 ## 🔧 How Do I…?
 
-→ **See the launch screen again?** | Clear localStorage or go through the shutdown process<br>
-→ **Delete files?** | Not yet, but tweaking localStorage can help<br>
+→ **See the launch screen again?** | Clear LocalStorage or go through the shutdown process<br>
+→ **Delete files?** | Not yet, but tweaking LocalStorage can help<br>
 → **Tweak settings or remove CRT flicker?** | Check Start > Settings > Control Panel
 
 ## 🚀 Future Goals & Improvements
@@ -35,7 +35,7 @@ Hydra98 is a web-based Windows 98-style desktop, built with React and modern web
 
 - [x] **"My Computer" folder** with a floppy disk that “freezes” before telling you there’s no floppy inserted
 - [ ] **BSOD on crashes**, because nostalgia
-- [ ] **Minesweeper with difficulty settings**
+- [ ] **Minesweeper** with difficulty settings
 - [ ] **Napster simulator** (I never used Napster, so this might suck)
 - [ ] **Image viewer & dedicated images** folder
 - [ ] **IE Navigation that works internally** (with questionable innerHTML practices)
