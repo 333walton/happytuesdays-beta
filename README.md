@@ -78,17 +78,11 @@ The answer is probably Start -> Settings -> Control Panel
 - [ ] server side rendering is more feasible (usage of window currently makes that hard)
 - [ ] writable features communicate with server (allowing users to log in)
 
-# Logging Hacks
-
-Hack styles should either be flagged or placed within the root css file
-Boxshadowing has led to issues with some content covering the borders without hacky margins being used
-All resizable windows feature a lot of repetition atm
-Internet Explorer is a mess now and whenever I get around to it it'll need documentation all of its own
-
 # Credits go to:
 
 - https://github.com/1j01/jspaint for JS Paint
-- https://github.com/react95/react95 I stole some of their icons
+- https://www.npmjs.com/package/packard-belle I stole some of their icons
+- https://github.com/react95/react95 I also stole some of their icons
 - https://github.com/1000hz/winmine-exe for an amazing version of MSSansSerif
 - https://github.com/ShizukuIchi/ for reminding me to finish this thing after seeing his great XP one
 - https://int10h.org/oldschool-pc-fonts/fontlist/ for the boot screen font

@@ -45,10 +45,10 @@ class InternetExplorer extends Component {
         Component={WindowExplorer}
         className={cx("InternetExplorer", props.className)}
         title={`${
-          props.data.title || props.title !== "Internet Explorer (WIP)"
+          props.data.title || props.title !== "Internet Explorer"
             ? `${props.data.title || props.title} - `
             : ""
-        }Internet Explorer (WIP)`}
+        }Internet Explorer`}
         menuOptions={buildMenu(props)}
         minHeight={300}
         minWidth={300}

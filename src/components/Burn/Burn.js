@@ -12,7 +12,7 @@ class Burn extends Component {
     return (
       <Window
         {...props}
-        title="BURN (coming soon)"
+        title="HydraBurn (coming soon)"
         icon={burn16}
         menuOptions={buildMenu(props)}
         Component={WindowProgram}

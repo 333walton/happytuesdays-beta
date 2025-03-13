@@ -45,7 +45,7 @@ class ShutDown extends Component {
       >
         <Window
           className="ShutDown__window Window--active"
-          title="Shut Down Windows"
+          title="Shut Down Hydra"
           onClose={context.toggleShutDownMenu}
           resizable={false}
           isActive

@@ -60,7 +60,7 @@ const programs = [
     multiInstance: true
   },
   { title: "Outlook Express", icon: icons.outlook16, isDisabled: true },
-  { title: "Windows Explorer", icon: icons.windowsExplorer16, isDisabled: true }
+  { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: true }
 ];
 
 const favorites = [
