@@ -15,12 +15,12 @@ const generateRows = () => {
       content: `
         <ul>
           <li>Windows 98 UI with authentic styling</li>
-          <li>Boot & Shutdown Screens for immersion</li>
-          <li>CRT Flicker Effect (toggleable in control panel)</li>
+          <li>Classic Windows 'start' & 'shutdown' sequences</li>
+          <li>Control Panel settings for screen sizes, themes, and more</li>
           <li>Resizable Windows & Desktop Interface</li>
-          <li>Apps: Notepad, Paint, DOOM, IE, ASCII</li>
-          <li>Customization: Add wallpapers & change themes</li>
-          <li>File Saving: Save Game and Notepad files for later</li>
+          <li><b>Apps:</b> Notepad, Paint, DOOM, IE, ASCII</li>
+          <li><b>Customization:</b> Add wallpapers & change themes</li>
+          <li><b>File Saving:</b> Save Game, Paint and Notepad files for later</li>
           <li>Runs Doom</li>
         </ul>
       `
@@ -30,15 +30,15 @@ const generateRows = () => {
       image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRX6w3EFRXeOcn6IvxIHNU8S7NU-HNKLtJd8CBYvAiuWZzbu0xNDvBFubV",
       content: `
         <ul>
-          <li>Why does the screen flicker?<br> → That’s a CRT effect to make it feel like an old-school monitor! If you feel a seizure coming on, you can adjust it in Control Panel settings.</li>
-          <li>Why is the screen size weird?<br> → Because monitors were square (4:3 aspect ratio) in the 90s. Start > Settings > Control Panel to adjust.</li>
-          <li>Can I delete files?<br> → Not yet! But if you’re really determined, you can clear your browser’s local storage and pretend you’re a 90s IT pro.</li>
-          <li>The launch screen was cool, can I play it again?<br> → Yes, just go through the shutdown sequence, and you’ll see it again on refresh.</li>
+          <li><b>Why does the screen flicker?</b><br> → That’s a CRT effect to make it feel like an old-school monitor! If you feel a seizure coming on, you can adjust it in Control Panel settings.</li>
+          <li><b>Why is the screen size weird?</b><br> → Because monitors were square (4:3 aspect ratio) in the 90s. Start > Settings > Control Panel to adjust.</li>
+          <li><b>Can I delete files?</b><br> → Not yet! But if you’re really determined, you can clear your browser’s local storage and pretend you’re a 90s IT pro.</li>
+          <li><b>Can I play the launch screen again?</b><br> → Yes, just go through the shutdown sequence, and you’ll see it again on refresh.</li>
         </ul>
       `
     },
     {
-      title: "Technical stuff",
+      title: "Technical Stuff",
       image: "https://i.imgur.com/PcmaUvV.png",
       content: `
         <ul>
@@ -53,9 +53,22 @@ const generateRows = () => {
       title: "Goals",
       image: "http://clipart-library.com/img/1577254.png",
       content: `
-        <ul>
+        <ul style="margin-bottom: 0;">
           <li>To the moon</li>
-        </ul>
+        </ul><pre style="font-family: 'Courier New', monospace; margin-top: 0;"><code>
+                               🌕
+                         🚀
+                     .
+                 .
+              .   
+           .
+         .
+       .
+      .   
+     .
+    .
+ 💥
+        </code></pre>
       `
     }
   ];
@@ -82,22 +95,29 @@ const generateRows = () => {
 const marqueeGen = () =>
   [
     {
-      href: "https://www.google.com",
+      href: "https://www.w3schools.com/code/tryit.asp?filename=GL3DXQD5BRPJ",
       title: "Source Code"
     },
     {
-      href: "https://www.npmjs.com/package/packard-belle",
+      href: "https://react95.github.io/React95",
       title: "Component Library"
     },
     {
-      href: "https://www.google.com",
-      title: "LinkedIn"
+      href: "https://app.icebreaker.xyz/profiles/UhU6VSSjMQ_bjgHPcN6rU",
+      title: "Icebreaker"
     },
-    { href: "https://www.buymeacoffee.com", title: "$$$?" },
     {
-      href: "https://www.google.com",
-      title: "Similar projects"
-    }
+      href: "https://www.muse.place/moonwalkervault-steven",
+      title: "Step Into My Office"
+    },
+    {
+      href: "https://threejs.org/examples/#webgl_effects_ascii",
+      title: "Three.js Inspo"
+    },
+    {
+      href: "https://buymeacoffee.com/333walton",
+      title: "$$$ ?"
+    },
   ]
     .map(
       l =>
