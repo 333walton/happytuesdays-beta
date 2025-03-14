@@ -16,7 +16,7 @@ class Doom extends Component {
         icon={doom16}
         menuOptions={buildMenu(props)}
         Component={WindowProgram}
-        initialHeight={410}
+        initialHeight={388}
         initialWidth={560}
         className={cx("Doom", props.className)}
       >
