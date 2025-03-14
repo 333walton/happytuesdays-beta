@@ -21,7 +21,7 @@ class Doom extends Component {
         className={cx("Doom", props.className)}
       >
         <iframe
-          src="https://doom-rouge-eight.vercel.app/"
+          src="https://doom-jsdos.vercel.app/"
           title="Doom"
           width="100%"
           height="100%"
