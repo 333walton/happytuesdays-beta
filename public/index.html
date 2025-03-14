@@ -172,7 +172,19 @@
         visibility: visible;
       }
       .BIOS__logo {
-        float: right;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end; /* Aligns the images to the right */
+        height: 48px;
+      }
+
+      .left-image {
+        width: 81px;
+        height: 81px;
+        margin-right: -107px; /* Adjust the spacing between the images as needed */
+      }
+
+      .right-image {
         width: 40%;
         height: 48px;
         background-image: url(./static/hydra98bios333.png);
@@ -255,7 +267,10 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div class="BIOSWrapper initial">
       <div class="BIOS">
-        <div class="BIOS__logo"></div>
+        <div class="BIOS__logo">
+          <img src="%PUBLIC_URL%/static/windows98 flag.gif" alt="Windows98 flag" class="left-image">
+          <div class="right-image"></div>
+        </div>
         <div class="BIOS__bootHeader">
           <p>AMII BIOS (C) 1992-2025</p>
           <p>BIOS Version 17.0.2.REACT</p>
