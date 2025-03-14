@@ -179,9 +179,9 @@
       }
 
       .left-image {
-        width: 81px;
-        height: 81px;
-        margin-right: -107px; /* Adjust the spacing between the images as needed */
+        width: 69px;
+        height: 69px;
+        margin-right: -95px; /* Adjust the spacing between the images as needed */
       }
 
       .right-image {
@@ -191,6 +191,26 @@
         background-repeat: no-repeat;
         background-position: right;
       }
+
+      @media (max-width: 600px) {
+        .BIOS__logo {
+          justify-content: flex-end; /* Keep the images to the right on smaller screens */
+          padding-right: 10px
+        }
+
+        .left-image {
+          width: 60px;
+          height: 60px;
+          margin-right: 5px; /* Adjust the spacing between the images as needed */
+        }
+
+        .right-image {
+          width: 105px;
+          height: 105px;
+          background-size: contain; /* Adjust the size of the background image */
+        }
+      }
+
       @media (max-width: 600px), (max-height: 600px) {
         .BIOS,
         .WindowsLaunch {
@@ -283,7 +303,7 @@
           Mouse/digitizer... <span>detected</span>
         </div>
         <div class="BIOS__bootMessage4">
-          <img src="%PUBLIC_URL%/static/cryptopunk.jpg" alt="Description" style="width: 69px; height: 69px;">
+          <img src="%PUBLIC_URL%/static/cryptopunk.jpg" alt="Description" style="width: 58px; height: 58px;">
           <p>
             This project is by
             <a href="https://bit.ly/3FsgmPt">Charles</a>
