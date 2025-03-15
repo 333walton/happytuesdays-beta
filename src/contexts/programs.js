@@ -67,19 +67,6 @@ const startMenu = (injectedData = [], set, shutDown) => [
       className: "hideMobileY",
       title: "Help",
       icon: icons.help24,
-      options: [
-        {
-          title: "[ Empty ]",
-          // icon: icons.htmlFile16,
-          onClick: () => window.open("https://www.buymeacoffee.com/padraig"),
-          isDisabled: true
-        }
-      ]
-    },
-    {
-      className: "hideMobileY",
-      title: "Run...",
-      icon: icons.run24,
       options: []
     }
   ],
@@ -178,7 +165,11 @@ class ProgramProvider extends Component {
         startMenu(
           this.props.startMenuData,
           [
-            { title: "Ctrl+Alt+Del", onClick: () => this.toggleTaskManager() },
+            {
+              title: "Task Manager",
+              onClick: () => this.toggleTaskManager(),
+              icon: icons.folderProgram16
+            },
             {
               title: "Control Panel",
               onClick: () => this.toggleSettings(),

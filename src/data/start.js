@@ -12,13 +12,7 @@ const accessories = [
   { title: "Internet Tools", icon: icons.folderProgram16, options: [] },
   { title: "System Tools", icon: icons.folderProgram16, options: [] },
   { title: "Calculator", icon: icons.calculator16, isDisabled: true },
-  {
-    title: "Minesweeper",
-    icon: icons.minesweeper16,
-    component: "Minesweeper",
-    multiInstance: true,
-    isDisabled: true
-  },
+  
   {
     title: "Notepad",
     icon: icons.notepad16,
@@ -32,15 +26,7 @@ const accessories = [
     data: { src: "https://jspaint.app/", creator: "https://github.com/1j01" },
     multiInstance: true
   },
-  {
-    title: "Doom",
-    icon: icons.doom16,
-    component: "Doom",
-    // data: {
-    //   src: "https://basicallydan.github.io/skifree.js/"
-    // },
-    multiInstance: false
-  }
+  
 ];
 
 const programs = [
@@ -123,6 +109,28 @@ export const find = [
   }
 ];
 
+const games = [
+  {
+    title: "HydraBurn",
+    icon: icons.burn16,
+    component: "Burn",
+    multiInstance: true
+  },
+  {
+    title: "DOOM",
+    icon: icons.doom16,
+    component: "Doom",
+    multiInstance: true
+  },
+  {
+    title: "Minesweeper",
+    icon: icons.minesweeper16,
+    component: "Minesweeper",
+    multiInstance: true,
+    isDisabled: true
+  }
+];
+
 const startMenuData = [
   {
     title: "Programs",
@@ -142,7 +150,7 @@ const startMenuData = [
         title: "ASCII Art",
         options: [
           {
-            title: "SOON",
+            title: "Flames",
             icon: icons.burn16,
             component: "Burn",
             // data: {
@@ -205,7 +213,12 @@ const startMenuData = [
         icon: icons.folder16
       }
     ]
-  }
+  },
+  {
+    title: "Games",
+    icon: icons.joystick24,
+    options: games,
+  },
 ];
 
 export default startMenuData;

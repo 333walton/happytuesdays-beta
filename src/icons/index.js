@@ -23,6 +23,7 @@ export { default as htmlFile32 } from "./htmlFile32-min.png";
 export { default as imaging16 } from "./imaging16-min.png";
 export { default as internetExplorere16 } from "./internetExplorer16-min.png";
 export { default as internetExplorere32 } from "./internetExplorer32-min.png";
+export { default as joystick24 } from "./joystick24-min.png";
 export { default as logOff24 } from "./logOff24-min.png";
 export { default as msDos16 } from "./msDos16-min.png";
 export { default as notepad16 } from "./notepad16-min.png";
@@ -76,5 +77,5 @@ export { default as cd32 } from "./cd32-min.png";
 export {default as doom32} from "./doom32.png"
 export {default as doom16} from "./doom16.png"
 
-export {default as burn32} from "./Burn32.png"
-export {default as burn16} from "./Burn16.png"
+export {default as burn32} from "./burn32.png"
+export {default as burn16} from "./burn16-min.png"
