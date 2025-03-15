@@ -77,5 +77,5 @@ export { default as cd32 } from "./cd32-min.png";
 export {default as doom32} from "./doom32.png"
 export {default as doom16} from "./doom16.png"
 
-export {default as burn32} from "./burn32.png"
+export {default as burn32} from "./Burn32.png"
 export {default as burn16} from "./burn16-min.png"

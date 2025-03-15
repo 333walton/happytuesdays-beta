@@ -3,7 +3,6 @@ import google1999 from "./textFiles/google1999";
 import squirtel from "./textFiles/squirtel";
 import rollin from "./textFiles/rollin";
 import allStarTabs from "./textFiles/allStarTabs";
-import blue from "./textFiles/blue"; // Ensure this line is correct
 import blueLyrics from "./textFiles/blue";
 import allstarLyrics from "./textFiles/allStar";
 
