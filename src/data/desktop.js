@@ -65,9 +65,11 @@ const desktopData = [
     // }
   },
   {
-    title: "SOON",
-    icon: icons.burn32,
-    component: "Burn",
+    title: "Paint",
+    icon: icons.paint32,
+    component: "IframeWindow",
+    data: { src: "https://jspaint.app/", creator: "https://github.com/1j01" },
+    multiInstance: true,
     // data: {
     //   content: resume,
     //   readOnly: true
