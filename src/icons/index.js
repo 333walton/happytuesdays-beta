@@ -17,6 +17,7 @@ export { default as folderOpen32 } from "./folderOpen32-min.png";
 export { default as folderOptions16 } from "./folderOptions16-min.png";
 export { default as folderProgram16 } from "./folderProgram16-min.png";
 export { default as folderProgram24 } from "./folderProgram24-min.png";
+export { default as help16} from "./help16-min.png"
 export { default as help24 } from "./help24-min.png";
 export { default as htmlFile16 } from "./htmlFile16-min.png";
 export { default as htmlFile32 } from "./htmlFile32-min.png";
@@ -79,3 +80,6 @@ export {default as doom16} from "./doom16.png"
 
 export {default as burn32} from "./Burn32.png"
 export {default as burn16} from "./burn16-min.png"
+export { default as ascii16} from "./ascii16-min.png"
+export { default as ascii24 } from "./ascii24-min.png"
+export {default as pipes16} from "./pipes16-min.png"

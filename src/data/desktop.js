@@ -1,5 +1,4 @@
 import * as icons from "../icons";
-import resume from "./textFiles/resume";
 import readme from "./textFiles/readme";
 
 const desktopData = [

@@ -4,7 +4,6 @@ import squirtel from "./textFiles/squirtel";
 import rollin from "./textFiles/rollin";
 import allStarTabs from "./textFiles/allStarTabs";
 import blueLyrics from "./textFiles/blue";
-import allstarLyrics from "./textFiles/allStar";
 
 const accessories = [
   { title: "Entertainment", icon: icons.folderProgram16, options: [] },
@@ -72,7 +71,7 @@ const favorites = [
     icon: icons.folder16,
     options: [
       {
-        title: "My Big List of Films",
+        title: "Good Movies",
         type: "ExternalLink",
         icon: icons.htmlFile16,
         href: "https://boxd.it/9UyaN"
@@ -130,6 +129,30 @@ const games = [
   }
 ];
 
+const ASCII = [
+  {
+    title: "Flames",
+    icon: icons.burn16,
+    component: "Burn",
+    multiInstance: true
+  },
+  {
+    title: "Pipes",
+    icon: icons.pipes16,
+    component: "Notepad",
+    multiInstance: true,
+    isDisabled: true
+  },
+  {
+    title: "Squirtel",
+    icon: icons.notepadFile32,
+    component: "Notepad",
+    data: {
+      content: squirtel
+    }
+  },
+];
+
 const startMenuData = [
   {
     title: "Programs",
@@ -146,26 +169,16 @@ const startMenuData = [
     icon: icons.folderOpen24,
     options: [
       {
-        title: "ASCII Art",
+        title: "Help",
         options: [
           {
-            title: "Flames",
-            icon: icons.burn16,
-            component: "Burn",
-            // data: {
-            //   content: facepalm
-            // }
-          },
-          {
-            title: "Squirtel",
+            title: "FAQ",
             icon: icons.notepadFile32,
             component: "Notepad",
-            data: {
-              content: squirtel
-            }
-          }
+            multiInstance: true
+          },
         ],
-        icon: icons.folder16
+        icon: icons.help16
       },
       {
         title: "Lyrics",
@@ -176,14 +189,6 @@ const startMenuData = [
             component: "Notepad",
             data: {
               content: blueLyrics // Ensure this line is correct
-            }
-          },
-          {
-            title: "All Star",
-            icon: icons.notepadFile32,
-            component: "Notepad",
-            data: {
-              content: allstarLyrics
             }
           }
         ],
@@ -217,6 +222,11 @@ const startMenuData = [
     title: "Games",
     icon: icons.joystick24,
     options: games,
+  },
+  {
+    title: "ASCII Art",
+    icon: icons.ascii24,
+    options: ASCII,
   },
 ];
 

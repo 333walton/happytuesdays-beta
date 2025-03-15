@@ -33,11 +33,6 @@ const settings = (injectedData = []) => [
       isDisabled: true
     },
     {
-      title: "Folder Options",
-      icon: icons.folderOptions16,
-      isDisabled: true
-    },
-    {
       title: "Active Desktop",
       icon: icons.activeDesktop16,
       isDisabled: true
@@ -51,23 +46,13 @@ const settings = (injectedData = []) => [
 ];
 
 const startMenu = (injectedData = [], set, shutDown) => [
-  {
-    title: "Hydra Update",
-    icon: icons.windowsUpdate24,
-    isDisabled: true
-  },
   [
     ...injectedData,
+    
     {
       title: "Settings",
       icon: icons.settings24,
       options: settings(set)
-    },
-    {
-      className: "hideMobileY",
-      title: "Help",
-      icon: icons.help24,
-      options: []
     }
   ],
   {
