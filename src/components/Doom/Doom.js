@@ -34,27 +34,6 @@ class Doom extends Component {
 
     return (
       <>
-        {showAlert && (
-          <WindowAlert
-            {...commonProps}
-            title="DOOM Controls" // Custom title for the WindowAlert
-            onOK={this.confirm}
-            onClose={this.confirm} // Separate handler for closing the alert
-            className="IframeWindow--alert Window--active"
-            style={{ zIndex: 1000 }} // Ensure the alert has a higher z-index
-          >
-            {props.data && props.data.disclaimer ? (
-              props.data.disclaimer
-            ) : (
-              <div style={{ paddingTop: "px", paddingLeft: "5px", paddingRight: "5px" }}>
-                <b>WASD</b> - Move (Up, Down, Left, Right)<br></br>
-                <b>CTRL</b> - Shoot<br></br>
-                <b>ESC</b> - Pause<br></br>
-              </div>
-            )}
-          </WindowAlert>
-        )}
-
         <Window
           {...props}
           title="DOOM"
@@ -74,6 +53,27 @@ class Doom extends Component {
             scrolling="no"
           />
         </Window>
+
+      {showAlert && (
+        <WindowAlert
+          {...commonProps}
+          title="DOOM Controls" // Custom title for the WindowAlert
+          onOK={this.confirm}
+          onClose={this.confirm} // Separate handler for closing the alert
+          className="IframeWindow--alert Window--active"
+          style={{ zIndex: 1000 }} // Ensure the alert has a higher z-index
+        >
+          {props.data && props.data.disclaimer ? (
+            props.data.disclaimer
+          ) : (
+            <div style={{ paddingTop: "px", paddingLeft: "5px", paddingRight: "5px" }}>
+              <b>Arrows</b> - Move (Up, Down, Left, Right)<br></br>
+              <b>CTRL</b> - Shoot<br></br>
+              <b>ESC</b> - Pause<br></br>
+              </div>
+            )}
+          </WindowAlert>
+        )}
       </>
     );
   }
