@@ -67,7 +67,7 @@ class Doom extends Component {
             props.data.disclaimer
           ) : (
             <div style={{ paddingTop: "px", paddingLeft: "5px", paddingRight: "5px" }}>
-              <b>Arrows</b> - Move (Up, Down, Left, Right)<br></br>
+              <b>Arrows</b> - Move<br></br>
               <b>CTRL</b> - Shoot<br></br>
               <b>ESC</b> - Pause<br></br>
               </div>
