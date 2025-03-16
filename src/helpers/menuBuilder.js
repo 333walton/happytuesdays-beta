@@ -10,13 +10,25 @@ const buildCustomOptions = rows =>
     []
   );
 
-export const helpOptions = props => ({
-  title: "Help",
-  options: [
-    [{ title: "Help Topics", isDisabled: true }],
-    { title: `About ${props.title}`, isDisabled: true }
-  ]
-});
+export const helpOptions = props => {
+  if (props.componentType === "Doom") {
+    return {
+      title: "Help",
+      options: [
+        [{ title: "Help Topics", onClick: props.showHelp, isDisabled: true }],
+        { title: `About ${props.title}`, isDisabled: true }
+      ]
+    };
+  } else {
+    return {
+      title: "Help",
+      options: [
+        [{ title: "Help Topics", onClick: () => alert("Help Topics clicked"), isDisabled: true }],
+        { title: `About ${props.title}`, isDisabled: true }
+      ]
+    };
+  }
+};
 
 export const buildMenu = (props, customOptions = {}) => {
   const fileOptions = props.fileOptions || [];
