@@ -115,13 +115,13 @@ const marqueeGen = () =>
       title: "Three.js Inspo"
     },
     {
-      href: "https://buymeacoffee.com/333walton",
+      href: "",
       title: "$$$ ?"
     },
   ]
     .map(
       l =>
-        `<a href="${l.href}" target="_blank" norel="noopen noreferrer">${l.title}</a>`
+        `<a href="${l.href}" target="_blank" class="marquee-link">${l.title}</a>`
     )
     .join(" | ");
 
@@ -154,11 +154,20 @@ blink {
       visibility: visible;
   }
 }
+.marquee-link {
+  font-size: 20px !important;
+  font-weight: normal !important;
+  text-decoration: none;
+}
 </style>
+
 <font size="4" >
   <marquee bgcolor="red" color="white">
-    ${marqueeGen()}
+    <span>
+      ${marqueeGen()}
+    </span>
   </marquee>
+
   <table bgcolor="grey" width="100%">
     <thead>
       <tr>
@@ -179,7 +188,7 @@ blink {
       </td></tr>
     </tfoot>
   </table>
- </font>
+</font>
 `;
 
 export default readmeHTML;
