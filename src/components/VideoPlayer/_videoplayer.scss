@@ -1,0 +1,24 @@
+.VideoPlayer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.VideoPlayer__container {
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border: 2px solid #b4b4b4;
+    box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.2),
+        inset -2px -2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.VideoPlayer__video {
+    width: 100%;
+    height: 100%;
+}

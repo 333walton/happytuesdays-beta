@@ -116,10 +116,10 @@ const favorites = [
   },
   {
     title: "Promo (IIGA Test)",
-    type: "ExternalLink",
     icon: icons.mediavid16,
-    isDisabled: true,
-  }
+    component: "VideoPlayer",
+    multiInstance: true 
+  },
 ];
 
 export const find = [
