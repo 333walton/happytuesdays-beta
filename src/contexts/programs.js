@@ -27,8 +27,8 @@ const settings = (injectedData = []) => [
   [
     ...injectedData,
     {
-      title: "Printers",
-      icon: icons.settingsPrinters16,
+      title: "Defragmenter",
+      icon: icons.defrag16,
       component: "ExplorerWindow",
       isDisabled: true
     },

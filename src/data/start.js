@@ -6,9 +6,6 @@ import allStarTabs from "./textFiles/allStarTabs";
 import blueLyrics from "./textFiles/blue";
 
 const accessories = [
-  { title: "Entertainment", icon: icons.folderProgram16, options: [] },
-  { title: "Internet Tools", icon: icons.folderProgram16, options: [] },
-  { title: "System Tools", icon: icons.folderProgram16, options: [] },
   { title: "Calculator", icon: icons.calculator16, isDisabled: true },
   
   {
@@ -29,8 +26,27 @@ const accessories = [
 
 const programs = [
   { title: "Accessories", icon: icons.folderProgram16, options: accessories },
-  { title: "Online Services", icon: icons.folderProgram16, options: [] },
-  { title: "StartUp", icon: icons.folderProgram16, options: [] },
+  {
+    title: "Online Services", icon: icons.folderProgram16, options: [
+    {
+        title: "AOL",
+        icon: icons.aol16,
+        isDisabled: true
+      }
+  ] },
+  {
+    title: "Entertainment", icon: icons.folderProgram16, options: [
+      {
+        title: "Movie Player",
+        icon: icons.mediavid16,
+        isDisabled: true
+      },
+      {
+        title: "CD Player",
+        icon: icons.mediacd16,
+        isDisabled: true
+      }
+  ] },
   {
     title: "Internet Explorer",
     icon: icons.internetExplorere16,
@@ -49,9 +65,28 @@ const programs = [
 
 const favorites = [
   {
-    title: "Channels",
-    options: [],
-    icon: icons.folder16
+    title: "Media",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "Warpcast",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href: "https://warpcast.com/333walton"
+      },
+      {
+        title: "Good Movies",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href: "https://boxd.it/9UyaN"
+      },
+      {
+        title: "Good Techno",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href: "https://soundcloud.com/southbound_music/sets/best-techno?utm_source=good_techno&utm_medium=startmenu&utm_campaign=hydra98"
+      }
+    ]
   },
   {
     title: "Links",
@@ -67,22 +102,23 @@ const favorites = [
     ]
   },
   {
-    title: "Media",
+    title: "WebGL",
     icon: icons.folder16,
     options: [
       {
-        title: "Good Movies",
+        title: "Inspo",
         type: "ExternalLink",
         icon: icons.htmlFile16,
-        href: "https://boxd.it/9UyaN"
+        href:
+          "https://threejs.org/examples/#webgl_effects_ascii"
       }
-    ]
+    ],
   },
   {
-    title: "Warpcast",
+    title: "Promo (IIGA Test)",
     type: "ExternalLink",
-    icon: icons.htmlFile16,
-    href: "https://warpcast.com/333walton"
+    icon: icons.mediavid16,
+    isDisabled: true,
   }
 ];
 
@@ -115,15 +151,54 @@ const games = [
     multiInstance: true
   },
   {
-    title: "DOOM",
-    icon: icons.doom16,
-    component: "Doom",
-    multiInstance: true
+    title: "Doom Wads",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "coming soon...",
+        icon: icons.loaderbat16,
+        isDisabled: true
+      }
+    ]
+  },
+  {
+    title: "DOS Games",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "DOOM",
+        icon: icons.doom16,
+        component: "Doom",
+        multiInstance: true
+      }
+    ]
   },
   {
     title: "Minesweeper",
     icon: icons.minesweeper16,
     component: "Minesweeper",
+    multiInstance: true,
+    isDisabled: true
+  },
+  {
+    title: "Solitaire",
+    icon: icons.soli16,
+    component: "",
+    multiInstance: true,
+    isDisabled: true
+  },
+  
+  {
+    title: "SkiFree",
+    icon: icons.skifree,   
+    component: "",
+    multiInstance: true,
+    isDisabled: true
+  },
+  {
+    title: "Space Cadet Pinball",
+    icon: icons.spacecadet16,
+    component: "",
     multiInstance: true,
     isDisabled: true
   }
