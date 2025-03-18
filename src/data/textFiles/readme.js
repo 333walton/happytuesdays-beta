@@ -108,15 +108,15 @@ const marqueeGen = () =>
     },
     {
       href: "https://www.muse.place/moonwalkervault-steven",
-      title: "Step Into My Office"
+      title: "Vault Access"
     },
     {
       href: "https://threejs.org/examples/#webgl_effects_ascii",
       title: "Three.js Inspo"
     },
     {
-      href: "",
-      title: "$$$ ?"
+      href: "https://buymeacoffee.com/",
+      title: "Coffee?"
     },
   ]
     .map(
