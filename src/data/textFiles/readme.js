@@ -108,7 +108,7 @@ const marqueeGen = () =>
     },
     {
       href: "https://www.muse.place/moonwalkervault-steven",
-      title: "Vault Acces"
+      title: "Vault Access"
     },
     {
       href: "https://threejs.org/examples/#webgl_effects_ascii",
