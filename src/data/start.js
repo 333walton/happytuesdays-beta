@@ -92,7 +92,7 @@ const favorites = [
     icon: icons.folder16,
     options: [
       {
-        title: "MineCraft",
+        title: "Minecraft Sim",
         type: "ExternalLink",
         icon: icons.htmlFile16,
         href:

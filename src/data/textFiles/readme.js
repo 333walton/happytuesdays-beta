@@ -107,10 +107,6 @@ const marqueeGen = () =>
       title: "HQ"
     },
     {
-      href: "https://threejs.org/examples/#webgl_effects_ascii",
-      title: "Three.js Inspo"
-    },
-    {
       href: "https://buymeacoffee.com/",
       title: "Coffee?"
     },
