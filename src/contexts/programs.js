@@ -170,7 +170,7 @@ class ProgramProvider extends Component {
       {
         onClick: () => this.minimizeAll(),
         icon: icons.twitter16,
-        title: "Display Desktop"
+        title: ""
       }
     ],
     activePrograms: {},

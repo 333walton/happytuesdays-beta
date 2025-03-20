@@ -10,9 +10,22 @@ class Doom extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showAlert: true // State variable to control the visibility of the alert
+      showAlert: true, // State variable to control the visibility of the alert
+      isDesktop: window.innerWidth > 1024 // State variable to check if the user is on a desktop
     };
   }
+
+  componentDidMount() {
+    window.addEventListener("resize", this.handleResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+  }
+
+  handleResize = () => {
+    this.setState({ isDesktop: window.innerWidth > 1024 });
+  };
 
   confirm = () => {
     this.setState({ showAlert: false });
@@ -24,7 +37,7 @@ class Doom extends Component {
 
   render() {
     const { props } = this;
-    const { showAlert } = this.state;
+    const { showAlert, isDesktop } = this.state;
 
     const commonProps = {
       title: props.title,
@@ -54,23 +67,23 @@ class Doom extends Component {
           />
         </Window>
 
-      {showAlert && (
-        <WindowAlert
-          {...commonProps}
-          title="DOOM Controls" // Custom title for the WindowAlert
-          onOK={this.confirm}
-          onClose={this.confirm} // Separate handler for closing the alert
-          className="IframeWindow--alert Window--active"
-          style={{ zIndex: 1000 }} // Ensure the alert has a higher z-index
-        >
-          {props.data && props.data.disclaimer ? (
-            props.data.disclaimer
-          ) : (
-            <div style={{ paddingTop: "px", paddingLeft: "5px", paddingRight: "5px" }}>
-              <b>Arrows</b> - Move (up, down, left, right)<br></br>
-              <b>CTRL</b> - Shoot<br></br>
-              <b>CTRL</b> - Shoot<br></br>
-              <b>ESC</b> - Pause<br></br>
+        {showAlert && isDesktop && (
+          <WindowAlert
+            {...commonProps}
+            title="DOOM Controls" // Custom title for the WindowAlert
+            onOK={this.confirm}
+            onClose={this.confirm} // Separate handler for closing the alert
+            className="IframeWindow--alert Window--active"
+            style={{ zIndex: 1000 }} // Ensure the alert has a higher z-index
+          >
+            {props.data && props.data.disclaimer ? (
+              props.data.disclaimer
+            ) : (
+              <div style={{ paddingTop: "px", paddingLeft: "5px", paddingRight: "5px" }}>
+                <b>Arrows</b> - Move (up, down, left, right)<br></br>
+                <b>Enter</b> - Use<br></br>
+                <b>CTRL</b> - Shoot<br></br>
+                <b>ESC</b> - Pause<br></br>
               </div>
             )}
           </WindowAlert>

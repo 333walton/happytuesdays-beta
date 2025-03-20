@@ -3,7 +3,6 @@ import google1999 from "./textFiles/google1999";
 import squirtel from "./textFiles/squirtel";
 import rollin from "./textFiles/rollin";
 import allStarTabs from "./textFiles/allStarTabs";
-import blueLyrics from "./textFiles/blue";
 
 const accessories = [
   { title: "Calculator", icon: icons.calculator16, isDisabled: true },
@@ -89,6 +88,47 @@ const favorites = [
     ]
   },
   {
+    title: "WebGL",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "MineCraft",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://threejs.org/examples/webgl_geometry_minecraft.html"
+      },
+      {
+        title: "ASCII Ball",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://threejs.org/examples/webgl_effects_ascii.html"
+      },
+      {
+        title: "Blobmixer",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://blobmixer.14islands.com/remix"
+      },
+      {
+        title: "Rain Physics",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://loklok-volume.vercel.app/gpu"
+      },
+      {
+        title: "Instance Points",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://threejs.org/examples/webgpu_instance_points.html"
+      }
+    ],
+  },
+  {
     title: "Links",
     icon: icons.folder16,
     options: [
@@ -100,19 +140,6 @@ const favorites = [
           "https://www.coingecko.com/"
       }
     ]
-  },
-  {
-    title: "WebGL",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "Inspo",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://threejs.org/examples/#webgl_effects_ascii"
-      }
-    ],
   },
   {
     title: "Promo (IIGA Test)",
@@ -256,15 +283,12 @@ const startMenuData = [
         icon: icons.help16
       },
       {
-        title: "Lyrics",
+        title: "Change Log",
         options: [
           {
-            title: "Blue (Da Ba Dee)",
+            title: "3.25",
             icon: icons.notepadFile32,
             component: "Notepad",
-            data: {
-              content: blueLyrics // Ensure this line is correct
-            }
           }
         ],
         icon: icons.folder16
