@@ -125,8 +125,63 @@ const favorites = [
         icon: icons.htmlFile16,
         href:
           "https://threejs.org/examples/webgpu_instance_points.html"
-      }
+      },
+      {
+        title: "2.5D UI",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://yanlinma.co/flat-ui-and-a-half/"
+      },
     ],
+  },
+  {
+    title: "Demoscenes",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "Gallery",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://nanogems.demozoo.org/"
+      },
+      {
+        title: "GleEst",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://demozoo.org/productions/288839/"
+      },
+      {
+        title: "Videoram",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://demozoo.org/productions/296642/"
+      },
+      {
+        title: "micro1k",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://demozoo.org/productions/128900/"
+      },
+      {
+        title: "Kishkoid",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://demozoo.org/productions/13245/"
+      },
+      {
+        title: "Hush",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://www.youtube.com/watch?v=SteW58-pKnM"
+      }
+    ]
   },
   {
     title: "Links",
