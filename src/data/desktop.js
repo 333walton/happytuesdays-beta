@@ -1,5 +1,6 @@
 import * as icons from "../icons";
 import readme from "./textFiles/readme";
+import "../styles/desktop.css"; // Import the CSS file
 
 const desktopData = [
   {
@@ -45,23 +46,10 @@ const desktopData = [
       __html: readme
     }
   },
-  // {
-  //   title: "Resume draft 31 final last 2019 may final 1",
-  //   icon: icons.notepadFile32,
-  //   component: "Notepad",
-  //   data: {
-  //     content: resume,
-  //     readOnly: true
-  //   }
-  // },
   {
     title: "DOOM",
     icon: icons.doom32,
     component: "Doom",
-    // data: {
-    //   content: resume,
-    //   readOnly: true
-    // }
   },
   {
     title: "Paint",
@@ -69,12 +57,15 @@ const desktopData = [
     component: "IframeWindow",
     data: { src: "https://jspaint.app/", creator: "https://github.com/1j01" },
     multiInstance: true,
-    // data: {
-    //   content: resume,
-    //   readOnly: true
-    // }
   },
-  
+  {
+    title: "Trash",
+    icon: icons.recycle32,
+    component: "",
+    data: { src: "", creator: "" },
+    multiInstance: true,
+    className: "trash-icon" // Apply the CSS class
+  }
 ];
 
 export default desktopData;
