@@ -118,7 +118,7 @@ const favorites = [
     title: "Promo (IIGA Test)",
     icon: icons.mediavid16,
     component: "VideoPlayer",
-    multiInstance: true 
+    multiInstance: true
   },
 ];
 
@@ -248,7 +248,7 @@ const startMenuData = [
         options: [
           {
             title: "FAQ",
-            icon: icons.notepadFile32,
+            icon: icons.faq32,
             component: "Notepad",
             multiInstance: true
           },

@@ -169,7 +169,7 @@ class ProgramProvider extends Component {
     quickLaunch: [
       {
         onClick: () => this.minimizeAll(),
-        icon: icons.activeDesktop16,
+        icon: icons.twitter16,
         title: "Display Desktop"
       }
     ],

@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "classnames": "^2.2.6",
+    "@react95/core": "^9.2.1",
+    "@react95/icons": "^2.1.1",
+    "classnames": "^2.5.1",
     "nanoid": "^2.0.1",
     "packard-belle": "^0.4.0",
     "pb-minesweeper": "1.0.5",
