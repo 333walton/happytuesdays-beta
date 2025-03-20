@@ -61,9 +61,8 @@ const desktopData = [
   {
     title: "Trash",
     icon: icons.recycle32,
-    component: "",
-    data: { src: "", creator: "" },
-    multiInstance: true,
+    href:
+          "https://www.dallascowboys.com/",
     className: "trash-icon" // Apply the CSS class
   }
 ];
