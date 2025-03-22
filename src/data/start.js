@@ -293,6 +293,12 @@ const ASCII = [
     multiInstance: true,
   },
   {
+    title: "Hourglass",
+    icon: icons.sand16,
+    component: "Sand",
+    multiInstance: true,
+  },
+  {
     title: "Squirtel",
     icon: icons.notepadFile32,
     component: "Notepad",
