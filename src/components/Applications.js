@@ -5,5 +5,6 @@ export { default as JSDos } from "./JSDos";
 export { default as Notepad } from "./Notepad";
 export { default as Doom } from "./Doom"
 export { default as Burn } from "./Burn"
+export { default as Pipes } from "./Pipes"
 export { default as Minesweeper } from "./Minesweeper";
 

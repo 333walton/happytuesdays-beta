@@ -289,9 +289,8 @@ const ASCII = [
   {
     title: "Pipes",
     icon: icons.pipes16,
-    component: "Notepad",
+    component: "Pipes",
     multiInstance: true,
-    isDisabled: true
   },
   {
     title: "Squirtel",
