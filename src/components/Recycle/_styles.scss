@@ -1,0 +1,14 @@
+.recycle-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 48px;
+    height: auto;
+    z-index: 100;
+
+    @media (max-width: 600px) {
+        bottom: 5px;
+        right: 5px;
+        transform: scale(0.8);
+    }
+}

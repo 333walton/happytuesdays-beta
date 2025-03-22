@@ -1,5 +1,6 @@
 import React from 'react';
 import recycle32 from '../../icons'; // Ensure the correct file extension and path
+import './_styles.scss'; // Ensure the correct file extension and path
 
 class Recycle extends React.Component {
   handleDoubleClick = () => {

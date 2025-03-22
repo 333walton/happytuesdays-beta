@@ -161,7 +161,7 @@ const favorites = [
           "https://demozoo.org/productions/296642/"
       },
       {
-        title: "micro1k",
+        title: "Micro1k",
         type: "ExternalLink",
         icon: icons.htmlFile16,
         href:
@@ -173,13 +173,6 @@ const favorites = [
         icon: icons.htmlFile16,
         href:
           "https://demozoo.org/productions/13245/"
-      },
-      {
-        title: "Hush",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://www.youtube.com/watch?v=SteW58-pKnM"
       }
     ]
   },

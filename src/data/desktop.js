@@ -1,6 +1,5 @@
 import * as icons from "../icons";
 import readme from "./textFiles/readme";
-import "../styles/desktop.css"; // Import the CSS file
 
 const desktopData = [
   {
@@ -62,8 +61,8 @@ const desktopData = [
     title: "Trash",
     icon: icons.recycle32,
     href:
-          "https://www.dallascowboys.com/",
-    className: "trash-icon" // Apply the CSS class
+          "",
+    className: "recycle-icon" // Apply the CSS class
   }
 ];
 
