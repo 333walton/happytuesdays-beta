@@ -3,7 +3,14 @@ import readme from "./textFiles/readme";
 
 const desktopData = [
   {
-    title: "My Computer",
+    title: "Recycle",
+    icon: icons.recycle32,
+    href:
+          "",
+    className: "recycle-icon" // Apply the CSS class
+  },
+  {
+    title: "Computer",
     icon: icons.computer32,
     component: "ExplorerWindow",
     data: {
@@ -56,14 +63,8 @@ const desktopData = [
     component: "IframeWindow",
     data: { src: "https://jspaint.app/", creator: "https://github.com/1j01" },
     multiInstance: true,
-  },
-  {
-    title: "Trash",
-    icon: icons.recycle32,
-    href:
-          "",
-    className: "recycle-icon" // Apply the CSS class
   }
+  
 ];
 
 export default desktopData;
