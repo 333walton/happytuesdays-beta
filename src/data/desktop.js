@@ -60,12 +60,10 @@ const desktopData = [
   },
   {
     title: "Recycle",
-    icon: icons.recycle32,
-    href:
-          "",
+    icon: icons.recycleempty32, // Default icon (This will be overridden in the component using state)
+    component: "RecycleBin",
     className: "recycle-icon" // Apply the CSS class
   }
-  
 ];
 
 export default desktopData;
