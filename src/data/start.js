@@ -220,10 +220,16 @@ export const find = [
 
 const games = [
   {
-    title: "HydraBurn",
-    icon: icons.burn16,
-    component: "Burn",
-    multiInstance: true
+    title: "DOS Games",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "DOOM",
+        icon: icons.doom16,
+        component: "Doom",
+        multiInstance: true
+      }
+    ]
   },
   {
     title: "Doom Wads",
@@ -237,16 +243,10 @@ const games = [
     ]
   },
   {
-    title: "DOS Games",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "DOOM",
-        icon: icons.doom16,
-        component: "Doom",
-        multiInstance: true
-      }
-    ]
+    title: "HydraBurn",
+    icon: icons.burn16,
+    component: "Burn",
+    multiInstance: true
   },
   {
     title: "Minesweeper",
