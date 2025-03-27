@@ -31,7 +31,12 @@ const programs = [
         title: "AOL",
         icon: icons.aol16,
         isDisabled: true
-      }
+    },
+      {
+        title: "Outlook Express",
+        icon: icons.outlook16,
+        isDisabled: true
+      },
   ] },
   {
     title: "Entertainment", icon: icons.folderProgram16, options: [
@@ -58,7 +63,12 @@ const programs = [
     component: "JSDos",
     multiInstance: true
   },
-  { title: "Outlook Express", icon: icons.outlook16, isDisabled: true },
+  {
+    title: "Promo (IIGA Test)",
+    icon: icons.mediavid16,
+    component: "VideoPlayer",
+    multiInstance: true
+  },
   { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: true }
 ];
 
@@ -177,26 +187,6 @@ const favorites = [
     ]
   },
   {
-    title: "Doodle Gallery",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "Submit Here",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          ""
-      },
-      {
-        title: "placeholder",
-        type: "Notepad",
-        icon: icons.paint32,
-        component: "Notepad",
-        isDisabled: true
-      }
-    ]
-  },
-  {
     title: "Links",
     icon: icons.folder16,
     options: [
@@ -208,13 +198,7 @@ const favorites = [
           "https://www.coingecko.com/"
       }
     ]
-  },
-  {
-    title: "Promo (IIGA Test)",
-    icon: icons.mediavid16,
-    component: "VideoPlayer",
-    multiInstance: true
-  },
+  }
 ];
 
 export const find = [
@@ -239,6 +223,39 @@ export const find = [
 ];
 
 const games = [
+  {
+    title: "MS Classics",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "Minesweeper",
+        icon: icons.minesweeper16,
+        component: "Minesweeper2",
+        multiInstance: true
+      },
+      {
+      title: "Solitaire",
+      icon: icons.soli16,
+      component: "",
+      multiInstance: true,
+      isDisabled: true
+      },
+      {
+      title: "SkiFree",
+      icon: icons.skifree,   
+      component: "",
+      multiInstance: true,
+      isDisabled: true
+      },
+      {
+      title: "Space Cadet Pinball",
+      icon: icons.spacecadet16,
+      component: "",
+      multiInstance: true,
+      isDisabled: true
+      }
+    ]
+  },
   {
     title: "DOS Games",
     icon: icons.folder16,
@@ -268,34 +285,6 @@ const games = [
     component: "Burn",
     multiInstance: true
   },
-  {
-    title: "Minesweeper",
-    icon: icons.minesweeper16,
-    component: "Minesweeper2",
-    multiInstance: true
-  },
-  {
-    title: "Solitaire",
-    icon: icons.soli16,
-    component: "",
-    multiInstance: true,
-    isDisabled: true
-  },
-  
-  {
-    title: "SkiFree",
-    icon: icons.skifree,   
-    component: "",
-    multiInstance: true,
-    isDisabled: true
-  },
-  {
-    title: "Space Cadet Pinball",
-    icon: icons.spacecadet16,
-    component: "",
-    multiInstance: true,
-    isDisabled: true
-  }
 ];
 
 const ASCII = [
@@ -344,6 +333,7 @@ const startMenuData = [
     options: [
       {
         title: "Help",
+        icon: icons.help16,
         options: [
           {
             title: "FAQ",
@@ -351,19 +341,33 @@ const startMenuData = [
             component: "Notepad",
             multiInstance: true
           },
-        ],
-        icon: icons.help16
-      },
-      {
-        title: "Change Log",
-        options: [
           {
-            title: "3.25",
+            title: "Change Log",
             icon: icons.notepadFile32,
             component: "Notepad",
+            multiInstance: true
           }
         ],
-        icon: icons.folder16
+      },
+      {
+        title: "Doodle Gallery",
+        icon: icons.folder16,
+        options: [
+          {
+            title: "Submit Here",
+            type: "ExternalLink",
+            icon: icons.htmlFile16,
+            href:
+              ""
+          },
+          {
+        title: "placeholder",
+        type: "Notepad",
+        icon: icons.paint32,
+        component: "Notepad",
+        isDisabled: true
+          }
+        ],
       },
       {
         title: "Guitar Tabs",
