@@ -188,10 +188,11 @@ const favorites = [
           ""
       },
       {
-        title: "Doodle 1",
+        title: "placeholder",
         type: "Notepad",
         icon: icons.paint32,
         component: "Notepad",
+        isDisabled: true
       }
     ]
   },
