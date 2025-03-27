@@ -67,6 +67,7 @@ const programs = [
     title: "Promo (IIGA Test)",
     icon: icons.mediavid16,
     component: "VideoPlayer",
+    data: {},
     multiInstance: true
   },
   { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: true }
