@@ -177,6 +177,25 @@ const favorites = [
     ]
   },
   {
+    title: "Doodle Gallery",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "Submit Here",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          ""
+      },
+      {
+        title: "Doodle 1",
+        type: "Notepad",
+        icon: icons.paint32,
+        component: "Notepad",
+      }
+    ]
+  },
+  {
     title: "Links",
     icon: icons.folder16,
     options: [
