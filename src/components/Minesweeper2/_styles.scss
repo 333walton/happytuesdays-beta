@@ -1,0 +1,80 @@
+@import "../../../node_modules/packard-belle/src/_scss/w98/mixins/box-shadows.scss";
+
+@font-face {
+  font-family: pixelmix;
+  src: url("../../assets/pixelmix.woff2") format("woff2");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: FixedSys;
+  src: url("../../assets/FixedsysStripped.woff2") format("woff2");
+}
+
+.Doom {
+  input {
+    filter: opacity(0%);
+    position: absolute;
+    left: -2000px;
+  }
+  .terminal {
+    @include shadow-input;
+    flex-grow: 1;
+    * {
+      font-family: pixelmix, FixedSys, MSSansSerif, "Courier New", Courier,
+        monospace;
+    }
+    background-color: black;
+    color: white;
+    font-size: 8px;
+    letter-spacing: 1px;
+    line-height: 1.5em;
+    padding: 8px 4px;
+    overflow: auto;
+    
+    &::selection {
+      background-color: white;
+      color: black;
+    }
+  }
+  form:focus-within + .terminal .terminal__content > span:after {
+    content: "_";
+  }
+  &.Window:after {
+    content: none;
+  }
+
+  .IframeWindow {
+    >div:not(.Window__heading) {
+      width: 100%;
+      height: calc(100% - 10px);
+    }
+    iframe {
+      border: none;
+      width: 100%;
+      height: calc(100% - 6px);
+    }
+  
+    &--alert.WindowAlert {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      -ms-transform: translateX(-50%) translateY(-50%);
+      -webkit-transform: translateX(-50%) translateY(-50%);
+      -moz-transform: translateX(-50%) translateY(-50%);
+      -o-transform: translateX(-50%) translateY(-50%);
+      transform: translateX(-50%) translateY(-50%);
+      z-index: 8;
+    }
+  }
+}
+
+.react-draggable-dragging {
+  .IframeWindow {
+
+    >div,
+    iframe {
+      pointer-events: none;
+    }
+  }
+}

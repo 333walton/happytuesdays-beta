@@ -182,7 +182,7 @@ class Window extends React.PureComponent {
 }
 
 Window.defaultProps = {
-  minWidth: 200,
+  minWidth: 162,
   minHeight: 200,
   initialWidth: 250,
   initialHeight: 250,

@@ -251,9 +251,8 @@ const games = [
   {
     title: "Minesweeper",
     icon: icons.minesweeper16,
-    component: "Minesweeper",
-    multiInstance: true,
-    isDisabled: true
+    component: "Minesweeper2",
+    multiInstance: true
   },
   {
     title: "Solitaire",

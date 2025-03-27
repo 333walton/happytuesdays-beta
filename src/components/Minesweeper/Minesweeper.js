@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import cx from "classnames";
 import { WindowProgram } from "packard-belle";
-import Minesweeper95 from "pb-minesweeper";
+import App from "pb-minesweeper/src/App";  // instead of /src/App
 
 import { minesweeper16 } from "../../icons";
 import { helpOptions } from "../../helpers/menuBuilder";
@@ -76,16 +76,17 @@ class Minesweeper extends Component {
           })}
           title={`Minesweeper`}
           Component={WindowProgram}
-          minHeight={150}
-          minWidth={150}
-          initialHeight={150}
-          initialWidth={150}
+          minHeight={100}
+          minWidth={100}
+          initialHeight={100}
+          initialWidth={100}
           resizable={false}
           onMaximize={null}
         >
-          <Minesweeper95
+          <App
             key={this.state.gameId}
-            {...difficulty[this.state.difficulty]}
+            gridSize={difficulty[this.state.difficulty].gridSize}
+            mines={difficulty[this.state.difficulty].mines}
           />
         </Window>
       </>
