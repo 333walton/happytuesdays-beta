@@ -80,6 +80,8 @@ class WindowManager extends Component {
           // Skip if application doesn't exist
           if (!Application) return null;
           
+          console.log(`Rendering program: ${prog.title}, id: ${prog.id}, activeId: ${this.context.activeId}`);
+
           return (
             <Application
               {...prog}
@@ -89,7 +91,7 @@ class WindowManager extends Component {
               onOpen={this.context.onOpen}
               onMinimize={this.context.onMinimize}
               moveToTop={this.context.moveToTop}
-              isActive={prog.id === this.context.activeId}
+              isActive={prog.id === this.context.activeId} // Ensure this logic is correct
               program={prog}
               zIndex={this.context.zIndexes.indexOf(progId) + 5}
             />

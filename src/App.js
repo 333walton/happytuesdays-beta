@@ -13,6 +13,8 @@ import Settings from "./components/Settings";
 import CRTOverlay from "./components/tools/CRT";
 import ShutDown from "./components/ShutDown/ShutDown";
 import Background from "./components/tools/Background";
+// Import React95 global styles and theme
+import VideoPlayer from "./components/VideoPlayer";
 
 class Desktop extends Component {
   static contextType = SettingsContext;
@@ -42,6 +44,7 @@ class Desktop extends Component {
           <TaskManager />
           <Settings />
           <ShutDown />
+          <VideoPlayer />
           {context.crt && <CRTOverlay />}
         </Theme>
       </ProgramProvider>

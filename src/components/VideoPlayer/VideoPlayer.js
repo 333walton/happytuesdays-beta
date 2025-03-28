@@ -1,25 +1,26 @@
 import React from 'react';
-import './Video.scss'; // Ensure the path is correct relative to your component file
+import { Video } from '@react95/core';
+import { ThemeProvider, createGlobalStyle } from 'styled-components';
+
+const GlobalStyle = createGlobalStyle`
+  @import url('@react95/core/GlobalStyle');
+  @import url('@react95/core/themes/win95.css');
+`;
 
 const VideoPlayer = () => {
   return (
-    <div>
-      <video className="videoTag.visible">
-        <source src="" type="video/mp4" />
-      </video>
-      <div className="controls">
-        <button className="controlBtn">Play</button>
-        <input type="range" className="range" />
+    <ThemeProvider theme={{}}>
+      <GlobalStyle />
+      <div>
+        <h1>My Video Player</h1>
+        <Video
+          src="path_to_your_video_file.mp4" // Replace with the actual path to your video file
+          controls
+          autoPlay
+        />
       </div>
-      <div className="countDownContainer">
-        <span className="videoFont">00:00</span>
-        <span className="currentTime">Current Time</span>
-        <span className="elapsedTime">Elapsed Time</span>
-      </div>
-      <div className="divider"></div>
-    </div>
+    </ThemeProvider>
   );
 };
 
 export default VideoPlayer;
-
