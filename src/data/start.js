@@ -3,6 +3,7 @@ import google1999 from "./textFiles/google1999";
 import squirtel from "./textFiles/squirtel";
 import rollin from "./textFiles/rollin";
 import allStarTabs from "./textFiles/allStarTabs";
+import commits from "./textFiles/commits";
 
 const accessories = [
   { title: "Calculator", icon: icons.calculator16, isDisabled: true },
@@ -346,7 +347,9 @@ const startMenuData = [
             title: "Change Log",
             icon: icons.notepadFile32,
             component: "Notepad",
-            multiInstance: true
+            data: {
+              content: commits
+            }
           }
         ],
       },
