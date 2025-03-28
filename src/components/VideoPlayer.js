@@ -1,24 +1,19 @@
 import React from 'react';
 import { Video } from '@react95/core';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
-import { Helmet } from 'react-helmet';
 
 const GlobalStyle = createGlobalStyle`
-  /* Add any global styles if needed */
+  /* You can add other global styles here if needed */
 `;
 
 const VideoPlayer = () => {
   return (
     <ThemeProvider theme={{}}>
-      <Helmet>
-        <link rel="stylesheet" href="https://unpkg.com/@react95/core/GlobalStyle.css" />
-        <link rel="stylesheet" href="https://unpkg.com/@react95/core/themes/win95.css" />
-      </Helmet>
       <GlobalStyle />
       <div>
         <h1>My Video Player</h1>
         <Video
-          src="/assets/testvideo.gif" // Replace with the actual path to your video file
+          src="/assets/videotest.gif" // Path to your video file
           controls
           autoPlay
         />
