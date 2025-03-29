@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ExplorerView, ExplorerIcon } from "packard-belle";
 import { ProgramContext } from "../../contexts";
 import * as icons from "../../icons";
+import './_styles.scss';
 
 const DesktopView = () => {
   const [isRecycleEmpty, setRecycleEmpty] = useState(true);
@@ -20,7 +21,8 @@ const DesktopView = () => {
       {context => (
         <ExplorerView>
           {context.desktop.map(option => {
-            const icon = option.title === "Recycle"
+            const isRecycle = option.title === "Recycle"; // ✅ define this here
+            const icon = isRecycle
               ? isRecycleEmpty ? icons.recycleempty32 : icons.recyclefull32
               : option.icon;
 
@@ -30,7 +32,9 @@ const DesktopView = () => {
                 {...option}
                 icon={icon}
                 onClick={() => handleClick(option)}
+                className={`ExplorerIcon icon ${option.title === 'Recycle' ? 'recycle-icon' : ''}`}
               />
+
             );
           })}
         </ExplorerView>
@@ -40,3 +44,5 @@ const DesktopView = () => {
 };
 
 export default DesktopView;
+
+
