@@ -111,13 +111,6 @@ const favorites = [
           "https://threejs.org/examples/webgl_geometry_minecraft.html"
       },
       {
-        title: "ASCII Ball",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://threejs.org/examples/webgl_effects_ascii.html"
-      },
-      {
         title: "Blobmixer",
         type: "ExternalLink",
         icon: icons.htmlFile16,
@@ -152,25 +145,11 @@ const favorites = [
     icon: icons.folder16,
     options: [
       {
-        title: "Gallery",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://nanogems.demozoo.org/"
-      },
-      {
         title: "GleEst",
         type: "ExternalLink",
         icon: icons.htmlFile16,
         href:
           "https://demozoo.org/productions/288839/"
-      },
-      {
-        title: "Videoram",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://demozoo.org/productions/296642/"
       },
       {
         title: "Micro1k",
