@@ -104,20 +104,6 @@ const favorites = [
     icon: icons.folder16,
     options: [
       {
-        title: "Minecraft Sim",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://threejs.org/examples/webgl_geometry_minecraft.html"
-      },
-      {
-        title: "Blobmixer",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://blobmixer.14islands.com/remix"
-      },
-      {
         title: "Rain Physics",
         type: "ExternalLink",
         icon: icons.htmlFile16,
@@ -132,7 +118,21 @@ const favorites = [
           "https://threejs.org/examples/webgpu_instance_points.html"
       },
       {
-        title: "2.5D UI",
+        title: "Blobmixer",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://blobmixer.14islands.com/remix"
+      },
+      {
+        title: "Minecraft Sim (DT)",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://threejs.org/examples/webgl_geometry_minecraft.html"
+      },
+      {
+        title: "2.5D UI (DT)",
         type: "ExternalLink",
         icon: icons.htmlFile16,
         href:
