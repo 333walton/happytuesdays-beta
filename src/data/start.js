@@ -71,7 +71,7 @@ const programs = [
     data: {},
     multiInstance: true
   },
-  { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: true }
+  { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: false }
 ];
 
 const favorites = [
