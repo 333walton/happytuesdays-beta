@@ -44,7 +44,8 @@ const programs = [
       {
         title: "Movie Player",
         icon: icons.mediavid16,
-        isDisabled: true
+        component: "VideoPlayer",
+        isDisabled: false
       },
       {
         title: "CD Player",
@@ -71,7 +72,7 @@ const programs = [
     data: {},
     multiInstance: true
   },
-  { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: false }
+  { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: true }
 ];
 
 const favorites = [

@@ -4,7 +4,7 @@ import React, { Component } from "react"
 import { WindowProgram } from "packard-belle"
 import cx from "classnames"
 import Window from "../tools/Window"
-// import { video16 } from "../../icons";
+import { mediavid16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder"
 import "./_styles.scss"
 
@@ -53,7 +53,7 @@ class VideoPlayer extends Component {
   render() {
     const { props } = this
     const { isPlaying, currentTime, duration, volume } = this.state
-    const videoSrc = props.data?.src || "/static/SampleVideo_1280x720_1mb (1).mp4"
+    const videoSrc = props.data?.src || "/static/windows98flag.mp4"
 
     // Handle the onClose prop
     const onClose = props.onClose || (() => console.log("No onClose handler provided"))
@@ -62,7 +62,7 @@ class VideoPlayer extends Component {
       <Window
         {...props}
         title="Video Player"
-        // icon={video16}
+        icon={mediavid16}
         menuOptions={buildMenu(props)}
         Component={WindowProgram}
         initialHeight={360}
