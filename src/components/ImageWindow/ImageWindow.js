@@ -6,26 +6,20 @@ import buildMenu from "../../helpers/menuBuilder";
 import cx from "classnames";
 import "./_styles.scss";
 
+const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 class ImageWindow extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      width: 300,
-      height: 200,
-      showAlert: false,
-      isMobile: false
+      width: isMobile ? 300 : 293,
+      height: isMobile ? 200 : 208,
+      showAlert: false
     };
-  }
-
-  componentDidMount() {
-    // Safe mobile detection AFTER mount
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    this.setState({ isMobile });
   }
 
   handleImageLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
-    const { isMobile } = this.state;
 
     const maxWidth = isMobile ? 300 : 800;
     const maxHeight = isMobile ? 250 : 600;
@@ -57,8 +51,8 @@ class ImageWindow extends Component {
 
   render() {
     const { props, state } = this;
-    const { src, title } = props.data || {};
-    const { showAlert, isMobile, width, height } = state;
+    const { src, title, disclaimer } = props.data || {};
+    const { showAlert } = state;
 
     return (
       <>
@@ -72,11 +66,18 @@ class ImageWindow extends Component {
             showAbout: this.showAboutAlert
           })}
           Component={WindowProgram}
-          initialWidth={width}
-          initialHeight={height}
+          initialWidth={state.width}
+          initialHeight={state.height}
           className={cx("ImageWindow", props.className)}
         >
-          <div className="image-content">
+          <div
+            style={{
+              height: "auto",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
             {src ? (
               <img
                 src={src}
@@ -86,36 +87,45 @@ class ImageWindow extends Component {
                   e.target.src = "/static/fallback.png";
                   e.target.alt = "Image not found";
                 }}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "contain"
+                }}
               />
             ) : (
-              <p>No image source provided</p>
+              <p style={{ textAlign: "center" }}>No image source provided</p>
             )}
           </div>
         </Window>
 
         {showAlert && (
           <WindowAlert
+            key="doodler-alert"
             title="Doodler's Abstract"
             icon={paint16}
             onOK={this.closeAboutAlert}
             onClose={this.closeAboutAlert}
             className="Window--active"
             style={{
-              zIndex: 1000,
+              zIndex: 9999,
               position: "fixed",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: isMobile ? "90%" : "400px",
+              width: "90vw",
               maxWidth: "400px",
               backgroundColor: "#fff",
-              padding: "10px"
+              padding: "10px",
+              display: "block",
+              border: "2px solid #000",
+              pointerEvents: "all"
             }}
           >
-            {props.data?.disclaimer ? (
-              props.data.disclaimer
+            {disclaimer ? (
+              disclaimer
             ) : (
-              <div>
+              <div style={{ padding: "0px 10px", margin: "0" }}>
                 <p><b>Doodle Name:</b> Test Doodle</p>
                 <p><b>Doodler:</b> CS</p>
                 <p><b>Date Submitted:</b> 3/31/25</p>
@@ -130,4 +140,3 @@ class ImageWindow extends Component {
 }
 
 export default ImageWindow;
-
