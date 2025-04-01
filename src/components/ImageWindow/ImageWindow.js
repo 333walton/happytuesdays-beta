@@ -11,13 +11,13 @@ const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent
 class ImageWindow extends Component {
   state = {
     width: isMobile() ? 300 : 293,
-    height: isMobile() ? 200 : 208,
+    height: isMobile() ? 250 : 208,
     showAlert: false
   };
 
   handleImageLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
-    const maxWidth = isMobile() ? 300 : 800;
+    const maxWidth = isMobile() ? 320 : 800;
     const maxHeight = isMobile() ? 250 : 600;
     const minWidth = 282;
     const minHeight = 200;
@@ -25,7 +25,6 @@ class ImageWindow extends Component {
 
     let newWidth = Math.min(naturalWidth, maxWidth);
     let newHeight = newWidth / aspectRatio;
-
     if (newHeight > maxHeight) {
       newHeight = maxHeight;
       newWidth = newHeight * aspectRatio;
@@ -37,18 +36,12 @@ class ImageWindow extends Component {
     });
   };
 
-  showAboutAlert = () => {
-    this.setState({ showAlert: true });
-  };
-
-  closeAboutAlert = () => {
-    this.setState({ showAlert: false });
-  };
+  showAboutAlert = () => this.setState({ showAlert: true });
+  closeAboutAlert = () => this.setState({ showAlert: false });
 
   render() {
     const { props, state } = this;
     const { src, title } = props.data || {};
-    const { showAlert } = state;
 
     return (
       <>
@@ -64,10 +57,10 @@ class ImageWindow extends Component {
           Component={WindowProgram}
           initialWidth={state.width}
           initialHeight={state.height}
-          maximizeOnOpen={false}
           className={cx("ImageWindow", props.className)}
+          maximizeOnOpen={false} // Prevent mobile auto-maximize
         >
-          <div style={{ height: "auto", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div className="image-container">
             {src ? (
               <img
                 src={src}
@@ -77,15 +70,14 @@ class ImageWindow extends Component {
                   e.target.src = "/static/fallback.png";
                   e.target.alt = "Image not found";
                 }}
-                style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
               />
             ) : (
-              <p style={{ textAlign: "center" }}>No image source provided</p>
+              <p>No image source provided</p>
             )}
           </div>
         </Window>
 
-        {showAlert && (
+        {state.showAlert && (
           <WindowAlert
             title="Doodler's Abstract"
             icon={paint16}
@@ -93,26 +85,21 @@ class ImageWindow extends Component {
             onClose={this.closeAboutAlert}
             className="Window--active"
             style={{
-              zIndex: 1000,
+              zIndex: 9999,
               position: "fixed",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: isMobile() ? "90%" : "75%",
-              height: "auto",
-              maxWidth: isMobile() ? "300px" : "400px",
-              maxHeight: isMobile() ? "250px" : "300px",
+              width: isMobile() ? "90%" : "400px",
+              maxWidth: "90vw",
+              maxHeight: "90vh",
               padding: "10px",
               backgroundColor: "#fff",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-              borderRadius: "8px",
-              overflow: "hidden"
+              overflow: "auto"
             }}
           >
-            {props.data && props.data.disclaimer ? (
-              props.data.disclaimer
-            ) : (
-              <div style={{ padding: "0px 10px", margin: "0" }}>
+            {props.data?.disclaimer || (
+              <div>
                 <p><b>Doodle Name:</b> Test Doodle</p>
                 <p><b>Doodler:</b> CS</p>
                 <p><b>Date Submitted:</b> 3/31/25</p>
