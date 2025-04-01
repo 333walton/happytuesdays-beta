@@ -11,8 +11,8 @@ const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent
 
 class ImageWindow extends Component {
   state = {
-    width: isMobile() ? 293 : 293, // Default width for mobile and desktop
-    height: isMobile() ? 208 : 208, // Default height for mobile and desktop
+    width: isMobile() ? 300 : 293, // Default width for mobile and desktop
+    height: isMobile() ? 200 : 208, // Default height for mobile and desktop
     showAlert: false // Default state: alert is not visible
   };
 
@@ -73,8 +73,8 @@ class ImageWindow extends Component {
             showAbout: this.showAboutAlert // Pass the handler to the menu
           })}
           Component={WindowProgram}
-          initialWidth={isMobile() ? 366 : state.width} // Set smaller width for mobile
-          initialHeight={isMobile() ? 247 : state.height} // Set smaller height for mobile
+          initialWidth={state.width} // Use dynamic width
+          initialHeight={state.height} // Use dynamic height
           className={cx("ImageWindow", props.className)}
         >
           <div style={{ height: "auto", display: "flex", justifyContent: "center", alignItems: "center" }}>
