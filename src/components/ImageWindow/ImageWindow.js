@@ -6,25 +6,36 @@ import buildMenu from "../../helpers/menuBuilder";
 import cx from "classnames";
 import "./_styles.scss";
 
-const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
 class ImageWindow extends Component {
-  state = {
-    width: isMobile() ? 300 : 293,
-    height: isMobile() ? 250 : 208,
-    showAlert: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      width: 300,
+      height: 200,
+      showAlert: false,
+      isMobile: false
+    };
+  }
+
+  componentDidMount() {
+    // Safe mobile detection AFTER mount
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    this.setState({ isMobile });
+  }
 
   handleImageLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
-    const maxWidth = isMobile() ? 320 : 800;
-    const maxHeight = isMobile() ? 250 : 600;
+    const { isMobile } = this.state;
+
+    const maxWidth = isMobile ? 300 : 800;
+    const maxHeight = isMobile ? 250 : 600;
     const minWidth = 282;
     const minHeight = 200;
-    const aspectRatio = naturalWidth / naturalHeight;
 
+    const aspectRatio = naturalWidth / naturalHeight;
     let newWidth = Math.min(naturalWidth, maxWidth);
     let newHeight = newWidth / aspectRatio;
+
     if (newHeight > maxHeight) {
       newHeight = maxHeight;
       newWidth = newHeight * aspectRatio;
@@ -36,12 +47,18 @@ class ImageWindow extends Component {
     });
   };
 
-  showAboutAlert = () => this.setState({ showAlert: true });
-  closeAboutAlert = () => this.setState({ showAlert: false });
+  showAboutAlert = () => {
+    this.setState({ showAlert: true });
+  };
+
+  closeAboutAlert = () => {
+    this.setState({ showAlert: false });
+  };
 
   render() {
     const { props, state } = this;
     const { src, title } = props.data || {};
+    const { showAlert, isMobile, width, height } = state;
 
     return (
       <>
@@ -55,12 +72,11 @@ class ImageWindow extends Component {
             showAbout: this.showAboutAlert
           })}
           Component={WindowProgram}
-          initialWidth={state.width}
-          initialHeight={state.height}
+          initialWidth={width}
+          initialHeight={height}
           className={cx("ImageWindow", props.className)}
-          maximizeOnOpen={false} // Prevent mobile auto-maximize
         >
-          <div className="image-container">
+          <div className="image-content">
             {src ? (
               <img
                 src={src}
@@ -77,7 +93,7 @@ class ImageWindow extends Component {
           </div>
         </Window>
 
-        {state.showAlert && (
+        {showAlert && (
           <WindowAlert
             title="Doodler's Abstract"
             icon={paint16}
@@ -85,20 +101,20 @@ class ImageWindow extends Component {
             onClose={this.closeAboutAlert}
             className="Window--active"
             style={{
-              zIndex: 9999,
+              zIndex: 1000,
               position: "fixed",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: isMobile() ? "90%" : "400px",
-              maxWidth: "90vw",
-              maxHeight: "90vh",
-              padding: "10px",
+              width: isMobile ? "90%" : "400px",
+              maxWidth: "400px",
               backgroundColor: "#fff",
-              overflow: "auto"
+              padding: "10px"
             }}
           >
-            {props.data?.disclaimer || (
+            {props.data?.disclaimer ? (
+              props.data.disclaimer
+            ) : (
               <div>
                 <p><b>Doodle Name:</b> Test Doodle</p>
                 <p><b>Doodler:</b> CS</p>
@@ -114,3 +130,4 @@ class ImageWindow extends Component {
 }
 
 export default ImageWindow;
+
