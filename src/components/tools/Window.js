@@ -52,11 +52,12 @@ const launchPositions = (propX, propY, isMobile) => {
 
 class Window extends React.PureComponent {
   static contextType = SettingsContext;
+
   state = {
     height: this.props.initialHeight,
     width: this.props.initialWidth,
     maximized:
-      (this.context.isMobile && this.props.resizable) ||
+      (this.context?.isMobile && this.props.resizable) ||
       this.props.maximizeOnOpen,
     ...launchPositions(this.props.inintalX, this.props.initialY)
   };
@@ -153,28 +154,35 @@ class Window extends React.PureComponent {
           {...resizeProps}
           {...maximizedProps}
         >
-          <props.Component
-            title={props.title}
-            icon={props.icon}
-            footer={props.footer}
-            onOpen={props.multiInstance && props.onOpen}
-            onClose={() => props.onClose(props)}
-            onMinimize={props.onMinimize && (() => props.onMinimize(props.id))}
-            onRestore={props.resizable ? this.restore : undefined}
-            onMaximize={props.resizable ? this.maximize : undefined}
-            changingState={this.state.isDragging || this.state.isResizing}
-            maximizeOnOpen={this.context.isMobile || this.props.maximizeOnOpen}
-            className={cx(props.className, {
-              "Window--active": props.isActive
-            })}
-            resizable={props.resizable}
-            menuOptions={props.menuOptions}
-            hasMenu={props.hasMenu}
-            explorerOptions={props.explorerOptions}
-            data={props.data}
-            style={props.style}
-            children={props.children}
-          />
+          {props.Component ? (
+            <props.Component
+              title={props.title}
+              icon={props.icon}
+              footer={props.footer}
+              onOpen={props.multiInstance && props.onOpen}
+              onClose={() => props.onClose(props)}
+              onMinimize={props.onMinimize && (() => props.onMinimize(props.id))}
+              onRestore={props.resizable ? this.restore : undefined}
+              onMaximize={props.resizable ? this.maximize : undefined}
+              changingState={this.state.isDragging || this.state.isResizing}
+              maximizeOnOpen={this.context.isMobile || this.props.maximizeOnOpen}
+              className={cx(props.className, {
+                "Window--active": props.isActive
+              })}
+              resizable={props.resizable}
+              menuOptions={props.menuOptions}
+              hasMenu={props.hasMenu}
+              explorerOptions={props.explorerOptions}
+              data={props.data}
+              style={props.style}
+              children={props.children}
+            />
+          ) : (
+            <div>
+              Error: Component not found
+              {console.error("Component not found:", props.Component)}
+            </div>
+          )}
         </Rnd>
       </>
     );

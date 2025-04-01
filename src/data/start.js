@@ -344,16 +344,20 @@ const startMenuData = [
             title: "Submit Here",
             type: "ExternalLink",
             icon: icons.htmlFile16,
+            isDisabled: true,
             href:
               ""
           },
           {
-        title: "placeholder",
-        type: "Notepad",
-        icon: icons.paint32,
-        component: "Notepad",
-        isDisabled: true
-          }
+          title: "Test Doodle", // This is the title of the image window
+          icon: icons.paint32,
+          component: "ImageWindow", // Ensure this matches the registered component name in Applications.js
+          data: {
+            src: "/static/test1.png", // Ensure this path is correct
+            title: "My Image"
+          },
+          isDisabled: false
+        }
         ],
       },
       {
