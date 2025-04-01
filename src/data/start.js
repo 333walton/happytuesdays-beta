@@ -109,36 +109,56 @@ const favorites = [
     options: [
       {
         title: "Rain Physics",
-        type: "ExternalLink",
         icon: icons.htmlFile16,
-        href: "https://loklok-volume.vercel.app/gpu"
+        component: "TestExplorer",
+        data: {
+          src: "https://loklok-volume.vercel.app/gpu", // URL to load in the iframe
+          title: "Example Website" // Title for the window
+        },
+        multiInstance: false
       },
       {
         title: "Instance Points",
-        type: "ExternalLink",
         icon: icons.htmlFile16,
-        href: "https://threejs.org/examples/webgpu_instance_points.html"
+        component: "TestExplorer",
+        data: {
+          src: "https://threejs.org/examples/webgpu_instance_points.html", // URL to load in the iframe
+          title: "Example Website" // Title for the window
+        },
+        multiInstance: false
       },
       {
         title: "Blobmixer",
-        type: "ExternalLink",
         icon: icons.htmlFile16,
-        href: "https://blobmixer.14islands.com/remix"
+        component: "TestExplorer",
+        data: {
+          src: "https://blobmixer.14islands.com/remix", // URL to load in the iframe
+          title: "Example Website" // Title for the window
+        },
+        multiInstance: false
       },
       // Only show these options for desktop users
       ...(!isMobile()
         ? [
             {
               title: "Minecraft Sim",
-              type: "ExternalLink",
               icon: icons.htmlFile16,
-              href: "https://threejs.org/examples/webgl_geometry_minecraft.html"
+              component: "TestExplorer",
+                data: {
+                src: "https://threejs.org/examples/webgl_geometry_minecraft.html", // URL to load in the iframe
+                title: "Example Website" // Title for the window
+            },
+                multiInstance: false
             },
             {
               title: "2.5D UI",
-              type: "ExternalLink",
               icon: icons.htmlFile16,
-              href: "https://yanlinma.co/flat-ui-and-a-half/"
+              component: "TestExplorer",
+                data: {
+                src: "https://yanlinma.co/flat-ui-and-a-half/", // URL to load in the iframe
+                title: "Example Website" // Title for the window
+            },
+                multiInstance: false
             }
           ]
         : [])
