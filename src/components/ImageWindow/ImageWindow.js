@@ -11,9 +11,9 @@ const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent
 
 class ImageWindow extends Component {
   state = {
-    width: isMobile() ? 200 : 282, // Default width for mobile and desktop
-    height: isMobile() ? 150 : 200, // Default height for mobile and desktop
-    showAlert: false // State to control the visibility of the WindowAlert
+    width: isMobile() ? 293 : 293, // Default width for mobile and desktop
+    height: isMobile() ? 208 : 208, // Default height for mobile and desktop
+    showAlert: false // Default state: alert is not visible
   };
 
   handleImageLoad = (e) => {
@@ -44,12 +44,12 @@ class ImageWindow extends Component {
 
   // Handler to show the alert
   showAboutAlert = () => {
-    this.setState({ showAlert: true });
+    this.setState({ showAlert: true }); // Set showAlert to true when the button is clicked
   };
 
   // Handler to close the alert
   closeAboutAlert = () => {
-    this.setState({ showAlert: false });
+    this.setState({ showAlert: false }); // Set showAlert to false when the alert is closed
   };
 
   render() {
@@ -109,10 +109,10 @@ class ImageWindow extends Component {
               top: "50%", // Center vertically
               left: "50%", // Center horizontally
               transform: "translate(-50%, -50%)", // Adjust for the element's size
-              width: "75%", // Reduce width by 25%
+              width: isMobile() ? "90%" : "75%", // Adjust width for mobile
               height: "auto", // Adjust height dynamically based on content
-              maxWidth: "400px", // Optional: Set a maximum width
-              maxHeight: "300px", // Optional: Set a maximum height
+              maxWidth: isMobile() ? "300px" : "400px", // Adjust max width for mobile
+              maxHeight: isMobile() ? "250px" : "300px", // Adjust max height for mobile
               padding: "10px", // Add padding for better spacing
               backgroundColor: "#fff", // Ensure a white background
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Add a subtle shadow
