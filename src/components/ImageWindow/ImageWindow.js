@@ -73,8 +73,8 @@ class ImageWindow extends Component {
             showAbout: this.showAboutAlert // Pass the handler to the menu
           })}
           Component={WindowProgram}
-          initialWidth={isMobile() ? 360 : state.width} // Set smaller width for mobile
-          initialHeight={isMobile() ? 241 : state.height} // Set smaller height for mobile
+          initialWidth={isMobile() ? 366 : state.width} // Set smaller width for mobile
+          initialHeight={isMobile() ? 247 : state.height} // Set smaller height for mobile
           className={cx("ImageWindow", props.className)}
         >
           <div style={{ height: "auto", display: "flex", justifyContent: "center", alignItems: "center" }}>
