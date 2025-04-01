@@ -140,26 +140,6 @@ const favorites = [
               },
               multiInstance: false
             },
-            {
-              title: "Blobmixer",
-              icon: icons.htmlFile16,
-              component: "TestExplorer",
-              data: {
-                src: "https://blobmixer.14islands.com/remix", // URL to load in the iframe
-                title: "Example Website" // Title for the window
-              },
-              multiInstance: false
-            },
-            {
-              title: "2.5D UI",
-              icon: icons.htmlFile16,
-              component: "TestExplorer",
-              data: {
-                src: "https://yanlinma.co/flat-ui-and-a-half/", // URL to load in the iframe
-                title: "Example Website" // Title for the window
-              },
-              multiInstance: false
-            }
           ]
         : [])
     ],

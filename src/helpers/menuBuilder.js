@@ -10,13 +10,20 @@ const buildCustomOptions = rows =>
     []
   );
 
-export const helpOptions = props => {
+export const helpOptions = (props) => {
   if (props.componentType === "Doom") {
     return {
       title: "Help",
       options: [
         [{ title: "Help Topics", onClick: props.showHelp, isDisabled: true }],
         { title: `About ${props.title}`, isDisabled: true }
+      ]
+    };
+  } else if (props.componentType === "ImageWindow") {
+    return {
+      title: "About The Doodle",
+      options: [
+        [{ title: "Doodler's Abstract", onClick: props.showAbout }]
       ]
     };
   } else {
