@@ -44,17 +44,20 @@ class ImageWindow extends Component {
 
   // Handler to show the alert
   showAboutAlert = () => {
+    console.log("showAboutAlert triggered"); // Debugging log
     this.setState({ showAlert: true }); // Set showAlert to true when the button is clicked
   };
 
   // Handler to close the alert
   closeAboutAlert = () => {
+    console.log("closeAboutAlert triggered"); // Debugging log
     this.setState({ showAlert: false }); // Set showAlert to false when the alert is closed
   };
 
   render() {
     const { props, state } = this;
     console.log("ImageWindow data:", props.data);
+    console.log("showAlert state:", state.showAlert); // Debugging log
     const { src, title } = props.data || {};
     const { showAlert } = state;
 
@@ -70,8 +73,8 @@ class ImageWindow extends Component {
             showAbout: this.showAboutAlert // Pass the handler to the menu
           })}
           Component={WindowProgram}
-          initialWidth={state.width}
-          initialHeight={state.height}
+          initialWidth={isMobile() ? 360 : state.width} // Set smaller width for mobile
+          initialHeight={isMobile() ? 241 : state.height} // Set smaller height for mobile
           className={cx("ImageWindow", props.className)}
         >
           <div style={{ height: "auto", display: "flex", justifyContent: "center", alignItems: "center" }}>
