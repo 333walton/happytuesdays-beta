@@ -75,6 +75,9 @@ const programs = [
   { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: true }
 ];
 
+// Utility function to detect mobile devices
+const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 const favorites = [
   {
     title: "Media",
@@ -108,37 +111,37 @@ const favorites = [
         title: "Rain Physics",
         type: "ExternalLink",
         icon: icons.htmlFile16,
-        href:
-          "https://loklok-volume.vercel.app/gpu"
+        href: "https://loklok-volume.vercel.app/gpu"
       },
       {
         title: "Instance Points",
         type: "ExternalLink",
         icon: icons.htmlFile16,
-        href:
-          "https://threejs.org/examples/webgpu_instance_points.html"
+        href: "https://threejs.org/examples/webgpu_instance_points.html"
       },
       {
         title: "Blobmixer",
         type: "ExternalLink",
         icon: icons.htmlFile16,
-        href:
-          "https://blobmixer.14islands.com/remix"
+        href: "https://blobmixer.14islands.com/remix"
       },
-      {
-        title: "Minecraft Sim (DT)",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://threejs.org/examples/webgl_geometry_minecraft.html"
-      },
-      {
-        title: "2.5D UI (DT)",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://yanlinma.co/flat-ui-and-a-half/"
-      },
+      // Only show these options for desktop users
+      ...(!isMobile()
+        ? [
+            {
+              title: "Minecraft Sim",
+              type: "ExternalLink",
+              icon: icons.htmlFile16,
+              href: "https://threejs.org/examples/webgl_geometry_minecraft.html"
+            },
+            {
+              title: "2.5D UI",
+              type: "ExternalLink",
+              icon: icons.htmlFile16,
+              href: "https://yanlinma.co/flat-ui-and-a-half/"
+            }
+          ]
+        : [])
     ],
   },
   {
