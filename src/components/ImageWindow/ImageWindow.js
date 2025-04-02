@@ -9,13 +9,25 @@ import "./_styles.scss";
 class ImageWindow extends Component {
   constructor(props) {
     super(props);
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     this.state = {
-      width: isMobile ? 300 : 293,
-      height: isMobile ? 200 : 208,
+      width: 293,
+      height: 208,
       showAlert: false,
-      isMobile
+      isMobile: false
     };
+  }
+
+  componentDidMount() {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // Delay sizing to avoid fullscreen flicker on mobile
+    setTimeout(() => {
+      this.setState({
+        isMobile,
+        width: isMobile ? 300 : 293,
+        height: isMobile ? 200 : 208
+      });
+    }, 100);
   }
 
   handleImageLoad = (e) => {
@@ -43,7 +55,6 @@ class ImageWindow extends Component {
   };
 
   showAboutAlert = () => {
-    console.log("showAboutAlert triggered");
     this.setState({ showAlert: true });
   };
 
@@ -57,49 +68,50 @@ class ImageWindow extends Component {
     const { showAlert, width, height } = state;
 
     return (
-      <Window
-        {...props}
-        title="Doodle Viewer"
-        icon={paint16}
-        menuOptions={buildMenu({
-          ...props,
-          componentType: "ImageWindow",
-          showAbout: this.showAboutAlert
-        })}
-        Component={WindowProgram}
-        initialWidth={width}
-        initialHeight={height}
-        className={cx("ImageWindow", props.className)}
-      >
-        <div
-          style={{
-            height: "auto",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
+      <>
+        <Window
+          {...props}
+          title="Doodle Viewer"
+          icon={paint16}
+          menuOptions={buildMenu({
+            ...props,
+            componentType: "ImageWindow",
+            showAbout: this.showAboutAlert
+          })}
+          Component={WindowProgram}
+          initialWidth={width}
+          initialHeight={height}
+          className={cx("ImageWindow", props.className)}
         >
-          {src ? (
-            <img
-              src={src}
-              alt={title}
-              onLoad={this.handleImageLoad}
-              onError={(e) => {
-                e.target.src = "/static/fallback.png";
-                e.target.alt = "Image not found";
-              }}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                objectFit: "contain"
-              }}
-            />
-          ) : (
-            <p style={{ textAlign: "center" }}>No image source provided</p>
-          )}
-        </div>
+          <div
+            style={{
+              height: "auto",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            {src ? (
+              <img
+                src={src}
+                alt={title}
+                onLoad={this.handleImageLoad}
+                onError={(e) => {
+                  e.target.src = "/static/fallback.png";
+                  e.target.alt = "Image not found";
+                }}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "contain"
+                }}
+              />
+            ) : (
+              <p style={{ textAlign: "center" }}>No image source provided</p>
+            )}
+          </div>
+        </Window>
 
-        {/* Alert now inside Window context */}
         {showAlert && (
           <WindowAlert
             key="doodler-alert"
@@ -110,12 +122,13 @@ class ImageWindow extends Component {
             className="Window--active"
             style={{
               zIndex: 9999,
-              position: "absolute",
+              position: "fixed",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: "90%",
-              maxWidth: "400px",
+              width: "min(90vw, 400px)",
+              maxHeight: "80vh",
+              overflowY: "auto",
               backgroundColor: "#fff",
               padding: "10px",
               display: "block",
@@ -135,10 +148,9 @@ class ImageWindow extends Component {
             )}
           </WindowAlert>
         )}
-      </Window>
+      </>
     );
   }
 }
 
 export default ImageWindow;
-
