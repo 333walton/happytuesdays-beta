@@ -6,18 +6,29 @@ import buildMenu from "../../helpers/menuBuilder";
 import cx from "classnames";
 import "./_styles.scss";
 
-// Utility function to detect mobile devices
-const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
 class ImageWindow extends Component {
-  state = {
-    width: isMobile ? 300 : 293,
-    height: isMobile ? 200 : 208,
-    showAlert: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      width: 293,
+      height: 208,
+      showAlert: false,
+      isMobile: false,
+    };
+  }
+
+  componentDidMount() {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    this.setState({
+      isMobile,
+      width: isMobile ? 300 : 293,
+      height: isMobile ? 200 : 208,
+    });
+  }
 
   handleImageLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
+    const { isMobile } = this.state;
 
     const maxWidth = isMobile ? 300 : 800;
     const maxHeight = isMobile ? 250 : 600;
@@ -35,7 +46,7 @@ class ImageWindow extends Component {
 
     this.setState({
       width: Math.max(minWidth, newWidth),
-      height: Math.max(minHeight, newHeight)
+      height: Math.max(minHeight, newHeight),
     });
   };
 
@@ -45,14 +56,13 @@ class ImageWindow extends Component {
   };
 
   closeAboutAlert = () => {
-    console.log("closeAboutAlert triggered");
     this.setState({ showAlert: false });
   };
 
   render() {
     const { props, state } = this;
     const { src, title, disclaimer } = props.data || {};
-    const { showAlert } = state;
+    const { showAlert, isMobile } = state;
 
     return (
       <>
@@ -63,14 +73,21 @@ class ImageWindow extends Component {
           menuOptions={buildMenu({
             ...props,
             componentType: "ImageWindow",
-            showAbout: this.showAboutAlert
+            showAbout: this.showAboutAlert,
           })}
           Component={WindowProgram}
           initialWidth={state.width}
           initialHeight={state.height}
           className={cx("ImageWindow", props.className)}
         >
-          <div style={{ height: "auto", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div
+            style={{
+              height: "auto",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             {src ? (
               <img
                 src={src}
@@ -83,7 +100,7 @@ class ImageWindow extends Component {
                 style={{
                   maxWidth: "100%",
                   maxHeight: "100%",
-                  objectFit: "contain"
+                  objectFit: "contain",
                 }}
               />
             ) : (
@@ -100,28 +117,36 @@ class ImageWindow extends Component {
             onClose={this.closeAboutAlert}
             className="Window--active"
             style={{
-              zIndex: 1000,
+              zIndex: 99999,
               position: "fixed",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: isMobile ? "90%" : "75%",
+              width: isMobile ? "90vw" : "75vw",
               maxWidth: isMobile ? "300px" : "400px",
-              maxHeight: isMobile ? "250px" : "300px",
-              padding: "10px",
               backgroundColor: "#fff",
-              borderRadius: "8px",
-              overflow: "hidden"
+              padding: "10px",
+              display: "block",
+              border: "2px solid red", // TEMP: Red border to confirm visibility
+              pointerEvents: "all",
             }}
           >
             {disclaimer ? (
               disclaimer
             ) : (
               <div style={{ padding: "0px 10px", margin: "0" }}>
-                <p><b>Doodle Name:</b> Test Doodle</p>
-                <p><b>Doodler:</b> CS</p>
-                <p><b>Date Submitted:</b> 3/31/25</p>
-                <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
+                <p>
+                  <b>Doodle Name:</b> Test Doodle
+                </p>
+                <p>
+                  <b>Doodler:</b> CS
+                </p>
+                <p>
+                  <b>Date Submitted:</b> 3/31/25
+                </p>
+                <p>
+                  <b>Doodle Statement:</b> This is the first doodle submitted to the gallery
+                </p>
               </div>
             )}
           </WindowAlert>

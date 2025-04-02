@@ -43,3 +43,10 @@
     padding: 10px;
     pointer-events: all;
 }
+
+.Window--active {
+    z-index: 99999 !important;
+    position: fixed !important;
+    display: block !important;
+    pointer-events: auto !important;
+}
