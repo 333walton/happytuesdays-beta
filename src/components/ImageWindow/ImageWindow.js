@@ -48,75 +48,58 @@ class ImageWindow extends Component {
   };
 
   closeAboutAlert = () => {
-    console.log("closeAboutAlert triggered");
     this.setState({ showAlert: false });
   };
 
   render() {
     const { props, state } = this;
     const { src, title, disclaimer } = props.data || {};
-    const { showAlert } = state;
-
-    // Debug: log menu options
-    const menuOptions = buildMenu({
-      ...props,
-      componentType: "ImageWindow",
-      showAbout: this.showAboutAlert
-    });
-    console.log("MENU DEBUG", menuOptions);
+    const { showAlert, width, height } = state;
 
     return (
-      <>
-        <Window
-          {...props}
-          title="Doodle Viewer"
-          icon={paint16}
-          // Toggle between the two menu options here for testing
-          menuOptions={menuOptions}
-
-          // Uncomment below to test simplified menu:
-          // menuOptions={[
-          //   {
-          //     title: "Help",
-          //     options: [
-          //       [{ title: "Doodler's Abstract", onClick: this.showAboutAlert }]
-          //     ]
-          //   }
-          // ]}
-          Component={WindowProgram}
-          initialWidth={state.width}
-          initialHeight={state.height}
-          className={cx("ImageWindow", props.className)}
+      <Window
+        {...props}
+        title="Doodle Viewer"
+        icon={paint16}
+        menuOptions={buildMenu({
+          ...props,
+          componentType: "ImageWindow",
+          showAbout: this.showAboutAlert
+        })}
+        Component={WindowProgram}
+        initialWidth={width}
+        initialHeight={height}
+        className={cx("ImageWindow", props.className)}
+      >
+        <div
+          style={{
+            height: "auto",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
         >
-          <div
-            style={{
-              height: "auto",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            {src ? (
-              <img
-                src={src}
-                alt={title}
-                onLoad={this.handleImageLoad}
-                onError={(e) => {
-                  e.target.src = "/static/fallback.png";
-                  e.target.alt = "Image not found";
-                }}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  objectFit: "contain"
-                }}
-              />
-            ) : (
-              <p style={{ textAlign: "center" }}>No image source provided</p>
-            )}
-          </div>
-        </Window>
+          {src ? (
+            <img
+              src={src}
+              alt={title}
+              onLoad={this.handleImageLoad}
+              onError={(e) => {
+                e.target.src = "/static/fallback.png";
+                e.target.alt = "Image not found";
+              }}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "contain"
+              }}
+            />
+          ) : (
+            <p style={{ textAlign: "center" }}>No image source provided</p>
+          )}
+        </div>
 
+        {/* Alert now inside Window context */}
         {showAlert && (
           <WindowAlert
             key="doodler-alert"
@@ -127,11 +110,11 @@ class ImageWindow extends Component {
             className="Window--active"
             style={{
               zIndex: 9999,
-              position: "fixed",
+              position: "absolute",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: "90vw",
+              width: "90%",
               maxWidth: "400px",
               backgroundColor: "#fff",
               padding: "10px",
@@ -152,25 +135,10 @@ class ImageWindow extends Component {
             )}
           </WindowAlert>
         )}
-
-        {/* TEMP DEBUG BUTTON */}
-        <button
-          onClick={this.showAboutAlert}
-          style={{
-            position: "fixed",
-            bottom: 20,
-            right: 20,
-            zIndex: 99999,
-            backgroundColor: "#c0c0c0",
-            padding: "6px 10px",
-            fontFamily: "sans-serif"
-          }}
-        >
-          Show Alert
-        </button>
-      </>
+      </Window>
     );
   }
 }
 
 export default ImageWindow;
+
