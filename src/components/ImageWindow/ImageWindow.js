@@ -73,12 +73,23 @@ class ImageWindow extends Component {
           menuOptions={buildMenu({
             ...props,
             componentType: "ImageWindow",
-            showAbout: this.showAboutAlert,
+            showAbout: this.showAboutAlert, // Pass the handler to the menu
           })}
           Component={WindowProgram}
-          initialWidth={state.width}
-          initialHeight={state.height}
+          initialWidth={state.width} // Use dynamic width
+          initialHeight={state.height} // Use dynamic height
           className={cx("ImageWindow", props.className)}
+          style={{
+            width: `${state.width}px`, // Explicitly set width
+            height: `${state.height}px`, // Explicitly set height
+            maxWidth: "100%", // Ensure it does not exceed the screen width
+            maxHeight: "100%", // Ensure it does not exceed the screen height
+            overflow: "hidden", // Prevent content overflow
+            position: "absolute", // Ensure it is positioned correctly
+            top: "50%", // Center vertically
+            left: "50%", // Center horizontally
+            transform: "translate(-50%, -50%)", // Adjust for the element's size
+          }}
         >
           <div
             style={{
