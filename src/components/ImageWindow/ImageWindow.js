@@ -19,8 +19,6 @@ class ImageWindow extends Component {
 
   componentDidMount() {
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    // Delay sizing to avoid fullscreen flicker on mobile
     setTimeout(() => {
       this.setState({
         isMobile,
@@ -55,10 +53,12 @@ class ImageWindow extends Component {
   };
 
   showAboutAlert = () => {
+    console.log("✅ showAboutAlert triggered"); // Debug
     this.setState({ showAlert: true });
   };
 
   closeAboutAlert = () => {
+    console.log("❌ closeAboutAlert triggered"); // Debug
     this.setState({ showAlert: false });
   };
 
@@ -67,17 +67,21 @@ class ImageWindow extends Component {
     const { src, title, disclaimer } = props.data || {};
     const { showAlert, width, height } = state;
 
+    const menu = buildMenu({
+      ...props,
+      componentType: "ImageWindow",
+      showAbout: this.showAboutAlert
+    });
+
+    console.log("📋 MENU DEBUG:", menu);
+
     return (
       <>
         <Window
           {...props}
           title="Doodle Viewer"
           icon={paint16}
-          menuOptions={buildMenu({
-            ...props,
-            componentType: "ImageWindow",
-            showAbout: this.showAboutAlert
-          })}
+          menuOptions={menu}
           Component={WindowProgram}
           initialWidth={width}
           initialHeight={height}
@@ -113,41 +117,42 @@ class ImageWindow extends Component {
         </Window>
 
         {showAlert && (
-          <WindowAlert
-            key="doodler-alert"
-            title="Doodler's Abstract"
-            icon={paint16}
-            onOK={this.closeAboutAlert}
-            onClose={this.closeAboutAlert}
-            className="Window--active"
-            style={{
-              zIndex: 9999,
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "min(90vw, 400px)",
-              maxHeight: "80vh",
-              overflowY: "auto",
-              backgroundColor: "#fff",
-              padding: "10px",
-              display: "block",
-              border: "2px solid #000",
-              pointerEvents: "all"
-            }}
-          >
-            {disclaimer ? (
-              disclaimer
-            ) : (
-              <div style={{ padding: "0px 10px", margin: "0" }}>
-                <p><b>Doodle Name:</b> Test Doodle</p>
-                <p><b>Doodler:</b> CS</p>
-                <p><b>Date Submitted:</b> 3/31/25</p>
-                <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
-              </div>
-            )}
-          </WindowAlert>
-        )}
+  <WindowAlert
+    title="Doodler's Abstract"
+    icon={paint16}
+    onOK={this.closeAboutAlert}
+    onClose={this.closeAboutAlert}
+    className="Window--active"
+    style={{
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      backgroundColor: "#fff",
+      zIndex: 2147483647, // Very high to avoid conflicts
+      width: "min(95vw, 400px)",
+      maxHeight: "80vh",
+      overflowY: "auto",
+      padding: "10px",
+      display: "block",
+      border: "2px solid #000",
+      boxShadow: "0 4px 8px rgba(0,0,0,0.4)",
+      pointerEvents: "all"
+    }}
+  >
+    {disclaimer ? (
+      disclaimer
+    ) : (
+      <div style={{ padding: "0px 10px", margin: "0" }}>
+        <p><b>Doodle Name:</b> Test Doodle</p>
+        <p><b>Doodler:</b> CS</p>
+        <p><b>Date Submitted:</b> 3/31/25</p>
+        <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
+      </div>
+    )}
+  </WindowAlert>
+)}
+
       </>
     );
   }
