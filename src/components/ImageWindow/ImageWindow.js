@@ -64,7 +64,7 @@ class ImageWindow extends Component {
 
   render() {
     const { props, state } = this;
-    const { src, title, disclaimer } = props.data || {};
+    const { src, title } = props.data || {};
     const { showAlert, width, height } = state;
 
     const menu = buildMenu({
@@ -118,39 +118,35 @@ class ImageWindow extends Component {
 
         {showAlert && (
   <WindowAlert
-    title="Doodler's Abstract"
-    icon={paint16}
-    onOK={this.closeAboutAlert}
-    onClose={this.closeAboutAlert}
-    className="Window--active"
-    style={{
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      backgroundColor: "#fff",
-      zIndex: 2147483647, // Very high to avoid conflicts
-      width: "min(95vw, 400px)",
-      maxHeight: "80vh",
-      overflowY: "auto",
-      padding: "10px",
-      display: "block",
-      border: "2px solid #000",
-      boxShadow: "0 4px 8px rgba(0,0,0,0.4)",
-      pointerEvents: "all"
-    }}
-  >
-    {disclaimer ? (
-      disclaimer
-    ) : (
-      <div style={{ padding: "0px 10px", margin: "0" }}>
-        <p><b>Doodle Name:</b> Test Doodle</p>
-        <p><b>Doodler:</b> CS</p>
-        <p><b>Date Submitted:</b> 3/31/25</p>
-        <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
-      </div>
-    )}
-  </WindowAlert>
+  key="doodler-alert"
+  title="Doodler's Abstract"
+  icon={paint16}
+  onOK={this.closeAboutAlert}
+  onClose={this.closeAboutAlert}
+  className="Window--active"
+  style={{
+    zIndex: 99999,
+    position: "fixed",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "90vw",
+    maxWidth: "400px",
+    backgroundColor: "#fff",
+    padding: "10px",
+    display: "block",
+    border: "2px solid #000",
+    pointerEvents: "all"
+  }}
+>
+  <div>
+    <p><b>Doodle Name:</b> Test Doodle</p>
+    <p><b>Doodler:</b> CS</p>
+    <p><b>Date Submitted:</b> 3/31/25</p>
+    <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
+  </div>
+</WindowAlert>
+
 )}
 
       </>
