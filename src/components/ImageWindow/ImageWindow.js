@@ -118,36 +118,22 @@ class ImageWindow extends Component {
 
         {showAlert && (
   <WindowAlert
-  key="doodler-alert"
-  title="Doodler's Abstract"
-  icon={paint16}
-  onOK={this.closeAboutAlert}
-  onClose={this.closeAboutAlert}
-  className="Window--active"
-  style={{
-    zIndex: 99999,
-    position: "fixed",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: "90vw",
-    maxWidth: "400px",
-    backgroundColor: "#fff",
-    padding: "10px",
-    display: "block",
-    border: "2px solid #000",
-    pointerEvents: "all"
-  }}
->
-  <div>
-    <p><b>Doodle Name:</b> Test Doodle</p>
-    <p><b>Doodler:</b> CS</p>
-    <p><b>Date Submitted:</b> 3/31/25</p>
-    <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
-  </div>
-</WindowAlert>
-
+    key="doodler-alert"
+    title="Doodler's Abstract"
+    icon={paint16}
+    onOK={this.closeAboutAlert}
+    onClose={this.closeAboutAlert}
+    className="DoodlerAlert Window--active"
+  >
+    <div style={{ padding: "0px 10px", margin: "0" }}>
+      <p><b>Doodle Name:</b> Test Doodle</p>
+      <p><b>Doodler:</b> CS</p>
+      <p><b>Date Submitted:</b> 3/31/25</p>
+      <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
+    </div>
+  </WindowAlert>
 )}
+
 
       </>
     );
