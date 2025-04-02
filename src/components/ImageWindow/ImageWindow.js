@@ -6,20 +6,29 @@ import buildMenu from "../../helpers/menuBuilder";
 import cx from "classnames";
 import "./_styles.scss";
 
-const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
 class ImageWindow extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      width: isMobile ? 300 : 293,
-      height: isMobile ? 200 : 208,
-      showAlert: false
+      width: 293,
+      height: 208,
+      showAlert: false,
+      isMobile: false
     };
+  }
+
+  componentDidMount() {
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    this.setState({
+      isMobile,
+      width: isMobile ? 300 : 293,
+      height: isMobile ? 200 : 208
+    });
   }
 
   handleImageLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
+    const { isMobile } = this.state;
 
     const maxWidth = isMobile ? 300 : 800;
     const maxHeight = isMobile ? 250 : 600;
