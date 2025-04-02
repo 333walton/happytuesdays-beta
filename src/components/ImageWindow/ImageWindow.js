@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { createPortal } from "react-dom";
 import Window from "../tools/Window";
 import { WindowProgram, WindowAlert } from "packard-belle";
 import { paint16 } from "../../icons";
@@ -46,18 +47,61 @@ class ImageWindow extends Component {
   };
 
   showAboutAlert = () => {
-    console.log("showAboutAlert triggered");
+    console.log("✅ showAboutAlert triggered");
     this.setState({ showAlert: true });
   };
 
   closeAboutAlert = () => {
+    console.log("✅ closeAboutAlert triggered");
     this.setState({ showAlert: false });
+  };
+
+  renderAlert = () => {
+    const { showAlert } = this.state;
+    const { disclaimer } = this.props.data || {};
+
+    if (!showAlert) return null;
+
+    return createPortal(
+      <WindowAlert
+        title="Doodler's Abstract"
+        icon={paint16}
+        onOK={this.closeAboutAlert}
+        onClose={this.closeAboutAlert}
+        className="Window--active"
+        style={{
+          zIndex: 99999,
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "90vw",
+          maxWidth: "400px",
+          backgroundColor: "#fff",
+          padding: "10px",
+          display: "block",
+          border: "2px solid #000",
+          pointerEvents: "all",
+        }}
+      >
+        {disclaimer ? (
+          disclaimer
+        ) : (
+          <div style={{ padding: "0px 10px", margin: "0" }}>
+            <p><b>Doodle Name:</b> Test Doodle</p>
+            <p><b>Doodler:</b> CS</p>
+            <p><b>Date Submitted:</b> 3/31/25</p>
+            <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
+          </div>
+        )}
+      </WindowAlert>,
+      document.body // append outside Window context
+    );
   };
 
   render() {
     const { props, state } = this;
-    const { src, title, disclaimer } = props.data || {};
-    const { showAlert } = state;
+    const { src, title } = props.data || {};
 
     return (
       <>
@@ -75,14 +119,12 @@ class ImageWindow extends Component {
           initialHeight={state.height}
           className={cx("ImageWindow", props.className)}
         >
-          <div
-            style={{
-              height: "auto",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
+          <div style={{
+            height: "auto",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}>
             {src ? (
               <img
                 src={src}
@@ -104,45 +146,12 @@ class ImageWindow extends Component {
           </div>
         </Window>
 
-        {showAlert && (
-          <WindowAlert
-            key="doodler-alert"
-            title="Doodler's Abstract"
-            icon={paint16}
-            onOK={this.closeAboutAlert}
-            onClose={this.closeAboutAlert}
-            className="Window--active"
-            style={{
-              zIndex: 9999,
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "90vw",
-              maxWidth: "400px",
-              backgroundColor: "#fff",
-              padding: "10px",
-              display: "block",
-              border: "2px solid #000",
-              pointerEvents: "all"
-            }}
-          >
-            {disclaimer ? (
-              disclaimer
-            ) : (
-              <div style={{ padding: "0px 10px", margin: "0" }}>
-                <p><b>Doodle Name:</b> Test Doodle</p>
-                <p><b>Doodler:</b> CS</p>
-                <p><b>Date Submitted:</b> 3/31/25</p>
-                <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
-              </div>
-            )}
-          </WindowAlert>
-        )}
+        {this.renderAlert()}
       </>
     );
   }
 }
 
 export default ImageWindow;
+
 
