@@ -9,21 +9,13 @@ import "./_styles.scss";
 class ImageWindow extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      width: 293,
-      height: 208,
-      showAlert: false,
-      isMobile: false
-    };
-  }
-
-  componentDidMount() {
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    this.setState({
-      isMobile,
+    this.state = {
       width: isMobile ? 300 : 293,
-      height: isMobile ? 200 : 208
-    });
+      height: isMobile ? 200 : 208,
+      showAlert: false,
+      isMobile
+    };
   }
 
   handleImageLoad = (e) => {
@@ -51,10 +43,12 @@ class ImageWindow extends Component {
   };
 
   showAboutAlert = () => {
+    console.log("showAboutAlert triggered");
     this.setState({ showAlert: true });
   };
 
   closeAboutAlert = () => {
+    console.log("closeAboutAlert triggered");
     this.setState({ showAlert: false });
   };
 
@@ -63,17 +57,32 @@ class ImageWindow extends Component {
     const { src, title, disclaimer } = props.data || {};
     const { showAlert } = state;
 
+    // Debug: log menu options
+    const menuOptions = buildMenu({
+      ...props,
+      componentType: "ImageWindow",
+      showAbout: this.showAboutAlert
+    });
+    console.log("MENU DEBUG", menuOptions);
+
     return (
       <>
         <Window
           {...props}
           title="Doodle Viewer"
           icon={paint16}
-          menuOptions={buildMenu({
-            ...props,
-            componentType: "ImageWindow",
-            showAbout: this.showAboutAlert
-          })}
+          // Toggle between the two menu options here for testing
+          menuOptions={menuOptions}
+
+          // Uncomment below to test simplified menu:
+          // menuOptions={[
+          //   {
+          //     title: "Help",
+          //     options: [
+          //       [{ title: "Doodler's Abstract", onClick: this.showAboutAlert }]
+          //     ]
+          //   }
+          // ]}
           Component={WindowProgram}
           initialWidth={state.width}
           initialHeight={state.height}
@@ -143,6 +152,22 @@ class ImageWindow extends Component {
             )}
           </WindowAlert>
         )}
+
+        {/* TEMP DEBUG BUTTON */}
+        <button
+          onClick={this.showAboutAlert}
+          style={{
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+            zIndex: 99999,
+            backgroundColor: "#c0c0c0",
+            padding: "6px 10px",
+            fontFamily: "sans-serif"
+          }}
+        >
+          Show Alert
+        </button>
       </>
     );
   }
