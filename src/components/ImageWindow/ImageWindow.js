@@ -89,6 +89,7 @@ class ImageWindow extends Component {
             top: "50%", // Center vertically
             left: "50%", // Center horizontally
             transform: "translate(-50%, -50%)", // Adjust for the element's size
+            boxSizing: "border-box", // Ensure padding and borders are included in dimensions
           }}
         >
           <div
