@@ -18,6 +18,27 @@
         padding: 10px;
         text-align: center;
     }
+
+    .DoodlerAlert {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-width: 400px;
+        width: 90vw;
+        background-color: #fff;
+        z-index: 9999;
+        border: 2px solid #000;
+        padding: 10px;
+        pointer-events: all;
+    }
+
+    .Window--active {
+        z-index: 99999 !important;
+        position: fixed !important;
+        display: block !important;
+        pointer-events: auto !important;
+    }
 }
 
 .react-draggable-dragging {
@@ -28,25 +49,4 @@
             pointer-events: none;
         }
     }
-}
-
-.DoodlerAlert {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 400px;
-    width: 90vw;
-    background-color: #fff;
-    z-index: 9999;
-    border: 2px solid #000;
-    padding: 10px;
-    pointer-events: all;
-}
-
-.Window--active {
-    z-index: 99999 !important;
-    position: fixed !important;
-    display: block !important;
-    pointer-events: auto !important;
 }
