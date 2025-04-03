@@ -21,8 +21,8 @@ class ImageWindow extends Component {
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     this.setState({
       isMobile,
-      width: isMobile ? 300 : 293,
-      height: isMobile ? 200 : 208
+      width: isMobile ? 299 : 293,
+      height: isMobile ? 214 : 208
     });
   }
 
@@ -30,10 +30,10 @@ class ImageWindow extends Component {
     const { naturalWidth, naturalHeight } = e.target;
     const { isMobile } = this.state;
 
-    const maxWidth = isMobile ? 300 : 800;
-    const maxHeight = isMobile ? 250 : 600;
-    const minWidth = 282;
-    const minHeight = 200;
+    const maxWidth = isMobile ? 299 : 800;
+    const maxHeight = isMobile ? 214 : 600;
+    const minWidth = 269;
+    const minHeight = 184;
 
     const aspectRatio = naturalWidth / naturalHeight;
     let newWidth = Math.min(naturalWidth, maxWidth);
@@ -75,8 +75,8 @@ class ImageWindow extends Component {
             showAbout: this.showAboutAlert
           })}
           Component={WindowProgram}
-          initialWidth={state.width}
-          initialHeight={state.height}
+          initialHeight={214}
+          initialWidth={299}
           maximizeOnOpen={false} // ← This ensures it doesn't open in fullscreen
           className={cx("ImageWindow", props.className)}
         >
@@ -103,8 +103,8 @@ class ImageWindow extends Component {
             icon={paint16}
             onClose={this.closeAboutAlert}
             className="DoodlerAlert"
-            initialWidth={isMobile ? 300 : 400}
-            initialHeight={250}
+            initialWidth={isMobile ? 225 : 225}
+            initialHeight={200}
             resizable={false}
             Component={WindowProgram}
             style={{
@@ -112,7 +112,7 @@ class ImageWindow extends Component {
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              zIndex: 99999,
+              zIndex: 0,
               pointerEvents: "auto"
             }}
           >
@@ -123,7 +123,7 @@ class ImageWindow extends Component {
                 <>
                   <p><b>Doodle Name:</b> Test Doodle</p>
                   <p><b>Doodler:</b> CS</p>
-                  <p><b>Date Submitted:</b> 3/31/25</p>
+                  <p><b>Doodle Date:</b> 3/31/25</p>
                   <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
                 </>
               )}
