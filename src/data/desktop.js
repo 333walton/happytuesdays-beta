@@ -63,7 +63,13 @@ const desktopData = [
     icon: icons.recycleempty32, // Default icon (This will be overridden in the component using state)
     component: "RecycleBin",
     className: "recycle-icon" // Apply the CSS class
-  }
+  },
+  {
+    title: "Calculator",
+    icon: icons.doom32,
+    component: "Calculator",
+  },
+
 ];
 
 export default desktopData;

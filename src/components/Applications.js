@@ -11,4 +11,5 @@ export { default as Sand } from "./Sand"
 export { default as Minesweeper2 } from "./Minesweeper2";
 export { default as VideoPlayer } from "./VideoPlayer";
 export { default as ImageWindow } from "./ImageWindow";
+export { default as Calculator } from "./Calculator";
 
