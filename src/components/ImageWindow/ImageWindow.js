@@ -51,7 +51,6 @@ class ImageWindow extends Component {
   };
 
   showAboutAlert = () => {
-    console.log("showAboutAlert triggered");
     this.setState({ showAlert: true });
   };
 
@@ -115,20 +114,10 @@ class ImageWindow extends Component {
             icon={paint16}
             onOK={this.closeAboutAlert}
             onClose={this.closeAboutAlert}
-            className="Window--active"
+            className="DoodlerAlert"
             style={{
-              zIndex: 99999,
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
               width: isMobile ? "90vw" : "75vw",
               maxWidth: isMobile ? "300px" : "400px",
-              backgroundColor: "#fff",
-              padding: "10px",
-              display: "block",
-              border: "2px solid red", // TEMP: Red border to confirm visibility
-              pointerEvents: "all",
             }}
           >
             {disclaimer ? (

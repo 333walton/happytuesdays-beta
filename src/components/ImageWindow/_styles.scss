@@ -33,20 +33,11 @@
         pointer-events: all;
     }
 
-    .Window--active {
-        z-index: 99999 !important;
-        position: fixed !important;
-        display: block !important;
-        pointer-events: auto !important;
-    }
-}
-
-.react-draggable-dragging {
-    .ImageWindow {
-
-        >div,
-        iframe {
-            pointer-events: none;
-        }
+    // This ensures the alert window stays on top and is interactable,
+    // but only for this component.
+    .DoodlerAlert.Window--active {
+        z-index: 99999;
+        display: block;
+        pointer-events: auto;
     }
 }
