@@ -21,7 +21,7 @@ export const helpOptions = (props) => {
     };
   } else if (props.componentType === "ImageWindow") {
     return {
-      title: "About The Doodle",
+      title: "About This Doodle",
       options: [
         [{ title: "Doodler's Abstract", onClick: props.showAbout }]
       ]

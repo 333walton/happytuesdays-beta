@@ -77,7 +77,7 @@ class ImageWindow extends Component {
           Component={WindowProgram}
           initialWidth={state.width}
           initialHeight={state.height}
-          startMaximized={false} // ← This ensures it doesn't open in fullscreen
+          maximizeOnOpen={false} // ← This ensures it doesn't open in fullscreen
           className={cx("ImageWindow", props.className)}
         >
           <div className="image-wrapper">
