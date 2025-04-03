@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Window from "../tools/Window";
-import { WindowProgram, WindowAlert } from "packard-belle";
+import { WindowProgram } from "packard-belle";
 import { paint16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import cx from "classnames";
@@ -13,7 +13,7 @@ class ImageWindow extends Component {
       width: 293,
       height: 208,
       showAlert: false,
-      isMobile: false,
+      isMobile: false
     };
   }
 
@@ -22,7 +22,7 @@ class ImageWindow extends Component {
     this.setState({
       isMobile,
       width: isMobile ? 300 : 293,
-      height: isMobile ? 200 : 208,
+      height: isMobile ? 200 : 208
     });
   }
 
@@ -46,7 +46,7 @@ class ImageWindow extends Component {
 
     this.setState({
       width: Math.max(minWidth, newWidth),
-      height: Math.max(minHeight, newHeight),
+      height: Math.max(minHeight, newHeight)
     });
   };
 
@@ -72,21 +72,14 @@ class ImageWindow extends Component {
           menuOptions={buildMenu({
             ...props,
             componentType: "ImageWindow",
-            showAbout: this.showAboutAlert,
+            showAbout: this.showAboutAlert
           })}
           Component={WindowProgram}
           initialWidth={state.width}
           initialHeight={state.height}
           className={cx("ImageWindow", props.className)}
         >
-          <div
-            style={{
-              height: "auto",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+          <div className="image-wrapper">
             {src ? (
               <img
                 src={src}
@@ -96,49 +89,45 @@ class ImageWindow extends Component {
                   e.target.src = "/static/fallback.png";
                   e.target.alt = "Image not found";
                 }}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  objectFit: "contain",
-                }}
               />
             ) : (
-              <p style={{ textAlign: "center" }}>No image source provided</p>
+              <p>No image source provided</p>
             )}
           </div>
         </Window>
 
         {showAlert && (
-          <WindowAlert
+          <Window
             title="Doodler's Abstract"
             icon={paint16}
-            onOK={this.closeAboutAlert}
             onClose={this.closeAboutAlert}
             className="DoodlerAlert"
+            initialWidth={isMobile ? 300 : 400}
+            initialHeight={250}
+            resizable={false}
+            Component={WindowProgram}
             style={{
-              width: isMobile ? "90vw" : "75vw",
-              maxWidth: isMobile ? "300px" : "400px",
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 99999,
+              pointerEvents: "auto"
             }}
           >
-            {disclaimer ? (
-              disclaimer
-            ) : (
-              <div style={{ padding: "0px 10px", margin: "0" }}>
-                <p>
-                  <b>Doodle Name:</b> Test Doodle
-                </p>
-                <p>
-                  <b>Doodler:</b> CS
-                </p>
-                <p>
-                  <b>Date Submitted:</b> 3/31/25
-                </p>
-                <p>
-                  <b>Doodle Statement:</b> This is the first doodle submitted to the gallery
-                </p>
-              </div>
-            )}
-          </WindowAlert>
+            <div className="image-content">
+              {disclaimer ? (
+                disclaimer
+              ) : (
+                <>
+                  <p><b>Doodle Name:</b> Test Doodle</p>
+                  <p><b>Doodler:</b> CS</p>
+                  <p><b>Date Submitted:</b> 3/31/25</p>
+                  <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
+                </>
+              )}
+            </div>
+          </Window>
         )}
       </>
     );
