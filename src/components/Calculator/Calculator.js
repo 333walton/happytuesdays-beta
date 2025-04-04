@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { WindowProgram, WindowAlert } from "packard-belle";
+import { WindowProgram } from "packard-belle";
 import cx from "classnames";
 import Window from "../tools/Window";
 import { doom16 } from "../../icons";
@@ -38,13 +38,6 @@ class Doom extends Component {
 
   render() {
     const { props } = this;
-    const { showAlert, isDesktop } = this.state;
-
-    const commonProps = {
-      title: props.title,
-      icon: props.icon,
-      onClose: () => props.onClose(props)
-    };
 
     return (
       <>
