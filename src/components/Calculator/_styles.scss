@@ -17,13 +17,15 @@
     position: absolute;
     left: -2000px;
   }
+
   .terminal {
     @include shadow-input;
     flex-grow: 1;
+
     * {
-      font-family: pixelmix, FixedSys, MSSansSerif, "Courier New", Courier,
-        monospace;
+      font-family: pixelmix, FixedSys, MSSansSerif, "Courier New", Courier, monospace;
     }
+
     background-color: black;
     color: white;
     font-size: 8px;
@@ -31,16 +33,32 @@
     line-height: 1.5em;
     padding: 8px 4px;
     overflow: auto;
+
     &::selection {
       background-color: white;
       color: black;
     }
   }
-  form:focus-within + .terminal .terminal__content > span:after {
+
+  form:focus-within+.terminal .terminal__content>span:after {
     content: "_";
   }
+
   &.Window:after {
     content: none;
+  }
+
+  // ✅ Calculator layout wrapper fix
+  .calculator-wrapper {
+    width: 100%;
+    padding: 0px 6px;
+    box-sizing: border-box;
+  }
+
+
+  // ✅ Limit frame padding removal to calculator only
+  .Frame {
+    padding: 0 !important;
   }
 
   .IframeWindow {
@@ -48,21 +66,18 @@
       width: 100%;
       height: calc(100% - 10px);
     }
+
     iframe {
       border: none;
       width: 100%;
       height: calc(100% - 6px);
     }
-  
+
     &--alert.WindowAlert {
       position: absolute;
       left: 50%;
       top: 50%;
-      -ms-transform: translateX(-50%) translateY(-50%);
-      -webkit-transform: translateX(-50%) translateY(-50%);
-      -moz-transform: translateX(-50%) translateY(-50%);
-      -o-transform: translateX(-50%) translateY(-50%);
-      transform: translateX(-50%) translateY(-50%);
+      transform: translate(-50%, -50%);
       z-index: 8;
     }
   }

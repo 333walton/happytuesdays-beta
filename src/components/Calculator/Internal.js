@@ -430,12 +430,13 @@ class Windows98Calculator extends Component {
   }
 
   renderDeleteButton(keyFunction, value) {
-    return (
-      <button onClick={keyFunction} className="delete-button">
-        <span style={{ color: 'red' }}>{value}</span>
-      </button>
-    );
-  }
+  return (
+    <button onClick={keyFunction} className="main-button delete-button">
+      <span style={{ color: 'red', marginLeft: '-2.5px' }}>{value}</span> {/* Shift text 2px to the left */}
+    </button>
+  );
+}
+
 
   renderNumberButton(value) {
     return (
@@ -503,128 +504,87 @@ class Windows98Calculator extends Component {
   render() {
     return (
       <div className="calculator-container">
-        <div className="window">
-          <div className="window-body">
-            {this.renderDisplay()}
-            {this.renderDeleteButtonRow()}
-            {this.renderMainButtonsGrid()}
-          </div>
-        </div>
+        {this.renderDisplay()}
+        {this.renderDeleteButtonRow()}
+        {this.renderMainButtonsGrid()}
+
         <style>{`
           .calculator-container {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            padding: 0px;
-            font-family: Arial;
-            font-size: 12px;
-          }
-          
-          /* Windows 98 specific styles */
-          .window {
             background: #c0c0c0;
-            border: 1px solid;
-            border-color: #fff #808080 #808080 #fff;
-            padding: 5px;
-            width: 230px;
-            margin: 0;
-            display: inline-block;
+            padding: 0;
+            font-family: 'MS Sans Serif', sans-serif;
+            width: fit-content;
           }
-          
-          .window-body {
-            margin: 3px;
-            background-color: #c0c0c0;
-            padding: 3px;
-          }
-          
+
           .display-container {
-            margin-bottom: 0px;
+            margin: 0;
             width: 100%;
           }
-          
+
           .windows98-display {
-            height: 25px;
+            height: 22px;
             background-color: white;
-            border: 1px solid;
-            border-color: #808080 #fff #fff #808080;
+            border: 2px inset #fff;
             padding: 1px 5px;
             text-align: right;
-            font-family: 'Arial', sans-serif;
-            font-size: 16px;
+            font-family: 'MS Sans Serif', sans-serif;
+            font-size: 15px;
             line-height: 25px;
-            overflow: hidden;
-            white-space: nowrap;
-            color: black;
+            width: 205px;
+            margin-bottom: 6px;
+            margin-top: 0px;
           }
-          
+
           .delete-button-row {
             display: grid;
-            grid-template-columns: 1fr 2fr 1fr 1fr;
-            grid-gap: 3px;
-            margin-bottom: 5px;
-            margin-top: 10px;
+            grid-template-columns: 40px 1fr 1fr 1fr;
+            gap: 4px;
+            margin-bottom: 6px;
           }
-          
-          .empty-box {
-            width: 100%;
-            height: 25px;
-            border: 1px solid;
-            border-style: inset;
-            background-color: #c0c0c0;
-          }
-          
+
           .delete-button {
-            padding: 0;
-            color: red;
-            font-size: 11px;
-            height: 25px;
-            margin: 0;
+            height: 26px;
+            width: 56px;
+            font-size: 9.5px;
+            font-family: inherit;
           }
-          
+
           .main-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            grid-gap: 3px;
-            margin-top: 5px;
+            gap: 4px;
           }
-          
+
           button {
-            border: 1px solid;
-            border-color: #fff #808080 #808080 #fff;
+            border: 2px outset #fff;
             background-color: #c0c0c0;
-            box-sizing: border-box;
-            min-width: 35px;
-            min-height: 25px;
-            padding: 0;
-            margin: 0;
             font-size: 11px;
+            font-family: inherit;
+            height: 26px;
           }
-          
+
           button:active {
-            border-color: #808080 #fff #fff #808080;
+            border: 2px inset #808080;
           }
-          
-          .main-button {
-            min-width: 30px;
-            min-height: 25px;
-            width: 100%;
-            height: 25px;
-            font-family: Arial, sans-serif;
-            font-size: 11px;
-            margin: 0;
-            padding: 0;
-          }
-          
+
           .memory-button {
-            text-align: center;
             color: red;
-            font-weight: normal;
-            font-size: 11px;
+          }
+
+          .empty-box {
+            background: #c0c0c0;
+            border: 2px inset #fff;
+            height: 23px;
+            width: 23px;
+            margin-left: 4px;
           }
         `}</style>
+
       </div>
     );
   }
 }
-
 export default Windows98Calculator;

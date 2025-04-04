@@ -2,17 +2,17 @@ import React, { Component } from "react";
 import { WindowProgram } from "packard-belle";
 import cx from "classnames";
 import Window from "../tools/Window";
-import { doom16 } from "../../icons";
+import { calculator16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 import Windows98Calculator from "./Internal";
 
-class Doom extends Component {
+class Calculator extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showAlert: true,
-      isDesktop: window.innerWidth > 1024
+      showAlert: false,
+      isDesktop: window.innerWidth > 1024,
     };
   }
 
@@ -28,10 +28,6 @@ class Doom extends Component {
     this.setState({ isDesktop: window.innerWidth > 1024 });
   };
 
-  confirm = () => {
-    this.setState({ showAlert: false });
-  };
-
   showHelp = () => {
     this.setState({ showAlert: true });
   };
@@ -40,27 +36,30 @@ class Doom extends Component {
     const { props } = this;
 
     return (
-      <>
-        <Window
-          {...props}
-          title="Calculator"
-          icon={doom16}
-          menuOptions={buildMenu({
-            ...props,
-            componentType: "Doom",
-            showHelp: this.showHelp
-          })}
-          Component={WindowProgram}
-          initialHeight={257}
-          initialWidth={215}
-          forceNoMobileMax={true} // this toggles auto-maximize on mobile devices
-          className={cx("Doom", props.className)}
-        >
+      <Window
+        {...props}
+        title="Calculator"
+        icon={calculator16}
+        menuOptions={buildMenu({
+          ...props,
+          componentType: "Doom",
+          showHelp: this.showHelp,
+        })}
+        Component={WindowProgram}
+        initialHeight={235}
+        initialWidth={234} // ✅ Wider to fit layout
+        forceNoMobileMax={true}
+        className={cx("Doom", props.className)}
+        theme={props.theme}
+      >
+        <div className="calculator-wrapper">
           <Windows98Calculator />
-        </Window>
-      </>
+        </div>
+      </Window>
     );
   }
 }
 
-export default Doom;
+export default Calculator;
+
+
