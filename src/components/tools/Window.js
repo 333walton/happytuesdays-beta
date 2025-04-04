@@ -54,13 +54,16 @@ class Window extends React.PureComponent {
   static contextType = SettingsContext;
 
   state = {
-    height: this.props.initialHeight,
-    width: this.props.initialWidth,
-    maximized:
-      (this.context?.isMobile && this.props.resizable) ||
-      this.props.maximizeOnOpen,
-    ...launchPositions(this.props.inintalX, this.props.initialY)
-  };
+  height: this.props.initialHeight,
+  width: this.props.initialWidth,
+  maximized:
+    (!this.props.forceNoMobileMax &&
+      this.context?.isMobile &&
+      this.props.resizable) ||
+    this.props.maximizeOnOpen,
+  ...launchPositions(this.props.inintalX, this.props.initialY)
+};
+
 
   updateLocation = (a, b) => {
     this.setState({ x: b.x, y: b.y, isDragging: false });

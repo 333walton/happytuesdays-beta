@@ -26,6 +26,16 @@ class ImageWindow extends Component {
     });
   }
 
+  getCenteredPosition = () => {
+    const { width, height, isMobile } = this.state;
+
+    if (!isMobile) return {}; // Let desktop use default
+    const x = (window.innerWidth - width) / 2;
+    const y = (window.innerHeight - height) / 2;
+
+    return { initialX: x, initialY: y };
+  };
+
   handleImageLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
     const { isMobile } = this.state;
@@ -72,12 +82,14 @@ class ImageWindow extends Component {
           menuOptions={buildMenu({
             ...props,
             componentType: "ImageWindow",
-            showAbout: this.showAboutAlert
+            showAbout: this.showAboutAlert,
           })}
           Component={WindowProgram}
-          initialHeight={214}
-          initialWidth={299}
-          maximizeOnOpen={false} // ← This ensures it doesn't open in fullscreen
+          initialHeight={state.height}
+          initialWidth={state.width}
+          maximizeOnOpen={false}
+          forceNoMobileMax={true} // ✅ Prevent auto-maximize
+          {...this.getCenteredPosition()} // ✅ Center on mobile
           className={cx("ImageWindow", props.className)}
         >
           <div className="image-wrapper">
@@ -102,19 +114,17 @@ class ImageWindow extends Component {
             title="Doodler's Abstract"
             icon={paint16}
             onClose={this.closeAboutAlert}
-            className="DoodlerAlert" // Add a unique className
-            initialWidth={200}
-            initialHeight={125} // Set the desired initial height
+            className="DoodlerAlert"
+            initialX={window.innerWidth / 9}
+            initialY={window.innerHeight / 9}
             resizable={false}
-            draggable={false} // Disable dragging for the alert window
-            isActive={true} // ✅ Add this line
+            draggable={false}
+            isActive={true}
+            disableRandomLaunch={true}
             Component={WindowProgram}
             style={{
-              position: "fixed",
-              top: "100px", // Set a fixed vertical position
-              left: "100px", // Set a fixed horizontal position
-              zIndex: 1000, // Ensure it appears above other elements
-              pointerEvents: "auto"
+              zIndex: 1000,
+              pointerEvents: "auto",
             }}
           >
             <div className="image-content">
@@ -137,3 +147,4 @@ class ImageWindow extends Component {
 }
 
 export default ImageWindow;
+
