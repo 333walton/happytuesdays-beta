@@ -15,7 +15,7 @@ class ImageWindow extends Component {
       showAlert: false,
       isMobile: false
     };
-  }
+  };
 
   componentDidMount() {
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -24,17 +24,19 @@ class ImageWindow extends Component {
       width: isMobile ? 299 : 293,
       height: isMobile ? 214 : 208
     });
-  }
+  };
 
   getCenteredPosition = () => {
     const { width, height, isMobile } = this.state;
 
-    if (!isMobile) return {}; // Let desktop use default
+    if (!isMobile) return {}; // Let default behavior apply on desktop
+
     const x = (window.innerWidth - width) / 2;
     const y = (window.innerHeight - height) / 2;
 
     return { initialX: x, initialY: y };
   };
+
 
   handleImageLoad = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
@@ -88,10 +90,11 @@ class ImageWindow extends Component {
           initialHeight={state.height}
           initialWidth={state.width}
           maximizeOnOpen={false}
-          forceNoMobileMax={true} // ✅ Prevent auto-maximize
-          {...this.getCenteredPosition()} // ✅ Center on mobile
+          forceNoMobileMax={true}
+          {...this.getCenteredPosition()} // ✅ Center the window on mobile
           className={cx("ImageWindow", props.className)}
         >
+
           <div className="image-wrapper">
             {src ? (
               <img
