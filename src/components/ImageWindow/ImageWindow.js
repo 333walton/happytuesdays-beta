@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Window from "../tools/Window";
-import { WindowProgram } from "packard-belle";
+import { WindowProgram, WindowAlert } from "packard-belle";
 import { paint16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import cx from "classnames";
@@ -18,13 +18,13 @@ class ImageWindow extends Component {
   };
 
   componentDidMount() {
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    this.setState({
-      isMobile,
-      width: isMobile ? 299 : 293,
-      height: isMobile ? 214 : 208
-    });
-  };
+  const isMobile = window.innerWidth < 600;
+  this.setState({
+    isMobile,
+    width: isMobile ? 299 : 293,
+    height: isMobile ? 214 : 208
+  });
+}
 
   getCenteredPosition = () => {
     const { width, height, isMobile } = this.state;
@@ -72,7 +72,7 @@ class ImageWindow extends Component {
 
   render() {
     const { props, state } = this;
-    const { src, title, disclaimer } = props.data || {};
+    const { src, title } = props.data || {};
     const { showAlert } = state;
 
     return (
@@ -113,36 +113,34 @@ class ImageWindow extends Component {
         </Window>
 
         {showAlert && (
-          <Window
+          <WindowAlert
             title="Doodler's Abstract"
             icon={paint16}
             onClose={this.closeAboutAlert}
-            className="DoodlerAlert"
-            initialX={window.innerWidth / 9}
-            initialY={window.innerHeight / 9}
-            resizable={false}
-            draggable={false}
-            isActive={true}
-            disableRandomLaunch={true}
-            Component={WindowProgram}
+            className="DoodlerAlert Window--active"
             style={{
-              zIndex: 1000,
-              pointerEvents: "auto",
+              zIndex: 0,
+              position: "fixed", // Forces visibility
+              top: "100px", // Adjust vertical position
+              left: "50%", // Adjust horizontal position
+              transform: "translate(-50%)", // Center horizontally
+              width: this.state.isMobile ? "200px" : "200px", // ✅ dynamic width
+              padding: 0
             }}
           >
-            <div className="image-content">
-              {disclaimer ? (
-                disclaimer
-              ) : (
-                <>
-                  <p><b>Doodle Name:</b> Test Doodle</p>
-                  <p><b>Doodler:</b> CS</p>
-                  <p><b>Doodle Date:</b> 3/31/25</p>
-                  <p><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
-                </>
-              )}
+            <div
+              style={{
+                padding: "6px 10px",
+                fontSize: "11px",
+                lineHeight: "1.3"
+              }}
+            >
+              <span style={{ lineHeight: "1.0" }}><b>Doodle Name:</b> Test Doodle</span>
+              <p style={{ margin: "2px 0" }}><b>Doodler:</b> CS</p>
+              <p style={{ margin: "2px 0" }}><b>Date Submitted:</b> 3/31/25</p>
+              <p style={{ margin: "2px 0" }}><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
             </div>
-          </Window>
+          </WindowAlert>
         )}
       </>
     );

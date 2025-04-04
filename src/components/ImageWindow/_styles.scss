@@ -24,8 +24,8 @@
     }
 
     .image-content {
-    padding: 10px;
-    text-align: center;
+        padding: 10px;
+        text-align: center;
     }
 }
 
@@ -36,5 +36,43 @@
         iframe {
             pointer-events: none;
         }
+    }
+}
+
+// ------------------------------------
+// 🧩 Doodler's Abstract alert styling
+// ------------------------------------
+.DoodlerAlert {
+    display: flex !important;
+    position: fixed !important;
+    z-index: 1000 !important;
+    width: 200px !important;
+    min-width: unset !important;
+    max-width: none !important;
+
+    // Override internal theme frame only on desktop
+    @media (min-width: 601px) {
+        .Frame {
+            padding: 10px 12px !important;
+            background-color: #c0c0c0 !important;
+            border: 2px solid #000 !important;
+            box-shadow: inset -1px -1px 0 #000, inset 1px 1px 0 #fff !important;
+        }
+
+        .window-alert__content {
+            padding: 4px 10px !important;
+            font-size: 11px !important;
+            line-height: 1.3 !important;
+            text-align: left !important;
+
+            p {
+                margin: 3px 0 !important;
+                padding: 0 !important;
+            }
+        }
+    }
+
+    .window-alert__buttons {
+        display: none !important;
     }
 }
