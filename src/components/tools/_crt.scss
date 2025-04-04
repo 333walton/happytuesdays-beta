@@ -19,8 +19,8 @@ $screen-background: #121010;
   left: 0px;
   position: absolute;
   overflow: hidden;
-  z-index: 100;
-  pointer-events: none;
+  z-index: 1000; // Ensure it overlays the WindowAlert
+  pointer-events: none; // Prevent interference with user interactions
 
   // flicker
   &::after {
@@ -33,7 +33,7 @@ $screen-background: #121010;
     right: 0;
     background: transparentize($screen-background, 0.98);
     opacity: 0;
-    z-index: 2;
+    z-index: 1001; // Ensure the flicker effect is above the WindowAlert
     pointer-events: none;
   }
   // scanlines
@@ -55,7 +55,7 @@ $screen-background: #121010;
         transparentize(#00ff00, 0.98),
         transparentize(#0000ff, 0.94)
       );
-    z-index: 2;
+    z-index: 1001; // Ensure the scanlines are above the WindowAlert
     background-size: 100% 2px, 3px 100%;
     pointer-events: none;
   }
@@ -161,4 +161,8 @@ $screen-background: #121010;
 .container .overlay {
   animation: overlay-anim 5s linear;
   animation-fill-mode: forwards;
+}
+.container .DoodlerAlert {
+  pointer-events: auto; /* Allow interaction with the WindowAlert */
+  z-index: 101; /* Ensure it appears above the CRT effect */
 }
