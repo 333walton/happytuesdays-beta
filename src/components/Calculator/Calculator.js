@@ -11,8 +11,8 @@ class Doom extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showAlert: true, // State variable to control the visibility of the alert
-      isDesktop: window.innerWidth > 1024 // State variable to check if the user is on a desktop
+      showAlert: true,
+      isDesktop: window.innerWidth > 1024
     };
   }
 
@@ -45,17 +45,19 @@ class Doom extends Component {
           {...props}
           title="Calculator"
           icon={doom16}
-          menuOptions={buildMenu({ ...props, componentType: "Doom", showHelp: this.showHelp })}
+          menuOptions={buildMenu({
+            ...props,
+            componentType: "Doom",
+            showHelp: this.showHelp
+          })}
           Component={WindowProgram}
           initialHeight={257}
           initialWidth={215}
+          forceNoMobileMax={true} // this toggles auto-maximize on mobile devices
           className={cx("Doom", props.className)}
         >
           <Windows98Calculator />
         </Window>
-
-        
-      
       </>
     );
   }

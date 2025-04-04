@@ -64,11 +64,6 @@ const desktopData = [
     component: "RecycleBin",
     className: "recycle-icon" // Apply the CSS class
   },
-  {
-    title: "Calculator",
-    icon: icons.doom32,
-    component: "Calculator",
-  },
 
 ];
 

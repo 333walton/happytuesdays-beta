@@ -90,7 +90,7 @@ class ImageWindow extends Component {
           initialHeight={state.height}
           initialWidth={state.width}
           maximizeOnOpen={false}
-          forceNoMobileMax={true}
+          forceNoMobileMax={true} // this prevents the window from maximizing on mobile
           {...this.getCenteredPosition()} // ✅ Center the window on mobile
           className={cx("ImageWindow", props.className)}
         >

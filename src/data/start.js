@@ -6,7 +6,13 @@ import allStarTabs from "./textFiles/allStarTabs";
 import commits from "./textFiles/commits";
 
 const accessories = [
-  { title: "Calculator", icon: icons.calculator16, isDisabled: true },
+  {
+    title: "Calculator",
+    icon: icons.calculator16,
+    component: "Calculator",
+    multiInstance: true,
+    isDisabled: false
+  },
   
   {
     title: "Notepad",
