@@ -1,0 +1,111 @@
+============================================================
+>>CHARLES98 CHANGELOG.TXT - 2025-04-04
+============================================================
+[2025-04-04]  aabbeed  - change log
+[2025-04-04]  e7c80eb  - calc css
+[2025-04-04]  15880e4  - crt small
+[2025-04-04]  cb2b09b  - frames css
+[2025-04-04]  defc20b  - css fixes
+[2025-04-04]  4922a0d  - small
+[2025-04-04]  2e1baa5  - m auto maximize toggle
+[2025-04-04]  fff0d50  - doodle small
+[2025-04-03]  c828017  - calc small
+[2025-04-03]  fd5c364  - Calculatir
+[2025-04-03]  5f4eb15  - small
+[2025-04-02]  ce04eaf  - mobile window fix
+[2025-04-02]  ce33d08  - small css
+[2025-04-02]  1580439  - css
+[2025-04-02]  1302b20  - style small
+[2025-04-02]  b2acfe6  - global styling fix
+[2025-04-02]  feb20d1  - Revert ImageWindow files to commit 119cc42
+[2025-04-02]  3c8f214  - mobile test
+[2025-04-02]  ed1341f  - doodle mobile
+[2025-04-02]  119cc42  - test4
+[2025-04-02]  2998945  - test3
+[2025-04-02]  93dfd89  - test3
+[2025-04-02]  385ceb9  - test2
+[2025-04-02]  b5aa58c  - test
+[2025-04-02]  624e1df  - small
+[2025-04-02]  ea588a6  - doodle prog
+[2025-04-02]  d2d0efd  - doodle styling
+[2025-04-02]  ca69066  - more styling
+[2025-04-02]  f640e55  - styling
+[2025-04-01]  19f26c3  - styling
+[2025-04-01]  ef47124  - styling
+[2025-04-01]  1a47295  - styling
+[2025-04-01]  a69c5c2  - styling headaches
+[2025-04-01]  0cf63c2  - small doodles
+[2025-04-01]  2caba05  - small doodles
+[2025-04-01]  840872f  - small
+[2025-04-01]  bf4dfb1  - small
+[2025-04-01]  45bd7c0  - doodle alert small
+[2025-04-01]  6173d27  - doodle prog
+[2025-04-01]  3440155  - small start.js
+[2025-04-01]  1ae30c7  - test explorer iframe links
+[2025-04-01]  c6b5098  - doodle prog
+[2025-04-01]  2dd1d97  - desktop only start.js options
+[2025-03-31]  e7d9d9c  - video changes
+[2025-03-31]  e984f82  - vid player/calc
+[2025-03-31]  cb50f6a  - Play
+[2025-03-29]  10b9bc1  - webgl
+[2025-03-29]  c9c4b56  - webgl and demoscenes
+[2025-03-29]  7588ae0  - icon styling edits
+[2025-03-28]  759e796  - commits log
+[2025-03-28]  f55082c  - revert to 22a585
+[2025-03-28]  222a585  - helmet added
+[2025-03-28]  0918d32  - video player
+[2025-03-27]  5102286  - video player prog
+[2025-03-27]  2794dbd  - start menu organize
+[2025-03-27]  af77882  - recycling icon small
+[2025-03-26]  88d690d  - doodle small
+[2025-03-26]  27d4d0c  - doodles
+[2025-03-26]  9e9f18f  - start menu small
+[2025-03-26]  c235b1c  - minesweeper
+[2025-03-23]  be5e8cb  - small
+[2025-03-23]  ea64742  - small icons
+[2025-03-22]  c397f81  - hourglass ascii
+[2025-03-22]  53cffcb  - pipes
+[2025-03-21]  3d52a23  - recycling css
+[2025-03-20]  be900bf  - small trash
+[2025-03-20]  95d778f  - trash link
+[2025-03-20]  b987d0b  - demoscene and misc start
+[2025-03-20]  2963823  - trash
+[2025-03-20]  aed5376  - small
+[2025-03-20]  e6fdccc  - start menu
+[2025-03-20]  15d87ca  - icons
+[2025-03-18]  62aeb8c  - vid player
+[2025-03-18]  99c5728  - small
+[2025-03-18]  ac9d4f3  - small
+[2025-03-18]  86e4463  - small
+[2025-03-18]  890a804  - small
+[2025-03-17]  8a61318  - start menu edits
+[2025-03-16]  ea89dd4  - small
+[2025-03-16]  a7173d6  - small
+[2025-03-16]  e1e67fc  - small
+[2025-03-16]  b3ea98f  - small
+[2025-03-16]  3f068c4  - doom controls popup
+[2025-03-15]  688a739  - start menu edits
+[2025-03-14]  f251334  - dt icon swap
+[2025-03-14]  82e1330  - error fix
+[2025-03-14]  783db51  - start menu changes
+[2025-03-14]  734d2aa  - doom window load size
+[2025-03-14]  34cb332  - more bios changes in index
+[2025-03-13]  af0ce0e  - more bios
+[2025-03-14]  bd242e0  - dawd
+[2025-03-13]  ddd8566  - more bios
+[2025-03-13]  64059a2  - bios
+[2025-03-13]  2368fb1  - og metadata
+[2025-03-13]  03f5fc4  - more readme
+[2025-03-13]  417e365  - more readme
+[2025-03-13]  bf2ef8b  - Readme and css edits
+[2025-03-13]  3db22b3  - Updated image URL and site content
+[2025-03-13]  2b69809  - Added Google Tag Manager
+[2025-03-12]  094e6e8  - favicon2
+[2025-03-12]  572cafd  - favicon
+[2025-03-12]  3cf3c04  - Updated meta tags for Twitter and Discord previews
+[2025-03-12]  eec766b  - Saving my local changes before pulling updates
+[2025-03-12]  70fb2ea  - Update WindowManager.js for open in URL
+[2025-03-08]  cd504a6  - readme
+[2025-03-08]  1210b74  - css editsg
+[2025-03-08]  cc8bb3e  - project files update
+[2025-03-06]  c3131e0  - Initial commit============================================================

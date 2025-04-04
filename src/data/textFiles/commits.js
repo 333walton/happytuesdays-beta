@@ -3,7 +3,45 @@ const commits = `
 >>HYDRA98 CHANGELOG.TXT
 ============================================================
 
-[2025-03-28]  f55082c  - Revert to commit 22a585  
+[2025-04-04]  aabbeed  - change log
+[2025-04-04]  e7c80eb  - calc css
+[2025-04-04]  15880e4  - crt small
+[2025-04-04]  cb2b09b  - frames css
+[2025-04-04]  defc20b  - css fixes
+[2025-04-04]  4922a0d  - small
+[2025-04-04]  2e1baa5  - m auto maximize toggle
+[2025-04-04]  fff0d50  - doodle small
+[2025-04-03]  c828017  - calc small
+[2025-04-03]  fd5c364  - Calculatir
+[2025-04-03]  5f4eb15  - small
+[2025-04-02]  ce04eaf  - mobile window fix
+[2025-04-02]  ce33d08  - small css
+[2025-04-02]  ed1341f  - doodle mobile
+[2025-04-02]  119cc42  - test4
+[2025-04-02]  2998945  - test3
+[2025-04-02]  93dfd89  - test3
+[2025-04-02]  385ceb9  - test2
+[2025-04-02]  b5aa58c  - test
+[2025-04-02]  624e1df  - small
+[2025-04-02]  ea588a6  - doodle prog
+[2025-04-02]  d2d0efd  - doodle styling
+[2025-04-02]  ca69066  - more styling
+[2025-04-02]  f640e55  - styling
+[2025-04-01]  19f26c3  - styling
+[2025-04-01]  ef47124  - styling
+[2025-04-01]  1a47295  - styling
+[2025-04-01]  a69c5c2  - styling headaches
+[2025-04-01]  0cf63c2  - small doodles
+[2025-04-01]  2caba05  - small doodles
+[2025-04-01]  840872f  - small
+[2025-04-01]  bf4dfb1  - small
+[2025-04-01]  45bd7c0  - doodle alert small
+[2025-04-01]  6173d27  - doodle prog
+[2025-04-01]  3440155  - small start.js
+[2025-04-01]  1ae30c7  - test explorer iframe links
+[2025-04-01]  c6b5098  - doodle prog
+[2025-04-01]  2dd1d97  - desktop only start.js options
+[2025-03-28]  f55082c  - Revert to commit 22a585
 [2025-03-28]  222a585  - Helmet added  
 [2025-03-28]  0918d32  - Video player  
 [2025-03-27]  5102286  - Video player program  
