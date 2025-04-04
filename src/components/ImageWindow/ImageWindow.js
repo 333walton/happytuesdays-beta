@@ -61,7 +61,7 @@ class ImageWindow extends Component {
   render() {
     const { props, state } = this;
     const { src, title, disclaimer } = props.data || {};
-    const { showAlert, isMobile } = state;
+    const { showAlert } = state;
 
     return (
       <>
@@ -102,17 +102,18 @@ class ImageWindow extends Component {
             title="Doodler's Abstract"
             icon={paint16}
             onClose={this.closeAboutAlert}
-            className="DoodlerAlert"
-            initialWidth={isMobile ? 225 : 225}
-            initialHeight={200}
+            className="DoodlerAlert" // Add a unique className
+            initialWidth={200}
+            initialHeight={125} // Set the desired initial height
             resizable={false}
+            draggable={false} // Disable dragging for the alert window
+            isActive={true} // ✅ Add this line
             Component={WindowProgram}
             style={{
               position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: 0,
+              top: "100px", // Set a fixed vertical position
+              left: "100px", // Set a fixed horizontal position
+              zIndex: 1000, // Ensure it appears above other elements
               pointerEvents: "auto"
             }}
           >

@@ -137,6 +137,7 @@ class Window extends React.PureComponent {
           }
           position={{ x: this.state.x, y: this.state.y }}
           dragHandleClassName="Window__title"
+          disableDragging={props.draggable === false || this.state.maximized}
           resizeHandleClasses={handleClasses}
           onDragStart={this.toggleDrag(true)}
           onDragStop={!this.state.maximized && this.updateLocation}
@@ -191,9 +192,9 @@ class Window extends React.PureComponent {
 
 Window.defaultProps = {
   minWidth: 162,
-  minHeight: 200,
-  initialWidth: 250,
-  initialHeight: 250,
+  minHeight: 150,
+  initialWidth: 200,
+  initialHeight: 200,
   // maxHeight: 448,
   // maxWidth: 635,
   resizable: true,

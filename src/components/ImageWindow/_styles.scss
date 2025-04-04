@@ -41,11 +41,14 @@
 
 .DoodlerAlert {
     position: fixed;
-    top: 50%;
-    left: 50%;
+    top: 100px;
+    left: 100px;
     transform: translate(-50%, -50%);
     z-index: 99999;
     pointer-events: all;
-    width: 90vw;
-    max-width: 400px;
+    min-width: 100px;
+    max-width: 300px;
+    min-height: 100px !important;
+    max-height: 300px !important; /* Ensure it doesn't exceed 125px */
+    overflow: hidden; /* Prevent content overflow */
 }
