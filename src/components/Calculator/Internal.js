@@ -432,7 +432,7 @@ class Windows98Calculator extends Component {
   renderDeleteButton(keyFunction, value) {
   return (
     <button onClick={keyFunction} className="main-button delete-button">
-      <span style={{ color: 'red', marginLeft: '-2.5px' }}>{value}</span> {/* Shift text 2px to the left */}
+      <span style={{ color: 'red', marginLeft: '0px' }}>{value}</span> {/* Shift text 2px to the left */}
     </button>
   );
 }
@@ -516,7 +516,7 @@ class Windows98Calculator extends Component {
             padding: 0;
             font-family: 'MS Sans Serif', sans-serif;
             width: 100%;
-            max-width: 275px;
+            max-width: 240px;
             margin: 0 auto;
           }
 
@@ -530,14 +530,16 @@ class Windows98Calculator extends Component {
             background-color: white;
             border: 1px solid;
             border-color: #808080 #fff #fff #808080;
-            padding: 1px 5px;
+            padding: 0px 5px;
             text-align: right;
             font-size: 14px;
             line-height: 24px;
             overflow: hidden;
             white-space: nowrap;
             color: black;
-            width: 100%;
+            width: 98%;
+            margin-left: .75%;
+            margin-bottom: .75%;
             box-sizing: border-box;
           }
 
@@ -546,7 +548,8 @@ class Windows98Calculator extends Component {
             grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 3px;
             margin: 8px 0 6px 0;
-            width: 100%;
+            margin-left: 2.2%;
+            width: 95%;
           }
 
           .delete-button {
@@ -586,9 +589,10 @@ class Windows98Calculator extends Component {
 
           .empty-box {
             background: #c0c0c0;
-            border: 1px inset;
-            height: 26px;
-            width: 100%;
+            border: 1.1px inset;
+            margin-top: 2.5px;
+            height: 21px;
+            width: 46%;
           }
 
           @media (max-width: 600px) {

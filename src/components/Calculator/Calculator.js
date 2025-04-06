@@ -42,15 +42,16 @@ class Calculator extends Component {
         icon={calculator16}
         menuOptions={buildMenu({
           ...props,
-          componentType: "Doom",
+          componentType: "Calculator",
           showHelp: this.showHelp,
+          disableMaximize: true, // Disable maximize option in the menu
         })}
         Component={WindowProgram}
-        initialHeight={235}
-        initialWidth={234} // ✅ Wider to fit layout
-        forceNoMobileMax={true}
-        className={cx("Doom", props.className)}
-        theme={props.theme}
+        initialHeight={233}
+        initialWidth={234}
+        forceNoMobileMax={true} // Prevent auto-maximization on mobile
+        className={cx("Calculator", props.className)}
+        resizable={false} // Disable resizing to prevent manual maximization
       >
         <div className="calculator-wrapper">
           <Windows98Calculator />
