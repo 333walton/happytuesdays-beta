@@ -13,401 +13,172 @@ class Windows98Calculator extends Component {
     this.operators = ["+", "-", "/", "*", "%"];
   }
 
-  /**
-   * Safely evaluate a mathematical expression
-   * @param {String} expression - The expression to evaluate
-   * @returns {Number} - The result of the evaluation
-   */
   safeEval = (expression) => {
     try {
-      // Simple expression evaluator
       return Function('"use strict"; return (' + expression + ')')();
-    } catch (error) {
-      console.error('Error evaluating expression:', error);
+    } catch {
       return NaN;
     }
   };
 
-  /**
-   * Add number or expression to memory
-   * MS button
-   */
   addToMemoryStore = () => {
-    const expression = this.state.expression,
-      last = expression[expression.length - 1];
-    if (
-      this.operators.includes(last) ||
-      last === "" ||
-      this.state.memory !== ""
-    ) {
-      return;
-    }
-    this.setState({
-      memory: this.safeEval(expression.join("")).toString(),
-    });
+    const { expression, memory } = this.state;
+    const last = expression[expression.length - 1];
+    if (this.operators.includes(last) || last === "" || memory !== "") return;
+    this.setState({ memory: this.safeEval(expression.join("")).toString() });
   };
 
-  /**
-   * Add a number to the current value in memory store
-   * M+ button
-   */
   addToCurrentMemoryStore = () => {
-    const expression = this.state.expression,
-      last = expression[expression.length - 1];
-    if (this.state.memory === "" || this.operators.includes(last)) return;
-    
-    const currentMemory = parseFloat(this.state.memory);
-    const exprValue = this.safeEval(expression.join(""));
-    const newMemory = currentMemory + exprValue;
-    
-    this.setState({
-      memory: newMemory.toString(),
-    });
+    const { expression, memory } = this.state;
+    const last = expression[expression.length - 1];
+    if (memory === "" || this.operators.includes(last)) return;
+    const newMemory = parseFloat(memory) + this.safeEval(expression.join(""));
+    this.setState({ memory: newMemory.toString() });
   };
 
-  /**
-   * Retrieve and print value in memory store
-   * MR button
-   */
   retrieveMemoryStore = () => {
-    if (this.state.memory === "") return;
+    if (!this.state.memory) return;
     this.printNumber(this.state.memory);
     this.checkNumberType();
   };
 
-  /**
-   * Clear memory store
-   * MC button
-   */
-  clearMemoryStore = () => {
-    this.setState({ memory: "" });
-  };
+  clearMemoryStore = () => this.setState({ memory: "" });
+  setFloatState = () => this.setState({ int: false, float: true });
+  setIntState = () => this.setState({ int: true, float: false });
 
-  /**
-   * Set the state of the application to handle floats
-   * Used when the user clicks the "." (decimal) button
-   */
-  setFloatState = () => {
-    this.setState({
-      int: false,
-      float: true,
-    });
-  };
-
-  /**
-   * Set application state to handle integers
-   */
-  setIntState = () => {
-    this.setState({
-      int: true,
-      float: false,
-    });
-  };
-
-  /**
-   * Set int or float depending on whether contains a decimal
-   */
   toggleNumberType = () => {
-    if (this.state.expression.join("").includes(".")) {
-      this.setFloatState();
-    } else {
-      this.setIntState();
-    }
+    this.state.expression.join("").includes(".") ? this.setFloatState() : this.setIntState();
   };
 
-  /**
-   * Check if display is a number type and if so convert to string
-   * Call toggleNumberType to set application state accordingly
-   * This is necessary as the application uses strings rather than numbers
-   * for convenience as strings are easier to manipulate
-   */
   checkNumberType = () => {
-    if (typeof this.state.display == "number") {
-      const strNum = this.state.display.toString();
-      this.setState({ display: strNum }, () => this.toggleNumberType());
-    } else {
-      this.toggleNumberType();
-    }
+    const { display } = this.state;
+    typeof display === "number"
+      ? this.setState({ display: display.toString() }, this.toggleNumberType)
+      : this.toggleNumberType();
   };
 
-  /**
-   * Clear the display
-   */
   clearDisplay = () => {
     this.setState({ display: "0." });
     this.clearExpression();
     this.setIntState();
   };
 
-  /**
-   * Backspace last entry to the current expression
-   */
   backSpaceExpression = () => {
-    const { expression } = this.state,
-      lastEntered = expression[expression.length - 1];
-    if (lastEntered.length === 1) {
-      if (expression.length === 1) {
-        return this.clearExpression();
-      } else {
-        expression.pop();
-        return this.setState({ expression: expression });
-      }
-    } else if (lastEntered.length === 2 && lastEntered[0] === "-") {
-      if (expression.length === 1) {
-        return this.clearExpression();
-      } else {
-        expression.pop();
-      }
-    } else if (lastEntered.length > 1) {
-      let newLast = lastEntered.split("");
-      newLast.pop();
-      newLast = newLast.join("");
-      expression.pop();
-      expression.push(newLast);
-    }
-    this.setState({ expression: expression });
-  };
-
-  /**
-   * Backspace the calculator display
-   * @return {String} newDisplay - new string to be displayed
-   * return value used by clearExpression
-   */
-  backSpaceDisplay = () => {
-    if (this.state.display === "0." || this.state.display === "Error") return;
-    let newDisplay;
-    if (this.state.display.length === 1) {
-      newDisplay = "0.";
+    const { expression } = this.state;
+    let last = expression[expression.length - 1];
+    if (last.length === 1 || (last.length === 2 && last[0] === "-")) {
+      expression.length === 1 ? this.clearExpression() : expression.pop();
     } else {
-      newDisplay = this.state.display.substr(0, this.state.display.length - 1);
+      last = last.slice(0, -1);
+      expression[expression.length - 1] = last;
     }
-    this.setState({ display: `${newDisplay}` }, () => {
-      if (this.state.display !== "0.") {
-        this.checkNumberType();
-      }
-    });
-    return newDisplay;
+    this.setState({ expression });
   };
 
-  /**
-   * Backspace last entry
-   */
+  backSpaceDisplay = () => {
+    let { display } = this.state;
+    if (display === "0." || display === "Error") return;
+    display = display.length === 1 ? "0." : display.slice(0, -1);
+    this.setState({ display }, () => {
+      if (display !== "0.") this.checkNumberType();
+    });
+    return display;
+  };
+
   backSpace = () => {
     const newDisplay = this.backSpaceDisplay();
     this.clearExpression(newDisplay);
     this.backSpaceExpression();
   };
 
-  /**
-   * Add a number to the display
-   * If state.display > 40 the number cannot fit and will display "Error"
-   * @param {String} num - the number string passed to update display
-   */
   printNumber = (num) => {
-    if (this.state.display === "Error") {
-      this.setState({ display: "" });
-    }
+    if (this.state.display === "Error") this.setState({ display: "" });
     this.updateExpression(num);
     if (this.state.display.length >= 40) {
       this.clearExpression();
       return this.setState({ display: "Error" });
     }
-    if (this.state.display == "0." || this.state.display == "0") {
-      this.setState((prevState) => ({
-        display: `${num}`,
-      }));
-    } else {
-      this.setState((prevState) => ({
-        display: `${prevState.display}${num}`,
-      }));
-    }
+    this.setState(prev => ({
+      display: prev.display === "0." || prev.display === "0" ? `${num}` : `${prev.display}${num}`
+    }));
   };
 
-  /**
-   * Add number or operator to expression array in state
-   * @param {String} str - number or character to be added to current expression
-   */
   updateExpression = (str) => {
     const { expression } = this.state;
-    if (typeof str === "number") str = str.toString();
-    if (
-      this.operators.includes(str) ||
-      this.operators.includes(this.state.display[this.state.display.length - 1])
-    ) {
-      expression.push(str);
-    } else {
-      expression[expression.length - 1] += str;
-    }
-    this.setState({ expression: expression });
+    str = str.toString();
+    if (this.operators.includes(str) || this.operators.includes(this.state.display.slice(-1))) expression.push(str);
+    else expression[expression.length - 1] += str;
+    this.setState({ expression });
   };
 
-  /**
-   * Reset expression state array
-   * @param {String} newExp - string to replace old expression
-   */
-  clearExpression = (newExp = "") => {
-    if (typeof newExp === "number") newExp = newExp.toString();
-    this.setState((prevState) => ({
-      expression: [newExp],
-    }));
-  };
+  clearExpression = (newExp = "") => this.setState({ expression: [newExp.toString()] });
 
-  /**
-   * Evaluate arithmetic expression and display result
-   */
   compute = () => {
-    if (
-      this.operators.includes(
-        this.state.expression[this.state.expression.length - 1]
-      )
-    )
-      return;
-      
-    const result = this.safeEval(this.state.expression.join(""));
-    
-    if (isNaN(result)) {
-      this.setState({ display: "Error" });
-      return this.clearExpression();
-    }
-    
-    this.setState(
-      {
-        display: result,
-      },
-      () => {
-        this.clearExpression(result);
-        this.checkNumberType();
-      }
-    );
-  };
-
-  /**
-   * Add passed operator to the current expression
-   * @param {String} operator 
-   */
-  addOperator = (operator) => {
-    if (this.state.expression[this.state.expression.length - 1] === "") return;
-    this.setState((prevState) => ({
-      display: `${prevState.display}${operator}`,
-    }));
-    this.updateExpression(operator);
-  };
-
-  /**
-   * Add the decimal operator to display
-   */
-  addDecimal = () => {
-    this.addOperator(".");
-  };
-
-  /**
-   * Add the addition operator to display
-   */
-  addition = () => {
-    this.addOperator("+");
-  };
-
-  /**
-   * Add the subtraction operator to display
-   */
-  subtraction = () => {
-    this.addOperator("-");
-  };
-
-  /**
-   * Add the multiplication operator to display
-   */
-  multiplication = () => {
-    this.addOperator("*");
-  };
-
-  /**
-   * Add the division operator to display
-   */
-  division = () => {
-    this.addOperator("/");
-  };
-
-  /**
-   * Add the percent operator to display
-   */
-  percent = () => {
-    this.setState((prevState) => ({
-      display: `${prevState.display}%`,
-    }));
-    this.updateExpression("%");
-    this.computePercent();
-  };
-
-  /**
-   * Process an expression string containing percentages
-   * Called when the user adds a percent sign
-   */
-  computePercent = () => {
-    if (this.state.expression.includes("%")) {
-      const { expression } = this.state,
-        percentOperatorIndex = expression.lastIndexOf("%"),
-        secondNum = expression[percentOperatorIndex - 1],
-        secondNumIndex = expression.indexOf(secondNum),
-        firstNum = expression[percentOperatorIndex - 3],
-        percentage = ((parseFloat(secondNum) / 100) * parseFloat(firstNum)).toString();
-      
-      expression.splice(secondNumIndex, 1, percentage);
-      expression.splice(percentOperatorIndex, 1);
-      this.setState({ expression: expression });
-    }
-  };
-
-  /**
-   * Compute the square root of the current expression
-   */
-  squareRoot = () => {
-    const expressionValue = this.safeEval(this.state.expression.join(""));
-    const sqrt = Math.sqrt(expressionValue);
-    
-    this.setState({ display: sqrt }, () => {
-      this.clearExpression(sqrt);
+    const { expression } = this.state;
+    if (this.operators.includes(expression[expression.length - 1])) return;
+    const result = this.safeEval(expression.join(""));
+    if (isNaN(result)) return this.setState({ display: "Error" }, this.clearExpression);
+    this.setState({ display: result }, () => {
+      this.clearExpression(result);
       this.checkNumberType();
     });
   };
 
-  /**
-   * Compute the reciprocal of the current expression
-   */
-  reciprocal = () => {
-    const expressionValue = this.safeEval(this.state.expression.join(""));
-    
-    // Check for division by zero
-    if (expressionValue === 0) {
-      this.setState({ display: "Error" });
-      return this.clearExpression();
+  addOperator = (op) => {
+    if (this.state.expression[this.state.expression.length - 1] === "") return;
+    this.setState(prev => ({ display: `${prev.display}${op}` }));
+    this.updateExpression(op);
+  };
+
+  addDecimal = () => this.addOperator(".");
+  addition = () => this.addOperator("+");
+  subtraction = () => this.addOperator("-");
+  multiplication = () => this.addOperator("*");
+  division = () => this.addOperator("/");
+
+  percent = () => {
+    this.setState(prev => ({ display: `${prev.display}%` }));
+    this.updateExpression("%");
+    this.computePercent();
+  };
+
+  computePercent = () => {
+    if (this.state.expression.includes("%")) {
+      const { expression } = this.state;
+      const idx = expression.lastIndexOf("%");
+      const second = expression[idx - 1], first = expression[idx - 3];
+      const pct = ((parseFloat(second) / 100) * parseFloat(first)).toString();
+      expression.splice(idx - 1, 1, pct);
+      expression.splice(idx, 1);
+      this.setState({ expression });
     }
-    
-    const recip = 1 / expressionValue;
-    
+  };
+
+  squareRoot = () => {
+    const val = Math.sqrt(this.safeEval(this.state.expression.join("")));
+    this.setState({ display: val }, () => {
+      this.clearExpression(val);
+      this.checkNumberType();
+    });
+  };
+
+  reciprocal = () => {
+    const val = this.safeEval(this.state.expression.join(""));
+    if (val === 0) return this.setState({ display: "Error" }, this.clearExpression);
+    const recip = 1 / val;
     this.setState({ display: recip }, () => {
       this.clearExpression(recip);
       this.checkNumberType();
     });
   };
 
-  /**
-   * Invert the last number in the current expression
-   */
   toggleNegative = () => {
-    const { expression } = this.state,
-      lastNum = expression[expression.length - 1];
-    let newNum;
-    if (this.operators.includes(lastNum) || lastNum === "" || lastNum === "0")
-      return;
-    if (parseFloat(lastNum) < 0) {
-      newNum = Math.abs(parseFloat(lastNum)).toString();
-    } else if (parseFloat(lastNum) > 0) {
-      newNum = (-1 * parseFloat(lastNum)).toString();
-    }
-    expression.splice(expression.length - 1, 1, newNum);
-    this.setState({ expression: expression });
-    this.setState({ display: expression.join("") });
+    const { expression } = this.state;
+    const last = expression[expression.length - 1];
+    if (this.operators.includes(last) || last === "" || last === "0") return;
+    const neg = parseFloat(last) < 0 ? Math.abs(parseFloat(last)) : -parseFloat(last);
+    expression[expression.length - 1] = neg.toString();
+    this.setState({ expression, display: expression.join("") });
   };
 
   renderDisplay() {
@@ -429,40 +200,31 @@ class Windows98Calculator extends Component {
     );
   }
 
-  renderDeleteButton(keyFunction, value) {
-  return (
-    <button onClick={keyFunction} className="main-button delete-button">
-      <span style={{ color: 'red', marginLeft: '0px' }}>{value}</span> {/* Shift text 2px to the left */}
-    </button>
-  );
-}
-
-
-  renderNumberButton(value) {
+  renderDeleteButton(fn, val) {
     return (
-      <button
-        data-number={value}
-        className="main-button"
-        onClick={() => this.printNumber(value)}
-      >
-        {value}
+      <button onClick={fn} className="main-button delete-button">
+        <span style={{ color: "red" }}>{val}</span>
       </button>
     );
   }
 
-  renderFunctionButton(keyFunction, value) {
-    const isOperator = ["+", "-", "*", "/", "="].includes(value);
+  renderNumberButton(val) {
+    return <button onClick={() => this.printNumber(val)} className="main-button">{val}</button>;
+  }
+
+  renderFunctionButton(fn, val) {
+    const isOp = ["+", "-", "*", "/", "="].includes(val);
     return (
-      <button onClick={keyFunction} className="main-button">
-        <span style={{ color: isOperator ? 'blue' : 'black' }}>{value}</span>
+      <button onClick={fn} className="main-button">
+        <span style={{ color: isOp ? "blue" : "black" }}>{val}</span>
       </button>
     );
   }
 
-  renderMemoryButton(keyFunction, value) {
+  renderMemoryButton(fn, val) {
     return (
-      <button onClick={keyFunction} className="memory-button main-button">
-        <span style={{ color: 'red' }}>{value}</span>
+      <button onClick={fn} className="memory-button main-button">
+        <span style={{ color: "red" }}>{val}</span>
       </button>
     );
   }
@@ -476,21 +238,21 @@ class Windows98Calculator extends Component {
         {this.renderNumberButton(9)}
         {this.renderFunctionButton(this.division, "/")}
         {this.renderFunctionButton(this.squareRoot, "sqrt")}
-        
+
         {this.renderMemoryButton(this.retrieveMemoryStore, "MR")}
         {this.renderNumberButton(4)}
         {this.renderNumberButton(5)}
         {this.renderNumberButton(6)}
         {this.renderFunctionButton(this.multiplication, "*")}
         {this.renderFunctionButton(this.percent, "%")}
-        
+
         {this.renderMemoryButton(this.addToMemoryStore, "MS")}
         {this.renderNumberButton(1)}
         {this.renderNumberButton(2)}
         {this.renderNumberButton(3)}
         {this.renderFunctionButton(this.subtraction, "-")}
         {this.renderFunctionButton(this.reciprocal, "1/x")}
-        
+
         {this.renderMemoryButton(this.addToCurrentMemoryStore, "M+")}
         {this.renderNumberButton(0)}
         {this.renderFunctionButton(this.toggleNegative, "+/-")}
@@ -503,116 +265,10 @@ class Windows98Calculator extends Component {
 
   render() {
     return (
-      <div className="calculator-container">
+      <div className="windows98-calculator">
         {this.renderDisplay()}
         {this.renderDeleteButtonRow()}
         {this.renderMainButtonsGrid()}
-        <style>{`
-          .calculator-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: #c0c0c0;
-            padding: 0;
-            font-family: 'MS Sans Serif', sans-serif;
-            width: 100%;
-            max-width: 240px;
-            margin: 0 auto;
-          } 
-
-          .display-container {
-            margin: 0;
-            width: 100%;
-          }
-
-          .windows98-display {
-            height: 24px;
-            background-color: white;
-            border: 1px solid;
-            border-color: #808080 #fff #fff #808080;
-            padding: 0px 5px;
-            text-align: right;
-            font-size: 14px;
-            line-height: 24px;
-            overflow: hidden;
-            white-space: nowrap;
-            color: black;
-            width: 98%;
-            margin-left: .75%;
-            margin-bottom: .75%;
-            box-sizing: border-box;
-          }
-
-          .delete-button-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 3px;
-            margin: 8px 0 6px 0;
-            margin-left: 2.2%;
-            width: 95%;
-          }
-
-          .delete-button {
-            height: 28px;
-            font-size: 10px;
-            font-family: inherit;
-          }
-
-          .main-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 3px;
-            width: 100%;
-          }
-
-          button {
-            border: 1px solid;
-            border-color: #fff #808080 #808080 #fff;
-            background-color: #c0c0c0;
-            font-size: 11px;
-            height: 28px;
-            width: 100%;
-            padding: 0;
-            font-family: inherit;
-          }
-
-          button:active {
-            border-color: #808080 #fff #fff #808080;
-          }
-
-          .memory-button {
-            color: red;
-            font-weight: normal;
-            font-size: 11px;
-            text-align: center;
-          }
-
-          .empty-box {
-            background: #c0c0c0;
-            border: 1.1px inset;
-            margin-top: 2.5px;
-            height: 21px;
-            width: 46%;
-          }
-
-          @media (max-width: 600px) {
-            .calculator-container {
-              max-width: 90vw;
-              font-size: 11px;
-            }
-            .windows98-display {
-              font-size: 13px;
-            }
-            .delete-button {
-              font-size: 9px;
-              height: 26px;
-            }
-            button {
-              height: 26px;
-              font-size: 10px;
-            }
-          }
-        `}</style>
       </div>
     );
   }
