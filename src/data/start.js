@@ -71,13 +71,6 @@ const programs = [
     component: "JSDos",
     multiInstance: true
   },
-  {
-    title: "Promo (IIGA Test)",
-    icon: icons.mediavid16,
-    component: "VideoPlayer",
-    data: {},
-    multiInstance: true
-  },
   { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: true }
 ];
 
@@ -85,31 +78,7 @@ const programs = [
 const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 const favorites = [
-  {
-    title: "Media",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "Warpcast",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href: "https://warpcast.com/333walton"
-      },
-      {
-        title: "Good Movies",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href: "https://boxd.it/9UyaN"
-      },
-      {
-        title: "Good Techno",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href: "https://soundcloud.com/southbound_music/sets/best-techno?utm_source=good_techno&utm_medium=startmenu&utm_campaign=hydra98"
-      }
-    ]
-  },
-  {
+    {
     title: "WebGL",
     icon: icons.folder16,
     options: [
@@ -178,9 +147,32 @@ const favorites = [
     ]
   },
   {
-    title: "Links",
+    title: "Pixel Art",
+    icon: icons.folder16,
+    options: []
+  },
+  {
+    title: "Media",
     icon: icons.folder16,
     options: [
+      {
+        title: "Good Movies",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href: "https://boxd.it/9UyaN"
+      },
+      {
+        title: "Good Techno",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href: "https://soundcloud.com/southbound_music/sets/best-techno?utm_source=good_techno&utm_medium=startmenu&utm_campaign=hydra98"
+      },
+      {
+        title: "Warpcast",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href: "https://warpcast.com/333walton"
+      },
       {
         title: "CoinGecko",
         type: "ExternalLink",

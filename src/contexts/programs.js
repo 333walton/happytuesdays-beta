@@ -27,12 +27,6 @@ const settings = (injectedData = []) => [
   [
     ...injectedData,
     {
-      title: "Defragmenter",
-      icon: icons.defrag16,
-      component: "ExplorerWindow",
-      isDisabled: true
-    },
-    {
       title: "Active Desktop",
       icon: icons.activeDesktop16,
       isDisabled: true
@@ -159,7 +153,33 @@ class ProgramProvider extends Component {
               title: "Control Panel",
               onClick: () => this.toggleSettings(),
               icon: icons.controlPanel16
-            }
+            },
+            {
+              title: "IIGA Tests",
+              icon: icons.folder16,
+              options: [
+                {
+                  title: "Video Emitters",
+                  icon: icons.mediavid16,
+                  component: "VideoPlayer",
+                  data: {},
+                  multiInstance: true,
+                  isDisabled: true
+                },
+                {
+                  title: "Form Submission",
+                  icon: icons.mediavid16,
+                  multiInstance: true,
+                  isDisabled: true
+                },
+                {
+                  title: "Cookie Consent",
+                  icon: icons.htmlFile16,
+                  href: "",
+                  isDisabled: true
+                }
+              ]
+            },
           ],
           () => this.toggleShutDownMenu()
         )
