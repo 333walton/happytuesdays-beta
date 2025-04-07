@@ -64,6 +64,11 @@ const desktopData = [
     component: "RecycleBin",
     className: "recycle-icon" // Apply the CSS class
   },
+  {
+    title: "Video Player",
+    icon: icons.doom32,
+    component: "VideoPlayer",
+  },
 
 ];
 

@@ -1,113 +1,54 @@
-"use client"
-
-import React, { Component } from "react"
+import { Component } from "react"
 import { WindowProgram } from "packard-belle"
 import cx from "classnames"
 import Window from "../tools/Window"
-import { mediavid16 } from "../../icons";
+import { burn16 } from "../../icons"
 import buildMenu from "../../helpers/menuBuilder"
 import "./_styles.scss"
+import { Video } from "@react95/core"
+import "@react95/core/GlobalStyle"
+import "@react95/core/themes/win95.css"
+
 
 class VideoPlayer extends Component {
-  state = {
-    isPlaying: false,
-    currentTime: 0,
-    duration: 0,
-    volume: 1,
+
+  
+
+  constructor(props) {
+    super(props)
   }
 
-  videoRef = React.createRef()
-
-  handlePlay = () => {
-    this.setState({ isPlaying: true })
-  }
-
-  handlePause = () => {
-    this.setState({ isPlaying: false })
-  }
-
-  handleTimeUpdate = () => {
-    const video = this.videoRef.current
-    if (video) {
-      this.setState({
-        currentTime: video.currentTime,
-        duration: video.duration,
-      })
-    }
-  }
-
-  handleVolumeChange = (e) => {
-    const volume = Number.parseFloat(e.target.value)
-    this.setState({ volume })
-    if (this.videoRef.current) {
-      this.videoRef.current.volume = volume
-    }
-  }
-
-  formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`
+  toggleFullScreen = () => {
+    const playerElement = this.player.current
+    playerElement?.requestFullscreen()
   }
 
   render() {
     const { props } = this
-    const { isPlaying, currentTime, duration, volume } = this.state
-    const videoSrc = props.data?.src || "/static/windows98flag.mp4"
-
-    // Handle the onClose prop
-    const onClose = props.onClose || (() => console.log("No onClose handler provided"))
-
     return (
       <Window
         {...props}
-        title="Video Player"
-        icon={mediavid16}
+        title="Video Player" 
+        icon={burn16}
         menuOptions={buildMenu(props)}
         Component={WindowProgram}
-        initialHeight={360}
-        initialWidth={480}
+        initialHeight={328}
+        initialWidth={325}
+        // resizable={false}
         className={cx("VideoPlayer", props.className)}
-        onClose={onClose}
       >
-        <div className="video-container" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-          <div style={{ flex: 1, background: "#000", display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <video
-              ref={this.videoRef}
-              src={videoSrc}
-              style={{ maxWidth: "100%", maxHeight: "100%" }}
-              onPlay={this.handlePlay}
-              onPause={this.handlePause}
-              onTimeUpdate={this.handleTimeUpdate}
-              autoPlay={props.data?.autoPlay}
-              controls
-            />
-          </div>
-
-          <div
-            className="video-controls"
-            style={{ padding: "8px", background: "#c0c0c0", borderTop: "1px solid #fff" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
-              <span style={{ marginRight: "8px", fontSize: "12px" }}>
-                {this.formatTime(currentTime)} / {this.formatTime(duration)}
-              </span>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <span style={{ fontSize: "12px", marginRight: "4px" }}>Volume:</span>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={volume}
-                  onChange={this.handleVolumeChange}
-                  style={{ width: "80px" }}
-                />
-              </div>
-              <div style={{ marginLeft: "auto", fontSize: "12px" }}>Status: {isPlaying ? "Playing" : "Paused"}</div>
-            </div>
-          </div>
-        </div>
+        <Video
+          // w="100%"
+          // h="100%"
+          src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4"
+          style={{
+            marginBottom: 4,
+            height: "100%",
+            width: '100%',
+            objectFit: "contain"
+          }}
+          
+        />
       </Window>
     )
   }

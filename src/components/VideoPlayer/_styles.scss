@@ -11,69 +11,207 @@
   src: url("../../assets/FixedsysStripped.woff2") format("woff2");
 }
 
-.Doom {
-  input {
-    filter: opacity(0%);
-    position: absolute;
-    left: -2000px;
-  }
-  .terminal {
-    @include shadow-input;
-    flex-grow: 1;
-    * {
-      font-family: pixelmix, FixedSys, MSSansSerif, "Courier New", Courier,
-        monospace;
-    }
-    background-color: black;
-    color: white;
-    font-size: 8px;
-    letter-spacing: 1px;
-    line-height: 1.5em;
-    padding: 8px 4px;
-    overflow: auto;
-    &::selection {
-      background-color: white;
-      color: black;
+.VideoPlayer {
+  &.Window {
+    overflow: hidden; // Prevent any overflow
+    &:after {
+      content: none;
     }
   }
-  form:focus-within + .terminal .terminal__content > span:after {
-    content: "_";
+  .Video-title, // Adjust this selector based on the actual class name
+  .video-title-bar {
+    display: none !important;
   }
-  &.Window:after {
-    content: none;
-  }
-
-  .IframeWindow {
-    >div:not(.Window__heading) {
-      width: 100%;
-      height: calc(100% - 10px);
-    }
-    iframe {
-      border: none;
-      width: 100%;
-      height: calc(100% - 6px);
-    }
   
-    &--alert.WindowAlert {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      -ms-transform: translateX(-50%) translateY(-50%);
-      -webkit-transform: translateX(-50%) translateY(-50%);
-      -moz-transform: translateX(-50%) translateY(-50%);
-      -o-transform: translateX(-50%) translateY(-50%);
-      transform: translateX(-50%) translateY(-50%);
-      z-index: 8;
+  .video {
+    height: calc(100% - 73px); // Reserve space for controls
+    width: 100%;
+    background: #000;
+    object-fit: contain;
+  }
+
+  .video-player-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 2px;
+    overflow: hidden; // Contain all children
+  }
+  
+  .video-controls-container {
+    height: 80px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden; // Prevent any overflow
+  }
+  
+  .countdown-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 5px;
+    margin: 0;
+    background-color: #000;
+    color: #fff;
+    height: 30px;
+    font-family: "FixedSys", monospace;
+    border: inset 1px #888;
+    align-items: center;
+    width: 100%; // Ensure full width
+    box-sizing: border-box; // Include padding in width calculation
+    flex-shrink: 0; // Prevent shrinking
+  }
+
+  .time-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0; // Allow text truncation
+    flex: 1; // Allow equal distribution of space
+
+    &.left {
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    &.right {
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    .current-time-display,
+    .duration-display,
+    .elapsed-display,
+    .loading-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%; // Take full available width
+    }
+  }
+  
+  .control-panel {
+    display: flex;
+    background-color: #c0c0c0;
+    border: outset 1px #dfdfdf;
+    height: 40px; // Fixed height
+    flex-shrink: 0; // Prevent shrinking
+  }
+  
+  .control-buttons {
+    display: flex;
+    align-items: center;
+    
+    .control-btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: outset 1px #dfdfdf;
+      background-color: #c0c0c0;
+      cursor: pointer;
+      margin-right: 2px;
+      margin-left: 2px;
+      
+      svg {
+        fill: #000;
+        width: 8px;
+        height: 8px;
+      }
+      
+      &:disabled {
+        cursor: default;
+        
+        svg {
+          fill: #808080;
+        }
+      }
+      
+      &:active {
+        border-style: inset;
+      }
+    }
+    
+    .loading-indicator {
+      width: 6px;
+      height: 6px;
+      background-color: #000;
+    }
+  }
+  
+  .progress-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+  
+  /* Styles for React95 Range component and fallback */
+  .progress-slider {
+    width: 100%;
+    height: 8px;
+    border: none;
+    
+    &[type="range"] {
+      -webkit-appearance: none;
+      background: #c0c0c0;
+      border: inset 1px #888;
+      outline: none;
+      
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 10px;
+        height: 16px;
+        background: #c0c0c0;
+        border: outset 1px #dfdfdf;
+        cursor: pointer;
+      }
+      
+      &::-moz-range-thumb {
+        width: 10px;
+        height: 16px;
+        background: #c0c0c0;
+        border: outset 1px #dfdfdf;
+        cursor: pointer;
+      }
     }
   }
 }
 
-.react-draggable-dragging {
-  .IframeWindow {
-
-    >div,
-    iframe {
-      pointer-events: none;
-    }
-  }
+.window__menu{
+  display: none !important;
 }
+
+.r95_1kpzw682{
+  display: none !important;
+}
+
+.r95_1kpzw683{
+  display: none !important;
+}
+
+.r95_13gnpv00{
+  padding: 0 !important;
+}
+
+.r95_iuzg895z{
+  box-shadow: none !important;
+}
+
+// .r95_1bzq74l0 {
+//     background-color: #c3c7cb !important;
+//     padding-top: 7px !important;
+//     padding-inline: 20px !important;
+//     padding-bottom: 5px !important;
+//     border: none !important;
+//     color: #000000 !important;
+//     font-size: 12px !important;
+//     box-shadow: inset 1px 1px 0px 1px #ffffff, inset 0 0 0 1px #868a8e, 1px 1px 0 0px #000000 !important;
+// }
+
