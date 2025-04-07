@@ -32,9 +32,9 @@ class VideoPlayer extends Component {
         icon={burn16}
         menuOptions={buildMenu(props)}
         Component={WindowProgram}
-        initialHeight={328}
+        initialHeight={300}
         initialWidth={325}
-        // resizable={false}
+        resizable={false}
         className={cx("VideoPlayer", props.className)}
       >
         <Video
