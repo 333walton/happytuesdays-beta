@@ -63,12 +63,7 @@ const desktopData = [
     icon: icons.recycleempty32, // Default icon (This will be overridden in the component using state)
     component: "RecycleBin",
     className: "recycle-icon" // Apply the CSS class
-  },
-  {
-    title: "Video Player",
-    icon: icons.doom32,
-    component: "VideoPlayer",
-  },
+  }
 
 ];
 
