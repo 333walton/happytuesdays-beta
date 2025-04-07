@@ -160,7 +160,7 @@ class ProgramProvider extends Component {
               options: [
                 {
                   title: "Video Emitters",
-                  icon: icons.mediavid16,
+                  icon: icons.vid16,
                   component: "VideoPlayer",
                   data: {},
                   multiInstance: true,
@@ -168,13 +168,13 @@ class ProgramProvider extends Component {
                 },
                 {
                   title: "Form Submission",
-                  icon: icons.mediavid16,
+                  icon: icons.prompt16,
                   multiInstance: true,
                   isDisabled: true
                 },
                 {
                   title: "Cookie Consent",
-                  icon: icons.htmlFile16,
+                  icon: icons.cookie16,
                   href: "",
                   isDisabled: true
                 }
