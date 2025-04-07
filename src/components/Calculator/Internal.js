@@ -518,7 +518,7 @@ class Windows98Calculator extends Component {
             width: 100%;
             max-width: 240px;
             margin: 0 auto;
-          }
+          } 
 
           .display-container {
             margin: 0;
