@@ -49,7 +49,7 @@ const programs = [
     title: "Entertainment", icon: icons.folderProgram16, options: [
       {
         title: "Movie Player",
-        icon: icons.mediavid16,
+        icon: icons.camera16,
         component: "VideoPlayer",
         isDisabled: false
       },

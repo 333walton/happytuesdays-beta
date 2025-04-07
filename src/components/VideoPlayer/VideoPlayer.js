@@ -2,7 +2,7 @@ import { Component } from "react"
 import { WindowProgram } from "packard-belle"
 import cx from "classnames"
 import Window from "../tools/Window"
-import { mediavid16 } from "../../icons"
+import { camera16 } from "../../icons"
 import buildMenu from "../../helpers/menuBuilder"
 import "./_styles.scss"
 import { Video } from "@react95/core"
@@ -29,7 +29,7 @@ class VideoPlayer extends Component {
       <Window
         {...props}
         title="Video Player" 
-        icon={mediavid16}
+        icon={camera16}
         menuOptions={buildMenu(props)}
         Component={WindowProgram}
         initialHeight={300}
