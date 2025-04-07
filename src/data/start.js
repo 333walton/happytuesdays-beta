@@ -4,6 +4,7 @@ import squirtel from "./textFiles/squirtel";
 import rollin from "./textFiles/rollin";
 import allStarTabs from "./textFiles/allStarTabs";
 import commits from "./textFiles/commits";
+import faq from "./textFiles/faq";
 
 const accessories = [
   {
@@ -322,7 +323,10 @@ const startMenuData = [
             title: "FAQ",
             icon: icons.faq32,
             component: "Notepad",
-            multiInstance: true
+            multiInstance: true,
+            data: {
+              content: faq
+            }
           },
           {
             title: "Change Log",
