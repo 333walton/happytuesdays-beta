@@ -17,7 +17,6 @@ const accessories = [
     component: "Calculator",
     multiInstance: true,
     isDisabled: false,
-    className: "menu-title"
   },
   
   {
@@ -30,16 +29,25 @@ const accessories = [
     title: "Paint",
     icon: icons.paint16,
     component: "IframeWindow",
-    data: { src: "https://jspaint.app/", creator: "https://github.com/1j01" },
+    data: {
+      src: "https://jspaint.app/",
+      creator: "https://github.com/1j01"
+    },
     multiInstance: true
   },
   
 ];
 
 const programs = [
-  { title: "Accessories", icon: icons.folderProgram16, options: accessories },
   {
-    title: "Online Services", icon: icons.folderProgram16, options: [
+    title: "Accessories",
+    icon: icons.folderProgram16,
+    options: accessories
+  },
+  {
+    title: "Online Services",
+    icon: icons.folderProgram16,
+    options: [
     {
         title: "AOL",
         icon: icons.aol16,
@@ -52,7 +60,9 @@ const programs = [
       },
   ] },
   {
-    title: "Entertainment", icon: icons.folderProgram16, options: [
+    title: "Entertainment",
+    icon: icons.folderProgram16,
+    options: [
       {
         title: "Movie Player",
         icon: icons.camera16,
@@ -77,7 +87,11 @@ const programs = [
     component: "JSDos",
     multiInstance: true
   },
-  { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: true }
+  {
+    title: "Hydra Explorer",
+    icon: icons.windowsExplorer16,
+    isDisabled: true
+  }
 ];
 
 const favorites = [
@@ -188,7 +202,11 @@ const favorites = [
 ];
 
 export const find = [
-  { title: "Files or Folders...", icon: icons.findFiles16, isDisabled: true },
+  {
+    title: "Files or Folders...",
+    icon: icons.findFiles16,
+    isDisabled: true
+  },
   {
     title: "Computer...",
     icon: icons.findComputer16,
@@ -305,9 +323,9 @@ const ASCII = [
 const startMenuData = [
   {
     title: "Programs",
-    color: "black",
     icon: icons.folderProgram24,
     options: programs,
+    className: "menu-item"
   },
   {
     title: "Favorites",
@@ -402,8 +420,8 @@ const startMenuData = [
 ];
 
 startMenuData.map((item) => (
-  <div key={item.title} style={{ color: item.color }}>
-    {item.title}
+  <div key={item.title} className="menu-item">
+    <span style={{ color: "black" }}>{item.title}</span>
   </div>
 ));
 
