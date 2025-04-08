@@ -325,7 +325,6 @@ const startMenuData = [
     title: "Programs",
     icon: icons.folderProgram24,
     options: programs,
-    className: "menu-item"
   },
   {
     title: "Favorites",
@@ -418,16 +417,5 @@ const startMenuData = [
     options: ASCII,
   },
 ];
-
-startMenuData.map((item) => (
-  <div
-    key={item.title}
-    className="menu-item"
-    style={{ color: "black", WebkitTextFillColor: "black" }}
-  >
-    <span>{item.title}</span>
-  </div>
-));
-
 
 export default startMenuData;
