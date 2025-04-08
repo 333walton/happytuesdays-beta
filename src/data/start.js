@@ -17,7 +17,8 @@ const accessories = [
     component: "Calculator",
     multiInstance: true,
     isDisabled: false,
-    style: { color: isMobile() ? "black" : "blue" } // Set text color based on device
+    className: "menu-title",
+    style: { color: isMobile() ? "black" : "black" }
   },
   
   {
@@ -306,7 +307,8 @@ const startMenuData = [
   {
     title: "Programs",
     icon: icons.folderProgram24,
-    options: programs
+    options: programs,
+    style: { color: isMobile() ? "black" : "black" }
   },
   {
     title: "Favorites",
