@@ -420,9 +420,14 @@ const startMenuData = [
 ];
 
 startMenuData.map((item) => (
-  <div key={item.title} className="menu-item">
-    <span style={{ color: "black" }}>{item.title}</span>
+  <div
+    key={item.title}
+    className="menu-item"
+    style={{ color: "black", WebkitTextFillColor: "black" }}
+  >
+    <span>{item.title}</span>
   </div>
 ));
+
 
 export default startMenuData;
