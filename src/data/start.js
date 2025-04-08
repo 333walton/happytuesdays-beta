@@ -401,4 +401,10 @@ const startMenuData = [
   },
 ];
 
+startMenuData.map((item) => (
+  <div key={item.title} style={{ color: item.color }}>
+    {item.title}
+  </div>
+));
+
 export default startMenuData;
