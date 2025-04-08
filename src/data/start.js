@@ -6,13 +6,18 @@ import allStarTabs from "./textFiles/allStarTabs";
 import commits from "./textFiles/commits";
 import faq from "./textFiles/faq";
 
+
+// Utility function to detect mobile devices
+const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 const accessories = [
   {
     title: "Calculator",
     icon: icons.calculator16,
     component: "Calculator",
     multiInstance: true,
-    isDisabled: false
+    isDisabled: false,
+    style: { color: "black" }
   },
   
   {
@@ -74,9 +79,6 @@ const programs = [
   },
   { title: "Hydra Explorer", icon: icons.windowsExplorer16, isDisabled: true }
 ];
-
-// Utility function to detect mobile devices
-const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 const favorites = [
     {
