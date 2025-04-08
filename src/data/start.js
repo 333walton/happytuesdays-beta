@@ -17,7 +17,7 @@ const accessories = [
     component: "Calculator",
     multiInstance: true,
     isDisabled: false,
-    style: { color: "black" }
+    style: { color: isMobile() ? "black" : "blue" } // Set text color based on device
   },
   
   {
