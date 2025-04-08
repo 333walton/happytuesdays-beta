@@ -17,8 +17,7 @@ const accessories = [
     component: "Calculator",
     multiInstance: true,
     isDisabled: false,
-    className: "menu-title",
-    style: { color: isMobile() ? "black" : "black" }
+    className: "menu-title"
   },
   
   {
@@ -306,9 +305,9 @@ const ASCII = [
 const startMenuData = [
   {
     title: "Programs",
+    color: "black",
     icon: icons.folderProgram24,
     options: programs,
-    style: { color: isMobile() ? "black" : "black" }
   },
   {
     title: "Favorites",
