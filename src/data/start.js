@@ -363,12 +363,16 @@ const startMenuData = [
         icon: icons.folder16,
         options: [
           {
-            title: "Submit Here",
-            type: "ExternalLink",
-            icon: icons.htmlFile16,
+            title: "Enter Gallery",
+            icon: icons.defrag16,
+            component: "",
             isDisabled: true,
-            href:
-              ""
+          },
+          {
+            title: "Submit Here",
+            icon: icons.prompt16,
+            component: "DoodleSubmission",
+            isDisabled: false,
           },
           {
           title: "Test Doodle", // This is the title of the image window
@@ -379,7 +383,13 @@ const startMenuData = [
             title: "My Image"
           },
           isDisabled: false
-        }
+          },
+          {
+            title: "All Doodles",
+            icon: icons.folderOpen24,
+            component: "",
+            isDisabled: true,
+          }
         ],
       },
       {

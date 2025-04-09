@@ -1,0 +1,80 @@
+@import "../../../node_modules/packard-belle/src/_scss/w98/mixins/box-shadows.scss";
+
+@font-face {
+  font-family: pixelmix;
+  src: url("../../assets/pixelmix.woff2") format("woff2");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: FixedSys;
+  src: url("../../assets/FixedsysStripped.woff2") format("woff2");
+}
+
+.DoodleSubmission {
+    padding: 4px;
+
+    .doodle-form {
+        display: flex;
+        flex-direction: column;
+        margin-top: 6px;
+        gap: 8px;
+        font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+        font-size: 12px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+
+        label {
+            font-weight: bold;
+            margin-bottom: 2px;
+            margin-left: 2.5px;
+        }
+
+        input,
+        textarea {
+            font-family: inherit;
+            font-size: 12px;
+            padding: 4px;
+            margin-right: 2px;
+            border: 2px inset #fff;
+            background: #fff;
+        }
+    }    
+    
+    .no-background {
+        background-color: transparent !important; // Remove the white background
+        display: flex;
+        flex-direction: column;
+        
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            margin-left: 2.5px;
+        }
+    }
+
+    .submit-button {
+        align-self: flex-start;
+        background: #c0c0c0;
+        border: 2px outset #fff;
+        padding: 6px 15px;
+        margin-top: 1px;
+        margin: auto; //center horizonally
+        font-weight: bold;
+
+        &:active {
+            border: 2px inset #000;
+        }
+    }
+
+    .submission-status {
+        margin-top: 8px;
+        color: green;
+        font-weight: bold;
+    }
+
+}
+
