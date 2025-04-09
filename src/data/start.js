@@ -228,39 +228,6 @@ export const find = [
 
 const games = [
   {
-    title: "MS Classics",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "Minesweeper",
-        icon: icons.minesweeper16,
-        component: "Minesweeper2",
-        multiInstance: true
-      },
-      {
-      title: "Solitaire",
-      icon: icons.soli16,
-      component: "",
-      multiInstance: true,
-      isDisabled: true
-      },
-      {
-      title: "SkiFree",
-      icon: icons.skifree,   
-      component: "",
-      multiInstance: true,
-      isDisabled: true
-      },
-      {
-      title: "Space Cadet Pinball",
-      icon: icons.spacecadet16,
-      component: "",
-      multiInstance: true,
-      isDisabled: true
-      }
-    ]
-  },
-  {
     title: "DOS Games",
     icon: icons.folder16,
     options: [
@@ -284,11 +251,49 @@ const games = [
     ]
   },
   {
+    title: "Misc.",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "GliderPro",
+        icon: icons.glider16,
+        isDisabled: true
+      }
+    ]
+  },
+  {
     title: "HydraBurn",
     icon: icons.burn16,
     component: "Burn",
     multiInstance: true
   },
+  {
+    title: "Minesweeper",
+    icon: icons.minesweeper16,
+    component: "Minesweeper2",
+    multiInstance: true
+  },
+  {
+  title: "Solitaire",
+  icon: icons.soli16,
+  component: "",
+  multiInstance: true,
+  isDisabled: true
+  },
+  //{
+  //title: "SkiFree",
+  //icon: icons.skifree,   
+  //component: "",
+  //multiInstance: true,
+  //isDisabled: true
+  //},
+  {
+  title: "Space Cadet Pinball",
+  icon: icons.spacecadet16,
+  component: "",
+  multiInstance: true,
+  isDisabled: true
+  }
 ];
 
 const ASCII = [
