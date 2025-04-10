@@ -260,15 +260,18 @@ const games = [
         component: "Burn",
         multiInstance: true
       },
-      {
+      // Only show these options for desktop users
+      ...(!isMobile()
+        ? [
+            {
         title: "GliderPro",
         icon: icons.glider16,
         component: "Glider",
-        multiInstance: true,
-        isDisabled: false
-      }
+        multiInstance: false,
+      },
     ]
-  },
+  : [])  
+]},
   {
     title: "Minesweeper",
     icon: icons.minesweeper16,
