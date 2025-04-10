@@ -101,7 +101,7 @@ const favorites = [
     options: [
       {
         title: "Rain Physics",
-        icon: icons.htmlFile16,
+        icon: icons.webglwindow32,
         component: "TestExplorer",
         data: {
           src: "https://loklok-volume.vercel.app/gpu", // URL to load in the iframe
@@ -111,7 +111,7 @@ const favorites = [
       },
       {
         title: "Instance Points",
-        icon: icons.htmlFile16,
+        icon: icons.webglwindow32,
         component: "TestExplorer",
         data: {
           src: "https://threejs.org/examples/webgpu_instance_points.html", // URL to load in the iframe
@@ -124,7 +124,7 @@ const favorites = [
         ? [
             {
               title: "Minecraft Sim",
-              icon: icons.htmlFile16,
+              icon: icons.webglwindow32,
               component: "TestExplorer",
               data: {
                 src: "https://threejs.org/examples/webgl_geometry_minecraft.html", // URL to load in the iframe
@@ -255,22 +255,24 @@ const games = [
     icon: icons.folder16,
     options: [
       {
+        title: "HydraBurn",
+        icon: icons.burn16,
+        component: "Burn",
+        multiInstance: true
+      },
+      {
         title: "GliderPro",
         icon: icons.glider16,
-        isDisabled: true
+        component: "Glider",
+        multiInstance: true,
+        isDisabled: false
       }
     ]
   },
   {
-    title: "HydraBurn",
-    icon: icons.burn16,
-    component: "Burn",
-    multiInstance: true
-  },
-  {
     title: "Minesweeper",
     icon: icons.minesweeper16,
-    component: "Minesweeper2",
+    component: "Minesweeper",
     multiInstance: true
   },
   {
@@ -369,7 +371,7 @@ const startMenuData = [
         options: [
           {
             title: "Enter Gallery",
-            icon: icons.defrag16,
+            icon: icons.doodlegallery32,
             component: "",
             isDisabled: true,
           },

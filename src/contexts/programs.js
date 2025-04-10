@@ -145,16 +145,6 @@ class ProgramProvider extends Component {
           this.props.startMenuData,
           [
             {
-              title: "Task Manager",
-              onClick: () => this.toggleTaskManager(),
-              icon: icons.folderProgram16
-            },
-            {
-              title: "Control Panel",
-              onClick: () => this.toggleSettings(),
-              icon: icons.controlPanel16
-            },
-            {
               title: "IIGA Tests",
               icon: icons.folder16,
               options: [
@@ -180,6 +170,16 @@ class ProgramProvider extends Component {
                 }
               ]
             },
+            {
+              title: "Task Manager",
+              onClick: () => this.toggleTaskManager(),
+              icon: icons.folderProgram16
+            },
+            {
+              title: "Control Panel",
+              onClick: () => this.toggleSettings(),
+              icon: icons.controlPanel16
+            }
           ],
           () => this.toggleShutDownMenu()
         )

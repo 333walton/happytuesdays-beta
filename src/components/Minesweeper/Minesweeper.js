@@ -1,97 +1,44 @@
 import React, { Component } from "react";
-import cx from "classnames";
 import { WindowProgram } from "packard-belle";
-import App from "pb-minesweeper/src/App";  // instead of /src/App
-
-import { minesweeper16 } from "../../icons";
-import { helpOptions } from "../../helpers/menuBuilder";
-
+import cx from "classnames";
 import Window from "../tools/Window";
-
+import { minesweeper16 } from "../../icons";
+import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
-const difficulty = {
-  beginner: {
-    gridSize: [9, 9],
-    mines: 10
-  },
-  intermediate: {
-    gridSize: [16, 16],
-    mines: 40
-  },
-  expert: {
-    gridSize: [30, 16],
-    mines: 99
-  }
-};
-
-class Minesweeper extends Component {
-  static defaultProps = {
-    data: {}
-  };
-  state = {
-    gameId: Date.now(),
-    difficulty: "beginner"
-  };
-
-  updateDifficulty = difficulty => () =>
-    this.setState({ difficulty, gameId: Date.now() });
-
+class Doom extends Component {
   render() {
-    const { props, state } = this;
+    const { props } = this;
     return (
-      <>
-        <Window
-          {...props}
-          icon={minesweeper16}
-          footer={[
-            { text: "needs 100% width height" },
-            { text: "overflow control" }
-          ]}
-          menuOptions={[
-            {
-              title: "File",
-              options: [
-                {
-                  title: "New",
-                  onClick: () => this.setState({ gameId: Date.now() })
-                },
-                [
-                  ...Object.keys(difficulty).map(level => ({
-                    title: level[0].toUpperCase() + level.slice(1),
-                    onClick: this.updateDifficulty(level),
-                    className:
-                      this.state.difficulty === level ? "checked" : undefined
-                  })),
-                  { title: "Custom", isDisabled: true }
-                ],
-                { title: "Close", onClick: () => props.onClose(props) }
-              ]
-            },
-            helpOptions(props)
-          ]}
-          className={cx("Minesweeper", props.className, {
-            "Minesweeper--wrap": state.wrap,
-            "Window--blocked": state.saveScreen
-          })}
-          title={`Minesweeper`}
-          Component={WindowProgram}
-          minHeight={100}
-          minWidth={100}
-          initialHeight={100}
-          initialWidth={100}
-          resizable={false}
-          onMaximize={null}
-        >
-          <App
-            key={this.state.gameId}
-            gridSize={difficulty[this.state.difficulty].gridSize}
-            mines={difficulty[this.state.difficulty].mines}
-          />
-        </Window>
-      </>
+      <Window
+        {...props}
+        title="Minesweeper"
+        icon={minesweeper16}
+        menuOptions={buildMenu({
+          ...props,
+          componentType: "Doom",
+          showHelp: this.showHelp,
+          options: {
+          },
+        })}
+        Component={WindowProgram}
+        initialHeight={240}
+        initialWidth={162}
+        resizable={false}           // This disables resizing
+        onMaximize={null}           // This disables the maximize button
+        className={cx("Doom", props.className)}
+      >
+        <iframe
+          src="/dist/minesweeper222.html"
+          title="Minesweeper"
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          scrolling="no"
+        />
+      </Window>
     );
   }
 }
 
-export default Minesweeper;
+export default Doom;
