@@ -30,8 +30,8 @@ class VideoPlayer extends Component {
         title="Video Player" 
         icon={camera16}
         Component={WindowProgram}
-        initialHeight={300}
-        initialWidth={325}
+        initialHeight={290}
+        initialWidth={320}
         resizable={false}
         className={cx("VideoPlayer", props.className)}
       >
