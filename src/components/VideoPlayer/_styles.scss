@@ -135,6 +135,9 @@
       &:after {
         content: none;
       }
+    &.window__menu {
+      display: none !important;
+      }
     }
     .Video-title, // Adjust this selector based on the actual class name
     .video-title-bar {
@@ -300,10 +303,6 @@
         }
       }
     }
-  }
-
-  .window__menu{
-    display: none !important;
   }
 
   .r95_1kpzw682{

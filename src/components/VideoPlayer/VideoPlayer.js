@@ -3,7 +3,6 @@ import { WindowProgram } from "packard-belle"
 import cx from "classnames"
 import Window from "../tools/Window"
 import { camera16 } from "../../icons"
-import buildMenu from "../../helpers/menuBuilder"
 import "./_styles.scss"
 import { Video } from "@react95/core"
 import "@react95/core/GlobalStyle"
@@ -24,13 +23,12 @@ class VideoPlayer extends Component {
   }
 
   render() {
-    const { props } = this
+    const { props } = this;
     return (
       <Window
         {...props}
         title="Video Player" 
         icon={camera16}
-        menuOptions={buildMenu(props)}
         Component={WindowProgram}
         initialHeight={300}
         initialWidth={325}
