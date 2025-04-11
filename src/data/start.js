@@ -231,6 +231,20 @@ const games = [
         icon: icons.glider16,
         component: "Glider",
         multiInstance: false,
+          },
+          {
+        title: "Retro City",
+        icon: icons.retrocity32,
+        component: "",
+        isDisabled: true,
+        multiInstance: true
+          },
+          {
+        title: "Rampage World Tour",
+        icon: icons.rampage16,
+        component: "",
+        isDisabled: true,
+        multiInstance: false,
       },
     ]
   : [])  
