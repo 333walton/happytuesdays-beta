@@ -167,6 +167,12 @@ class ProgramProvider extends Component {
                   icon: icons.cookie16,
                   href: "",
                   isDisabled: true
+                },
+                {
+                  title: "Newsletter Prompt",
+                  icon: icons.newsletter16,
+                  href: "",
+                  isDisabled: true
                 }
               ]
             },

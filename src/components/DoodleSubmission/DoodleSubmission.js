@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import Window from "../tools/Window";
 import { WindowProgram } from "packard-belle";
-import { paint16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import cx from "classnames";
 import "./_styles.scss";
@@ -46,7 +45,6 @@ render() {
     <Window
         {...this.props}
         title="Submit Doodle"
-        icon={paint16}
         Component={WindowProgram}
         initialWidth={300}
         initialHeight={282}
