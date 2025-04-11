@@ -156,12 +156,12 @@ class ProgramProvider extends Component {
                   multiInstance: true,
                   isDisabled: true
                 },
-                {
-                  title: "Form Submission",
-                  icon: icons.prompt16,
-                  multiInstance: true,
-                  isDisabled: true
-                },
+                //{
+                  //title: "Form Submission",
+                  //icon: icons.prompt16,
+                  //multiInstance: true,
+                  //isDisabled: true
+                //},
                 {
                   title: "Cookie Consent",
                   icon: icons.cookie16,

@@ -136,42 +136,18 @@ const favorites = [
         : [])
     ],
   },
-  {
-    title: "Demoscenes",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "GleEst",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://demozoo.org/productions/288839/"
-      },
-      {
-        title: "Micro1k",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://demozoo.org/productions/128900/"
-      },
-      {
-        title: "Kishkoid",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://demozoo.org/productions/13245/"
-      }
-    ]
-  },
-  {
-    title: "Pixel Art",
-    icon: icons.folder16,
-    options: []
-  },
+  
   {
     title: "Media",
     icon: icons.folder16,
     options: [
+      {
+        title: "Good Music",
+        type: "ExternalLink",
+        icon: icons.mediacd16,
+        isDisabled: true,
+        href: "https://soundcloud.com/southbound_music/sets/best-techno?utm_source=good_techno&utm_medium=startmenu&utm_campaign=hydra98"
+      },
       {
         title: "Good Movies",
         type: "ExternalLink",
@@ -179,23 +155,10 @@ const favorites = [
         href: "https://boxd.it/9UyaN"
       },
       {
-        title: "Good Techno",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href: "https://soundcloud.com/southbound_music/sets/best-techno?utm_source=good_techno&utm_medium=startmenu&utm_campaign=hydra98"
-      },
-      {
         title: "Warpcast",
         type: "ExternalLink",
         icon: icons.htmlFile16,
         href: "https://warpcast.com/333walton"
-      },
-      {
-        title: "CoinGecko",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href:
-          "https://www.coingecko.com/"
       }
     ]
   }
@@ -303,30 +266,68 @@ const games = [
 
 const ASCII = [
   {
-    title: "Flames",
-    icon: icons.burn16,
-    component: "Burn",
-    multiInstance: true
+    title: "ASCII Art",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "Flames",
+        icon: icons.burn16,
+        component: "Burn",
+        multiInstance: true
+      },
+      {
+        title: "Pipes",
+        icon: icons.pipes16,
+        component: "Pipes",
+        multiInstance: true,
+      },
+      {
+        title: "Hourglass",
+        icon: icons.sand16,
+        component: "Sand",
+        multiInstance: true,
+      },
+      {
+        title: "Squirtel",
+        icon: icons.notepad16,
+        component: "Notepad",
+        data: {
+          content: squirtel
+        }
+      },
+    ]
   },
   {
-    title: "Pipes",
-    icon: icons.pipes16,
-    component: "Pipes",
-    multiInstance: true,
+    title: "Demoscenes",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "GleEst",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://demozoo.org/productions/288839/"
+      },
+      {
+        title: "Micro1k",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://demozoo.org/productions/128900/"
+      },
+      {
+        title: "Kishkoid",
+        type: "ExternalLink",
+        icon: icons.htmlFile16,
+        href:
+          "https://demozoo.org/productions/13245/"
+      }
+    ]
   },
   {
-    title: "Hourglass",
-    icon: icons.sand16,
-    component: "Sand",
-    multiInstance: true,
-  },
-  {
-    title: "Squirtel",
-    icon: icons.notepadFile32,
-    component: "Notepad",
-    data: {
-      content: squirtel
-    }
+    title: "Pixel Art",
+    icon: icons.folder16,
+    options: []
   },
 ];
 
@@ -360,11 +361,19 @@ const startMenuData = [
           },
           {
             title: "Change Log",
-            icon: icons.notepadFile32,
+            icon: icons.notepadFile16,
             component: "Notepad",
             data: {
               content: commits
             }
+          },
+          {
+            title: "Demo",
+            icon: icons.camera16,
+            component: "VideoPlayer",
+            multiInstance: true,
+            isDisabled: true,
+            data: {}
           }
         ],
       },
@@ -407,7 +416,7 @@ const startMenuData = [
         options: [
           {
             title: "Rollin",
-            icon: icons.notepadFile32,
+            icon: icons.notepadFile16,
             component: "Notepad",
             data: {
               content: rollin
@@ -415,7 +424,7 @@ const startMenuData = [
           },
           {
             title: "All Star",
-            icon: icons.notepadFile32,
+            icon: icons.notepadFile16,
             component: "Notepad",
             data: {
               content: allStarTabs
@@ -432,7 +441,7 @@ const startMenuData = [
     options: games,
   },
   {
-    title: "ASCII Art",
+    title: "Artifacts",
     icon: icons.ascii24,
     options: ASCII,
   },
