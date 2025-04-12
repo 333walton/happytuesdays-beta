@@ -428,8 +428,8 @@ const startMenuData = [
           {
             title: "All Doodles",
             icon: icons.folderOpen24,
-            component: "",
-            isDisabled: true,
+            component: "FileBrowser",
+            isDisabled: false,
           }
         ],
       },
