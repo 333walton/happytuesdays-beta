@@ -144,17 +144,19 @@ class ProgramProvider extends Component {
         startMenu(
           this.props.startMenuData,
           [
-            {
-              title: "IIGA Tests",
-              icon: icons.folder16,
-              options: [
-                {
-                  title: "Video Emitters",
+              {
+                title: "IIGA Tests",
+                icon: icons.folder16,
+                options: [
+                                {
+                  title: "Pre-roll Emitters",
                   icon: icons.vid16,
                   component: "VideoPlayer",
-                  data: {},
                   multiInstance: true,
-                  isDisabled: true
+                  isDisabled: false,
+                  data: {
+                    src: "/static/donwest.mp4"
+                  },
                 },
                 //{
                   //title: "Form Submission",

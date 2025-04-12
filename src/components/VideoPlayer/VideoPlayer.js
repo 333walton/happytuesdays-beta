@@ -10,24 +10,14 @@ import "@react95/core/themes/win95.css"
 
 
 class VideoPlayer extends Component {
-
-  
-
-  constructor(props) {
-    super(props)
-  }
-
-  toggleFullScreen = () => {
-    const playerElement = this.player.current
-    playerElement?.requestFullscreen()
-  }
-
   render() {
     const { props } = this;
+    const videoSrc = props.data?.src || "https://media.w3.org/2010/05/sintel/trailer_hd.mp4";
+
     return (
       <Window
         {...props}
-        title="Video Player" 
+        title="Video Player"
         icon={camera16}
         Component={WindowProgram}
         initialHeight={290}
@@ -36,21 +26,18 @@ class VideoPlayer extends Component {
         className={cx("VideoPlayer", props.className)}
       >
         <Video
-          // w="100%"
-          // h="100%"
-          src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4"
+          src={videoSrc}
           style={{
             marginBottom: 4,
             height: "100%",
-            width: '100%',
-            objectFit: "contain"
+            width: "100%",
+            objectFit: "contain",
           }}
-          
         />
       </Window>
-    )
+    );
   }
 }
 
-export default VideoPlayer
+export default VideoPlayer;
 

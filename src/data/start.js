@@ -67,7 +67,15 @@ const programs = [
         title: "Movie Player",
         icon: icons.camera16,
         component: "VideoPlayer",
-        isDisabled: false
+        data: {
+          src: "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
+          style: {
+            marginBottom: 4,
+            height: "100%",
+            width: "100%",
+            objectFit: "contain"
+          }
+        }
       },
       {
         title: "CD Player",
@@ -77,7 +85,7 @@ const programs = [
   ] },
   {
     title: "Internet Explorer",
-    icon: icons.internetExplorere16,
+    icon: icons.internetExplorer16,
     component: "InternetExplorer",
     data: { __html: google1999 }
   },
