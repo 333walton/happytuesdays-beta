@@ -9,13 +9,17 @@ import "../../icons/icons.scss";
 const noop = () => {};
 
 class Explorer extends Component {
-  state = {
-    loading: false,
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false,
+      viewMode: props.title === "All Doodles" ? "list" : "icons",
+      message: null,
+    };
   }
+
   handleClick = (entry) => {
-    if (entry.onDoubleClick) {
-      entry.onDoubleClick(); // ✅ this triggers opening the image window
-    } else if (entry.failState) {
+    if (entry.failState) {
       this.toggleLoading();
       setTimeout(() => {
         this.setState({
@@ -23,84 +27,97 @@ class Explorer extends Component {
           title: entry.title,
           message: entry.failState.message,
           icon: entry.icon,
-        })
-      }, entry.failState.loadTime || 2000)
+        });
+      }, entry.failState.loadTime || 2000);
+    } else if (entry.onDoubleClick) {
+      entry.onDoubleClick();
     }
-  }
+  };
 
-  toggleLoading = () => this.setState(state => ({ loading: !state.loading }));
+  toggleLoading = () => this.setState((state) => ({ loading: !state.loading }));
   dismissMessage = () => this.setState({ message: null });
 
+  toggleViewMode = () => {
+    this.setState((state) => ({
+      viewMode: state.viewMode === "icons" ? "list" : "icons",
+    }));
+  };
+
   render() {
-    const { props } = this;
+    const { props, state } = this;
+
     return (
       <>
         <Window
           {...props}
           Component={WindowExplorer}
-          className={this.state.loading && 'wait wait2'}
+          className={state.loading && "wait wait2"}
           explorerOptions={[
-            {
-              icon: icons.back,
-              title: "Back",
-              onClick: noop
-            },
-            {
-              icon: icons.forward,
-              title: "Forward",
-              onClick: noop
-            },
-            {
-              icon: icons.upDir,
-              title: "Up",
-              onClick: noop
-            },
-            {
-              icon: icons.cut,
-              title: "Cut",
-              onClick: noop
-            },
-            {
-              icon: icons.copy,
-              title: "Copy",
-              onClick: noop
-            },
-            {
-              icon: icons.delete,
-              title: "Delete",
-              onClick: noop
-            },
-            {
-              icon: icons.properties,
-              title: "Properties",
-              onClick: noop
-            },
-            {
-              icon: icons.views,
-              title: "Views"
-            }
+            { icon: icons.back, title: "Back", onClick: noop },
+            { icon: icons.forward, title: "Forward", onClick: noop },
+            { icon: icons.upDir, title: "Up", onClick: noop },
+            { icon: icons.cut, title: "Cut", onClick: noop },
+            { icon: icons.copy, title: "Copy", onClick: noop },
+            { icon: icons.delete, title: "Delete", onClick: noop },
+            { icon: icons.properties, title: "Properties", onClick: noop },
+            // No toggle button here anymore
           ]}
-          menuOptions={buildMenu(props)}
+          menuOptions={buildMenu(
+            {
+              ...props,
+              componentType: "Explorer",
+            },
+            {
+              View: [
+                {
+                  title: "Toggle View Mode",
+                  onClick: this.toggleViewMode,
+                },
+              ],
+            }
+          )}
         >
-          {props.data &&
-            Array.isArray(props.data.content) &&
-            props.data.content.map(entry => (
-              <ExplorerIcon
-                key={entry.title}
-                title={entry.title}
-                icon={icons[entry.icon]}
-                className={entry.icon}
-                onDoubleClick={!this.state.loading ? () => this.handleClick(entry) : undefined}
-              />
-            ))}
+          <div className={`doodle-container ${state.viewMode === "icons" ? "icons-view" : "list-view"}`}>
+            {props.data?.content &&
+              (state.viewMode === "list" ? (
+                <ul className="doodle-listing">
+                  {props.data.content.map((entry) => (
+                    <li
+                      key={entry.title}
+                      className="doodle-row"
+                      onDoubleClick={!state.loading ? () => this.handleClick(entry) : undefined}
+                    >
+                      <span className="file-icon">
+                        {icons[entry.icon] && <img src={icons[entry.icon]} alt="" />}
+                      </span>
+                      <span className="file-name">{entry.title}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                props.data.content.map((entry) => (
+                  <ExplorerIcon
+                    key={entry.title}
+                    title={entry.title}
+                    icon={icons[entry.icon]}
+                    className={entry.icon}
+                    onDoubleClick={!state.loading ? () => this.handleClick(entry) : undefined}
+                  />
+                ))
+              ))}
+          </div>
         </Window>
-        {
-          this.state.message && (
-            <WindowAlert title={this.state.title} icon={icons.ieStop} onOK={this.dismissMessage} className="Window--active">
-              {this.state.message}
-            </WindowAlert>
-          )
-        }
+
+        {state.message && (
+          <WindowAlert
+            title={state.title}
+            icon={icons.ieStop}
+            onOK={this.dismissMessage}
+            className="Window--active"
+          >
+            {state.message}
+          </WindowAlert>
+        )}
       </>
     );
   }

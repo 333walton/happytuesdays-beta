@@ -422,7 +422,7 @@ const startMenuData = [
           isDisabled: false,
           data: {
             content: [{
-              title: "Image 1",
+              title: "Doodle 1",
               icon: "paint16",
               onDoubleClick: () =>
                 window.ProgramContext.onOpen({
@@ -433,14 +433,14 @@ const startMenuData = [
                   data: {
                     src: "/static/test1.png",
                     doodleName: "Test Doodle",
-                    doodler: "CS",
+                    doodler: "cs",
                     dateSubmitted: "3/31/25",
                     doodleStatement: "This is the first doodle submitted to the gallery",
                   }
                 })
             },
               {
-              title: "Image 2",
+              title: "Doodle 2",
               icon: "paint16",
               multiInstance: true,
               onDoubleClick: () =>
@@ -451,10 +451,10 @@ const startMenuData = [
                   multiInstance: true,
                   data: {
                     src: "/static/hydradoodle.png",
-                    doodleName: "Hydra Doodle",
-                    doodler: "Alex",
-                    dateSubmitted: "4/1/25",
-                    doodleStatement: "This is a creative doodle of the Hydra logo.",
+                    doodleName: "Kindled Hydra",
+                    doodler: "js",
+                    dateSubmitted: "4/4/25",
+                    doodleStatement: "fuel the burn before the blaze begins",
                   }
                 })
               }
