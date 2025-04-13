@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { WindowProgram } from "packard-belle";
 import cx from "classnames";
 import Window from "../tools/Window"; // your custom wrapper
-import { camera16 } from "../../icons"; // replace with your actual icon
+import { folderOptions16 } from "../../icons"; // replace with your actual icon
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
@@ -37,8 +37,8 @@ class FileBrowser extends Component {
     return (
       <Window
         {...props}
-        title="Pokedex.exe"
-        icon={camera16}
+        title="File Browser"
+        icon={folderOptions16}
         menuOptions={buildMenu({
           ...props,
           componentType: "Calculator",

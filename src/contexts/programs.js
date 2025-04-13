@@ -215,6 +215,10 @@ class ProgramProvider extends Component {
         desktop: buildDesktop(desktopSaved, () => this.open)
       }));
     }
+    window.ProgramContext = {
+    onOpen: this.open,
+    onClose: this.close
+  };
   }
 
   toggleShutDownMenu = () =>

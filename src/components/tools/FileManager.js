@@ -55,6 +55,7 @@ class FileManager extends React.Component {
 
   render() {
     const { props } = this;
+    
     return (
       <Rnd
         position={{ x: this.state.x, y: this.state.y }}
@@ -77,7 +78,7 @@ class FileManager extends React.Component {
       </Rnd>
     );
   }
-}
+};
 
 FileManager.defaultProps = {
   minWidth: 200,

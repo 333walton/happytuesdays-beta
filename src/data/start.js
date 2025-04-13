@@ -426,15 +426,42 @@ const startMenuData = [
           isDisabled: false
           },
           {
-            title: "All Doodles",
-            icon: icons.folderOpen24,
-            component: "FileBrowser",
-            data: {
-              src: "", // Ensure this path is correct
-              title: ""
-          },
-          isDisabled: false
-          },
+          title: "All Doodles",
+          icon: icons.folderOpen24,
+          component: "ExplorerWindow",
+          isDisabled: false,
+          data: {
+            content: [{
+              title: "Image 1",
+              icon: "paint16",
+              onDoubleClick: () =>
+                window.ProgramContext.onOpen({
+                  component: "ImageWindow",
+                  multiInstance: true,
+                  title: "Image 1",
+                  data: {
+                    src: "/static/test1.png",
+                    title: "Image 1"
+                  }
+                })
+            },
+              {
+              title: "Image 2",
+              icon: "paint16",
+              multiInstance: true,
+              onDoubleClick: () =>
+                window.ProgramContext.onOpen({
+                  component: "ImageWindow",
+                  title: "Image 2",
+                  data: {
+                    src: "/static/test1.png",
+                    title: "Image 2"
+                  }
+                })
+              }
+              ]
+            }
+          }
         ],
       },
       {

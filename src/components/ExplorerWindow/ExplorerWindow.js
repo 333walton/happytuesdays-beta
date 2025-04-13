@@ -13,7 +13,9 @@ class Explorer extends Component {
     loading: false,
   }
   handleClick = (entry) => {
-    if (entry.failState) {
+    if (entry.onDoubleClick) {
+      entry.onDoubleClick(); // ✅ this triggers opening the image window
+    } else if (entry.failState) {
       this.toggleLoading();
       setTimeout(() => {
         this.setState({
