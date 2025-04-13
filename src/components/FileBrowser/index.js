@@ -1,3 +1,3 @@
-import FileBrowser from "../FileBrowser";
+import FileBrowser from "./FileBrowser";
 
 export default FileBrowser;

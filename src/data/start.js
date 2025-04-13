@@ -429,8 +429,12 @@ const startMenuData = [
             title: "All Doodles",
             icon: icons.folderOpen24,
             component: "FileBrowser",
-            isDisabled: false,
-          }
+            data: {
+              src: "", // Ensure this path is correct
+              title: ""
+          },
+          isDisabled: false
+          },
         ],
       },
       {
