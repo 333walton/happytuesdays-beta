@@ -416,16 +416,6 @@ const startMenuData = [
             isDisabled: false,
           },
           {
-          title: "Test Doodle", // This is the title of the image window
-          icon: icons.paint32,
-          component: "ImageWindow", // Ensure this matches the registered component name in Applications.js
-          data: {
-            src: "/static/test1.png", // Ensure this path is correct
-            title: "My Image"
-          },
-          isDisabled: false
-          },
-          {
           title: "All Doodles",
           icon: icons.folderOpen24,
           component: "ExplorerWindow",
