@@ -53,6 +53,7 @@ class Explorer extends Component {
           title="Doodle Explorer"
           initialWidth={381} // Custom width for .doodle-container
           initialHeight={252} // Custom height for .doodle-container
+          maximizeOnOpen={false}
           Component={WindowExplorer}
           className={state.loading && "wait wait2"}
           explorerOptions={[

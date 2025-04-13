@@ -7,6 +7,7 @@ const desktopData = [
     title: "Computer",
     icon: icons.computer32,
     component: "ExplorerWindow",
+    maximizeOnOpen: false, // Prevent maximizing on mobile
     data: {
       content: [
         {
