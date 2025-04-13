@@ -428,10 +428,14 @@ const startMenuData = [
                 window.ProgramContext.onOpen({
                   component: "ImageWindow",
                   multiInstance: true,
-                  title: "Image 1",
+                  title: "Doodle Viewer",
+                  icon: "paint16",
                   data: {
                     src: "/static/test1.png",
-                    title: "Image 1"
+                    doodleName: "Test Doodle",
+                    doodler: "CS",
+                    dateSubmitted: "3/31/25",
+                    doodleStatement: "This is the first doodle submitted to the gallery",
                   }
                 })
             },
@@ -442,10 +446,15 @@ const startMenuData = [
               onDoubleClick: () =>
                 window.ProgramContext.onOpen({
                   component: "ImageWindow",
-                  title: "Image 2",
+                  title: "Doodle Viewer",
+                  icon: "paint16",
+                  multiInstance: true,
                   data: {
-                    src: "/static/test1.png",
-                    title: "Image 2"
+                    src: "/static/hydradoodle.png",
+                    doodleName: "Hydra Doodle",
+                    doodler: "Alex",
+                    dateSubmitted: "4/1/25",
+                    doodleStatement: "This is a creative doodle of the Hydra logo.",
                   }
                 })
               }

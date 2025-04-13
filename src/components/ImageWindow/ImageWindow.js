@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import Window from "../tools/Window";
 import { WindowProgram, WindowAlert } from "packard-belle";
 import { paint16 } from "../../icons";
-import buildMenu from "../../helpers/menuBuilder";
 import cx from "classnames";
 import "./_styles.scss";
 
@@ -11,8 +10,8 @@ class ImageWindow extends Component {
     super(props);
     this.state = {
       width: 293,
-      height: 208,
-      showAlert: false,
+      height: 189,
+      showAlert: true,
       isMobile: false
     };
   };
@@ -72,7 +71,7 @@ class ImageWindow extends Component {
 
   render() {
     const { props, state } = this;
-    const { src, title } = props.data || {};
+    const { src, title, doodleName, doodler, dateSubmitted, doodleStatement } = props.data || {};
     const { showAlert } = state;
 
     return (
@@ -81,11 +80,6 @@ class ImageWindow extends Component {
           {...props}
           title="Doodle Viewer"
           icon={paint16}
-          menuOptions={buildMenu({
-            ...props,
-            componentType: "ImageWindow",
-            showAbout: this.showAboutAlert,
-          })}
           Component={WindowProgram}
           initialHeight={state.height}
           initialWidth={state.width}
@@ -94,7 +88,6 @@ class ImageWindow extends Component {
           {...this.getCenteredPosition()} // ✅ Center the window on mobile
           className={cx("ImageWindow", props.className)}
         >
-
           <div className="image-wrapper">
             {src ? (
               <img
@@ -114,7 +107,7 @@ class ImageWindow extends Component {
 
         {showAlert && (
           <WindowAlert
-            title="Doodler's Abstract"
+            title="About This Doodle"
             icon={paint16}
             onClose={this.closeAboutAlert}
             className="DoodlerAlert Window--active"
@@ -125,20 +118,28 @@ class ImageWindow extends Component {
               left: "50%", // Adjust horizontal position
               transform: "translate(-50%)", // Center horizontally
               width: this.state.isMobile ? "200px" : "200px", // ✅ dynamic width
-              padding: 0
+              padding: 0,
             }}
           >
             <div
               style={{
                 padding: "6px 10px",
                 fontSize: "11px",
-                lineHeight: "1.3"
+                lineHeight: "1.3",
               }}
             >
-              <span style={{ lineHeight: "1.0" }}><b>Doodle Name:</b> Test Doodle</span>
-              <p style={{ margin: "2px 0" }}><b>Doodler:</b> CS</p>
-              <p style={{ margin: "2px 0" }}><b>Date Submitted:</b> 3/31/25</p>
-              <p style={{ margin: "2px 0" }}><b>Doodle Statement:</b> This is the first doodle submitted to the gallery</p>
+              <span style={{ lineHeight: "1.0" }}>
+                <b>Doodle Name:</b> {doodleName || "N/A"}
+              </span>
+              <p style={{ margin: "2px 0" }}>
+                <b>Doodler:</b> {doodler || "N/A"}
+              </p>
+              <p style={{ margin: "2px 0" }}>
+                <b>Date Submitted:</b> {dateSubmitted || "N/A"}
+              </p>
+              <p style={{ margin: "2px 0" }}>
+                <b>Doodle Statement:</b> {doodleStatement || "N/A"}
+              </p>
             </div>
           </WindowAlert>
         )}

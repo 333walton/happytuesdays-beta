@@ -1,15 +1,30 @@
-const buildCustomOptions = rows =>
-  Object.keys(rows).reduce(
-    (acc, val) => [
+// 🚀 Update this to allow single-click menu items (like for ImageWindow)
+const buildCustomOptions = (rows) =>
+  Object.keys(rows).reduce((acc, val) => {
+    const menuEntry = rows[val];
+
+    if (typeof menuEntry === "object" && menuEntry?.onClick) {
+      return [
+        ...acc,
+        {
+          title: val,
+          onClick: menuEntry.onClick,
+          options: [] // ✅ required to avoid crash in .reduce()
+        }
+      ];
+    }
+
+    return [
       ...acc,
       {
         title: val,
-        options: rows[val]
+        options: menuEntry
       }
-    ],
-    []
-  );
+    ];
+  }, []);
 
+
+// 🎯 Adjusted helpOptions to work with buildCustomOptions
 export const helpOptions = (props) => {
   if (props.componentType === "Doom") {
     return {
@@ -19,14 +34,16 @@ export const helpOptions = (props) => {
         { title: `About ${props.title}`, isDisabled: true }
       ]
     };
-  } else if (props.componentType === "ImageWindow") {
+  }
+  else if (props.componentType === "ImageWindow") {
+    // 🔥 No dropdown — triggers onClick instantly
     return {
       title: "About This Doodle",
-      options: [
-        [{ title: "Doodler's Abstract", onClick: props.showAbout }]
-      ]
+      options: [],
+      onClick: props.showAbout
     };
-  } else {
+  }
+  else {
     return {
       title: "Help",
       options: [
@@ -37,6 +54,8 @@ export const helpOptions = (props) => {
   }
 };
 
+
+// 🛠 No changes needed here
 export const buildMenu = (props, customOptions = {}) => {
   const fileOptions = props.fileOptions || [];
   const onClose = [{ title: "Close", onClick: () => props.onClose(props) }];
@@ -68,7 +87,9 @@ export const buildMenu = (props, customOptions = {}) => {
   if (props.multiWindow) {
     onClose.push([{ title: "Exit", onClick: () => props.onExit(props) }]);
   }
+
   const customElements = buildCustomOptions(customOptions);
+
   return [
     {
       title: "File",
@@ -80,3 +101,4 @@ export const buildMenu = (props, customOptions = {}) => {
 };
 
 export default buildMenu;
+
