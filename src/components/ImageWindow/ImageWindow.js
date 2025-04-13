@@ -81,9 +81,10 @@ class ImageWindow extends Component {
           title="Doodle Viewer"
           icon={paint16}
           Component={WindowProgram}
-          initialHeight={state.height}
-          initialWidth={state.width}
-          maximizeOnOpen={false}
+          initialHeight={189}
+          initialWidth={293}
+          resizable={true}
+          onMaximize={null}           // This disables the maximize button
           forceNoMobileMax={true} // this prevents the window from maximizing on mobile
           {...this.getCenteredPosition()} // ✅ Center the window on mobile
           className={cx("ImageWindow", props.className)}
@@ -114,7 +115,7 @@ class ImageWindow extends Component {
             style={{
               zIndex: 0,
               position: "fixed", // Forces visibility
-              top: "100px", // Adjust vertical position
+              top: "50px", // Adjust vertical position
               left: "50%", // Adjust horizontal position
               transform: "translate(-50%)", // Center horizontally
               width: this.state.isMobile ? "200px" : "200px", // ✅ dynamic width
@@ -147,6 +148,7 @@ class ImageWindow extends Component {
     );
   }
 }
+
 
 export default ImageWindow;
 

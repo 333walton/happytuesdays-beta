@@ -167,7 +167,8 @@ class Window extends React.PureComponent {
               onClose={() => props.onClose(props)}
               onMinimize={props.onMinimize && (() => props.onMinimize(props.id))}
               onRestore={props.resizable ? this.restore : undefined}
-              onMaximize={props.resizable ? this.maximize : undefined}
+              onMaximize={props.onMaximize !== null ? this.maximize : undefined}
+              disableMaximize={props.onMaximize === null}
               changingState={this.state.isDragging || this.state.isResizing}
               maximizeOnOpen={this.context.isMobile || this.props.maximizeOnOpen}
               className={cx(props.className, {
