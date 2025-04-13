@@ -50,6 +50,9 @@ class Explorer extends Component {
       <>
         <Window
           {...props}
+          title="Doodle Explorer"
+          initialWidth={381} // Custom width for .doodle-container
+          initialHeight={252} // Custom height for .doodle-container
           Component={WindowExplorer}
           className={state.loading && "wait wait2"}
           explorerOptions={[
