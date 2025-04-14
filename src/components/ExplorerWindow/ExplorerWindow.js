@@ -72,7 +72,8 @@ class Explorer extends Component {
           title={props.title || "Explorer"} // Dynamically set the title based on props.title
           initialWidth={dimensions.initialWidth} // Dynamically set width
           initialHeight={dimensions.initialHeight} // Dynamically set height
-          maximizeOnOpen={false}
+          maximizeOnOpen={false} // Ensure the window does not open maximized
+          forceNoMobileMax={true} // Prevent maximization on mobile devices
           Component={WindowExplorer}
           className={state.loading && "wait wait2"}
           explorerOptions={[

@@ -170,7 +170,9 @@ class Window extends React.PureComponent {
               onMaximize={props.onMaximize !== null ? this.maximize : undefined}
               disableMaximize={props.onMaximize === null}
               changingState={this.state.isDragging || this.state.isResizing}
-              maximizeOnOpen={this.context.isMobile || this.props.maximizeOnOpen}
+              maximizeOnOpen={
+                (!this.props.forceNoMobileMax && this.context.isMobile) || this.props.maximizeOnOpen
+              }
               className={cx(props.className, {
                 "Window--active": props.isActive
               })}
