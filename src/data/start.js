@@ -1,5 +1,4 @@
 import * as icons from "../icons";
-import google1999 from "./textFiles/google1999";
 import squirtel from "./textFiles/squirtel";
 import rollin from "./textFiles/rollin";
 import allStarTabs from "./textFiles/allStarTabs";
@@ -86,8 +85,12 @@ const programs = [
   {
     title: "Internet Explorer",
     icon: icons.internetExplorer16,
-    component: "InternetExplorer",
-    data: { __html: google1999 }
+    component: "TestExplorer",
+    data: {
+      src: "https://myspace.windows93.net/",
+      title: "MySpace"
+    },
+    multiInstance: true
   },
   {
     title: "JS-DOS Prompt",
@@ -113,7 +116,7 @@ const favorites = [
         component: "TestExplorer",
         data: {
           src: "https://loklok-volume.vercel.app/gpu", // URL to load in the iframe
-          title: "Example Website" // Title for the window
+          title: "Internet Explorer" // Title for the window
         },
         multiInstance: false
       },
@@ -123,7 +126,7 @@ const favorites = [
         component: "TestExplorer",
         data: {
           src: "https://threejs.org/examples/webgpu_instance_points.html", // URL to load in the iframe
-          title: "Example Website" // Title for the window
+          title: "Internet Explorer" // Title for the window
         },
         multiInstance: false
       },
@@ -136,7 +139,7 @@ const favorites = [
               component: "TestExplorer",
               data: {
                 src: "https://threejs.org/examples/webgl_geometry_minecraft.html", // URL to load in the iframe
-                title: "Example Website" // Title for the window
+                title: "Internet Explorer" // Title for the window
               },
               multiInstance: false
             },
@@ -167,6 +170,27 @@ const favorites = [
         type: "ExternalLink",
         icon: icons.htmlFile16,
         href: "https://warpcast.com/333walton"
+      },
+      {
+        title: "Star Wars (full)",
+        type: "ExternalLink",
+        icon: icons.camera16,
+        component: "IframeWindow",
+        data: {
+          src: "https://www.asciimation.co.nz/",
+          initialWidth: 600, // Set the initial width of the window
+          initialHeight: 400, // Set the initial height of the window
+          iframeStyle: {
+            transform: "scale(0.8)", // Shrink the iframe to 80%
+            transformOrigin: "top left", // Anchor scaling to the top-left
+            width: "1250px", // Scale width up so the visible area stays the same
+            height: "1000px", // Same for height
+            position: "absolute",
+            top: "-50px", // Adjust to center the content
+            left: "-100px", // Adjust to center the content
+            border: "none",
+          },
+        },
       }
     ]
   }

@@ -91,6 +91,11 @@ class Notepad extends Component {
           Component={WindowProgram}
           maximizeOnOpen={false} // Prevent maximizing on open
           forceNoMobileMax={true} // Prevent maximization on mobile devices
+          initialWidth={390} // Set the initial width of the window
+          initialHeight={300} // Set the initial height of the window
+          initialX={10} // Set the initial X position of the window
+          initialY={2} // Set the initial Y position of the window
+          position={{ x: 10, y: 2 }} // Explicitly set the position
         >
           <div className="Notepad__textarea">
             <textarea
