@@ -89,6 +89,8 @@ class Notepad extends Component {
             props.title !== "Notepad" ? props.title : "Untitled"
           } - Notepad${props.data.readOnly ? "(Read Only)" : ""}`}
           Component={WindowProgram}
+          maximizeOnOpen={false} // Prevent maximizing on open
+          forceNoMobileMax={true} // Prevent maximization on mobile devices
         >
           <div className="Notepad__textarea">
             <textarea
