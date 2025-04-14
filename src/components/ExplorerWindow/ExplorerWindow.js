@@ -46,13 +46,32 @@ class Explorer extends Component {
   render() {
     const { props, state } = this;
 
+    // Dynamically set dimensions based on the title and screen size
+    const dimensions = (() => {
+      const isMobile = window.innerWidth < 600; // Define mobile breakpoint
+      switch (props.title) {
+        case "All Doodles":
+          return isMobile
+            ? { initialWidth: 374, initialHeight: 193 } // Mobile size
+            : { initialWidth: 381, initialHeight: 252 }; // Desktop size
+        case "My Computer":
+          return isMobile
+            ? { initialWidth: 271, initialHeight: 229 } // Mobile size
+            : { initialWidth: 262, initialHeight: 230 }; // Desktop size
+        default:
+          return isMobile
+            ? { initialWidth: 271, initialHeight: 229 } // Mobile size
+            : { initialWidth: 381, initialHeight: 252 }; // Desktop size
+      }
+    })();
+
     return (
       <>
         <Window
           {...props}
-          title="Doodle Explorer"
-          initialWidth={381} // Custom width for .doodle-container
-          initialHeight={252} // Custom height for .doodle-container
+          title={props.title || "Explorer"} // Dynamically set the title based on props.title
+          initialWidth={dimensions.initialWidth} // Dynamically set width
+          initialHeight={dimensions.initialHeight} // Dynamically set height
           maximizeOnOpen={false}
           Component={WindowExplorer}
           className={state.loading && "wait wait2"}
@@ -64,7 +83,6 @@ class Explorer extends Component {
             { icon: icons.copy, title: "Copy", onClick: noop },
             { icon: icons.delete, title: "Delete", onClick: noop },
             { icon: icons.properties, title: "Properties", onClick: noop },
-            // No toggle button here anymore
           ]}
           menuOptions={buildMenu(
             {
@@ -81,6 +99,9 @@ class Explorer extends Component {
             }
           )}
         >
+          <div className="explorer-options">
+            {/* Render explorer options here */}
+          </div>
           <div className={`doodle-container ${state.viewMode === "icons" ? "icons-view" : "list-view"}`}>
             {props.data?.content &&
               (state.viewMode === "list" ? (

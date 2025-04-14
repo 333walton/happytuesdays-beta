@@ -104,6 +104,7 @@
   text-align: center;
   max-width: 64px;
   margin: 4px;
+  color: black;
 }
 
 /* ------------------------------
@@ -119,6 +120,7 @@
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
+  color: black;
   gap: 6px;
 
   &.list-view {
@@ -147,4 +149,20 @@
     height: 100%;
     object-fit: contain;
   }
+}
+
+/* Default styles for explorer options */
+.explorer-options {
+  color: inherit; /* Use the default text color */
+}
+
+/* Mobile-specific styles */
+@media (max-width: 600px) {
+  .explorer-options {
+    color: black; /* Set text color to black on mobile devices */
+  }
+}
+
+button.icon.ExplorerIcon.floppy32 .icon__text {
+  overflow: visible !important;
 }

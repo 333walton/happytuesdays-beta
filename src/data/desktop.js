@@ -2,7 +2,6 @@ import * as icons from "../icons";
 import readme from "./textFiles/readme";
 
 const desktopData = [
-  
   {
     title: "Computer",
     icon: icons.computer32,
@@ -16,16 +15,16 @@ const desktopData = [
           failState: {
             message:
               "This is a React App, there is no CD drive, your laptop probably doesn't have one either",
-            loadTime: 4000
-          }
+            loadTime: 4000,
+          },
         },
         {
           title: "(D:)",
           icon: "hdd32",
           failState: {
             message: "This is a React App, there is no hard drive",
-            loadTime: 1000
-          }
+            loadTime: 1000,
+          },
         },
         {
           title: "3 1/2 Floppy (A:)",
@@ -33,11 +32,11 @@ const desktopData = [
           failState: {
             message:
               "Did everyone else's computer take ages to load the 'no floppy disc inserted' message or was that just mine?",
-            loadTime: 8000
-          }
-        }
-      ]
-    }
+            loadTime: 8000,
+          },
+        },
+      ],
+    },
   },
   {
     title: "Read Me",
