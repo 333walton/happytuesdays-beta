@@ -79,7 +79,7 @@ const programs = [
         isDisabled: false,
         options: [
           {
-            title: "Paint Doodes",
+            title: "Paint Doodles",
             icon: icons.paint16,
             component: "IframeWindow",
             data: {
@@ -88,7 +88,7 @@ const programs = [
             },
           },
           {
-            title: "Pixel Doodes",
+            title: "Pixel Doodles",
             icon: icons.loaderbat16,
             component: "IframeWindow",
             isDisabled: true,
@@ -98,7 +98,7 @@ const programs = [
             },
           },
           {
-            title: "ASCII Doodes",
+            title: "ASCII Doodles",
             icon: icons.loaderbat16,
             component: "IframeWindow",
             isDisabled: true,
