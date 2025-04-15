@@ -15,3 +15,4 @@ export { default as Calculator } from "./Calculator";
 export { default as DoodleSubmission } from "./DoodleSubmission";
 export { default as Glider } from "./Glider";
 export { default as FileBrowser } from "./FileBrowser";
+export { default as StarWars } from "./StarWars";

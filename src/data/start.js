@@ -172,25 +172,10 @@ const favorites = [
         href: "https://warpcast.com/333walton"
       },
       {
-        title: "Star Wars (full)",
-        type: "ExternalLink",
+        title: "Star Wars",
         icon: icons.camera16,
-        component: "IframeWindow",
-        data: {
-          src: "https://www.asciimation.co.nz/",
-          initialWidth: 600, // Set the initial width of the window
-          initialHeight: 400, // Set the initial height of the window
-          iframeStyle: {
-            transform: "scale(0.8)", // Shrink the iframe to 80%
-            transformOrigin: "top left", // Anchor scaling to the top-left
-            width: "1250px", // Scale width up so the visible area stays the same
-            height: "1000px", // Same for height
-            position: "absolute",
-            top: "-50px", // Adjust to center the content
-            left: "-100px", // Adjust to center the content
-            border: "none",
-          },
-        },
+        component: "StarWars",
+        multiInstance: false,
       }
     ]
   }

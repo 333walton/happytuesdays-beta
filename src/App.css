@@ -100,7 +100,7 @@ body {
   }
 }
 @media (max-width: 600px) {
-  .hideMobileX {
+  .btn.ButtonNav.Window__maximize {
     display: none !important;
   }
 }

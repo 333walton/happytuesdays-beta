@@ -21,16 +21,16 @@ class Doom extends Component {
           options: {},
         })}
         Component={WindowProgram}
-        initialHeight={395}
-        initialWidth={433}
+        initialHeight={399}
+        initialWidth={432}
         resizable={false}  // This disables resizing
         onMaximize={null} // This disables the maximize button
         className={cx("Doom", props.className)}
       >
-      <div
+      <div // this will edit the iframe within the window above
         style={{
-          width: "500px", // Reduce the width to tighten the visible area
-          height: "372px",
+          width: "424.8px", // nearly match the initial width of the window above (iframe sizing)
+          height: "372px", // nearly match the initial height of the window above (iframe sizing)
           overflow: "hidden",
           position: "relative",
         }}
@@ -38,16 +38,14 @@ class Doom extends Component {
         <iframe
           src="https://gabrieljones.github.io/Glider/"
           title="gliderpro"
-          width="1050"
-          height="800"
           style={{
-            transform: "scale(0.66)",           // Shrink to 50%
+            transform: "scale(0.67)",           // Shrink to 50%
             transformOrigin: "top left",       // Anchor scaling to the top-left
             width: "1540px",                   // Scale width up so the visible area stays the same
             height: "1212px",                  // Same for height
             position: "absolute",
             top: "-17px",   // adjust these values
-            left: "-295px", // until canvas is centered
+            left: "-304px", // until canvas is centered
             border: "none",
           }}
         />
