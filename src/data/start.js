@@ -74,7 +74,7 @@ const programs = [
     ]
   },
   {
-        title: "Make a Doodle",
+        title: "Doodle",
         icon: icons.folder16,
         isDisabled: false,
         options: [
