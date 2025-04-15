@@ -24,16 +24,6 @@ const accessories = [
     component: "Notepad",
     multiInstance: true
   },
-  {
-    title: "Paint",
-    icon: icons.paint16,
-    component: "IframeWindow",
-    data: {
-      src: "https://jspaint.app/",
-      creator: "https://github.com/1j01"
-    },
-    multiInstance: true
-  },
   
 ];
 
@@ -81,14 +71,51 @@ const programs = [
         icon: icons.mediacd16,
         isDisabled: true
       }
-  ] },
+    ]
+  },
+  {
+        title: "Make a Doodle",
+        icon: icons.folder16,
+        isDisabled: false,
+        options: [
+          {
+            title: "Paint Doodes",
+            icon: icons.paint16,
+            component: "IframeWindow",
+            data: {
+              src: "https://jspaint.app/",
+              creator: "https://github.com/1j01",
+            },
+          },
+          {
+            title: "Pixel Doodes",
+            icon: icons.loaderbat16,
+            component: "IframeWindow",
+            isDisabled: true,
+            data: {
+              src: "https://example.com/pixel-doodes", // Replace with a valid URL
+              creator: "https://github.com/example", // Replace with a valid creator
+            },
+          },
+          {
+            title: "ASCII Doodes",
+            icon: icons.loaderbat16,
+            component: "IframeWindow",
+            isDisabled: true,
+            data: {
+              src: "https://example.com/ascii-doodes", // Replace with a valid URL
+              creator: "https://github.com/example", // Replace with a valid creator
+            },
+          },
+        ],
+  },
   {
     title: "Internet Explorer",
     icon: icons.internetExplorer16,
     component: "TestExplorer",
     data: {
       src: "https://myspace.windows93.net/",
-      title: "MySpace"
+      title: "Internet Explorer" // Title for the window
     },
     multiInstance: true
   },
@@ -97,13 +124,8 @@ const programs = [
     icon: icons.msDos16,
     component: "JSDos",
     multiInstance: true
-  },
-  {
-    title: "Hydra Explorer",
-    icon: icons.windowsExplorer16,
-    isDisabled: true
   }
-];
+]
 
 const favorites = [
     {
