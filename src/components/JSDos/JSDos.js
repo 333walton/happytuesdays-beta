@@ -3,7 +3,7 @@ import { WindowProgram } from "packard-belle";
 import cx from "classnames";
 import safeEval from "safe-eval";
 import Window from "../tools/Window";
-import { msDos16 } from "../../icons";
+import { command16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
@@ -52,8 +52,8 @@ class JSDos extends Component {
     return (
       <Window
         {...props}
-        title="JS DOS Prompt"
-        icon={msDos16}
+        title="Command Prompt"
+        icon={command16}
         menuOptions={buildMenu(props)}
         Component={WindowProgram}
         initialHeight={200}

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { WindowProgram } from "packard-belle";
 import cx from "classnames";
 import Window from "../tools/Window";
-import { camera16 } from "../../icons";
+import { rebelcommand16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
@@ -12,8 +12,8 @@ class Doom extends Component {
     return (
       <Window
         {...props}
-        title="StarWars"
-        icon={camera16}
+        title="Rebel Command Prompt"
+        icon={rebelcommand16}
         menuOptions={buildMenu({
           ...props,
           componentType: "Doom",
@@ -21,7 +21,7 @@ class Doom extends Component {
           options: {},
         })}
         Component={WindowProgram}
-        initialHeight={310} // Set the initial height of the window  
+        initialHeight={307} // Set the initial height of the window  
         initialWidth={515} // Set the initial width of the window  
         resizable={false}  // This disables resizing
         onMaximize={null}  // This disables the maximize button

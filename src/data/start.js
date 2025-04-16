@@ -120,10 +120,16 @@ const programs = [
     multiInstance: true
   },
   {
-    title: "JS-DOS Prompt",
-    icon: icons.msDos16,
+    title: "CMD Prompt",
+    icon: icons.command16,
     component: "JSDos",
     multiInstance: true
+  },
+  {
+    title: "Rebel CMD Prompt",
+    icon: icons.rebelcommand16,
+    component: "StarWars",
+    multiInstance: false,
   }
 ]
 
@@ -192,12 +198,6 @@ const favorites = [
         type: "ExternalLink",
         icon: icons.htmlFile16,
         href: "https://warpcast.com/333walton"
-      },
-      {
-        title: "Star Wars",
-        icon: icons.camera16,
-        component: "StarWars",
-        multiInstance: false,
       }
     ]
   }
