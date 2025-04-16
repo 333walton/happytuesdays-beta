@@ -269,7 +269,13 @@ const games = [
         title: "GliderPro",
         icon: icons.glider16,
         component: "Glider",
-        multiInstance: false,
+        multiInstance: true,
+          },
+          {
+        title: "ASCII Maze",
+        icon: icons.maze16,
+        component: "ASCIIMaze",
+        multiInstance: true,
           },
           {
         title: "Retro City",
