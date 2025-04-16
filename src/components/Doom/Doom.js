@@ -55,6 +55,9 @@ class Doom extends Component {
           Component={WindowProgram}
           initialHeight={388}
           initialWidth={560}
+          initialX={.1} // Set the initial X position of the window (horizontal)
+          initialY={.1} // Set the initial Y position of the window (vertical)
+          forceNoMobileMax={true} // Prevent maximization on mobile devices
           className={cx("Doom", props.className, { "hide-maximize": !isDesktop })} // Add conditional class
           onMaximize={isDesktop ? undefined : null} // Disables maximize button on mobile
         >
