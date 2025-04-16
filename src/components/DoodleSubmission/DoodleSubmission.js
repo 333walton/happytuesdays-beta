@@ -50,7 +50,7 @@ render() {
         initialHeight={282}
         resizable={false}           // This disables resizing
         onMaximize={null}           // This disables the maximize button
-        menuOptions={filteredMenuOptions} // Pass filtered menu options
+        menuOptions={   } // Pass filtered menu options
         className={cx("DoodleSubmission", this.props.className)}
     >
         <form className="doodle-form" onSubmit={this.handleSubmit}>

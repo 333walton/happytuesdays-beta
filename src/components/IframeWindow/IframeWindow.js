@@ -60,7 +60,7 @@ class IFrame extends Component {
         hideOnDrag={true}
       >
         <div style={props.data && props.data.style}>
-          <PureIframe src={props.data.src} title={props.title} />
+          <PureIframe src={"https://paint-cyan-eight.vercel.app/"} title={props.title} />
         </div>
       </Window>
     );
