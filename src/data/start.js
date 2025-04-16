@@ -107,6 +107,13 @@ const programs = [
               creator: "https://github.com/example", // Replace with a valid creator
             },
           },
+          {
+            title: "ASCII Banners",
+            icon: icons.loaderbat16,
+            component: "ASCIIText",
+            isDisabled: true,
+            data: {},
+          },
         ],
   },
   {

@@ -17,3 +17,4 @@ export { default as Glider } from "./Glider";
 export { default as FileBrowser } from "./FileBrowser";
 export { default as StarWars } from "./StarWars";
 export { default as ASCIIMaze } from "./ASCIIMaze";
+export { default as ASCIIText } from "./ASCIIText";
