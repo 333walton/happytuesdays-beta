@@ -3,6 +3,56 @@ const commits = `
 >>HYDRA98 CHANGELOG.TXT
 ============================================================
 
+[2025-04-16]  7d1629c  - ascii maze dt
+[2025-04-15]  43691f0  - rebel command
+[2025-04-15]  26b5bc6  - dood
+[2025-04-15]  c550d21  - small
+[2025-04-15]  37cf697  - start menu small
+[2025-04-14]  2ce3326  - star wars
+[2025-04-13]  3b0264a  - small
+[2025-04-13]  5b9539d  - notepad
+[2025-04-13]  d95ec92  - small
+[2025-04-13]  18aeea7  - text css fixes
+[2025-04-13]  7a00e07  - small mobile
+[2025-04-13]  8e0c3ce  - small mobile
+[2025-04-13]  14be038  - small
+[2025-04-13]  61a109d  - explorerwindow css
+[2025-04-13]  b909cbb  - small
+[2025-04-13]  45ab369  - imagewindow css
+[2025-04-13]  4df840c  - small
+[2025-04-13]  a3051e6  - explorer window for img
+[2025-04-12]  402b569  - filebrowser prog
+[2025-04-12]  7c27586  - css menu
+[2025-04-11]  23693fb  - preroll rough
+[2025-04-11]  c371e7b  - start m small
+[2025-04-11]  aef52ea  - newsletter small
+[2025-04-11]  c96adca  - start menu
+[2025-04-10]  6624ab2  - small css
+[2025-04-10]  de58c68  - vid player and css
+[2025-04-10]  edfaff2  - Buttons fix
+[2025-04-09]  3ac6020  - small minesweeper
+[2025-04-09]  18b419a  - gliderpro dt only
+[2025-04-09]  66fb3c8  - gliderpro grough dt
+[2025-04-09]  903d216  - gliderpro
+[2025-04-08]  3f1b454  - submit doodle
+[2025-04-08]  4eafe16  - small
+[2025-04-08]  306470a  - small
+[2025-04-08]  caea059  - start small
+[2025-04-08]  035498d  - start menu text
+[2025-04-07]  ab1e4fe  - faq css
+[2025-04-07]  701b002  - icons
+[2025-04-07]  74bab24  - icons
+[2025-04-07]  214d3c7  - start menu options
+[2025-04-07]  c1024d7  - dt small
+[2025-04-07]  88e7e2e  - vid player
+[2025-04-07]  a46b3dd  - Scoped the stylings
+[2025-04-07]  ede8213  - Update VideoPlayer.js
+[2025-04-07]  b4bdf41  - HJel
+[2025-04-06]  ec1e8a6  - calc small
+[2025-04-06]  9cfdf0e  - small
+[2025-04-05]  91b9bdd  - small calc
+[2025-04-04]  951a4bf  - mobile calc styling
+[2025-04-04]  707effb  - commits log
 [2025-04-04]  aabbeed  - change log
 [2025-04-04]  e7c80eb  - calc css
 [2025-04-04]  15880e4  - crt small
