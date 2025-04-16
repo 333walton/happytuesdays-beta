@@ -6,8 +6,9 @@ import Window from "../tools/Window";
 import PureIframe from "./Iframe";
 
 class IFrame extends Component {
+  // Initialize state
   state = {
-    displayAlert: this.props.data.displayAlert || true
+    displayAlert: true, // Default to true unless explicitly disabled in props
   };
 
   confirm = () => this.setState({ displayAlert: false });
@@ -18,10 +19,11 @@ class IFrame extends Component {
     const commonProps = {
       title: props.title,
       icon: props.icon,
-      onClose: () => props.onClose(props)
+      onClose: () => props.onClose(props),
     };
 
-    if (state.displayAlert) {
+    // Check if alerts are disabled for this iframe
+    if (state.displayAlert && !props.data?.disableAlert) {
       return (
         <WindowAlert
           {...commonProps}
@@ -29,16 +31,16 @@ class IFrame extends Component {
           onCancel={commonProps.onClose}
           className="IframeWindow--alert Window--active"
         >
-          {props.data.disclaimer || (
+          {props.data?.disclaimer || (
             <div>
               The following is an iframe, content belongs to{" "}
-              {props.data.creator || "the original creator"} at
+              {props.data?.creator || "the original creator"} at
               <a
-                href={props.data.src}
+                href={props.data?.src}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {props.data.src}
+                {props.data?.src}
               </a>
               . Behaviour will be inconsistent with rest of system.
             </div>
@@ -46,21 +48,22 @@ class IFrame extends Component {
         </WindowAlert>
       );
     }
+
     return (
       <Window
         {...props}
         className={"IframeWindow"}
-        initialHeight={props.data.height || 380}
-        initialWidth={props.data.width || 440}
-        minWidth={props.data.width}
-        minHeight={props.data.height}
-        menuOptions={props.data.useMenu && buildMenu(props)}
+        initialHeight={props.data?.height || 380}
+        initialWidth={props.data?.width || 440}
+        minWidth={props.data?.width}
+        minHeight={props.data?.height}
+        menuOptions={props.data?.useMenu && buildMenu(props)}
         Component={WindowProgram}
-        resizable={!(props.data.width || props.data.height)}
+        resizable={!(props.data?.width || props.data?.height)}
         hideOnDrag={true}
       >
-        <div style={props.data && props.data.style}>
-          <PureIframe src={"https://paint-cyan-eight.vercel.app/"} title={props.title} />
+        <div style={props.data?.style}>
+          <PureIframe src={props.data?.src} title={props.title} />
         </div>
       </Window>
     );

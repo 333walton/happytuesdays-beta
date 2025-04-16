@@ -55,7 +55,14 @@ const desktopData = [
     title: "Paint",
     icon: icons.paint32,
     component: "IframeWindow",
-    data: { src: "https://jspaint.app/", creator: "https://github.com/1j01" },
+    data: {
+      src: "https://paint-cyan-eight.vercel.app/",
+      disableAlert: true, // Disable the alert for this iframe
+      style: {
+        width: "100%",
+        height: "100%",
+      },
+    },
     multiInstance: true,
   },
   {

@@ -83,10 +83,14 @@ const programs = [
             icon: icons.paint16,
             component: "IframeWindow",
             data: {
-              src: "https://jspaint.app/",
-              creator: "https://github.com/1j01",
+              src: "https://paint-cyan-eight.vercel.app/",
+              disableAlert: true, // Disable the alert for this iframe
+              style: {
+                width: "100%",
+                height: "100%"
+              },
             },
-          },
+            },
           {
             title: "Pixel Doodles",
             icon: icons.loaderbat16,
