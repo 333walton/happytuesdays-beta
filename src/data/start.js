@@ -112,7 +112,7 @@ const programs = [
             icon: icons.loaderbat16,
             component: "ASCIIText",
             isDisabled: true,
-            data: {},
+            data: {}, 
           },
         ],
   },
