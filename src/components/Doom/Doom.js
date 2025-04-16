@@ -53,13 +53,16 @@ class Doom extends Component {
           icon={doom16}
           menuOptions={buildMenu({ ...props, componentType: "Doom", showHelp: this.showHelp })}
           Component={WindowProgram}
-          initialHeight={388}
-          initialWidth={560}
-          initialX={.1} // Set the initial X position of the window (horizontal)
-          initialY={.1} // Set the initial Y position of the window (vertical)
-          forceNoMobileMax={true} // Prevent maximization on mobile devices
-          className={cx("Doom", props.className, { "hide-maximize": !isDesktop })} // Add conditional class
-          onMaximize={isDesktop ? undefined : null} // Disables maximize button on mobile
+          initialHeight={isDesktop ? 388 : window.innerHeight} // Maximize height on mobile
+          initialWidth={isDesktop ? 560 : window.innerWidth} // Maximize width on mobile
+          initialX={.2} // Align to the top-left corner
+          initialY={.2} // Align to the top-left corner
+          resizable={isDesktop} // Enable resizing only for desktop
+          minHeight={isDesktop ? 226 : undefined} // Set minHeight for desktop
+          minWidth={isDesktop ? 306 : undefined} // Set minWidth for desktop
+          maximizeOnOpen={!isDesktop} // Automatically maximize on mobile
+          className={cx("Doom", props.className, { "hide-maximize": !isDesktop })} // Hide maximize button on mobile
+          onMaximize={isDesktop ? undefined : null} // Disable maximize button on mobile
         >
           <iframe
             src="https://doom-jsdos.vercel.app/"
