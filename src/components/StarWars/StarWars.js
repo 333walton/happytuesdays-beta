@@ -21,11 +21,13 @@ class Doom extends Component {
           options: {},
         })}
         Component={WindowProgram}
-        initialHeight={307} // Set the initial height of the window  
-        initialWidth={515} // Set the initial width of the window  
-        resizable={false}  // This disables resizing
-        onMaximize={null}  // This disables the maximize button
-        className={cx("Doom", props.className)}
+        initialHeight={307} // Set the initial height of the window
+        initialWidth={515} // Set the initial width of the window
+        initialX={1} // Explicitly set the horizontal position (working method to override rnd frame rendering)
+        initialY={1} // Explicitly set the vertical position (working method to override rnd frame rendering)
+        resizable={false} // This disables resizing
+        onMaximize={null} // This disables the maximize button
+        className={cx("Doom", "fixed-window", props.className)} // Add the custom class
       >
       <div // this is the iframe within the window above
         style={{

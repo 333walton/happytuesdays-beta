@@ -55,7 +55,8 @@ class Doom extends Component {
           Component={WindowProgram}
           initialHeight={388}
           initialWidth={560}
-          className={cx("Doom", props.className)}
+          className={cx("Doom", props.className, { "hide-maximize": !isDesktop })} // Add conditional class
+          onMaximize={isDesktop ? undefined : null} // Disables maximize button on mobile
         >
           <iframe
             src="https://doom-jsdos.vercel.app/"

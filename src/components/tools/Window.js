@@ -4,6 +4,7 @@ import { Rnd } from "react-rnd";
 import { SettingsContext } from "../../contexts";
 import "./_window.scss";
 
+
 const handleClasses = {
   bottom: "ns-resize",
   bottomLeft: "nesw-resize",
@@ -61,7 +62,7 @@ class Window extends React.PureComponent {
       this.context?.isMobile &&
       this.props.resizable) ||
     this.props.maximizeOnOpen,
-  ...launchPositions(this.props.inintalX, this.props.initialY)
+  ...launchPositions(this.props.initialX, this.props.initialY)
 };
 
 
