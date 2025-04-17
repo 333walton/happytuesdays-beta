@@ -9,6 +9,7 @@ import "./_styles.scss";
 class Doom extends Component {
   render() {
     const { props } = this;
+
     return (
       <Window
         {...props}
@@ -21,38 +22,38 @@ class Doom extends Component {
           options: {},
         })}
         Component={WindowProgram}
-        initialHeight={307} // Set the initial height of the window
-        initialWidth={515} // Set the initial width of the window
-        initialX={1} // Explicitly set the horizontal position (working method to override rnd frame rendering)
-        initialY={1} // Explicitly set the vertical position (working method to override rnd frame rendering)
-        resizable={false} // This disables resizing
-        onMaximize={null} // This disables the maximize button
+        initialHeight={window.innerWidth <= 420 ? 270 : 307} // Adjust height for mobile
+        initialWidth={window.innerWidth <= 420 ? window.innerWidth * 0.98 : 515} // Adjust width for mobile
+        initialX={window.innerWidth <= 420 ? 1 : 1} // Center horizontally on mobile
+        initialY={window.innerWidth <= 420 ? 1 : 1} // Center vertically on mobile
+        resizable={window.innerWidth > 420} // Disable resizing on mobile
+        onMaximize={window.innerWidth <= 420 ? null : undefined} // Disable maximize button on mobile
         className={cx("Doom", "fixed-window", props.className)} // Add the custom class
       >
-      <div // this is the iframe within the window above
-        style={{
-          width: "508px", // nearly match the initial width of the window above (iframe sizing)
-          height: "305px", // nearly match the initial height of the window above (iframe sizing)
-          overflow: "hidden",
-          position: "relative",
-          }}
-      >  
-        <iframe
-          src="https://www.asciimation.co.nz/"
-          title="starwars"
-          scrolling="no" // disables any scrolling within the iframe
+        <div
           style={{
-            transform: "scale(.87)",           // Shrinks the iframe
-            transformOrigin: "top left",       // Anchor scaling to the top-left
-            width: "620px",                   // Reduce the width to tighten the visible area
-            height: "600px",                  // Same for height
-            position: "absolute",
-            top: "-103px",   // adjust these values
-            left: "-11px", // until canvas is centered
-            border: "none",
+            height: window.innerWidth <= 420 ? "305px" : "305px", // Adjust iframe height for mobile
+            width: window.innerWidth <= 420 ? window.innerWidth * 0.967 : "508px", // Adjust iframe width for mobile
+            overflow: "hidden",
+            position: "relative",
           }}
-        />
-      </div>
+        >
+          <iframe
+            src="https://www.asciimation.co.nz/"
+            title="starwars"
+            scrolling="no"
+            style={{
+              transform: window.innerWidth <= 420 ? "scale(.75)" : "scale(.87)", // Adjust scaling for mobile
+              transformOrigin: "top left",
+              width: "620px",
+              height: "600px",
+              position: "absolute",
+              top: window.innerWidth <= 420 ? "-87px" : "-103px", // Adjust positioning for mobile
+              left: window.innerWidth <= 420 ? "-28px" : "-11px",
+              border: "none",
+            }}
+          />
+        </div>
       </Window>
     );
   }

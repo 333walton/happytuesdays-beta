@@ -49,6 +49,8 @@ class JSDos extends Component {
 
   render() {
     const { props } = this;
+    const isMobile = window.innerWidth <= 420; // Define isMobile based on screen width
+
     return (
       <Window
         {...props}
@@ -58,6 +60,8 @@ class JSDos extends Component {
         Component={WindowProgram}
         initialHeight={200}
         initialWidth={400}
+        initialX={isMobile ? 1 : 1} 
+        initialY={isMobile ? 1 : 1} 
         className={cx("JSDos", props.className)}
       >
         <form name="hiddenForm" onSubmit={this.processEntry}>
