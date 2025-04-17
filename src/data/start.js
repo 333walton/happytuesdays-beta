@@ -87,7 +87,7 @@ const programs = [
               disableAlert: true, // Disable the alert for this iframe
               style: {
                 width: "100%",
-                height: "100%"
+                height: "100%",
               },
             },
             },

@@ -6,15 +6,19 @@ import Window from "../tools/Window";
 import PureIframe from "./Iframe";
 
 class IFrame extends Component {
-  // Initialize state
-  state = {
-    displayAlert: true, // Default to true unless explicitly disabled in props
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      displayAlert: true, // Default to true unless explicitly disabled in props
+      isDesktop: window.innerWidth > 1024 // State variable to check if the user is on a desktop
+    };
+  }
 
   confirm = () => this.setState({ displayAlert: false });
 
   render() {
     const { props, state } = this;
+    const { displayAlert, isDesktop } = this.state;
 
     const commonProps = {
       title: props.title,
@@ -53,14 +57,20 @@ class IFrame extends Component {
       <Window
         {...props}
         className={"IframeWindow"}
-        initialHeight={props.data?.height || 380}
-        initialWidth={props.data?.width || 440}
-        minWidth={props.data?.width}
-        minHeight={props.data?.height}
+        initialX={isDesktop ? 20 : 23}
+        initialY={isDesktop ? 10 : 3}
+        initialHeight={isDesktop ? 335 : 335}
+        initialWidth={isDesktop ? 389 : 389}
+        minHeight={isDesktop ? 335 : 335}
+        minWidth={isDesktop ? 389 : 389}
         menuOptions={props.data?.useMenu && buildMenu(props)}
         Component={WindowProgram}
-        resizable={!(props.data?.width || props.data?.height)}
+        resizable={true} // Ensure resizing is enabled
         hideOnDrag={true}
+        forceNoMobileMax={true} // Prevent automatic maximization on mobile
+        onRestore={this.restore} // Always enable the restore functionality
+        onMaximize={this.maximize} // Always enable the maximize functionality
+        disableMaximize={false}
       >
         <div style={props.data?.style}>
           <PureIframe src={props.data?.src} title={props.title} />
