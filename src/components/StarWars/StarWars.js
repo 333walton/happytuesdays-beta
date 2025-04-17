@@ -23,17 +23,17 @@ class Doom extends Component {
         })}
         Component={WindowProgram}
         initialHeight={window.innerWidth <= 420 ? 270 : 307} // Adjust height for mobile
-        initialWidth={window.innerWidth <= 420 ? window.innerWidth * 0.98 : 515} // Adjust width for mobile
+        initialWidth={window.innerWidth <= 420 ? window.innerWidth * 0.978 : 515} // Adjust width for mobile
         initialX={window.innerWidth <= 420 ? 1 : 1} // Center horizontally on mobile
         initialY={window.innerWidth <= 420 ? 1 : 1} // Center vertically on mobile
-        resizable={window.innerWidth > 420} // Disable resizing on mobile
+        resizable={false} // Disable resizing on mobile
         onMaximize={window.innerWidth <= 420 ? null : undefined} // Disable maximize button on mobile
         className={cx("Doom", "fixed-window", props.className)} // Add the custom class
       >
         <div
           style={{
-            height: window.innerWidth <= 420 ? "305px" : "305px", // Adjust iframe height for mobile
-            width: window.innerWidth <= 420 ? window.innerWidth * 0.967 : "508px", // Adjust iframe width for mobile
+            height: window.innerWidth <= 420 ? "270px" : "305px", // Adjust iframe height for mobile
+            width: window.innerWidth <= 420 ? window.innerWidth * 0.96 : "508px", // Adjust iframe width for mobile
             overflow: "hidden",
             position: "relative",
           }}

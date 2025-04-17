@@ -62,6 +62,7 @@ class JSDos extends Component {
         initialWidth={400}
         initialX={isMobile ? 1 : 1} 
         initialY={isMobile ? 1 : 1} 
+        onMaximize={window.innerWidth <= 420 ? null : undefined} // Disable maximize button on mobile
         className={cx("JSDos", props.className)}
       >
         <form name="hiddenForm" onSubmit={this.processEntry}>
