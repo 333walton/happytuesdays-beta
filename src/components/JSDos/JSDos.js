@@ -49,7 +49,7 @@ class JSDos extends Component {
 
   render() {
     const { props } = this;
-    const isMobile = window.innerWidth <= 420; // Define isMobile based on screen width
+    const isMobile = window.innerWidth <= 768; // Define isMobile based on screen width
 
     return (
       <Window
@@ -62,7 +62,8 @@ class JSDos extends Component {
         initialWidth={400}
         initialX={isMobile ? 1 : 1} 
         initialY={isMobile ? 1 : 1} 
-        onMaximize={window.innerWidth <= 420 ? null : undefined} // Disable maximize button on mobile
+        forceNoMobileMax={true} // Prevent automatic maximization on mobile
+        onMaximize={window.innerWidth <= 768 ? null : undefined} // Disable maximize button on mobile
         className={cx("JSDos", props.className)}
       >
         <form name="hiddenForm" onSubmit={this.processEntry}>
