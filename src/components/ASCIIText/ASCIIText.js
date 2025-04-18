@@ -2,12 +2,12 @@ import React, { Component } from "react";
 import { WindowProgram } from "packard-belle";
 import cx from "classnames";
 import Window from "../tools/Window";
-import { maze16 } from "../../icons";
+import { asciibanner16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import FigletText from "./Internal";
 import "./_styles.scss";
 
-const fonts = ["Standard", "Slant", "Ghost", "Graffiti", "Sub-Zero", "Small"];
+const fonts = ["Standard", "Slant", "Ghost", "Sub-Zero", "Small"];
 
 class ASCIIText extends Component {
   state = {
@@ -27,14 +27,18 @@ class ASCIIText extends Component {
       <Window
         {...props}
         title="ASCII Banners"
-        icon={maze16}
+        icon={asciibanner16}
         Component={WindowProgram}
         initialHeight={207}
-        initialWidth={330}
+        initialWidth={370}
+        maxHeight={isMobile ? 207 : 260} 
+        maxWidth={isMobile ? 410 : 630} 
+        minHeight={177}
+        minWidth={340}
         initialX={isMobile ? 1 : 1} 
         initialY={isMobile ? 1 : 1} 
         forceNoMobileMax={true} // Prevent automatic maximization on mobile
-        resizable={false}
+        resizable={true}
         onMaximize={null}
         className={cx("ASCIIText", props.className)}
         menuOptions={buildMenu({

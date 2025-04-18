@@ -113,7 +113,7 @@ const programs = [
           },
           {
             title: "ASCII Banners",
-            icon: icons.loaderbat16,
+            icon: icons.asciibanner16,
             component: "ASCIIText",
             isDisabled: false,
             data: {}, 
