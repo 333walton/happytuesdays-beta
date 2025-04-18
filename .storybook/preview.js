@@ -2,12 +2,12 @@ import React, { useMemo } from 'react';
 import { SettingsContext } from '../src/contexts';
 
 // Global styles
-//import 'packard-belle/build/pb/index.css';
+// import 'packard-belle/build/pb/index.css';
 import '../src/icons/icons.scss';
 import '../src/components/tools/_window.scss';
 import '../src/components/tools/_background.scss';
 import '../src/components/tools/_StandardWindow.scss';
-//import '../src/styles/storybook.scss';
+// import '../src/styles/storybook.scss';
 
 // Toolbar toggle
 export const globalTypes = {
@@ -43,14 +43,13 @@ export const decorators = [
     );
 
     const containerStyle = {
-      width: isMobile ? '375px' : '100vw',
-      height: '100vh',
+      width: '768px',
+      height: '768px',
       margin: '0 auto',
-      overflow: 'auto',
       background: '#008080',
+      overflow: 'auto',
       padding: '8px',
       boxSizing: 'border-box',
-      border: '1px solid #444',
     };
 
     return (
@@ -63,7 +62,7 @@ export const decorators = [
   },
 ];
 
-// Controls config
+// Controls + Viewport config
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
   controls: {
@@ -71,5 +70,34 @@ export const parameters = {
       color: /(background|color)$/i,
       date: /Date$/,
     },
+  },
+  viewport: {
+    viewports: {
+      desktop640: {
+        name: 'Desktop (640x480)',
+        styles: {
+          width: '640px',
+          height: '480px',
+        },
+        type: 'desktop',
+      },
+      mobile320: {
+        name: 'Mobile (320x640)',
+        styles: {
+          width: '320px',
+          height: '640px',
+        },
+        type: 'mobile',
+      },
+      tablet768: {
+        name: 'Tablet (768x1024)',
+        styles: {
+          width: '768px',
+          height: '1024px',
+        },
+        type: 'tablet',
+      },
+    },
+    defaultViewport: 'desktop640',
   },
 };
