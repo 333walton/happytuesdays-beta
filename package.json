@@ -26,13 +26,30 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": [
+      "react-app",
+      "plugin:storybook/recommended"
+    ]
   },
   "devDependencies": {
-    "sass": "^1.63.4"
+    "@storybook/addon-essentials": "^8.6.12",
+    "@storybook/addon-interactions": "^8.6.12",
+    "@storybook/addon-onboarding": "^8.6.12",
+    "@storybook/blocks": "^8.6.12",
+    "@storybook/preset-create-react-app": "^8.6.12",
+    "@storybook/react": "^8.6.12",
+    "@storybook/react-webpack5": "^8.6.12",
+    "@storybook/test": "^8.6.12",
+    "eslint-plugin-storybook": "^0.12.0",
+    "prop-types": "^15.8.1",
+    "sass": "^1.63.4",
+    "storybook": "^8.6.12",
+    "webpack": "^5.99.5"
   },
   "browserslist": [
     ">0.2%",
