@@ -11,8 +11,8 @@ const fonts = ["Standard", "Slant", "Ghost", "Graffiti", "Sub-Zero", "Small"];
 
 class ASCIIText extends Component {
   state = {
-    text: "Hydra98",
-    font: "Graffiti",
+    text: "TEST",
+    font: "Sub-Zero",
   };
 
   handleTextChange = (e) => this.setState({ text: e.target.value });
@@ -21,6 +21,7 @@ class ASCIIText extends Component {
   render() {
     const { props } = this;
     const { text, font } = this.state;
+    const isMobile = window.innerWidth <= 768; // Define isMobile based on screen width
 
     return (
       <Window
@@ -28,9 +29,12 @@ class ASCIIText extends Component {
         title="ASCII Banners"
         icon={maze16}
         Component={WindowProgram}
-        initialHeight={320}
-        initialWidth={440}
-        resizable={true}
+        initialHeight={207}
+        initialWidth={330}
+        initialX={isMobile ? 1 : 1} 
+        initialY={isMobile ? 1 : 1} 
+        forceNoMobileMax={true} // Prevent automatic maximization on mobile
+        resizable={false}
         onMaximize={null}
         className={cx("ASCIIText", props.className)}
         menuOptions={buildMenu({

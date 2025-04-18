@@ -1,10 +1,13 @@
 
-import React from 'react';
-import ASCIIText from './ASCIIText';
+import React from "react";
+import ASCIIText from "./ASCIIText";
 
+// Normal themed story (wrapped by global decorators)
 export default {
-  title: 'Components/ASCIIText',
+  title: "Components/ASCIIText",
   component: ASCIIText,
 };
 
-export const Default = () => <ASCIIText />;
+// Normal, with packard-belle theme
+export const Themed = () => <ASCIIText />;
+

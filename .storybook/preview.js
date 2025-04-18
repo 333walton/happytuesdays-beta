@@ -26,7 +26,8 @@ export const globalTypes = {
 };
 
 export const decorators = [
-  (Story, context) => {
+  (Story, context) => { 
+
     const isMobile = context.globals.device === 'mobile';
 
     const mockSettings = useMemo(
