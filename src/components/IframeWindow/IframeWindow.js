@@ -67,6 +67,7 @@ class IFrame extends Component {
         Component={WindowProgram}
         resizable={true} // Ensure resizing is enabled
         hideOnDrag={true}
+        maximizeOnOpen={false} // Prevent automatic maximization
         forceNoMobileMax={true} // Prevent automatic maximization on mobile
         onRestore={this.restore} // Always enable the restore functionality
         onMaximize={this.maximize} // Always enable the maximize functionality
