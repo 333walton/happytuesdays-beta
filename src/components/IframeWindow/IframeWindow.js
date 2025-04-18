@@ -10,7 +10,7 @@ class IFrame extends Component {
     super(props);
     this.state = {
       displayAlert: true, // Default to true unless explicitly disabled in props
-      isDesktop: window.innerWidth > 1024 // State variable to check if the user is on a desktop
+      isDesktop: window.innerWidth > 768 // State variable to check if the user is on a desktop
     };
   }
 
