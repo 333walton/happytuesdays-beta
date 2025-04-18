@@ -13,8 +13,8 @@
 
 .ASCIIText .ascii-text-wrapper {
   padding: 12px;
-  font-family: monospace;
-  font-size: 12px;
+  font-family:'Courier New', monospace;
+  font-size: 11px;
   white-space: pre;
   overflow-x: auto;
   line-height: 1.1;
@@ -23,23 +23,33 @@
 .ASCIIText {
   .ascii-banner-controls {
     display: flex;
-    gap: 10px;
+    gap: 9px;
     padding: 8px;
 
     input,
     select {
       font-family: 'Courier New', monospace;
-      font-size: 12px;
+      font-size: 11px;
       padding: 3px 6px;
       background: #eaeaea;
       border: 1px solid #888;
+      height: 20px;
+    }
+    Select {
+      width: 125px; /* Adjusted width of the dropdown */
+      height: 20px; /* Set the height of the dropdown menu */
+    }
+    Select,
+    &:focus {
+      height: 150px; /* Set the height of the dropdown menu when focused */
+      overflow-y: auto; /* Enable vertical scrolling for additional options */
     }
   }
-
-    .ascii-banner-output {
+  
+  .ascii-banner-output {
       padding: 12px;
       font-family: 'Courier New', monospace;
-      font-size: 13px;
+      font-size: 11px;
       line-height: 1.05;
       white-space: pre;
       overflow: auto;
@@ -49,15 +59,4 @@
       height: 180px;
       box-shadow: inset 0 0 0px #00ff00;
     }
-
-}
-
-//.react-draggable-dragging {
-//  .IframeWindow {
-//
-//    >div,
-//    iframe {
-//      pointer-events: none;
-//    }
-//  }
-//}
+  }
