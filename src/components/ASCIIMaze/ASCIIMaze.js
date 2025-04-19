@@ -57,7 +57,7 @@ class Doom extends Component {
           options: {},
         })}
         Component={WindowProgram}
-        initialHeight={isMobile ? 400 : 328}
+        initialHeight={isMobile ? 420 : 328}
         initialWidth={280}
         initialX={isMobile ? 1 : 1}
         initialY={isMobile ? 1 : 1}
