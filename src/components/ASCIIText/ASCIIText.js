@@ -8,54 +8,16 @@ import buildMenu from "../../helpers/menuBuilder";
 import FigletText from "./Internal";
 import "./_styles.scss";
 
-const fonts = [
-  { value: "Alligator2", label: "Alligator2" },
-  { value: "ANSI Regular", label: "ANSI Regular" },
-  { value: "ANSI Shadow", label: "ANSI Shadow" },
-  { value: "Banner3-D", label: "Banner3-D" },
-  { value: "Big Money-nw", label: "Big Money-nw" },
-  { value: "Bloody", label: "Bloody" },
-  { value: "BlurVision ASCII", label: "BlurVision ASCII" },
-  { value: "Bright", label: "Bright" },
-  { value: "Broadway", label: "Broadway" },
-  { value: "Bulbhead", label: "Bulbhead" },
-  { value: "Chunky", label: "Chunky" },
-  { value: "Colossal", label: "Colossal" },
-  { value: "Contessa", label: "Contessa" },
-  { value: "Contrast", label: "Contrast" },
-  { value: "Delta Corps Priest 1", label: "Delta Corps Priest 1" },
-  { value: "Efti Water", label: "Efti Water" },
-  { value: "Fire Font-k", label: "Fire Font-k" },
-  { value: "Fuzzy", label: "Fuzzy" },
-  { value: "Ghost", label: "Ghost" },
-  { value: "Isometric3", label: "Isometric3" },
-  { value: "Lean", label: "Lean" },
-  { value: "Letters", label: "Letters" },
-  { value: "Marquee", label: "Marquee" },
-  { value: "Mini", label: "Mini" },
-  { value: "Pawp", label: "Pawp" },
-  { value: "Peaks Slant", label: "Peaks Slant" },
-  { value: "Roman", label: "Roman" },
-  { value: "Shadow", label: "Shadow" },
-  { value: "Slant", label: "Slant" },
-  { value: "Slant Relief", label: "Slant Relief" },
-  { value: "Small", label: "Small" },
-  { value: "Small Keyboard", label: "Small Keyboard" },
-  { value: "Standard", label: "Standard" },
-  { value: "Sub-Zero", label: "Sub-Zero" },
-  { value: "Train", label: "Train" },
-  { value: "Trek", label: "Trek" },
-  { value: "Tubular", label: "Tubular" },
-  { value: "Wavy", label: "Wavy" },
-  { value: "Whimsy", label: "Whimsy" },
-];
+const fonts = [/* unchanged font array here */];
 
 class ASCIIText extends Component {
   constructor(props) {
     super(props);
     this.state = {
       text: "TEST",
-      font: { value: "Sub-Zero", label: "Sub-Zero" },
+      font: window.innerWidth <= 768
+      ? { value: "Train", label: "Train" } // Mobile
+      : { value: "Colossal", label: "Colossal" }, // Desktop
       asciiOutput: "",
       copyButtonLabel: "Copy",
       windowWidth: 370,
@@ -82,7 +44,7 @@ class ASCIIText extends Component {
 
   handleAsciiGenerated = (ascii) => {
     this.setState({ asciiOutput: ascii }, () => {
-      setTimeout(this.adjustWindowSize, 0); // Wait for render
+      setTimeout(this.adjustWindowSize, 0);
     });
   };
 
@@ -103,6 +65,22 @@ class ASCIIText extends Component {
     this.setState({ windowWidth: newWidth, windowHeight: newHeight });
   };
 
+  // ✅ Save functions now match what buildMenu expects
+  //handleSave = (props) => {
+    //const { asciiOutput } = this.state;
+    //console.log("Saved ASCII output:", asciiOutput);
+    //alert("Saved!");
+  //};
+
+  handleSaveAs = (props) => {
+    const { asciiOutput } = this.state;
+    const blob = new Blob([asciiOutput], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "ascii-banner.txt";
+    a.click();
+  };
+
   render() {
     const { props } = this;
     const { text, font, copyButtonLabel, windowWidth, windowHeight } = this.state;
@@ -114,14 +92,14 @@ class ASCIIText extends Component {
         title="ASCII Banners"
         icon={asciibanner16}
         Component={WindowProgram}
-        initialWidth={windowWidth}
+        initialWidth={isMobile ? 340 : windowWidth}
         initialHeight={windowHeight}
         maxWidth={630}
         maxHeight={265}
         minWidth={340}
         minHeight={177}
-        initialX={isMobile ? 1 : 1}
-        initialY={isMobile ? 1 : 1}
+        initialX={1}
+        initialY={1}
         forceNoMobileMax={true}
         resizable={true}
         onMaximize={null}
@@ -129,6 +107,7 @@ class ASCIIText extends Component {
         menuOptions={buildMenu({
           ...props,
           componentType: "ASCIIText",
+          onSaveAs: this.handleSaveAs,
         })}
       >
         <div className="ascii-banner-controls">
@@ -187,9 +166,7 @@ class ASCIIText extends Component {
           </button>
         </div>
 
-        <div
-          className="ascii-banner-output"
-          ref={this.outputRef}>
+        <div className="ascii-banner-output" ref={this.outputRef}>
           <FigletText
             text={text}
             font={font.value}

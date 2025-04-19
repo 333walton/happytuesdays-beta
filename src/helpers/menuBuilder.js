@@ -59,17 +59,32 @@ export const helpOptions = (props) => {
 export const buildMenu = (props, customOptions = {}) => {
   const fileOptions = props.fileOptions || [];
   const onClose = [{ title: "Close", onClick: () => props.onClose(props) }];
-  const saveOptions =
-    props.onSave || props.onSaveAs
-      ? [
-          { title: "Save As...", onClick: data => props.onSaveAs(props, data) },
-          {
-            title: "Save",
-            onClick: props.onSave && (data => props.onSave(props, data)),
-            isDisabled: props.readOnly || !props.onSave
-          }
-        ]
-      : [];
+  let saveOptions = [];
+
+if (props.componentType === "ASCIIText") {
+  if (props.onSaveAs) {
+    saveOptions.push({
+      title: "Save As...",
+      onClick: data => props.onSaveAs(props, data)
+    });
+  }
+} else {
+  if (props.onSaveAs) {
+    saveOptions.push({
+      title: "Save As...",
+      onClick: data => props.onSaveAs(props, data)
+    });
+  }
+
+  if (props.onSave) {
+    saveOptions.push({
+      title: "Save",
+      onClick: data => props.onSave(props, data),
+      isDisabled: props.readOnly
+    });
+  }
+}
+
   const multiInstance = props.multiInstance
     ? [
         {
