@@ -7,8 +7,44 @@ import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
 class Doom extends Component {
+  iframeRef = null;
+
+  sendKeyToIframe = (label, key) => {
+    const iframe = this.iframeRef;
+    if (!iframe || !iframe.contentWindow || !iframe.contentWindow.document) return;
+
+    const keyCodeMap = {
+      ArrowUp: 38,
+      ArrowDown: 40,
+      ArrowLeft: 37,
+      ArrowRight: 39,
+    };
+
+    const keyCode = keyCodeMap[key];
+    if (!keyCode) return;
+
+    const doc = iframe.contentWindow.document;
+
+    ["keydown", "keyup"].forEach((type) => {
+      const event = new KeyboardEvent(type, {
+        key,
+        keyCode,
+        bubbles: true,
+      });
+
+      Object.defineProperty(event, "keyCode", { get: () => keyCode });
+      Object.defineProperty(event, "which", { get: () => keyCode });
+
+      doc.dispatchEvent(event);
+    });
+
+    console.log(`🔘 Pressed ${label} → Sent ${key} (${keyCode})`);
+  };
+
   render() {
     const { props } = this;
+    const isMobile = window.innerWidth <= 768;
+
     return (
       <Window
         {...props}
@@ -21,35 +57,50 @@ class Doom extends Component {
           options: {},
         })}
         Component={WindowProgram}
-        initialHeight={260}
+        initialHeight={isMobile ? 400 : 328}
         initialWidth={280}
-        resizable={false}  // This disables resizing
-        onMaximize={null} // This disables the maximize button
+        initialX={isMobile ? 1 : 1}
+        initialY={isMobile ? 1 : 1}
+        resizable={false}
+        onMaximize={null}
         className={cx("Doom", props.className)}
       >
-      <div // this will edit the iframe within the window above
-        style={{
-          width: "280px", // nearly match the initial width of the window above (iframe sizing)
-          height: "280px", // nearly match the initial height of the window above (iframe sizing)
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
-        <iframe
-          src="https://www.windows93.net/c/programs/maze/index.html"
-          title="ASCII Maze"
+        <div
           style={{
-            transform: "scale(1)",           // Shrink to 50%
-            transformOrigin: "top left",       // Anchor scaling to the top-left
-            width: "270px",                   // Scale width up so the visible area stays the same
-            height: "200px",                  // Same for height
-            position: "absolute",
-            top: "1px",   // adjust these values
-            left: "1px", // until canvas is centered
-            border: "none",
+            width: "280px",
+            height: "328px",
+            overflow: "hidden",
+            position: "relative",
           }}
-        />
-      </div>
+        >
+          <iframe
+            ref={(ref) => (this.iframeRef = ref)}
+            src="/maze/index.html"
+            title="ASCII Maze"
+            style={{
+              transform: "scale(1)",
+              transformOrigin: "top left",
+              width: "270px",
+              height: "280px",
+              position: "absolute",
+              top: "1px",
+              left: "1px",
+              border: "none",
+            }}
+          />
+        </div>
+
+        {/* Mobile Controls */}
+        <div className="ASCIIMaze-controls">
+          <div className="row">
+            <button onClick={() => this.sendKeyToIframe("Up", "ArrowUp")}>↑</button>
+          </div>
+          <div className="row">
+            <button onClick={() => this.sendKeyToIframe("Left", "ArrowLeft")}>←</button>
+            <button onClick={() => this.sendKeyToIframe("Down", "ArrowDown")}>↓</button>
+            <button onClick={() => this.sendKeyToIframe("Right", "ArrowRight")}>→</button>
+          </div>
+        </div>
       </Window>
     );
   }
