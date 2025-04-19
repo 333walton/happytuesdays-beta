@@ -273,6 +273,12 @@ const games = [
         component: "Burn",
         multiInstance: true
       },
+      {
+        title: "ASCII Maze",
+        icon: icons.maze16,
+        component: "ASCIIMaze",
+        multiInstance: true,
+      },
       // Only show these options for desktop users
       ...(!isMobile()
         ? [
@@ -280,12 +286,6 @@ const games = [
         title: "GliderPro",
         icon: icons.glider16,
         component: "Glider",
-        multiInstance: true,
-          },
-          {
-        title: "ASCII Maze",
-        icon: icons.maze16,
-        component: "ASCIIMaze",
         multiInstance: true,
           },
           {
