@@ -189,10 +189,10 @@ class ASCIIText extends Component {
         <strong>Well this is awkward...</strong>
         <br />
         <br />
-        File has been sent to the Recycle Bin, where it belongs.
+        After a scan of your art, it was determined that it belongs in the Recycling Bin.
         <br />
         <br />
-        If you're actually serious, you can save it from there.
+        If you really want to save that, you can find it in there.
         <div style={{ marginTop: "18px", textAlign: "center" }}>
           <button
             className="pb-button"
