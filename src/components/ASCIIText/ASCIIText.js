@@ -176,11 +176,11 @@ class ASCIIText extends Component {
   renderMessageWindow() {
   return (
     <Window
-      title="Recycle Bin"
+      title="File Location"
       icon={asciibanner16}
       Component={WindowProgram}
       initialWidth={330}
-      initialHeight={160}
+      initialHeight={177}
       resizable={false}
       className="always-blue-heading Window--active" 
       onClose={() => this.setState({ showMessageWindow: false })}
@@ -189,7 +189,7 @@ class ASCIIText extends Component {
         <strong>Well this is awkward...</strong>
         <br />
         <br />
-        After a scan of your art, it was determined that it belongs in the Recycling Bin.
+        After a scan of your art, it was determined that it belongs in the <strong>Recycle Bin</strong>.
         <br />
         <br />
         If you really want to save that, you can find it in there.
