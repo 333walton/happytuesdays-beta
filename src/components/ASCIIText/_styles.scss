@@ -151,3 +151,40 @@
   border-right-color: #ffffff;
   border-bottom-color: #ffffff;
 }
+
+/* Hides the maximize button for windows with 'hide-maximize' class */
+.hide-maximize .Window__maximize {
+  display: none !important;
+}
+
+.always-blue-heading .pb-title-bar {
+  background: linear-gradient(to right, #0000a2, #126fc2) !important;
+  color: white !important;
+}
+
+.pb-button {
+    padding: 4px 16px;
+    font-size: 13px;
+    font-family: Tahoma, sans-serif;
+    cursor: pointer;
+    background: #e0e0e0;
+    border: 2px solid #dfdfdf;
+    border-right-color: #404040;
+    border-bottom-color: #404040;
+    border-left-color: #ffffff;
+    border-top-color: #ffffff;
+    outline: none;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  .pb-button:hover {
+  background: #d6d6d6;
+  }
+
+  .pb-button:active {
+    border-left-color: #404040;
+    border-top-color: #404040;
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
+  }

@@ -42,7 +42,6 @@ const settings = (injectedData = []) => [
 const startMenu = (injectedData = [], set, shutDown) => [
   [
     ...injectedData,
-    
     {
       title: "Settings",
       icon: icons.settings24,
@@ -130,6 +129,7 @@ class ProgramProvider extends Component {
     startMenuData,
     desktopData
   };
+
   state = {
     programs: Object.keys(Applications).reduce(
       (acc, p) => ({
@@ -138,17 +138,18 @@ class ProgramProvider extends Component {
       }),
       {}
     ),
+    recycleEmpty: true, // ✅ Added
     startMenu: initialize(
       p => this.open(p),
       addIdsToData(
         startMenu(
           this.props.startMenuData,
           [
-              {
-                title: "IIGA Tests",
-                icon: icons.folder16,
-                options: [
-                                {
+            {
+              title: "IIGA Tests",
+              icon: icons.folder16,
+              options: [
+                {
                   title: "Pre-roll Emitters",
                   icon: icons.vid16,
                   component: "VideoPlayer",
@@ -156,14 +157,8 @@ class ProgramProvider extends Component {
                   isDisabled: false,
                   data: {
                     src: "/static/donwest.mp4"
-                  },
+                  }
                 },
-                //{
-                  //title: "Form Submission",
-                  //icon: icons.prompt16,
-                  //multiInstance: true,
-                  //isDisabled: true
-                //},
                 {
                   title: "Cookie Consent",
                   icon: icons.cookie16,
@@ -215,16 +210,21 @@ class ProgramProvider extends Component {
         desktop: buildDesktop(desktopSaved, () => this.open)
       }));
     }
+
     window.ProgramContext = {
-    onOpen: this.open,
-    onClose: this.close
-  };
+      onOpen: this.open,
+      onClose: this.close,
+      setRecycleBinFull: this.setRecycleBinFull // ✅ add this line
+    };
+
   }
 
   toggleShutDownMenu = () =>
     this.setState(state => ({ shutDownMenu: !state.shutDownMenu }));
+
   toggleTaskManager = () =>
     this.setState(state => ({ taskManager: !state.taskManager }));
+
   toggleSettings = val =>
     this.setState(state => ({
       settingsDisplay: val || !state.settingsDisplay
@@ -245,8 +245,7 @@ class ProgramProvider extends Component {
     }
   };
 
-  isProgramActive = programId =>
-    this.state.activePrograms[programId];
+  isProgramActive = programId => this.state.activePrograms[programId];
 
   moveToTop = windowId => {
     this.setState({
@@ -254,70 +253,62 @@ class ProgramProvider extends Component {
         ...this.state.activePrograms,
         [windowId]: {
           ...this.state.activePrograms[windowId],
-          minimized: false,
-        },
+          minimized: false
+        }
       },
       activeId: windowId,
       zIndexes: [
         ...this.state.zIndexes.filter(v => v !== windowId),
-        windowId,
-      ],
+        windowId
+      ]
     });
   };
 
   open = (program, options = {}) => {
-    // Check if Doom or JSDos is currently running
     const isBlockingProgramRunning = Object.values(this.state.activePrograms).some(
       prog => ['Doom', 'JSDos'].includes(prog.component)
     );
 
-    // If either Doom or JSDos is running, prevent opening either of them
     if (isBlockingProgramRunning && ['Doom', 'JSDos'].includes(program.component)) {
       return;
     }
 
-    // If Doom or JSDos is running, prevent opening any other program
     if (isBlockingProgramRunning) {
       return;
     }
 
-    // @todo use id instead to avoid weird open handling
-    // @todo rename launch to handle multi-window programs
-    if (!Applications[program.component]) {
-      return;
-    }
-    
+    if (!Applications[program.component]) return;
+
     if (this.isProgramActive(program.id) && !program.multiInstance) {
       this.moveToTop(program.id);
       return;
     }
-    
+
     const newProgram = {
       ...program,
       id: nanoid(),
       data: options.new ? {} : program.data,
       title: options.new ? program.component : program.title
     };
-    
+
     this.setState({
       activePrograms: {
         ...this.state.activePrograms,
-        [newProgram.id]: newProgram,
+        [newProgram.id]: newProgram
       },
       openOrder: [...this.state.openOrder, newProgram.id],
-      zIndexes: [ ...this.state.zIndexes, newProgram.id],
+      zIndexes: [...this.state.zIndexes, newProgram.id],
       activeId: newProgram.id
     });
   };
 
   close = (program, exit) => {
-    if (!this.isProgramActive(program.id)) {
-      return;
-    }
+    if (!this.isProgramActive(program.id)) return;
+
     const taskBar = this.state.openOrder.filter(p => p !== program.id);
     this.setState({
       openOrder: taskBar,
-      zIndexes: this.state.zIndexes.filter(p => p !== program.id),
+      zIndexes: this.state.zIndexes.filter(p => p !== program.id)
     });
 
     if (!program.background || exit) {
@@ -331,37 +322,36 @@ class ProgramProvider extends Component {
         if (programId !== val) {
           return {
             ...acc,
-            [val]: this.state.activePrograms[val],
-          }
+            [val]: this.state.activePrograms[val]
+          };
         }
         return acc;
       }, {}),
-      activeId: null,
+      activeId: null
     });
 
   minimize = programId => {
-    if (!this.state.activePrograms[programId]) {
-      return;
-    } else {
-      this.setState({
-        activePrograms: {
-          ...this.state.activePrograms,
-          [programId]: {
-            ...this.state.activePrograms[programId],
-            minimized: true,
-          },
-        },
-        activeId: null
-      });
-    }
+    if (!this.state.activePrograms[programId]) return;
+
+    this.setState({
+      activePrograms: {
+        ...this.state.activePrograms,
+        [programId]: {
+          ...this.state.activePrograms[programId],
+          minimized: true
+        }
+      },
+      activeId: null
+    });
   };
+
   minimizeAll = () =>
     this.setState(state => ({
       activePrograms: Object.keys(state.activePrograms).reduce((acc, val) => ({
-        ...state.activePrograms,
+        ...acc,
         [val]: {
           ...state.activePrograms[val],
-          minimized: true,
+          minimized: true
         }
       }), {}),
       activeId: null
@@ -427,6 +417,11 @@ class ProgramProvider extends Component {
   saveLocally = loc =>
     window.localStorage.setItem(loc, JSON.stringify(this.state[loc]));
 
+  // ✅ ADDED: Controls the recycle icon state globally
+  setRecycleBinFull = (isFull) => {
+    this.setState({ recycleEmpty: !isFull });
+  };
+
   render() {
     return (
       <ProgramContext.Provider
@@ -440,7 +435,8 @@ class ProgramProvider extends Component {
           toggleShutDownMenu: this.toggleShutDownMenu,
           shutDown: this.shutDown,
           onMinimize: this.minimize,
-          save: this.save
+          save: this.save,
+          setRecycleBinFull: this.setRecycleBinFull // ✅ exposed here
         }}
       >
         {this.props.children}

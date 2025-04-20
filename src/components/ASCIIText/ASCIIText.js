@@ -6,7 +6,8 @@ import Window from "../tools/Window";
 import { asciibanner16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import FigletText from "./Internal";
-import "./_styles.scss"; // Your app theme/styles
+import { ProgramContext } from "../../contexts";
+import "./_styles.scss";
 
 const fonts = [
   { value: "Train", label: "Train" },
@@ -18,6 +19,8 @@ const fonts = [
 ];
 
 class ASCIIText extends Component {
+  static contextType = ProgramContext;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -30,6 +33,7 @@ class ASCIIText extends Component {
       showSaveModal: false,
       saveFileName: "ascii-banner",
       saveFileType: "txt",
+      showMessageWindow: false,
     };
 
     this.outputRef = React.createRef();
@@ -74,15 +78,14 @@ class ASCIIText extends Component {
   };
 
   confirmSave = () => {
-    const { asciiOutput, saveFileName, saveFileType } = this.state;
-    const blob = new Blob([asciiOutput], { type: "text/plain;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = saveFileName.endsWith(`.${saveFileType}`)
-      ? saveFileName
-      : `${saveFileName}.${saveFileType}`;
-    a.click();
-    this.setState({ showSaveModal: false });
+    this.setState({
+      showSaveModal: false,
+      showMessageWindow: true,
+    });
+
+    if (this.context?.setRecycleBinFull) {
+      this.context.setRecycleBinFull(true);
+    }
   };
 
   renderSaveAsModal() {
@@ -170,14 +173,51 @@ class ASCIIText extends Component {
     );
   }
 
+  renderMessageWindow() {
+  return (
+    <Window
+      title="Recycle Bin"
+      icon={asciibanner16}
+      Component={WindowProgram}
+      initialWidth={330}
+      initialHeight={160}
+      resizable={false}
+      className="always-blue-heading Window--active" 
+      onClose={() => this.setState({ showMessageWindow: false })}
+    >
+      <div style={{ padding: "10px", fontSize: "13px" }}>
+        <strong>Well this is awkward...</strong>
+        <br />
+        <br />
+        File has been sent to the Recycle Bin, where it belongs.
+        <br />
+        <br />
+        If you're actually serious, you can save it from there.
+        <div style={{ marginTop: "18px", textAlign: "center" }}>
+          <button
+            className="pb-button"
+            onClick={() => this.setState({ showMessageWindow: false })}
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </Window>
+  );
+}
+
+
+
+
   render() {
     const { props } = this;
-    const { text, font, copyButtonLabel, showSaveModal } = this.state;
+    const { text, font, copyButtonLabel, showSaveModal, showMessageWindow } = this.state;
     const isMobile = window.innerWidth <= 768;
 
     return (
       <>
         {showSaveModal && this.renderSaveAsModal()}
+        {showMessageWindow && this.renderMessageWindow()}
 
         <Window
           {...props}
@@ -186,9 +226,9 @@ class ASCIIText extends Component {
           Component={WindowProgram}
           initialWidth={isMobile ? 370 : 620}
           initialHeight={isMobile ? 207 : 266}
-          maxWidth={isMobile ? 500 : 630}
+          maxWidth={630}
           maxHeight={280}
-          minWidth={isMobile ? 311 : 305}
+          minWidth={340}
           minHeight={177}
           initialX={1}
           initialY={1}
