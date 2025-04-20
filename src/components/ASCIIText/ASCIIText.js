@@ -235,7 +235,7 @@ class ASCIIText extends Component {
           forceNoMobileMax={true}
           resizable={true}
           onMaximize={null}
-          className={cx("ASCIIText", props.className)}
+          className={cx("ASCIIText", "hide-maximize", props.className)}
           menuOptions={buildMenu({
             ...props,
             componentType: "ASCIIText",
