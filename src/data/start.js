@@ -95,10 +95,14 @@ const programs = [
             title: "Pixel Doodles",
             icon: icons.loaderbat16,
             component: "IframeWindow",
-            isDisabled: true,
+            isDisabled: false,
             data: {
-              src: "https://example.com/pixel-doodes", // Replace with a valid URL
-              creator: "https://github.com/example", // Replace with a valid creator
+              src: "https://paint-doodle.vercel.app/#vertical-color-box-mode", // Replace with a valid URL
+              disableAlert: true,
+              style: {
+                width: "100%",
+                height: "100%",
+              },
             },
           },
           {
