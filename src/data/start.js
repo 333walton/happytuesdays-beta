@@ -83,7 +83,7 @@ const programs = [
             icon: icons.paint16,
             component: "IframeWindow",
             data: {
-              src: "https://paint-cyan-eight.vercel.app/",
+              src: "https://paint-standard.vercel.app",
               disableAlert: true, // Disable the alert for this iframe
               style: {
                 width: "100%",
@@ -97,7 +97,7 @@ const programs = [
             component: "IframeWindow",
             isDisabled: false,
             data: {
-              src: "https://paint-doodle.vercel.app/#vertical-color-box-mode", // Replace with a valid URL
+              src: "https://paint-doodle-nine.vercel.app/#vertical-color-box-mode",
               disableAlert: true,
               style: {
                 width: "100%",

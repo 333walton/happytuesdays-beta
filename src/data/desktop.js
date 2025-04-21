@@ -56,7 +56,7 @@ const desktopData = [
     icon: icons.paint32,
     component: "IframeWindow",
     data: {
-      src: "https://paint-cyan-eight.vercel.app/",
+      src: "https://paint-standard.vercel.app",
       disableAlert: true, // Disable the alert for this iframe
       style: {
         width: "100%",
