@@ -83,7 +83,7 @@ const programs = [
             icon: icons.paint16,
             component: "IframeWindow",
             data: {
-              src: "https://paint-standard.vercel.app",
+              src: "https://paint-standard.vercel.app/#vertical-color-box-mode",
               disableAlert: true, // Disable the alert for this iframe
               style: {
                 width: "100%",
@@ -93,7 +93,7 @@ const programs = [
             },
           {
             title: "Pixel Doodles",
-            icon: icons.loaderbat16,
+            icon: icons.wangimg32,
             component: "IframeWindow",
             isDisabled: false,
             data: {
