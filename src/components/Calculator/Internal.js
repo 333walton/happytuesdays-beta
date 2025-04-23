@@ -9,6 +9,7 @@ class Windows98Calculator extends Component {
       memory: "",
       int: true,
       float: false,
+      pressedButtons: new Set()
     };
     this.operators = ["+", "-", "/", "*", "%"];
   }
@@ -181,10 +182,23 @@ class Windows98Calculator extends Component {
     this.setState({ expression, display: expression.join("") });
   };
 
+  // Button press handling functions
+  handleMouseDown = (id) => {
+    const { pressedButtons } = this.state;
+    pressedButtons.add(id);
+    this.setState({ pressedButtons });
+  }
+  
+  handleMouseUp = (id) => {
+    const { pressedButtons } = this.state;
+    pressedButtons.delete(id);
+    this.setState({ pressedButtons });
+  }
+
   renderDisplay() {
     return (
-      <div className="display-container">
-        <div className="windows98-display">{this.state.display}</div>
+      <div className="display-container" style={displayContainerStyle}>
+        <div className="windows98-display" style={displayStyle}>{this.state.display}</div>
       </div>
     );
   }
@@ -192,38 +206,83 @@ class Windows98Calculator extends Component {
   renderDeleteButtonRow() {
     return (
       <div className="delete-button-row">
-        <span className="empty-box"></span>
+        <span className="empty-box" style={emptyBoxStyle}></span>
         {this.renderDeleteButton(this.backSpace, "Backspace")}
         {this.renderDeleteButton(this.backSpace, "CE")}
-        {this.renderDeleteButton(this.clearDisplay, "C")}
+        {this.renderDeleteButton(this.clearDisplay, "C", true)}
       </div>
     );
   }
 
-  renderDeleteButton(fn, val) {
+  renderDeleteButton(fn, val, fullHeight = false) {
+    const buttonId = `delete-${val}`;
+    const isPressed = this.state.pressedButtons.has(buttonId);
+    const style = {
+      ...(isPressed ? pressedButtonStyle : buttonStyle),
+      ...(fullHeight ? fullHeightButtonStyle : {})
+    };
+    
     return (
-      <button onClick={fn} className="main-button delete-button">
+      <button 
+        onClick={fn} 
+        className="main-button delete-button" 
+        style={style}
+        onMouseDown={() => this.handleMouseDown(buttonId)}
+        onMouseUp={() => this.handleMouseUp(buttonId)}
+        onMouseLeave={() => this.handleMouseUp(buttonId)}
+      >
         <span style={{ color: "red" }}>{val}</span>
       </button>
     );
   }
 
   renderNumberButton(val) {
-    return <button onClick={() => this.printNumber(val)} className="main-button">{val}</button>;
+    const buttonId = `number-${val}`;
+    const isPressed = this.state.pressedButtons.has(buttonId);
+    return (
+      <button 
+        onClick={() => this.printNumber(val)} 
+        className="main-button" 
+        style={isPressed ? pressedButtonStyle : buttonStyle}
+        onMouseDown={() => this.handleMouseDown(buttonId)}
+        onMouseUp={() => this.handleMouseUp(buttonId)}
+        onMouseLeave={() => this.handleMouseUp(buttonId)}
+      >
+        {val}
+      </button>
+    );
   }
 
   renderFunctionButton(fn, val) {
     const isOp = ["+", "-", "*", "/", "="].includes(val);
+    const buttonId = `function-${val}`;
+    const isPressed = this.state.pressedButtons.has(buttonId);
     return (
-      <button onClick={fn} className="main-button">
+      <button 
+        onClick={fn} 
+        className="main-button" 
+        style={isPressed ? pressedButtonStyle : buttonStyle}
+        onMouseDown={() => this.handleMouseDown(buttonId)}
+        onMouseUp={() => this.handleMouseUp(buttonId)}
+        onMouseLeave={() => this.handleMouseUp(buttonId)}
+      >
         <span style={{ color: isOp ? "blue" : "black" }}>{val}</span>
       </button>
     );
   }
 
   renderMemoryButton(fn, val) {
+    const buttonId = `memory-${val}`;
+    const isPressed = this.state.pressedButtons.has(buttonId);
     return (
-      <button onClick={fn} className="memory-button main-button">
+      <button 
+        onClick={fn} 
+        className="memory-button main-button" 
+        style={isPressed ? pressedButtonStyle : buttonStyle}
+        onMouseDown={() => this.handleMouseDown(buttonId)}
+        onMouseUp={() => this.handleMouseUp(buttonId)}
+        onMouseLeave={() => this.handleMouseUp(buttonId)}
+      >
         <span style={{ color: "red" }}>{val}</span>
       </button>
     );
@@ -231,7 +290,7 @@ class Windows98Calculator extends Component {
 
   renderMainButtonsGrid() {
     return (
-      <div className="main-grid">
+      <div className="main-grid" style={gridStyle}>
         {this.renderMemoryButton(this.clearMemoryStore, "MC")}
         {this.renderNumberButton(7)}
         {this.renderNumberButton(8)}
@@ -265,7 +324,7 @@ class Windows98Calculator extends Component {
 
   render() {
     return (
-      <div className="windows98-calculator">
+      <div className="windows98-calculator" style={calculatorStyle}>
         {this.renderDisplay()}
         {this.renderDeleteButtonRow()}
         {this.renderMainButtonsGrid()}
@@ -273,5 +332,96 @@ class Windows98Calculator extends Component {
     );
   }
 }
+
+// Windows 98 style constants
+const buttonStyle = {
+  border: '2px solid',
+  borderColor: '#ffffff #808080 #808080 #ffffff',
+  boxShadow: '1px 1px 0px #000000',
+  backgroundColor: '#d4d0c8',
+  padding: '4px 8px',
+  margin: '2px',
+  fontFamily: '"MS Sans Serif", Arial, sans-serif',
+  fontWeight: 'normal',
+  fontSize: '12px',
+  textAlign: 'center',
+  cursor: 'pointer',
+  position: 'relative',
+  outline: 'none',
+  transition: 'all 0.05s ease',
+  height: '28px' // Fixed height for consistency
+};
+
+// Style for pressed buttons
+const pressedButtonStyle = {
+  border: '2px solid',
+  borderColor: '#808080 #ffffff #ffffff #808080',
+  boxShadow: 'inset 1px 1px 0px #000000',
+  backgroundColor: '#d4d0c8',
+  padding: '4px 8px',
+  margin: '2px',
+  fontFamily: '"MS Sans Serif", Arial, sans-serif',
+  fontWeight: 'normal',
+  fontSize: '12px',
+  textAlign: 'center',
+  cursor: 'pointer',
+  position: 'relative',
+  outline: 'none',
+  transform: 'translateY(1px) translateX(1px)',
+  height: '28px' // Fixed height for consistency
+};
+
+// Style for the empty box in top row
+const emptyBoxStyle = {
+  display: 'inline-block',
+  width: '38px', // Match width of memory buttons
+  height: '28px', // Match height of regular buttons
+  margin: '2px',
+  backgroundColor: '#d4d0c8'
+};
+
+// Style for buttons that need full height alignment
+const fullHeightButtonStyle = {
+  height: '28px', // Match other buttons
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+};
+
+const calculatorStyle = {
+  backgroundColor: '#d4d0c8',
+  padding: '8px',
+  border: '2px solid',
+  borderColor: '#ffffff #808080 #808080 #ffffff',
+  fontFamily: '"MS Sans Serif", Arial, sans-serif',
+  width: 'fit-content'
+};
+
+const gridStyle = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(6, 1fr)',
+  gap: '0px',
+  alignItems: 'stretch'
+};
+
+const displayContainerStyle = {
+  margin: '0 0 10px 0'
+};
+
+const displayStyle = {
+  backgroundColor: '#ffffff',
+  border: '2px solid',
+  borderColor: '#808080 #ffffff #ffffff #808080',
+  boxShadow: 'inset 1px 1px 0px #000000',
+  padding: '5px 8px',
+  textAlign: 'right',
+  fontFamily: 'Digital, monospace',
+  fontSize: '16px',
+  height: '25px',
+  marginBottom: '10px',
+  display: 'flex',
+  justifyContent: 'flex-end',
+  alignItems: 'center'
+};
 
 export default Windows98Calculator;

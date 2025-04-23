@@ -200,3 +200,19 @@
     }
   }
 }
+
+.Frame .Window .WindowProgram .Calculator .Window--active{
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.calculator-wrapper{
+   margin: 0 !important;
+  padding: 0 !important;
+}
+
+.windows98-calculator{
+  border: 0 !important;
+  padding: 9 !important;
+  background-color: rgb(186 191 189)
+}
