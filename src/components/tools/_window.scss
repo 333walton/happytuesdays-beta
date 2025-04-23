@@ -7,7 +7,7 @@
 }
 
 .react-draggable {
-  position: fixed;
+  position: absolute;
   top: 0px;
   left: 0px;
   z-index: 7;
@@ -17,7 +17,7 @@
   height: 15px;
   width: 15px;
   z-index: 1;
-  position: fixed;
+  position: absolute;
   right: -3px;
   bottom: -3px;
 }
