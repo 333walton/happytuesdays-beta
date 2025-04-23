@@ -98,7 +98,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #c0c0c0;
+  background: #bbc3c4;
   padding: 0;
   font-family: "MS Sans Serif", sans-serif;
   width: 100%;
@@ -114,7 +114,7 @@
     height: 24px;
     background-color: white;
     border: 1px solid;
-    border-color: #808080 #fff #fff #808080;
+    border-color: #bbc3c4 #fff #fff #bbc3c4;
     padding: 0 5px;
     text-align: right;
     font-size: 14px;
@@ -153,8 +153,8 @@
 
   button {
     border: 1px solid;
-    border-color: #fff #808080 #808080 #fff;
-    background-color: #c0c0c0;
+    border-color: #fff #bbc3c4 #bbc3c4 #fff;
+    background-color: #bbc3c4;
     font-size: 11px;
     height: 28px;
     width: 100%;
@@ -162,7 +162,7 @@
     font-family: inherit;
 
     &:active {
-      border-color: #808080 #fff #fff #808080;
+      border-color: #bbc3c4 #fff #fff #bbc3c4;
     }
   }
 
@@ -174,7 +174,7 @@
   }
 
   .empty-box {
-    background: #c0c0c0;
+    background: #bbc3c4;
     border: 1.1px inset;
     margin-top: 2.5px;
     height: 21px;
@@ -214,5 +214,5 @@
 .windows98-calculator{
   border: 0 !important;
   padding: 9 !important;
-  background-color: rgb(186 191 189)
+  background-color: #bbc3c4
 }

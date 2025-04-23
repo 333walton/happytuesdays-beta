@@ -338,7 +338,7 @@ const buttonStyle = {
   border: '2px solid',
   borderColor: '#ffffff #808080 #808080 #ffffff',
   boxShadow: '1px 1px 0px #000000',
-  backgroundColor: '#d4d0c8',
+  backgroundColor: '#bbc3c4',
   padding: '4px 8px',
   margin: '2px',
   fontFamily: '"MS Sans Serif", Arial, sans-serif',
@@ -355,7 +355,7 @@ const buttonStyle = {
 // Style for pressed buttons
 const pressedButtonStyle = {
   border: '2px solid',
-  borderColor: '#808080 #ffffff #ffffff #808080',
+  borderColor: '#bbc3c4 #ffffff #ffffff #bbc3c4',
   boxShadow: 'inset 1px 1px 0px #000000',
   backgroundColor: '#d4d0c8',
   padding: '4px 8px',
@@ -389,7 +389,7 @@ const fullHeightButtonStyle = {
 };
 
 const calculatorStyle = {
-  backgroundColor: '#d4d0c8',
+  backgroundColor: '#bbc3c4',
   padding: '8px',
   border: '2px solid',
   borderColor: '#ffffff #808080 #808080 #ffffff',
@@ -411,7 +411,7 @@ const displayContainerStyle = {
 const displayStyle = {
   backgroundColor: '#ffffff',
   border: '2px solid',
-  borderColor: '#808080 #ffffff #ffffff #808080',
+  borderColor: '#bbc3c4 #ffffff #ffffff #bbc3c4',
   boxShadow: 'inset 1px 1px 0px #000000',
   padding: '5px 8px',
   textAlign: 'right',
