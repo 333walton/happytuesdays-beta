@@ -97,7 +97,7 @@ const programs = [
             component: "IframeWindow",
             isDisabled: false,
             data: {
-              src: "https://paint-doodle-nine.vercel.app/#vertical-color-box-mode",
+              src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
               disableAlert: true,
               style: {
                 width: "100%",

@@ -59,9 +59,9 @@ class IFrame extends Component {
         className={"IframeWindow"}
         initialX={isDesktop ? 20 : 23}
         initialY={isDesktop ? 10 : 3}
-        initialHeight={isDesktop ? 341 : 341}
+        initialHeight={isDesktop ? 342 : 342}
         initialWidth={isDesktop ? 395 : 395}
-        minHeight={isDesktop ? 341 : 341}
+        minHeight={isDesktop ? 342 : 342}
         minWidth={isDesktop ? 395 : 395}
         menuOptions={props.data?.useMenu && buildMenu(props)}
         Component={WindowProgram}
