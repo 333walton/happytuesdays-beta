@@ -56,7 +56,7 @@ const desktopData = [
     icon: icons.paint32,
     component: "IframeWindow",
     data: {
-      src: "https://paint-notpixel.vercel.app/#vertical-color-box-mode",
+      src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
       disableAlert: true, // Disable the alert for this iframe
       style: {
         width: "100%",
