@@ -59,10 +59,10 @@ class IFrame extends Component {
         className={"IframeWindow"}
         initialX={isDesktop ? 20 : 23}
         initialY={isDesktop ? 10 : 3}
-        initialHeight={isDesktop ? 335 : 335}
-        initialWidth={isDesktop ? 389 : 389}
-        minHeight={isDesktop ? 335 : 335}
-        minWidth={isDesktop ? 389 : 389}
+        initialHeight={isDesktop ? 341 : 341}
+        initialWidth={isDesktop ? 395 : 395}
+        minHeight={isDesktop ? 341 : 341}
+        minWidth={isDesktop ? 395 : 395}
         menuOptions={props.data?.useMenu && buildMenu(props)}
         Component={WindowProgram}
         resizable={true} // Ensure resizing is enabled
