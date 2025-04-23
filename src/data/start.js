@@ -57,7 +57,7 @@ const programs = [
         icon: icons.camera16,
         component: "VideoPlayer",
         data: {
-          src: "https://media.w3.org/2010/05/sintel/trailer_hd.mp4",
+          src: "/static/donwest.mp4",
           style: {
             marginBottom: 4,
             height: "100%",
@@ -106,6 +106,16 @@ const programs = [
             },
           },
           {
+            title: "ASCII Banners",
+            icon: icons.asciibanner16,
+            component: "ASCIIText",
+            isDisabled: false,
+            data: {}, 
+          },
+        // Only show these options for desktop users
+      ...(!isMobile()
+      ? [
+          {
             title: "ASCII Doodles",
             icon: icons.loaderbat16,
             component: "IframeWindow",
@@ -115,14 +125,9 @@ const programs = [
               creator: "https://github.com/example", // Replace with a valid creator
             },
           },
-          {
-            title: "ASCII Banners",
-            icon: icons.asciibanner16,
-            component: "ASCIIText",
-            isDisabled: false,
-            data: {}, 
-          },
-        ],
+        ]
+        : [])
+      ],
   },
   {
     title: "Internet Explorer",
