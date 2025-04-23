@@ -13,6 +13,7 @@ class VideoPlayer extends Component {
   render() {
     const { props } = this;
     const videoSrc = props.data?.src || "https://media.w3.org/2010/05/sintel/trailer_hd.mp4";
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     return (
       <Window
@@ -20,10 +21,10 @@ class VideoPlayer extends Component {
         title="Video Player"
         icon={camera16}
         Component={WindowProgram}
-        initialHeight={290}
-        initialWidth={320}
-        resizable={false}
-        className={cx("VideoPlayer", props.className)}
+        initialHeight={isMobile ? window.innerHeight * 0.35 : 290}
+        initialWidth={isMobile ? window.innerWidth * 0.855 : 320}
+        resizable={!isMobile}
+        className={cx("VideoPlayer", props.className, { "mobile-player": isMobile })}
       >
         <Video
           src={videoSrc}
@@ -33,6 +34,11 @@ class VideoPlayer extends Component {
             width: "100%",
             objectFit: "contain",
           }}
+          controls={isMobile}
+          playsInline
+          preload="metadata"
+          controlsList="nodownload"
+          onContextMenu={(e) => e.preventDefault()}
         />
       </Window>
     );
