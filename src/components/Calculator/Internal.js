@@ -357,7 +357,7 @@ const pressedButtonStyle = {
   border: '2px solid',
   borderColor: '#bbc3c4 #ffffff #ffffff #bbc3c4',
   boxShadow: 'inset 1px 1px 0px #000000',
-  backgroundColor: '#d4d0c8',
+  backgroundColor: '#bbc3c4',
   padding: '4px 8px',
   margin: '2px',
   fontFamily: '"MS Sans Serif", Arial, sans-serif',
