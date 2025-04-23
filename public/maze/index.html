@@ -3,63 +3,63 @@
 <!-- on Monday 8 May 2000 at 7:19 AM -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<link rel="stylesheet" href="/c/sys42.css">
-<link rel="stylesheet" href="/c/sys/skins/w93.css" id="w93_skin">
-<link rel="stylesheet" href="/sys/hotfix.css">
-<style>
-@font-face {
-    font-family: 'pixelmix';
-    src: url("/fonts/pixelmix.woff2") format("woff2");
-    font-weight: normal;
-}
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/c/sys42.css">
+    <link rel="stylesheet" href="/c/sys/skins/w93.css" id="w93_skin">
+    <link rel="stylesheet" href="/sys/hotfix.css">
+    <style>
+        @font-face {
+            font-family: 'pixelmix';
+            src: url("/fonts/pixelmix.woff2") format("woff2");
+            font-weight: normal;
+        }
 
-body {
-    overflow: hidden;
-    margin: 0px;
-    margin-left: 18px;
-    margin-bottom: 0px;
-    color: #000;
-    background: #bbc3c4;
-}
+        body {
+            overflow: hidden;
+            margin: 0;
+            color: #000;
+            background: #bbc3c4;
+            font-family: sans-serif;
+        }
 
-pre {
-    overflow: hidden;
-    width: 195px;
-}
+        pre {
+            overflow: hidden;
+            width: 195px;
+            margin: auto;
+        }
 
-#readout {
-    position: absolute;
-    text-align: center;
-    font-family: 'pixelmix', monospace;
-    font-size: 14.2px;
-    color: black;
-    z-index: 9999;
-    pointer-events: none;
-}
+        #readout {
+        position: absolute;
+        bottom: -210px; /* pull closer to maze */
+        height: 220px;
+        width: 250px;
+        text-align: center;
+        font-family: 'pixelmix', monospace;
+        font-size: 12px;
+        color: black;
+        pointer-events: none;
+        }
 
-#maze {
-    position: absolute;
-    height: 177px; /* was 236px */
-    width: 195px;  /* was 260px */
-}
+        #maze {
+        position: relative;
+        height: 220px;
+        width: 260px;
+        margin: auto;
+        }
 
-</style>
-
-<script>
-    window.addEventListener("keydown", (e) => {
-        console.log("Maze received key:", e.key, e.keyCode);
-    });
-</script>
-
+    </style>
 </head>
-</head>
+
 <body>
-<div id="maze">
-<div id="viewport" class="viewport" style=""><pre></pre></div>
-<div id="readout" class="readout"></div>
-</div>
+    <div id="maze">
+        <div id="viewport" class="viewport">
+            <pre></pre>
+        </div>
+        <div id="readout" class="readout"></div>
+    </div>
+
 <script language="javascript">
 // The binary data for the maze
 var map = [

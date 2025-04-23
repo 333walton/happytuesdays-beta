@@ -47,48 +47,45 @@ class Doom extends Component {
 
     return (
       <Window
-        {...props}
-        title="ASCII Maze"
-        icon={maze16}
-        menuOptions={buildMenu({
-          ...props,
-          componentType: "Doom",
-          showHelp: this.showHelp,
-          options: {},
-        })}
-        Component={WindowProgram}
-        initialHeight={isMobile ? 315 : 263}
-        initialWidth={isMobile ? 190 : 190}
-        initialX={isMobile ? 1 : 1}
-        initialY={isMobile ? 1 : 1}
-        resizable={false}
-        onMaximize={null}
-        className={cx("Doom", props.className)}
-      >
-        <div
-          style={{
-            width: "184px", // was 280px
-            height: "275px", // was 328px
-            overflow: "hidden",
-            position: "relative",
+  {...props}
+  title="ASCII Maze"
+  icon={maze16}
+  menuOptions={buildMenu({
+    ...props,
+    componentType: "Doom",
+    showHelp: this.showHelp,
+    options: {},
+  })}
+  Component={WindowProgram}
+  initialHeight={isMobile ? 350 : 315} // MATCH container height!
+  initialWidth={isMobile ? 270 : 280}  // MATCH iframe width (m : d)
+  initialX={1}
+  initialY={1}
+  resizable={false}
+  onMaximize={null}
+  className={cx("Doom", props.className)}
+>
+  <div
+    style={{
+      width: "260px",     // MATCH iframe width
+      height: "250px",    // MATCH maze height
+      overflow: "hidden",
+      position: "relative",
+      background: "#bbc3c4"
+    }}
+  >
+    <iframe
+      ref={(ref) => (this.iframeRef = ref)}
+      src="/maze/index.html"
+      title="ASCII Maze"
+      style={{
+        width: "260px",
+        height: "250px",
+        border: "none",
+        position: "relative",
       }}
-      >
-        <iframe
-          ref={(ref) => (this.iframeRef = ref)}
-          src="/maze/index.html"
-          title="ASCII Maze"
-          style={{
-            transform: "scale(0.75)", // shrink iframe content
-            transformOrigin: "top left",
-            width: "270px", // keep original width for scaling
-            height: "280px",
-            position: "relative",
-            top: "1px",
-            left: "1px",
-            border: "none",
-          }}
-        />
-      </div>
+    />
+  </div>
 
         {/* Mobile Controls */}
         <div className="ASCIIMaze-controls">
