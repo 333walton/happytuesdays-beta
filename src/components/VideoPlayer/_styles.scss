@@ -12,40 +12,280 @@
   src: url("../../assets/FixedsysStripped.woff2") format("woff2");
 }
 
-// .r95_1bzq74l0 {
-//   background-color: #c3c7cb !important; /* var(--r95-color-material) */
-//   padding-top: 7px !important; /* var(--r95-space-7) */
-//   padding-inline: 20px !important; /* var(--r95-space-20) */
-//   padding-bottom: 5px !important; /* var(--r95-space-5) */
-//   border: none !important;
-//   color: #000000 !important; /* var(--r95-color-materialText) */
-//   font-size: 12px !important;
-//   box-shadow: inset 1px 1px 0px 1px #ffffff,
-//               inset 0 0 0 1px #868a8e,
-//               1px 1px 0 0px #000000 !important; /* var(--r95-color-borderLightest), var(--r95-color-borderDark), var(--r95-color-borderDarkest) */
-// }
+/* Base VideoPlayer styles for desktop */
+.VideoPlayer.Window {
+  overflow: hidden;
+  background-color: #c0c0c0 !important;
 
-// .r95_1bzq74l0:disabled {
-//   color: #868a8e !important; /* var(--r95-color-materialTextDisabled) */
-// }
+  &:after {
+    content: none;
+  }
+  
+  &.window__menu {
+    display: none !important;
+  }
 
-// .r95_1bzq74l0 {
-//   outline: 1px dotted #000000 !important; /* var(--r95-space-1) and var(--r95-color-materialText) */
-//   outline-offset: -5px !important; /* calc(var(--r95-space-5) * -1) */
-//   box-shadow: inset 1px 1px 0px 1px #ffffff,
-//               inset -0.5px -0.5px 0px 1px #868a8e,
-//               1px 1px 0 1px #000000 !important; /* var(--r95-color-borderLightest), var(--r95-color-borderDark), var(--r95-color-borderDarkest) */
-// }
+  /* Desktop video container */
+  .video-player-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 2px;
+    overflow: hidden;
+    background-color: #c0c0c0 !important;
+  }
 
-// .r95_1bzq74l0:active {
-//   padding-top: 8px !important; /* var(--r95-space-8) */
-//   padding-inline: 20px !important; /* var(--r95-space-20) */
-//   padding-bottom: 4px !important; /* var(--r95-space-4) */
-//   outline: 1px dotted #000000 !important; /* var(--r95-space-1) and var(--r95-color-borderDarkest) */
-//   outline-offset: -5px !important; /* calc(var(--r95-space-5) * -1) */
-//   box-shadow: inset 0 0 0 1px #868a8e,
-//               0 0 0 1px #000000 !important; /* var(--r95-color-borderDark), var(--r95-color-borderDarkest) */
-// }
+  /* Video element */
+  .video {
+    height: calc(100% - 73px);
+    width: 100%;
+    background-color: #000;
+    object-fit: contain;
+  }
+
+  /* Controls container */
+  .video-controls-container {
+    height: 80px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+    background-color: #c0c0c0 !important;
+  }
+
+  /* Timer display */
+  .countdown-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 5px;
+    margin: 0;
+    background-color: #000;
+    color: #fff;
+    height: 30px;
+    font-family: "FixedSys", monospace;
+    border: inset 1px #888;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  /* Control panel */
+  .control-panel {
+    display: flex;
+    background-color: #c0c0c0 !important;
+    border: outset 1px #dfdfdf;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  /* Control buttons */
+  .control-buttons {
+    display: flex;
+    align-items: center;
+    background-color: #c0c0c0 !important;
+    
+    .control-btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: outset 1px #dfdfdf;
+      background-color: #c0c0c0 !important;
+      cursor: pointer;
+      margin: 0 2px;
+      
+      svg {
+        fill: #000;
+        width: 8px;
+        height: 8px;
+      }
+      
+      &:disabled {
+        cursor: default;
+        svg {
+          fill: #808080;
+        }
+      }
+      
+      &:active {
+        border-style: inset;
+      }
+    }
+    
+    .loading-indicator {
+      width: 6px;
+      height: 6px;
+      background-color: #000;
+    }
+  }
+
+  /* Progress bar */
+  .progress-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 2px;
+    background-color: #c0c0c0 !important;
+  }
+  
+  .progress-slider {
+    width: 100%;
+    height: 8px;
+    border: none;
+    
+    &[type="range"] {
+      -webkit-appearance: none;
+      background-color: #c0c0c0;
+      border: inset 1px #888;
+      outline: none;
+      
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 10px;
+        height: 16px;
+        background-color: #c0c0c0;
+        border: outset 1px #dfdfdf;
+        cursor: pointer;
+      }
+      
+      &::-moz-range-thumb {
+        width: 10px;
+        height: 16px;
+        background-color: #c0c0c0;
+        border: outset 1px #dfdfdf;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+/* Mobile and iOS specific styles */
+.VideoPlayer.mobile-player {
+  max-width: 100vw;
+  max-height: 100vh !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 9999 !important;
+  
+  &.Window {
+    background-color: #000 !important;
+  }
+  
+  .video {
+    height: 100% !important;
+    width: 100% !important;
+    background-color: #000;
+    object-fit: contain;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .video-controls-container,
+  .countdown-container,
+  .control-panel,
+  .control-buttons {
+    display: none !important;
+  }
+
+  .video-player-container {
+    height: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    background-color: #000 !important;
+  }
+
+  .window-title,
+  .window__menu,
+  .window__minimize,
+  .window__maximize,
+  .window__close {
+    display: none !important;
+  }
+}
+
+/* iOS specific overrides */
+.VideoPlayer.ios-player {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  z-index: 9999 !important;
+
+  &.Window {
+    background-color: #000 !important;
+  }
+
+  .video {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    object-fit: contain !important;
+    background-color: #000 !important;
+  }
+
+  .video-player-container {
+    background-color: #000 !important;
+  }
+
+  &.Window {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+}
+
+/* Hide specific React95 elements */
+.r95_1kpzw682,
+.r95_1kpzw683 {
+  display: none !important;
+}
+
+/* Remove padding from React95 container */
+.r95_13gnpv00 {
+  padding: 0 !important;
+}
+
+/* Remove box shadow from React95 element */
+.r95_iuzg895z {
+  box-shadow: none !important;
+}
+
 .r95_13gnpv00 {
   width: 100% !important;  /* Makes the container full width */
   padding: 2px !important; /* Small padding around the edges */
@@ -133,254 +373,9 @@
   margin-left: -2px !important; /* calc(var(--r95-space-2) * -1) */
 }
 
-/* Main video player styles */
-.VideoPlayer {
-  &.Window {
-    overflow: hidden;  /* Prevents content from spilling out */
-    &:after {
-      content: none;  /* Removes any pseudo-elements */
-    }
-    &.window__menu {
-      display: none !important;  /* Hides the window menu */
-    }
-  }
-
-  /* Mobile-specific styles */
-  &.mobile-player {
-    max-width: 100vw;  /* Full viewport width */
-    max-height: 100vh !important;  /* Full viewport height */
-    
-    .video {
-      height: 100%;
-      width: 100% !important;
-      background: #000;  /* Black background for letterboxing */
-      object-fit: contain;  /* Maintains video aspect ratio */
-      touch-action: manipulation;  /* Better touch handling */
-      -webkit-tap-highlight-color: transparent;  /* Removes tap highlight on mobile */
-    }
-
-    /* Hide desktop controls on mobile */
-    .video-controls-container,
-    .countdown-container,
-    .control-panel,
-    .control-buttons {
-      display: none !important;
-    }
-
-    .video-player-container {
-      height: 100% !important;
-      padding: 0 !important;
-    }
-  }
-
-  /* Hide title elements */
-  .Video-title,
-  .video-title-bar {
-    display: none !important;
-  }
-  
-  /* Main video element styles */
-  .video {
-    height: calc(100% - 73px);  /* Full height minus controls */
-    width: 100%;
-    background: #000;
-    object-fit: contain;
-  }
-
-  /* Container for the entire player */
-  .video-player-container {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    padding: 2px;
-    overflow: hidden;
-  }
-  
-  /* Container for video controls */
-  .video-controls-container {
-    height: 80px;
-    min-height: 80px;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    overflow: hidden;
-  }
-  
-  /* Timer/countdown display area */
-  .countdown-container {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 5px;
-    margin: 0;
-    background-color: #000;
-    color: #fff;
-    height: 30px;
-    font-family: "FixedSys", monospace;  /* Windows 95 style font */
-    border: inset 1px #888;  /* Inset border effect */
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-    flex-shrink: 0;
-  }
-
-  /* Time display formatting */
-  .time-display {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 0;
-    flex: 1;
-
-    &.left {
-      align-items: flex-start;
-      text-align: left;
-    }
-
-    &.right {
-      align-items: flex-end;
-      text-align: right;
-    }
-
-    /* Ensures time text doesn't overflow */
-    .current-time-display,
-    .duration-display,
-    .elapsed-display,
-    .loading-text {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 100%;
-    }
-  }
-  
-  /* Panel containing playback controls */
-  .control-panel {
-    display: flex;
-    background-color: #c0c0c0;  /* Classic Windows 95 gray */
-    border: outset 1px #dfdfdf;  /* 3D effect border */
-    height: 40px;
-    flex-shrink: 0;
-  }
-  
-  /* Container for control buttons */
-  .control-buttons {
-    display: flex;
-    align-items: center;
-    
-    /* Individual control button styling */
-    .control-btn {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 24px;
-      height: 24px;
-      padding: 0;
-      border: outset 1px #dfdfdf;  /* 3D effect border */
-      background-color: #c0c0c0;
-      cursor: pointer;
-      margin-right: 2px;
-      margin-left: 2px;
-      
-      /* Button icon styling */
-      svg {
-        fill: #000;
-        width: 8px;
-        height: 8px;
-      }
-      
-      /* Disabled button state */
-      &:disabled {
-        cursor: default;
-        
-        svg {
-          fill: #808080;  /* Gray out the icon */
-        }
-      }
-      
-      /* Pressed button state */
-      &:active {
-        border-style: inset;  /* Changes border to look pressed */
-      }
-    }
-    
-    /* Loading animation dot */
-    .loading-indicator {
-      width: 6px;
-      height: 6px;
-      background-color: #000;
-    }
-  }
-  
-  /* Progress bar container */
-  .progress-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    padding-left: 2px;
-    padding-right: 2px;
-  }
-  
-  /* Video progress slider */
-  .progress-slider {
-    width: 100%;
-    height: 8px;
-    border: none;
-    
-    /* Custom styling for the range input */
-    &[type="range"] {
-      -webkit-appearance: none;
-      background: #c0c0c0;
-      border: inset 1px #888;
-      outline: none;
-      
-      /* Slider thumb (the draggable part) */
-      &::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 10px;
-        height: 16px;
-        background: #c0c0c0;
-        border: outset 1px #dfdfdf;
-        cursor: pointer;
-      }
-      
-      /* Firefox-specific slider thumb */
-      &::-moz-range-thumb {
-        width: 10px;
-        height: 16px;
-        background: #c0c0c0;
-        border: outset 1px #dfdfdf;
-        cursor: pointer;
-      }
-    }
-  }
-}
-
-/* Hide specific React95 elements */
-.r95_1kpzw682,
-.r95_1kpzw683 {
+/* Hide title elements */
+.Video-title,
+.video-title-bar {
   display: none !important;
 }
-
-/* Remove padding from React95 container */
-.r95_13gnpv00 {
-  padding: 0 !important;
-}
-
-/* Remove box shadow from React95 element */
-.r95_iuzg895z {
-  box-shadow: none !important;
-}
-
-// .r95_1bzq74l0 {
-//     background-color: #c3c7cb !important;
-//     padding-top: 7px !important;
-//     padding-inline: 20px !important;
-//     padding-bottom: 5px !important;
-//     border: none !important;
-//     color: #000000 !important;
-//     font-size: 12px !important;
-//     box-shadow: inset 1px 1px 0px 1px #ffffff, inset 0 0 0 1px #868a8e, 1px 1px 0 0px #000000 !important;
-// }
 

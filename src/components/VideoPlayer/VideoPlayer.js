@@ -13,7 +13,12 @@ class VideoPlayer extends Component {
   render() {
     const { props } = this;
     const videoSrc = props.data?.src || "https://media.w3.org/2010/05/sintel/trailer_hd.mp4";
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isMobile = /Mobi|Android/.test(navigator.userAgent) || isIOS;
+
+    // Calculate dimensions based on device
+    const mobileHeight = isIOS ? '100%' : window.innerHeight * 0.35;
+    const mobileWidth = isIOS ? '100%' : window.innerWidth * 0.855;
 
     return (
       <Window
@@ -21,24 +26,32 @@ class VideoPlayer extends Component {
         title="Video Player"
         icon={camera16}
         Component={WindowProgram}
-        initialHeight={isMobile ? window.innerHeight * 0.35 : 290}
-        initialWidth={isMobile ? window.innerWidth * 0.855 : 320}
+        initialHeight={isMobile ? mobileHeight : 290}
+        initialWidth={isMobile ? mobileWidth : 320}
         resizable={!isMobile}
-        className={cx("VideoPlayer", props.className, { "mobile-player": isMobile })}
+        className={cx("VideoPlayer", props.className, { 
+          "mobile-player": isMobile,
+          "ios-player": isIOS 
+        })}
       >
         <Video
           src={videoSrc}
           style={{
-            marginBottom: 4,
+            marginBottom: isMobile ? 0 : 4,
             height: "100%",
             width: "100%",
             objectFit: "contain",
+            background: "#000",
+            maxWidth: "100vw",
+            maxHeight: isIOS ? "100vh" : "auto"
           }}
           controls={isMobile}
           playsInline
           preload="metadata"
           controlsList="nodownload"
           onContextMenu={(e) => e.preventDefault()}
+          playsinline="true"
+          webkit-playsinline="true"
         />
       </Window>
     );
