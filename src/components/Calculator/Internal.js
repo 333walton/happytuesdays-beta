@@ -373,11 +373,11 @@ const pressedButtonStyle = {
 
 // Style for the empty box in top row
 const emptyBoxStyle = {
-  display: 'inline-block',
+  display: 'flex',
   width: '38px', // Match width of memory buttons
   height: '28px', // Match height of regular buttons
   margin: '2px',
-  backgroundColor: '#d4d0c8'
+  backgroundColor: '#bbc3c4'
 };
 
 // Style for buttons that need full height alignment
