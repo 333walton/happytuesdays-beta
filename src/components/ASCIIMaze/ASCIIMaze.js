@@ -82,7 +82,7 @@ class Doom extends Component {
               transformOrigin: "top left",
               width: "270px",
               height: "280px",
-              position: "absolute",
+              position: "relative",
               top: "1px",
               left: "1px",
               border: "none",
