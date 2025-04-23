@@ -57,8 +57,8 @@ class Doom extends Component {
           options: {},
         })}
         Component={WindowProgram}
-        initialHeight={isMobile ? 420 : 328}
-        initialWidth={280}
+        initialHeight={isMobile ? 315 : 263}
+        initialWidth={isMobile ? 190 : 190}
         initialX={isMobile ? 1 : 1}
         initialY={isMobile ? 1 : 1}
         resizable={false}
@@ -67,28 +67,28 @@ class Doom extends Component {
       >
         <div
           style={{
-            width: "280px",
-            height: "328px",
+            width: "184px", // was 280px
+            height: "275px", // was 328px
             overflow: "hidden",
             position: "relative",
+      }}
+      >
+        <iframe
+          ref={(ref) => (this.iframeRef = ref)}
+          src="/maze/index.html"
+          title="ASCII Maze"
+          style={{
+            transform: "scale(0.75)", // shrink iframe content
+            transformOrigin: "top left",
+            width: "270px", // keep original width for scaling
+            height: "280px",
+            position: "relative",
+            top: "1px",
+            left: "1px",
+            border: "none",
           }}
-        >
-          <iframe
-            ref={(ref) => (this.iframeRef = ref)}
-            src="/maze/index.html"
-            title="ASCII Maze"
-            style={{
-              transform: "scale(1)",
-              transformOrigin: "top left",
-              width: "270px",
-              height: "280px",
-              position: "relative",
-              top: "1px",
-              left: "1px",
-              border: "none",
-            }}
-          />
-        </div>
+        />
+      </div>
 
         {/* Mobile Controls */}
         <div className="ASCIIMaze-controls">

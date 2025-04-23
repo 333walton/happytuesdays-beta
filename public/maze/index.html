@@ -9,11 +9,44 @@
 <link rel="stylesheet" href="/c/sys/skins/w93.css" id="w93_skin">
 <link rel="stylesheet" href="/sys/hotfix.css">
 <style>
-body{margin:5px;color:#000;background:#bbc3c4;}
-pre{overflow:hidden;width:185px;margin-left: auto;margin-right: auto;}
-#readout{text-align:center;}
-#maze{position:absolute;top:50%;left:50%;width:260px;transform: translate(-50%,-50%);}
+@font-face {
+    font-family: 'pixelmix';
+    src: url("/fonts/pixelmix.woff2") format("woff2");
+    font-weight: normal;
+}
+
+body {
+    overflow: hidden;
+    margin: 0px;
+    margin-left: 18px;
+    margin-bottom: 0px;
+    color: #000;
+    background: #bbc3c4;
+}
+
+pre {
+    overflow: hidden;
+    width: 195px;
+}
+
+#readout {
+    position: absolute;
+    text-align: center;
+    font-family: 'pixelmix', monospace;
+    font-size: 14.2px;
+    color: black;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+#maze {
+    position: absolute;
+    height: 177px; /* was 236px */
+    width: 195px;  /* was 260px */
+}
+
 </style>
+
 <script>
     window.addEventListener("keydown", (e) => {
         console.log("Maze received key:", e.key, e.keyCode);

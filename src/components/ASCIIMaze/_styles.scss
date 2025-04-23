@@ -57,6 +57,7 @@
 /* === Mobile Controls === */
 .ASCIIMaze-controls {
   display: none; // default hidden
+  background-color: #bbc3c4;
 
   @media (max-width: 768px) {
     display: flex;
@@ -68,17 +69,13 @@
     .row {
       display: flex;
       justify-content: center;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
 
       button {
-        font-family: pixelmix, FixedSys, monospace;
-        font-size: 12px;
-        width: 36px;
-        height: 32px;
-        margin: 0 4px;
-        border: 1px solid gray;
-        background-color: #e0e0e0;
-        cursor: pointer;
+        font-size: 10px; // was 12px
+        width: 27px; // was 36px
+        height: 24px; // was 32px
+        margin: 0 2px; // tighter spacing
 
         &:active {
           background-color: #c0c0c0;
