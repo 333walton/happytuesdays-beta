@@ -450,7 +450,7 @@ const startMenuData = [
           {
             title: "Demo",
             icon: icons.camera16,
-            component:  isMobile ? "VideoPlayerDesktop" : "VideoPlayerMobile",
+            component:  isMobile ? "VideoPlayerMobile" : "VideoPlayerMobile", //replace the left one with "VideoPlayerDesktop" after done testing
             multiInstance: true,
             isDisabled: true,
             data: {}

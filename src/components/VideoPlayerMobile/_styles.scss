@@ -1,27 +1,89 @@
-  @import "../../../node_modules/packard-belle/src/_scss/w98/mixins/box-shadows.scss";
-
-/* Import custom fonts for Windows 95 style text */
-  @font-face {
-    font-family: pixelmix;
-    src: url("../../assets/pixelmix.woff2") format("woff2");
-    font-weight: normal;
+/* Windows 98 style mixin */
+@mixin box-shadows($inset: false) {
+  @if $inset {
+    border-top: 2px solid #808080;
+    border-left: 2px solid #808080;
+    border-bottom: 2px solid #ffffff;
+    border-right: 2px solid #ffffff;
   }
 
-  @font-face {
-    font-family: FixedSys;
-    src: url("../../assets/FixedsysStripped.woff2") format("woff2");
+  @else {
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+    border-bottom: 2px solid #808080;
+    border-right: 2px solid #808080;
   }
+}
+
+/* Fonts (if you use them elsewhere in your app) */
+@font-face {
+  font-family: pixelmix;
+  src: url("../../assets/pixelmix.woff2") format("woff2");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: FixedSys;
+  src: url("../../assets/FixedsysStripped.woff2") format("woff2");
+}
 
 .video98-player {
-  width: 350px;
-  margin: 20px auto;
+  .window-body {
+    padding: 0;
+    background-color: #000;
+  }
+
+  media-controller {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 
   video {
     width: 100%;
+    height: auto;
+    max-height: 240px;
+    object-fit: contain;
+    background-color: #000;
   }
 
   media-control-bar {
     display: flex;
     flex-wrap: wrap;
+    gap: 2px;
+    padding: 4px;
+    background-color: #c0c0c0;
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #808080;
+    border-right: 2px solid #808080;
+  }
+
+  media-play-button,
+  media-seek-backward-button,
+  media-seek-forward-button,
+  media-mute-button,
+  media-fullscreen-button {
+    background-color: #c0c0c0;
+    padding: 2px;
+    border: none;
+    min-width: 28px;
+    min-height: 24px;
+    @include box-shadows();
+
+    &:hover {
+      background-color: #d4d0c8;
+    }
+
+    &:active {
+      @include box-shadows(true);
+    }
+  }
+
+  media-volume-range,
+  media-time-range {
+    flex: 1;
+    min-width: 80px;
+    margin: 2px 0;
   }
 }

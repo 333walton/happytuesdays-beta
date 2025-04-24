@@ -17,6 +17,6 @@ export { default as FileBrowser } from "./FileBrowser";
 export { default as StarWars } from "./StarWars";
 export { default as ASCIIMaze } from "./ASCIIMaze";
 export { default as ASCIIText } from "./ASCIIText";
-export { default as W95MediaPlayer } from "./W95MediaPlayer";
 export { default as VideoPlayerMobile } from "./VideoPlayerMobile";
 export { default as VideoPlayerDesktop } from "./VideoPlayerDesktop";
+export { default as W95MediaPlayer } from "./W95MediaPlayer";

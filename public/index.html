@@ -1,353 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <!-- Google Tag Manager -->
-    <script>(function (w, d, s, l, i) {
-        w[l] = w[l] || []; w[l].push({
-          'gtm.start':
-            new Date().getTime(), event: 'gtm.js'
-        }); var f = d.getElementsByTagName(s)[0],
-          j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
-            'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
-      })(window, document, 'script', 'dataLayer', 'GTM-FVTXCVSR');</script>
-    <!-- End Google Tag Manager -->
-    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="%PUBLIC_URL%/static/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/static/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/static/favicon-16x16.png">
-    <link rel="android-chrome-192x192" type="image/png" sizes="192x192" href="%PUBLIC_URL%/static/android-chrome-192x192.png">
-    <link rel="android-chrome-512x512" type="image/png" sizes="512x512" href="%PUBLIC_URL%/static/android-chrome-512x512.png">
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <meta property="og:title" content="Hydra98 - Web-Based Windows 98 Experience" />
-    <meta property="og:url" content="https://www.hydra98.net" />
-    <meta property="og:image" content="%PUBLIC_URL%/static/favicon-32x32.png" />
-    <meta
-      property="og:description" 
-      content="A Windows 98-inspired creative sandbox, exploring nostalgia, gaming, and emerging web tech."
-    />
-    <!-- Twitter/X Meta Tags (For Twitter Link Previews) - ADDED -->
-    <meta name="twitter:card" content="summary_large_image" /> <!-- ADDED -->
-    <meta name="twitter:title" content="Hydra98 - Web-Based Windows 98 Experience" /> <!-- ADDED -->
-    <meta name="twitter:description"
-      content="A Windows 98-inspired creative sandbox, exploring nostalgia, gaming, and emerging web tech."/> <!-- ADDED -->
-    <meta name="twitter:image" content="%PUBLIC_URL%/static/favicon-32x32.png"/> <!-- ADDED -->
-    <meta name="twitter:site" content="@YourTwitterHandle"/> <!-- ADDED (Optional) Replace with your Twitter username -->
-    
-    <meta name="theme-color" content="#000000" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    
-    <!-- Media Chrome -->
-    <script type="module" src="https://cdn.jsdelivr.net/npm/media-chrome@1.0.0/dist/media-chrome.min.js"></script>
 
-    <!-- 98.css -->
-    <link rel="stylesheet" href="https://unpkg.com/98.css@0.1.0/98.css" />
-    
-    <title>Hydra98 -- A Web-Based Windows 98 Experience</title>
+<head>
+  <meta charset="utf-8" />
+  <!-- Google Tag Manager -->
+  <script>
+    (function (w, d, s, l, i) {
+      w[l] = w[l] || [];
+      w[l].push({
+        'gtm.start': new Date().getTime(),
+        event: 'gtm.js'
+      });
+      var f = d.getElementsByTagName(s)[0],
+        j = d.createElement(s),
+        dl = l != 'dataLayer' ? '&l=' + l : '';
+      j.async = true;
+      j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+      f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-FVTXCVSR');
+  </script>
+  <!-- End Google Tag Manager -->
 
-    <meta name="theme-color" content="#000000" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+  <!-- Favicon + App Icons -->
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="%PUBLIC_URL%/static/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/static/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/static/favicon-16x16.png">
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <style>
-      body {
-        background-color: darkslategrey; /* Original background color */
-      }
-      @keyframes Gradient {
-        0% {
-          background-position: 0%;
-        }
-        100% {
-          background-position: 100%;
-        }
-      }
-      @font-face {
-        font-family: AMIBios;
-        src: url("./assets/ami_bios1.woff2") format("woff2");
-      }
+  <!-- Meta Tags -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta property="og:title" content="Hydra98 - Web-Based Windows 98 Experience" />
+  <meta property="og:url" content="https://www.hydra98.net" />
+  <meta property="og:image" content="%PUBLIC_URL%/static/favicon-32x32.png" />
+  <meta property="og:description"
+    content="A Windows 98-inspired creative sandbox, exploring nostalgia, gaming, and emerging web tech." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Hydra98 - Web-Based Windows 98 Experience" />
+  <meta name="twitter:description"
+    content="A Windows 98-inspired creative sandbox, exploring nostalgia, gaming, and emerging web tech." />
+  <meta name="twitter:image" content="%PUBLIC_URL%/static/favicon-32x32.png" />
+  <meta name="twitter:site" content="@YourTwitterHandle" />
 
-      body {
-        height: 100%;
-        width: 100%;
-        padding: 0;
-        overflow: hidden;
-        margin: 0;
-        background-color: darkslategrey;
-      }
+  <!-- Theme -->
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-      #root {
-        display: flex;
-        align-content: center;
-        align-items: center;
-        background-color: darkslategrey;
-      }
+  <!-- ✅ Media Chrome Library -->
+  <script type="module" src="https://cdn.jsdelivr.net/npm/media-chrome@1/+esm"></script>
 
-      html,
-      body,
-      #root,
-      .w98,
-      .desktop,
-      .BIOSWrapper,
-      .WindowsLaunchWrapper,
-      * {
-        overscroll-behavior: none;
-      }
+  <!-- ✅ Windows 98 CSS Theme -->
+  <link rel="stylesheet" href="https://unpkg.com/98.css@0.1.0/98.css" />
 
-      .screen,
-      .w98.desktop {
-        width: 100vw;
-        height: 80vh;
-      }
-      .desktop,
-      .BIOSWrapper,
-      .WindowsLaunchWrapper {
-        margin-left: auto;
-        margin-right: auto;
-        overflow: hidden;
-        background-color: #5f9ea0;
-        width: 100vw;
-        height: 80vh;
-      }
+  <title>Hydra98 -- A Web-Based Windows 98 Experience</title>
 
-      .desktop.notMobile {
-        width: 640px;
-        height: 480px;
-      }
+  <!-- ✅ BIOS / Desktop Theme Styles -->
+  <style>
+    body {
+      background-color: darkslategrey;
+      height: 100%;
+      width: 100%;
+      padding: 0;
+      overflow: hidden;
+      margin: 0;
+    }
 
-      .BIOSWrapper,
-      .WindowsLaunchWrapper {
-        position: absolute;
-        overflow: hidden;
-        height: 100%;
-        width: 100%;
-        top: 0px;
-        left: 0px;
-        display: flex;
-      }
-      .BIOS,
-      .WindowsLaunch {
-        color: white;
-        font-family: AMIBios !important;
-        z-index: 1;
-        width: 640px;
-        height: 480px;
-        margin: auto;
-        padding: 16px;
-      }
-      .BIOS {
-        background-color: #000000;
-      }
-      .WindowsLaunchWrapper {
-        background: linear-gradient(
-          -90deg,
+    @font-face {
+      font-family: AMIBios;
+      src: url("./assets/ami_bios1.woff2") format("woff2");
+    }
+
+    #root {
+      display: flex;
+      align-content: center;
+      align-items: center;
+      background-color: darkslategrey;
+    }
+
+    html,
+    body,
+    #root,
+    .w98,
+    .desktop,
+    .BIOSWrapper,
+    .WindowsLaunchWrapper,
+    * {
+      overscroll-behavior: none;
+    }
+
+    .screen,
+    .w98.desktop {
+      width: 100vw;
+      height: 80vh;
+    }
+
+    .desktop,
+    .BIOSWrapper,
+    .WindowsLaunchWrapper {
+      margin-left: auto;
+      margin-right: auto;
+      overflow: hidden;
+      background-color: #5f9ea0;
+      width: 100vw;
+      height: 80vh;
+    }
+
+    .desktop.notMobile {
+      width: 640px;
+      height: 480px;
+    }
+
+    .BIOSWrapper,
+    .WindowsLaunchWrapper {
+      position: absolute;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      top: 0px;
+      left: 0px;
+      display: flex;
+    }
+
+    .BIOS,
+    .WindowsLaunch {
+      color: white;
+      font-family: AMIBios !important;
+      z-index: 1;
+      width: 640px;
+      height: 480px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    .BIOS {
+      background-color: #000000;
+    }
+
+    .WindowsLaunchWrapper {
+      background: linear-gradient(-90deg,
           #a6c7df,
           #ffffff,
           #a6c7df,
           #c9d9ef,
           #a6c7df,
-          #ffffff
-        );
-        background-size: 400% 400%;
-        animation: Gradient 5s ease infinite;
-        z-index: 1;
-      }
-      .WindowsLaunch {
-        background-image: url("./static/windowsLaunch.png");
-        background-size: cover;
-        background-repeat: no-repeat;
-      }
-      .BIOS > div {
-        margin-bottom: 16px;
-        visibility: hidden;
-      }
-      .BIOS > div.visible {
-        visibility: visible;
-      }
+          #ffffff);
+      background-size: 400% 400%;
+      animation: Gradient 5s ease infinite;
+      z-index: 1;
+    }
+
+    .WindowsLaunch {
+      background-image: url("./static/windowsLaunch.png");
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    .BIOS>div {
+      margin-bottom: 16px;
+      visibility: hidden;
+    }
+
+    .BIOS>div.visible {
+      visibility: visible;
+    }
+
+    .BIOS__logo {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      height: 50px;
+    }
+
+    .left-image {
+      width: 69px;
+      height: 69px;
+      margin-right: 0px;
+    }
+
+    .right-image {
+      width: 150px;
+      height: auto;
+      background-repeat: no-repeat;
+      background-position: right;
+      background-size: contain;
+    }
+
+    @media (max-width: 600px) {
       .BIOS__logo {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end; /* Aligns the images to the right */
-        height: 50px;
+        justify-content: flex-end;
+        padding-right: 10px;
       }
 
       .left-image {
-        width: 69px;
-        height: 69px;
-        margin-right: 0px; /* Adjust the spacing between the images as needed */
+        width: 60px;
+        height: 60px;
+        margin-right: 5px;
       }
 
       .right-image {
         width: 150px;
         height: auto;
-        background-repeat: no-repeat;
-        background-position: right;
+        background-size: contain;
+      }
+    }
+
+    @media (max-width: 600px),
+    (max-height: 600px) {
+
+      .BIOS,
+      .WindowsLaunch {
+        margin-top: 0px;
+        background-position: center;
+        width: 100vw;
+        height: 80vh;
+      }
+
+      .WindowsLaunch {
         background-size: contain;
       }
 
-      @media (max-width: 600px) {
-        .BIOS__logo {
-          justify-content: flex-end; /* Keep the images to the right on smaller screens */
-          padding-right: 10px
-        }
+      .BIOS__logo {
+        width: 100%;
+      }
+    }
 
-        .left-image {
-          width: 60px;
-          height: 60px;
-          margin-right: 5px; /* Adjust the spacing between the images as needed */
-        }
+    .visible {
+      visibility: visible;
+    }
 
-        .right-image {
-          width: 150px;
-          height: auto;
-          background-size: contain; /* Adjust the size of the background image */
-        }
+    .hidden {
+      display: none;
+    }
+  </style>
+
+  <script>
+    function hideBios() {
+      document.getElementsByClassName("BIOSWrapper")[0].classList.add("hidden");
+    }
+
+    function windowsLogo() {
+      hideBios();
+      const windowsLaunch = document.getElementsByClassName("WindowsLaunchWrapper")[0];
+      windowsLaunch.classList.add("visible");
+      windowsLaunch.classList.remove("hidden");
+      window.localStorage.setItem("loggedIn", "true");
+      setTimeout(() => {
+        windowsLaunch.classList.remove("visible");
+        windowsLaunch.classList.add("hidden");
+      }, 5000);
+    }
+
+    function staggerElements(elems, entry) {
+      if (!elems[entry]) {
+        document.querySelector(".BIOS").classList.add("hidden");
+        windowsLogo();
+        return;
       }
 
-      @media (max-width: 600px), (max-height: 600px) {
-        .BIOS,
-        .WindowsLaunch {
-          margin-top: 0px;
-          background-position: center;
-          width: 100vw;
-          height: 80vh;
-        }
-        .WindowsLaunch {
-          background-size: contain;
-        }
-        .BIOS__logo {
-          width: 100%;
-        }
-      }
-      .visible {
-        visibility: visible;
-      }
-      .hidden {
-        display: none;
-      }
-    </style>
-    <script>
-      function hideBios() {
-        document
-          .getElementsByClassName("BIOSWrapper")[0]
-          .classList.add("hidden");
-      }
-      function windowsLogo() {
+      elems[entry].classList.add("visible");
+      setTimeout(() => staggerElements(elems, entry + 1), 1000);
+    }
+
+    function loadScreen() {
+      var biosElem = document.querySelector(".BIOS");
+      biosElem.classList.remove("initial");
+      if (window.localStorage.getItem("loggedIn")) {
         hideBios();
-        const windowsLaunch = document.getElementsByClassName(
-          "WindowsLaunchWrapper"
-        )[0];
-        windowsLaunch.classList.add("visible");
-        windowsLaunch.classList.remove("hidden");
-        window.localStorage.setItem("loggedIn", "true");
-        setTimeout(() => {
-          windowsLaunch.classList.remove("visible");
-          windowsLaunch.classList.add("hidden");
-        }, 5000);
+        return;
       }
+      biosElem.classList.add("visible");
+      staggerElements(biosElem.getElementsByTagName("div"), 0);
+    }
 
-      function staggerElements(elems, entry) {
-        if (!elems[entry]) {
-          document.querySelector(".BIOS").classList.add("hidden");
-          windowsLogo();
-          return;
-        }
-        elems[entry].classList.add("visible");
+    setTimeout(loadScreen, 1500);
+  </script>
+</head>
 
-        setTimeout(() => staggerElements(elems, entry + 1), 1000);
-      }
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-FVTXCVSR" height="0" width="0"
+      style="display:none;visibility:hidden"></iframe></noscript>
 
-      function loadScreen() {
-        var biosElem = document.querySelector(".BIOS");
-        biosElem.classList.remove("initial");
-        if (window.localStorage.getItem("loggedIn")) {
-          hideBios();
-          return;
-        }
-        biosElem.classList.add("visible");
-
-        staggerElements(biosElem.getElementsByTagName("div"), 0);
-      }
-
-      setTimeout(loadScreen, 1500);
-    </script>
-  </head>
-  <body>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-FVTXCVSR" height="0" width="0"
-        style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div class="BIOSWrapper initial">
-      <div class="BIOS">
-        <div class="BIOS__logo">
-          <img src="%PUBLIC_URL%/static/windows98 flag.gif" alt="Windows98 flag" class="left-image">
-          <img src="%PUBLIC_URL%/static/hydrabios2.png" alt="Hydra98 Logo" class="right-image" style="max-width: 150px; height: auto;">
-        </div>
-        <div class="BIOS__bootHeader">
-          <p>AMII BIOS (C) 1992-2025</p>
-          <p>BIOS Version 17.0.2.REACT</p>
-        </div>
-        <div class="BIOS__bootMessage1">
-          Press &lt;?&gt; key if you want to run setup
-        </div>
-        <div class="BIOS__bootMessage2">Keyboard... <span>detected</span>
-        </div>
-        <div class="BIOS__bootMessage3">
-          Mouse/digitizer... <span>detected</span>
-        </div>
-        <div class="BIOS__bootMessage4">
-          <img src="%PUBLIC_URL%/static/cryptopunk.jpg" alt="Description" style="width: 33px; height: auto;">
-          <p>
-            This project is by
-            <a href="https://bit.ly/3FsgmPt">CS</a>
-          </p>
-          
-          <p>
-            Philadelphia based, contactable via
-            <a href="https://bit.ly/3FEdIG8"
-              >LinkedIn</a
-            >
-          </p>
-          <p>
-            Likes <a href="https://bit.ly/3Foun0t">chess</a> and <a href="https://soundcloud.com/southbound_music/sets/best-techno">techno</a>
-          </p>
-          <p>
-            Is unwilling to link his Twitter because he can't remember whether
-            anything he tweeted is embarrassing
-          </p>
-          <p>
-            Is sorry for how weird this works on tablets
-          </p>
-        </div>
+  <div class="BIOSWrapper initial">
+    <div class="BIOS">
+      <div class="BIOS__logo">
+        <img src="%PUBLIC_URL%/static/windows98 flag.gif" alt="Windows98 flag" class="left-image" />
+        <img src="%PUBLIC_URL%/static/hydrabios2.png" alt="Hydra98 Logo" class="right-image" />
+      </div>
+      <div class="BIOS__bootHeader">
+        <p>AMII BIOS (C) 1992-2025</p>
+        <p>BIOS Version 17.0.2.REACT</p>
+      </div>
+      <div class="BIOS__bootMessage1">Press &lt;?&gt; key if you want to run setup</div>
+      <div class="BIOS__bootMessage2">Keyboard... <span>detected</span></div>
+      <div class="BIOS__bootMessage3">Mouse/digitizer... <span>detected</span></div>
+      <div class="BIOS__bootMessage4">
+        <img src="%PUBLIC_URL%/static/cryptopunk.jpg" alt="Author avatar" style="width: 33px;" />
+        <p>This project is by <a href="https://bit.ly/3FsgmPt">CS</a></p>
+        <p>Philadelphia based, contactable via <a href="https://bit.ly/3FEdIG8">LinkedIn</a></p>
+        <p>Likes <a href="https://bit.ly/3Foun0t">chess</a> and <a
+            href="https://soundcloud.com/southbound_music/sets/best-techno">techno</a></p>
+        <p>Is unwilling to link his Twitter because he can't remember whether anything he tweeted is embarrassing</p>
+        <p>Is sorry for how weird this works on tablets</p>
       </div>
     </div>
-    <div class="WindowsLaunchWrapper hidden">
-      <div class="WindowsLaunch"></div>
-    </div>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+  </div>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+  <div class="WindowsLaunchWrapper hidden">
+    <div class="WindowsLaunch"></div>
+  </div>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+  <div id="root"></div>
+</body>
+
 </html>
