@@ -12,7 +12,7 @@ import "@react95/core/themes/win95.css"
 class VideoPlayer extends Component {
   render() {
     const { props } = this;
-    const videoSrc = props.data?.src || "https://media.w3.org/2010/05/sintel/trailer_hd.mp4";
+    const videoSrc = props.data?.src || "/static/donwest.mp4";
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isMobile = /Mobi|Android/.test(navigator.userAgent) || isIOS;
 
@@ -59,4 +59,3 @@ class VideoPlayer extends Component {
 }
 
 export default VideoPlayer;
-

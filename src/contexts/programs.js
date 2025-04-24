@@ -6,6 +6,9 @@ import startMenuData from "../data/start";
 import desktopData from "../data/desktop";
 import { ProgramContext } from ".";
 
+// Utility function to detect mobile devices
+const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 const transformLinks = option => ({
   ...option,
   onClick:
@@ -152,11 +155,11 @@ class ProgramProvider extends Component {
                 {
                   title: "Pre-roll Emitters",
                   icon: icons.vid16,
-                  component: "VideoPlayer",
+                  component: isMobile ? "VideoPlayerDesktop" : "VideoPlayerMobile",
                   multiInstance: true,
                   isDisabled: false,
                   data: {
-                    src: "/static/donwest.mp4"
+                    src: ""
                   }
                 },
                 {

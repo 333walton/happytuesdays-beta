@@ -9,7 +9,6 @@ export { default as Burn } from "./Burn"
 export { default as Pipes } from "./Pipes"
 export { default as Sand } from "./Sand"
 export { default as Minesweeper } from "./Minesweeper";
-export { default as VideoPlayer } from "./VideoPlayer";
 export { default as ImageWindow } from "./ImageWindow";
 export { default as Calculator } from "./Calculator";
 export { default as DoodleSubmission } from "./DoodleSubmission";
@@ -19,3 +18,5 @@ export { default as StarWars } from "./StarWars";
 export { default as ASCIIMaze } from "./ASCIIMaze";
 export { default as ASCIIText } from "./ASCIIText";
 export { default as W95MediaPlayer } from "./W95MediaPlayer";
+export { default as VideoPlayerMobile } from "./VideoPlayerMobile";
+export { default as VideoPlayerDesktop } from "./VideoPlayerDesktop";

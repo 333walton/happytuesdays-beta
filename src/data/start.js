@@ -55,9 +55,9 @@ const programs = [
       {
         title: "Movie Player",
         icon: icons.camera16,
-        component: "VideoPlayer",
+        component:  isMobile ? "VideoPlayerDesktop" : "VideoPlayerMobile",
         data: {
-          src: "/static/donwest.mp4",
+          src: "",
           style: {
             marginBottom: 4,
             height: "100%",
@@ -450,7 +450,7 @@ const startMenuData = [
           {
             title: "Demo",
             icon: icons.camera16,
-            component: "VideoPlayer",
+            component:  isMobile ? "VideoPlayerDesktop" : "VideoPlayerMobile",
             multiInstance: true,
             isDisabled: true,
             data: {}
