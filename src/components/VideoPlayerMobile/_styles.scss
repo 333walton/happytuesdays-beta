@@ -1,89 +1,97 @@
-/* Windows 98 style mixin */
-@mixin box-shadows($inset: false) {
-  @if $inset {
-    border-top: 2px solid #808080;
-    border-left: 2px solid #808080;
-    border-bottom: 2px solid #ffffff;
-    border-right: 2px solid #ffffff;
-  }
-
-  @else {
-    border-top: 2px solid #ffffff;
-    border-left: 2px solid #ffffff;
-    border-bottom: 2px solid #808080;
-    border-right: 2px solid #808080;
-  }
-}
-
-/* Fonts (if you use them elsewhere in your app) */
 @font-face {
-  font-family: pixelmix;
-  src: url("../../assets/pixelmix.woff2") format("woff2");
+  font-family: 'FixedSys';
+  src: url('../../assets/FixedsysStripped.woff2') format('woff2');
   font-weight: normal;
 }
 
-@font-face {
-  font-family: FixedSys;
-  src: url("../../assets/FixedsysStripped.woff2") format("woff2");
+/* 🎨 Main Shell */
+.wmp-shell {
+  position: relative;
+  width: 294px;
+  height: 403px;
+  font-family: 'FixedSys', 'Microsoft Sans Serif', monospace;
+  overflow: hidden;
+  z-index: 1;
 }
 
-.video98-player {
-  .window-body {
-    padding: 0;
-    background-color: #000;
-  }
+/* 🖼 Background Window Image */
+.wmp-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 294px;
+  height: 403px;
+  z-index: 0;
+  image-rendering: pixelated;
+}
 
-  media-controller {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
+/* 🎮 Custom Media Buttons and Sliders */
+media-play-button,
+media-pause-button,
+media-stop-button,
+media-seek-backward-button,
+media-seek-forward-button,
+media-open-button,
+media-mute-button,
+media-volume-range,
+media-time-range,
+media-time-display {
+  all: unset;
+  display: block;
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: cover;
+  cursor: pointer;
+  image-rendering: pixelated;
+  z-index: 2;
+  transition: filter 0.2s, transform 0.2s;
+  /* Smooth hover/press effect */
+}
 
-  video {
-    width: 100%;
-    height: auto;
-    max-height: 240px;
-    object-fit: contain;
-    background-color: #000;
-  }
+/* 🎛 Hover Effects */
+media-play-button:hover,
+media-pause-button:hover,
+media-stop-button:hover,
+media-seek-backward-button:hover,
+media-seek-forward-button:hover,
+media-open-button:hover,
+media-mute-button:hover,
+media-volume-range:hover,
+media-time-range:hover {
+  filter: brightness(1.2);
+}
 
-  media-control-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    padding: 4px;
-    background-color: #c0c0c0;
-    border-top: 2px solid #fff;
-    border-left: 2px solid #fff;
-    border-bottom: 2px solid #808080;
-    border-right: 2px solid #808080;
-  }
+/* 🎚 Active (Pressed) Effects */
+media-play-button:active,
+media-pause-button:active,
+media-stop-button:active,
+media-seek-backward-button:active,
+media-seek-forward-button:active,
+media-open-button:active,
+media-mute-button:active,
+media-volume-range:active,
+media-time-range:active {
+  transform: scale(0.98);
+  filter: brightness(0.9);
+}
 
-  media-play-button,
-  media-seek-backward-button,
-  media-seek-forward-button,
-  media-mute-button,
-  media-fullscreen-button {
-    background-color: #c0c0c0;
-    padding: 2px;
-    border: none;
-    min-width: 28px;
-    min-height: 24px;
-    @include box-shadows();
+/* 🕘 Text Info, Status, Stereo */
+.wmp-info,
+.wmp-status,
+.wmp-stereo {
+  position: absolute;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: 'Microsoft Sans Serif', sans-serif;
+  line-height: 14px;
+  z-index: 2;
+  pointer-events: none;
+}
 
-    &:hover {
-      background-color: #d4d0c8;
-    }
-
-    &:active {
-      @include box-shadows(true);
-    }
-  }
-
-  media-volume-range,
-  media-time-range {
-    flex: 1;
-    min-width: 80px;
-    margin: 2px 0;
-  }
+/* 📼 Video Element (Hidden but Functional) */
+video {
+  display: block;
+  width: 0px;
+  height: 0px;
+  position: absolute;
 }
