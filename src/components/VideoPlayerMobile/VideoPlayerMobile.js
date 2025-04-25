@@ -62,7 +62,7 @@ const VideoPlayerMobile = (props) => {
             style={{
               backgroundImage: 'url("/wmp_assets/bar2_pause.png")',
               top: '276px',
-              left: '6px',
+              left: '28px',
               width: '20px',
               height: '20px',
               position: 'absolute',
@@ -74,7 +74,7 @@ const VideoPlayerMobile = (props) => {
             style={{
               backgroundImage: 'url("/wmp_assets/bar2_stop.png")',
               top: '276px',
-              left: '28px',
+              left: '50px',
               width: '21px',
               height: '21px',
               position: 'absolute',
@@ -86,7 +86,7 @@ const VideoPlayerMobile = (props) => {
             style={{
               backgroundImage: 'url("/wmp_assets/bar2_open.png")',
               top: '276px',
-              left: '50px',
+              left: '72px',
               width: '21px',
               height: '21px',
               position: 'absolute',
@@ -98,7 +98,7 @@ const VideoPlayerMobile = (props) => {
             style={{
               backgroundImage: 'url("/wmp_assets/bar2_prev.png")',
               top: '276px',
-              left: '82px',
+              left: '94px',
               width: '21px',
               height: '21px',
               position: 'absolute',
@@ -110,7 +110,7 @@ const VideoPlayerMobile = (props) => {
             style={{
               backgroundImage: 'url("/wmp_assets/bar2_next.png")',
               top: '276px',
-              left: '104px',
+              left: '116px',
               width: '21px',
               height: '21px',
               position: 'absolute',

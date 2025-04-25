@@ -95,3 +95,51 @@ video {
   height: 0px;
   position: absolute;
 }
+
+/* Hide default media-chrome shadow parts */
+media-play-button::part(button),
+media-pause-button::part(button),
+media-mute-button::part(button),
+media-volume-range::part(slider),
+media-volume-range::part(track),
+media-volume-range::part(thumb),
+media-time-range::part(slider),
+media-time-range::part(track),
+media-time-range::part(thumb),
+media-time-display::part(root) {
+  display: none !important;
+}
+
+/* Hide all fallback SVGs or icons on media elements */
+media-play-button,
+media-pause-button,
+media-mute-button,
+media-stop-button,
+media-seek-backward-button,
+media-seek-forward-button,
+media-volume-range,
+media-time-range {
+  color: transparent !important;
+  background-color: transparent !important;
+  fill: transparent !important;
+  stroke: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Further reset interactive components */
+media-volume-range::part(track),
+media-volume-range::part(thumb),
+media-time-range::part(track),
+media-time-range::part(thumb) {
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Global suppression fallback */
+media-controller *::before,
+media-controller *::after {
+  content: none !important;
+  display: none !important;
+}
