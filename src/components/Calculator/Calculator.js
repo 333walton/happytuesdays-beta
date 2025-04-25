@@ -47,7 +47,7 @@ class Calculator extends Component {
           disableMaximize: true, // Disable maximize option in the menu
         })}
         Component={WindowProgram}
-        initialHeight={278}
+        initialHeight={290}
         initialWidth={238}
         forceNoMobileMax={true} // Prevent auto-maximization on mobile
         className={cx("Calculator", props.className)}
