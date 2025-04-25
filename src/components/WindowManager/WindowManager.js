@@ -76,6 +76,7 @@ class WindowManager extends Component {
         {Object.keys(this.context.activePrograms).map(progId => {
           const prog = this.context.activePrograms[progId];
           const Application = Applications[prog.component];
+          console.log("🧠 Application lookup:", prog.component, Application);
           
           // Skip if application doesn't exist
           if (!Application) return null;
