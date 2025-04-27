@@ -1,236 +1,282 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import 'media-chrome';
 import Window from '../tools/Window';
 import { WindowProgram } from 'packard-belle';
+import buildMenu from '../../helpers/menuBuilder';
 import './_styles.scss';
 
 const VideoPlayerMobile = (props) => {
+  const videoRef = useRef(null);
+
+  const showHelp = () => {
+    alert('Media Player Help is not implemented yet.');
+  };
+
+  const menuOptions = buildMenu({
+    ...props,
+    componentType: 'VideoPlayerMobile',
+    showHelp,
+    options: {},
+  });
+
+  // 📼 WMP Button
+  const WmpButton = ({ backgroundImage, left, top }) => {
+    const [hovered, setHovered] = useState(false);
+    const [pressed, setPressed] = useState(false);
+
+    const getBackgroundPosition = () => {
+      if (pressed) return "-42px 0";  // active (pressed)
+      if (hovered) return "-21px 0";  // hover
+      return "0 0";                   // default
+    };
+
+    return (
+      <div
+        style={{
+          position: "absolute",
+          width: "21px",
+          height: "21px",
+          left: `${left}px`,
+          top: `${top}px`,
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "84px 21px",
+          backgroundPosition: getBackgroundPosition(),
+          imageRendering: "pixelated",
+          cursor: "pointer",
+          zIndex: 6,
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => {
+          setHovered(false);
+          setPressed(false);
+        }}
+        onMouseDown={() => setPressed(true)}
+        onMouseUp={() => setPressed(false)}
+      />
+    );
+  };
+
+  // 📋 Button Data
+  const controlButtons = [
+    { image: "/wmp_assets/bar2_play.png", left: 6, top: 237 },
+    { image: "/wmp_assets/bar2_pause.png", left: 28, top: 237 },
+    { image: "/wmp_assets/bar2_stop.png", left: 50, top: 237 },
+    { image: "/wmp_assets/bar2_open.png", left: 82, top: 237 },
+    { image: "/wmp_assets/bar2_prev.png", left: 104, top: 237 },
+    { image: "/wmp_assets/bar2_next.png", left: 126, top: 237 },
+    { image: "/wmp_assets/bar2_mute.png", left: 212, top: 237 },
+  ];
+
   return (
     <Window
       {...props}
       Component={WindowProgram}
       title="Windows Media Player"
+      menuOptions={menuOptions}
       className="wmp-window"
       initialWidth={294}
       initialHeight={403}
       resizable={false}
+      style={{
+        zIndex: 11,
+        top: '50px',
+      }}
     >
       <media-controller
+        autohide="-1"
         style={{
-          width: '294px',
-          height: '403px',
+          width: '288px',
+          height: '359px',
           display: 'block',
+          top: '0px',
           position: 'relative',
+          backgroundColor: 'transparent', // important
+          zIndex: 3,
         }}
       >
-        <video
-          slot="media"
-          src="/static/donwest.mp4"
-          crossOrigin="anonymous"
-          playsInline
-          style={{
-            display: 'block',
-            width: '0px',
-            height: '0px',
-            position: 'absolute',
-          }}
-        />
+        {/* 🎥 Video */}
+        <div className="video-wrapper">
+          <video
+            slot="media"
+            ref={videoRef}
+            src="/static/donwest.mp4"
+            crossOrigin="anonymous"
+            playsInline
+            muted
+            preload="auto"
+            disablePictureInPicture
+            style={{
+              width: '288px',
+              height: '189px',
+              position: 'absolute',
+              objectFit: 'cover',
+              backgroundColor: 'transparent',
+              overflow: 'hidden',
+              zIndex: 3,
+              top: '-1px',
+              left: '.5px',
+              transform: 'scale(1.07)',
+              transformOrigin: 'center',
+            }}
+          />
+        </div>
 
+        {/* 🛡 Empty fallback to prevent black screen */}
+        <div slot="fallback"></div>
+
+        {/* 🎨 Background Shell */}
         <div className="wmp-shell">
-          {/* 🎨 Background Shell */}
           <img
-            src="/wmp_assets/window_player.png"
+            src="/wmp_assets/window_player_crop2.png"
             alt="WMP Background"
             className="wmp-bg"
           />
 
-          {/* 🎮 Controls */}
-          <media-play-button
-            mediapresent="false"
-            style={{
-              backgroundImage: 'url("/wmp_assets/bar2_play.png")',
-              top: '276px',
-              left: '6px',
-              width: '20px',
-              height: '20px',
-              position: 'absolute',
-              zIndex: 2,
-            }}
-          />
-          <media-pause-button
-            mediapresent="false"
-            style={{
-              backgroundImage: 'url("/wmp_assets/bar2_pause.png")',
-              top: '276px',
-              left: '28px',
-              width: '20px',
-              height: '20px',
-              position: 'absolute',
-              zIndex: 2,
-            }}
-          />
-          <media-stop-button
-            mediapresent="false"
-            style={{
-              backgroundImage: 'url("/wmp_assets/bar2_stop.png")',
-              top: '276px',
-              left: '50px',
-              width: '21px',
-              height: '21px',
-              position: 'absolute',
-              zIndex: 2,
-            }}
-          />
-          <media-open-button
-            mediapresent="false"
-            style={{
-              backgroundImage: 'url("/wmp_assets/bar2_open.png")',
-              top: '276px',
-              left: '72px',
-              width: '21px',
-              height: '21px',
-              position: 'absolute',
-              zIndex: 2,
-            }}
-          />
-          <media-seek-backward-button
-            mediapresent="false"
-            style={{
-              backgroundImage: 'url("/wmp_assets/bar2_prev.png")',
-              top: '276px',
-              left: '94px',
-              width: '21px',
-              height: '21px',
-              position: 'absolute',
-              zIndex: 2,
-            }}
-          />
-          <media-seek-forward-button
-            mediapresent="false"
-            style={{
-              backgroundImage: 'url("/wmp_assets/bar2_next.png")',
-              top: '276px',
-              left: '116px',
-              width: '21px',
-              height: '21px',
-              position: 'absolute',
-              zIndex: 2,
-            }}
-          />
-          <media-mute-button
-            mediapresent="false"
-            style={{
-              backgroundImage: 'url("/wmp_assets/bar2_mute.png")',
-              top: '276px',
-              left: '216px',
-              width: '24px',
-              height: '21px',
-              position: 'absolute',
-              zIndex: 2,
-            }}
-          />
+          {/* 🎮 Render Buttons */}
+          {controlButtons.map((btn, index) => (
+            <WmpButton
+              key={index}
+              backgroundImage={btn.image}
+              left={btn.left}
+              top={btn.top}
+            />
+          ))}
 
           {/* 🎚 Volume Slider */}
           <media-volume-range
             mediapresent="false"
             className="wmp-slider"
             style={{
-              top: '276px',
-              left: '237px',
-              width: '51px',
-              height: '21px',
+              top: '247px',
+              left: '232px',
+              width: '38px',
+              height: '0px',
               position: 'absolute',
-              backgroundImage: 'url("/wmp_assets/bar2_volume_slide.png")',
+              //backgroundImage: 'url("/wmp_assets/bar2_volume_slide - crop.png")',
               backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover',
+              backgroundSize: 'cover', // cover not contain for bar background
               zIndex: 2,
             }}
-          />
-
-          {/* ⏱ Time Slider */}
+          >
+            {/* Volume Thumb */}
+            <div
+              slot="thumb"
+              style={{
+                width: '10px',
+                height: '16px',
+                backgroundImage: 'url("/wmp_assets/bar2_volume_slide - crop.png")', // reusing progress thumb png here
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'contain',
+                backgroundPosition: 'center',
+                zIndex: 3,
+                cursor: 'pointer',
+              }}
+            >
+              <media-volume-range
+                style={{
+                  height: '5px',
+                }}
+              />
+            </div>
+          </media-volume-range>
+            
+          {/* Time Progress Bar */}
           <media-time-range
             mediapresent="false"
             className="wmp-slider"
             style={{
-              top: '257px',
-              left: '5px',
-              width: '283px',
-              height: '15px',
+              top: '219px',
+              left: '0px',
+              width: '288px',
+              height: '16px',
               position: 'absolute',
               backgroundImage: 'url("/wmp_assets/progress_bar.png")',
+              backgroundSize: '101% 100%',
+              backgroundPosition: 'center center',
               backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover',
               zIndex: 2,
             }}
-          />
+          >
+            {/* time prog thumb */}
+            <div
+              slot="thumb"
+              style={{
+                width: '12px',
+                height: '14px',
+                position: 'absolute',
+                backgroundImage: 'url("/wmp_assets/progress_slide - crop.png")',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'contain',
+                backgroundPosition: 'center',
+                zIndex: 3,
+                cursor: 'pointer',
+              }}
+            />
+          </media-time-range>
 
-          {/* 🕘 Info (Current Time) */}
+          {/* 📄 Info Panels */}
           <div
             style={{
-              top: '305px',
-              left: '8px',
-              width: '278px',
+              top: '266px',
+              left: '-200px',
+              width: '270px',
               height: '14px',
               color: '#ffffff',
-              fontSize: '14px',
+              fontSize: '10px',
               fontFamily: 'Microsoft Sans Serif, sans-serif',
               position: 'absolute',
-              textAlign: 'left',
+              textAlign: 'right',
               lineHeight: '14px',
               zIndex: 2,
             }}
           >
-            <media-time-display mediapresent="false" />
+            Media Type:
           </div>
 
-          {/* 📟 Status Text */}
           <div
             style={{
-              top: '380px',
-              left: '33px',
-              width: '175px',
-              height: '14px',
+              top: '285px',
+              left: '-200px',
+              width: '270px',
+              height: '50px',
               color: '#ffffff',
-              fontSize: '14px',
+              fontSize: '10px',
               fontFamily: 'Microsoft Sans Serif, sans-serif',
               position: 'absolute',
-              textAlign: 'left',
+              textAlign: 'right',
+              lineHeight: '16px',
               zIndex: 2,
             }}
           >
-            Status text here
+            Clip:<br />
+            Author:<br />
+            Copyright:
           </div>
 
-          {/* 🔢 LED Digits */}
-          <img
-            src="/wmp_assets/number.png"
-            alt="LED"
-            style={{
-              position: 'absolute',
-              top: '379px',
-              left: '208px',
-              width: '31px',
-              height: '15px',
-              zIndex: 2,
-            }}
-          />
-
-          {/* 🎧 Stereo Indicator */}
+          {/* ⏱ Time Display */}
           <div
             style={{
-              top: '380px',
-              left: '245px',
+              top: '325px',
+              left: '250px',
               width: '37px',
               height: '14px',
               color: '#ffffff',
-              fontSize: '14px',
+              background: 'transparent', 
+              fontSize: '10px',
               fontFamily: 'Microsoft Sans Serif, sans-serif',
               textAlign: 'right',
               position: 'absolute',
               zIndex: 2,
             }}
           >
-            Stereo
+            <media-time-display
+              mediapresent="false"
+              style={{
+                backgroundColor: 'transparent',
+                fontSize: '11px',
+              }}
+            />
           </div>
         </div>
       </media-controller>

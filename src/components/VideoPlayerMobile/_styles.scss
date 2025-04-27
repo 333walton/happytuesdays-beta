@@ -6,9 +6,9 @@
 
 /* 🎨 Main Shell */
 .wmp-shell {
-  position: relative;
-  width: 294px;
-  height: 403px;
+  position: absolute;
+  width: 288px;
+  height: 359px;
   font-family: 'FixedSys', 'Microsoft Sans Serif', monospace;
   overflow: hidden;
   z-index: 1;
@@ -19,86 +19,82 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 294px;
-  height: 403px;
+  width: 288px;
+  height: 359px;
   z-index: 0;
   image-rendering: pixelated;
 }
 
-/* 🎮 Custom Media Buttons and Sliders */
-media-play-button,
-media-pause-button,
-media-stop-button,
-media-seek-backward-button,
-media-seek-forward-button,
-media-open-button,
-media-mute-button,
-media-volume-range,
-media-time-range,
-media-time-display {
-  all: unset;
-  display: block;
+/* 📼 Video Element */
+video {
+  position: absolute;
+  background: transparent;
+  object-fit: contain;
+  width: 288px;
+  height: 187px;
+  overflow: hidden;
+  z-index: 3;
+}
+
+/* 📼 Shared Slider Track (Time and Volume) */
+.wmp-slider {
   position: absolute;
   background-repeat: no-repeat;
   background-size: cover;
   cursor: pointer;
   image-rendering: pixelated;
   z-index: 2;
-  transition: filter 0.2s, transform 0.2s;
-  /* Smooth hover/press effect */
+  height: 16px;
+  width: 100%;
+  border: none;
+  outline: none;
+  background-color: transparent;
 }
 
-/* 🎛 Hover Effects */
-media-play-button:hover,
-media-pause-button:hover,
-media-stop-button:hover,
-media-seek-backward-button:hover,
-media-seek-forward-button:hover,
-media-open-button:hover,
-media-mute-button:hover,
-media-volume-range:hover,
-media-time-range:hover {
+/* Media Time Range perfect fix */
+media-time-range {
+  background-size: 100% 100%;
+  /* Shrink slightly horizontally */
+  background-position: center center;
+  /* Keep it centered */
+  background-repeat: no-repeat;
+}
+
+/* video time track cropped to fit visual bar */
+media-time-range::part(track) {
+  background: transparent;
+  clip-path: inset(0 1px 0 2px) !important; // changed from 8px before on the right (middle number)
+  background-size: cover !important;
+  background-position: center !important;
+  height: 100%
+}
+media-volume-range::part(track)
+
+/* Thumb reset */
+media-time-range::part(thumb) {
+  background: none !important; // remove native thumb bg
+  box-shadow: none !important;
+  border: none !important;
+}
+media-volume-range::part(thumb) {
+  width: 12px;
+  height: 14px;
+  cursor: pointer;
+  image-rendering: pixelated;
+  position: relative;
+}
+
+.wmp-slider:hover {
   filter: brightness(1.2);
 }
 
-/* 🎚 Active (Pressed) Effects */
-media-play-button:active,
-media-pause-button:active,
-media-stop-button:active,
-media-seek-backward-button:active,
-media-seek-forward-button:active,
-media-open-button:active,
-media-mute-button:active,
-media-volume-range:active,
-media-time-range:active {
-  transform: scale(0.98);
-  filter: brightness(0.9);
-}
-
-/* 🕘 Text Info, Status, Stereo */
-.wmp-info,
-.wmp-status,
-.wmp-stereo {
-  position: absolute;
-  color: #ffffff;
-  font-size: 14px;
-  font-family: 'Microsoft Sans Serif', sans-serif;
-  line-height: 14px;
-  z-index: 2;
-  pointer-events: none;
-}
-
-/* 📼 Video Element (Hidden but Functional) */
-video {
-  display: block;
-  width: 0px;
-  height: 0px;
-  position: absolute;
-}
-
-/* Hide default media-chrome shadow parts */
+/* 🔥 Media-Chrome Reset (Important) */
 media-play-button::part(button),
 media-pause-button::part(button),
+media-stop-button::part(button),
+media-seek-backward-button::part(button),
+media-seek-forward-button::part(button),
+media-open-button::part(button),
 media-mute-button::part(button),
 media-volume-range::part(slider),
 media-volume-range::part(track),
@@ -110,36 +106,40 @@ media-time-display::part(root) {
   display: none !important;
 }
 
-/* Hide all fallback SVGs or icons on media elements */
-media-play-button,
-media-pause-button,
-media-mute-button,
-media-stop-button,
-media-seek-backward-button,
-media-seek-forward-button,
-media-volume-range,
-media-time-range {
-  color: transparent !important;
-  background-color: transparent !important;
-  fill: transparent !important;
-  stroke: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
+/* 🛡 Full Protection against background blackening while playing */
+
+media-controller {
+  --media-control-background: transparent !important;
+  --media-control-color: transparent !important;
+  background: transparent !important;
+  opacity: 1 !important;
 }
 
-/* Further reset interactive components */
-media-volume-range::part(track),
-media-volume-range::part(thumb),
-media-time-range::part(track),
-media-time-range::part(thumb) {
-  background: none !important;
-  box-shadow: none !important;
-  border: none !important;
+media-controller[mediastate="playing"] {
+  --media-control-background: transparent !important;
+  --media-control-color: transparent !important;
+  background: transparent !important;
+  opacity: 1 !important;
 }
 
-/* Global suppression fallback */
-media-controller *::before,
-media-controller *::after {
-  content: none !important;
+media-controller::part(container),
+media-controller::part(controls) {
+  background: transparent !important;
+  opacity: 1 !important;
+}
+
+media-controller::before,
+media-controller::after {
   display: none !important;
+  content: none !important;
+}
+
+.video-wrapper {
+  position: absolute;
+  top: 26px;
+  left: 0;
+  width: 288px;
+  height: 187px;
+  overflow: hidden;
+  z-index: 3;
 }
