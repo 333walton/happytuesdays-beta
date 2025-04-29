@@ -223,6 +223,7 @@ video::-webkit-media-controls {
 video {
   -webkit-playsinline: 1 !important;
   playsinline: 1 !important;
+  playsinline: "true" !important;
 }
 
 /* Fix for any React95 elements that might be causing the black rectangle */

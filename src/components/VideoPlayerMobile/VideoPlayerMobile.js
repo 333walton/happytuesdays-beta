@@ -400,6 +400,8 @@ const VideoPlayerMobile = (props) => {
             src="/static/donwest.mp4"
             controls={false}
             playsInline
+            playsinline="true"
+            webkit-playsinline="true"
             preload="auto"
             onContextMenu={(e) => e.preventDefault()}
             style={{
