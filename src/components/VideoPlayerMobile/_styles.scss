@@ -9,6 +9,9 @@
   width: 288px;
   height: 359px;
   overflow: hidden;
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
+  playsinline: "true" !important;
 }
 
 .wmp-shell {
@@ -41,6 +44,9 @@
   height: 187px;
   overflow: hidden;
   z-index: 3;
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
+  playsinline: "true" !important;
 }
 
 /* Button Styling */
@@ -204,20 +210,32 @@
   /* Make sure there's no black footer or margins */
   padding-bottom: 0 !important;
   margin-bottom: 0 !important;
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
+  playsinline: "true" !important;
 }
 
 .wmp-window .r95 {
   background: transparent !important;
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
+  playsinline: "true" !important;
 }
 
 .wmp-window video::-webkit-media-controls,
 .wmp-window video::-webkit-media-controls-enclosure {
   display: none !important;
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
+  playsinline: "true" !important;
 }
 
 /* iOS fixes */
 video::-webkit-media-controls {
   display: none !important;
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
+  playsinline: "true" !important;
 }
 
 video {
@@ -240,6 +258,9 @@ video {
 /* Make sure bottom of video content area is clean */
 .wmp-window .video-wrapper::after {
   display: none !important;
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
+  playsinline: "true" !important;
 }
 
 /* Reset any footer elements that might be causing issues */
@@ -262,6 +283,9 @@ video {
 .wmp-window .r95_13gnpv08 {
   display: none !important;
   z-index: 0 !important;
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
+  playsinline: "true" !important;
 }
 
 .r95_iuzg892r.r95_iuzg895z.r95_iuzg893p {
@@ -269,6 +293,9 @@ video {
   justify-content: normal;
   align-items: normal;
   overflow: visible;
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
+  playsinline: "true" !important;
   /*This property might be already present in your code*/
 }
 

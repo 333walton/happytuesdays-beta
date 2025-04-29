@@ -416,6 +416,7 @@ const VideoPlayerMobile = (props) => {
               left: '.69px',
               transform: 'scale(1.25)',
               transformOrigin: 'center',
+              display: 'inline',
             }}
           />
         </div>
