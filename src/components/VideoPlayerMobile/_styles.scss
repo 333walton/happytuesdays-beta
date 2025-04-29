@@ -71,15 +71,6 @@
   /* pressed frame */
 }
 
-.wmp-button.disabled,
-.window-dragging .wmp-button {
-  cursor: not-allowed !important;
-  opacity: 1;
-  /* Keep full opacity but disable interaction */
-  pointer-events: none;
-  /* Prevent interaction during drag */
-}
-
 /* Position and image for each button */
 .wmp-button.play {
   background-image: url('../../assets/bar2_play.png');
@@ -133,13 +124,6 @@
   z-index: 2;
 }
 
-.wmp-progress-slider.disabled,
-.window-dragging .wmp-progress-slider {
-  cursor: not-allowed !important;
-  pointer-events: none;
-  /* Prevent interaction during drag */
-}
-
 /* Volume Slider */
 .wmp-volume-slider {
   position: absolute;
@@ -149,13 +133,6 @@
   image-rendering: pixelated;
   z-index: 2;
   background: transparent !important;
-}
-
-.wmp-volume-slider.disabled,
-.window-dragging .wmp-volume-slider {
-  cursor: not-allowed !important;
-  pointer-events: none;
-  /* Prevent interaction during drag */
 }
 
 /* Custom Thumbs for Sliders */
@@ -182,27 +159,30 @@
   image-rendering: pixelated;
 }
 
-/* Volume indicator fill with triangular clip path */
+/* Volume indicator fill - right triangle */
 .volume-indicator {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
+  width: 100%;
   background-color: rgba(16, 132, 208, 0.15);
   /* Very translucent blue */
   z-index: 2;
   pointer-events: none;
   /* Allow clicking through to the slider */
-  /* Clip path creates triangular shape */
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  /* Clip path specifically for right triangle in slider area */
+  clip-path: polygon(8px 100%, 100% 100%, 100% 30%);
 }
 
 /* Time Display */
 .wmp-time-display {
   position: absolute;
+  top: 343px;
   bottom: 10px;
-  /* Positioned lower as requested */
+  /* Positioned as requested */
   right: 9px;
+  width: 37px;
   height: 14px;
   color: #ffffff;
   background: transparent;
@@ -219,6 +199,22 @@
   text-align: right;
 }
 
+/* React 95 Overrides to remove the black rectangle */
+.VideoPlayer.wmp-window {
+  /* Make sure there's no black footer or margins */
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.wmp-window .r95 {
+  background: transparent !important;
+}
+
+.wmp-window video::-webkit-media-controls,
+.wmp-window video::-webkit-media-controls-enclosure {
+  display: none !important;
+}
+
 /* iOS fixes */
 video::-webkit-media-controls {
   display: none !important;
@@ -229,25 +225,72 @@ video {
   playsinline: 1 !important;
 }
 
-/* Window dragging state */
-.window-dragging {
-  /* Apply styles to indicate window is being dragged */
-  cursor: grabbing;
+/* Fix for any React95 elements that might be causing the black rectangle */
+.wmp-window [class*="r95_"] {
+  background: transparent !important;
 }
 
-.window-dragging .wmp-button,
-.window-dragging .wmp-volume-slider,
-.window-dragging .wmp-progress-slider {
-  pointer-events: none !important;
-  cursor: not-allowed !important;
+/* Hide any unwanted elements at the bottom */
+.wmp-window::after,
+.wmp-shell::after {
+  display: none !important;
 }
 
-/* Responsive styling for iOS as per handoff doc */
-@media only screen and (max-width: 480px) {
-  .video {
-    width: 100vw;
-    height: 56.25vw;
-    object-fit: contain;
-    max-height: 100vh;
-  }
+/* Make sure bottom of video content area is clean */
+.wmp-window .video-wrapper::after {
+  display: none !important;
+}
+
+/* Reset any footer elements that might be causing issues */
+.wmp-window .footer,
+.wmp-window .status-bar {
+  display: none !important;
+}
+
+/* Reset any pseudo-elements that might be causing the black box */
+.wmp-window *::after,
+.wmp-window *::before {
+  display: none !important;
+}
+
+/* Ensure no black rectangle at the bottom */
+.wmp-window .r95 {
+  display: none !important;
+}
+
+.wmp-window .r95_13gnpv08 {
+  display: none !important;
+  z-index: 0 !important;
+}
+
+.r95_iuzg892r.r95_iuzg895z.r95_iuzg893p {
+  display: block;
+  justify-content: normal;
+  align-items: normal;
+  overflow: visible;
+  /*This property might be already present in your code*/
+}
+
+.r95_iuzg892d.r95_iuzg892l.r95_iuzg892n.r95_iuzg891v {
+  display: none;
+  width: 80px;
+  /*This property is not required to hide the element, but it was changed*/
+  height: 50px;
+  /*This property is not required to hide the element, but it was changed*/
+  position: static;
+  /*This property is not required to hide the element, but it was changed*/
+  top: auto;
+  /*This property is not required to hide the element, but it was changed*/
+  left: auto;
+  /*This property is not required to hide the element, but it was changed*/
+  transform: none;
+  /*This property is not required to hide the element, but it was changed*/
+  z-index: 0;
+  /*This property is not required to hide the element, but it was changed*/
+  margin: 0px;
+  /*This property is not required to hide the element, but it was changed*/
+}
+
+.hidden-by-ai {
+  display: none !important;
 }
