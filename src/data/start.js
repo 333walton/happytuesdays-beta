@@ -55,7 +55,7 @@ const programs = [
       {
         title: "Movie Player",
         icon: icons.camera16,
-        component:  isMobile ? "VideoPlayerDesktop" : "VideoPlayerMobile",
+        component: "VideoPlayerwebkit", // isMobile ? "VideoPlayerwebkit" : "VideoPlayerMobile",
         data: {
           src: "",
           style: {
