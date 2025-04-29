@@ -4,6 +4,13 @@
   font-weight: normal;
 }
 
+.wmp-container {
+  position: relative;
+  width: 288px;
+  height: 359px;
+  overflow: hidden;
+}
+
 .wmp-shell {
   position: absolute;
   width: 288px;
@@ -36,6 +43,7 @@
   z-index: 3;
 }
 
+/* Button Styling */
 .wmp-button {
   width: 21px;
   height: 21px;
@@ -48,76 +56,91 @@
   border: none;
   outline: none;
   background-color: transparent;
-  background-position: 0 0; /* Default background position (Unhovered) */
-
-  &.hovered {
-    background-position: -21px 0;
-  }
-
-  &.pressed {
-    background-position: -42px 0; // your pressed frame
-  }
-
-  &.selected {
-    background-position: -42px 0;
-  }
-
-  &.play {
-    background-image: url('../../assets/bar2_play.png');
-    top: 237px;
-    left: 6px;
-  }
-
-  &.pause {
-    background-image: url('../../assets/bar2_pause.png');
-    top: 237px;
-    left: 28px;
-  }
-
-  &.stop {
-    background-image: url('../../assets/bar2_stop.png');
-    top: 237px;
-    left: 50px;
-  }
-
-  &.seekbackward {
-    background-image: url('../../assets/bar2_prev.png');
-    top: 237px;
-    left: 104px;
-  }
-
-  &.seekforward {
-    background-image: url('../../assets/bar2_next.png');
-    top: 237px;
-    left: 126px;
-  }
-
-  &.open {
-    background-image: url('../../assets/bar2_open.png');
-    top: 237px;
-    left: 82px;
-  }
-
-  &.mute {
-    background-image: url('../../assets/bar2_mute.png');
-    top: 237px;
-    left: 212px;
-  }
+  background-position: 0 0;
+  /* Default background position (Unhovered) */
 }
 
+.wmp-button:hover,
+.wmp-button.hovered {
+  background-position: -21px 0;
+}
+
+.wmp-button:active,
+.wmp-button.selected {
+  background-position: -42px 0;
+  /* pressed frame */
+}
+
+.wmp-button.disabled,
+.window-dragging .wmp-button {
+  cursor: not-allowed !important;
+  opacity: 1;
+  /* Keep full opacity but disable interaction */
+  pointer-events: none;
+  /* Prevent interaction during drag */
+}
+
+/* Position and image for each button */
+.wmp-button.play {
+  background-image: url('../../assets/bar2_play.png');
+  top: 237px;
+  left: 6px;
+}
+
+.wmp-button.pause {
+  background-image: url('../../assets/bar2_pause.png');
+  top: 237px;
+  left: 28px;
+}
+
+.wmp-button.stop {
+  background-image: url('../../assets/bar2_stop.png');
+  top: 237px;
+  left: 50px;
+}
+
+.wmp-button.open {
+  background-image: url('../../assets/bar2_open.png');
+  top: 237px;
+  left: 82px;
+}
+
+.wmp-button.seekbackward {
+  background-image: url('../../assets/bar2_prev.png');
+  top: 237px;
+  left: 104px;
+}
+
+.wmp-button.seekforward {
+  background-image: url('../../assets/bar2_next.png');
+  top: 237px;
+  left: 126px;
+}
+
+.wmp-button.mute {
+  background-image: url('../../assets/bar2_mute.png');
+  top: 237px;
+  left: 212px;
+}
+
+/* Progress Slider */
 .wmp-progress-slider {
   position: absolute;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 100% 100%;
   cursor: pointer;
   image-rendering: pixelated;
   z-index: 2;
-  width: 100%;
-  height: 16px;
-  background-color: transparent;
-  background-image: url('/assets/progress_bar.png');
 }
 
+.wmp-progress-slider.disabled,
+.window-dragging .wmp-progress-slider {
+  cursor: not-allowed !important;
+  pointer-events: none;
+  /* Prevent interaction during drag */
+}
+
+/* Volume Slider */
 .wmp-volume-slider {
   position: absolute;
   background-repeat: no-repeat;
@@ -125,73 +148,106 @@
   cursor: pointer;
   image-rendering: pixelated;
   z-index: 2;
-  width: 100%;
-  height: 16px;
-  background-color: transparent;
-  background-image: url('');
+  background: transparent !important;
 }
 
-.volume-thumb,
-.progress-thumb {
-  width: 10px;
-  height: 14px;
+.wmp-volume-slider.disabled,
+.window-dragging .wmp-volume-slider {
+  cursor: not-allowed !important;
+  pointer-events: none;
+  /* Prevent interaction during drag */
+}
+
+/* Custom Thumbs for Sliders */
+.volume-thumb {
+  width: 15px;
+  /* Width set to 15px as requested */
+  height: 19px;
+  background-image: url('../../assets/bar2_volume_slide - crop.png');
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
-  z-index: 3;
   cursor: pointer;
   image-rendering: pixelated;
 }
 
-.volume-thumb {
-  background-image: url('../../assets/bar2_volume_slide - crop.png');
-  height: 19px;
-}
-
 .progress-thumb {
+  width: 10px;
+  height: 14px;
   background-image: url('../../assets/progress_slide - crop.png');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  cursor: pointer;
+  image-rendering: pixelated;
 }
 
+/* Volume indicator fill with triangular clip path */
+.volume-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: rgba(16, 132, 208, 0.15);
+  /* Very translucent blue */
+  z-index: 2;
+  pointer-events: none;
+  /* Allow clicking through to the slider */
+  /* Clip path creates triangular shape */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Time Display */
 .wmp-time-display {
   position: absolute;
-  top: 325px;
-  left: 250px;
-  width: 37px;
+  bottom: 10px;
+  /* Positioned lower as requested */
+  right: 9px;
   height: 14px;
   color: #ffffff;
   background: transparent;
   font-size: 10px;
   font-family: 'Microsoft Sans Serif', sans-serif;
   text-align: right;
-  z-index: 2;
+  z-index: 4;
 }
 
-/* Hide native parts */
-media-play-button::part(button),
-media-pause-button::part(button),
-media-stop-button::part(button),
-media-open-button::part(button),
-media-seek-backward-button::part(button),
-media-seek-forward-button::part(button),
-media-mute-button::part(button),
-media-volume-range::part(slider),
-media-volume-range::part(track),
-media-volume-range::part(thumb),
-media-time-range::part(slider),
-media-time-range::part(track),
-media-time-range::part(thumb),
-media-time-display::part(root) {
+.wmp-time-text {
+  color: #ffffff;
+  font-size: 10px;
+  font-family: 'Microsoft Sans Serif', sans-serif;
+  text-align: right;
+}
+
+/* iOS fixes */
+video::-webkit-media-controls {
   display: none !important;
 }
 
-/* Resetting media-chrome background */
-media-controller {
-  --media-control-background: transparent !important;
-  --media-control-color: transparent !important;
-  background: transparent !important;
-  opacity: 1 !important;
+video {
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
 }
 
-.wmp-slider:hover {
-  filter: brightness(1.2);
+/* Window dragging state */
+.window-dragging {
+  /* Apply styles to indicate window is being dragged */
+  cursor: grabbing;
+}
+
+.window-dragging .wmp-button,
+.window-dragging .wmp-volume-slider,
+.window-dragging .wmp-progress-slider {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+}
+
+/* Responsive styling for iOS as per handoff doc */
+@media only screen and (max-width: 480px) {
+  .video {
+    width: 100vw;
+    height: 56.25vw;
+    object-fit: contain;
+    max-height: 100vh;
+  }
 }
