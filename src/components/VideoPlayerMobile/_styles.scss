@@ -4,7 +4,6 @@
   font-weight: normal;
 }
 
-/* 🎨 Main Shell */
 .wmp-shell {
   position: absolute;
   width: 288px;
@@ -14,87 +13,166 @@
   z-index: 1;
 }
 
-/* 🖼 Background Window Image */
 .wmp-bg {
   position: absolute;
   top: 0;
   left: 0;
   width: 288px;
   height: 359px;
-  z-index: 0;
+  z-index: 1;
   image-rendering: pixelated;
+  background-image: url('../../assets/window_player_crop2.png');
+  background-size: cover;
+  background-position: center;
 }
 
-/* 📼 Video Element */
-video {
+.video-wrapper {
   position: absolute;
-  background: transparent;
-  object-fit: contain;
+  top: 26px;
+  left: 0;
   width: 288px;
   height: 187px;
   overflow: hidden;
   z-index: 3;
 }
 
-/* 📼 Shared Slider Track (Time and Volume) */
-.wmp-slider {
+.wmp-button {
+  width: 21px;
+  height: 21px;
+  background-repeat: no-repeat;
+  background-size: 84px 21px;
+  position: absolute;
+  image-rendering: pixelated;
+  cursor: pointer;
+  z-index: 6;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  background-position: 0 0; /* Default background position (Unhovered) */
+
+  &.hovered {
+    background-position: -21px 0;
+  }
+
+  &.pressed {
+    background-position: -42px 0; // your pressed frame
+  }
+
+  &.selected {
+    background-position: -42px 0;
+  }
+
+  &.play {
+    background-image: url('../../assets/bar2_play.png');
+    top: 237px;
+    left: 6px;
+  }
+
+  &.pause {
+    background-image: url('../../assets/bar2_pause.png');
+    top: 237px;
+    left: 28px;
+  }
+
+  &.stop {
+    background-image: url('../../assets/bar2_stop.png');
+    top: 237px;
+    left: 50px;
+  }
+
+  &.seekbackward {
+    background-image: url('../../assets/bar2_prev.png');
+    top: 237px;
+    left: 104px;
+  }
+
+  &.seekforward {
+    background-image: url('../../assets/bar2_next.png');
+    top: 237px;
+    left: 126px;
+  }
+
+  &.open {
+    background-image: url('../../assets/bar2_open.png');
+    top: 237px;
+    left: 82px;
+  }
+
+  &.mute {
+    background-image: url('../../assets/bar2_mute.png');
+    top: 237px;
+    left: 212px;
+  }
+}
+
+.wmp-progress-slider {
   position: absolute;
   background-repeat: no-repeat;
   background-size: cover;
   cursor: pointer;
   image-rendering: pixelated;
   z-index: 2;
-  height: 16px;
   width: 100%;
-  border: none;
-  outline: none;
+  height: 16px;
   background-color: transparent;
+  background-image: url('/assets/progress_bar.png');
 }
 
-/* Media Time Range perfect fix */
-media-time-range {
-  background-size: 100% 100%;
-  /* Shrink slightly horizontally */
-  background-position: center center;
-  /* Keep it centered */
+.wmp-volume-slider {
+  position: absolute;
   background-repeat: no-repeat;
-}
-
-/* video time track cropped to fit visual bar */
-media-time-range::part(track) {
-  background: transparent;
-  clip-path: inset(0 1px 0 2px) !important; // changed from 8px before on the right (middle number)
-  background-size: cover !important;
-  background-position: center !important;
-  height: 100%
-}
-media-volume-range::part(track)
-
-/* Thumb reset */
-media-time-range::part(thumb) {
-  background: none !important; // remove native thumb bg
-  box-shadow: none !important;
-  border: none !important;
-}
-media-volume-range::part(thumb) {
-  width: 12px;
-  height: 14px;
+  background-size: cover;
   cursor: pointer;
   image-rendering: pixelated;
-  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 16px;
+  background-color: transparent;
+  background-image: url('');
 }
 
-.wmp-slider:hover {
-  filter: brightness(1.2);
+.volume-thumb,
+.progress-thumb {
+  width: 10px;
+  height: 14px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  z-index: 3;
+  cursor: pointer;
+  image-rendering: pixelated;
 }
 
-/* 🔥 Media-Chrome Reset (Important) */
+.volume-thumb {
+  background-image: url('../../assets/bar2_volume_slide - crop.png');
+  height: 19px;
+}
+
+.progress-thumb {
+  background-image: url('../../assets/progress_slide - crop.png');
+}
+
+.wmp-time-display {
+  position: absolute;
+  top: 325px;
+  left: 250px;
+  width: 37px;
+  height: 14px;
+  color: #ffffff;
+  background: transparent;
+  font-size: 10px;
+  font-family: 'Microsoft Sans Serif', sans-serif;
+  text-align: right;
+  z-index: 2;
+}
+
+/* Hide native parts */
 media-play-button::part(button),
 media-pause-button::part(button),
 media-stop-button::part(button),
+media-open-button::part(button),
 media-seek-backward-button::part(button),
 media-seek-forward-button::part(button),
-media-open-button::part(button),
 media-mute-button::part(button),
 media-volume-range::part(slider),
 media-volume-range::part(track),
@@ -106,8 +184,7 @@ media-time-display::part(root) {
   display: none !important;
 }
 
-/* 🛡 Full Protection against background blackening while playing */
-
+/* Resetting media-chrome background */
 media-controller {
   --media-control-background: transparent !important;
   --media-control-color: transparent !important;
@@ -115,31 +192,6 @@ media-controller {
   opacity: 1 !important;
 }
 
-media-controller[mediastate="playing"] {
-  --media-control-background: transparent !important;
-  --media-control-color: transparent !important;
-  background: transparent !important;
-  opacity: 1 !important;
-}
-
-media-controller::part(container),
-media-controller::part(controls) {
-  background: transparent !important;
-  opacity: 1 !important;
-}
-
-media-controller::before,
-media-controller::after {
-  display: none !important;
-  content: none !important;
-}
-
-.video-wrapper {
-  position: absolute;
-  top: 26px;
-  left: 0;
-  width: 288px;
-  height: 187px;
-  overflow: hidden;
-  z-index: 3;
+.wmp-slider:hover {
+  filter: brightness(1.2);
 }
