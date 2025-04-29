@@ -55,15 +55,15 @@ const programs = [
       {
         title: "Movie Player",
         icon: icons.camera16,
-        component: "VideoPlayerwebkit", // isMobile ? "VideoPlayerwebkit" : "VideoPlayerMobile",
+        component: "VideoPlayerMobile", // isMobile ? "VideoPlayerwebkit" : "VideoPlayerMobile",
         data: {
-          src: "",
-          style: {
-            marginBottom: 4,
-            height: "100%",
-            width: "100%",
-            objectFit: "contain"
-          }
+          //src: "",
+          //style: {
+            //marginBottom: 4,
+            //height: "100%",
+            //width: "100%",
+            //objectFit: "contain"
+          //}
         }
       },
       {
