@@ -48,9 +48,9 @@ class MusicPlayer extends Component {
       // Configure Webamp with proper options
       const options = {
         initialTracks: tracks,
-        zIndex: this.props.zIndex || 5,
+        zIndex: this.props.zIndex || .1,
         initialWindowLayout: {
-          main: { position: { x: 50, y: 50 } }
+          main: { position: { x: 0, y: 0 } }
         }
       };
       
@@ -107,8 +107,8 @@ class MusicPlayer extends Component {
       
       // Calculate a good position within the viewport
       // Position it in the top half of the screen, in the center
-      const posX = 850;
-      const posY = -330;
+      const posX = 0;
+      const posY = 0;
       //initialX={.2} // Align to the top-left corner
       //initialY={.2} // Align to the top-left corner
       
@@ -116,7 +116,7 @@ class MusicPlayer extends Component {
       webampMain.style.position = 'absolute';
       webampMain.style.top = `${posY}px`;
       webampMain.style.left = `${posX}px`;
-      webampMain.style.zIndex = this.props.zIndex || 9999;
+      webampMain.style.zIndex = this.props.zIndex || .1;
       
       // Position other Webamp windows if they exist
       const webampEqualizer = document.querySelector('#webamp .equalizer-window');
@@ -124,7 +124,7 @@ class MusicPlayer extends Component {
         webampEqualizer.style.position = 'absolute';
         webampEqualizer.style.top = `${posY + webampHeight + 10}px`;
         webampEqualizer.style.left = `${posX}px`;
-        webampEqualizer.style.zIndex = this.props.zIndex || 9999;
+        webampEqualizer.style.zIndex = this.props.zIndex || .1;
       }
       
       const webampPlaylist = document.querySelector('#webamp .playlist-window');
@@ -132,7 +132,7 @@ class MusicPlayer extends Component {
         webampPlaylist.style.position = 'absolute';
         webampPlaylist.style.top = `${posY}px`;
         webampPlaylist.style.left = `${posX + webampWidth + 10}px`;
-        webampPlaylist.style.zIndex = this.props.zIndex || 9999;
+        webampPlaylist.style.zIndex = this.props.zIndex || .1;
       }
     } catch (error) {
       console.error('Error positioning Webamp:', error);
@@ -180,16 +180,17 @@ class MusicPlayer extends Component {
     return (
       <loadWebamp
         {...props}
-        Component={WindowProgram}
         title="Winamp Music Player"
+        Component={WindowProgram}
         menuOptions={menuOptions}
         className={cx('music-player-window', props.className)}
         initialWidth={348}
         initialHeight={232}
+        PosX={0}
+        PosY={0}
         resizable={false}
-        style={{ zIndex: 9, top: '50px', ...props.style }}
-        initialX={.2} // Align to the top-left corner
-        initialY={.2} // Align to the top-left corner
+        zIndex={props.zIndex || .1}
+        onMaximize={null}
       >
         <div 
           ref={this.containerRef}
@@ -197,6 +198,8 @@ class MusicPlayer extends Component {
           style={{
             width: '100%',
             height: '100%',
+            PosX:'0',
+            PosY:'0',
             position: 'relative',
             backgroundColor: '#D1D1D1',
             display: 'flex',

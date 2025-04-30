@@ -101,10 +101,11 @@ export function createWebampContainer(id = 'webamp-container') {
     container = document.createElement('div');
     container.id = id;
     container.style.position = 'absolute';
-    container.style.zIndex = '9999';
+    container.style.zIndex = '.1';
+    container.style.left = '850px';
+    container.style.top = '400px';
     container.style.width = '0';
     container.style.height = '0';
-    
     // Add to body
     document.body.appendChild(container);
   }
