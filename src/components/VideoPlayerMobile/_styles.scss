@@ -322,3 +322,17 @@ video {
 .hidden-by-ai {
   display: none !important;
 }
+
+video.r95_13gnpv00.r95_13gnpv01 {
+  object-fit: contain;
+  /* Preserve aspect ratio and fit within the container */
+  width: 100%;
+  /* Adjust as needed, relative to parent */
+  height: auto;
+  /* Maintain aspect ratio */
+  display: block;
+  /* ensures the element is on a new line */
+  -webkit-playsinline: 1 !important;
+  playsinline: 1 !important;
+  playsinline: "true" !important;
+}
