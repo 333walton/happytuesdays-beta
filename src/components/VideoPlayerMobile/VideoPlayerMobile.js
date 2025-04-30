@@ -342,6 +342,14 @@ const VideoPlayerMobile = (props) => {
       videoElement.addEventListener('play', handleVideoPlay);
       videoElement.addEventListener('pause', handleVideoPause);
       
+      // Critical fix for iOS: force playsinline attribute
+      videoElement.setAttribute('playsinline', '');
+      videoElement.setAttribute('webkit-playsinline', '');
+      videoElement.setAttribute('x5-playsinline', '');
+      videoElement.setAttribute('x5-video-player-type', 'h5');
+      videoElement.setAttribute('x5-video-player-fullscreen', 'false');
+      videoElement.setAttribute('x5-video-orientation', 'portraint');
+      
       // Initialize volume indicator
       setTimeout(() => {
         const currentVolume = videoElement.volume || 1;
@@ -399,9 +407,7 @@ const VideoPlayerMobile = (props) => {
           <Video
             src="/static/donwest.mp4"
             controls={false}
-            playsInline
-            playsinline="true"
-            webkit-playsinline="true"
+            playsInline={true}
             preload="auto"
             onContextMenu={(e) => e.preventDefault()}
             style={{

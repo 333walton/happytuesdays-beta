@@ -9,9 +9,6 @@
   width: 288px;
   height: 359px;
   overflow: hidden;
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
 }
 
 .wmp-shell {
@@ -44,9 +41,26 @@
   height: 187px;
   overflow: hidden;
   z-index: 3;
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
+}
+
+/* iOS-specific fixes to prevent fullscreen */
+video::-webkit-media-controls {
+  display: none !important;
+}
+
+video {
+  /* Using standards-compliant attribute */
+  playsinline: true;
+  /* For older iOS */
+  -webkit-playsinline: true;
+  /* For newer iOS */
+  webkit-playsinline: true;
+  /* For WeChat X5 browser */
+  x5-playsinline: true;
+  x5-video-player-type: h5;
+  x5-video-player-fullscreen: false;
+  /* Force object-fit */
+  object-fit: contain !important;
 }
 
 /* Button Styling */
@@ -210,38 +224,21 @@
   /* Make sure there's no black footer or margins */
   padding-bottom: 0 !important;
   margin-bottom: 0 !important;
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
 }
 
 .wmp-window .r95 {
   background: transparent !important;
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
 }
 
+/* Special iOS fix for fullscreen prevention */
 .wmp-window video::-webkit-media-controls,
 .wmp-window video::-webkit-media-controls-enclosure {
   display: none !important;
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
 }
 
 /* iOS fixes */
-video::-webkit-media-controls {
+video::-webkit-media-controls-fullscreen-button {
   display: none !important;
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
-}
-
-video {
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
 }
 
 /* Fix for any React95 elements that might be causing the black rectangle */
@@ -258,9 +255,6 @@ video {
 /* Make sure bottom of video content area is clean */
 .wmp-window .video-wrapper::after {
   display: none !important;
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
 }
 
 /* Reset any footer elements that might be causing issues */
@@ -283,9 +277,6 @@ video {
 .wmp-window .r95_13gnpv08 {
   display: none !important;
   z-index: 0 !important;
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
 }
 
 .r95_iuzg892r.r95_iuzg895z.r95_iuzg893p {
@@ -293,30 +284,18 @@ video {
   justify-content: normal;
   align-items: normal;
   overflow: visible;
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
-  /*This property might be already present in your code*/
 }
 
 .r95_iuzg892d.r95_iuzg892l.r95_iuzg892n.r95_iuzg891v {
   display: none;
   width: 80px;
-  /*This property is not required to hide the element, but it was changed*/
   height: 50px;
-  /*This property is not required to hide the element, but it was changed*/
   position: static;
-  /*This property is not required to hide the element, but it was changed*/
   top: auto;
-  /*This property is not required to hide the element, but it was changed*/
   left: auto;
-  /*This property is not required to hide the element, but it was changed*/
   transform: none;
-  /*This property is not required to hide the element, but it was changed*/
   z-index: 0;
-  /*This property is not required to hide the element, but it was changed*/
   margin: 0px;
-  /*This property is not required to hide the element, but it was changed*/
 }
 
 .hidden-by-ai {
@@ -332,7 +311,17 @@ video.r95_13gnpv00.r95_13gnpv01 {
   /* Maintain aspect ratio */
   display: block;
   /* ensures the element is on a new line */
-  -webkit-playsinline: 1 !important;
-  playsinline: 1 !important;
-  playsinline: "true" !important;
+}
+
+/* Additional specific iOS fix for newer versions */
+@supports (-webkit-touch-callout: none) {
+  video {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Force video to stay inline in iOS */
+  video::-webkit-media-controls {
+    display: none !important;
+  }
 }
