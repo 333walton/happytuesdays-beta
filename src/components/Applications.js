@@ -20,4 +20,5 @@ export { default as ASCIIText } from "./ASCIIText";
 export { default as VideoPlayerMobile } from "./VideoPlayerMobile";
 export { default as VideoPlayerDesktop } from "./VideoPlayerDesktop";
 export { default as W95MediaPlayer } from "./W95MediaPlayer";
-export { default as VideoPlayerwebkit } from "./VideoPlayerwebkit";
+export { default as VideoPlayerwebkit } from "./VideoPlayerwebkit"; 
+export { default as MusicPlayer } from "./MusicPlayer";

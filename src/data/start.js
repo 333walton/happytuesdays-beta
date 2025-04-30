@@ -69,8 +69,8 @@ const programs = [
       {
         title: "CD Player",
         icon: icons.mediacd16,
-        component: "W95MediaPlayer",
-        isDisabled: true
+        component: "MusicPlayer",
+        isDisabled: false
       }
     ]
   },
