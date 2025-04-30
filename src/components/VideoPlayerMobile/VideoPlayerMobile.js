@@ -565,7 +565,7 @@ const VideoPlayerMobile = (props) => {
               left: '0',
               top: '290px', // Right below the trigger
               width: '288px',
-              height: '30px',
+              height: '48px',
               backgroundColor: '#000000',
               zIndex: 5,
               color: '#ffffff',
@@ -573,7 +573,7 @@ const VideoPlayerMobile = (props) => {
               //borderTop: '1px',
               //borderColor: '#ffffff',
               //bordersize: '1px',
-            }}>coming soon</div>
+            }}>//coming soon</div>
           )}
           
           {/* Media Info Text */}
