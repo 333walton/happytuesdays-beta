@@ -63,6 +63,18 @@ video {
   object-fit: contain !important;
 }
 
+/* Dropdown styles */
+.dropdown-trigger {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dropdown-content {
+  transition: height 0.2s ease-in-out;
+  overflow: hidden;
+}
+
+
 /* Button Styling */
 .wmp-button {
   width: 21px;
@@ -217,6 +229,15 @@ video {
   font-size: 10px;
   font-family: 'Microsoft Sans Serif', sans-serif;
   text-align: right;
+}
+
+/* Text Styles for Media Info */
+.wmp-info-text {
+  font-family: 'Microsoft Sans Serif', sans-serif;
+  display: block;
+  line-height: 1.2;
+  text-align: left;
+  z-index: 3;
 }
 
 /* React 95 Overrides to remove the black rectangle */

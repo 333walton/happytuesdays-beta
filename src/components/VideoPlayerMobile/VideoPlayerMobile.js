@@ -15,6 +15,7 @@ const VideoPlayerMobile = (props) => {
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   // Create refs for DOM elements
   const videoRef = useRef(null);
@@ -25,6 +26,10 @@ const VideoPlayerMobile = (props) => {
   const volumeRef = useRef(null);
   const volumeIndicatorRef = useRef(null);
   const windowRef = useRef(null);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
 
   const showHelp = () => {
     alert('Media Player Help is not implemented yet.');
@@ -392,6 +397,9 @@ const VideoPlayerMobile = (props) => {
       initialHeight={403}
       resizable={false}
       style={{ zIndex: 9, top: '50px' }}
+      initialX={10} // Set the initial X position of the window
+      initialY={2} // Set the initial Y position of the window
+      position={{ x: 10, y: 2 }} // Explicitly set the position
     >
       <div 
         className="wmp-container"
@@ -533,6 +541,77 @@ const VideoPlayerMobile = (props) => {
           >
             <span ref={timeDisplayRef} className="wmp-time-text">00:00</span>
           </div>
+          
+          {/* Dropdown trigger */}
+          <div 
+            className="dropdown-trigger"
+            onClick={toggleDropdown}
+            style={{
+              position: 'absolute',
+              left: '5px',
+              top: '265px',
+              width: '288px',
+              height: '18px',
+              zIndex: 5,
+              cursor: 'pointer',
+              color: '#ffffff',
+              fontSize: '17px'
+            }}>...</div>
+          
+          {/* Dropdown area - shown when isDropdownOpen is true */}
+          {isDropdownOpen && (
+            <div className="dropdown-content" style={{
+              position: 'absolute',
+              left: '0',
+              top: '290px', // Right below the trigger
+              width: '288px',
+              height: '30px',
+              backgroundColor: '#000000',
+              zIndex: 5,
+              color: '#ffffff',
+              fontSize: '11px',
+              //borderTop: '1px',
+              //borderColor: '#ffffff',
+              //bordersize: '1px',
+            }}>coming soon</div>
+          )}
+          
+          {/* Media Info Text */}
+          <span className="wmp-info-text" style={{
+            position: 'absolute',
+            left: '44px',
+            bottom: '76px',
+            fontSize: '12px',
+            color: '#F7931A',
+          }}>VAST Inspector & Video Ad Tag Tester</span>
+          <span className="wmp-info-text" style={{
+            position: 'absolute',
+            left: '6px',
+            bottom: '56px',
+            color: '#ffffff',
+            fontSize: '11px'
+          }}>Clip:</span>
+          <span className="wmp-info-text" style={{
+            position: 'absolute',
+            left: '6px',
+            bottom: '40px',
+            color: '#ffffff',
+            fontSize: '11px'
+          }}>Length:</span>
+          <span className="wmp-info-text" style={{
+            position: 'absolute',
+            left: '6px',
+            bottom: '24px',
+            color: '#ffffff',
+            fontSize: '11px'
+          }}>Date:</span>
+          <span className="wmp-info-text" style={{
+            position: 'absolute',
+            left: '6px',
+            bottom: '3px',
+            color: '#ffffff',
+            fontSize: '9px'
+          }}>©Hydra98</span>
         </div>
       </div>
     </Window>
