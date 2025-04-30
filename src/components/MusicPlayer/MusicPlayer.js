@@ -48,9 +48,9 @@ class MusicPlayer extends Component {
       // Configure Webamp with proper options
       const options = {
         initialTracks: tracks,
-        zIndex: this.props.zIndex || 9999,
+        zIndex: this.props.zIndex || 5,
         initialWindowLayout: {
-          main: { position: { x: 200, y: 200 } }
+          main: { position: { x: 50, y: 50 } }
         }
       };
       
@@ -79,7 +79,7 @@ class MusicPlayer extends Component {
       // Position Webamp within the viewport
       setTimeout(() => {
         this.positionWebampInViewport();
-      }, 200);
+      }, 0);
       
       // Add resize listener
       window.addEventListener('resize', this.positionWebampInViewport);
@@ -100,10 +100,6 @@ class MusicPlayer extends Component {
       const webampMain = document.getElementById('webamp');
       if (!webampMain) return;
       
-      // Get viewport dimensions
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      
       // Get webamp dimensions
       const webampRect = webampMain.getBoundingClientRect();
       const webampWidth = webampRect.width;
@@ -111,8 +107,10 @@ class MusicPlayer extends Component {
       
       // Calculate a good position within the viewport
       // Position it in the top half of the screen, in the center
-      const posX = Math.max(20, (viewportWidth - webampWidth) / 2);
-      const posY = Math.max(20, viewportHeight * 0.2); // 20% down from the top
+      const posX = 850;
+      const posY = -330;
+      //initialX={.2} // Align to the top-left corner
+      //initialY={.2} // Align to the top-left corner
       
       // Apply the position
       webampMain.style.position = 'absolute';
@@ -190,9 +188,8 @@ class MusicPlayer extends Component {
         initialHeight={232}
         resizable={false}
         style={{ zIndex: 9, top: '50px', ...props.style }}
-        initialX={props.initialX || 10}
-        initialY={props.initialY || 10}
-        position={props.position || { x: 10, y: 10 }}
+        initialX={.2} // Align to the top-left corner
+        initialY={.2} // Align to the top-left corner
       >
         <div 
           ref={this.containerRef}
