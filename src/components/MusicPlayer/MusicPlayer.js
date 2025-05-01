@@ -7,7 +7,7 @@ import {
   loadButterchurn,
   loadButterchurnPresets,
   createWebampContainer,
-  removeWebampContainer
+  removeWebampContainer,
 } from './webampLoader';
 import './_styles.scss';
 
@@ -18,20 +18,52 @@ class MusicPlayer extends Component {
       isLoading: true,
       isWebampReady: false,
       error: null,
+      isMobileDevice: false
     };
     this.containerRef = React.createRef();
     this.webampInstance = null;
     this.containerId = 'webamp-container-' + Math.floor(Math.random() * 1000000);
   }
+  
+  // Method to unlock audio on iOS devices
+  unlockAudioForIOS = () => {
+    // Create and play a silent audio element to unlock audio
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // iOS requires user interaction to start audio
+    document.addEventListener('touchstart', () => {
+      // Create silent buffer
+      const buffer = audioContext.createBuffer(1, 1, 22050);
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+      source.start(0);
+      
+      // Resume audio context if suspended
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    }, { once: true });
+  }
 
   componentDidMount() {
+    // Check if mobile device
+    this.checkIfMobileDevice();
     this.initializeWebamp();
+  }
+  
+  checkIfMobileDevice = () => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    this.setState({ isMobileDevice: isMobile });
   }
 
   initializeWebamp = async () => {
     try {
       this.setState({ isLoading: true });
-
+      
+      // iOS-specific audio unlock
+      this.unlockAudioForIOS();
+      
       const container = createWebampContainer(this.containerId);
 
       const tracks = [
@@ -172,27 +204,46 @@ class MusicPlayer extends Component {
           url: "/music/Aurora.mp3"
         }
       ];
-            
 
       const Webamp = await loadWebamp();
-      const butterchurn = await loadButterchurn();
-      const presets = await loadButterchurnPresets();
 
+      // Load Butterchurn + presets
+      const Butterchurn = await import(/* webpackIgnore: true */ 'https://unpkg.com/butterchurn@2.6.7/lib/butterchurn.min.js');
+      const butterchurnPresets = await import(/* webpackIgnore: true */ 'https://unpkg.com/butterchurn-presets@2.4.7/lib/butterchurnPresets.min.js');
+
+      // Define your available skins
+      const availableSkins = [
+        { name: "Windows 98", url: "/skins/Windows98.wsz" },
+        { name: "CuteAmp", url: "/skins/CuteAmp.wsz" },
+        { name: "NES Edition", url: "/skins/NES Edition.wsz" },
+        { name: "Matrix 001", url: "/skins/Matrix 001.zip" },
+        { name: "Shrek 001", url: "/skins/Shrek001.wsz" },
+        { name: "Super Mario Bros 3", url: "/skins/Super_Mario_Bros_3.wsz" }, //remove?
+        { name: "Ascii Amp 3.7", url: "/skins/ascii_amp3.7.wsz" }, //remove?
+        { name: "Windows Classic", url: "/skins/Windows-clarre.wsz" }, //remove?
+      ];
+
+      // Configure options differently for mobile
       const options = {
         initialTracks: tracks,
-        zIndex: this.props.zIndex || 0.1,
+        zIndex: this.props.zIndex || 99, // Higher zIndex for iOS
         initialWindowLayout: {
           main: { position: { x: 0, y: 0 } }
         },
+        initialSkin: {
+          url: availableSkins[0].url
+        },
         __butterchurnOptions: {
-          butterchurn,
-          getPresets: () => Promise.resolve(presets)
+          butterchurn: Butterchurn,
+          getPresets: () => Promise.resolve(butterchurnPresets.default),
+          // Improve visualizer performance for mobile
+          butterchurnOptions: {
+            meshWidth: 32, // Lower mesh resolution for better performance
+            meshHeight: 24,
+            pixelRatio: window.devicePixelRatio || 1
+          }
         }
       };
-
-      if (this.props.initialSkin) {
-        options.initialSkin = this.props.initialSkin;
-      }
 
       this.webampInstance = new Webamp(options);
 
@@ -202,28 +253,132 @@ class MusicPlayer extends Component {
 
       await this.webampInstance.renderWhenReady(container);
 
-      // ✅ Set window visibility states before drawing UI
+      // ✅ Inject skins for Webamp's built-in context menu
       this.webampInstance.store.dispatch({
-        type: "WINDOW_VISIBILITY_CHANGED",
-        payload: { windowId: "equalizer", hidden: false }
-      });
-      this.webampInstance.store.dispatch({
-        type: "WINDOW_VISIBILITY_CHANGED",
-        payload: { windowId: "playlist", hidden: false }
-      });
-      this.webampInstance.store.dispatch({
-        type: "WINDOW_VISIBILITY_CHANGED",
-        payload: { windowId: "milkdrop", hidden: false }
+        type: "SET_AVAILABLE_SKINS",
+        skins: availableSkins
       });
 
-      // Delay position call after window is mounted
+      // Open visualizer window
+      this.webampInstance.store.dispatch({
+        type: "TOGGLE_VISUALIZER_WINDOW"
+      });
+      
+      // Setup touch-friendly behaviors for iOS
+      if (this.state.isMobileDevice) {
+        // Force the visualizer to be visible
+        setTimeout(() => {
+          // For iOS specific behavior
+          const milkdropWindow = document.querySelector('.milkdrop-window');
+          if (milkdropWindow) {
+            // Force visualizer to be visible and properly sized
+            milkdropWindow.style.visibility = 'visible';
+            milkdropWindow.style.width = '300px';
+            milkdropWindow.style.height = '200px';
+            
+            // Make visualizer draggable via touch
+            this.setupTouchDragging(milkdropWindow);
+            
+            // Force render the visualizer
+            this.webampInstance.store.dispatch({
+              type: "TOGGLE_MILKDROP_DESKTOP"
+            });
+          }
+        }, 1000);
+      }
+
+      // Initial EQ Settings
+      this.webampInstance.store.dispatch({
+        type: "SET_EQ",
+        value: {
+          preamp: 0.0476,
+          bands: [
+            0.4286, // hz60
+            0.3333, // hz170
+            0.0476, // hz310
+           -0.2698, // hz600
+           -0.2381, // hz1000
+            0.0476, // hz3000
+            0.4286, // hz6000
+            0.5238, // hz12000
+            0.5238, // hz14000
+            0.4921  // hz16000
+          ],
+          on: true
+        }
+      });
+      
+      // Set up Techno preset for Milkdrop visualizer
+      try {
+        const presets = butterchurnPresets.default;
+        
+        // Find the Techno preset
+        // First try to find one explicitly named "Techno"
+        let technoPresetName = Object.keys(presets).find(name => 
+          name.toLowerCase() === 'techno');
+        
+        // If not found, look for any preset containing "techno" in the name
+        if (!technoPresetName) {
+          technoPresetName = Object.keys(presets).find(name => 
+            name.toLowerCase().includes('techno'));
+        }
+        
+        if (technoPresetName) {
+          console.log("Found Techno preset:", technoPresetName);
+          
+          // Get the preset data
+          const technoPreset = presets[technoPresetName];
+          
+          // Set the preset as active
+          this.webampInstance.store.dispatch({
+            type: "SET_MILKDROP_DESKTOP_VISUALIZER_PRESET",
+            presetName: technoPresetName,
+            preset: technoPreset
+          });
+          
+          // Set EQ Settings optimized for Techno preset
+          this.webampInstance.store.dispatch({
+            type: "SET_EQ",
+            value: {
+              preamp: 0.6, // Boosted preamp for stronger response
+              bands: [
+                0.7,    // hz60 - Bass boost
+                0.6,    // hz170 - Bass boost
+                0.3,    // hz310 - Mid-bass
+                0.0,    // hz600 - Mid
+                0.2,    // hz1000 - Mid
+                0.4,    // hz3000 - Upper-mid
+                0.5,    // hz6000 - Presence
+                0.6,    // hz12000 - Treble
+                0.5,    // hz14000 - Treble
+                0.4     // hz16000 - High end
+              ],
+              on: true
+            }
+          });
+          
+          // Enable auto EQ mode (optional)
+          this.webampInstance.store.dispatch({
+            type: "SET_EQ_AUTO",
+            value: true
+          });
+        } else {
+          console.warn("Techno preset not found in available presets");
+        }
+      } catch (presetError) {
+        console.error("Error setting up Techno preset:", presetError);
+      }
+
+      this.setState({
+        isLoading: false,
+        isWebampReady: true
+      });
+
       setTimeout(() => {
         this.positionWebampInViewport();
-      }, 300);
+      }, 0);
 
-      this.setState({ isLoading: false, isWebampReady: true });
-
-      window.addEventListener('resize', this.positionWebampInViewport);
+      window.addEventListener("resize", this.positionWebampInViewport);
     } catch (error) {
       console.error("Error initializing Webamp:", error);
       this.setState({
@@ -239,12 +394,71 @@ class MusicPlayer extends Component {
 
     if (mainWindow && visualizerWindow) {
       const mainRect = mainWindow.getBoundingClientRect();
-
+      
       visualizerWindow.style.position = 'absolute';
       visualizerWindow.style.top = `${mainRect.top + 40}px`;
       visualizerWindow.style.left = `${mainRect.left + mainRect.width + 20}px`;
-      visualizerWindow.style.zIndex = 10;
+      visualizerWindow.style.zIndex = 100; // Higher zIndex for iOS
+      
+      // Ensure visualizer is visible
+      visualizerWindow.style.visibility = 'visible';
+      visualizerWindow.style.display = 'block';
+      
+      // Force render for iOS
+      if (this.state.isMobileDevice) {
+        // Add specific iOS styles for better visibility
+        visualizerWindow.style.width = '300px';
+        visualizerWindow.style.height = '200px';
+        visualizerWindow.style.overflow = 'visible';
+        
+        // Get the canvas element and ensure it's visible
+        const canvas = visualizerWindow.querySelector('canvas');
+        if (canvas) {
+          canvas.style.visibility = 'visible';
+          canvas.style.display = 'block';
+          canvas.style.width = '100%';
+          canvas.style.height = '100%';
+        }
+      }
     }
+  };
+  
+  // Add touch dragging support for iOS
+  setupTouchDragging = (element) => {
+    if (!element) return;
+    
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+    
+    // Touch event handlers
+    element.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      startLeft = parseInt(element.style.left) || 0;
+      startTop = parseInt(element.style.top) || 0;
+      e.preventDefault();
+    }, { passive: false });
+    
+    element.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      
+      const deltaX = e.touches[0].clientX - startX;
+      const deltaY = e.touches[0].clientY - startY;
+      
+      element.style.left = `${startLeft + deltaX}px`;
+      element.style.top = `${startTop + deltaY}px`;
+      e.preventDefault();
+    }, { passive: false });
+    
+    element.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+    
+    // Apply styles to make it obvious the element is draggable
+    element.style.cursor = 'move';
+    element.style.userSelect = 'none';
+    element.style.webkitUserSelect = 'none';
   };
 
   componentWillUnmount() {
@@ -280,18 +494,6 @@ class MusicPlayer extends Component {
       <div
         ref={this.containerRef}
         className="music-player-container"
-        style={{
-          width: '100%',
-          height: '100%',
-          position: 'relative',
-          backgroundColor: '#D1D1D1',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center',
-          padding: '20px',
-        }}
       >
         {isLoading ? (
           <div>Loading Webamp...</div>
@@ -312,7 +514,7 @@ class MusicPlayer extends Component {
             </button>
           </div>
         ) : isWebampReady ? (
-          <div>Webamp is running with visualizer.</div>
+          <div>Webamp is running with Techno visualizer preset.</div>
         ) : null}
       </div>
     );
