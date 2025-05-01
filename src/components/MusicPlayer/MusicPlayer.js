@@ -18,54 +18,38 @@ class MusicPlayer extends Component {
       isLoading: true,
       isWebampReady: false,
       error: null,
-      isMobileDevice: false
+      isMobileDevice: false,
+      isSafari: false
     };
     this.containerRef = React.createRef();
     this.webampInstance = null;
     this.containerId = 'webamp-container-' + Math.floor(Math.random() * 1000000);
   }
-  
-  // Method to unlock audio on iOS devices
-  unlockAudioForIOS = () => {
-    // Create and play a silent audio element to unlock audio
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // iOS requires user interaction to start audio
-    document.addEventListener('touchstart', () => {
-      // Create silent buffer
-      const buffer = audioContext.createBuffer(1, 1, 22050);
-      const source = audioContext.createBufferSource();
-      source.buffer = buffer;
-      source.connect(audioContext.destination);
-      source.start(0);
-      
-      // Resume audio context if suspended
-      if (audioContext.state === 'suspended') {
-        audioContext.resume();
-      }
-    }, { once: true });
-  }
 
   componentDidMount() {
-    // Check if mobile device
-    this.checkIfMobileDevice();
+    this.detectDevice();
     this.initializeWebamp();
   }
-  
-  checkIfMobileDevice = () => {
+
+  detectDevice = () => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    this.setState({ isMobileDevice: isMobile });
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    this.setState({ 
+      isMobileDevice: isMobile,
+      isSafari: isSafari
+    });
   }
 
+  // We'll use the built-in helpers to load Butterchurn instead of direct imports
+  // This avoids CORS issues since the helper handles the loading properly
   initializeWebamp = async () => {
     try {
       this.setState({ isLoading: true });
       
-      // iOS-specific audio unlock
-      this.unlockAudioForIOS();
-      
+      // Create container for Webamp
       const container = createWebampContainer(this.containerId);
 
+      // Define tracks
       const tracks = [
         {
           metaData: { title: "Hotel Pools", artist: "Distance" },
@@ -96,251 +80,84 @@ class MusicPlayer extends Component {
           url: "/music/Parallel.mp3"
         },
         {
-          metaData: { title: "DJ BORING", artist: "Winona" },
-          url: "/music/Winona.mp3"
-        },
-        {
-          metaData: { title: "A.L.I.S.O.N", artist: "Space Echo" },
-          url: "/music/Space Echo.mp3"
-        },
-        {
-          metaData: { title: "Voyage", artist: "Paradise" },
-          url: "/music/Paradise.mp3"
-        },
-        {
-          metaData: { title: "A.L.I.S.O.N & Hotel Pools", artist: "Murmurs" },
-          url: "/music/Murmurs.mp3"
-        },
-        {
-          metaData: { title: "Hotel Pools", artist: "Drift" },
-          url: "/music/Drift.mp3"
-        },
-        {
-          metaData: { title: "oDDling", artist: "Ascend" },
-          url: "/music/Ascend.mp3"
-        },
-        {
-          metaData: { title: "Xtract", artist: "Audiotool Day 2016" },
-          url: "/music/Audiotool Day 2016.mp3"
-        },
-        {
-          metaData: { title: "Ross From Friends", artist: "Lies" },
-          url: "/music/Lies.mp3"
-        },
-        {
-          metaData: { title: "Hotel Pools", artist: "Solitude" },
-          url: "/music/Solitude.mp3"
-        },
-        {
-          metaData: { title: "Hotel Pools", artist: "Eclipse" },
-          url: "/music/Eclipse.mp3"
-        },
-        {
-          metaData: { title: "Hotel Pools, VIQ", artist: "Splash" },
-          url: "/music/Splash.mp3"
-        },
-        {
-          metaData: { title: "DreamStation1986", artist: "Pylon" },
-          url: "/music/Pylon.mp3"
-        },
-        {
-          metaData: { title: "Hotel Pools", artist: "Beginning" },
-          url: "/music/Beginning.mp3"
-        },
-        {
-          metaData: { title: "COMPUTER DATA", artist: "Healing" },
-          url: "/music/Healing.mp3"
-        },
-        {
-          metaData: { title: "The Midnight", artist: "Night Skies (Instrumental)" },
-          url: "/music/Night Skies (Instrumental).mp3"
-        },
-        {
-          metaData: { title: "oDDling & Hotel Pools", artist: "Remain" },
-          url: "/music/Remain.mp3"
-        },
-        {
-          metaData: { title: "Krosia", artist: "Azur" },
-          url: "/music/Azur.mp3"
-        },
-        {
-          metaData: { title: "Hotel Pools", artist: "Coast" },
-          url: "/music/Coast.mp3"
-        },
-        {
-          metaData: { title: "Eagle Eyed Tiger & Hotel Pools", artist: "Hold" },
-          url: "/music/Hold.mp3"
-        },
-        {
-          metaData: { title: "Emil Rottmayer", artist: "Evade" },
-          url: "/music/Evade.mp3"
-        },
-        {
-          metaData: { title: "Zane Alexander", artist: "Float" },
-          url: "/music/Float.mp3"
-        },
-        {
-          metaData: { title: "Ax14", artist: "Water Race" },
-          url: "/music/Water Race.mp3"
-        },
-        {
-          metaData: { title: "Voyager", artist: "Intelestellar" },
-          url: "/music/Intelestellar.mp3"
-        },
-        {
-          metaData: { title: "Hotel Pools", artist: "Sequence" },
-          url: "/music/Sequence.mp3"
-        },
-        {
-          metaData: { title: "oDDling & Forhill", artist: "Supernal" },
-          url: "/music/Supernal.mp3"
-        },
-        {
-          metaData: { title: "Hotel Pools", artist: "Time" },
-          url: "/music/Time.mp3"
-        },
-        {
           metaData: { title: "oDDling", artist: "Aurora" },
           url: "/music/Aurora.mp3"
         }
       ];
 
-      const Webamp = await loadWebamp();
-
-      // Load Butterchurn + presets
-      const Butterchurn = await import(/* webpackIgnore: true */ 'https://unpkg.com/butterchurn@2.6.7/lib/butterchurn.min.js');
-      const butterchurnPresets = await import(/* webpackIgnore: true */ 'https://unpkg.com/butterchurn-presets@2.4.7/lib/butterchurnPresets.min.js');
-
-      // Define your available skins
+      // Define skins
       const availableSkins = [
         { name: "Windows 98", url: "/skins/Windows98.wsz" },
         { name: "CuteAmp", url: "/skins/CuteAmp.wsz" },
         { name: "NES Edition", url: "/skins/NES Edition.wsz" },
         { name: "Matrix 001", url: "/skins/Matrix 001.zip" },
-        { name: "Shrek 001", url: "/skins/Shrek001.wsz" },
-        { name: "Super Mario Bros 3", url: "/skins/Super_Mario_Bros_3.wsz" }, //remove?
-        { name: "Ascii Amp 3.7", url: "/skins/ascii_amp3.7.wsz" }, //remove?
-        { name: "Windows Classic", url: "/skins/Windows-clarre.wsz" }, //remove?
+        { name: "Shrek 001", url: "/skins/Shrek001.wsz" }
       ];
 
-      // Configure options differently for mobile
+      // First load Webamp
+      const Webamp = await loadWebamp();
+
+      // Then load Butterchurn and presets using our helpers
+      // This avoids CORS issues by using your loaders instead of direct imports
+      const butterchurn = await loadButterchurn();
+      const butterchurnPresets = await loadButterchurnPresets();
+
+      // Setup visualizer options based on device
+      const visualizerOptions = {
+        width: this.state.isMobileDevice ? 300 : 600,
+        height: this.state.isMobileDevice ? 200 : 400,
+        pixelRatio: window.devicePixelRatio || 1,
+        meshWidth: this.state.isMobileDevice ? 32 : 48,
+        meshHeight: this.state.isMobileDevice ? 24 : 36
+      };
+
+      // Configure Webamp with our options
       const options = {
         initialTracks: tracks,
-        zIndex: this.props.zIndex || 99, // Higher zIndex for iOS
-        initialWindowLayout: {
-          main: { position: { x: 0, y: 0 } }
-        },
+        zIndex: 99999,
         initialSkin: {
           url: availableSkins[0].url
         },
+        initialWindowLayout: {
+          main: { position: { x: 0, y: 0 } }
+        },
         __butterchurnOptions: {
-          butterchurn: Butterchurn,
-          getPresets: () => Promise.resolve(butterchurnPresets.default),
-          // Improve visualizer performance for mobile
-          butterchurnOptions: {
-            meshWidth: 32, // Lower mesh resolution for better performance
-            meshHeight: 24,
-            pixelRatio: window.devicePixelRatio || 1
-          }
+          butterchurn: butterchurn,
+          getPresets: () => butterchurnPresets,
+          butterchurnOptions: visualizerOptions
         }
       };
 
+      // Initialize Webamp
       this.webampInstance = new Webamp(options);
 
+      // Set close handler if provided
       if (this.props.onClose) {
         this.webampInstance.onClose(this.props.onClose);
       }
 
+      // Render Webamp
       await this.webampInstance.renderWhenReady(container);
 
-      // ✅ Inject skins for Webamp's built-in context menu
+      // Set available skins
       this.webampInstance.store.dispatch({
         type: "SET_AVAILABLE_SKINS",
         skins: availableSkins
       });
 
-      // Open visualizer window
-      this.webampInstance.store.dispatch({
-        type: "TOGGLE_VISUALIZER_WINDOW"
-      });
-      
-      // Setup touch-friendly behaviors for iOS
-      if (this.state.isMobileDevice) {
-        // Force the visualizer to be visible
-        setTimeout(() => {
-          // For iOS specific behavior
-          const milkdropWindow = document.querySelector('.milkdrop-window');
-          if (milkdropWindow) {
-            // Force visualizer to be visible and properly sized
-            milkdropWindow.style.visibility = 'visible';
-            milkdropWindow.style.width = '300px';
-            milkdropWindow.style.height = '200px';
-            
-            // Make visualizer draggable via touch
-            this.setupTouchDragging(milkdropWindow);
-            
-            // Force render the visualizer
-            this.webampInstance.store.dispatch({
-              type: "TOGGLE_MILKDROP_DESKTOP"
-            });
-          }
-        }, 1000);
-      }
-
-      // Initial EQ Settings
-      this.webampInstance.store.dispatch({
-        type: "SET_EQ",
-        value: {
-          preamp: 0.0476,
-          bands: [
-            0.4286, // hz60
-            0.3333, // hz170
-            0.0476, // hz310
-           -0.2698, // hz600
-           -0.2381, // hz1000
-            0.0476, // hz3000
-            0.4286, // hz6000
-            0.5238, // hz12000
-            0.5238, // hz14000
-            0.4921  // hz16000
-          ],
-          on: true
-        }
-      });
-      
-      // Set up Techno preset for Milkdrop visualizer
-      try {
-        const presets = butterchurnPresets.default;
-        
-        // Find the Techno preset
-        // First try to find one explicitly named "Techno"
-        let technoPresetName = Object.keys(presets).find(name => 
-          name.toLowerCase() === 'techno');
-        
-        // If not found, look for any preset containing "techno" in the name
-        if (!technoPresetName) {
-          technoPresetName = Object.keys(presets).find(name => 
-            name.toLowerCase().includes('techno'));
-        }
-        
-        if (technoPresetName) {
-          console.log("Found Techno preset:", technoPresetName);
-          
-          // Get the preset data
-          const technoPreset = presets[technoPresetName];
-          
-          // Set the preset as active
+      // Open visualizer window with a delay to ensure DOM is ready
+      setTimeout(() => {
+        if (this.webampInstance) {
+          // Open visualizer window
           this.webampInstance.store.dispatch({
-            type: "SET_MILKDROP_DESKTOP_VISUALIZER_PRESET",
-            presetName: technoPresetName,
-            preset: technoPreset
+            type: "TOGGLE_VISUALIZER_WINDOW"
           });
-          
-          // Set EQ Settings optimized for Techno preset
+
+          // Set EQ settings for better visualization with Techno preset
           this.webampInstance.store.dispatch({
             type: "SET_EQ",
             value: {
-              preamp: 0.6, // Boosted preamp for stronger response
+              preamp: 0.6,
               bands: [
                 0.7,    // hz60 - Bass boost
                 0.6,    // hz170 - Bass boost
@@ -356,29 +173,37 @@ class MusicPlayer extends Component {
               on: true
             }
           });
-          
-          // Enable auto EQ mode (optional)
+
+          // Enable EQ auto mode
           this.webampInstance.store.dispatch({
             type: "SET_EQ_AUTO",
             value: true
           });
-        } else {
-          console.warn("Techno preset not found in available presets");
-        }
-      } catch (presetError) {
-        console.error("Error setting up Techno preset:", presetError);
-      }
 
+          // Try to find and set techno preset
+          this.setTechnoPreset(butterchurnPresets);
+
+          // Make visualizer draggable on mobile
+          if (this.state.isMobileDevice) {
+            this.setupMobileDragging();
+          }
+        }
+      }, 1000);
+
+      // Update Webamp positioning
+      setTimeout(() => {
+        this.positionWebampInViewport();
+      }, 1500);
+
+      // Add window resize handler
+      window.addEventListener("resize", this.positionWebampInViewport);
+
+      // Update component state
       this.setState({
         isLoading: false,
         isWebampReady: true
       });
 
-      setTimeout(() => {
-        this.positionWebampInViewport();
-      }, 0);
-
-      window.addEventListener("resize", this.positionWebampInViewport);
     } catch (error) {
       console.error("Error initializing Webamp:", error);
       this.setState({
@@ -388,81 +213,186 @@ class MusicPlayer extends Component {
     }
   };
 
-  positionWebampInViewport = () => {
-    const mainWindow = document.getElementById('webamp');
-    const visualizerWindow = document.querySelector('#webamp .milkdrop-window');
+  setTechnoPreset = (butterchurnPresets) => {
+    try {
+      if (!this.webampInstance || !butterchurnPresets) return;
 
-    if (mainWindow && visualizerWindow) {
-      const mainRect = mainWindow.getBoundingClientRect();
-      
-      visualizerWindow.style.position = 'absolute';
-      visualizerWindow.style.top = `${mainRect.top + 40}px`;
-      visualizerWindow.style.left = `${mainRect.left + mainRect.width + 20}px`;
-      visualizerWindow.style.zIndex = 100; // Higher zIndex for iOS
-      
-      // Ensure visualizer is visible
-      visualizerWindow.style.visibility = 'visible';
-      visualizerWindow.style.display = 'block';
-      
-      // Force render for iOS
-      if (this.state.isMobileDevice) {
-        // Add specific iOS styles for better visibility
-        visualizerWindow.style.width = '300px';
-        visualizerWindow.style.height = '200px';
-        visualizerWindow.style.overflow = 'visible';
+      // Get presets
+      const presets = butterchurnPresets;
+      const presetNames = Object.keys(presets);
+
+      // Look for a techno preset
+      let technoPresetName = presetNames.find(name => 
+        name.toLowerCase() === 'techno' || 
+        name.toLowerCase().includes('techno'));
+
+      // If not found, try some common good presets
+      if (!technoPresetName) {
+        technoPresetName = presetNames.find(name =>
+          name.includes('Geiss') || 
+          name.includes('Flexi') || 
+          name.includes('martin'));
+      }
+
+      // If still not found, use first preset
+      if (!technoPresetName && presetNames.length > 0) {
+        technoPresetName = presetNames[0];
+      }
+
+      // Set the preset if found
+      if (technoPresetName) {
+        console.log("Setting preset:", technoPresetName);
         
-        // Get the canvas element and ensure it's visible
-        const canvas = visualizerWindow.querySelector('canvas');
-        if (canvas) {
-          canvas.style.visibility = 'visible';
-          canvas.style.display = 'block';
-          canvas.style.width = '100%';
-          canvas.style.height = '100%';
+        try {
+          this.webampInstance.store.dispatch({
+            type: "SET_MILKDROP_DESKTOP_VISUALIZER_PRESET",
+            presetName: technoPresetName,
+            preset: presets[technoPresetName]
+          });
+        } catch (e) {
+          console.warn("Could not set preset:", e);
         }
       }
+    } catch (error) {
+      console.error("Error setting techno preset:", error);
     }
   };
-  
-  // Add touch dragging support for iOS
-  setupTouchDragging = (element) => {
+
+  setupMobileDragging = () => {
+    try {
+      // Make main window draggable
+      const mainWindow = document.getElementById('webamp');
+      if (mainWindow) {
+        this.makeElementDraggable(mainWindow);
+      }
+
+      // Make visualizer window draggable
+      const visualizerWindow = document.querySelector('.milkdrop-window');
+      if (visualizerWindow) {
+        this.makeElementDraggable(visualizerWindow);
+        
+        // Force visualizer to be visible
+        visualizerWindow.style.width = '300px';
+        visualizerWindow.style.height = '200px';
+        visualizerWindow.style.visibility = 'visible';
+        visualizerWindow.style.display = 'block';
+        
+        // Force canvas to be visible
+        const canvas = visualizerWindow.querySelector('canvas');
+        if (canvas) {
+          canvas.style.width = '100%';
+          canvas.style.height = '100%';
+          canvas.style.visibility = 'visible';
+          canvas.style.display = 'block';
+        }
+      }
+    } catch (e) {
+      console.error("Error setting up mobile dragging:", e);
+    }
+  };
+
+  makeElementDraggable = (element) => {
     if (!element) return;
     
     let isDragging = false;
-    let startX, startY, startLeft, startTop;
+    let startX, startY, initialLeft, initialTop;
     
-    // Touch event handlers
-    element.addEventListener('touchstart', (e) => {
+    const handleTouchStart = (e) => {
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      
+      // Get current position
+      const rect = element.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+      
       isDragging = true;
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-      startLeft = parseInt(element.style.left) || 0;
-      startTop = parseInt(element.style.top) || 0;
+      
+      // Add dragging styles
+      element.style.position = 'absolute';
+      element.style.zIndex = '99999';
+      
       e.preventDefault();
-    }, { passive: false });
+    };
     
-    element.addEventListener('touchmove', (e) => {
+    const handleTouchMove = (e) => {
       if (!isDragging) return;
       
-      const deltaX = e.touches[0].clientX - startX;
-      const deltaY = e.touches[0].clientY - startY;
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
       
-      element.style.left = `${startLeft + deltaX}px`;
-      element.style.top = `${startTop + deltaY}px`;
+      // Calculate and set new position
+      element.style.left = `${initialLeft + deltaX}px`;
+      element.style.top = `${initialTop + deltaY}px`;
+      
       e.preventDefault();
-    }, { passive: false });
+    };
     
-    element.addEventListener('touchend', () => {
+    const handleTouchEnd = () => {
       isDragging = false;
-    });
+    };
     
-    // Apply styles to make it obvious the element is draggable
-    element.style.cursor = 'move';
-    element.style.userSelect = 'none';
-    element.style.webkitUserSelect = 'none';
+    // Add event listeners
+    element.addEventListener('touchstart', handleTouchStart, { passive: false });
+    element.addEventListener('touchmove', handleTouchMove, { passive: false });
+    element.addEventListener('touchend', handleTouchEnd);
+    
+    // Add visual indicator
+    element.style.cursor = 'grab';
+  };
+
+  positionWebampInViewport = () => {
+    try {
+      const mainWindow = document.getElementById('webamp');
+      const visualizerWindow = document.querySelector('.milkdrop-window');
+
+      if (mainWindow && visualizerWindow) {
+        const mainRect = mainWindow.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Position visualizer relative to main window
+        let leftPosition = mainRect.left + mainRect.width + 20;
+        let topPosition = mainRect.top + 40;
+        
+        // Ensure visualizer stays on screen
+        if (leftPosition + 300 > viewportWidth) {
+          leftPosition = Math.max(0, viewportWidth - 320);
+        }
+        
+        if (topPosition + 200 > viewportHeight) {
+          topPosition = Math.max(0, viewportHeight - 220);
+        }
+        
+        // Set position
+        visualizerWindow.style.position = 'absolute';
+        visualizerWindow.style.top = `${topPosition}px`;
+        visualizerWindow.style.left = `${leftPosition}px`;
+        visualizerWindow.style.zIndex = '99999';
+        
+        // Force visualizer to be visible
+        visualizerWindow.style.visibility = 'visible';
+        visualizerWindow.style.display = 'block';
+        
+        // Ensure canvas is visible
+        const canvas = visualizerWindow.querySelector('canvas');
+        if (canvas) {
+          canvas.style.width = '100%';
+          canvas.style.height = '100%';
+          canvas.style.visibility = 'visible';
+          canvas.style.display = 'block';
+        }
+      }
+    } catch (e) {
+      console.error("Error positioning Webamp:", e);
+    }
   };
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.positionWebampInViewport);
+    
     if (this.webampInstance) {
       try {
         this.webampInstance.dispose();
@@ -471,6 +401,7 @@ class MusicPlayer extends Component {
         console.error('Error disposing Webamp:', error);
       }
     }
+    
     removeWebampContainer(this.containerId);
   }
 
@@ -514,7 +445,14 @@ class MusicPlayer extends Component {
             </button>
           </div>
         ) : isWebampReady ? (
-          <div>Webamp is running with Techno visualizer preset.</div>
+          <div>
+            <div>Webamp is running with visualizer.</div>
+            {this.state.isMobileDevice && (
+              <div style={{ marginTop: '10px', color: '#ff6600' }}>
+                <strong>Tip: Tap and drag the player or visualizer window to move them.</strong>
+              </div>
+            )}
+          </div>
         ) : null}
       </div>
     );
