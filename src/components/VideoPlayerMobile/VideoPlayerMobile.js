@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useContext } from 'react';
 import Window from '../tools/Window';
 import { WindowProgram } from 'packard-belle';
 import buildMenu from '../../helpers/menuBuilder';
@@ -7,15 +7,21 @@ import { Video } from '@react95/core';
 import '@react95/core/GlobalStyle';
 import '@react95/core/themes/win95.css';
 import './_styles.scss';
+import { ProgramContext } from '../../contexts';
+import readme from '../../data/textFiles/readme';
 
 const VideoPlayerMobile = (props) => {
   // Create state for minimal functionality
+  const { onOpen } = useContext(ProgramContext); 
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedButton, setSelectedButton] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showSkip, setShowSkip] = useState(true);
+  const [skipTimeProgress, setSkipTimeProgress] = useState(0);
+  const [remainingTime, setRemainingTime] = useState(30);
   
   // Create refs for DOM elements
   const videoRef = useRef(null);
@@ -42,11 +48,26 @@ const VideoPlayerMobile = (props) => {
     options: {},
   });
 
+  // Format remaining time as 0:SS
+  const formatRemainingTime = (seconds) => {
+    const wholeSeconds = Math.ceil(seconds);
+    return `0:${wholeSeconds.toString().padStart(2, '0')}`;
+  };
+
   // Format time as MM:SS
   const formatTime = (timeInSeconds) => {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // Skip function
+  const handleSkip = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = videoRef.current.duration; // Skip to the end of the video
+      setShowSkip(false); // Hide the skip button
+      setIsPlaying(false); // Stop the video
+    }
   };
 
   // BUTTON HANDLERS
@@ -55,6 +76,11 @@ const VideoPlayerMobile = (props) => {
       videoRef.current.play();
       setIsPlaying(true);
       setSelectedButton('play');
+      
+      // Reset progress if at the beginning
+      if (currentTime < 1) {
+        setSkipTimeProgress(0);
+      }
     }
   };
 
@@ -72,6 +98,7 @@ const VideoPlayerMobile = (props) => {
       videoRef.current.currentTime = 0;
       setIsPlaying(false);
       setSelectedButton(null);
+      setSkipTimeProgress(0);
     }
   };
 
@@ -239,6 +266,70 @@ const VideoPlayerMobile = (props) => {
       volumeRef.current.onmousedown = handleVolumeMouseDown;
     }
   };
+  
+  // Progress bar for skip timer - increments over 30 seconds when playing
+  useEffect(() => {
+    let intervalId;
+    
+    if (isPlaying && skipTimeProgress < 100) {
+      intervalId = setInterval(() => {
+        setSkipTimeProgress(prevProgress => {
+          const newProgress = prevProgress + (100 / 30) * 0.1; // 0.1 second intervals
+          return newProgress > 100 ? 100 : newProgress;
+        });
+      }, 100); // Update every 100ms for smooth animation
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isPlaying, skipTimeProgress]);
+
+  // Add this effect to handle the countdown timer
+  useEffect(() => {
+    let intervalId;
+    
+    if (isPlaying && remainingTime > 0) {
+      intervalId = setInterval(() => {
+        setRemainingTime(prevTime => {
+          const newTime = prevTime - 0.1; // Decrement by 0.1 seconds
+          return newTime < 0 ? 0 : newTime;
+        });
+      }, 100); // Update every 100ms for smooth countdown
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isPlaying, remainingTime]);
+
+  // Add this effect to reset the timer when the video is restarted
+  useEffect(() => {
+    if (currentTime < 1 && !isPlaying) {
+      setRemainingTime(30);
+    }
+  }, [currentTime, isPlaying]);
+
+  // Skip button auto-hide and reset
+  useEffect(() => {
+    if (showSkip) {
+      const timer = setTimeout(() => {
+        setShowSkip(false);
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSkip]);
+
+  // Reset progress when video restarts from beginning
+  useEffect(() => {
+    if (currentTime < 1 && !isPlaying) {
+      setSkipTimeProgress(0);
+    }
+  }, [currentTime, isPlaying]);
   
   // Handle window drag
   useEffect(() => {
@@ -433,6 +524,126 @@ const VideoPlayerMobile = (props) => {
               display: 'inline',
             }}
           />
+          
+          {/* YouTube style ad info overlay in the bottom left */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '10px',
+              bottom: '5px',
+              zIndex: 100,
+              display: 'flex',
+              alignItems: 'center',
+              color: 'white',
+              fontSize: '10px',
+              fontFamily: 'Arial, sans-serif',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              //opacity: 0.9,
+              padding: '2px 4px',
+              borderRadius: '2px'
+            }}
+          >
+            <span style={{ marginRight: '5px' }}>Ad</span>
+            <span>•</span>
+            <span style={{ marginLeft: '5px' }}>
+            {formatRemainingTime(remainingTime)}
+            </span>
+            <span 
+            style={{ 
+              marginLeft: '10px', 
+              cursor: 'pointer',
+              fontSize: '9px',
+              textDecoration: 'underline'
+            }}
+            onClick={() => {
+              onOpen({
+                component: "InternetExplorer",
+                data: {
+                  __html: readme,
+                },
+              });
+            }}
+          >
+            Visit advertiser's site
+          </span>
+          </div>
+          
+          {/* Yellow progress bar */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '0',
+              bottom: '0px', // Positioned just under the ad info
+              height: '4px', // Thin line
+              width: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark background
+              zIndex: 99
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                left: '0',
+                top: '0',
+                height: '100%',
+                width: `${skipTimeProgress}%`,
+                backgroundColor: '#FFBB00', // YouTube yellow
+                transition: 'width 0.1s linear'
+              }}
+            />
+          </div>
+          
+          {/* YouTube-style Skip Ad button */}
+          <div
+            onClick={skipTimeProgress >= 100 ? handleSkip : undefined}
+            style={{
+              position: 'absolute',
+              bottom: '20px',
+              right: '-4px',
+              backgroundColor: skipTimeProgress >= 100 ? '#333333' : '#555555',
+              color: 'white',
+              padding: '8px 12px 8px 10px',
+              fontSize: '12px',
+              fontFamily: 'Arial, sans-serif',
+              fontWeight: 'bold',
+              cursor: skipTimeProgress >= 100 ? 'pointer' : 'default',
+              zIndex: 100,
+              opacity: 0.9,
+              transition: 'background-color 0.2s',
+              userSelect: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+            }}
+            onMouseOver={(e) => {
+              if (skipTimeProgress >= 100) e.currentTarget.style.backgroundColor = '#444444';
+            }}
+            onMouseOut={(e) => {
+              if (skipTimeProgress >= 100) e.currentTarget.style.backgroundColor = '#333333';
+            }}
+          >
+            <span
+              onClick={skipTimeProgress >= 100 ? handleSkip : undefined} // Make text clickable
+              style={{
+                cursor: skipTimeProgress >= 100 ? 'pointer' : 'default', // Show pointer when clickable
+              }}
+            >
+              Skip Ad
+            </span>
+            <span
+              onClick={skipTimeProgress >= 100 ? handleSkip : undefined} // Make arrow clickable
+              style={{
+                display: 'inline-block',
+                width: '0',
+                height: '0',
+                borderTop: '5px solid transparent',
+                borderBottom: '5px solid transparent',
+                borderLeft: '8px solid white',
+                marginLeft: '3px',
+                cursor: skipTimeProgress >= 100 ? 'pointer' : 'default', // Show pointer when clickable
+              }}
+            ></span>
+          </div>
         </div>
 
         {/* Background and Buttons */}
@@ -570,9 +781,6 @@ const VideoPlayerMobile = (props) => {
               zIndex: 5,
               color: '#ffffff',
               fontSize: '11px',
-              //borderTop: '1px',
-              //borderColor: '#ffffff',
-              //bordersize: '1px',
             }}>//coming soon</div>
           )}
           

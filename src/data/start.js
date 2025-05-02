@@ -196,7 +196,70 @@ const favorites = [
         : [])
     ],
   },
-  
+  {
+    title: "Doodle Gallery",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "Enter Gallery",
+        icon: icons.doodlegallery32,
+        component: "",
+        isDisabled: true,
+      },
+      {
+        title: "Submit Here",
+        icon: icons.prompt16,
+        component: "DoodleSubmission",
+        isDisabled: false,
+      },
+      {
+      title: "All Doodles",
+      icon: icons.folderOpen24,
+      component: "ExplorerWindow",
+      isDisabled: false,
+      data: {
+        content: [{
+          title: "Doodle 1",
+          icon: "paint16",
+          onDoubleClick: () =>
+            window.ProgramContext.onOpen({
+              component: "ImageWindow",
+              multiInstance: true,
+              title: "Doodle Viewer",
+              icon: "paint16",
+              data: {
+                src: "/static/test1.png",
+                doodleName: "Test Doodle",
+                doodler: "cs",
+                dateSubmitted: "3/31/25",
+                doodleStatement: "This is the first doodle submitted to the gallery",
+              }
+            })
+        },
+          {
+          title: "Doodle 2",
+          icon: "paint16",
+          multiInstance: true,
+          onDoubleClick: () =>
+            window.ProgramContext.onOpen({
+              component: "ImageWindow",
+              title: "Doodle Viewer",
+              icon: "paint16",
+              multiInstance: true,
+              data: {
+                src: "/static/hydradoodle.png",
+                doodleName: "Kindled Hydra",
+                doodler: "js",
+                dateSubmitted: "4/4/25",
+                doodleStatement: "fuel the burn before the blaze begins",
+              }
+            })
+          }
+          ]
+        }
+      }
+    ],
+  },
   {
     title: "Media",
     icon: icons.folder16,
@@ -427,6 +490,18 @@ const startMenuData = [
     icon: icons.folderOpen24,
     options: [
       {
+        title: "Ad Tools",
+        icon: icons.faq32,
+        //isDisabled: true,
+        options: [
+          {
+            title: "Coming Soon...",
+            isDisabled: true,
+            icon: icons.faq32,
+          },
+        ],
+      },
+      {
         title: "Help",
         icon: icons.help16,
         options: [
@@ -454,70 +529,6 @@ const startMenuData = [
             multiInstance: true,
             isDisabled: true,
             data: {}
-          }
-        ],
-      },
-      {
-        title: "Doodle Gallery",
-        icon: icons.folder16,
-        options: [
-          {
-            title: "Enter Gallery",
-            icon: icons.doodlegallery32,
-            component: "",
-            isDisabled: true,
-          },
-          {
-            title: "Submit Here",
-            icon: icons.prompt16,
-            component: "DoodleSubmission",
-            isDisabled: false,
-          },
-          {
-          title: "All Doodles",
-          icon: icons.folderOpen24,
-          component: "ExplorerWindow",
-          isDisabled: false,
-          data: {
-            content: [{
-              title: "Doodle 1",
-              icon: "paint16",
-              onDoubleClick: () =>
-                window.ProgramContext.onOpen({
-                  component: "ImageWindow",
-                  multiInstance: true,
-                  title: "Doodle Viewer",
-                  icon: "paint16",
-                  data: {
-                    src: "/static/test1.png",
-                    doodleName: "Test Doodle",
-                    doodler: "cs",
-                    dateSubmitted: "3/31/25",
-                    doodleStatement: "This is the first doodle submitted to the gallery",
-                  }
-                })
-            },
-              {
-              title: "Doodle 2",
-              icon: "paint16",
-              multiInstance: true,
-              onDoubleClick: () =>
-                window.ProgramContext.onOpen({
-                  component: "ImageWindow",
-                  title: "Doodle Viewer",
-                  icon: "paint16",
-                  multiInstance: true,
-                  data: {
-                    src: "/static/hydradoodle.png",
-                    doodleName: "Kindled Hydra",
-                    doodler: "js",
-                    dateSubmitted: "4/4/25",
-                    doodleStatement: "fuel the burn before the blaze begins",
-                  }
-                })
-              }
-              ]
-            }
           }
         ],
       },
