@@ -202,7 +202,7 @@ export function loadButterchurnPresets() {
 export function createWebampContainer(containerId) {
   // Remove any existing container with this ID
   removeWebampContainer(containerId);
-  
+
   // Create a new container
   const container = document.createElement('div');
   container.id = containerId;
@@ -210,12 +210,12 @@ export function createWebampContainer(containerId) {
   container.style.top = '0';
   container.style.left = '0';
   container.style.width = '100%';
-  container.style.height = '100%';
+  container.style.height = '100vh'; // Set height to 100vh
   container.style.pointerEvents = 'none'; // Let clicks pass through to underlying elements
-  
+
   // Add container to the DOM
   document.body.appendChild(container);
-  
+
   return container;
 }
 

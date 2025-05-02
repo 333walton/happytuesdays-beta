@@ -84,11 +84,6 @@ class MusicPlayer extends Component {
   initializeWebamp = async () => {
     try {
       this.setState({ isLoading: true });
-      
-      // Check if required dependencies are loaded
-      if (!window.butterchurn || !window.butterchurnPresets) {
-        throw new Error("Butterchurn libraries not properly loaded");
-      }
 
       // Create container
       const container = createWebampContainer(this.containerId);
@@ -280,6 +275,43 @@ class MusicPlayer extends Component {
       this.presetKeys = Object.keys(butterchurnPresets);
       this.currentPresetIndex = 0;
 
+      // Determine window layout based on device and browser
+      let windowLayout;
+
+      if (this.state.isMobileDevice && this.state.isSafari) {
+        // Mobile Safari layout
+        windowLayout = {
+          main: { position: { x: 0, y: 0 } },
+          equalizer: { position: { x: 0, y: 65 } },
+          playlist: { position: { x: 0, y: 130 }, size: [0, 1] },
+          milkdrop: { position: { x: -90, y: 0 }, size: [-1.3, 1] },
+        };
+      } else if (this.state.isMobileDevice) {
+        // Mobile layout (non-Safari)
+        windowLayout = {
+          main: { position: { x: 0, y: 0 } },
+          equalizer: { position: { x: 0, y: 70 } },
+          playlist: { position: { x: 0, y: 140 }, size: [0, 1] },
+          milkdrop: { position: { x: -100, y: 0 }, size: [-1.5, 1] },
+        };
+      } else if (this.state.isSafari) {
+        // Desktop Safari layout
+        windowLayout = {
+          main: { position: { x: 0, y: 0 } },
+          equalizer: { position: { x: 0, y: 116 } },
+          playlist: { position: { x: 0, y: 231 }, size: [0, 1.5] },
+          milkdrop: { position: { x: -180, y: -1 }, size: [-2.5, 1.5] },
+        };
+      } else {
+        // Standard desktop layout
+        windowLayout = {
+          main: { position: { x: 0, y: 0 } },
+          equalizer: { position: { x: 0, y: 116 } },
+          playlist: { position: { x: 0, y: 231 }, size: [0, 1.5] },
+          milkdrop: { position: { x: -200, y: -1 }, size: [-3, 1.5] },
+        };
+      }
+
       // Configure Webamp with Butterchurn options
       const options = {
         initialTracks: tracks,
@@ -393,12 +425,7 @@ class MusicPlayer extends Component {
           },
           butterchurnOpen: true,
         },
-        __initialWindowLayout: {
-          main: { position: { x: 0, y: 0 } },
-          equalizer: { position: { x: 0, y: 116 } },
-          playlist: { position: { x: 0, y: 231 }, size: [0, 1.5] },
-          milkdrop: { position: { x: -200, y: -1 }, size: [-3, 1.5] },
-        },
+        __initialWindowLayout: windowLayout, // Use the determined layout
       };
 
       // Load Webamp
@@ -983,18 +1010,30 @@ class MusicPlayer extends Component {
         Component={WindowProgram}
         title="Winamp Music Player"
         menuOptions={menuOptions}
-        className={cx('music-player', 'music-player-window', props.className)}
+        className={cx(
+          'music-player',
+          'music-player-window',
+          { 'safari-browser': this.state.isSafari }, // Add a class for Safari
+          props.className
+        )}
         minHeight={this.state.isMobileDevice ? '80px' : '80px'}
         minWidth={this.state.isMobileDevice ? '270px' : '270px'}
         initialWidth={this.state.isMobileDevice ? '270px' : '270px'}
         initialHeight={this.state.isMobileDevice ? '80px' : '80px'}
         resizable={false}
         initialX={this.state.isMobileDevice ? 10 : 2} // Adjust x position for mobile
-        initialY={this.state.isMobileDevice ? 100 : 372} // Adjust y position for mobile
+        initialY={
+          this.state.isMobileDevice
+            ? this.state.isSafari
+              ? 210 // Safari-specific adjustment
+              : 170 // Default mobile position
+            : 372 // Desktop position
+        }
         style={{
           zIndex: 9,
           width: this.state.isMobileDevice ? '270px' : '270px',
           height: this.state.isMobileDevice ? '80px' : '80px',
+          ...(this.state.isSafari && { border: '1px solid #ccc' }), // Safari-specific styles
           ...props.style,
         }}
       >

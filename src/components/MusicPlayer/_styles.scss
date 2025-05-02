@@ -2,6 +2,11 @@
   .music-player-window {
     min-height: 80px !important; // Override default minHeight
     position: relative; // Ensure proper positioning
+
+    &.safari-browser {
+      border: 1px solid #ccc; // Safari-specific border
+      background-color: #f9f9f9; // Optional Safari-specific background
+    }
   }
 
   .music-player-container {
