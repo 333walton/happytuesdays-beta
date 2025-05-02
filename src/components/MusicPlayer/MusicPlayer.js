@@ -84,6 +84,11 @@ class MusicPlayer extends Component {
   initializeWebamp = async () => {
     try {
       this.setState({ isLoading: true });
+      
+      // Check if required dependencies are loaded
+      if (!window.butterchurn || !window.butterchurnPresets) {
+        throw new Error("Butterchurn libraries not properly loaded");
+      }
 
       // Create container
       const container = createWebampContainer(this.containerId);
@@ -275,43 +280,6 @@ class MusicPlayer extends Component {
       this.presetKeys = Object.keys(butterchurnPresets);
       this.currentPresetIndex = 0;
 
-      // Determine window layout based on device and browser
-      let windowLayout;
-
-      if (this.state.isMobileDevice && this.state.isSafari) {
-        // Mobile Safari layout
-        windowLayout = {
-          main: { position: { x: 0, y: 0 } },
-          equalizer: { position: { x: 0, y: 65 } },
-          playlist: { position: { x: 0, y: 130 }, size: [0, 1] },
-          milkdrop: { position: { x: -90, y: 0 }, size: [-1.3, 1] },
-        };
-      } else if (this.state.isMobileDevice) {
-        // Mobile layout (non-Safari)
-        windowLayout = {
-          main: { position: { x: 0, y: 0 } },
-          equalizer: { position: { x: 0, y: 70 } },
-          playlist: { position: { x: 0, y: 140 }, size: [0, 1] },
-          milkdrop: { position: { x: -100, y: 0 }, size: [-1.5, 1] },
-        };
-      } else if (this.state.isSafari) {
-        // Desktop Safari layout
-        windowLayout = {
-          main: { position: { x: 0, y: 0 } },
-          equalizer: { position: { x: 0, y: 116 } },
-          playlist: { position: { x: 0, y: 231 }, size: [0, 1.5] },
-          milkdrop: { position: { x: -180, y: -1 }, size: [-2.5, 1.5] },
-        };
-      } else {
-        // Standard desktop layout
-        windowLayout = {
-          main: { position: { x: 0, y: 0 } },
-          equalizer: { position: { x: 0, y: 116 } },
-          playlist: { position: { x: 0, y: 231 }, size: [0, 1.5] },
-          milkdrop: { position: { x: -200, y: -1 }, size: [-3, 1.5] },
-        };
-      }
-
       // Configure Webamp with Butterchurn options
       const options = {
         initialTracks: tracks,
@@ -425,7 +393,12 @@ class MusicPlayer extends Component {
           },
           butterchurnOpen: true,
         },
-        __initialWindowLayout: windowLayout, // Use the determined layout
+        __initialWindowLayout: {
+          main: { position: { x: 1062, y: -860 } },
+          equalizer: { position: { x: 1062, y: -744 } },
+          playlist: { position: { x: 1062, y: -628 }, size: [0, 1.5] },
+          milkdrop: { position: { x: 861, y: -860 }, size: [-3, 1.5] },
+        },
       };
 
       // Load Webamp
