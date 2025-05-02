@@ -983,20 +983,20 @@ class MusicPlayer extends Component {
         Component={WindowProgram}
         title="Winamp Music Player"
         menuOptions={menuOptions}
-        className={cx('music-player', 'music-player-window', props.className)} // Add 'music-player' class
-        minHeight= {this.state.isMobileDevice ? '80px' : '80px'} // Set mobile and desktop minHeight
-        minWidth= {this.state.isMobileDevice ? '270px' : '270px'}
+        className={cx('music-player', 'music-player-window', props.className)}
+        minHeight={this.state.isMobileDevice ? '80px' : '80px'}
+        minWidth={this.state.isMobileDevice ? '270px' : '270px'}
         initialWidth={this.state.isMobileDevice ? '270px' : '270px'}
         initialHeight={this.state.isMobileDevice ? '80px' : '80px'}
         resizable={false}
+        initialX={this.state.isMobileDevice ? 10 : 2} // Adjust x position for mobile
+        initialY={this.state.isMobileDevice ? 100 : 372} // Adjust y position for mobile
         style={{
           zIndex: 9,
-          width: this.state.isMobileDevice ? '270px' : '270px', // Set mobile and desktop width
-          height: this.state.isMobileDevice ? '80px' : '80px', // Set mobile and desktop height
+          width: this.state.isMobileDevice ? '270px' : '270px',
+          height: this.state.isMobileDevice ? '80px' : '80px',
           ...props.style,
         }}
-        initialX={this.state.isMobileDevice ? 2 : 2}
-        initialY={this.state.isMobileDevice ? 372 : 372}
       >
         <div 
           ref={this.containerRef}
@@ -1031,7 +1031,7 @@ class MusicPlayer extends Component {
               </button>
             </div>
           ) : isWebampReady ? (
-            <div>Close me to exit the player!</div>
+            <div>Close me to exit the player</div>
           ) : null}
         </div>
       </Window>

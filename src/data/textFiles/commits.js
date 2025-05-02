@@ -3,6 +3,55 @@ const commits = `
 >>HYDRA98 CHANGELOG.TXT
 ============================================================
 
+[2025-05-02]  e3155fc  - ismobile
+[2025-05-02]  85fa448  - winamp stubborn css
+[2025-05-02]  7b78803  - .
+[2025-05-01]  ea673f1  - .
+[2025-05-01]  78c665f  - winamp
+[2025-05-01]  78c665f  - winamp
+[2025-05-01]  26f4079  - winamp visualizer
+[2025-04-30]  7674be9  - small
+[2025-04-30]  7674be9  - small
+[2025-04-30]  61f4495  - webamp
+[2025-04-29]  b518440  - vast rough
+[2025-04-29]  a795e4c  - .
+[2025-04-29]  95729fb  - small
+[2025-04-29]  8659abb  - webkit stuff
+[2025-04-28]  e2a4c5f  - wmp update
+[2025-04-27]  c616474  - wmp
+[2025-04-25]  a7e43d7  - vplayer small
+[2025-04-25]  9d7d58a  - vid player and calc big
+[2025-04-24]  b9edcaf  - playwright & mediachrome
+[2025-04-24]  4c5dab8  - mediachrome player configs
+[2025-04-23]  d508df9  - .
+[2025-04-23]  d508df9  - .
+[2025-04-23]  bd7d5c4  - v mobile test
+[2025-04-23]  9a612c9  - video player mobile
+[2025-04-23]  054828c  - vid players
+[2025-04-21]  8ee6a1e  - paint restart
+[2025-04-21]  5922103  - paint css
+[2025-04-21]  144db1f  - vercel paints
+[2025-04-20]  d428c00  - pixel doodle
+[2025-04-20]  c306c7e  - small
+[2025-04-20]  c306c7e  - small
+[2025-04-20]  7e3174c  - ascii text saveas
+[2025-04-20]  5275f90  - alert
+[2025-04-19]  ee30db7  - ascii text saveas css
+[2025-04-19]  b0af66b  - menuoptions
+[2025-04-18]  c4d37bd  - ascii maze m
+[2025-04-18]  b9b9bd3  - sb
+[2025-04-18]  926d964  - storybook
+[2025-04-18]  7c7129b  - ascii
+[2025-04-18]  68798f2  - ascii text
+[2025-04-18]  65deee5  - asciitext
+[2025-04-18]  23df4b6  - small
+[2025-04-18]  23df4b6  - small
+[2025-04-17]  fa6e5b6  - jsdos
+[2025-04-17]  f8f3893  - small
+[2025-04-17]  f8f3893  - small
+[2025-04-17]  6617b20  - .
+[2025-04-17]  6617b20  - .
+[2025-04-16]  1524077  - css
 [2025-04-16]  7d1629c  - ascii maze dt
 [2025-04-15]  43691f0  - rebel command
 [2025-04-15]  26b5bc6  - dood
