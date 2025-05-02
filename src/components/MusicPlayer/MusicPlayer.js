@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import cx from 'classnames';
-import { WindowProgram } from 'packard-belle';
+import { WindowProgram } from 'packard-belle'; // Ensure Window is imported
+import Window from '../tools/Window';
 import buildMenu from '../../helpers/menuBuilder';
 import {
   loadWebamp,
@@ -125,6 +126,138 @@ class MusicPlayer extends Component {
         {
           metaData: { title: "DJ BORING", artist: "Winona" },
           url: "/music/Winona.mp3"
+        },
+        {
+          metaData: { title: "Krosia", artist: "Slight Days" },
+          url: "/music/Slight Days.mp3"
+        },
+        {
+          metaData: { title: "Hotel Pools", artist: "Crush" },
+          url: "/music/Crush.mp3"
+        },
+        {
+          metaData: { title: "FRM", artist: "Endless Lines" },
+          url: "/music/Endless Lines.mp3"
+        },
+        {
+          metaData: { title: "De Lorra", artist: "Let Us" },
+          url: "/music/Let Us.mp3"
+        },
+        {
+          metaData: { title: "Rosentwig", artist: "Hiraeth" },
+          url: "/music/Hiraeth.mp3"
+        },
+        {
+          metaData: { title: "Hotel Pools", artist: "Parallel" },
+          url: "/music/Parallel.mp3"
+        },
+        {
+          metaData: { title: "DJ BORING", artist: "Winona" },
+          url: "/music/Winona.mp3"
+        },
+        {
+          metaData: { title: "A.L.I.S.O.N", artist: "Space Echo" },
+          url: "/music/Space Echo.mp3"
+        },
+        {
+          metaData: { title: "Voyage", artist: "Paradise" },
+          url: "/music/Paradise.mp3"
+        },
+        {
+          metaData: { title: "A.L.I.S.O.N & Hotel Pools", artist: "Murmurs" },
+          url: "/music/Murmurs.mp3"
+        },
+        {
+          metaData: { title: "Hotel Pools", artist: "Drift" },
+          url: "/music/Drift.mp3"
+        },
+        {
+          metaData: { title: "oDDling", artist: "Ascend" },
+          url: "/music/Ascend.mp3"
+        },
+        {
+          metaData: { title: "Xtract", artist: "Audiotool Day 2016" },
+          url: "/music/Audiotool Day 2016.mp3"
+        },
+        {
+          metaData: { title: "Ross From Friends", artist: "Lies" },
+          url: "/music/Lies.mp3"
+        },
+        {
+          metaData: { title: "Hotel Pools", artist: "Solitude" },
+          url: "/music/Solitude.mp3"
+        },
+        {
+          metaData: { title: "Hotel Pools", artist: "Eclipse" },
+          url: "/music/Eclipse.mp3"
+        },
+        {
+          metaData: { title: "Hotel Pools, VIQ", artist: "Splash" },
+          url: "/music/Splash.mp3"
+        },
+        {
+          metaData: { title: "DreamStation1986", artist: "Pylon" },
+          url: "/music/Pylon.mp3"
+        },
+        {
+          metaData: { title: "Hotel Pools", artist: "Beginning" },
+          url: "/music/Beginning.mp3"
+        },
+        {
+          metaData: { title: "COMPUTER DATA", artist: "Healing" },
+          url: "/music/Healing.mp3"
+        },
+        {
+          metaData: { title: "The Midnight", artist: "Night Skies (Instrumental)" },
+          url: "/music/Night Skies (Instrumental).mp3"
+        },
+        {
+          metaData: { title: "oDDling & Hotel Pools", artist: "Remain" },
+          url: "/music/Remain.mp3"
+        },
+        {
+          metaData: { title: "Krosia", artist: "Azur" },
+          url: "/music/Azur.mp3"
+        },
+        {
+          metaData: { title: "Hotel Pools", artist: "Coast" },
+          url: "/music/Coast.mp3"
+        },
+        {
+          metaData: { title: "Eagle Eyed Tiger & Hotel Pools", artist: "Hold" },
+          url: "/music/Hold.mp3"
+        },
+        {
+          metaData: { title: "Emil Rottmayer", artist: "Evade" },
+          url: "/music/Evade.mp3"
+        },
+        {
+          metaData: { title: "Zane Alexander", artist: "Float" },
+          url: "/music/Float.mp3"
+        },
+        {
+          metaData: { title: "Ax14", artist: "Water Race" },
+          url: "/music/Water Race.mp3"
+        },
+        {
+          metaData: { title: "Voyager", artist: "Intelestellar" },
+          url: "/music/Intelestellar.mp3"
+        },
+        {
+          metaData: { title: "Hotel Pools", artist: "Sequence" },
+          url: "/music/Sequence.mp3"
+        },
+        {
+          metaData: { title: "oDDling & Forhill", artist: "Supernal" },
+          url: "/music/Supernal.mp3"
+        },
+        {
+          metaData: { title: "Hotel Pools", artist: "Time" },
+          url: "/music/Time.mp3"
+        },
+        {
+          metaData: { title: "oDDling", artist: "Aurora" },
+          url: "/music/Aurora.mp3"
         }
       ];
 
@@ -257,8 +390,15 @@ class MusicPlayer extends Component {
             textureRatio: 1.0,
             meshWidth: this.state.isMobileDevice ? 32 : 48,
             meshHeight: this.state.isMobileDevice ? 24 : 36
-          }
-        }
+          },
+          butterchurnOpen: true,
+        },
+        __initialWindowLayout: {
+          main: { position: { x: 0, y: 0 } },
+          equalizer: { position: { x: 0, y: 116 } },
+          playlist: { position: { x: 0, y: 231 }, size: [0, 1.5] },
+          milkdrop: { position: { x: -200, y: -1 }, size: [-3, 1.5] },
+        },
       };
 
       // Load Webamp
@@ -828,59 +968,64 @@ class MusicPlayer extends Component {
       componentType: 'MusicPlayer',
       showHelp: this.showHelp,
       options: {},
+    }, {
+      Help: {
+        options: [
+          { title: "Help Topics", onClick: () => alert("Music Player Help Topics"), isDisabled: true },
+          //{ title: "About", onClick: () => alert("About Music Player"), isDisabled: false }
+        ]
+      }
     });
   
     return (
-      <div
-        ref={this.containerRef}
-        className="music-player-container"
+      <Window
+        {...props}
+        Component={WindowProgram}
+        title="Winamp Music Player"
+        menuOptions={menuOptions}
+        className={cx('music-player-window', props.className)}
+        resizable={false}
+        style={{ zIndex: 9, ...props.style }}
+        initialX={props.initialX || 2}
+        initialY={props.initialY || 372}
+        position={props.position || { x: 2, y: 372 }}
       >
-        {isLoading ? (
-          <div>Loading Webamp...</div>
-        ) : error ? (
-          <div className="webamp-error">
-            <div>Error: {error}</div>
-            <button
-              onClick={this.retryLoading}
-              style={{
-                padding: '8px 16px',
-                margin: '10px',
-                backgroundColor: '#d3d3',
-                border: '1px solid #999',
-                cursor: 'pointer',
-              }}
-            >
-              Retry
-            </button>
-          </div>
-        ) : isWebampReady ? (
-          <div>
-            <div>Webamp is running with visualizer.</div>
-            <div style={{ marginTop: '10px' }}>
-              <p>
-                <strong>Keyboard Controls:</strong> Use Left/Right arrow keys to change presets.
-              </p>
-              <button
-                onClick={() => this.loadCustomPresets()}
+        <div 
+          ref={this.containerRef}
+          className="music-player-container"
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+          }}
+        >
+          {isLoading ? (
+            <div>Loading Webamp...</div>
+          ) : error ? (
+            <div className="webamp-error">
+              <div>Error: {error}</div>
+              <button 
+                onClick={this.retryLoading}
                 style={{
-                  padding: '8px 16px',
-                  margin: '10px 0',
+
                   backgroundColor: '#d3d3d3',
                   border: '1px solid #999',
                   cursor: 'pointer',
                 }}
               >
-                Load Custom Presets (ZIP)
+                Retry
               </button>
-              {this.state.isMobileDevice && (
-                <p style={{ color: '#ff6600' }}>
-                  <strong>Tip: Tap and drag to move the player window.</strong>
-                </p>
-              )}
             </div>
-          </div>
-        ) : null}
-      </div>
+          ) : isWebampReady ? (
+            <div>Close me to exit the player!</div>
+          ) : null}
+        </div>
+      </Window>
     );
   }
 }

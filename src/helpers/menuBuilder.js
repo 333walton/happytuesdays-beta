@@ -3,24 +3,17 @@ const buildCustomOptions = (rows) =>
   Object.keys(rows).reduce((acc, val) => {
     const menuEntry = rows[val];
 
-    if (typeof menuEntry === "object" && menuEntry?.onClick) {
+    if (typeof menuEntry === "object" && menuEntry?.options) {
       return [
         ...acc,
         {
           title: val,
-          onClick: menuEntry.onClick,
-          options: [] // ✅ required to avoid crash in .reduce()
+          options: menuEntry.options
         }
       ];
     }
 
-    return [
-      ...acc,
-      {
-        title: val,
-        options: menuEntry
-      }
-    ];
+    return acc; // Skip invalid entries
   }, []);
 
 
@@ -61,29 +54,29 @@ export const buildMenu = (props, customOptions = {}) => {
   const onClose = [{ title: "Close", onClick: () => props.onClose(props) }];
   let saveOptions = [];
 
-if (props.componentType === "ASCIIText") {
-  if (props.onSaveAs) {
-    saveOptions.push({
-      title: "Save As...",
-      onClick: data => props.onSaveAs(props, data)
-    });
-  }
-} else {
-  if (props.onSaveAs) {
-    saveOptions.push({
-      title: "Save As...",
-      onClick: data => props.onSaveAs(props, data)
-    });
-  }
+  if (props.componentType === "ASCIIText") {
+    if (props.onSaveAs) {
+      saveOptions.push({
+        title: "Save As...",
+        onClick: data => props.onSaveAs(props, data)
+      });
+    }
+  } else {
+    if (props.onSaveAs) {
+      saveOptions.push({
+        title: "Save As...",
+        onClick: data => props.onSaveAs(props, data)
+      });
+    }
 
-  if (props.onSave) {
-    saveOptions.push({
-      title: "Save",
-      onClick: data => props.onSave(props, data),
-      isDisabled: props.readOnly
-    });
+    if (props.onSave) {
+      saveOptions.push({
+        title: "Save",
+        onClick: data => props.onSave(props, data),
+        isDisabled: props.readOnly
+      });
+    }
   }
-}
 
   const multiInstance = props.multiInstance
     ? [
@@ -111,7 +104,7 @@ if (props.componentType === "ASCIIText") {
       options: [...multiInstance, saveOptions, ...fileOptions, onClose]
     },
     ...customElements,
-    helpOptions(props)
+    customOptions.Help || helpOptions(props) // Use custom Help options if provided
   ];
 };
 
