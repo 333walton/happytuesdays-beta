@@ -1,16 +1,14 @@
 .music-player {
   .music-player-window {
-    width: 270px !important; // Desktop width
-    height: 80px !important; // Desktop height
+    min-height: 80px !important; // Override default minHeight
     position: relative; // Ensure proper positioning
   }
 
   .music-player-container {
-    width: 100%; // Match the parent width
-    height: 100%; // Match the parent height
+    min-width: 100% !important; // Override default minWidth
+    min-height: 36px !important; // Override default minHeight
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     text-align: center;
     color: #000;
@@ -20,16 +18,20 @@
   }
 
   .react-draggable {
-    width: 270px !important; // Desktop width
-    height: 80px !important; // Desktop height
+    width: 270px !important;
+    height: 80px !important;
+    min-height: 80px !important; // Override default minHeight
+    min-width: 270px !important;
     position: absolute !important; // Ensure proper positioning
     top: 0 !important;
     left: 0 !important;
   }
 
   .react-draggable.react-draggable-dragged {
-    width: 270px !important; // Desktop width
-    height: 80px !important; // Desktop height
+    width: 270px !important;
+    height: 80px !important;
+    min-height: 80px !important; // Override default minHeight
+    min-width: 270px !important; // Override default minWidth
     position: absolute !important; // Ensure proper positioning
     top: 0 !important;
     left: 0 !important;
@@ -37,18 +39,41 @@
 
   &.is-mobile {
     .music-player-window {
-      width: 270px !important; // Mobile width (same as desktop for now)
-      height: 80px !important; // Mobile height (same as desktop for now)
+    width: 270px !important;
+    height: 80px !important;
+    min-height: 80px !important; // Override default minHeight
+    min-width: 270px !important; // Override default minWidth
     }
 
+    .music-player-container {
+    min-width: 100% !important; // Override default minWidth
+    min-height: 36px !important; // Override default minHeight
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #000;
+    font-family: 'Microsoft Sans Serif', sans-serif;
+    font-size: 13px;
+    z-index: 5;   }
+    
     .react-draggable {
-      width: 270px !important; // Mobile width (same as desktop for now)
-      height: 80px !important; // Mobile height (same as desktop for now)
+    width: 270px !important;
+    height: 80px !important;
+    min-height: 80px !important; // Override default minHeight
+    position: absolute !important; // Ensure proper positioning
+    top: 0 !important;
+    left: 0 !important;
     }
-
+    
     .react-draggable.react-draggable-dragged {
-      width: 270px !important; // Mobile width (same as desktop for now)
-      height: 80px !important; // Mobile height (same as desktop for now)
-    }
+    width: 270px !important;
+    height: 80px !important;
+    min-height: 80px !important; // Override default minHeight
+    min-width: 270px !important; // Override default minWidth
+    position: absolute !important; // Ensure proper positioning
+    top: 0 !important;
+    left: 0 !important;   }
   }
 }

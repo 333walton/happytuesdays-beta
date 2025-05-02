@@ -984,6 +984,10 @@ class MusicPlayer extends Component {
         title="Winamp Music Player"
         menuOptions={menuOptions}
         className={cx('music-player', 'music-player-window', props.className)} // Add 'music-player' class
+        minHeight= {this.state.isMobileDevice ? '80px' : '80px'} // Set mobile and desktop minHeight
+        minWidth= {this.state.isMobileDevice ? '270px' : '270px'}
+        initialWidth={this.state.isMobileDevice ? '270px' : '270px'}
+        initialHeight={this.state.isMobileDevice ? '80px' : '80px'}
         resizable={false}
         style={{
           zIndex: 9,
@@ -991,9 +995,8 @@ class MusicPlayer extends Component {
           height: this.state.isMobileDevice ? '80px' : '80px', // Set mobile and desktop height
           ...props.style,
         }}
-        initialX={props.initialX || 2}
-        initialY={props.initialY || 372}
-        position={props.position || { x: 2, y: 372 }}
+        initialX={this.state.isMobileDevice ? 2 : 2}
+        initialY={this.state.isMobileDevice ? 372 : 372}
       >
         <div 
           ref={this.containerRef}
@@ -1001,6 +1004,8 @@ class MusicPlayer extends Component {
           style={{
             width: '100%',
             height: '100%',
+            minHeight: '100%',
+            minWidth: '100%',
             position: 'relative',
             display: 'flex',
             flexDirection: 'column',
