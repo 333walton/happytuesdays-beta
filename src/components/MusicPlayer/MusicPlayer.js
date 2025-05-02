@@ -994,18 +994,20 @@ class MusicPlayer extends Component {
         initialWidth={this.state.isMobileDevice ? '270px' : '270px'}
         initialHeight={this.state.isMobileDevice ? '80px' : '80px'}
         resizable={false}
-        initialX={this.state.isMobileDevice ? 10 : 2} // Adjust x position for mobile
+        initialX={this.state.isMobileDevice ? 100 : 2} // Adjust x position for mobile
         initialY={
           this.state.isMobileDevice
             ? this.state.isSafari
               ? 270 // Safari-specific adjustment, 30% lower
               : 221 // Default mobile position, 30% lower
-            : 372 // Desktop position
+            : 372 // Desktop position workls 
         }
         style={{
           zIndex: 9,
           width: this.state.isMobileDevice ? '270px' : '270px',
           height: this.state.isMobileDevice ? '80px' : '80px',
+          position: 'absolute', // Ensure proper positioning
+          top: this.state.isMobileDevice ? '320px' : '372px', // Desktop vertical position is 372px
           ...(this.state.isSafari && { border: '1px solid #ccc' }), // Safari-specific styles
           ...props.style,
         }}
