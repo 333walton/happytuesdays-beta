@@ -998,8 +998,8 @@ class MusicPlayer extends Component {
         initialY={
           this.state.isMobileDevice
             ? this.state.isSafari
-              ? 210 // Safari-specific adjustment
-              : 170 // Default mobile position
+              ? 270 // Safari-specific adjustment, 30% lower
+              : 221 // Default mobile position, 30% lower
             : 372 // Desktop position
         }
         style={{
