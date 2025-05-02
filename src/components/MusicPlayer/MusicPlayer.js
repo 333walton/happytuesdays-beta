@@ -983,9 +983,14 @@ class MusicPlayer extends Component {
         Component={WindowProgram}
         title="Winamp Music Player"
         menuOptions={menuOptions}
-        className={cx('music-player-window', props.className)}
+        className={cx('music-player', 'music-player-window', props.className)} // Add 'music-player' class
         resizable={false}
-        style={{ zIndex: 9, ...props.style }}
+        style={{
+          zIndex: 9,
+          width: this.state.isMobileDevice ? '270px' : '270px', // Set mobile and desktop width
+          height: this.state.isMobileDevice ? '80px' : '80px', // Set mobile and desktop height
+          ...props.style,
+        }}
         initialX={props.initialX || 2}
         initialY={props.initialY || 372}
         position={props.position || { x: 2, y: 372 }}
@@ -1012,7 +1017,6 @@ class MusicPlayer extends Component {
               <button 
                 onClick={this.retryLoading}
                 style={{
-
                   backgroundColor: '#d3d3d3',
                   border: '1px solid #999',
                   cursor: 'pointer',

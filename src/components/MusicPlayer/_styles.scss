@@ -1,11 +1,13 @@
-.music-player-window {
-    width: 270px !important;
-    height: 80px !important; // Changed from 100px to 80px as per the suggestion
-}
+.music-player {
+  .music-player-window {
+    width: 270px !important; // Desktop width
+    height: 80px !important; // Desktop height
+    position: relative; // Ensure proper positioning
+  }
 
-.music-player-container {
-    width: 270px !important;
-    height: 80px !important;
+  .music-player-container {
+    width: 100%; // Match the parent width
+    height: 100%; // Match the parent height
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -15,45 +17,38 @@
     font-family: 'Microsoft Sans Serif', sans-serif;
     font-size: 13px;
     z-index: 5;
-    } 
+  }
 
-.react-draggable {
-    /* Ensure the draggable wrapper adapts to content size */
-    right: unset !important;
-    bottom: unset !important;
-    width: auto !important;
-    /* Adjust to the width of the content */
-    height: 109px !important;
-    /* Set the height for the wrapper, including the header */
-    min-height: 109px !important;
-    /* Ensure a minimum height for the wrapper */
+  .react-draggable {
+    width: 270px !important; // Desktop width
+    height: 80px !important; // Desktop height
+    position: absolute !important; // Ensure proper positioning
+    top: 0 !important;
+    left: 0 !important;
+  }
+
+  .react-draggable.react-draggable-dragged {
+    width: 270px !important; // Desktop width
+    height: 80px !important; // Desktop height
+    position: absolute !important; // Ensure proper positioning
+    top: 0 !important;
+    left: 0 !important;
+  }
+
+  &.is-mobile {
+    .music-player-window {
+      width: 270px !important; // Mobile width (same as desktop for now)
+      height: 80px !important; // Mobile height (same as desktop for now)
+    }
+
+    .react-draggable {
+      width: 270px !important; // Mobile width (same as desktop for now)
+      height: 80px !important; // Mobile height (same as desktop for now)
+    }
+
+    .react-draggable.react-draggable-dragged {
+      width: 270px !important; // Mobile width (same as desktop for now)
+      height: 80px !important; // Mobile height (same as desktop for now)
+    }
+  }
 }
-    
-.react-draggable.react-draggable-dragged {
-    /* Ensure the draggable wrapper adapts to content size */
-    right: unset !important;
-    bottom: unset !important;
-    width: auto !important;
-    /* Adjust to the width of the content */
-    height: 109px !important;
-    /* Set the height for the wrapper, including the header */
-    min-height: 109px !important;
-    /* Ensure a minimum height for the wrapper */
-}
-    
-.Frame.Window.WindowProgram.music-player-window {
-    /* Set the height of the music-player-window component */
-    height: 80px !important;
-    /* This should align with .music-player-container's height */
-}
-    
-.Window__heading {
-    /* Ensure the heading adjusts to content size */
-    height: unset !important;
-    /* This allows the heading to take up only the space it needs */
-}
-    
-.Window__title {
-    /* Ensure the title adjusts to content size */
-    height: unset !important;
-    /* This allows the title to take up only the space it needs */   }
