@@ -986,7 +986,7 @@ class MusicPlayer extends Component {
         className={cx(
           'music-player',
           'music-player-window',
-          { 'safari-browser': this.state.isSafari }, // Add a class for Safari
+          { 'safari-browser': this.state.isSafari },
           props.className
         )}
         minHeight={this.state.isMobileDevice ? '80px' : '80px'}
@@ -994,21 +994,15 @@ class MusicPlayer extends Component {
         initialWidth={this.state.isMobileDevice ? '270px' : '270px'}
         initialHeight={this.state.isMobileDevice ? '80px' : '80px'}
         resizable={false}
-        initialX={this.state.isMobileDevice ? 100 : 2} // Adjust x position for mobile
-        initialY={
-          this.state.isMobileDevice
-            ? this.state.isSafari
-              ? 270 // Safari-specific adjustment, 30% lower
-              : 221 // Default mobile position, 30% lower
-            : 372 // Desktop position workls 
-        }
+        initialX={1} // Set the same initialX as ASCIIText
+        initialY={372} // Set the same initialY as ASCIIText
         style={{
           zIndex: 9,
           width: this.state.isMobileDevice ? '270px' : '270px',
           height: this.state.isMobileDevice ? '80px' : '80px',
-          position: 'absolute', // Ensure proper positioning
-          top: this.state.isMobileDevice ? '320px' : '372px', // Desktop vertical position is 372px
-          ...(this.state.isSafari && { border: '1px solid #ccc' }), // Safari-specific styles
+          position: 'absolute',
+          top: this.state.isMobileDevice ? '320px' : '372px',
+          ...(this.state.isSafari && { border: '1px solid #ccc' }),
           ...props.style,
         }}
       >
