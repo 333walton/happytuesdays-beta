@@ -23,28 +23,91 @@
 .ASCIIText {
   .ascii-banner-controls {
     display: flex;
-    gap: 9px;
+    align-items: center;
+    gap: 8px;
     padding: 8px;
 
-    input,
-    select {
+    input {
       font-family: 'Courier New', monospace;
-      font-size: 11px;
+      font-size: 12px;
       padding: 3px 6px;
-      background: #eaeaea;
-      border: 1px solid #888;
-      height: 20px;
+      background: white;
+      border: 2px inset #dfdfdf;
+      height: 24px;
+      box-sizing: border-box;
     }
 
-    Select {
-      width: 125px;
-      height: 20px;
+    button {
+      font-family: Tahoma, sans-serif;
+      font-size: 12px;
+      padding: 0 12px;
+      background: #dfdfdf;
+      border: 2px outset #dfdfdf;
+      height: 24px;
+      cursor: pointer;
+
+      &:active {
+        border-style: inset;
+      }
     }
 
-    Select,
-    &:focus {
-      height: 150px;
-      overflow-y: auto;
+    // React95 Dropdown styling
+    .dropdown {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      min-width: 150px;
+      height: 24px;
+      margin: 0 !important;
+
+      select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        padding: 3px 24px 3px 6px;
+        background: white;
+        border: 2px inset #dfdfdf;
+        height: 24px;
+        width: 100%;
+        box-sizing: border-box;
+        cursor: pointer;
+        margin: 0;
+
+        &:focus {
+          outline: none;
+        }
+      }
+
+      // Dropdown arrow styling
+      &::after {
+        content: '';
+        position: absolute;
+        right: 2px;
+        top: 2px;
+        bottom: 2px;
+        width: 17px;
+        background: #dfdfdf;
+        border: 2px outset #dfdfdf;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      &::before {
+        content: '';
+        position: absolute;
+        right: 7px;
+        top: 50%;
+        transform: translateY(-40%);
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid black;
+        pointer-events: none;
+        z-index: 1;
+      }
     }
   }
 

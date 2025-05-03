@@ -7,6 +7,7 @@ import { asciibanner16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import FigletText from "./Internal";
 import { ProgramContext } from "../../contexts";
+import { Dropdown } from "@react95/core";
 import "./_styles.scss";
 
 const fonts = [
@@ -26,7 +27,7 @@ class ASCIIText extends Component {
     this.state = {
       text: "TEST",
       font: window.innerWidth <= 768
-        ? { value: "Train", label: "Train" }
+        ? { value: "Colossal", label: "Colossal" }
         : { value: "Slant Relief", label: "Slant Relief" },
       asciiOutput: "",
       copyButtonLabel: "Copy",
@@ -66,7 +67,7 @@ class ASCIIText extends Component {
 
     const { scrollWidth, scrollHeight } = el;
     const padding = 100;
-    const minWidth = 340;
+    const minWidth = 380;
     const minHeight = 177;
     const maxWidth = 630;
     const maxHeight = 280;
@@ -209,106 +210,77 @@ class ASCIIText extends Component {
 
 
 
-  render() {
-    const { props } = this;
-    const { text, font, copyButtonLabel, showSaveModal, showMessageWindow } = this.state;
-    const isMobile = window.innerWidth <= 768;
+render() {
+  const { props } = this;
+  const { text, font, copyButtonLabel, showSaveModal, showMessageWindow } = this.state;
+  const isMobile = window.innerWidth <= 768;
 
-    return (
-      <>
-        {showSaveModal && this.renderSaveAsModal()}
-        {showMessageWindow && this.renderMessageWindow()}
+  return (
+    <>
+      {showSaveModal && this.renderSaveAsModal()}
+      {showMessageWindow && this.renderMessageWindow()}
 
-        <Window
-          {...props}
-          title="ASCII Banners"
-          icon={asciibanner16}
-          Component={WindowProgram}
-          initialWidth={isMobile ? 370 : 620}
-          initialHeight={isMobile ? 207 : 266}
-          maxWidth={630}
-          maxHeight={280}
-          minWidth={340}
-          minHeight={177}
-          initialX={1}
-          initialY={1}
-          forceNoMobileMax={true}
-          resizable={true}
-          onMaximize={null}
-          className={cx("ASCIIText", "hide-maximize", props.className)}
-          menuOptions={buildMenu({
-            ...props,
-            componentType: "ASCIIText",
-            onSaveAs: () => this.setState({ showSaveModal: true }),
-          })}
-        >
-          <div className="ascii-banner-controls">
-            <input
-              type="text"
-              value={text}
-              onChange={this.handleTextChange}
-              placeholder="Type something..."
-              style={{ height: "24px", fontSize: "12px" }}
-            />
-            <Select
-              value={font}
-              onChange={this.handleFontChange}
-              options={fonts}
-              styles={{
-                control: (provided) => ({
-                  ...provided,
-                  minHeight: "24px",
-                  height: "24px",
-                  fontSize: "12px",
-                }),
-                valueContainer: (provided) => ({
-                  ...provided,
-                  padding: "0 13px",
-                  height: "24px",
-                }),
-                input: (provided) => ({
-                  ...provided,
-                  margin: 1,
-                  padding: 1,
-                }),
-                indicatorsContainer: (provided) => ({
-                  ...provided,
-                  height: "24px",
-                }),
-                dropdownIndicator: (provided) => ({
-                  ...provided,
-                  padding: "0 6px",
-                }),
-                menu: (provided) => ({
-                  ...provided,
-                  marginTop: "-.5px",
-                }),
-                menuList: (provided) => ({
-                  ...provided,
-                  maxHeight: "150px",
-                  padding: 0,
-                }),
+      <Window
+        {...props}
+        title="ASCII Banners"
+        icon={asciibanner16}
+        Component={WindowProgram}
+        initialWidth={isMobile ? 370 : 620}
+        initialHeight={isMobile ? 211 : 244}
+        maxWidth={630}
+        maxHeight={268}
+        minWidth={415}
+        minHeight={177}
+        initialX={1}
+        initialY={1}
+        forceNoMobileMax={true}
+        resizable={true}
+        onMaximize={null}
+        className={cx("ASCIIText", "hide-maximize", props.className)}
+        menuOptions={buildMenu({
+          ...props,
+          componentType: "ASCIIText",
+          onSaveAs: () => this.setState({ showSaveModal: true }),
+        })}
+      >
+        <div className="ascii-banner-controls">
+          <input
+            type="text"
+            value={text}
+            onChange={this.handleTextChange}
+            placeholder="Type something..."
+          />
+          <div className="dropdown">
+            <select
+              value={font.value}
+              onChange={(e) => {
+                const selectedFont = fonts.find((f) => f.value === e.target.value);
+                this.handleFontChange(selectedFont);
               }}
-            />
-            <button
-              onClick={this.handleCopy}
-              style={{ height: "24px", fontSize: "12px" }}
             >
-              {copyButtonLabel}
-            </button>
+              {fonts.map((font) => (
+                <option key={font.value} value={font.value}>
+                  {font.label}
+                </option>
+              ))}
+            </select>
           </div>
+          <button onClick={this.handleCopy}>
+            {copyButtonLabel}
+          </button>
+        </div>
 
-          <div className="ascii-banner-output" ref={this.outputRef}>
-            <FigletText
-              text={text}
-              font={font.value}
-              onAsciiGenerated={this.handleAsciiGenerated}
-            />
-          </div>
-        </Window>
-      </>
-    );
-  }
+        <div className="ascii-banner-output" ref={this.outputRef}>
+          <FigletText
+            text={text}
+            font={font.value}
+            onAsciiGenerated={this.handleAsciiGenerated}
+          />
+        </div>
+      </Window>
+    </>
+  );
+}
 }
 
 export default ASCIIText;
