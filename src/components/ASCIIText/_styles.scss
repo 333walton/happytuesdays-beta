@@ -13,15 +13,9 @@
 
 .ASCIIText {
   height: 100%;
-  max-width: {
-      desktop: '460',
-    }
 
   .Window__body {
     padding: 0;
-    max-width: {
-        desktop: '460',
-      }
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -34,25 +28,77 @@
     padding: 8px;
     flex-wrap: wrap;
     flex-shrink: 0;
-    max-width: {
-        desktop: '460',
-    };
 
-    input[type="text"] {
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      padding: 3px 5px;
-      background: white;
-      border: 2px inset #dfdfdf;
-      height: 24px;
-      box-sizing: border-box;
-      flex: 1;
-      min-width: 100px;
-
+    // Stack controls on mobile
       @media (max-width: 480px) {
-        min-width: auto;
+        flex-direction: column;
+        align-items: stretch;
+    
+        input[type="text"],
+        .dropdown {
+          width: 100%;
+          margin: 0px 0;
+        }
+    
+        // Create a flex container for button and toggle
+        .button-toggle-container {
+          display: flex;
+          gap: 8px;
+          width: 100%;
+          margin: 0px 0;
+    
+          button {
+            flex: 1;
+            justify-content: center;
+          }
+    
+          .color-toggle {
+            width: auto;
+            flex: 0 0 auto;
+          }
+        }
+    
+        button {
+          width: auto;
+          justify-content: center;
+        }
+    
+        .color-toggle {
+          width: auto;
+          justify-content: center;
+          padding: 0 6px;
+    
+          label {
+            margin: 0;
+          }
+        }
       }
+
+  input[type="text"] {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 3px 5px;
+    background: white;
+    border: 2px inset #dfdfdf;
+    height: 24px;
+    box-sizing: border-box;
+    flex: 1;
+    min-width: 100px;
+      
+    @media (max-width: 480px) {
+      min-width: auto;
     }
+  }
+      
+  // Container for button and toggle - only affects layout on mobile
+  .button-toggle-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+      
+    @media (min-width: 481px) {
+      display: contents; // This makes the container act as if it doesn't exist on desktop
+    }     }
 
     button {
       font-family: Tahoma, sans-serif;
@@ -97,19 +143,12 @@
         cursor: pointer;
         margin: 0;
 
-        // Restore native appearance on touch devices
-        @media (pointer: coarse) {
-          -webkit-appearance: menulist-button;
-          appearance: menulist-button;
-          padding-right: 6px;
-        }
-
         &:focus {
           outline: none;
         }
       }
 
-      // Dropdown arrow button - hide on touch devices
+      // Always show custom dropdown arrow
       &::after {
         content: '';
         position: absolute;
@@ -123,13 +162,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
-        @media (pointer: coarse) {
-          display: none;
-        }
       }
 
-      // Dropdown arrow triangle - hide on touch devices
+      // Always show custom dropdown triangle
       &::before {
         content: '';
         position: absolute;
@@ -141,10 +176,6 @@
         border-top: 5px solid black;
         pointer-events: none;
         z-index: 1;
-
-        @media (pointer: coarse) {
-          display: none;
-        }
       }
     }
 
@@ -343,5 +374,23 @@
     border-top-color: #404040;
     border-right-color: #ffffff;
     border-bottom-color: #ffffff;
+  }
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+  .ASCIIText {
+    .ascii-banner-controls {
+      gap: 4px;
+      padding: 6px;
+    }
+
+    .ascii-banner-output-wrapper {
+      margin: 0 6px 6px 6px;
+    }
+
+    .ascii-banner-output {
+      padding: 8px;
+    }
   }
 }

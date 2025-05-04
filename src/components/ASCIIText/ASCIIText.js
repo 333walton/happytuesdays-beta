@@ -356,17 +356,19 @@ class ASCIIText extends Component {
                 <option value="html">HTML</option>
               </select>
             </div>
-            <button onClick={this.handleCopy}>
-              {copyButtonLabel}
-            </button>
-            <div className="color-toggle">
-              <input
-                type="checkbox"
-                id="colorToggle"
-                checked={textColor === "white"}
-                onChange={this.handleColorToggle}
-              />
-              <label htmlFor="colorToggle" title="Toggle text color (Green/White)"></label>
+            <div className="button-toggle-container">
+              <button onClick={this.handleCopy}>
+                {copyButtonLabel}
+              </button>
+              <div className="color-toggle">
+                <input
+                  type="checkbox"
+                  id="colorToggle"
+                  checked={textColor === "white"}
+                  onChange={this.handleColorToggle}
+                />
+                <label htmlFor="colorToggle" title="Toggle text color (Green/White)"></label>
+              </div>
             </div>
           </div>
 
