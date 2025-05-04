@@ -1,0 +1,452 @@
+@import "../../../node_modules/packard-belle/src/_scss/w98/mixins/box-shadows.scss";
+
+/* Import custom fonts for Windows 95 style text */
+@font-face {
+    font-family: pixelmix;
+    src: url("../../assets/pixelmix.woff2") format("woff2");
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: FixedSys;
+    src: url("../../assets/FixedsysStripped.woff2") format("woff2");
+}
+
+/* Base VideoPlayer styles for desktop */
+.VideoPlayer.Window {
+    overflow: hidden;
+    background-color: #c0c0c0 !important;
+
+    &:after {
+        content: none;
+    }
+
+    &.window__menu {
+        display: none !important;
+    }
+
+    /* Desktop video container */
+    .video-player-container {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        padding: 2px;
+        overflow: hidden;
+        background-color: #c0c0c0 !important;
+    }
+
+    /* Video element */
+    .video {
+        height: calc(100% - 73px);
+        width: 100%;
+        background-color: #000;
+        object-fit: contain;
+    }
+
+    /* Controls container */
+    .video-controls-container {
+        height: 80px;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        overflow: hidden;
+        background-color: #c0c0c0 !important;
+    }
+
+    /* Timer display */
+    .countdown-container {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 5px;
+        margin: 0;
+        background-color: #000;
+        color: #fff;
+        height: 30px;
+        font-family: "FixedSys", monospace;
+        border: inset 1px #888;
+        align-items: center;
+        width: 100%;
+        box-sizing: border-box;
+        flex-shrink: 0;
+    }
+
+    /* Control panel */
+    .control-panel {
+        display: flex;
+        background-color: #c0c0c0 !important;
+        border: outset 1px #dfdfdf;
+        height: 40px;
+        flex-shrink: 0;
+    }
+
+    /* Control buttons */
+    .control-buttons {
+        display: flex;
+        align-items: center;
+        background-color: #c0c0c0 !important;
+
+        .control-btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border: outset 1px #dfdfdf;
+            background-color: #c0c0c0 !important;
+            cursor: pointer;
+            margin: 0 2px;
+
+            svg {
+                fill: #000;
+                width: 8px;
+                height: 8px;
+            }
+
+            &:disabled {
+                cursor: default;
+
+                svg {
+                    fill: #808080;
+                }
+            }
+
+            &:active {
+                border-style: inset;
+            }
+        }
+
+        .loading-indicator {
+            width: 6px;
+            height: 6px;
+            background-color: #000;
+        }
+    }
+
+    /* Progress bar */
+    .progress-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        padding: 0 2px;
+        background-color: #c0c0c0 !important;
+    }
+
+    .progress-slider {
+        width: 100%;
+        height: 8px;
+        border: none;
+
+        &[type="range"] {
+            -webkit-appearance: none;
+            background-color: #c0c0c0;
+            border: inset 1px #888;
+            outline: none;
+
+            &::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 10px;
+                height: 16px;
+                background-color: #c0c0c0;
+                border: outset 1px #dfdfdf;
+                cursor: pointer;
+            }
+
+            &::-moz-range-thumb {
+                width: 10px;
+                height: 16px;
+                background-color: #c0c0c0;
+                border: outset 1px #dfdfdf;
+                cursor: pointer;
+            }
+        }
+    }
+}
+
+/* Mobile and iOS specific styles */
+.VideoPlayer.mobile-player {
+    max-width: 100vw;
+    max-height: 100vh !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 9999 !important;
+
+    &.Window {
+        background-color: #000 !important;
+    }
+
+    .video {
+        height: 100% !important;
+        width: 100% !important;
+        background-color: #000;
+        object-fit: contain;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .video-controls-container,
+    .countdown-container,
+    .control-panel,
+    .control-buttons {
+        display: none !important;
+    }
+
+    .video-player-container {
+        height: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        background-color: #000 !important;
+    }
+
+    .window-title,
+    .window__menu,
+    .window__minimize,
+    .window__maximize,
+    .window__close {
+        display: none !important;
+    }
+}
+
+/* iOS specific overrides */
+.VideoPlayer.ios-player {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    z-index: 9999 !important;
+
+    &.Window {
+        background-color: #000 !important;
+    }
+
+    .video {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        object-fit: contain !important;
+        background-color: #000 !important;
+    }
+
+    .video-player-container {
+        background-color: #000 !important;
+    }
+
+    &.Window {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+    }
+}
+
+/* Hide specific React95 elements */
+.r95_1kpzw682,
+.r95_1kpzw683 {
+    display: none !important;
+}
+
+/* Remove padding from React95 container */
+.r95_13gnpv00 {
+    padding: 0 !important;
+}
+
+/* Remove box shadow from React95 element */
+.r95_iuzg895z {
+    box-shadow: none !important;
+}
+
+.r95_13gnpv00 {
+    width: 100% !important;
+    /* Makes the container full width */
+    padding: 2px !important;
+    /* Small padding around the edges */
+}
+
+.r95_13gnpv01 {
+    display: block !important;
+    /* Forces element to be a block-level element */
+}
+
+.r95_13gnpv02 {
+    display: none !important;
+    /* Hides this element completely */
+}
+
+.r95_13gnpv03 {
+    display: flex !important;
+    /* Makes this a flex container */
+    align-items: center !important;
+    /* Centers items vertically */
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+.r95_13gnpv04 {
+    display: flex !important;
+    padding: 6px !important;
+    margin-bottom: 4px !important;
+    /* Windows 95 style inset shadow effect */
+    box-shadow: inset 0.5px 0.5px 0px 0.5px #868a8e, 0.5px 0.5px 0px 0.5px #ffffff !important;
+    background-color: #000000 !important;
+    height: 50px !important;
+    color: #ffffff !important;
+
+    >div {
+        background-color: #000 !important;
+        color: #fff !important;
+    }
+}
+
+.r95_13gnpv05 {
+    font-family: React95Video-Numbers !important;
+    /* Special font for numbers */
+    text-transform: uppercase !important;
+}
+
+.r95_13gnpv06 {
+    margin-top: auto !important;
+    /* Pushes element to bottom */
+    font-size: 22px !important;
+}
+
+.r95_13gnpv07 {
+    height: 12px !important;
+    /* Fixed height for consistency */
+}
+
+.r95_13gnpv08 {
+    /* Creates a Windows 95 style separator line with light/dark borders */
+    display: block !important;
+    height: 1px !important;
+    border-top-style: solid !important;
+    border-top-width: 1px !important;
+    border-top-color: #868a8e !important;
+    border-bottom-width: 1px !important;
+    border-bottom-style: solid !important;
+    border-bottom-color: #ffffff !important;
+    margin-bottom: 2px !important;
+}
+
+.r95_13gnpv09 {
+    /* Styles for control buttons (play, pause, etc.) */
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 20px !important;
+    height: 20px !important;
+    padding: 7px !important;
+}
+
+.r95_13gnpv09:active,
+.r95_13gnpv09:focus {
+    width: 20px !important;
+    /* var(--r95-space-20) */
+    height: 20px !important;
+    /* var(--r95-space-20) */
+    padding: 7px !important;
+    /* var(--r95-space-7) */
+}
+
+.r95_13gnpv09:disabled {
+    padding: 4px !important;
+    /* var(--r95-space-4) */
+}
+
+.r95_13gnpv09 svg {
+    fill: #000000 !important;
+    /* var(--r95-color-materialText) */
+}
+
+.r95_13gnpv09:disabled svg {
+    fill: #868a8e !important;
+    /* var(--r95-color-borderDark) */
+    border-bottom-width: 1px !important;
+    /* var(--r95-space-1) */
+    border-bottom-style: solid !important;
+    border-bottom-color: #ffffff !important;
+    /* var(--r95-color-borderLightest) */
+    border-right-width: 1px !important;
+    /* var(--r95-space-1) */
+    border-right-style: solid !important;
+    border-right-color: #ffffff !important;
+    /* var(--r95-color-borderLightest) */
+}
+
+.r95_13gnpv0a::-webkit-slider-thumb {
+    height: 18px !important;
+    /* var(--r95-space-18) */
+    margin-top: -7px !important;
+    /* calc(var(--r95-space-7) * -1) */
+    width: 10px !important;
+    /* var(--r95-space-10) */
+}
+
+.r95_13gnpv0a[value='0']::-webkit-slider-thumb {
+    margin-left: -2px !important;
+    /* calc(var(--r95-space-2) * -1) */
+}
+
+/* Hide title elements */
+.Video-title,
+.video-title-bar {
+    display: none !important;
+}
+
+/* Control area background fix */
+.r95_iuzg891v,
+.r95_iuzg892r,
+.r95_iuzg893p,
+.r95_iuzg892d,
+.r95_iuzg892l,
+.r95_iuzg892n {
+    background-color: #c0c0c0 !important;
+}
+
+/* Keep countdown container black */
+.countdown-container {
+    background-color: #000 !important;
+    color: #fff !important;
+}
+
+/* Ensure time display stays black in all modes */
+.r95_13gnpv04 {
+    background-color: #000 !important;
+    color: #fff !important;
+
+    >div {
+        background-color: #000 !important;
+        color: #fff !important;
+    }
+}

@@ -55,15 +55,15 @@ const programs = [
       {
         title: "Movie Player",
         icon: icons.camera16,
-        component: "VideoPlayerMobile", // isMobile ? "VideoPlayerwebkit" : "VideoPlayerMobile",
+        component: "VideoPlayer",
         data: {
-          //src: "",
-          //style: {
-            //marginBottom: 4,
-            //height: "100%",
-            //width: "100%",
-            //objectFit: "contain"
-          //}
+          src: "",
+          style: {
+            marginBottom: 4,
+            height: "100%",
+            width: "100%",
+            objectFit: "contain"
+          }
         }
       },
       {
@@ -495,11 +495,16 @@ const startMenuData = [
         //isDisabled: true,
         options: [
           {
-            title: "Coming Soon...",
-            isDisabled: true,
-            icon: icons.faq32,
-          },
-        ],
+            title: "Pre-roll Toolkit",
+            icon: icons.vid16,
+            component: "VideoPlayerMobile",
+            //isMobile ? "VideoPlayerMobile" : "VideoPlayerDesktop", //replace the left one with "VideoPlayerDesktop" after done testing
+            multiInstance: true,
+            isDisabled: false,
+            data: {
+              src: ""
+            },
+          },],
       },
       {
         title: "Help",

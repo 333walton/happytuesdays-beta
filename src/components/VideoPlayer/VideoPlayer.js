@@ -1,58 +1,61 @@
-  import { Component } from "react"
-  import { WindowProgram } from "packard-belle"
-  import cx from "classnames"
-  import Window from "../tools/Window"
-  import { burn16 } from "../../icons"
-  import buildMenu from "../../helpers/menuBuilder"
-  import "./_styles.scss"
-  import { Video } from "@react95/core"
-  import "@react95/core/GlobalStyle"
-  import "@react95/core/themes/win95.css"
+import { Component } from "react"
+import { WindowProgram } from "packard-belle"
+import cx from "classnames"
+import Window from "../tools/Window"
+import { camera16 } from "../../icons"
+import "./_styles.scss"
+import { Video } from "@react95/core"
+import "@react95/core/GlobalStyle"
+import "@react95/core/themes/win95.css"
 
 
-  class VideoPlayer extends Component {
+class VideoPlayer extends Component {
+  render() {
+    const { props } = this;
+    const videoSrc = props.data?.src || "/static/donwest.mp4";
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isMobile = /Mobi|Android/.test(navigator.userAgent) || isIOS;
 
-    
+    // Calculate dimensions based on device
+    const mobileHeight = isIOS ? '100%' : window.innerHeight * 0.35;
+    const mobileWidth = isIOS ? '100%' : window.innerWidth * 0.855;
 
-    constructor(props) {
-      super(props)
-    }
-
-    toggleFullScreen = () => {
-      const playerElement = this.player.current
-      playerElement?.requestFullscreen()
-    }
-
-    render() {
-      const { props } = this
-      return (
-        <Window
-          {...props}
-          title="Video Player" 
-          icon={burn16}
-          menuOptions={buildMenu(props)}
-          Component={WindowProgram}
-          initialHeight={300}
-          initialWidth={325}
-          resizable={false}
-          className={cx("VideoPlayer", props.className)}
-        >
-          <Video
-            // w="100%"
-            // h="100%"
-            src="https://media.w3.org/2010/05/sintel/trailer_hd.mp4"
-            style={{
-              marginBottom: 4,
-              height: "100%",
-              width: '100%',
-              objectFit: "contain"
-            }}
-            
-          />
-        </Window>
-      )
-    }
+    return (
+      <Window
+        {...props}
+        title="Video Player"
+        icon={camera16}
+        Component={WindowProgram}
+        initialHeight={isMobile ? mobileHeight : 290}
+        initialWidth={isMobile ? mobileWidth : 320}
+        resizable={!isMobile}
+        className={cx("VideoPlayer", props.className, { 
+          "mobile-player": isMobile,
+          "ios-player": isIOS 
+        })}
+      >
+        <Video
+          src={videoSrc}
+          style={{
+            marginBottom: isMobile ? 0 : 4,
+            height: "calc(100% - 40px)", // Adjust height for controls
+            width: "100%",
+            objectFit: "contain",
+            background: "#000",
+            maxWidth: "100vw",
+            maxHeight: isIOS ? "calc(100vh - 40px)" : "auto"
+          }}
+          controls={true} // Always show controls
+          playsInline
+          preload="metadata"
+          controlsList="nodownload"
+          onContextMenu={(e) => e.preventDefault()}
+          playsinline="true"
+          webkit-playsinline="true"
+        />
+      </Window>
+    );
   }
+}
 
-  export default VideoPlayer
-
+export default VideoPlayer;
