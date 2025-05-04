@@ -308,8 +308,8 @@ class ASCIIText extends Component {
           minHeight={this.state.isMobileDevice ? '177' : '177'}
           initialWidth={this.state.isMobileDevice ? this.state.contentWidth.mobile : this.state.contentWidth.desktop}
           initialHeight={this.state.isMobileDevice ? this.state.contentHeight.mobile : this.state.contentHeight.desktop}
-          initialX={1}
-          initialY={1}
+          initialX={this.state.isMobileDevice ? '1' : '105'}
+          initialY={this.state.isMobileDevice ? '1' : '1'}
           forceNoMobileMax={true}
           resizable={true}
           onMaximize={null}
