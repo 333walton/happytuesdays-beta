@@ -30,75 +30,76 @@
     flex-shrink: 0;
 
     // Stack controls on mobile
-      @media (max-width: 480px) {
-        flex-direction: column;
-        align-items: stretch;
-    
-        input[type="text"],
-        .dropdown {
-          width: 100%;
-          margin: 0px 0;
-        }
-    
-        // Create a flex container for button and toggle
-        .button-toggle-container {
-          display: flex;
-          gap: 8px;
-          width: 100%;
-          margin: 0px 0;
-    
-          button {
-            flex: 1;
-            justify-content: center;
-          }
-    
-          .color-toggle {
-            width: auto;
-            flex: 0 0 auto;
-          }
-        }
-    
+    @media (max-width: 480px) {
+      flex-direction: column;
+      align-items: stretch;
+
+      input[type="text"],
+      .custom-dropdown {
+        width: 100%;
+        margin: 0px 0;
+      }
+
+      // Create a flex container for button and toggle
+      .button-toggle-container {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+        margin: 0px 0;
+
         button {
-          width: auto;
+          flex: 1;
           justify-content: center;
         }
-    
+
         .color-toggle {
           width: auto;
-          justify-content: center;
-          padding: 0 6px;
-    
-          label {
-            margin: 0;
-          }
+          flex: 0 0 auto;
         }
       }
 
-  input[type="text"] {
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    padding: 3px 5px;
-    background: white;
-    border: 2px inset #dfdfdf;
-    height: 24px;
-    box-sizing: border-box;
-    flex: 1;
-    min-width: 100px;
-      
-    @media (max-width: 480px) {
-      min-width: auto;
+      button {
+        width: auto;
+        justify-content: center;
+      }
+
+      .color-toggle {
+        width: auto;
+        justify-content: center;
+        padding: 0 6px;
+
+        label {
+          margin: 0;
+        }
+      }
     }
-  }
-      
-  // Container for button and toggle - only affects layout on mobile
-  .button-toggle-container {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-      
-    @media (min-width: 481px) {
-      display: contents; // This makes the container act as if it doesn't exist on desktop
-    }     }
+
+    input[type="text"] {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      padding: 3px 5px;
+      background: white;
+      border: 2px inset #dfdfdf;
+      height: 24px;
+      box-sizing: border-box;
+      flex: 1;
+      min-width: 100px;
+
+      @media (max-width: 480px) {
+        min-width: auto;
+      }
+    }
+
+    // Container for button and toggle - only affects layout on mobile
+    .button-toggle-container {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+
+      @media (min-width: 481px) {
+        display: contents; // This makes the container act as if it doesn't exist on desktop
+      }
+    }
 
     button {
       font-family: Tahoma, sans-serif;
@@ -115,8 +116,8 @@
       }
     }
 
-    // Native dropdown styling
-    .dropdown {
+    // Custom dropdown styling
+    .custom-dropdown {
       position: relative;
       display: inline-flex;
       align-items: center;
@@ -128,12 +129,12 @@
         min-width: 120px;
       }
 
-      select {
+      .custom-select {
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
         font-family: 'Courier New', monospace;
-        font-size: 12px;
+        font-size: 11px;
         padding: 3px 24px 3px 6px;
         background: white;
         border: 2px inset #dfdfdf;
@@ -142,13 +143,16 @@
         box-sizing: border-box;
         cursor: pointer;
         margin: 0;
+        position: relative;
+        display: flex;
+        align-items: center;
 
         &:focus {
           outline: none;
         }
       }
 
-      // Always show custom dropdown arrow
+      // Custom dropdown arrow
       &::after {
         content: '';
         position: absolute;
@@ -164,7 +168,7 @@
         justify-content: center;
       }
 
-      // Always show custom dropdown triangle
+      // Custom dropdown triangle
       &::before {
         content: '';
         position: absolute;
@@ -176,6 +180,40 @@
         border-top: 5px solid black;
         pointer-events: none;
         z-index: 1;
+      }
+
+      // Custom dropdown list
+      .custom-dropdown-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 200px; // Control the max height here
+        overflow-y: auto;
+        background: white;
+        border: 2px solid #dfdfdf;
+        z-index: 1000;
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+
+        .custom-dropdown-item {
+          padding: 3px 6px;
+          cursor: pointer;
+          font-family: 'Courier New', monospace;
+          font-size: 11px;
+
+          &:hover {
+            background-color: #e8e8e8;
+          }
+
+          &.selected {
+            background-color: #0000aa;
+            color: white;
+
+            &:hover {
+              background-color: #0000aa;
+            }
+          }
+        }
       }
     }
 
@@ -225,12 +263,15 @@
     margin: 0 5px 5px 5px;
     border: 2px inset #444;
     background: black;
-    overflow-x: auto; /* Enable horizontal scrollbars */
-    overflow-y: hidden; /* Disable vertical scrollbars */
+    overflow-x: auto;
+    /* Enable horizontal scrollbars */
+    overflow-y: hidden;
+    /* Disable vertical scrollbars */
     display: flex;
     height: auto;
     flex-direction: column;
-    max-width: 100%; /* Ensure it doesn't exceed the parent's width */
+    max-width: 100%;
+    /* Ensure it doesn't exceed the parent's width */
   }
 
   .ascii-banner-output {
@@ -241,10 +282,14 @@
     font-family: 'Courier New', monospace;
     font-size: 11px;
     line-height: 1.05;
-    white-space: pre; /* Prevent text from wrapping */
-    overflow-x: auto; /* Enable horizontal scrolling */
-    overflow-y: hidden; /* Disable vertical scrolling */
-    max-width: 100%; /* Prevent it from exceeding the container's width */
+    white-space: pre;
+    /* Prevent text from wrapping */
+    overflow-x: auto;
+    /* Enable horizontal scrolling */
+    overflow-y: hidden;
+    /* Disable vertical scrolling */
+    max-width: 100%;
+    /* Prevent it from exceeding the container's width */
     box-sizing: border-box;
 
     &[data-color="white"] {

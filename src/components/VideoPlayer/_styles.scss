@@ -162,13 +162,15 @@
         border: none;
 
         &[type="range"] {
-            -webkit-appearance: none;
+            //appearance: none; /* Standard property */
+            -webkit-appearance: none; /* WebKit-specific property */
             background: #c0c0c0;
             border: inset 1px #888;
             outline: none;
 
             &::-webkit-slider-thumb {
-                -webkit-appearance: none;
+                //appearance: none; /* Standard property */
+                -webkit-appearance: none; /* WebKit-specific property */
                 width: 10px;
                 height: 16px;
                 background: #c0c0c0;
@@ -177,6 +179,7 @@
             }
 
             &::-moz-range-thumb {
+                //appearance: none; /* Standard property */
                 width: 10px;
                 height: 16px;
                 background: #c0c0c0;

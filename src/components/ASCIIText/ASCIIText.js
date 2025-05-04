@@ -9,12 +9,40 @@ import { ProgramContext } from "../../contexts";
 import "./_styles.scss";
 
 const fonts = [
-  { value: "Train", label: "Train" },
-  { value: "Slant Relief", label: "Slant Relief" },
-  { value: "Colossal", label: "Colossal" },
-  { value: "Standard", label: "Standard" },
-  { value: "Shadow", label: "Shadow" },
+  { value: "ANSI Regular", label: "ANSI Regular" },
   { value: "ANSI Shadow", label: "ANSI Shadow" },
+  { value: "Alligator2", label: "Alligator2" },
+  { value: "Banner3-D", label: "Banner3-D" },
+  { value: "Big Money-nw", label: "Big Money-nw" },
+  { value: "Bloody", label: "Bloody" },
+  { value: "BlurVision ASCII", label: "BlurVision ASCII" },
+  { value: "Bright", label: "Bright" },
+  { value: "Broadway", label: "Broadway" },
+  { value: "Bulbhead", label: "Bulbhead" },
+  { value: "Chunky", label: "Chunky" },
+  { value: "Colossal", label: "Colossal" },
+  { value: "Contessa", label: "Contessa" },
+  { value: "Contrast", label: "Contrast" },
+  { value: "Delta Corps Priest 1", label: "Delta Corps Priest 1" },
+  { value: "Efti Water", label: "Efti Water" },
+  { value: "Fire Font-k", label: "Fire Font-k" },
+  { value: "Fuzzy", label: "Fuzzy" },
+  { value: "Isometric3", label: "Isometric3" },
+  { value: "Lean", label: "Lean" },
+  { value: "Letters", label: "Letters" },
+  { value: "Marquee", label: "Marquee" },
+  { value: "Mini", label: "Mini" },
+  { value: "Pawp", label: "Pawp" },
+  { value: "Peaks Slant", label: "Peaks Slant" },
+  { value: "Roman", label: "Roman" },
+  { value: "Shadow", label: "Shadow" },
+  { value: "Slant Relief", label: "Slant Relief" },
+  { value: "Small Keyboard", label: "Small Keyboard" },
+  { value: "Train", label: "Train" },
+  { value: "Trek", label: "Trek" },
+  { value: "Tubular", label: "Tubular" },
+  { value: "Wavy", label: "Wavy" },
+  { value: "Whimsy", label: "Whimsy" }
 ];
 
 class ASCIIText extends Component {
@@ -25,7 +53,7 @@ class ASCIIText extends Component {
     this.state = {
       text: "TEST",
       font: window.innerWidth <= 768
-        ? { value: "Colossal", label: "Colossal" }
+        ? { value: "Isometric3", label: "Colossal" }
         : { value: "Slant Relief", label: "Slant Relief" },
       asciiOutput: "",
       isCopied: false,
@@ -33,19 +61,21 @@ class ASCIIText extends Component {
       saveFileName: "ascii-banner",
       saveFileType: "txt",
       showMessageWindow: false,
-      copyFormat: "plain",
+      copyFormat: "markdown",
       textColor: "green",
-      //contentWidth: 460,
-      contentHeight: { mobile: "270px", desktop: "190px" },
+      contentHeight: { mobile: "300px", desktop: "190px" },
       contentWidth: { mobile: "400px", desktop: "535px" },
-      //contentHeight: { mobile: '240', desktop: '240' },
       isMobileDevice: window.innerWidth <= 768,
+      isFontDropdownOpen: false,
+      isCopyFormatDropdownOpen: false,
     };
 
     this.outputRef = React.createRef();
     this.preRef = React.createRef();
     this.isMobile = window.innerWidth <= 768;
     this.resizeObserver = null;
+    this.fontDropdownRef = React.createRef();
+    this.copyFormatDropdownRef = React.createRef();
   }
 
   componentDidMount() {
@@ -60,6 +90,8 @@ class ASCIIText extends Component {
     };
     
     window.addEventListener('resize', this.handleResize);
+    // Add click outside listener
+    document.addEventListener('mousedown', this.handleClickOutside);
     
     // Set up ResizeObserver to watch for content size changes
     this.resizeObserver = new ResizeObserver((entries) => {
@@ -78,9 +110,45 @@ class ASCIIText extends Component {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
+    document.removeEventListener('mousedown', this.handleClickOutside);
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
+  }
+
+  handleClickOutside = (event) => {
+    if (this.fontDropdownRef.current && !this.fontDropdownRef.current.contains(event.target)) {
+      this.setState({ isFontDropdownOpen: false });
+    }
+    if (this.copyFormatDropdownRef.current && !this.copyFormatDropdownRef.current.contains(event.target)) {
+      this.setState({ isCopyFormatDropdownOpen: false });
+    }
+  }
+
+  toggleFontDropdown = () => {
+    this.setState(prevState => ({
+      isFontDropdownOpen: !prevState.isFontDropdownOpen,
+      isCopyFormatDropdownOpen: false // Close other dropdown
+    }));
+  }
+
+  toggleCopyFormatDropdown = () => {
+    this.setState(prevState => ({
+      isCopyFormatDropdownOpen: !prevState.isCopyFormatDropdownOpen,
+      isFontDropdownOpen: false // Close other dropdown
+    }));
+  }
+
+  handleFontSelect = (selectedFont) => {
+    this.handleFontChange(selectedFont);
+    this.setState({ isFontDropdownOpen: false });
+  }
+
+  handleCopyFormatSelect = (format) => {
+    this.setState({ 
+      copyFormat: format,
+      isCopyFormatDropdownOpen: false
+    });
   }
 
   updateWindowSize = () => {
@@ -284,7 +352,14 @@ class ASCIIText extends Component {
 
   render() {
     const { props } = this;
-    const { text, font, isCopied, showSaveModal, showMessageWindow, copyFormat, textColor, contentWidth, contentHeight } = this.state;
+    const { text, font, isCopied, showSaveModal, showMessageWindow, copyFormat, textColor, 
+      contentWidth, contentHeight, isFontDropdownOpen, isCopyFormatDropdownOpen } = this.state;
+
+    const copyFormatOptions = [
+      { value: "plain", label: "Plain Text", title: "Best for: Text editors & terminals" },
+      { value: "markdown", label: "Markdown", title: "Best for: GitHub, Discord & Markdown" },
+      { value: "html", label: "HTML", title: "Best for: Email, Word & rich text editors" }
+    ];
 
     return (
       <>
@@ -296,14 +371,8 @@ class ASCIIText extends Component {
           title="ASCII Banners"
           icon={asciibanner16}
           Component={WindowProgram}
-          //initialWidth={contentWidth}
-          //initialHeight={contentHeight}
-          //maxWidth={600}
           maxHeight={300}
           maxWidth={this.state.isMobileDevice ? '414' : '530'} 
-          //maxHeight={this.state.isMobileDevice ? 'contentHeight' : '300'}
-          //minWidth={340}
-          //minHeight={177}
           minWidth={this.state.isMobileDevice ? '340' : '340'}
           minHeight={this.state.isMobileDevice ? '177' : '177'}
           initialWidth={this.state.isMobileDevice ? this.state.contentWidth.mobile : this.state.contentWidth.desktop}
@@ -331,45 +400,72 @@ class ASCIIText extends Component {
                 color: 'inherit'
               }}
             />
-            <div className="dropdown">
-              <select
-                value={font.value}
-                onChange={(e) => {
-                  const selectedFont = fonts.find((f) => f.value === e.target.value);
-                  this.handleFontChange(selectedFont);
-                }}
+            
+            {/* Custom Font Dropdown - this allows you to set a dropdown height to override native dropdown settings */}
+            <div className="custom-dropdown" ref={this.fontDropdownRef}>
+              <div 
+                className="custom-select"
+                onClick={this.toggleFontDropdown}
                 style={{
                   WebkitTextFillColor: 'inherit',
                   color: 'inherit',
-                  WebkitAppearance: 'none'
                 }}
               >
-                {fonts.map((font) => (
-                  <option key={font.value} value={font.value}>
-                    {font.label}
-                  </option>
-                ))}
-              </select>
+                {font.label}
+              </div>
+              
+              {isFontDropdownOpen && (
+                <div className="custom-dropdown-list">
+                  {fonts.map((fontOption) => (
+                    <div
+                      key={fontOption.value}
+                      className={cx("custom-dropdown-item", {
+                        selected: fontOption.value === font.value
+                      })}
+                      onClick={() => this.handleFontSelect(fontOption)}
+                    >
+                      {fontOption.label}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="dropdown copy-format" title={
-              copyFormat === "plain" ? "Best for: Text editors & terminals" :
-              copyFormat === "markdown" ? "Best for: GitHub, Discord & Markdown" :
-              "Best for: Email, Word & rich text editors"
-            }>
-              <select
-                value={copyFormat}
-                onChange={(e) => this.setState({ copyFormat: e.target.value })}
+
+            {/* Custom Copy Format Dropdown */}
+            <div 
+              className="custom-dropdown copy-format" 
+              ref={this.copyFormatDropdownRef}
+              title={copyFormatOptions.find(opt => opt.value === copyFormat)?.title}
+            >
+              <div 
+                className="custom-select"
+                onClick={this.toggleCopyFormatDropdown}
                 style={{
                   WebkitTextFillColor: 'inherit',
                   color: 'inherit',
-                  WebkitAppearance: 'none'
                 }}
               >
-                <option value="plain">Plain Text</option>
-                <option value="markdown">Markdown</option>
-                <option value="html">HTML</option>
-              </select>
+                {copyFormatOptions.find(opt => opt.value === copyFormat)?.label}
+              </div>
+              
+              {isCopyFormatDropdownOpen && (
+                <div className="custom-dropdown-list">
+                  {copyFormatOptions.map((option) => (
+                    <div
+                      key={option.value}
+                      className={cx("custom-dropdown-item", {
+                        selected: option.value === copyFormat
+                      })}
+                      onClick={() => this.handleCopyFormatSelect(option.value)}
+                      title={option.title}
+                    >
+                      {option.label}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+
             <div className="button-toggle-container">
               <button 
                 onClick={this.handleCopy}
