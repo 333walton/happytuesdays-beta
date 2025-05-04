@@ -35,32 +35,77 @@ class ASCIIText extends Component {
       showMessageWindow: false,
       copyFormat: "plain",
       textColor: "green",
+      //contentWidth: 460,
+      contentHeight: 240,
+      contentWidth: { mobile: 414, desktop: 530 },
+      //contentHeight: { mobile: '240', desktop: '240' },
+      isMobileDevice: window.innerWidth <= 768,
     };
 
     this.outputRef = React.createRef();
+    this.preRef = React.createRef();
     this.isMobile = window.innerWidth <= 768;
+    this.resizeObserver = null;
   }
 
   componentDidMount() {
     this.handleResize = () => {
-      const wasMobile = this.isMobile;
-      this.isMobile = window.innerWidth <= 768;
-      
-      if (wasMobile !== this.isMobile) {
-        this.setState({
-          font: this.isMobile
-            ? { value: "Colossal", label: "Colossal" }
-            : { value: "Slant Relief", label: "Slant Relief" }
-        });
+      const isMobile = window.innerWidth <= 768;
+      if (this.state.isMobileDevice !== isMobile) {
+          this.setState({
+            font: this.isMobile
+              ? { value: "Colossal", label: "Colossal" }
+              : { value: "Slant Relief", label: "Slant Relief" }});
       }
     };
     
     window.addEventListener('resize', this.handleResize);
+    
+    // Set up ResizeObserver to watch for content size changes
+    this.resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        this.updateWindowSize();
+      }
+    });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // When font or text changes, update the window size
+    if (prevState.font !== this.state.font || prevState.text !== this.state.text) {
+      this.updateWindowSize();
+    }
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   }
+
+  updateWindowSize = () => {
+    if (this.preRef.current) {
+      const pre = this.preRef.current;
+      const rect = pre.getBoundingClientRect();
+      
+      // Account for transform scale (0.9)
+      const scaledWidth = rect.width / 0.9;
+      const scaledHeight = rect.height / 0.9;
+      
+      // Add padding for controls and window chrome
+      const controlsHeight = 45; // Height of controls
+      const windowPadding = 40; // Extra padding for window chrome
+      const horizontalPadding = 50; // Extra horizontal padding
+      
+      const newWidth = Math.max(340, Math.min(600, scaledWidth + horizontalPadding));
+      const newHeight = Math.max(177, Math.min(400, scaledHeight + controlsHeight + windowPadding));
+      
+      this.setState({
+        contentWidth: newWidth,
+        contentHeight: newHeight,
+      });
+    }
+  };
 
   handleTextChange = (e) => this.setState({ text: e.target.value });
 
@@ -110,7 +155,18 @@ class ASCIIText extends Component {
   };
 
   handleAsciiGenerated = (ascii) => {
-    this.setState({ asciiOutput: ascii });
+    this.setState({ asciiOutput: ascii }, () => {
+      // Update window size after ASCII is generated
+      setTimeout(this.updateWindowSize, 0);
+    });
+  };
+
+  handlePreRef = (el) => {
+    this.preRef.current = el;
+    
+    if (el && this.resizeObserver) {
+      this.resizeObserver.observe(el);
+    }
   };
 
   handleColorToggle = (e) => {
@@ -199,7 +255,7 @@ class ASCIIText extends Component {
         title="File Location"
         icon={asciibanner16}
         Component={WindowProgram}
-        initialWidth={330}
+        initialWidth={220}
         initialHeight={177}
         resizable={false}
         className="always-blue-heading Window--active"
@@ -228,7 +284,7 @@ class ASCIIText extends Component {
 
   render() {
     const { props } = this;
-    const { text, font, copyButtonLabel, showSaveModal, showMessageWindow, copyFormat, textColor } = this.state;
+    const { text, font, copyButtonLabel, showSaveModal, showMessageWindow, copyFormat, textColor, contentWidth, contentHeight } = this.state;
 
     return (
       <>
@@ -240,12 +296,18 @@ class ASCIIText extends Component {
           title="ASCII Banners"
           icon={asciibanner16}
           Component={WindowProgram}
-          initialWidth={this.isMobile ? 370 : 620}
-          initialHeight={this.isMobile ? 211 : 244}
-          maxWidth={630}
-          maxHeight={280}
-          minWidth={340}
-          minHeight={177}
+          //initialWidth={contentWidth}
+          //initialHeight={contentHeight}
+          //maxWidth={600}
+          //maxHeight={400}
+          maxWidth={this.state.isMobileDevice ? '414' : '530'} 
+          maxHeight={this.state.isMobileDevice ? 'contentHeight' : '400'}
+          //minWidth={340}
+          //minHeight={177}
+          minWidth={this.state.isMobileDevice ? '340' : '340'}
+          minHeight={this.state.isMobileDevice ? '177' : '177'}
+          initialWidth={this.state.isMobileDevice ? this.state.contentWidth.mobile : this.state.contentWidth.desktop}
+          initialHeight={this.state.isMobileDevice ? 'contentHeight' : 'contentHeight'}
           initialX={1}
           initialY={1}
           forceNoMobileMax={true}
@@ -315,8 +377,10 @@ class ASCIIText extends Component {
               data-color={textColor}
             >
               <FigletText
+                ref={this.handlePreRef}
                 text={text}
                 font={font.value}
+                textColor={textColor}
                 onAsciiGenerated={this.handleAsciiGenerated}
               />
             </div>

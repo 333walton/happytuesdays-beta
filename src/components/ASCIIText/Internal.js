@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import figlet from "figlet";
 
-const FigletText = ({ text, font = "Standard", onAsciiGenerated, ...props }) => {
+const FigletText = React.forwardRef(({ text, font = "Standard", onAsciiGenerated, textColor = "green", ...props }, ref) => {
   const [ascii, setAscii] = useState("");
 
   useEffect(() => {
@@ -30,22 +30,29 @@ const FigletText = ({ text, font = "Standard", onAsciiGenerated, ...props }) => 
 
   return (
     <pre
+      ref={ref}
       {...props}
       style={{
         fontFamily: "monospace",
-        fontSize: "13px",
+        fontSize: "10.5px",
         whiteSpace: "pre",
         lineHeight: "1.1",
         margin: 0,
+        width: "auto",
+        height: "auto",
         padding: 0,
-        color: "#00FF00",
+        paddingTop: "7px",
+        paddingBottom: "7px",
+        color: textColor === "white" ? "#FFFFFF" : "#00FF00",
         background: "black",
         overflowX: "auto",
+        transform: "scale(0.9)",
+        transformOrigin: "center", // Keeps the content aligned to center
       }}
     >
       {ascii}
     </pre>
   );
-};
+});
 
 export default FigletText;
