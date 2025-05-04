@@ -227,6 +227,7 @@
     background: black;
     overflow: hidden;
     display: flex;
+    height: auto;
     flex-direction: column;
   }
 
@@ -239,8 +240,9 @@
     font-size: 11px;
     line-height: 1.05;
     white-space: pre;
-    overflow: auto;
+    overflow: hidden;
     color: #00ff00;
+    height: auto;
     box-sizing: border-box;
 
     &[data-color="white"] {

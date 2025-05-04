@@ -36,8 +36,8 @@ class ASCIIText extends Component {
       copyFormat: "plain",
       textColor: "green",
       //contentWidth: 460,
-      contentHeight: 240,
-      contentWidth: { mobile: 414, desktop: 530 },
+      contentHeight: { mobile: "300px", desktop: "220px" },
+      contentWidth: { mobile: "414px", desktop: "530px" },
       //contentHeight: { mobile: '240', desktop: '240' },
       isMobileDevice: window.innerWidth <= 768,
     };
@@ -299,15 +299,15 @@ class ASCIIText extends Component {
           //initialWidth={contentWidth}
           //initialHeight={contentHeight}
           //maxWidth={600}
-          //maxHeight={400}
+          maxHeight={300}
           maxWidth={this.state.isMobileDevice ? '414' : '530'} 
-          maxHeight={this.state.isMobileDevice ? 'contentHeight' : '400'}
+          //maxHeight={this.state.isMobileDevice ? 'contentHeight' : '300'}
           //minWidth={340}
           //minHeight={177}
           minWidth={this.state.isMobileDevice ? '340' : '340'}
           minHeight={this.state.isMobileDevice ? '177' : '177'}
           initialWidth={this.state.isMobileDevice ? this.state.contentWidth.mobile : this.state.contentWidth.desktop}
-          initialHeight={this.state.isMobileDevice ? 'contentHeight' : 'contentHeight'}
+          initialHeight={this.state.isMobileDevice ? this.state.contentHeight.mobile : this.state.contentHeight.desktop}
           initialX={1}
           initialY={1}
           forceNoMobileMax={true}
