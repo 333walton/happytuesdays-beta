@@ -28,7 +28,7 @@ class ASCIIText extends Component {
         ? { value: "Colossal", label: "Colossal" }
         : { value: "Slant Relief", label: "Slant Relief" },
       asciiOutput: "",
-      copyButtonLabel: "Copy",
+      isCopied: false,
       showSaveModal: false,
       saveFileName: "ascii-banner",
       saveFileType: "txt",
@@ -36,8 +36,8 @@ class ASCIIText extends Component {
       copyFormat: "plain",
       textColor: "green",
       //contentWidth: 460,
-      contentHeight: { mobile: "300px", desktop: "220px" },
-      contentWidth: { mobile: "414px", desktop: "530px" },
+      contentHeight: { mobile: "270px", desktop: "190px" },
+      contentWidth: { mobile: "400px", desktop: "535px" },
       //contentHeight: { mobile: '240', desktop: '240' },
       isMobileDevice: window.innerWidth <= 768,
     };
@@ -117,17 +117,17 @@ class ASCIIText extends Component {
     
     if (copyFormat === "plain") {
       navigator.clipboard.writeText(asciiOutput).then(() => {
-        this.setState({ copyButtonLabel: "Copied!" });
+        this.setState({ isCopied: true });
         setTimeout(() => {
-          this.setState({ copyButtonLabel: "Copy" });
+          this.setState({ isCopied: false });
         }, 2000);
       });
     } else if (copyFormat === "markdown") {
       const markdownOutput = "```\n" + asciiOutput + "\n```";
       navigator.clipboard.writeText(markdownOutput).then(() => {
-        this.setState({ copyButtonLabel: "Copied!" });
+        this.setState({ isCopied: true });
         setTimeout(() => {
-          this.setState({ copyButtonLabel: "Copy" });
+          this.setState({ isCopied: false });
         }, 2000);
       });
     } else if (copyFormat === "html") {
@@ -139,15 +139,15 @@ class ASCIIText extends Component {
       });
       
       navigator.clipboard.write([clipboardItem]).then(() => {
-        this.setState({ copyButtonLabel: "Copied!" });
+        this.setState({ isCopied: true });
         setTimeout(() => {
-          this.setState({ copyButtonLabel: "Copy" });
+          this.setState({ isCopied: false });
         }, 2000);
       }).catch((err) => {
         navigator.clipboard.writeText(asciiOutput).then(() => {
-          this.setState({ copyButtonLabel: "Copied!" });
+          this.setState({ isCopied: true });
           setTimeout(() => {
-            this.setState({ copyButtonLabel: "Copy" });
+            this.setState({ isCopied: false });
           }, 2000);
         });
       });
@@ -284,7 +284,7 @@ class ASCIIText extends Component {
 
   render() {
     const { props } = this;
-    const { text, font, copyButtonLabel, showSaveModal, showMessageWindow, copyFormat, textColor, contentWidth, contentHeight } = this.state;
+    const { text, font, isCopied, showSaveModal, showMessageWindow, copyFormat, textColor, contentWidth, contentHeight } = this.state;
 
     return (
       <>
@@ -326,6 +326,10 @@ class ASCIIText extends Component {
               value={text}
               onChange={this.handleTextChange}
               placeholder="Type something..."
+              style={{
+                WebkitTextFillColor: 'inherit',
+                color: 'inherit'
+              }}
             />
             <div className="dropdown">
               <select
@@ -333,6 +337,11 @@ class ASCIIText extends Component {
                 onChange={(e) => {
                   const selectedFont = fonts.find((f) => f.value === e.target.value);
                   this.handleFontChange(selectedFont);
+                }}
+                style={{
+                  WebkitTextFillColor: 'inherit',
+                  color: 'inherit',
+                  WebkitAppearance: 'none'
                 }}
               >
                 {fonts.map((font) => (
@@ -350,6 +359,11 @@ class ASCIIText extends Component {
               <select
                 value={copyFormat}
                 onChange={(e) => this.setState({ copyFormat: e.target.value })}
+                style={{
+                  WebkitTextFillColor: 'inherit',
+                  color: 'inherit',
+                  WebkitAppearance: 'none'
+                }}
               >
                 <option value="plain">Plain Text</option>
                 <option value="markdown">Markdown</option>
@@ -357,8 +371,16 @@ class ASCIIText extends Component {
               </select>
             </div>
             <div className="button-toggle-container">
-              <button onClick={this.handleCopy}>
-                {copyButtonLabel}
+              <button 
+                onClick={this.handleCopy}
+                style={{ 
+                  minWidth: '60px',
+                  WebkitTextFillColor: 'inherit',
+                  color: 'inherit',
+                  WebkitAppearance: 'none'
+                }}
+              >
+                {isCopied ? '✓' : 'Copy'}
               </button>
               <div className="color-toggle">
                 <input

@@ -10,9 +10,6 @@ import "@react95/core/GlobalStyle"
 import "@react95/core/themes/win95.css"
 
 class VideoPlayer extends Component {
-
-
-
   constructor(props) {
     super(props)
   }

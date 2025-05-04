@@ -225,10 +225,12 @@
     margin: 0 5px 5px 5px;
     border: 2px inset #444;
     background: black;
-    overflow: hidden;
+    overflow-x: auto; /* Enable horizontal scrollbars */
+    overflow-y: hidden; /* Disable vertical scrollbars */
     display: flex;
     height: auto;
     flex-direction: column;
+    max-width: 100%; /* Ensure it doesn't exceed the parent's width */
   }
 
   .ascii-banner-output {
@@ -239,10 +241,10 @@
     font-family: 'Courier New', monospace;
     font-size: 11px;
     line-height: 1.05;
-    white-space: pre;
-    overflow: hidden;
-    color: #00ff00;
-    height: auto;
+    white-space: pre; /* Prevent text from wrapping */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    overflow-y: hidden; /* Disable vertical scrolling */
+    max-width: 100%; /* Prevent it from exceeding the container's width */
     box-sizing: border-box;
 
     &[data-color="white"] {
