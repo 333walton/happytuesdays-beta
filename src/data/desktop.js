@@ -72,7 +72,7 @@ const desktopData = [
     className: "recycle-icon" // Apply the CSS class
   },
   {
-    title: "Monitor",
+    title: "Monitor (test)",
     icon: icons.sand16,
     component: "MonitorView",
   },
