@@ -1,4 +1,3 @@
-// src/components/VideoPlayerMobile/VastInspector.js
 import React, { useState } from "react";
 
 const VastInspector = () => {
@@ -16,13 +15,13 @@ const VastInspector = () => {
       const errorUrl = xml.querySelector("Error");
       const clickThrough = xml.querySelector("ClickThrough");
 
-      setMediaSrc(mediaFile?.textContent || null);
+      setMediaSrc(mediaFile?.textContent?.trim() || null);
 
       setValidationResult({
-        mediaFile: mediaFile?.textContent || "Not found",
-        impression: impression?.textContent || "Not found",
-        errorUrl: errorUrl?.textContent || "Not found",
-        clickThrough: clickThrough?.textContent || "Not found",
+        mediaFile: mediaFile?.textContent?.trim() || "Not found",
+        impression: impression?.textContent?.trim() || "Not found",
+        errorUrl: errorUrl?.textContent?.trim() || "Not found",
+        clickThrough: clickThrough?.textContent?.trim() || "Not found",
       });
     } catch (err) {
       setValidationResult({ error: "Invalid XML format." });

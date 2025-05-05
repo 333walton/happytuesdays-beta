@@ -70,7 +70,12 @@ const desktopData = [
     icon: icons.recycleempty32, // Default icon (This will be overridden in the component using state)
     component: "RecycleBin",
     className: "recycle-icon" // Apply the CSS class
-  }
+  },
+  {
+    title: "Monitor",
+    icon: icons.sand16,
+    component: "MonitorView",
+  },
 
 ];
 
