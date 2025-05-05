@@ -1,14 +1,14 @@
-import React, { useRef, useState, useEffect, useContext } from 'react';
+import React, { useRef, useState, useEffect, useContext } from "react";
 import Window from '../tools/Window';
 import { WindowProgram } from 'packard-belle';
 import buildMenu from '../../helpers/menuBuilder';
 import cx from 'classnames';
 import { Video } from '@react95/core';
-import '@react95/core/GlobalStyle';
-import '@react95/core/themes/win95.css';
-import './_styles.scss';
 import { ProgramContext } from '../../contexts';
+import VastInspector from './VastInspector'; // ✅ IMPORTANT IMPORT
+import './_styles.scss';
 import readme from '../../data/textFiles/readme';
+
 
 const VideoPlayerMobile = (props) => {
   // Create state for minimal functionality
@@ -771,18 +771,11 @@ const VideoPlayerMobile = (props) => {
           
           {/* Dropdown area - shown when isDropdownOpen is true */}
           {isDropdownOpen && (
-            <div className="dropdown-content" style={{
-              position: 'absolute',
-              left: '0',
-              top: '290px', // Right below the trigger
-              width: '288px',
-              height: '48px',
-              backgroundColor: '#000000',
-              zIndex: 5,
-              color: '#ffffff',
-              fontSize: '11px',
-            }}>//coming soon</div>
+            <div className="dropdown-content">
+              <VastInspector />
+            </div>
           )}
+
           
           {/* Media Info Text */}
           <span className="wmp-info-text" style={{

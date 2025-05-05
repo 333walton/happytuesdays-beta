@@ -1,0 +1,74 @@
+.pb-window {
+    font-family: "Tahoma", sans-serif;
+    font-size: 12px;
+    background: #c0c0c0;
+
+    .pb-title-bar {
+        background: linear-gradient(to right, #00007f, #0000aa);
+        color: white;
+        padding: 4px 8px;
+        font-weight: bold;
+        border-bottom: 2px solid #000;
+    }
+
+    .pb-window-body {
+        background: #e0e0e0;
+        border: 2px inset #d3d3d3;
+    }
+
+    .pb-button {
+        background: #dfdfdf;
+        border: 2px outset #fff;
+        padding: 2px 6px;
+        cursor: pointer;
+        font-size: 11px;
+
+        &:active {
+            border-style: inset;
+        }
+    }
+
+    .folder-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+            padding: 4px;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #c8c8c8;
+            }
+        }
+    }
+
+    .email-list {
+        border-top: 1px solid #999;
+        border-bottom: 1px solid #999;
+
+        .email-item {
+            padding: 4px 6px;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #f0f0f0;
+            }
+        }
+    }
+
+    .reading-pane {
+        background: white;
+        padding: 8px;
+        font-size: 12px;
+        overflow-y: auto;
+    }
+}
+
+body {
+    background: #808080;
+    margin: 0;
+    padding: 0;
+    font-family: "Tahoma", sans-serif;
+    font-size: 12px;
+}

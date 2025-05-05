@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { WindowProgram } from "packard-belle";
 import cx from "classnames";
 import Window from "../tools/Window";
-import { sand16 } from "../../icons";
+import { sand16 } from "../../icons"; 
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 

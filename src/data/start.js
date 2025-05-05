@@ -43,9 +43,10 @@ const programs = [
         isDisabled: true
     },
       {
-        title: "Outlook Express",
+        title: "Outlook98 (soon)",
         icon: icons.outlook16,
-        isDisabled: true
+        isDisabled: false,
+        component: "Outlook98",
       },
   ] },
   {
