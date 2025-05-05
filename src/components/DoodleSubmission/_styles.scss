@@ -28,6 +28,8 @@
         padding-left: 2px;
         padding-right: 2px;
         margin-top: 10px;
+        color: #000000;
+        /* Ensure text color is black */
     }
 
     .form-group {
@@ -42,21 +44,31 @@
             font-size: 11px;
             margin-bottom: 2px;
             display: block;
+            color: #000000;
+            /* Ensure label text is black */
+            -webkit-text-fill-color: #000000;
+            /* Fix for iOS */
         }
 
         .w98-input,
         .w98-textarea {
             font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
             font-size: 11px;
-            //color: #000;
-            //background: #fff;
+            color: #000000;
+            /* Explicit text color */
+            background-color: #fff;
             border: none;
             padding: 3px 4px;
-            //box-sizing: border-box;
             width: 100%;
             resize: none;
             /* Prevent resizing for textareas */
             height: auto;
+            -webkit-text-fill-color: #000000;
+            /* Fix for iOS */
+            -webkit-appearance: none;
+            /* Fix for iOS */
+            border-radius: 0;
+            /* Fix for iOS */
 
             /* Windows 98 sunken field effect */
             box-shadow: inset -1px -1px 0px #ffffff,
@@ -65,10 +77,12 @@
                 inset 2px 2px 0px #000000;
 
             /* Selection styling */
-            //&::selection {
-                //background-color: #0000aa;
-                //color: #ffffff;
-            //}
+            &::selection {
+                background-color: #0000aa;
+                color: #ffffff;
+                -webkit-text-fill-color: #ffffff;
+                /* Fix for iOS */
+            }
         }
 
         .w98-textarea {
@@ -77,26 +91,32 @@
 
         .file-input-container {
             display: center;
+            font-size: 6px;
             align-items: left;
             margin-right: 10px;
-            width: 200px;
+            width: 400px;
             gap: 8px;
-            //margin-left: -121px;
             margin-right: 0px;
-            
+            color: #000000;
+            /* Ensure text color is black */
+            -webkit-text-fill-color: #000000;
+            /* Fix for iOS */
         }
 
         /* Specific styling for file input */
         input[type="file"] {
             position: relative;
-            //height: 22px;
             padding: 2px;
-            //background-color: #ffffff;
+            color: #000000;
+            -webkit-text-fill-color: #000000;
+            /* Fix for iOS */
 
             &::file-selector-button {
                 font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
                 font-size: 11px;
-                color: #000;
+                color: #000000;
+                -webkit-text-fill-color: #000000;
+                /* Fix for iOS */
                 background: #c0c0c0;
                 border: 1px solid #c0c0c0;
                 border-right-color: #000000;
@@ -111,6 +131,10 @@
                 top: -1px;
                 cursor: pointer;
                 margin-right: 8px;
+                -webkit-appearance: none;
+                /* Fix for iOS */
+                border-radius: 0;
+                /* Fix for iOS */
 
                 &:active {
                     border-right-color: #ffffff;
@@ -128,7 +152,9 @@
     .w98-button {
         font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
         font-size: 11px;
-        color: #000;
+        color: #000000;
+        -webkit-text-fill-color: #000000;
+        /* Fix for iOS */
         background: #c0c0c0;
         border: 1px solid #c0c0c0;
         border-right-color: #000000;
@@ -140,7 +166,12 @@
         cursor: pointer;
         margin: 4px auto;
         min-width: 100px;
+        width: 100px;
         text-align: center;
+        -webkit-appearance: none;
+        /* Fix for iOS */
+        border-radius: 0;
+        /* Fix for iOS */
 
         &:active {
             border-right-color: #ffffff;
@@ -155,12 +186,14 @@
         display: flex;
         justify-content: center;
         gap: 8px;
-        //margin-top: 12px;
     }
 
     .submission-status {
-        margin-top: 12px;
+        margin-top: -2px;
+        /* Raise the submission status by 10px */
         color: green;
+        -webkit-text-fill-color: green;
+        /* Fix for iOS */
         font-weight: bold;
         text-align: center;
         padding: 4px;
@@ -170,9 +203,23 @@
 
     .file-name {
         margin-left: 8px;
-        font-size: 10px;
+        font-size: 9.5px;
+        font-weight: normal;
         position: relative;
         top: 7px;
-            /* Add this */
+        overflow: hidden;
+        color: #000000;
+        /* Ensure text color is black */
+        -webkit-text-fill-color: #000000;
+        /* Fix for iOS */
+    }
+
+    .submit-doodle-button {
+        width: 120px;
+        /* Custom width for the Submit Doodle button */
+        height: 27px;
+        /* Custom height for the Submit Doodle button */
+        font-size: 12px;
+        /* Custom font size for the Submit Doodle button */
     }
 }

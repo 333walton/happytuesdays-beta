@@ -17,7 +17,7 @@ class DoodleSubmission extends Component {
       displayAlert: false,
     };
 
-    // Create a ref for the file input
+    // Initialize the ref
     this.fileInputRef = createRef();
   }
 
@@ -35,8 +35,11 @@ class DoodleSubmission extends Component {
   };
 
   handleFileButtonClick = () => {
-    // Programmatically click the hidden file input
-    this.fileInputRef.current.click();
+    if (this.fileInputRef.current) {
+      this.fileInputRef.current.click(); // Trigger the file input click
+    } else {
+      console.error("File input ref is not initialized.");
+    }
   };
 
   handleSubmit = (e) => {
@@ -68,7 +71,7 @@ class DoodleSubmission extends Component {
         {...this.props}
         title="Submit Doodle"
         Component={WindowProgram}
-        initialWidth={320}
+        initialWidth={310}
         initialHeight={260}
         resizable={false}
         onMaximize={null}
@@ -110,7 +113,7 @@ class DoodleSubmission extends Component {
                 id="imageFile"
                 accept="image/*"
                 onChange={this.handleFileChange}
-                ref={this.fileInputRef}
+                ref={this.fileInputRef} // Assign the ref
                 style={{ display: "none" }}
               />
               {/* Button to trigger file input */}
@@ -130,7 +133,7 @@ class DoodleSubmission extends Component {
             </div>
           </div>
 
-          <button type="submit" className="pb-button">
+          <button type="submit" className="pb-button submit-doodle-button">
             Submit Doodle
           </button>
 
