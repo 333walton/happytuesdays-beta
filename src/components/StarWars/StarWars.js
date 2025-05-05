@@ -22,8 +22,8 @@ class Doom extends Component {
           options: {},
         })}
         Component={WindowProgram}
-        initialHeight={window.innerWidth <= 420 ? 270 : 307} // Adjust height for mobile
-        initialWidth={window.innerWidth <= 420 ? window.innerWidth * 0.978 : 515} // Adjust width for mobile
+        initialHeight={window.innerWidth <= 420 ? 225 : 270} // Adjust height for mobile
+        initialWidth={window.innerWidth <= 420 ? window.innerWidth * 0.978 : 505} // Adjust width for mobile
         initialX={window.innerWidth <= 420 ? 1 : 1} // Center horizontally on mobile
         initialY={window.innerWidth <= 420 ? 1 : 1} // Center vertically on mobile
         resizable={false} // Disable resizing on mobile
@@ -32,8 +32,8 @@ class Doom extends Component {
       >
         <div
           style={{
-            height: window.innerWidth <= 420 ? "270px" : "305px", // Adjust iframe height for mobile
-            width: window.innerWidth <= 420 ? window.innerWidth * 0.96 : "508px", // Adjust iframe width for mobile
+            height: window.innerWidth <= 420 ? "225px" : "270px", // Adjust iframe height for mobile
+            width: window.innerWidth <= 420 ? window.innerWidth * 0.96 : "499px", // Adjust iframe width for mobile
             overflow: "hidden",
             position: "relative",
           }}
@@ -43,13 +43,14 @@ class Doom extends Component {
             title="starwars"
             scrolling="no"
             style={{
-              transform: window.innerWidth <= 420 ? "scale(.75)" : "scale(.87)", // Adjust scaling for mobile
+              transform: window.innerWidth <= 420 ? "scale(.70)" : "scale(.82)", // Adjust scaling for mobile
               transformOrigin: "top left",
-              width: "620px",
+              width: "610px",
               height: "600px",
               position: "absolute",
-              top: window.innerWidth <= 420 ? "-87px" : "-103px", // Adjust positioning for mobile
-              left: window.innerWidth <= 420 ? "-28px" : "-11px",
+              overflow: "hidden",
+              top: window.innerWidth <= 420 ? "-95px" : "-100px", // Adjust positioning for mobile
+              left: window.innerWidth <= 420 ? "-15px" : "0px",
               border: "none",
             }}
           />

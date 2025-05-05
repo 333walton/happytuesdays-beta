@@ -7,7 +7,7 @@ import { command16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
-const lineStart = "C:\\WINDOWNS>";
+const lineStart = "C:\\HYDRA>";
 
 class JSDos extends Component {
   state = {
@@ -76,9 +76,9 @@ class JSDos extends Component {
           />
         </form>
         <div className="terminal" onClick={this.focusInput}>
-          <div>Microsoft(R) Windows 98 </div>
+          <div>Hydra(R) 98 </div>
           <div style={{ marginLeft: "12px", marginBottom: "6px" }}>
-            (C)Copyright Microsoft Corp 1981-1999.
+            (C)Copyright Hydra Corp 1991-2025.
           </div>
           <div className="terminal__content">
             {this.state.content.map(entry => (

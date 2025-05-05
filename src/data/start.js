@@ -140,18 +140,6 @@ const programs = [
     },
     multiInstance: true
   },
-  {
-    title: "CMD Prompt",
-    icon: icons.command16,
-    component: "JSDos",
-    multiInstance: true
-  },
-  {
-    title: "Rebel CMD Prompt",
-    icon: icons.rebelcommand16,
-    component: "StarWars",
-    multiInstance: false,
-  }
 ]
 
 const favorites = [
@@ -504,7 +492,20 @@ const startMenuData = [
             data: {
               src: ""
             },
-          },],
+          },
+          {
+            title: "Cookie Consent",
+            icon: icons.cookie16,
+            href: "",
+            isDisabled: true
+          },
+          {
+            title: "Newsletter Prompt",
+            icon: icons.newsletter16,
+            href: "",
+            isDisabled: true
+          },
+        ],
       },
       {
         title: "Help",

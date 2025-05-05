@@ -29,11 +29,11 @@ const transformLinks = option => ({
 const settings = (injectedData = []) => [
   [
     ...injectedData,
-    {
-      title: "Active Desktop",
-      icon: icons.activeDesktop16,
-      isDisabled: true
-    }
+    //{
+    //  title: "Active Desktop",
+    //  icon: icons.activeDesktop16,
+    //  isDisabled: true
+    //}
   ],
   {
     title: "Hydra Update...",
@@ -149,44 +149,27 @@ class ProgramProvider extends Component {
           this.props.startMenuData,
           [
             {
-              title: "IIGA Tests",
-              icon: icons.folder16,
-              options: [
-                {
-                  title: "Pre-roll Emitters",
-                  icon: icons.vid16,
-                  component: "VideoPlayerMobile",
-                  //isMobile ? "VideoPlayerMobile" : "VideoPlayerDesktop", //replace the left one with "VideoPlayerDesktop" after done testing
-                  multiInstance: true,
-                  isDisabled: false,
-                  data: {
-                    src: ""
-                  }
-                },
-                {
-                  title: "Cookie Consent",
-                  icon: icons.cookie16,
-                  href: "",
-                  isDisabled: true
-                },
-                {
-                  title: "Newsletter Prompt",
-                  icon: icons.newsletter16,
-                  href: "",
-                  isDisabled: true
-                }
-              ]
+              title: "Control Panel",
+              onClick: () => this.toggleSettings(),
+              icon: icons.controlPanel16
+            },
+            {
+              title: "CMD.exe",
+              icon: icons.command16,
+              component: "JSDos",
+              multiInstance: true
+            },
+            {
+              title: "Rebel CMD.exe",
+              icon: icons.rebelcommand16,
+              component: "StarWars",
+              multiInstance: false,
             },
             {
               title: "Task Manager",
               onClick: () => this.toggleTaskManager(),
               icon: icons.folderProgram16
             },
-            {
-              title: "Control Panel",
-              onClick: () => this.toggleSettings(),
-              icon: icons.controlPanel16
-            }
           ],
           () => this.toggleShutDownMenu()
         )
