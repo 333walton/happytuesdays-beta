@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 // Comment out the packard-belle import if it's causing issues
 // import { ButtonIconLarge } from 'packard-belle';
-import "./_styles.scss";
+import './_styles.scss';
 //import { sand16 } from "../../icons"; 
 
 class MonitorView extends Component {
