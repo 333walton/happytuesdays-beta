@@ -90,4 +90,29 @@
 .monitor-screen>* {
     width: 100%;
     height: 100%;
-    overflow: hidden; }
+    overflow: hidden;
+}
+
+/* Windows 98 Style Button */
+.w98-button {
+  font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+  font-size: 11px;
+  color: #000;
+  background: #c0c0c0;
+  border: 1px solid #c0c0c0;
+  border-right-color: #000000;
+  border-bottom-color: #000000;
+  border-left-color: #ffffff;
+  border-top-color: #ffffff;
+  padding: 4px 12px;
+  cursor: pointer;
+  box-shadow: 1px 1px 0px #000000;
+
+  &:active {
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
+    border-left-color: #000000;
+    border-top-color: #000000;
+    box-shadow: 1px 1px 0px inset #000000;
+  }
+}

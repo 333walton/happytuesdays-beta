@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { ButtonIconLarge } from 'packard-belle';
 
 class MonitorView extends Component {
   constructor(props) {
@@ -22,14 +21,14 @@ class MonitorView extends Component {
   checkIsMobile = () => {
     const isMobile = window.innerWidth < 1024;
     this.setState({ isMobile });
-    
+
     if (isMobile) {
       this.setState({ showMonitor: false });
     }
   };
 
   toggleMonitorView = () => {
-    this.setState(prevState => ({ showMonitor: !prevState.showMonitor }));
+    this.setState((prevState) => ({ showMonitor: !prevState.showMonitor }));
   };
 
   render() {
@@ -44,10 +43,13 @@ class MonitorView extends Component {
       return (
         <div className="hydra98-container">
           <div className="desktop-icons">
-            <ButtonIconLarge
-              title="CRT Mode"
+            {/* Custom Button */}
+            <button
+              className="w98-button"
               onClick={this.toggleMonitorView}
-            />
+            >
+              CRT Mode
+            </button>
           </div>
           {children}
         </div>
@@ -57,19 +59,20 @@ class MonitorView extends Component {
     return (
       <div className="windows98-monitor-container">
         <div className="desktop-icons">
-          <ButtonIconLarge
-            title="Modern Mode"
+          {/* Custom Button */}
+          <button
+            className="w98-button"
             onClick={this.toggleMonitorView}
-          />
+          >
+            Modern Mode
+          </button>
         </div>
 
         <div className="monitor-frame">
-          <div className="monitor-screen">
-            {children}
-          </div>
-          <img 
-            alt="Windows 98 Monitor" 
-            className="monitor-image" 
+          <div className="monitor-screen">{children}</div>
+          <img
+            alt="Windows 98 Monitor"
+            className="monitor-image"
           />
         </div>
       </div>
@@ -78,3 +81,7 @@ class MonitorView extends Component {
 }
 
 export default MonitorView;
+
+<MonitorView>
+  <div>Your content here</div>
+</MonitorView>
