@@ -28,26 +28,25 @@ class Desktop extends Component {
     const { context } = this;
     return (
       <ProgramProvider>
-        <Theme
-          className={cx("desktop screen", {
-            desktopX2: context.scale === 2,
-            desktopX1_5: context.scale === 1.5,
-            notMobile: !context.isMobile,
-            fullScreen: context.fullScreen
-          })}
-        >
-          <Background />
-          <DesktopView />
-          <TaskBar />
-          <WindowManager />
-          <TaskManager />
-          <Settings />
-          <ShutDown />
-          {context.crt && <CRTOverlay />}
-          <MonitorView>
-            {/* wrap app content here if needed */}
-          </MonitorView>
-        </Theme>
+        <MonitorView>
+          <Theme
+            className={cx("desktop screen", {
+              desktopX2: context.scale === 2,
+              desktopX1_5: context.scale === 1.5,
+              notMobile: !context.isMobile,
+              fullScreen: context.fullScreen
+            })}
+          >
+            <Background />
+            <DesktopView />
+            <TaskBar />
+            <WindowManager />
+            <TaskManager />
+            <Settings />
+            <ShutDown />
+            {context.crt && <CRTOverlay />}
+          </Theme>
+        </MonitorView>
       </ProgramProvider>
     );
   }

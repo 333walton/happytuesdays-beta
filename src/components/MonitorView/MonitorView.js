@@ -6,25 +6,19 @@ import './_styles.scss';
 class CRTModeToggle extends Component {
   render() {
     const { showMonitor, toggleMonitorView } = this.props;
-    
+
     return (
       <button
         onClick={toggleMonitorView}
+        className={`submit-doodle-button ${showMonitor ? 'pressed' : ''}`} // Add 'pressed' class when toggled on
         style={{
-          position: 'fixed',
+          position: 'fixed', // Keep the fixed position for the toggle button
           top: '20px',
           left: '20px',
-          zIndex: 1000001, // Highest z-index
-          backgroundColor: '#ff0000',
-          color: '#ffffff',
-          padding: '10px 20px',
-          border: '3px solid #000000',
-          fontWeight: 'bold',
-          fontSize: '16px',
-          cursor: 'pointer',
+          zIndex: 101,
         }}
       >
-        {showMonitor ? 'Exit Monitor Mode' : 'Enter Monitor Mode'}
+        <span>{showMonitor ? 'Monitor Mode' : 'Monitor Mode'}</span>
       </button>
     );
   }
@@ -52,6 +46,7 @@ class MonitorView extends Component {
     document.body.appendChild(this.toggleRoot);
     document.body.appendChild(this.monitorRoot);
     
+    // Add resize listener to detect mobile/desktop changes
     window.addEventListener('resize', this.handleResize);
     console.log("MonitorView mounted with showMonitor:", this.state.showMonitor);
   }
@@ -69,12 +64,13 @@ class MonitorView extends Component {
     }
   }
 
-  // Comprehensive mobile detection logic
+  // Detect mobile devices
   checkIsMobile = () => {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || window.innerWidth < 1024;
   };
 
+  // Update mobile state on resize
   handleResize = () => {
     this.setState({ isMobile: this.checkIsMobile() });
   };
@@ -103,12 +99,10 @@ class MonitorView extends Component {
   }
 
   renderMonitorView() {
-    const { children } = this.props;
-
     // Don't render if not showing monitor or on mobile
     if (!this.state.showMonitor || this.state.isMobile) return null;
 
-    // Create the monitor view content
+    // Create the monitor view content - using reduced z-index values
     const monitorContent = (
       <div
         id="monitor-overlay"
@@ -121,8 +115,9 @@ class MonitorView extends Component {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          zIndex: 999999,
+          zIndex: 100,
           overflow: 'hidden',
+          pointerEvents: 'none', // Make entire overlay click-through
         }}
       >
         {/* Monitor container */}
@@ -132,24 +127,9 @@ class MonitorView extends Component {
             position: 'relative',
             width: '800px',
             height: '700px',
+            pointerEvents: 'none',
           }}
         >
-          {/* Your app content positioned within the screen area */}
-          <div
-            className="monitor-screen"
-            style={{
-              position: 'absolute',
-              top: '158px',
-              left: '165px',
-              width: '640px',
-              height: '480px',
-              zIndex: 999998,
-              overflow: 'hidden',
-            }}
-          >
-            {children}
-          </div>
-
           {/* Monitor image */}
           <img
             src="/static/monitor2.png"
@@ -160,7 +140,7 @@ class MonitorView extends Component {
               left: -75,
               width: '120%',
               height: '120%',
-              zIndex: 999997,
+              zIndex: 97,
               pointerEvents: 'none',
             }}
           />
@@ -174,10 +154,8 @@ class MonitorView extends Component {
 
   render() {
     console.log("MONITOR VIEW IS RENDERING, showMonitor:", this.state.showMonitor);
-    const { showMonitor, isMobile } = this.state;
     const { children } = this.props;
 
-    // Always render these items
     return (
       <>
         {/* Always render the toggle button portal */}
@@ -186,12 +164,8 @@ class MonitorView extends Component {
         {/* Conditionally render the monitor view portal */}
         {this.renderMonitorView()}
         
-        {/* Main content - hide when in monitor mode */}
-        <div className="hydra98-container" style={{ 
-          display: (showMonitor && !isMobile) ? 'none' : 'block' 
-        }}>
-          {children}
-        </div>
+        {/* Render any children if they exist */}
+        {children}
       </>
     );
   }
