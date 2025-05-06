@@ -24,7 +24,7 @@ class CRTModeToggle extends Component {
           cursor: 'pointer',
         }}
       >
-        {showMonitor ? 'Exit CRT Mode' : 'Enter CRT Mode'}
+        {showMonitor ? 'Exit Monitor Mode' : 'Enter Monitor Mode'}
       </button>
     );
   }
@@ -34,17 +34,16 @@ class MonitorView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showMonitor: true, // CRT mode enabled by default
+      showMonitor: true, // Monitor mode enabled by default
       isMobile: this.checkIsMobile(),
     };
     
     // Create root elements for our portals
     this.toggleRoot = document.createElement('div');
-    this.toggleRoot.id = 'crt-toggle-root';
-    
+    this.toggleRoot.id = 'monitor-toggle-root';
     this.monitorRoot = document.createElement('div');
-    this.monitorRoot.id = 'crt-monitor-root';
-    
+    this.monitorRoot.id = 'monitor-root';
+
     console.log("MonitorView constructor ran");
   }
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { WindowProgram } from "packard-belle";
-import { Window } from "../tools/Window";
+//import { Window } from "../tools/Window";
 import { outlook16 } from "../../icons";
 import "./_styles.scss";
 // import icons

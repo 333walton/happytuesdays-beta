@@ -79,7 +79,7 @@
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
-      overflow: visible;
+      //overflow: visible;
     }
 
     /* Timer display */
@@ -192,21 +192,21 @@
   /* Scoped React95 resets */
   .r95_iuzg895z {
     box-shadow: none !important;
-    overflow: visible !important;
+    //overflow: visible !important;
     max-height: 300px !important;
     height: 300px !important;
   }
 
   .r95_iuzg893p {
     box-shadow: none !important;
-    overflow: visible !important;
+    //overflow: visible !important;
     max-height: 300px !important;
     height: 300px !important;
   }
 
   .r95_iuzg892r {
     box-shadow: none !important;
-    overflow: visible !important;
+    //overflow: visible !important;
     max-height: 300px !important;
     height: 300px !important;
   }
@@ -227,7 +227,7 @@
     margin: 0 auto !important;
     z-index: 1000 !important;
     background-color: #c0c0c0 !important;
-    overflow: visible !important;
+    //overflow: visible !important;
   }
 
   .VideoPlayer.ios-player .window-titlebar {
