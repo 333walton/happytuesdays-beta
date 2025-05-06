@@ -13,7 +13,7 @@ import Settings from "./components/Settings";
 import CRTOverlay from "./components/tools/CRT";
 import ShutDown from "./components/ShutDown/ShutDown";
 import Background from "./components/tools/Background";
-//import MonitorView from './components/MonitorView/MonitorView';
+import MonitorView from './components/MonitorView/MonitorView';
 
 class Desktop extends Component {
   static contextType = SettingsContext;
@@ -44,6 +44,9 @@ class Desktop extends Component {
           <Settings />
           <ShutDown />
           {context.crt && <CRTOverlay />}
+          <MonitorView>
+            {/* wrap app content here if needed */}
+          </MonitorView>
         </Theme>
       </ProgramProvider>
     );

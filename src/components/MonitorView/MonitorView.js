@@ -2,24 +2,72 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './_styles.scss';
 
+// Create a separate component for the toggle button
+class CRTModeToggle extends Component {
+  render() {
+    const { showMonitor, toggleMonitorView } = this.props;
+    
+    return (
+      <button
+        onClick={toggleMonitorView}
+        style={{
+          position: 'fixed',
+          top: '20px',
+          left: '20px',
+          zIndex: 1000001, // Highest z-index
+          backgroundColor: '#ff0000',
+          color: '#ffffff',
+          padding: '10px 20px',
+          border: '3px solid #000000',
+          fontWeight: 'bold',
+          fontSize: '16px',
+          cursor: 'pointer',
+        }}
+      >
+        {showMonitor ? 'Exit CRT Mode' : 'Enter CRT Mode'}
+      </button>
+    );
+  }
+}
 
 class MonitorView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showMonitor: true,
+      showMonitor: true, // CRT mode enabled by default
       isMobile: this.checkIsMobile(),
     };
+    
+    // Create root elements for our portals
+    this.toggleRoot = document.createElement('div');
+    this.toggleRoot.id = 'crt-toggle-root';
+    
+    this.monitorRoot = document.createElement('div');
+    this.monitorRoot.id = 'crt-monitor-root';
+    
     console.log("MonitorView constructor ran");
   }
 
   componentDidMount() {
+    // Append portal roots to the document body
+    document.body.appendChild(this.toggleRoot);
+    document.body.appendChild(this.monitorRoot);
+    
     window.addEventListener('resize', this.handleResize);
-    console.log("MonitorView mounted");
+    console.log("MonitorView mounted with showMonitor:", this.state.showMonitor);
   }
 
   componentWillUnmount() {
+    // Clean up the portal roots when component unmounts
     window.removeEventListener('resize', this.handleResize);
+    
+    if (this.toggleRoot.parentNode) {
+      this.toggleRoot.parentNode.removeChild(this.toggleRoot);
+    }
+    
+    if (this.monitorRoot.parentNode) {
+      this.monitorRoot.parentNode.removeChild(this.monitorRoot);
+    }
   }
 
   // Comprehensive mobile detection logic
@@ -33,14 +81,35 @@ class MonitorView extends Component {
   };
 
   toggleMonitorView = () => {
-    console.log("Toggle button clicked");
-    this.setState((prevState) => ({ showMonitor: !prevState.showMonitor }));
+    console.log("Toggle button clicked, current state:", this.state.showMonitor);
+    this.setState(prevState => ({ 
+      showMonitor: !prevState.showMonitor 
+    }), () => {
+      console.log("State updated to:", this.state.showMonitor);
+    });
   };
+
+  renderToggleButton() {
+    // Don't render on mobile
+    if (this.state.isMobile) return null;
+    
+    // Create portal for the toggle button
+    return ReactDOM.createPortal(
+      <CRTModeToggle 
+        showMonitor={this.state.showMonitor} 
+        toggleMonitorView={this.toggleMonitorView} 
+      />,
+      this.toggleRoot
+    );
+  }
 
   renderMonitorView() {
     const { children } = this.props;
 
-    // Create the monitor view content to be rendered in the portal
+    // Don't render if not showing monitor or on mobile
+    if (!this.state.showMonitor || this.state.isMobile) return null;
+
+    // Create the monitor view content
     const monitorContent = (
       <div
         id="monitor-overlay"
@@ -57,26 +126,6 @@ class MonitorView extends Component {
           overflow: 'hidden',
         }}
       >
-        {/* Exit button */}
-        <button
-          onClick={this.toggleMonitorView}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            left: '20px',
-            zIndex: 1000001,
-            backgroundColor: '#ff0000',
-            color: '#ffffff',
-            padding: '5px 10px',
-            border: '3px solid #000000',
-            fontWeight: 'bold',
-            fontSize: '16px',
-            cursor: 'pointer',
-          }}
-        >
-          Exit Monitor Mode
-        </button>
-
         {/* Monitor container */}
         <div
           className="monitor-frame"
@@ -121,58 +170,29 @@ class MonitorView extends Component {
     );
 
     // Create a portal to render at document.body level
-    return ReactDOM.createPortal(monitorContent, document.body);
+    return ReactDOM.createPortal(monitorContent, this.monitorRoot);
   }
 
   render() {
-    console.log("MONITOR VIEW IS RENDERING");
+    console.log("MONITOR VIEW IS RENDERING, showMonitor:", this.state.showMonitor);
     const { showMonitor, isMobile } = this.state;
     const { children } = this.props;
 
-    // If on mobile, render only the children and hide the toggle button
-    if (isMobile) {
-      return children;
-    }
-
-    // Toggle button for normal view
-    const toggleButton = (
-      <button
-        onClick={this.toggleMonitorView}
-        style={{
-          position: 'fixed',
-          top: '20px',
-          left: '20px',
-          zIndex: 999999,
-          backgroundColor: '#ff0000',
-          color: '#ffffff',
-          padding: '10px 20px',
-          border: '3px solid #000000',
-          fontWeight: 'bold',
-          fontSize: '16px',
-          cursor: 'pointer',
-        }}
-      >
-        {showMonitor ? 'Exit Monitor Mode' : ''}
-      </button>
-    );
-
-    // If not in monitor mode, just show regular view with toggle button
-    if (!showMonitor) {
-      return (
-        <div className="hydra98-container">
-          {toggleButton}
-          {children}
-        </div>
-      );
-    }
-
-    // When in monitor mode, render both:
-    // 1. A portal with the monitor view at document.body level
-    // 2. The normal children (hidden) to maintain component hierarchy
+    // Always render these items
     return (
       <>
+        {/* Always render the toggle button portal */}
+        {this.renderToggleButton()}
+        
+        {/* Conditionally render the monitor view portal */}
         {this.renderMonitorView()}
-        <div style={{ display: 'none' }}>{children}</div>
+        
+        {/* Main content - hide when in monitor mode */}
+        <div className="hydra98-container" style={{ 
+          display: (showMonitor && !isMobile) ? 'none' : 'block' 
+        }}>
+          {children}
+        </div>
       </>
     );
   }

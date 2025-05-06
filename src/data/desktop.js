@@ -76,15 +76,9 @@ const desktopData = [
     component: "RecycleBin",
     className: "recycle-icon" // Apply the CSS class
   },
-  // Conditionally add the Monitor (test) icon
+  // Conditionally add any mobile-specific icons/components here
   ...(!isMobile()
-    ? [
-        {
-          title: "Monitor (test)",
-          icon: icons.sand16,
-          component: "MonitorView",
-        },
-      ]
+    ? []
     : []),
 ];
 
