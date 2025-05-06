@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import "./_styles.scss";
 import StarfieldContainer from "../StarfieldContainer"; 
+import Starfield2 from "../Starfield2";
 
 // Create a separate component for the toggle buttons
 class CRTModeToggle extends Component {
@@ -53,6 +54,7 @@ class MonitorView extends Component {
       showScreensaver: false, // Screensaver mode disabled by default
       rocketActive: false, // Rocket button state
       nextActive: false, // Next button state
+      activeScreensaver: 'default', // Which screensaver to show: 'default' or 'p5js'
       isMobile: this.checkIsMobile(),
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
@@ -66,6 +68,8 @@ class MonitorView extends Component {
     this.monitorRoot.id = 'monitor-root';
     this.starfieldRoot = document.createElement('div');
     this.starfieldRoot.id = 'starfield-root';
+    this.p5jsStarfieldRoot = document.createElement('div');
+    this.p5jsStarfieldRoot.id = 'p5js-starfield-root';
     
     // Reference to the monitor frame
     this.monitorFrameRef = React.createRef();
@@ -78,6 +82,7 @@ class MonitorView extends Component {
     document.body.appendChild(this.toggleRoot);
     document.body.appendChild(this.monitorRoot);
     document.body.appendChild(this.starfieldRoot);
+    document.body.appendChild(this.p5jsStarfieldRoot);
 
     // Add resize listener to detect mobile/desktop changes
     window.addEventListener('resize', this.handleResize);
@@ -110,6 +115,10 @@ class MonitorView extends Component {
 
     if (this.starfieldRoot.parentNode) {
       this.starfieldRoot.parentNode.removeChild(this.starfieldRoot);
+    }
+
+    if (this.p5jsStarfieldRoot.parentNode) {
+      this.p5jsStarfieldRoot.parentNode.removeChild(this.p5jsStarfieldRoot);
     }
     
     // Restore original background color when component unmounts
@@ -191,7 +200,12 @@ class MonitorView extends Component {
   toggleScreensaverMode = () => {
     console.log("Screensaver Mode button clicked, current state:", this.state.showScreensaver);
     this.setState(prevState => ({
-      showScreensaver: !prevState.showScreensaver
+      showScreensaver: !prevState.showScreensaver,
+      // Reset to default screensaver when toggling off and back on
+      activeScreensaver: !prevState.showScreensaver ? 'default' : prevState.activeScreensaver,
+      // Reset button states when toggling screensaver off
+      rocketActive: !prevState.showScreensaver ? false : prevState.rocketActive,
+      nextActive: !prevState.showScreensaver ? false : prevState.nextActive
     }), () => {
       console.log("Screensaver state updated to:", this.state.showScreensaver);
       
@@ -203,20 +217,36 @@ class MonitorView extends Component {
   toggleRocket = () => {
     console.log("Rocket button clicked, current state:", this.state.rocketActive);
     this.setState(prevState => ({
-      rocketActive: !prevState.rocketActive
+      rocketActive: !prevState.rocketActive,
+      // Toggle between screensavers
+      activeScreensaver: !prevState.rocketActive ? 'p5js' : 'default',
+      // Make sure only one button is active at a time
+      nextActive: false,
+      // Turn off monitor mode when rocket is activated
+      showMonitor: prevState.rocketActive
     }), () => {
       console.log("Rocket state updated to:", this.state.rocketActive);
-      // You'll add rocket functionality here later
+      console.log("Active screensaver:", this.state.activeScreensaver);
+      console.log("Monitor mode set to:", this.state.showMonitor);
+      
+      // Update background color
+      this.updateBackgroundColor();
     });
   };
 
   toggleNext = () => {
     console.log("Next button clicked, current state:", this.state.nextActive);
     this.setState(prevState => ({
-      nextActive: !prevState.nextActive
+      nextActive: !prevState.nextActive,
+      // Cycle between screensavers
+      activeScreensaver: !prevState.nextActive 
+        ? (prevState.activeScreensaver === 'default' ? 'p5js' : 'default')
+        : prevState.activeScreensaver,
+      // Make sure only one button is active at a time
+      rocketActive: !prevState.nextActive && prevState.activeScreensaver === 'default'
     }), () => {
       console.log("Next state updated to:", this.state.nextActive);
-      // You'll add next screensaver functionality here later
+      console.log("Active screensaver:", this.state.activeScreensaver);
     });
   };
 
@@ -288,14 +318,33 @@ class MonitorView extends Component {
     return position;
   };
 
-  renderStarfield() {
-    // Only render if screensaver mode is active
-    if (!this.state.showScreensaver || this.state.isMobile) return null;
+  renderDefaultStarfield() {
+    // Only render if screensaver mode is active and the active screensaver is 'default'
+    if (!this.state.showScreensaver || 
+        this.state.activeScreensaver !== 'default' || 
+        this.state.isMobile) {
+      return null;
+    }
 
-    // Create portal for the starfield
+    // Create portal for the default starfield
     return ReactDOM.createPortal(
       <StarfieldContainer />,
       this.starfieldRoot
+    );
+  }
+
+  renderP5jsStarfield() {
+    // Only render if screensaver mode is active and the active screensaver is 'p5js'
+    if (!this.state.showScreensaver || 
+        this.state.activeScreensaver !== 'p5js' || 
+        this.state.isMobile) {
+      return null;
+    }
+
+    // Create portal for the P5.js starfield
+    return ReactDOM.createPortal(
+      <Starfield2 />,
+      this.p5jsStarfieldRoot
     );
   }
 
@@ -341,8 +390,8 @@ class MonitorView extends Component {
             zIndex: 101,
           }}
         />
-
-        {/* Screensaver Button - with identical styling but 40px lower */}
+        
+        {/* Screensaver Mode Button - with identical styling but 40px lower */}
         <CRTModeToggle
           label="Screensaver"
           isActive={this.state.showScreensaver}
@@ -485,8 +534,9 @@ class MonitorView extends Component {
 
     return (
       <>
-        {/* Render the starfield when screensaver is active */}
-        {this.renderStarfield()}
+        {/* Render the appropriate screensaver based on the active state */}
+        {this.renderDefaultStarfield()}
+        {this.renderP5jsStarfield()}
         
         {/* Always render the toggle buttons portal */}
         {this.renderToggleButton()}
