@@ -12,6 +12,11 @@ body {
   background-color: darkslategrey;
 }
 
+
+.monitor-mode-active {
+  background-color: #000000 !important;
+}
+
 #root {
   display: flex;
   align-content: center;

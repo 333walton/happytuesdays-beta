@@ -273,3 +273,46 @@
     }
 }
 
+/* Add this to your _styles.scss file */
+
+/* Square button styling */
+.submit-doodle-button.square-button {
+    width: 52.5px !important;
+    /* Half the width of regular buttons */
+    height: 27px !important;
+    padding: 0 !important;
+    /* Remove padding */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    //font-size: 16px;
+    /* Better size for emoji */
+
+    /* Keep all the other styling from regular buttons */
+    background: #c0c0c0;
+    border: 1px solid #c0c0c0;
+    border-right-color: #000000;
+    border-bottom-color: #000000;
+    border-left-color: #ffffff;
+    border-top-color: #ffffff;
+    box-shadow: 1px 1px 0px #000000;
+
+    /* Ensure emoji is properly centered */
+    & span {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Pressed state */
+    &.pressed {
+        border-right-color: #ffffff;
+        border-bottom-color: #ffffff;
+        border-left-color: darkslategrey;
+        border-top-color: darkslategrey;
+        box-shadow: 1px 1px 0px inset #000000;
+        background-color: #bfbfbf;
+        transform: translateY(1px);
+    } }

@@ -25,3 +25,4 @@ export { default as VideoPlayerwebkit } from "./VideoPlayerwebkit";
 export { default as MusicPlayer } from "./MusicPlayer";
 //export { default as Outlook98 } from "./Outlook98";
 export { default as MonitorView } from "./MonitorView";
+export { default as StarfieldContainer } from "./StarfieldContainer";

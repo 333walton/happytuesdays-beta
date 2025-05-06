@@ -1,0 +1,46 @@
+/* Starfield styles */
+
+/* 
+ * This class is added to the body element when starfield is active
+ * It controls how content interacts with the starfield background
+ */
+body.starfield-active {
+  /* Keep the background transparent to show starfield */
+  background-color: transparent !important;
+}
+
+/* 
+ * Style the root element to make it display on top of the starfield
+ * but still show the starfield in the background areas
+ */
+body.starfield-active #root {
+  background-color: transparent !important;
+  
+  /* 
+   * These styles ensure the desktop content remains visible and on top
+   * while letting the starfield shine through in background areas
+   */
+  & > * {
+    /* 
+     * Make sure all direct children of root have a higher z-index than starfield
+     * This ensures desktop content appears on top of the starfield
+     */
+    position: relative;
+    z-index: 2;
+  }
+}
+
+/* 
+ * Ensure the starfield doesn't block any interactions
+ * The starfield-root container should be at the bottom of the stacking order
+ */
+#starfield-root {
+  /* Make sure the starfield stays behind everything */
+  z-index: -1 !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}

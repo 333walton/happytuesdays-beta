@@ -14,6 +14,7 @@ import CRTOverlay from "./components/tools/CRT";
 import ShutDown from "./components/ShutDown/ShutDown";
 import Background from "./components/tools/Background";
 import MonitorView from './components/MonitorView/MonitorView';
+//import StarfieldContainer from './components/StarfieldContainer/StarfieldContainer';
 
 class Desktop extends Component {
   static contextType = SettingsContext;
