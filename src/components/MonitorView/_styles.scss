@@ -12,12 +12,10 @@
 
 /* Monitor frame container */
 .monitor-frame {
-    position: relative;
-    width: 800px;
-    height: 700px;
-    margin: auto;
-    z-index: 90;
-    background-color: transparent;
+  position: relative;
+  width: 800px;
+  height: 700px;
+  pointer-events: none;
 }
 
 /* Override for toggle button */
@@ -88,8 +86,43 @@
   }
 }
 
+/* Custom styles for the Screen Power button */
+#monitor-toggle-root .screen-power-button {
+  height: 27px; /* Custom height for the Screen Power button */
+  width: 58px; /* Custom width for the Screen Power button */
+  box-shadow: none; /* Remove box-shadow */
+  transition: none; /* Remove hover and focus transitions */
+}
+
+#monitor-toggle-root .screen-power-button:focus {
+  outline: none; /* Remove focus outline */
+  box-shadow: none; /* Ensure no box-shadow on focus */
+}
+
+#monitor-toggle-root .screen-power-button:hover {
+  background-color: #c0c0c0; /* Keep the background consistent on hover */
+  box-shadow: none; /* Ensure no box-shadow on hover */
+}
+
+#monitor-toggle-root .screen-power-button:active {
+  transform: translateY(1px); /* Keep the pressed effect */
+  box-shadow: none; /* Ensure no box-shadow on active */
+}
+
 /* Regular viewport when not in monitor mode */
 .hydra98-container {
     position: relative;
     width: 100%;
-    height: 100%; }
+    height: 100%;
+}
+
+.monitor-screen {
+  position: absolute;
+  top: 50px; /* Adjust position inside the monitor frame */
+  left: 50px;
+  width: 700px; /* Independent size for the black square */
+  height: 600px;
+  background-color: transparent; /* Default state */
+  z-index: 98;
+  pointer-events: none;
+}

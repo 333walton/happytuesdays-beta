@@ -2,23 +2,23 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './_styles.scss';
 
-// Create a separate component for the toggle button
+// Create a separate component for the toggle buttons
 class CRTModeToggle extends Component {
   render() {
-    const { showMonitor, toggleMonitorView } = this.props;
+    const { label, isActive, onClick, top, left, className } = this.props;
 
     return (
       <button
-        onClick={toggleMonitorView}
-        className={`submit-doodle-button ${showMonitor ? 'pressed' : ''}`} // Add 'pressed' class when toggled on
+        onClick={onClick}
+        className={`submit-doodle-button ${isActive ? 'pressed' : ''} ${className || ''}`} // Include the custom class
         style={{
-          position: 'fixed', // Keep the fixed position for the toggle button
-          top: '20px',
-          left: '20px',
+          position: 'fixed',
+          top: top,
+          left: left,
           zIndex: 101,
         }}
       >
-        <span>{showMonitor ? 'Monitor Mode' : 'Monitor Mode'}</span>
+        <span>{label}</span>
       </button>
     );
   }
@@ -29,9 +29,10 @@ class MonitorView extends Component {
     super(props);
     this.state = {
       showMonitor: true, // Monitor mode enabled by default
+      isScreenPoweredOn: true, // Screen power is on by default
       isMobile: this.checkIsMobile(),
     };
-    
+
     // Create root elements for our portals
     this.toggleRoot = document.createElement('div');
     this.toggleRoot.id = 'monitor-toggle-root';
@@ -45,7 +46,7 @@ class MonitorView extends Component {
     // Append portal roots to the document body
     document.body.appendChild(this.toggleRoot);
     document.body.appendChild(this.monitorRoot);
-    
+
     // Add resize listener to detect mobile/desktop changes
     window.addEventListener('resize', this.handleResize);
     console.log("MonitorView mounted with showMonitor:", this.state.showMonitor);
@@ -54,11 +55,11 @@ class MonitorView extends Component {
   componentWillUnmount() {
     // Clean up the portal roots when component unmounts
     window.removeEventListener('resize', this.handleResize);
-    
+
     if (this.toggleRoot.parentNode) {
       this.toggleRoot.parentNode.removeChild(this.toggleRoot);
     }
-    
+
     if (this.monitorRoot.parentNode) {
       this.monitorRoot.parentNode.removeChild(this.monitorRoot);
     }
@@ -77,23 +78,45 @@ class MonitorView extends Component {
 
   toggleMonitorView = () => {
     console.log("Toggle button clicked, current state:", this.state.showMonitor);
-    this.setState(prevState => ({ 
-      showMonitor: !prevState.showMonitor 
+    this.setState(prevState => ({
+      showMonitor: !prevState.showMonitor,
     }), () => {
       console.log("State updated to:", this.state.showMonitor);
+    });
+  };
+
+  toggleScreenPower = () => {
+    console.log("Screen Power button clicked, current state:", this.state.isScreenPoweredOn);
+    this.setState(prevState => ({
+      isScreenPoweredOn: !prevState.isScreenPoweredOn,
+    }), () => {
+      console.log("State updated to:", this.state.isScreenPoweredOn);
     });
   };
 
   renderToggleButton() {
     // Don't render on mobile
     if (this.state.isMobile) return null;
-    
-    // Create portal for the toggle button
+
+    // Create portal for the toggle buttons
     return ReactDOM.createPortal(
-      <CRTModeToggle 
-        showMonitor={this.state.showMonitor} 
-        toggleMonitorView={this.toggleMonitorView} 
-      />,
+      <>
+        <CRTModeToggle
+          label="Monitor Mode"
+          isActive={this.state.showMonitor}
+          onClick={this.toggleMonitorView}
+          top="20px"
+          left="20px"
+        />
+        <CRTModeToggle
+          label="Power"
+          isActive={this.state.isScreenPoweredOn}
+          onClick={this.toggleScreenPower}
+          top="799px" // Custom top position for the second button
+          left="1171px" // Custom left position for the second button
+          className="screen-power-button" // Ensure this class is added
+        />
+      </>,
       this.toggleRoot
     );
   }
@@ -102,7 +125,7 @@ class MonitorView extends Component {
     // Don't render if not showing monitor or on mobile
     if (!this.state.showMonitor || this.state.isMobile) return null;
 
-    // Create the monitor view content - using reduced z-index values
+    // Create the monitor view content
     const monitorContent = (
       <div
         id="monitor-overlay"
@@ -124,22 +147,37 @@ class MonitorView extends Component {
         <div
           className="monitor-frame"
           style={{
-            position: 'relative',
-            width: '800px',
+            position: 'relative', // Ensure the monitor-screen is positioned relative to this container
+            width: '800px', // Original monitor frame size
             height: '700px',
             pointerEvents: 'none',
           }}
         >
+          {/* Black square (screen) */}
+          <div
+            className="monitor-screen"
+            style={{
+              position: 'absolute', // Position relative to the monitor-frame
+              top: '106px', // Adjust position inside the monitor frame
+              left: '44px',
+              width: '720px', // Size relative to the monitor-frame
+              height: '488px',
+              backgroundColor: this.state.isScreenPoweredOn ? 'transparent' : 'black', // Change background color based on screen power
+              zIndex: 98,
+              pointerEvents: 'none',
+            }}
+          ></div>
+
           {/* Monitor image */}
           <img
             src="/static/monitor2.png"
             alt="Windows 98 Monitor"
             style={{
               position: 'absolute',
-              top: 7,
-              left: -75,
-              width: '120%',
-              height: '120%',
+              top: 7, // Original top position
+              left: -75, // Original left position
+              width: '120%', // Original width
+              height: '120%', // Original height
               zIndex: 97,
               pointerEvents: 'none',
             }}
@@ -160,10 +198,10 @@ class MonitorView extends Component {
       <>
         {/* Always render the toggle button portal */}
         {this.renderToggleButton()}
-        
+
         {/* Conditionally render the monitor view portal */}
         {this.renderMonitorView()}
-        
+
         {/* Render any children if they exist */}
         {children}
       </>
