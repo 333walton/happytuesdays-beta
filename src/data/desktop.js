@@ -1,6 +1,11 @@
 import * as icons from "../icons";
 import readme from "./textFiles/readme";
 
+const isMobile = () => {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || window.innerWidth < 1024;
+};
+
 const desktopData = [
   {
     title: "Computer",
@@ -71,12 +76,16 @@ const desktopData = [
     component: "RecycleBin",
     className: "recycle-icon" // Apply the CSS class
   },
-  {
-    title: "Monitor (test)",
-    icon: icons.sand16,
-    component: "MonitorView",
-  },
-
+  // Conditionally add the Monitor (test) icon
+  ...(!isMobile()
+    ? [
+        {
+          title: "Monitor (test)",
+          icon: icons.sand16,
+          component: "MonitorView",
+        },
+      ]
+    : []),
 ];
 
 export default desktopData;

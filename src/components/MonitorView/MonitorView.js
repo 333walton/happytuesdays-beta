@@ -1,102 +1,162 @@
 import React, { Component } from 'react';
-// Comment out the packard-belle import if it's causing issues
-// import { ButtonIconLarge } from 'packard-belle';
+import ReactDOM from 'react-dom';
 import './_styles.scss';
-//import { sand16 } from "../../icons"; 
+
 
 class MonitorView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showMonitor: false,
-      isMobile: false
+      showMonitor: true,
+      isMobile: this.checkIsMobile(),
     };
     console.log("MonitorView constructor ran");
   }
 
   componentDidMount() {
-    this.checkIsMobile();
-    window.addEventListener('resize', this.checkIsMobile);
+    window.addEventListener('resize', this.handleResize);
     console.log("MonitorView mounted");
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.checkIsMobile);
+    window.removeEventListener('resize', this.handleResize);
   }
 
+  // Comprehensive mobile detection logic
   checkIsMobile = () => {
-    const isMobile = window.innerWidth < 1024;
-    this.setState({ isMobile });
-    
-    if (isMobile) {
-      this.setState({ showMonitor: false });
-    }
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || window.innerWidth < 1024;
+  };
+
+  handleResize = () => {
+    this.setState({ isMobile: this.checkIsMobile() });
   };
 
   toggleMonitorView = () => {
     console.log("Toggle button clicked");
-    this.setState(prevState => ({ showMonitor: !prevState.showMonitor }));
+    this.setState((prevState) => ({ showMonitor: !prevState.showMonitor }));
   };
+
+  renderMonitorView() {
+    const { children } = this.props;
+
+    // Create the monitor view content to be rendered in the portal
+    const monitorContent = (
+      <div
+        id="monitor-overlay"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 999999,
+          overflow: 'hidden',
+        }}
+      >
+        {/* Exit button */}
+        <button
+          onClick={this.toggleMonitorView}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px',
+            zIndex: 1000001,
+            backgroundColor: '#ff0000',
+            color: '#ffffff',
+            padding: '5px 10px',
+            border: '3px solid #000000',
+            fontWeight: 'bold',
+            fontSize: '16px',
+            cursor: 'pointer',
+          }}
+        >
+          Exit Monitor Mode
+        </button>
+
+        {/* Monitor container */}
+        <div
+          className="monitor-frame"
+          style={{
+            position: 'relative',
+            width: '800px',
+            height: '700px',
+          }}
+        >
+          {/* Your app content positioned within the screen area */}
+          <div
+            className="monitor-screen"
+            style={{
+              position: 'absolute',
+              top: '158px',
+              left: '165px',
+              width: '640px',
+              height: '480px',
+              zIndex: 999998,
+              overflow: 'hidden',
+            }}
+          >
+            {children}
+          </div>
+
+          {/* Monitor image */}
+          <img
+            src="/static/monitor2.png"
+            alt="Windows 98 Monitor"
+            style={{
+              position: 'absolute',
+              top: 7,
+              left: -75,
+              width: '120%',
+              height: '120%',
+              zIndex: 999997,
+              pointerEvents: 'none',
+            }}
+          />
+        </div>
+      </div>
+    );
+
+    // Create a portal to render at document.body level
+    return ReactDOM.createPortal(monitorContent, document.body);
+  }
 
   render() {
     console.log("MONITOR VIEW IS RENDERING");
     const { showMonitor, isMobile } = this.state;
     const { children } = this.props;
 
-    // Add this very obvious marker that should be visible regardless of styling
-    const debugMarker = (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '50px',
-        backgroundColor: 'red',
-        color: 'white',
-        fontSize: '24px',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        zIndex: 9999999,
-        padding: '10px',
-        border: '5px solid black'
-      }}>
-        MonitorView is active - Toggle button should be below this bar
-      </div>
-    );
-
+    // If on mobile, render only the children and hide the toggle button
     if (isMobile) {
-      return (
-        <>
-          {debugMarker}
-          {children}
-        </>
-      );
+      return children;
     }
 
-    console.log("Rendering MonitorView, showMonitor:", showMonitor);
-
-    // Create a plain, very visible button that should show up regardless of CSS
+    // Toggle button for normal view
     const toggleButton = (
-      <button 
+      <button
         onClick={this.toggleMonitorView}
         style={{
           position: 'fixed',
           top: '20px',
           left: '20px',
-          zIndex: 9999,
+          zIndex: 999999,
           backgroundColor: '#ff0000',
           color: '#ffffff',
           padding: '10px 20px',
           border: '3px solid #000000',
           fontWeight: 'bold',
           fontSize: '16px',
-          cursor: 'pointer'
+          cursor: 'pointer',
         }}
       >
-        {showMonitor ? 'Exit CRT Mode' : 'Enter CRT Mode'}
+        {showMonitor ? 'Exit Monitor Mode' : ''}
       </button>
     );
 
+    // If not in monitor mode, just show regular view with toggle button
     if (!showMonitor) {
       return (
         <div className="hydra98-container">
@@ -106,16 +166,14 @@ class MonitorView extends Component {
       );
     }
 
+    // When in monitor mode, render both:
+    // 1. A portal with the monitor view at document.body level
+    // 2. The normal children (hidden) to maintain component hierarchy
     return (
-      <div className="windows98-monitor-container">
-        {toggleButton}
-        <div className="monitor-frame">
-          <div className="monitor-screen">
-            {children}
-          </div>
-          {/* No image yet */}
-        </div>
-      </div>
+      <>
+        {this.renderMonitorView()}
+        <div style={{ display: 'none' }}>{children}</div>
+      </>
     );
   }
 }
