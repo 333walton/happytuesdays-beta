@@ -54,7 +54,7 @@
     border-left-color: #ffffff;
     /* Light border for 3D effect */
     border-top-color: #ffffff;
-    box-shadow: 1px 1px 0px #000000;
+    box-shadow: .5px .5px 0px #000000;
     cursor: pointer;
     font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
     text-align: center;
@@ -73,7 +73,7 @@
     &:hover {
         background-color: #dcdcdc;
         /* Slightly lighter gray on hover */
-        box-shadow: 2px 2px 0px #000000;
+        box-shadow: 1px 1px 0px #000000;
         /* Slightly deeper shadow on hover */
     }
 
@@ -102,10 +102,10 @@
         border-bottom-color: #ffffff;
         border-left-color: darkslategrey;
         border-top-color: darkslategrey;
-        box-shadow: 1px 1px 0px inset #000000;
+        box-shadow: .5px .5px 0px inset #000000;
         background-color: #bfbfbf;
         /* Slightly darker gray to indicate pressed state */
-        transform: translateY(1px);
+        transform: translateY(.75px);
         /* Move the button down slightly */
     }
 
@@ -147,7 +147,7 @@
 
     &:hover {
         background-color: #dcdcdc;
-        box-shadow: .5px .5px 0px #000000;
+        box-shadow: .3px .3px 0px #000000;
     }
 
     &:active {
@@ -157,7 +157,7 @@
         border-top-color: darkslategrey;
         box-shadow: 1px 1px 0px inset #000000;
         background-color: #bfbfbf;
-        transform: translateY(1px);
+        transform: translateY(.75px);
     }
 
     &:focus {
@@ -212,7 +212,7 @@
 
     /* Ensure proper styling when using an image */
     &:not(.pressed) {
-        transform: scale(1) !important;
+        //transform: scale(1) !important;
         /* Reset scale to use the outer scale property */
     }
 
