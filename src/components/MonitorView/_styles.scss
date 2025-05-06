@@ -12,101 +12,152 @@
 
 /* Monitor frame container */
 .monitor-frame {
-  position: relative;
-  width: 800px;
-  height: 700px;
-  pointer-events: none;
+    position: relative;
+    width: 800px;
+    height: 700px;
+    pointer-events: none;
+
+    /* Center the monitor in the viewport */
+    margin: 0 auto;
+
+    /* Make sure the monitor scales properly on smaller screens */
+    @media (max-width: 1200px) {
+        transform: scale(0.9);
+        transform-origin: center center;
+    }
+
+    @media (max-width: 900px) {
+        transform: scale(0.8);
+        transform-origin: center center;
+    }
 }
 
 /* Override for toggle button */
 #monitor-toggle-root button {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 101;
-  padding: 10px 15px;
-  width: 105px; /* Custom width for the button */
-  height: 27px; /* Custom height for the button */
-  font-size: 11.5px; /* Custom font size for the button */
-  background: #c0c0c0; /* Light gray background */
-  border: 1px solid #c0c0c0;
-  border-right-color: #000000; /* Dark border for 3D effect */
-  border-bottom-color: #000000;
-  border-left-color: #ffffff; /* Light border for 3D effect */
-  border-top-color: #ffffff;
-  box-shadow: 1px 1px 0px #000000;
-  cursor: pointer;
-  font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
-  text-align: center; /* Center text horizontally */
-  line-height: 27px; /* Center text vertically (matches height) */
-  display: flex; /* Use flexbox for centering */
-  justify-content: center; /* Center text horizontally */
-  align-items: center; /* Center text vertically */
-  transition: background-color 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effect */
+    position: fixed;
+    z-index: 101;
+    padding: 10px 15px;
+    width: 105px;
+    /* Custom width for the button */
+    height: 27px;
+    /* Custom height for the button */
+    font-size: 11.5px;
+    /* Custom font size for the button */
+    background: #c0c0c0;
+    /* Light gray background */
+    border: 1px solid #c0c0c0;
+    border-right-color: #000000;
+    /* Dark border for 3D effect */
+    border-bottom-color: #000000;
+    border-left-color: #ffffff;
+    /* Light border for 3D effect */
+    border-top-color: #ffffff;
+    box-shadow: 1px 1px 0px #000000;
+    cursor: pointer;
+    font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+    text-align: center;
+    /* Center text horizontally */
+    line-height: 27px;
+    /* Center text vertically (matches height) */
+    display: flex;
+    /* Use flexbox for centering */
+    justify-content: center;
+    /* Center text horizontally */
+    align-items: center;
+    /* Center text vertically */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    /* Smooth hover effect */
 
-  &:hover {
-    background-color: #dcdcdc; /* Slightly lighter gray on hover */
-    box-shadow: 2px 2px 0px #000000; /* Slightly deeper shadow on hover */
-  }
+    &:hover {
+        background-color: #dcdcdc;
+        /* Slightly lighter gray on hover */
+        box-shadow: 2px 2px 0px #000000;
+        /* Slightly deeper shadow on hover */
+    }
 
-  &:active {
-    border-right-color: #ffffff;
-    border-bottom-color: #ffffff;
-    border-left-color: darkslategrey;
-    border-top-color: darkslategrey;
-    box-shadow: 1px 1px 0px inset #000000;
-    background-color: #bfbfbf; /* Slightly darker gray when active */
-    transform: translateY(1px); /* Move the button down slightly */
-  }
+    &:active {
+        border-right-color: #ffffff;
+        border-bottom-color: #ffffff;
+        border-left-color: darkslategrey;
+        border-top-color: darkslategrey;
+        box-shadow: 1px 1px 0px inset #000000;
+        background-color: #bfbfbf;
+        /* Slightly darker gray when active */
+        transform: translateY(1px);
+        /* Move the button down slightly */
+    }
 
-  &:focus {
-    outline: none; /* Remove default focus outline */
-    box-shadow: 0 0 2px 1px #5f9ea0; /* Add a focus ring with a teal color */
-  }
+    &:focus {
+        outline: none;
+        /* Remove default focus outline */
+        box-shadow: 0 0 2px 1px #5f9ea0;
+        /* Add a focus ring with a teal color */
+    }
 
-  /* Pressed state when toggled on */
-  &.pressed {
-    border-right-color: #ffffff;
-    border-bottom-color: #ffffff;
-    border-left-color: darkslategrey;
-    border-top-color: darkslategrey;
-    box-shadow: 1px 1px 0px inset #000000;
-    background-color: #bfbfbf; /* Slightly darker gray to indicate pressed state */
-    transform: translateY(1px); /* Move the button down slightly */
-  }
+    /* Pressed state when toggled on */
+    &.pressed {
+        border-right-color: #ffffff;
+        border-bottom-color: #ffffff;
+        border-left-color: darkslategrey;
+        border-top-color: darkslategrey;
+        box-shadow: 1px 1px 0px inset #000000;
+        background-color: #bfbfbf;
+        /* Slightly darker gray to indicate pressed state */
+        transform: translateY(1px);
+        /* Move the button down slightly */
+    }
 
-  /* Ensure the text moves with the button */
-  & span {
-    transition: transform 0.1s ease; /* Smooth text movement */
-  }
+    /* Ensure the text moves with the button */
+    & span {
+        transition: transform 0.1s ease;
+        /* Smooth text movement */
+    }
 
-  &:active span,
-  &.pressed span {
-    transform: translateY(1px); /* Move the text down slightly */
-  }
+    &:active span,
+    &.pressed span {
+        transform: translateY(1px);
+        /* Move the text down slightly */
+    }
 }
 
 /* Custom styles for the Screen Power button */
 #monitor-toggle-root .screen-power-button {
-  height: 27px; /* Custom height for the Screen Power button */
-  width: 58px; /* Custom width for the Screen Power button */
-  box-shadow: none; /* Remove box-shadow */
-  transition: none; /* Remove hover and focus transitions */
+    height: 27px;
+    /* Custom height for the Screen Power button */
+    width: 58px;
+    /* Custom width for the Screen Power button */
+    box-shadow: none;
+    /* Remove box-shadow */
+
+    /* Special positioning for the power button - will be overridden by inline styles */
+    position: fixed;
+    /* We're not setting top/left here since they're calculated in JS */
+    z-index: 101;
+
+    /* Add transition for smooth appearance/disappearance */
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
 }
 
 #monitor-toggle-root .screen-power-button:focus {
-  outline: none; /* Remove focus outline */
-  box-shadow: none; /* Ensure no box-shadow on focus */
+    outline: none;
+    /* Remove focus outline */
+    box-shadow: none;
+    /* Ensure no box-shadow on focus */
 }
 
 #monitor-toggle-root .screen-power-button:hover {
-  background-color: #c0c0c0; /* Keep the background consistent on hover */
-  box-shadow: none; /* Ensure no box-shadow on hover */
+    background-color: #c0c0c0;
+    /* Keep the background consistent on hover */
+    box-shadow: none;
+    /* Ensure no box-shadow on hover */
 }
 
 #monitor-toggle-root .screen-power-button:active {
-  transform: translateY(1px); /* Keep the pressed effect */
-  box-shadow: none; /* Ensure no box-shadow on active */
+    transform: translateY(1px);
+    /* Keep the pressed effect */
+    box-shadow: none;
+    /* Ensure no box-shadow on active */
 }
 
 /* Regular viewport when not in monitor mode */
@@ -117,12 +168,16 @@
 }
 
 .monitor-screen {
-  position: absolute;
-  top: 50px; /* Adjust position inside the monitor frame */
-  left: 50px;
-  width: 700px; /* Independent size for the black square */
-  height: 600px;
-  background-color: transparent; /* Default state */
-  z-index: 98;
-  pointer-events: none;
-}
+    position: absolute;
+    top: 106px;
+    /* Adjusted to match JS value */
+    left: 44px;
+    /* Adjusted to match JS value */
+    width: 720px;
+    /* Independent size for the black square */
+    height: 488px;
+    /* Adjusted to match JS value */
+    background-color: transparent;
+    /* Default state */
+    z-index: 98;
+    pointer-events: none; }

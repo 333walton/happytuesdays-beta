@@ -5,18 +5,13 @@ import './_styles.scss';
 // Create a separate component for the toggle buttons
 class CRTModeToggle extends Component {
   render() {
-    const { label, isActive, onClick, top, left, className } = this.props;
+    const { label, isActive, onClick, style, className } = this.props;
 
     return (
       <button
         onClick={onClick}
-        className={`submit-doodle-button ${isActive ? 'pressed' : ''} ${className || ''}`} // Include the custom class
-        style={{
-          position: 'fixed',
-          top: top,
-          left: left,
-          zIndex: 101,
-        }}
+        className={`submit-doodle-button ${isActive ? 'pressed' : ''} ${className || ''}`}
+        style={style}
       >
         <span>{label}</span>
       </button>
@@ -31,6 +26,9 @@ class MonitorView extends Component {
       showMonitor: true, // Monitor mode enabled by default
       isScreenPoweredOn: true, // Screen power is on by default
       isMobile: this.checkIsMobile(),
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+      powerButtonReady: false // New state to track if power button position is ready
     };
 
     // Create root elements for our portals
@@ -38,6 +36,9 @@ class MonitorView extends Component {
     this.toggleRoot.id = 'monitor-toggle-root';
     this.monitorRoot = document.createElement('div');
     this.monitorRoot.id = 'monitor-root';
+    
+    // Reference to the monitor frame
+    this.monitorFrameRef = React.createRef();
 
     console.log("MonitorView constructor ran");
   }
@@ -49,6 +50,15 @@ class MonitorView extends Component {
 
     // Add resize listener to detect mobile/desktop changes
     window.addEventListener('resize', this.handleResize);
+    
+    // Wait for monitor to render, then calculate power button position
+    if (this.state.showMonitor) {
+      // Use a short timeout to ensure the monitor has rendered first
+      setTimeout(() => {
+        this.setState({ powerButtonReady: true });
+      }, 200);
+    }
+    
     console.log("MonitorView mounted with showMonitor:", this.state.showMonitor);
   }
 
@@ -73,15 +83,38 @@ class MonitorView extends Component {
 
   // Update mobile state on resize
   handleResize = () => {
-    this.setState({ isMobile: this.checkIsMobile() });
+    this.setState({ 
+      isMobile: this.checkIsMobile(),
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+      // Reset power button on resize to prevent incorrect positioning
+      powerButtonReady: false
+    }, () => {
+      // If monitor is showing, recalculate power button position after a delay
+      if (this.state.showMonitor) {
+        setTimeout(() => {
+          this.setState({ powerButtonReady: true });
+        }, 200);
+      }
+    });
   };
 
   toggleMonitorView = () => {
     console.log("Toggle button clicked, current state:", this.state.showMonitor);
     this.setState(prevState => ({
       showMonitor: !prevState.showMonitor,
+      // Reset power button ready state when toggling monitor off
+      powerButtonReady: prevState.showMonitor ? false : prevState.powerButtonReady
     }), () => {
       console.log("State updated to:", this.state.showMonitor);
+      
+      // If turning monitor on, wait for it to render before showing power button
+      if (this.state.showMonitor) {
+        // Use a short timeout to ensure the monitor has rendered first
+        setTimeout(() => {
+          this.setState({ powerButtonReady: true });
+        }, 200);
+      }
     });
   };
 
@@ -92,6 +125,36 @@ class MonitorView extends Component {
     }), () => {
       console.log("State updated to:", this.state.isScreenPoweredOn);
     });
+  };
+
+  // Calculate position for the power button relative to the monitor image
+  calculatePowerButtonPosition = () => {
+    // Default position if we can't calculate
+    let position = {
+      position: 'fixed',
+      top: '933px', // 40px lower than the previous value of 799px
+      left: '1176px',
+      zIndex: 101,
+    };
+
+    // Calculate position based on monitor frame
+    if (this.monitorFrameRef.current) {
+      const monitorRect = this.monitorFrameRef.current.getBoundingClientRect();
+      
+      // Position relative to the monitor's bottom-right area (power button area)
+      // These offsets position the button on the monitor's power button area
+      const powerButtonOffsetTop = 673;  // Original 550 + 40px lower
+      const powerButtonOffsetLeft = 670; // Offset from left of monitor frame
+      
+      position = {
+        position: 'fixed',
+        top: `${monitorRect.top + powerButtonOffsetTop}px`,
+        left: `${monitorRect.left + powerButtonOffsetLeft}px`,
+        zIndex: 101,
+      };
+    }
+
+    return position;
   };
 
   renderToggleButton() {
@@ -105,17 +168,23 @@ class MonitorView extends Component {
           label="Monitor Mode"
           isActive={this.state.showMonitor}
           onClick={this.toggleMonitorView}
-          top="20px"
-          left="20px"
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px',
+            zIndex: 101,
+          }}
         />
-        <CRTModeToggle
-          label="Power"
-          isActive={this.state.isScreenPoweredOn}
-          onClick={this.toggleScreenPower}
-          top="799px" // Custom top position for the second button
-          left="1171px" // Custom left position for the second button
-          className="screen-power-button" // Ensure this class is added
-        />
+        {/* Only render the Power button if monitor mode is active AND position is ready */}
+        {this.state.showMonitor && this.state.powerButtonReady && (
+          <CRTModeToggle
+            label="Power"
+            isActive={this.state.isScreenPoweredOn}
+            onClick={this.toggleScreenPower}
+            style={this.calculatePowerButtonPosition()}
+            className="screen-power-button"
+          />
+        )}
       </>,
       this.toggleRoot
     );
@@ -145,6 +214,7 @@ class MonitorView extends Component {
       >
         {/* Monitor container */}
         <div
+          ref={this.monitorFrameRef}
           className="monitor-frame"
           style={{
             position: 'relative', // Ensure the monitor-screen is positioned relative to this container
@@ -165,6 +235,8 @@ class MonitorView extends Component {
               backgroundColor: this.state.isScreenPoweredOn ? 'transparent' : 'black', // Change background color based on screen power
               zIndex: 98,
               pointerEvents: 'none',
+              transition: 'background-color 0.3s ease', // Add a short transition delay
+              borderRadius: '2px', // Slightly round the corners
             }}
           ></div>
 
