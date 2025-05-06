@@ -5,8 +5,32 @@ import './_styles.scss';
 // Create a separate component for the toggle buttons
 class CRTModeToggle extends Component {
   render() {
-    const { label, isActive, onClick, style, className } = this.props;
+    const { label, isActive, onClick, style, className, imageSrc } = this.props;
 
+    // If an image source is provided, render an <img> instead of a button
+    if (imageSrc) {
+      return (
+        <div 
+          className={`power-button-container ${isActive ? 'active' : ''}`}
+          style={{
+            position: 'relative',
+            ...style
+          }}
+        >
+          <img
+            src={imageSrc}
+            alt={label}
+            onClick={onClick}
+            className={`submit-doodle-button ${isActive ? 'pressed' : ''} ${className || ''}`}
+            style={{
+              cursor: 'pointer', // Ensure the image behaves like a button
+            }}
+          />
+        </div>
+      );
+    }
+
+    // Default button rendering
     return (
       <button
         onClick={onClick}
@@ -123,7 +147,10 @@ class MonitorView extends Component {
     this.setState(prevState => ({
       isScreenPoweredOn: !prevState.isScreenPoweredOn,
     }), () => {
-      console.log("State updated to:", this.state.isScreenPoweredOn);
+      console.log("Power state updated to:", this.state.isScreenPoweredOn);
+      
+      // No need to recalculate position when toggling power
+      // We're just changing the visual state of the button
     });
   };
 
@@ -132,7 +159,7 @@ class MonitorView extends Component {
     // Default position if we can't calculate
     let position = {
       position: 'fixed',
-      top: '933px', // 40px lower than the previous value of 799px
+      top: '933px', // Default position
       left: '1176px',
       zIndex: 101,
     };
@@ -143,8 +170,8 @@ class MonitorView extends Component {
       
       // Position relative to the monitor's bottom-right area (power button area)
       // These offsets position the button on the monitor's power button area
-      const powerButtonOffsetTop = 673;  // Original 550 + 40px lower
-      const powerButtonOffsetLeft = 670; // Offset from left of monitor frame
+      const powerButtonOffsetTop = 669;  
+      const powerButtonOffsetLeft = 667; 
       
       position = {
         position: 'fixed',
@@ -156,6 +183,58 @@ class MonitorView extends Component {
 
     return position;
   };
+
+  // Calculate position for the power indicator light relative to the monitor image
+  calculateIndicatorPosition = () => {
+    // Default position if we can't calculate
+    let position = {
+      position: 'fixed',
+      top: '920px', // Higher than the power button
+      left: '1100px', // To the left of the power button
+      zIndex: 102,
+    };
+
+    // Calculate position based on monitor frame
+    if (this.monitorFrameRef.current) {
+      const monitorRect = this.monitorFrameRef.current.getBoundingClientRect();
+      
+      // Position relative to the monitor
+      const indicatorOffsetTop = 669;  // Above the power button
+      const indicatorOffsetLeft = 605; // To the left of the power button
+      
+      position = {
+        position: 'fixed',
+        top: `${monitorRect.top + indicatorOffsetTop}px`,
+        left: `${monitorRect.left + indicatorOffsetLeft}px`,
+        zIndex: 102,
+      };
+    }
+
+    return position;
+  };
+
+  renderPowerIndicator() {
+    // Don't render if monitor not showing, on mobile, or button not ready
+    if (!this.state.showMonitor || this.state.isMobile || !this.state.powerButtonReady) return null;
+
+    // Create the indicator light
+    return ReactDOM.createPortal(
+      <div
+        className={`power-indicator ${this.state.isScreenPoweredOn ? 'on' : 'off'}`}
+        style={{
+          ...this.calculateIndicatorPosition(),
+          width: '8px',
+          height: '8px',
+          borderRadius: '50%',
+          backgroundColor: this.state.isScreenPoweredOn ? '#00ff00' : '#333333',
+          boxShadow: this.state.isScreenPoweredOn ? '0 0 4px rgba(0, 255, 0, 0.8)' : '0 0 2px rgba(0, 0, 0, 0.5)',
+          transition: 'all 0.3s ease',
+          pointerEvents: 'none', // Don't block clicks
+        }}
+      />,
+      this.toggleRoot
+    );
+  }
 
   renderToggleButton() {
     // Don't render on mobile
@@ -175,15 +254,21 @@ class MonitorView extends Component {
             zIndex: 101,
           }}
         />
-        {/* Only render the Power button if monitor mode is active AND position is ready */}
+        {/* Power button using image */}
         {this.state.showMonitor && this.state.powerButtonReady && (
-          <CRTModeToggle
+        <CRTModeToggle
             label="Power"
             isActive={this.state.isScreenPoweredOn}
             onClick={this.toggleScreenPower}
-            style={this.calculatePowerButtonPosition()}
+            style={{
+            ...this.calculatePowerButtonPosition(),
+            left: `${parseInt(this.calculatePowerButtonPosition().left, 10) - 43}px`, // Shift 39px to the left
+            top: `${parseInt(this.calculatePowerButtonPosition().top, 10) - 8}px`, // Shift 2px to the top
+            // Remove the transform property since it's handled in the CSS
+            }}
             className="screen-power-button"
-          />
+            imageSrc="/static/btn1.png" // Pass the image source as a prop
+        />
         )}
       </>,
       this.toggleRoot
@@ -228,10 +313,10 @@ class MonitorView extends Component {
             className="monitor-screen"
             style={{
               position: 'absolute', // Position relative to the monitor-frame
-              top: '106px', // Adjust position inside the monitor frame
-              left: '44px',
-              width: '720px', // Size relative to the monitor-frame
-              height: '488px',
+              top: '108px', // Adjust position inside the monitor frame
+              left: '80px',
+              width: '641px', // Size relative to the monitor-frame
+              height: '482px',
               backgroundColor: this.state.isScreenPoweredOn ? 'transparent' : 'black', // Change background color based on screen power
               zIndex: 98,
               pointerEvents: 'none',
@@ -242,14 +327,14 @@ class MonitorView extends Component {
 
           {/* Monitor image */}
           <img
-            src="/static/monitor2.png"
+            src="/static/monitor3.png"
             alt="Windows 98 Monitor"
             style={{
               position: 'absolute',
-              top: 7, // Original top position
-              left: -75, // Original left position
-              width: '120%', // Original width
-              height: '120%', // Original height
+              top: -115.5, // Original top position
+              left: -155, // Original left position
+              transform: 'scale(0.766, 0.758)', // Scale width by 76.5% and height by 76.4%
+              transformOrigin: 'center center', // Scale from the center of the image
               zIndex: 97,
               pointerEvents: 'none',
             }}
@@ -270,6 +355,9 @@ class MonitorView extends Component {
       <>
         {/* Always render the toggle button portal */}
         {this.renderToggleButton()}
+
+        {/* Render the power indicator */}
+        {this.renderPowerIndicator()}
 
         {/* Conditionally render the monitor view portal */}
         {this.renderMonitorView()}

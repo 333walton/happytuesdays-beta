@@ -32,8 +32,10 @@
     }
 }
 
-/* Override for toggle button */
-#monitor-toggle-root button {
+/* =================== MONITOR MODE BUTTON STYLES =================== */
+/* These styles apply only to the Monitor Mode button */
+
+#monitor-toggle-root button:not(.screen-power-button) {
     position: fixed;
     z-index: 101;
     padding: 10px 15px;
@@ -120,45 +122,108 @@
     }
 }
 
-/* Custom styles for the Screen Power button */
+/* =================== POWER BUTTON STYLES =================== */
+/* These styles apply to the Power button image and indicator */
+
+/* Power button styles - now using an image */
+/* =================== UNIFIED BUTTON STYLES =================== */
+/* Apply these styles to both Monitor Mode and Power buttons */
+
+#monitor-toggle-root button,
 #monitor-toggle-root .screen-power-button {
-    height: 27px;
-    /* Custom height for the Screen Power button */
-    width: 58px;
-    /* Custom width for the Screen Power button */
-    box-shadow: none;
-    /* Remove box-shadow */
-
-    /* Special positioning for the power button - will be overridden by inline styles */
     position: fixed;
-    /* We're not setting top/left here since they're calculated in JS */
     z-index: 101;
+    padding: 10px 15px;
+    background: #c0c0c0;
+    border: 1px solid #c0c0c0;
+    border-right-color: #000000;
+    border-bottom-color: #000000;
+    border-left-color: #ffffff;
+    border-top-color: #ffffff;
+    box-shadow: 1px 1px 0px #000000;
+    cursor: pointer;
+    font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
 
-    /* Add transition for smooth appearance/disappearance */
+    &:hover {
+        background-color: #dcdcdc;
+        box-shadow: .5px .5px 0px #000000;
+    }
+
+    &:active {
+        border-right-color: #ffffff;
+        border-bottom-color: #ffffff;
+        border-left-color: darkslategrey;
+        border-top-color: darkslategrey;
+        box-shadow: 1px 1px 0px inset #000000;
+        background-color: #bfbfbf;
+        transform: translateY(1px);
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 2px 1px #5f9ea0;
+    }
+
+    /* Pressed state when toggled on */
+    &.pressed {
+        border-right-color: #ffffff;
+        border-bottom-color: #ffffff;
+        border-left-color: darkslategrey;
+        border-top-color: darkslategrey;
+        box-shadow: 1px 1px 0px inset #000000;
+        background-color: #bfbfbf;
+        transform: translateY(1px);
+    }
+}
+
+/* Specific styles for Monitor Mode button */
+#monitor-toggle-root button:not(.screen-power-button) {
+    width: 105px;
+    height: 27px;
+    font-size: 11.5px;
+    text-align: center;
+    line-height: 27px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Ensure the text moves with the button */
+    & span {
+        transition: transform 0.1s ease;
+    }
+
+    &:active span,
+    &.pressed span {
+        transform: translateY(1px);
+    }
+}
+
+/* Specific adjustments for the Power button image */
+#monitor-toggle-root .screen-power-button {
+    padding: 0;
+    width: auto;
+    height: auto;
+    background: transparent;
+    /* Remove background since it's an image */
+    scale: 0.74 0.7;
+    /* Scale the image to the desired size */
     opacity: 1;
-    transition: opacity 0.3s ease-in-out;
+
+    /* Ensure proper styling when using an image */
+    &:not(.pressed) {
+        transform: scale(1) !important;
+        /* Reset scale to use the outer scale property */
+    }
+
+    &.pressed {
+        transform: translateY(1px) !important;
+        /* Match regular button pressed state */
+        filter: brightness(0.95);
+    }
 }
 
-#monitor-toggle-root .screen-power-button:focus {
-    outline: none;
-    /* Remove focus outline */
-    box-shadow: none;
-    /* Ensure no box-shadow on focus */
-}
-
-#monitor-toggle-root .screen-power-button:hover {
-    background-color: #c0c0c0;
-    /* Keep the background consistent on hover */
-    box-shadow: none;
-    /* Ensure no box-shadow on hover */
-}
-
-#monitor-toggle-root .screen-power-button:active {
-    transform: translateY(1px);
-    /* Keep the pressed effect */
-    box-shadow: none;
-    /* Ensure no box-shadow on active */
-}
+/* =================== MONITOR SCREEN STYLES =================== */
 
 /* Regular viewport when not in monitor mode */
 .hydra98-container {
@@ -167,17 +232,44 @@
     height: 100%;
 }
 
+
+/* Screen power states with transitions */
 .monitor-screen {
-    position: absolute;
-    top: 106px;
-    /* Adjusted to match JS value */
-    left: 44px;
-    /* Adjusted to match JS value */
-    width: 720px;
-    /* Independent size for the black square */
-    height: 488px;
-    /* Adjusted to match JS value */
-    background-color: transparent;
-    /* Default state */
-    z-index: 98;
-    pointer-events: none; }
+    &[style*="black"] {
+        background-color: #000000 !important;
+        transition: background-color 0.3s ease-out;
+    }
+
+    &[style*="transparent"] {
+        background-color: transparent !important;
+        transition: background-color 0.3s ease-in;
+    }
+}
+
+/* Power Indicator Styles */
+.power-indicator {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    /* Don't block clicks */
+    transition: all 0.3s ease;
+    z-index: 102;
+
+    /* Off state (default) */
+    &.off {
+        background-color: #333333;
+        /* Dark gray when off */
+        box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* On state */
+    &.on {
+        background-color: #00ff00;
+        /* Bright green when on */
+        box-shadow: 0 0 4px rgba(0, 255, 0, 0.8);
+        /* Green glow */
+    }
+}
+
