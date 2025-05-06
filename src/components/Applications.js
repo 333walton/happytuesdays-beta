@@ -27,3 +27,4 @@ export { default as MusicPlayer } from "./MusicPlayer";
 export { default as MonitorView } from "./MonitorView";
 export { default as StarfieldContainer } from "./StarfieldContainer";
 export { default as Starfield2 } from "./Starfield2";
+export { default as HookScoreHeatmap } from "./HookScoreHeatmap";

@@ -1,0 +1,246 @@
+// HookScoreHeatmap styles
+
+.HookScoreHeatmap {
+
+    // Main container styles
+    .upload-area {
+        transition: background-color 0.2s ease;
+
+        &.dragging {
+            background-color: #e0e0e0 !important;
+            border-color: #0066cc !important;
+        }
+    }
+
+    // Video player area
+    video {
+        object-fit: contain;
+        background-color: #000;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    // Progress bar customization
+    input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 11px;
+        background: transparent;
+
+        &::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 11px;
+            width: 11px;
+            background: #c0c0c0;
+            border: 1px outset #fff;
+            cursor: pointer;
+        }
+
+        &::-moz-range-thumb {
+            height: 11px;
+            width: 11px;
+            background: #c0c0c0;
+            border: 1px outset #fff;
+            cursor: pointer;
+        }
+    }
+
+    // Heatmap styles
+    .heatmap-container {
+        position: relative;
+        height: 35px;
+        border: 1px inset #fff;
+        background: #fff;
+
+        .heatmap-bar {
+            position: absolute;
+            bottom: 0;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+
+            &:hover {
+                opacity: 0.8;
+            }
+        }
+
+        .position-marker {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: #000;
+            z-index: 5;
+        }
+
+        .hook-marker {
+            position: absolute;
+            top: 2px;
+            z-index: 10;
+            cursor: pointer;
+
+            .hook-dot {
+                height: 6px;
+                width: 6px;
+                background-color: #ffcc00;
+                border: 1px solid #000;
+                border-radius: 50%;
+            }
+
+            .hook-label {
+                position: absolute;
+                top: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #ffffcc;
+                border: 1px solid #000;
+                font-size: 8px;
+                padding: 0px 2px;
+                white-space: nowrap;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+            }
+
+            &:hover .hook-label {
+                opacity: 1;
+            }
+        }
+    }
+
+    // Analysis panel styles
+    .analysis-panel {
+        border: 1px inset #fff;
+        background: #fff;
+        padding: 4px;
+        height: 100%;
+        font-size: 10px;
+
+        .score-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border: 1px solid #888;
+            position: relative;
+            margin-right: 3px;
+
+            .score-fill {
+                height: 100%;
+                transition: width 0.5s ease;
+            }
+        }
+
+        .trim-point {
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+
+            &.drop-point {
+                color: #cc0000;
+            }
+
+            button {
+                font-size: 9px;
+                padding: 0px 2px;
+            }
+        }
+    }
+
+    // Help dialog styles
+    .help-dialog {
+        position: absolute;
+        top: 20%;
+        left: 10%;
+        right: 10%;
+        bottom: 20%;
+        background: #c0c0c0;
+        border: 2px outset #fff;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+
+        .help-titlebar {
+            background: #000080;
+            color: #fff;
+            padding: 3px 5px;
+            display: flex;
+            justify-content: space-between;
+
+            .close-button {
+                background: transparent;
+                border: none;
+                color: #fff;
+                font-weight: bold;
+                cursor: pointer;
+
+                &:hover {
+                    color: #ccccff;
+                }
+            }
+        }
+
+        .help-content {
+            padding: 10px;
+            overflow: auto;
+            flex: 1;
+
+            h3 {
+                margin: 0 0 10px 0;
+            }
+
+            ul {
+                padding-left: 20px;
+                margin-bottom: 15px;
+
+                li {
+                    margin-bottom: 5px;
+                }
+            }
+        }
+
+        .help-footer {
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #888;
+        }
+    }
+
+    // Custom tooltip for Windows 98 style
+    .win98-tooltip {
+        position: absolute;
+        background: #ffffdd;
+        border: 1px solid #000;
+        padding: 2px 4px;
+        font-size: 9px;
+        pointer-events: none;
+        z-index: 1000;
+        max-width: 200px;
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        transition: opacity 0.3s;
+
+        &.visible {
+            opacity: 1;
+        }
+    }
+
+    // Loading spinner animation
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-spinner {
+        width: 32px;
+        height: 32px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 2s linear infinite;
+    } }

@@ -501,6 +501,16 @@ const startMenuData = [
             isDisabled: true
           },
           {
+            title: "Hookscore Heatmap",
+            icon: icons.vid16,
+            component: "HookScoreHeatmap",
+            multiInstance: true,
+            isDisabled: false,
+            data: {
+              src: ""
+            },
+          },
+          {
             title: "Newsletter Prompt",
             icon: icons.newsletter16,
             href: "",
