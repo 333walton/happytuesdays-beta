@@ -8,6 +8,316 @@
         display: none !important;
         /* Important needed here to override any inline styles */
     }
+
+    /* =================== MONITOR SCREEN STYLES =================== */
+
+    /* Regular viewport when not in monitor mode */
+    .hydra98-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Monitor screen and desktop viewport styles (jsx duplicate taking priority it seems) */
+    .monitor-screen {
+        position: absolute;
+        top: 110px;
+        /* Fixed position to match original */
+        left: 79px;
+        width: 641px;
+        height: 479px;
+        background-color: transparent;
+        z-index: 98;
+        overflow: hidden;
+        transition: background-color 0.3s ease;
+        border-radius: 2px;
+
+        /* Screen power states with transitions */
+        &[style*="black"] {
+            background-color: #000000 !important;
+            transition: background-color 0.3s ease-out !important;
+        }
+
+        &[style*="transparent"] {
+            background-color: transparent !important;
+            transition: background-color 0.3s ease-in !important;
+        }
+    }
+
+    /* Desktop content wrapper */
+    .desktop-content-wrapper {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transition: transform 0.3s ease;
+        transform-origin: center center;
+    }
+
+    /* Black overlay when power is off */
+    .black-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: black;
+        z-index: 999;
+        pointer-events: none;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+        transition: 'background-color 0.3s ease' !important; // Add a short transition delay
+    }
+
+    /* CRT effect styles - WITH EXPLICIT RULES TO HIDE WHEN ZOOMED */
+    .crt-effect {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+        background-size: 100% 4px;
+        z-index: 200;
+        pointer-events: none;
+        opacity: 0.15;
+
+        /* When this class is added, hide completely */
+        &.disabled {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+    }
+
+    /* CRITICAL: Multiple selectors to ensure CRT effect is always hidden when zoomed */
+    .monitor-container[style*="scale"] .crt-effect,
+    .monitor-container[style*="transform"] .crt-effect,
+    body[data-zoom="1"] .crt-effect,
+    body[data-zoom="2"] .crt-effect {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+    /* Power Indicator Styles */
+    .power-indicator {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        pointer-events: none;
+        /* Don't block clicks */
+        transition: all 0.3s ease;
+        z-index: 102;
+
+        /* Off state (default) */
+        &.off {
+            background-color: #333333;
+            /* Dark gray when off */
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* On state */
+        &.on {
+            background-color: #00ff00;
+            /* Bright green when on */
+            box-shadow: 0 0 4px rgba(0, 255, 0, 0.8);
+            /* Green glow */
+        }
+    }
+
+    /* Monitor controls container - SCOPED TO MONITOR BUTTONS ONLY */
+    .monitor-controls {
+        position: absolute;
+        bottom: 32px;
+        right: 160px;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        pointer-events: auto !important;
+    }
+
+    /* Button styles for monitor controls only - scoped to prevent affecting Start Menu */
+    .monitor-controls button {
+        width: 18px;
+        height: 18px;
+        background: #c0c0c0;
+        border: outset 2px #ffffff;
+        box-sizing: content-box;
+        cursor: pointer !important;
+        margin: 0 5px;
+        padding: 0;
+        pointer-events: auto !important;
+    }
+
+    /* Active button state for monitor controls only */
+    .monitor-controls button.active {
+        border-style: inset !important;
+        background-color: #a0a0a0 !important;
+    }
+
+    /* Button hover effect for monitor controls only */
+    .monitor-controls button:hover {
+        filter: brightness(1.1);
+    }
+
+    /* Zoom level indicator */
+    .zoom-level-indicator {
+        position: absolute;
+        top: -20px;
+        right: 70px;
+        background-color: #333;
+        color: white;
+        padding: 2px 4px;
+        border-radius: 2px;
+        font-size: 10px;
+        font-family: Arial, sans-serif;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
+        z-index: 102;
+    }
+
+    /* Square button styling */
+    .submit-doodle-button.square-button {
+        width: 47px !important;
+        /* Half the width of regular buttons (with slight adjustment for spacing) */
+        height: 27px !important;
+        padding: 0 !important;
+        /* Remove padding */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* Better size for emoji */
+
+        /* Keep all the other styling from regular buttons */
+        background: #c0c0c0;
+        border: 1px solid #c0c0c0;
+        border-right-color: #000000;
+        border-bottom-color: #000000;
+        border-left-color: #ffffff;
+        border-top-color: #ffffff;
+        box-shadow: 1px 1px 0px #000000;
+
+        /* Ensure emoji is properly centered */
+        & span {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Pressed state */
+        &.pressed {
+            border-right-color: #ffffff;
+            border-bottom-color: #ffffff;
+            border-left-color: darkslategrey;
+            border-top-color: darkslategrey;
+            box-shadow: 1px 1px 0px inset #000000;
+            background-color: #bfbfbf;
+            transform: translateY(1px);
+        }
+    }
+
+    /* Specific styles for Monitor Mode button */
+    #monitor-toggle-root button:not(.screen-power-button):not(.screen-zoom-button) {
+        width: 105px;
+        height: 27px;
+        font-size: 11.5px;
+        text-align: center;
+        line-height: 27px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        /* Ensure the text moves with the button */
+        & span {
+            transition: transform 0.1s ease;
+        }
+
+        &:active span,
+        &.pressed span {
+            transform: translateY(1px);
+        }
+    }
+
+    /* Specific adjustments for the Power button image */
+    #monitor-toggle-root .screen-power-button,
+    #monitor-toggle-root .screen-zoom-button {
+        padding: 0;
+        width: auto;
+        height: auto;
+        background: transparent;
+        /* Remove background since it's an image */
+        scale: 0.74 0.7;
+        /* Scale the image to the desired size */
+        opacity: 1;
+        pointer-events: auto !important;
+
+        /* Ensure proper styling when using an image */
+        &:not(.pressed) {
+            /* Reset scale to use the outer scale property */
+        }
+
+        &.pressed {
+            transform: translateY(1px) !important;
+            /* Match regular button pressed state */
+            filter: brightness(0.95);
+        }
+    }
+}
+
+/* =================== UNIFIED BUTTON STYLES =================== */
+/* Apply these styles to both Monitor Mode and Power buttons */
+
+#monitor-toggle-root button,
+#monitor-toggle-root .screen-power-button,
+#monitor-toggle-root .screen-zoom-button {
+    position: fixed;
+    z-index: 101;
+    padding: 10px 15px;
+    background: #c0c0c0;
+    border: 1px solid #c0c0c0;
+    border-right-color: #000000;
+    border-bottom-color: #000000;
+    border-left-color: #ffffff;
+    border-top-color: #ffffff;
+    box-shadow: 1px 1px 0px #000000;
+    cursor: pointer;
+    font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+
+    &:hover {
+        background-color: #dcdcdc;
+        box-shadow: .3px .3px 0px #000000;
+    }
+
+    &:active {
+        border-right-color: #ffffff;
+        border-bottom-color: #ffffff;
+        border-left-color: darkslategrey;
+        border-top-color: darkslategrey;
+        box-shadow: 1px 1px 0px inset #000000;
+        background-color: #bfbfbf;
+        transform: translateY(.75px);
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 2px 1px #5f9ea0;
+    }
+
+    /* Pressed state when toggled on */
+    &.pressed {
+        border-right-color: #ffffff;
+        border-bottom-color: #ffffff;
+        border-left-color: darkslategrey;
+        border-top-color: darkslategrey;
+        box-shadow: 1px 1px 0px inset #000000;
+        background-color: #bfbfbf;
+        transform: translateY(1px);
+    }
 }
 
 /* Monitor container styles - for zoom functionality */
@@ -130,314 +440,3 @@
         /* Move the text down slightly */
     }
 }
-
-/* =================== UNIFIED BUTTON STYLES =================== */
-/* Apply these styles to both Monitor Mode and Power buttons */
-
-#monitor-toggle-root button,
-#monitor-toggle-root .screen-power-button,
-#monitor-toggle-root .screen-zoom-button {
-    position: fixed;
-    z-index: 101;
-    padding: 10px 15px;
-    background: #c0c0c0;
-    border: 1px solid #c0c0c0;
-    border-right-color: #000000;
-    border-bottom-color: #000000;
-    border-left-color: #ffffff;
-    border-top-color: #ffffff;
-    box-shadow: 1px 1px 0px #000000;
-    cursor: pointer;
-    font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
-
-    &:hover {
-        background-color: #dcdcdc;
-        box-shadow: .3px .3px 0px #000000;
-
-    }&:active {
-        border-right-color: #ffffff;
-        border-bottom-color: #ffffff;
-        border-left-color: darkslategrey;
-        border-top-color: darkslategrey;
-        box-shadow: 1px 1px 0px inset #000000;
-        background-color: #bfbfbf;
-        transform: translateY(.75px);
-    }
-    
-    &:focus {
-        outline: none;
-        box-shadow: 0 0 2px 1px #5f9ea0;
-    }
-    
-    /* Pressed state when toggled on */
-    &.pressed {
-        border-right-color: #ffffff;
-        border-bottom-color: #ffffff;
-        border-left-color: darkslategrey;
-        border-top-color: darkslategrey;
-        box-shadow: 1px 1px 0px inset #000000;
-        background-color: #bfbfbf;
-        transform: translateY(1px);
-    }
-    }
-    
-    /* Specific styles for Monitor Mode button */
-    #monitor-toggle-root button:not(.screen-power-button):not(.screen-zoom-button) {
-        width: 105px;
-        height: 27px;
-        font-size: 11.5px;
-        text-align: center;
-        line-height: 27px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    
-        /* Ensure the text moves with the button */
-        & span {
-            transition: transform 0.1s ease;
-        }
-    
-        &:active span,
-        &.pressed span {
-            transform: translateY(1px);
-        }
-    }
-    
-    /* Specific adjustments for the Power button image */
-    #monitor-toggle-root .screen-power-button,
-    #monitor-toggle-root .screen-zoom-button {
-        padding: 0;
-        width: auto;
-        height: auto;
-        background: transparent;
-        /* Remove background since it's an image */
-        scale: 0.74 0.7;
-        /* Scale the image to the desired size */
-        opacity: 1;
-        pointer-events: auto !important;
-    
-        /* Ensure proper styling when using an image */
-        &:not(.pressed) {
-            //transform: scale(1) !important;
-            /* Reset scale to use the outer scale property */
-        }
-    
-        &.pressed {
-            transform: translateY(1px) !important;
-            /* Match regular button pressed state */
-            filter: brightness(0.95);
-        }
-    }
-    
-    /* =================== MONITOR SCREEN STYLES =================== */
-    
-    /* Regular viewport when not in monitor mode */
-    .hydra98-container {
-        position: relative;
-        width: 100%;
-        height: 100%;
-    }
-    
-    /* Monitor screen and desktop viewport styles */
-    .monitor-screen {
-        position: absolute;
-        top: 110px;
-        /* Fixed position to match original */
-        left: 80px;
-        width: 641px;
-        height: 482px;
-        background-color: transparent;
-        z-index: 98;
-        overflow: hidden;
-        transition: background-color 0.3s ease;
-        border-radius: 2px;
-    
-        /* Screen power states with transitions */
-        &[style*="black"] {
-            background-color: #000000 !important;
-            transition: background-color 0.3s ease-out;
-        }
-    
-        &[style*="transparent"] {
-            background-color: transparent !important;
-            transition: background-color 0.3s ease-in;
-        }
-    }
-    
-    /* Desktop content wrapper */
-    .desktop-content-wrapper {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        transition: transform 0.3s ease;
-        transform-origin: center center;
-    }
-    
-    /* Black overlay when power is off */
-    .black-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: black;
-        z-index: 999;
-        pointer-events: none;
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-    }
-    
-    /* CRT effect styles - WITH EXPLICIT RULES TO HIDE WHEN ZOOMED */
-    .crt-effect {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-        background-size: 100% 4px;
-        z-index: 200;
-        pointer-events: none;
-        opacity: 0.15;
-    
-        /* When this class is added, hide completely */
-        &.disabled {
-            display: none !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-        }
-    }
-    
-    /* CRITICAL: Multiple selectors to ensure CRT effect is always hidden when zoomed */
-    .monitor-container[style*="scale"] .crt-effect,
-    .monitor-container[style*="transform"] .crt-effect,
-    body[data-zoom="1"] .crt-effect,
-    body[data-zoom="2"] .crt-effect {
-        display: none !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-    }
-    
-    /* Power Indicator Styles */
-    .power-indicator {
-        position: fixed;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        pointer-events: none;
-        /* Don't block clicks */
-        transition: all 0.3s ease;
-        z-index: 102;
-    
-        /* Off state (default) */
-        &.off {
-            background-color: #333333;
-            /* Dark gray when off */
-            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-        }
-    
-        /* On state */
-        &.on {
-            background-color: #00ff00;
-            /* Bright green when on */
-            box-shadow: 0 0 4px rgba(0, 255, 0, 0.8);
-            /* Green glow */
-        }
-    }
-    
-    /* Monitor controls container - SCOPED TO MONITOR BUTTONS ONLY */
-    .monitor-controls {
-        position: absolute;
-        bottom: 32px;
-        right: 160px;
-        /* Moved 100px left from original position */
-        z-index: 999;
-        display: flex;
-        align-items: center;
-        pointer-events: auto !important;
-    }
-    
-    /* Button styles for monitor controls only - scoped to prevent affecting Start Menu */
-    .monitor-controls button {
-        width: 18px;
-        height: 18px;
-        background: #c0c0c0;
-        border: outset 2px #ffffff;
-        box-sizing: content-box;
-        cursor: pointer !important;
-        margin: 0 5px;
-        padding: 0;
-        pointer-events: auto !important;
-    }
-    
-    /* Active button state for monitor controls only */
-    .monitor-controls button.active {
-        border-style: inset !important;
-        background-color: #a0a0a0 !important;
-    }
-    
-    /* Button hover effect for monitor controls only */
-    .monitor-controls button:hover {
-        filter: brightness(1.1);
-    }
-    
-    /* Zoom level indicator */
-    .zoom-level-indicator {
-        position: absolute;
-        top: -20px;
-        right: 70px;
-        background-color: #333;
-        color: white;
-        padding: 2px 4px;
-        border-radius: 2px;
-        font-size: 10px;
-        font-family: Arial, sans-serif;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        pointer-events: none;
-        z-index: 102;
-    }
-    
-    /* Square button styling */
-    .submit-doodle-button.square-button {
-        width: 52.5px !important;
-        /* Half the width of regular buttons */
-        height: 27px !important;
-        padding: 0 !important;
-        /* Remove padding */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        //font-size: 16px;
-        /* Better size for emoji */
-    
-        /* Keep all the other styling from regular buttons */
-        background: #c0c0c0;
-        border: 1px solid #c0c0c0;
-        border-right-color: #000000;
-        border-bottom-color: #000000;
-        border-left-color: #ffffff;
-        border-top-color: #ffffff;
-        box-shadow: 1px 1px 0px #000000;
-    
-        /* Ensure emoji is properly centered */
-        & span {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 100%;
-        }
-    
-        /* Pressed state */
-        &.pressed {
-            border-right-color: #ffffff;
-            border-bottom-color: #ffffff;
-            border-left-color: darkslategrey;
-            border-top-color: darkslategrey;
-            box-shadow: 1px 1px 0px inset #000000;
-            background-color: #bfbfbf;
-            transform: translateY(1px);
-        }
-    }

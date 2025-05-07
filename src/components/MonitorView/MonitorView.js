@@ -332,8 +332,8 @@ class MonitorView extends Component {
       activeScreensaver: !prevState.rocketActive ? 'p5js' : 'default',
       // Make sure only one button is active at a time
       nextActive: false,
-      // Turn off monitor mode when rocket is activated
-      showMonitor: prevState.rocketActive
+      // When activating rocket, hide both monitor and viewport. When deactivating, show them both again.
+      showMonitor: !prevState.rocketActive ? false : true
     }), () => {
       console.log("Rocket state updated to:", this.state.rocketActive);
       console.log("Active screensaver:", this.state.activeScreensaver);
@@ -396,57 +396,67 @@ class MonitorView extends Component {
     if (this.state.isMobile || !this.state.powerButtonReady) return null;
     
     return (
-      <div className="monitor-controls" style={{
-        position: 'absolute',
-        bottom: 32,
-        right: 160, // Moved 100px left from original position
-        zIndex: 999, // Higher z-index to ensure it's above everything
-        display: 'flex',
-        alignItems: 'center',
-        pointerEvents: 'auto' // Ensure it's clickable
-      }}>
-        {/* Zoom level indicator */}
-        {this.state.zoomLevel > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: -20,
-            right: 70,
-            backgroundColor: '#333',
-            color: 'white',
-            padding: '2px 4px',
-            borderRadius: '2px',
-            fontSize: '10px',
-            fontFamily: 'Arial',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.5)',
-            pointerEvents: 'none'
-          }}>
-            {this.state.zoomLevel === 1 ? '110%' : '125%'}
-          </div>
-        )}
+      <>
+        {/* Zoom control and indicator light */}
+        <div className="monitor-controls" style={{
+          position: 'absolute',
+          bottom: 32,
+          right: 160,
+          zIndex: 999,
+          display: 'flex',
+          alignItems: 'center',
+          pointerEvents: 'auto'
+        }}>
+          {/* Power indicator light */}
+          <div 
+            style={{
+              position: 'absolute',
+              width: 8,
+              height: 8,
+              left: -22,
+              bottom: -5,
+              borderRadius: '50%',
+              backgroundColor: this.state.isScreenPoweredOn ? '#00ff00' : '#333333',
+              boxShadow: this.state.isScreenPoweredOn ? '0 0 4px rgba(0, 255, 0, 0.8)' : '0 0 2px rgba(0, 0, 0, 0.5)',
+              margin: '0 5px',
+              transition: 'background-color 0.2s ease, box-shadow 0.3s ease'
+            }}
+          />
+        </div>
         
-        {/* Use proper button elements for better click handling */}
-        <MonitorButton 
-          onClick={this.toggleZoom}
-          isActive={this.state.zoomActive}
-        />
-        
-        {/* Power indicator light */}
-        <div 
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            backgroundColor: this.state.isScreenPoweredOn ? '#00ff00' : '#333333',
-            boxShadow: this.state.isScreenPoweredOn ? '0 0 4px rgba(0, 255, 0, 0.8)' : '0 0 2px rgba(0, 0, 0, 0.5)',
-            margin: '0 5px'
-          }}
-        />
-        
-        <MonitorButton 
-          onClick={this.toggleScreenPower}
-          isActive={!this.state.isScreenPoweredOn}
-        />
-      </div>
+        {/* Power button - positioned separately */}
+        <div style={{
+          position: 'absolute',
+          bottom: -2,
+          right: 100,
+          zIndex: 999,
+          pointerEvents: 'auto'
+        }}>
+          <MonitorButton
+            onClick={this.toggleScreenPower}
+            style={{
+              width: '51px',
+              height: '27px',
+              backgroundColor: this.state.isScreenPoweredOn ? '#d5cca1' : '##cabe93',
+              borderRadius: '0px',
+              border: this.state.isScreenPoweredOn 
+              ? 'inset 1px #888888' 
+              : 'outset 1px #ffffff',
+
+            boxShadow: this.state.isScreenPoweredOn 
+              ? 'inset 1px 1px 1.5px rgba(0,0,0,0.5)' 
+              : 'none',
+              transform: !this.state.isScreenPoweredOn 
+              ? 'inset 0 1px 1.5px rgba(255, 255, 255, 0.3), 0 1px 1.5px rgba(0, 0, 0, 0.2)'
+              : 'inset 0 1px 1px rgba(0, 0, 0, 0.15)',
+              color: this.state.isScreenPoweredOn ? '#5c5845' : '#fff7e6',
+              transition: 'all 0.05s ease-in-out'
+            }}
+          >
+            {this.state.isScreenPoweredOn ? 'ON' : 'OFF'}
+          </MonitorButton>
+        </div>
+      </>
     );
   }
 
@@ -484,6 +494,9 @@ class MonitorView extends Component {
   renderMonitorView() {
     // Don't render anything if on mobile
     if (this.state.isMobile) return null;
+    
+    // Don't render desktop viewport if rocket emoji is active (rocketActive is true)
+    if (this.state.rocketActive) return null;
 
     // Create content for monitor frame and desktop viewport
     const monitorContent = (
@@ -529,13 +542,13 @@ class MonitorView extends Component {
               style={{
                 position: 'absolute',
                 top: 110, // Fixed position to match original
-                left: 80,
+                left: 79,
                 width: 641,
                 height: 482,
                 backgroundColor: 'transparent', // Always transparent, black overlay is separate
                 zIndex: 98,
                 overflow: 'hidden',
-                transition: 'background-color 0.3s ease',
+                transition: 'background-color 0.3s ease !important',
                 borderRadius: '2px',
               }}
             >
@@ -586,6 +599,7 @@ class MonitorView extends Component {
                     backgroundColor: 'black',
                     zIndex: 999,
                     pointerEvents: 'none',
+                    transition: 'background-color 0.3s ease !important', // Add a short transition delay
                   }}
                 />
               )}
@@ -600,11 +614,12 @@ class MonitorView extends Component {
                   position: 'absolute',
                   top: -115.5,
                   left: -155,
-                  transform: 'scale(0.766, 0.758)',
+                  transform: 'scale(0.766, 0.755)',
                   transformOrigin: 'center center',
                   zIndex: 97,
                   userSelect: 'none', // Prevent selection
                   pointerEvents: 'none', // Don't interfere with mouse events
+                  borderRadius: '12px', //not working
                 }}
               />
             )}
@@ -637,19 +652,55 @@ class MonitorView extends Component {
             top: '20px',
             left: '20px',
             zIndex: 101,
+            width: '105px'
           }}
         />
         
-        {/* Screensaver Mode Button - with identical styling but 40px lower */}
+        {/* Zoom Button - directly below Monitor Mode button */}
+        <CRTModeToggle
+          label="Zoom"
+          isActive={this.state.zoomActive}
+          onClick={this.toggleZoom}
+          style={{
+            position: 'fixed',
+            top: '60px', // 40px below the Monitor Mode button
+            left: '20px',
+            zIndex: 101,
+            width: '105px'
+          }}
+        />
+        
+        {/* Zoom Level Indicator - only show when zoomed */}
+        {this.state.zoomLevel > 0 && (
+          <div style={{
+            position: 'fixed',
+            top: '60px',
+            left: '135px',
+            backgroundColor: '#333',
+            color: 'white',
+            padding: '2px 4px',
+            borderRadius: '2px',
+            fontSize: '10px',
+            fontFamily: 'Arial',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.5)',
+            pointerEvents: 'none',
+            zIndex: 101
+          }}>
+            {this.state.zoomLevel === 1 ? '110%' : '125%'}
+          </div>
+        )}
+        
+        {/* Screensaver Mode Button - below the Zoom button */}
         <CRTModeToggle
           label="Screensaver"
           isActive={this.state.showScreensaver}
           onClick={this.toggleScreensaverMode}
           style={{
             position: 'fixed',
-            top: '60px', // 40px below the Monitor Mode button
+            top: '100px', // 40px below the Zoom button
             left: '20px',
             zIndex: 101,
+            width: '105px'
           }}
         />
         
@@ -662,9 +713,10 @@ class MonitorView extends Component {
             isSquare={true} // Make it square
             style={{
               position: 'fixed',
-              top: '100px', // 40px below the Screensaver Mode button
+              top: '140px', // 40px below the Screensaver button
               left: '20px',
               zIndex: 101,
+              width: '47px' // Just under half the width of buttons above
             }}
           />
         )}
@@ -678,9 +730,10 @@ class MonitorView extends Component {
             isSquare={true} // Make it square
             style={{
               position: 'fixed',
-              top: '100px', // Same height as Rocket button
-              left: '82.5px', // Right next to Rocket button (rocket width 52.5px + 10px space)
+              top: '140px', // Same height as Rocket button
+              left: '77px', // Right next to Rocket button with 10px spacing
               zIndex: 101,
+              width: '47px' // Just under half the width of buttons above
             }}
           />
         )}
