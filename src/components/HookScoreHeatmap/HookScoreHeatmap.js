@@ -1,872 +1,701 @@
-import React, { Component } from "react"
-import { WindowProgram } from "packard-belle"
-import cx from "classnames"
-import Window from "../tools/Window"
-import { mediavid16 } from "../../icons"
-import buildMenu from "../../helpers/menuBuilder"
-import "./_styles.scss"
+import React, { Component } from "react";
+import ReactDOM from "react-dom";
+import "./_styles.scss";
+import StarfieldContainer from "../StarfieldContainer"; 
+import Starfield2 from "../Starfield2";
 
-class HookScoreHeatmap extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      videoUrl: null,
-      isPlaying: false,
-      currentTime: 0,
-      duration: 30, // Default 30s duration
-      isLoading: true,
-      isAnalyzing: false,
-      isDragging: false,
-      heatmapData: [],
-      playbackSpeed: 1,
-      showHelp: false
-    }
-    this.videoRef = React.createRef()
-    this.fileInputRef = React.createRef()
-  }
-
-  componentDidMount() {
-    // Initialize the file input reference if it wasn't set in constructor
-    if (!this.fileInputRef) {
-      this.fileInputRef = React.createRef()
-    }
-    
-    const video = this.videoRef.current
-    if (video) {
-      video.addEventListener('loadedmetadata', this.handleLoadedMetadata)
-      video.addEventListener('timeupdate', this.handleTimeUpdate)
-      video.addEventListener('ended', this.handleEnded)
-      video.addEventListener('canplay', this.handleCanPlay)
-      
-      // Add error handling
-      video.addEventListener('error', this.handleVideoError)
-    }
-  }
-  
-  componentWillUnmount() {
-    const video = this.videoRef.current
-    if (video) {
-      video.removeEventListener('loadedmetadata', this.handleLoadedMetadata)
-      video.removeEventListener('timeupdate', this.handleTimeUpdate)
-      video.removeEventListener('ended', this.handleEnded)
-      video.removeEventListener('canplay', this.handleCanPlay)
-      video.removeEventListener('error', this.handleVideoError)
-    }
-  }
-  
-  handleVideoError = (e) => {
-    console.error("Video error:", e)
-    console.error("Video error details:", this.videoRef.current.error)
-    alert("Error playing video. Please try another video file.")
-  }
-
-  handleLoadedMetadata = () => {
-    const video = this.videoRef.current
-    if (video) {
-      this.setState({ duration: video.duration })
-    }
-  }
-
-  handleTimeUpdate = () => {
-    const video = this.videoRef.current
-    if (video) {
-      this.setState({ currentTime: video.currentTime })
-    }
-  }
-
-  handleEnded = () => {
-    this.setState({ isPlaying: false })
-  }
-
-  handleCanPlay = () => {
-    this.setState({ isLoading: false })
-  }
-
-  togglePlay = () => {
-    const video = this.videoRef.current
-    if (video) {
-      if (this.state.isPlaying) {
-        video.pause()
-        this.setState({ isPlaying: false })
-      } else {
-        // Fix for playback issues
-        const playPromise = video.play()
-        
-        // Handle the play promise to catch any errors
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              // Play started successfully
-              this.setState({ isPlaying: true })
-            })
-            .catch(error => {
-              // Auto-play was prevented or other error
-              console.error("Video play error:", error)
-              // Attempt to fix common autoplay issues
-              video.muted = true
-              video.play().then(() => {
-                this.setState({ isPlaying: true })
-              }).catch(err => {
-                console.error("Even muted play failed:", err)
-              })
-            })
-        } else {
-          // Older browsers might not return a promise
-          this.setState({ isPlaying: !this.state.isPlaying })
-        }
-      }
-    }
-  }
-
-  handleStop = () => {
-    const video = this.videoRef.current
-    if (video) {
-      video.pause()
-      video.currentTime = 0
-      this.setState({ isPlaying: false, currentTime: 0 })
-    }
-  }
-
-  handleSeek = (e) => {
-    const video = this.videoRef.current
-    if (video) {
-      const value = parseFloat(e.target.value)
-      video.currentTime = value
-      this.setState({ currentTime: value })
-    }
-  }
-
-  formatTime = (time) => {
-    const minutes = Math.floor(time / 60)
-    const seconds = Math.floor(time % 60)
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-  }
-
-  handleFileChange = (e) => {
-    if (e && e.target && e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0]
-      if (file && file.type.startsWith('video/')) {
-        const url = URL.createObjectURL(file)
-        this.setState({ 
-          videoUrl: url, 
-          isAnalyzing: true
-        }, this.analyzeVideo)
-      }
-    }
-  }
-
-  handleDragOver = (e) => {
-    e.preventDefault()
-    this.setState({ isDragging: true })
-  }
-
-  handleDragLeave = () => {
-    this.setState({ isDragging: false })
-  }
-
-  handleDrop = (e) => {
-    e.preventDefault()
-    this.setState({ isDragging: false })
-    
-    const file = e.dataTransfer.files[0]
-    if (file && file.type.startsWith('video/')) {
-      const url = URL.createObjectURL(file)
-      this.setState({ 
-        videoUrl: url, 
-        isAnalyzing: true
-      }, this.analyzeVideo)
-    }
-  }
-
-  analyzeVideo = () => {
-    // Simulate analysis with a timeout
-    setTimeout(() => {
-      const { duration } = this.state
-      const data = []
-      
-      // Create simulated attention scores for each second
-      for (let i = 0; i < duration; i++) {
-        // Start with high attention that generally drops over time
-        let baseScore = 100 - (i / duration * 60)
-        
-        // Add some variance with periodic peaks for "hooks"
-        if (i === 0) {
-          // First second is always high
-          baseScore = 95
-        } else if (i === 3) {
-          // Drop after intro
-          baseScore = Math.max(40, baseScore - 30)
-        } else if (i === 5 || i === 15 || i === 22) {
-          // Add hooks at key points
-          baseScore = Math.min(100, baseScore + 30)
-        } else if (i > 5 && i < 8) {
-          // Downward trend after first hook
-          baseScore = Math.max(30, baseScore - 15)
-        }
-        
-        // Add some noise
-        const noise = Math.random() * 10 - 5
-        const finalScore = Math.max(0, Math.min(100, baseScore + noise))
-        
-        data.push({
-          time: i,
-          score: finalScore,
-          isHook: i === 0 || i === 5 || i === 15 || i === 22
-        })
-      }
-      
-      this.setState({
-        heatmapData: data,
-        isAnalyzing: false
-      })
-    }, 3000)
-  }
-
-  handleGoToHook = (time) => {
-    const video = this.videoRef.current
-    if (video) {
-      video.currentTime = time
-      this.setState({ currentTime: time })
-    }
-  }
-
-  handleSetSpeed = (speed) => {
-    const video = this.videoRef.current
-    if (video) {
-      video.playbackRate = speed
-      this.setState({ playbackSpeed: speed })
-    }
-  }
-
-  toggleHelp = () => {
-    this.setState(prevState => ({ showHelp: !prevState.showHelp }))
-  }
-
-  getScoreColor = (score) => {
-    if (score > 80) return '#00cc00' // Green
-    if (score > 60) return '#ffcc00' // Yellow
-    if (score > 40) return '#ff9900' // Orange
-    return '#cc0000' // Red
-  }
-
-  renderUploadArea() {
-    const { isDragging } = this.state
-    
-    const loadDemoVideo = () => {
-      this.setState({ 
-        videoUrl: "/static/donwest.mp4", 
-        isAnalyzing: true
-      }, this.analyzeVideo)
-    }
-    
-    return (
-      <div 
-        className={cx("upload-area", { "dragging": isDragging })}
-        onDragOver={this.handleDragOver}
-        onDragLeave={this.handleDragLeave}
-        onDrop={this.handleDrop}
-        style={{
-          height: "150px", // Reduced height
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "2px solid #888",
-          margin: "10px",
-          background: isDragging ? "#e0e0e0" : "#f0f0f0",
-          borderRadius: "3px"
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <div style={{ marginBottom: "10px" }}>
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="#666">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-8h4V8h3l-5-5-5 5h3v4z"/>
-            </svg>
-          </div>
-          <p style={{ fontSize: "11px", margin: "2px 0" }}>Drag and drop a video file here</p>
-          <div style={{ 
-            display: "flex", 
-            flexDirection: "row", 
-            justifyContent: "center", 
-            alignItems: "center",
-            margin: "4px 0"
-          }}>
-            <button 
-              className="packard-button"
-              onClick={() => {
-                // Check if fileInputRef is available before trying to click it
-                if (this.fileInputRef && this.fileInputRef.current) {
-                  this.fileInputRef.current.click()
-                }
-              }}
-              style={{ margin: "0 4px", fontSize: "11px", padding: "1px 4px" }}
-            >
-              Browse Files
-            </button>
-            <span style={{ fontSize: "11px", margin: "0 4px" }}>or</span>
-            <button 
-              className="packard-button"
-              onClick={loadDemoVideo}
-              style={{ margin: "0 4px", fontSize: "11px", padding: "1px 4px" }}
-            >
-              Use Demo Video
-            </button>
-          </div>
-          <input 
-            ref={this.fileInputRef}
-            type="file" 
-            accept="video/*" 
-            style={{ display: "none" }}
-            onChange={this.handleFileChange}
-          />
-        </div>
-      </div>
-    )
-  }
-
-  renderAnalyzing() {
-    return (
-      <div style={{ 
-        height: "200px", 
-        display: "flex", 
-        flexDirection: "column", 
-        alignItems: "center", 
-        justifyContent: "center"
-      }}>
-        <div style={{ width: "32px", height: "32px", marginBottom: "15px" }}>
-          {/* Simple loading spinner made with CSS */}
-          <div style={{ 
-            width: "32px", 
-            height: "32px", 
-            border: "4px solid #f3f3f3", 
-            borderTop: "4px solid #3498db", 
-            borderRadius: "50%",
-            animation: "spin 2s linear infinite"
-          }} />
-        </div>
-        <p>Analyzing video hook effectiveness...</p>
-        <p style={{ fontSize: "12px", color: "#666" }}>This might take a few moments</p>
-        <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    )
-  }
-
-  renderHeatmap() {
-    const { heatmapData, currentTime, duration } = this.state
-    
-    if (heatmapData.length === 0) return null
-    
-    return (
-      <div style={{ margin: "5px", marginTop: "8px" }}>
-        <div style={{ marginBottom: "3px", fontWeight: "bold", fontSize: "11px" }}>
-          Audience Attention Heatmap:
-        </div>
-        <div style={{ 
-          height: "35px", // Reduced height
-          border: "1px inset #fff",
-          background: "#fff",
-          position: "relative",
-          overflow: "hidden"
-        }}>
-          {heatmapData.map((point, index) => (
-            <div 
-              key={index}
-              onClick={() => this.handleGoToHook(point.time)}
-              className="heatmap-bar"
-              title={`Time: ${this.formatTime(point.time)} | Attention: ${Math.round(point.score)}%${point.isHook ? ' | Key Hook Point!' : ''}`}
-              style={{ 
-                position: "absolute",
-                bottom: 0,
-                backgroundColor: this.getScoreColor(point.score),
-                borderRight: "1px solid rgba(255,255,255,0.2)",
-                left: `${(point.time / duration) * 100}%`, 
-                height: `${point.score}%`,
-                width: `${100 / duration}%`,
-                cursor: "pointer"
-              }}
-            />
-          ))}
-          
-          {/* Current position indicator */}
-          <div 
-            style={{ 
-              position: "absolute",
-              top: 0,
-              bottom: 0,
-              width: "1px",
-              backgroundColor: "#000",
-              left: `${(currentTime / duration) * 100}%`,
-              zIndex: 2
-            }}
-          />
-          
-          {/* Hook indicators - simplified for smaller space */}
-          {heatmapData.filter(point => point.isHook).map((hook, index) => (
-            <div 
-              key={`hook-${index}`}
-              onClick={() => this.handleGoToHook(hook.time)}
-              title={`Hook #${index + 1} | Time: ${this.formatTime(hook.time)} | Attention Spike: ${Math.round(hook.score)}%`}
-              style={{ 
-                position: "absolute",
-                top: "2px",
-                left: `${(hook.time / duration) * 100}%`,
-                cursor: "pointer",
-                zIndex: 3
-              }}
-            >
-              <div style={{ position: "relative" }}>
-                <div style={{ 
-                  height: "6px", 
-                  width: "6px", 
-                  backgroundColor: "#ffcc00", 
-                  border: "1px solid #000",
-                  borderRadius: "50%"
-                }}/>
-                {/* Only show tooltip on hover with CSS */}
-                <div className="hook-tooltip" style={{ 
-                  position: "absolute", 
-                  top: "9px", 
-                  left: "50%", 
-                  transform: "translateX(-50%)",
-                  backgroundColor: "#ffffcc",
-                  border: "1px solid #000",
-                  fontSize: "8px",
-                  padding: "0px 2px",
-                  whiteSpace: "nowrap",
-                  zIndex: 10,
-                  opacity: 0, // Hidden by default, shown on hover via CSS
-                  pointerEvents: "none" // Don't block clicks
-                }}>
-                  #{index + 1}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  renderAnalysisResults() {
-    const { heatmapData, duration } = this.state
-    
-    if (heatmapData.length === 0) return null
-    
-    // Find suggested trim points (engagement peaks and drops)
-    const peaks = heatmapData
-      .filter((point, i, arr) => 
-        i > 0 && point.score > arr[i-1].score && point.score > 70
-      )
-      .slice(0, 2) // Reduced number of peaks
-    
-    const drops = heatmapData
-      .filter((point, i, arr) => 
-        i > 0 && point.score < arr[i-1].score && point.score < 40
-      )
-      .slice(0, 1) // Only show one drop
-    
-    const openingScore = heatmapData.length > 0 ? heatmapData[0].score : 0
-    const retentionRate = heatmapData.length > 0 
-      ? (heatmapData[Math.min(29, heatmapData.length-1)].score / heatmapData[0].score) * 100
-      : 0
-    
-    return (
-      <div style={{ margin: "5px", display: "flex", flexDirection: "row" }}>
-        {/* Left column - Trim points */}
-        <div style={{ flex: 1, marginRight: "3px" }}>
-          <div style={{ 
-            border: "1px inset #fff",
-            background: "#fff",
-            padding: "4px",
-            height: "100%",
-            fontSize: "10px"
-          }}>
-            <div style={{ fontWeight: "bold", marginBottom: "3px", fontSize: "11px" }}>
-              Trim Points:
-            </div>
-            <ul style={{ 
-              paddingLeft: "12px",
-              margin: "3px 0"
-            }}>
-              {peaks.map((point, index) => (
-                <li key={index} style={{ marginBottom: "2px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span>Peak: {this.formatTime(point.time)}</span>
-                    <button 
-                      className="packard-button"
-                      onClick={() => this.handleGoToHook(point.time)}
-                      style={{ fontSize: "9px", padding: "0px 2px", marginLeft: "2px" }}
-                    >
-                      Go
-                    </button>
-                  </div>
-                </li>
-              ))}
-              {drops.map((point, index) => (
-                <li key={`drop-${index}`} style={{ 
-                  marginBottom: "2px",
-                  color: "#cc0000"
-                }}>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span>Drop: {this.formatTime(point.time)}</span>
-                    <button 
-                      className="packard-button"
-                      onClick={() => this.handleGoToHook(point.time)}
-                      style={{ fontSize: "9px", padding: "0px 2px", marginLeft: "2px" }}
-                    >
-                      Go
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        
-        {/* Right column - Scores */}
-        <div style={{ flex: 1, marginLeft: "3px" }}>
-          <div style={{ 
-            border: "1px inset #fff",
-            background: "#fff",
-            padding: "4px",
-            height: "100%",
-            fontSize: "10px"
-          }}>
-            <div style={{ fontWeight: "bold", marginBottom: "3px", fontSize: "11px" }}>
-              Hook Score:
-            </div>
-            
-            <div style={{ 
-              display: "flex", 
-              alignItems: "center", 
-              marginBottom: "3px"
-            }}>
-              <div style={{ 
-                flex: 1,
-                height: "10px",
-                background: "#e0e0e0",
-                border: "1px solid #888",
-                position: "relative"
-              }}>
-                <div style={{ 
-                  height: "100%",
-                  width: `${openingScore}%`,
-                  background: "#0066cc"
-                }} />
-              </div>
-              <span style={{ 
-                marginLeft: "3px",
-                fontWeight: "bold",
-                fontSize: "9px"
-              }}>
-                {Math.round(openingScore)}%
-              </span>
-            </div>
-            
-            <p style={{ fontSize: "9px", marginBottom: "4px" }}>
-              {openingScore > 80
-                ? "Strong opening! Good retention."
-                : "Opening needs work. Improve first 5s."}
-            </p>
-            
-            <div style={{ fontWeight: "bold", marginBottom: "2px", fontSize: "10px" }}>
-              Retention (30s):
-            </div>
-            
-            <div style={{ 
-              display: "flex", 
-              alignItems: "center"
-            }}>
-              <div style={{ 
-                flex: 1,
-                height: "10px",
-                background: "#e0e0e0",
-                border: "1px solid #888",
-                position: "relative"
-              }}>
-                <div style={{ 
-                  height: "100%",
-                  width: `${retentionRate}%`,
-                  background: "#00aa00"
-                }} />
-              </div>
-              <span style={{ 
-                marginLeft: "3px",
-                fontWeight: "bold",
-                fontSize: "9px"
-              }}>
-                {Math.round(retentionRate)}%
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  renderHelpDialog() {
-    if (!this.state.showHelp) return null
-    
-    return (
-      <div style={{
-        position: "absolute",
-        top: "20%",
-        left: "10%",
-        right: "10%",
-        bottom: "20%",
-        background: "#c0c0c0",
-        border: "2px outset #fff",
-        boxShadow: "2px 2px 10px rgba(0,0,0,0.3)",
-        zIndex: 1000,
-        display: "flex",
-        flexDirection: "column"
-      }}>
-        <div style={{
-          background: "#000080",
-          color: "#fff",
-          padding: "3px 5px",
-          display: "flex",
-          justifyContent: "space-between"
-        }}>
-          <div style={{ fontWeight: "bold" }}>
-            Hook Score Help
-          </div>
-          <button 
-            onClick={this.toggleHelp}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "#fff",
-              fontWeight: "bold",
-              cursor: "pointer"
-            }}
-          >
-            ×
-          </button>
-        </div>
-        
-        <div style={{ padding: "10px", overflow: "auto", flex: 1 }}>
-          <h3 style={{ margin: "0 0 10px 0" }}>How to use the Hook Score Heatmap:</h3>
-          <ul style={{ paddingLeft: "20px", marginBottom: "15px" }}>
-            <li>Upload your video to analyze its opening hook and engagement patterns</li>
-            <li>The heatmap shows predicted audience attention throughout your video</li>
-            <li>Yellow markers indicate key hooks or moments of high engagement</li>
-            <li>Click on any point in the heatmap to jump to that timestamp</li>
-            <li>The analysis provides recommendations for potential edit points</li>
-          </ul>
-          
-          <h3 style={{ margin: "0 0 10px 0" }}>Hook Score Metrics:</h3>
-          <ul style={{ paddingLeft: "20px", marginBottom: "15px" }}>
-            <li>Opening Hook: How compelling your first 5 seconds are</li>
-            <li>Retention Rate: Estimated viewer retention after 30 seconds</li>
-            <li>Engagement Peaks: Points where viewer attention increases</li>
-            <li>Drop-offs: Points where viewer attention decreases significantly</li>
-          </ul>
-        </div>
-        
-        <div style={{
-          padding: "10px",
-          display: "flex",
-          justifyContent: "flex-end",
-          borderTop: "1px solid #888"
-        }}>
-          <button 
-            className="packard-button"
-            onClick={this.toggleHelp}
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    )
-  }
-
+// Create a separate component for the toggle buttons
+class CRTModeToggle extends Component {
   render() {
-    const { props } = this
-    const { 
-      videoUrl, 
-      isPlaying, 
-      currentTime, 
-      duration, 
-      isLoading, 
-      isAnalyzing, 
-      playbackSpeed,
-      showHelp
-    } = this.state
+    const { label, isActive, onClick, style, className, imageSrc, isSquare } = this.props;
 
-    return (
-      <Window
-        {...props}
-        title="Hook Score Heatmap"
-        icon={mediavid16}
-        menuOptions={buildMenu(props)}
-        Component={WindowProgram}
-        initialHeight={400}
-        initialWidth={440}
-        resizable={true}
-        className={cx("HookScoreHeatmap", props.className)}
-      >
-        <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-          {/* Main content area */}
-          <div style={{ flex: 1, overflow: "auto", position: "relative" }}>
-            {!videoUrl ? (
-              this.renderUploadArea()
-            ) : (
-              <>
-                {/* Video preview area */}
-                <div style={{ 
-                  height: "150px", // Reduced height
-                  background: "#000",
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}>
-                  {isAnalyzing ? (
-                    this.renderAnalyzing()
-                  ) : (
-                    <>
-                      <video
-                        ref={this.videoRef}
-                        src={videoUrl}
-                        style={{
-                          maxHeight: "100%",
-                          maxWidth: "100%",
-                          display: "block"
-                        }}
-                        onClick={this.togglePlay}
-                        playsInline // Required for mobile
-                        preload="auto" // Preload video data
-                        controls={true} // Add native controls as fallback
-                      />
-                      {!isPlaying && !isLoading && (
-                        <div style={{
-                          position: "absolute",
-                          cursor: "pointer"
-                        }}
-                        onClick={this.togglePlay}>
-                          <svg viewBox="0 0 24 24" width="36" height="36" fill="#ffffff">
-                            <path d="M8 5v14l11-7z"/>
-                          </svg>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-                
-                {!isAnalyzing && (
-                  <>
-                    {/* Controls - more compact */}
-                    <div style={{ 
-                      display: "flex", 
-                      alignItems: "center", 
-                      padding: "2px 5px"
-                    }}>
-                      <button 
-                        className="packard-button"
-                        onClick={this.togglePlay}
-                        disabled={isLoading}
-                        style={{ marginRight: "3px", padding: "1px 4px", fontSize: "11px" }}
-                      >
-                        {isPlaying ? "Pause" : "Play"}
-                      </button>
-                      
-                      <button 
-                        className="packard-button"
-                        onClick={this.handleStop}
-                        disabled={isLoading}
-                        style={{ marginRight: "3px", padding: "1px 4px", fontSize: "11px" }}
-                      >
-                        Stop
-                      </button>
-                      
-                      <select 
-                        className="packard-dropdown"
-                        value={playbackSpeed}
-                        onChange={(e) => this.handleSetSpeed(parseFloat(e.target.value))}
-                        disabled={isLoading}
-                        style={{ marginRight: "auto", fontSize: "11px", height: "18px" }}
-                      >
-                        <option value={0.5}>0.5x</option>
-                        <option value={1}>1.0x</option>
-                        <option value={1.5}>1.5x</option>
-                        <option value={2}>2.0x</option>
-                      </select>
-                      
-                      <button 
-                        className="packard-button"
-                        onClick={this.toggleHelp}
-                        style={{ marginLeft: "auto", padding: "1px 4px", fontSize: "11px" }}
-                      >
-                        Help
-                      </button>
-                    </div>
-                    
-                    {/* Time display and progress bar */}
-                    <div style={{ padding: "0 5px", marginTop: "2px" }}>
-                      <div style={{ 
-                        display: "flex", 
-                        justifyContent: "space-between", 
-                        fontSize: "10px",
-                        marginBottom: "2px"
-                      }}>
-                        <span>{this.formatTime(currentTime)}</span>
-                        <span>{this.formatTime(duration)}</span>
-                      </div>
-                      
-                      <div style={{ 
-                        border: "1px inset #fff",
-                        height: "10px",
-                        position: "relative",
-                        background: "#e0e0e0"
-                      }}>
-                        <input
-                          type="range"
-                          min={0}
-                          max={duration || 0}
-                          value={currentTime}
-                          onChange={this.handleSeek}
-                          step={0.1}
-                          disabled={isLoading}
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            opacity: 0,
-                            cursor: "pointer",
-                            zIndex: 2
-                          }}
-                        />
-                        <div style={{
-                          height: "100%",
-                          width: `${(currentTime / duration) * 100}%`,
-                          background: "#0066cc"
-                        }} />
-                      </div>
-                    </div>
-                    
-                    {/* Heatmap and Analysis */}
-                    {this.renderHeatmap()}
-                    {this.renderAnalysisResults()}
-                  </>
-                )}
-              </>
-            )}
-          </div>
-          
-          {/* Help dialog */}
-          {this.renderHelpDialog()}
+    // If an image source is provided, render an <img> instead of a button
+    if (imageSrc) {
+      return (
+        <div 
+          className={`power-button-container ${isActive ? 'active' : ''}`}
+          style={{
+            position: 'relative',
+            ...style
+          }}
+        >
+          <img
+            src={imageSrc}
+            alt={label}
+            onClick={onClick}
+            className={`submit-doodle-button ${isActive ? 'pressed' : ''} ${className || ''}`}
+            style={{
+              cursor: 'pointer', // Ensure the image behaves like a button
+            }}
+          />
         </div>
-      </Window>
-    )
+      );
+    }
+
+    // Default button rendering (can be square if isSquare prop is true)
+    return (
+      <button
+        onClick={onClick}
+        className={`submit-doodle-button ${isActive ? 'pressed' : ''} ${isSquare ? 'square-button' : ''} ${className || ''}`}
+        style={style}
+      >
+        <span>{label}</span>
+      </button>
+    );
   }
 }
 
-export default HookScoreHeatmap
+// Create a simple button component for monitor controls
+const MonitorButton = ({ onClick, isActive, style }) => (
+  <button 
+    onClick={onClick}
+    className={isActive ? 'active' : ''}
+    style={{
+      width: '18px',
+      height: '18px',
+      background: '#c0c0c0',
+      border: isActive ? 'inset 2px #ffffff' : 'outset 2px #ffffff',
+      boxSizing: 'content-box',
+      cursor: 'pointer',
+      margin: '0 5px',
+      padding: 0,
+      ...style
+    }}
+  />
+);
+
+class MonitorView extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      showMonitor: true, // Monitor mode enabled by default
+      isScreenPoweredOn: true, // Screen power is on by default
+      showScreensaver: false, // Screensaver mode disabled by default
+      rocketActive: false, // Rocket button state
+      nextActive: false, // Next button state
+      activeScreensaver: 'default', // Which screensaver to show: 'default' or 'p5js'
+      isMobile: this.checkIsMobile(),
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+      powerButtonReady: false, // State to track if power button position is ready
+      zoomLevel: 0, // 0 = 100%, 1 = 110%, 2 = 125%
+      zoomActive: false, // Track if zoom button is pressed
+      crtEffectEnabled: true // Track CRT effect state
+    };
+
+    // Create root elements for our portals
+    this.toggleRoot = document.createElement('div');
+    this.toggleRoot.id = 'monitor-toggle-root';
+    this.monitorRoot = document.createElement('div');
+    this.monitorRoot.id = 'monitor-root';
+    this.starfieldRoot = document.createElement('div');
+    this.starfieldRoot.id = 'starfield-root';
+    this.p5jsStarfieldRoot = document.createElement('div');
+    this.p5jsStarfieldRoot.id = 'p5js-starfield-root';
+    
+    // Reference to the monitor frame
+    this.monitorFrameRef = React.createRef();
+    
+    console.log("MonitorView constructor ran");
+  }
+
+  componentDidMount() {
+    // Append portal roots to the document body
+    document.body.appendChild(this.toggleRoot);
+    document.body.appendChild(this.monitorRoot);
+    document.body.appendChild(this.starfieldRoot);
+    document.body.appendChild(this.p5jsStarfieldRoot);
+
+    // Add resize listener to detect mobile/desktop changes
+    window.addEventListener('resize', this.handleResize);
+    
+    // Set initial background color based on initial monitor state
+    this.updateBackgroundColor();
+    
+    // Wait for monitor to render, then calculate power button position
+    if (this.state.showMonitor) {
+      // Use a short timeout to ensure the monitor has rendered first
+      setTimeout(() => {
+        this.setState({ powerButtonReady: true });
+      }, 200);
+    }
+    
+    console.log("MonitorView mounted with showMonitor:", this.state.showMonitor);
+  }
+
+  componentWillUnmount() {
+    // Clean up the portal roots when component unmounts
+    window.removeEventListener('resize', this.handleResize);
+
+    if (this.toggleRoot.parentNode) {
+      this.toggleRoot.parentNode.removeChild(this.toggleRoot);
+    }
+
+    if (this.monitorRoot.parentNode) {
+      this.monitorRoot.parentNode.removeChild(this.monitorRoot);
+    }
+
+    if (this.starfieldRoot.parentNode) {
+      this.starfieldRoot.parentNode.removeChild(this.starfieldRoot);
+    }
+
+    if (this.p5jsStarfieldRoot.parentNode) {
+      this.p5jsStarfieldRoot.parentNode.removeChild(this.p5jsStarfieldRoot);
+    }
+    
+    // Restore original background color when component unmounts
+    document.body.style.backgroundColor = 'darkslategrey';
+    
+    // Reset root element background
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.style.backgroundColor = '';
+    }
+    
+    // Reset any zoom when component unmounts
+    this.resetZoom();
+  }
+
+  // Update background color based on current state
+  updateBackgroundColor = () => {
+    // If screensaver is active, make background transparent to show starfield
+    if (this.state.showScreensaver) {
+      document.body.style.backgroundColor = 'transparent';
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        rootElement.style.backgroundColor = 'transparent';
+      }
+    } 
+    // If only monitor is active, use normal darkslategrey background
+    else {
+      document.body.style.backgroundColor = 'darkslategrey';
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        rootElement.style.backgroundColor = '';
+      }
+    }
+  }
+
+  // Apply zoom level to both monitor and desktop viewport
+  applyZoom = (level) => {
+    let zoomFactor;
+    switch (level) {
+      case 1:
+        zoomFactor = 1.1; // 110%
+        break;
+      case 2:
+        zoomFactor = 1.25; // 125%
+        break;
+      default:
+        zoomFactor = 1.0; // 100%
+    }
+
+    // Get references to elements
+    const monitorContainer = document.querySelector('.monitor-container');
+    
+    if (monitorContainer) {
+      if (zoomFactor > 1) {
+        // Scale the entire monitor container
+        monitorContainer.style.transform = `scale(${zoomFactor})`;
+        monitorContainer.style.transformOrigin = 'center center';
+        
+        // Disable CRT effect when zoomed
+        this.setState({ crtEffectEnabled: false });
+      } else {
+        // Reset scaling
+        monitorContainer.style.transform = '';
+        monitorContainer.style.transformOrigin = '';
+        
+        // Re-enable CRT effect when back to 100%
+        this.setState({ crtEffectEnabled: true });
+      }
+    }
+  }
+  
+  // Reset zoom
+  resetZoom = () => {
+    const monitorContainer = document.querySelector('.monitor-container');
+    
+    if (monitorContainer) {
+      monitorContainer.style.transform = '';
+      monitorContainer.style.transformOrigin = '';
+    }
+    
+    // Reset CRT effect to enabled
+    this.setState({ crtEffectEnabled: true });
+  }
+
+  // Detect mobile devices
+  checkIsMobile = () => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || window.innerWidth < 1024;
+  };
+
+  // Update mobile state on resize
+  handleResize = () => {
+    this.setState({ 
+      isMobile: this.checkIsMobile(),
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+      // Reset power button on resize to prevent incorrect positioning
+      powerButtonReady: false
+    }, () => {
+      // If monitor is showing, recalculate power button position after a delay
+      if (this.state.showMonitor) {
+        setTimeout(() => {
+          this.setState({ powerButtonReady: true });
+        }, 200);
+      }
+    });
+  };
+
+  toggleMonitorView = () => {
+    console.log("Monitor Mode button clicked, current state:", this.state.showMonitor);
+    this.setState(prevState => ({
+      showMonitor: !prevState.showMonitor,
+      // Reset power button ready state when toggling monitor off
+      powerButtonReady: prevState.showMonitor ? false : prevState.powerButtonReady
+    }), () => {
+      console.log("Monitor state updated to:", this.state.showMonitor);
+      
+      // Update background color
+      this.updateBackgroundColor();
+      
+      // If turning monitor on, wait for it to render before showing power button
+      if (this.state.showMonitor) {
+        // Use a short timeout to ensure the monitor has rendered first
+        setTimeout(() => {
+          this.setState({ powerButtonReady: true });
+        }, 200);
+      }
+    });
+  };
+
+  toggleScreensaverMode = () => {
+    console.log("Screensaver Mode button clicked, current state:", this.state.showScreensaver);
+    this.setState(prevState => ({
+      showScreensaver: !prevState.showScreensaver,
+      // Reset to default screensaver when toggling off and back on
+      activeScreensaver: !prevState.showScreensaver ? 'default' : prevState.activeScreensaver,
+      // Reset button states when toggling screensaver off
+      rocketActive: !prevState.showScreensaver ? false : prevState.rocketActive,
+      nextActive: !prevState.showScreensaver ? false : prevState.nextActive
+    }), () => {
+      console.log("Screensaver state updated to:", this.state.showScreensaver);
+      
+      // Update background color
+      this.updateBackgroundColor();
+    });
+  };
+
+  toggleRocket = () => {
+    console.log("Rocket button clicked, current state:", this.state.rocketActive);
+    this.setState(prevState => ({
+      rocketActive: !prevState.rocketActive,
+      // Toggle between screensavers
+      activeScreensaver: !prevState.rocketActive ? 'p5js' : 'default',
+      // Make sure only one button is active at a time
+      nextActive: false,
+      // Turn off monitor mode when rocket is activated
+      showMonitor: prevState.rocketActive
+    }), () => {
+      console.log("Rocket state updated to:", this.state.rocketActive);
+      console.log("Active screensaver:", this.state.activeScreensaver);
+      console.log("Monitor mode set to:", this.state.showMonitor);
+      
+      // Update background color
+      this.updateBackgroundColor();
+    });
+  };
+
+  toggleNext = () => {
+    console.log("Next button clicked, current state:", this.state.nextActive);
+    this.setState(prevState => ({
+      nextActive: !prevState.nextActive,
+      // Cycle between screensavers
+      activeScreensaver: !prevState.nextActive 
+        ? (prevState.activeScreensaver === 'default' ? 'p5js' : 'default')
+        : prevState.activeScreensaver,
+      // Make sure only one button is active at a time
+      rocketActive: !prevState.nextActive && prevState.activeScreensaver === 'default'
+    }), () => {
+      console.log("Next state updated to:", this.state.nextActive);
+      console.log("Active screensaver:", this.state.activeScreensaver);
+    });
+  };
+
+  toggleScreenPower = () => {
+    console.log("Screen Power button clicked, current state:", this.state.isScreenPoweredOn);
+    this.setState(prevState => ({
+      isScreenPoweredOn: !prevState.isScreenPoweredOn
+    }), () => {
+      console.log("Power state updated to:", this.state.isScreenPoweredOn);
+    });
+  };
+
+  toggleZoom = () => {
+    console.log("Zoom button clicked, current level:", this.state.zoomLevel);
+    
+    // Calculate the next zoom level (cycling through 0, 1, 2)
+    const nextZoomLevel = (this.state.zoomLevel + 1) % 3;
+    
+    // Update state with new zoom level
+    this.setState({
+      zoomLevel: nextZoomLevel,
+      zoomActive: nextZoomLevel > 0 // Active when zoomed in
+    }, () => {
+      console.log("Zoom level updated to:", this.state.zoomLevel);
+      
+      // Apply the zoom
+      this.applyZoom(nextZoomLevel);
+    });
+  };
+
+  renderDefaultStarfield() {
+    // Only render if screensaver mode is active and the active screensaver is 'default'
+    if (!this.state.showScreensaver || 
+        this.state.activeScreensaver !== 'default' || 
+        this.state.isMobile) {
+      return null;
+    }
+
+    // Create portal for the default starfield
+    return ReactDOM.createPortal(
+      <StarfieldContainer />,
+      this.starfieldRoot
+    );
+  }
+
+  renderP5jsStarfield() {
+    // Only render if screensaver mode is active and the active screensaver is 'p5js'
+    if (!this.state.showScreensaver || 
+        this.state.activeScreensaver !== 'p5js' || 
+        this.state.isMobile) {
+      return null;
+    }
+
+    // Create portal for the P5.js starfield
+    return ReactDOM.createPortal(
+      <Starfield2 />,
+      this.p5jsStarfieldRoot
+    );
+  }
+
+  renderMonitorControls() {
+    if (!this.state.powerButtonReady) return null;
+    
+    return (
+      <div className="monitor-controls" style={{
+        position: 'absolute',
+        bottom: 32,
+        right: 160, // Moved 100px left from original position
+        zIndex: 999, // Higher z-index to ensure it's above everything
+        display: 'flex',
+        alignItems: 'center',
+        pointerEvents: 'auto' // Ensure it's clickable
+      }}>
+        {/* Zoom level indicator */}
+        {this.state.zoomLevel > 0 && (
+          <div style={{
+            position: 'absolute',
+            top: -20,
+            right: 70,
+            backgroundColor: '#333',
+            color: 'white',
+            padding: '2px 4px',
+            borderRadius: '2px',
+            fontSize: '10px',
+            fontFamily: 'Arial',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.5)',
+            pointerEvents: 'none'
+          }}>
+            {this.state.zoomLevel === 1 ? '110%' : '125%'}
+          </div>
+        )}
+        
+        {/* Use proper button elements for better click handling */}
+        <MonitorButton 
+          onClick={this.toggleZoom}
+          isActive={this.state.zoomActive}
+        />
+        
+        {/* Power indicator light */}
+        <div 
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            backgroundColor: this.state.isScreenPoweredOn ? '#00ff00' : '#333333',
+            boxShadow: this.state.isScreenPoweredOn ? '0 0 4px rgba(0, 255, 0, 0.8)' : '0 0 2px rgba(0, 0, 0, 0.5)',
+            margin: '0 5px'
+          }}
+        />
+        
+        <MonitorButton 
+          onClick={this.toggleScreenPower}
+          isActive={!this.state.isScreenPoweredOn}
+        />
+      </div>
+    );
+  }
+
+  renderMonitorView() {
+    // Don't render if not showing monitor or on mobile
+    if (!this.state.showMonitor || this.state.isMobile) return null;
+
+    // Create the monitor view content
+    const monitorContent = (
+      <div
+        id="monitor-overlay"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 100,
+          overflow: 'hidden',
+        }}
+      >
+        {/* Monitor container - scale both the monitor and desktop together */}
+        <div
+          className="monitor-container"
+          style={{
+            position: 'relative',
+            width: 'auto',
+            height: 'auto',
+            transition: 'transform 0.3s ease',
+            transformOrigin: 'center center'
+          }}
+        >
+          {/* Monitor frame */}
+          <div
+            ref={this.monitorFrameRef}
+            className="monitor-frame"
+            style={{
+              position: 'relative',
+              width: '800px',
+              height: '700px',
+            }}
+          >
+            {/* Desktop viewport / screen area - this contains Windows desktop */}
+            <div
+              className="monitor-screen"
+              style={{
+                position: 'absolute',
+                top: '108px',
+                left: '80px',
+                width: '641px',
+                height: '482px',
+                backgroundColor: 'transparent', // Always transparent, black overlay is separate
+                zIndex: 98,
+                overflow: 'hidden',
+                transition: 'background-color 0.3s ease',
+                borderRadius: '2px',
+              }}
+            >
+              {/* This div allows us to properly pass mouse events to desktop content */}
+              <div 
+                className="desktop-content-wrapper"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'relative',
+                  // Don't block desktop interaction when power is on
+                  pointerEvents: this.state.isScreenPoweredOn ? 'auto' : 'none'
+                }}
+              >
+                {/* Apply CRT effect based on enabled state */}
+                {this.state.crtEffectEnabled && (
+                  <div 
+                    className="crt-effect"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%)',
+                      backgroundSize: '100% 4px',
+                      zIndex: 200,
+                      pointerEvents: 'none',
+                      opacity: 0.15
+                    }}
+                  />
+                )}
+                
+                {/* Children will be rendered here (desktop content) */}
+                {this.props.children}
+              </div>
+              
+              {/* Black overlay when power is off - ALWAYS ON TOP */}
+              {!this.state.isScreenPoweredOn && (
+                <div 
+                  className="black-overlay"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'black',
+                    zIndex: 999,
+                    pointerEvents: 'none',
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Monitor image */}
+            <img
+              src="/static/monitor3.png"
+              alt="Windows 98 Monitor"
+              style={{
+                position: 'absolute',
+                top: -115.5,
+                left: -155,
+                transform: 'scale(0.766, 0.758)',
+                transformOrigin: 'center center',
+                zIndex: 97,
+                userSelect: 'none', // Prevent selection
+                pointerEvents: 'none', // Don't interfere with mouse events
+              }}
+            />
+            
+            {/* Render monitor buttons */}
+            {this.renderMonitorControls()}
+          </div>
+        </div>
+      </div>
+    );
+
+    // Create a portal to render at document.body level
+    return ReactDOM.createPortal(monitorContent, this.monitorRoot);
+  }
+
+  renderToggleButton() {
+    // Don't render on mobile
+    if (this.state.isMobile) return null;
+
+    // Create portal for the toggle buttons
+    return ReactDOM.createPortal(
+      <>
+        {/* Monitor Mode Button */}
+        <CRTModeToggle
+          label="Monitor Mode"
+          isActive={this.state.showMonitor}
+          onClick={this.toggleMonitorView}
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px',
+            zIndex: 101,
+          }}
+        />
+        
+        {/* Screensaver Mode Button - with identical styling but 40px lower */}
+        <CRTModeToggle
+          label="Screensaver"
+          isActive={this.state.showScreensaver}
+          onClick={this.toggleScreensaverMode}
+          style={{
+            position: 'fixed',
+            top: '60px', // 40px below the Monitor Mode button
+            left: '20px',
+            zIndex: 101,
+          }}
+        />
+        
+        {/* Rocket Button - only visible when screensaver is active */}
+        {this.state.showScreensaver && (
+          <CRTModeToggle
+            label="🚀"
+            isActive={this.state.rocketActive}
+            onClick={this.toggleRocket}
+            isSquare={true} // Make it square
+            style={{
+              position: 'fixed',
+              top: '100px', // 40px below the Screensaver Mode button
+              left: '20px',
+              zIndex: 101,
+            }}
+          />
+        )}
+        
+        {/* Next Button - only visible when screensaver is active */}
+        {this.state.showScreensaver && (
+          <CRTModeToggle
+            label="▶️"
+            isActive={this.state.nextActive}
+            onClick={this.toggleNext}
+            isSquare={true} // Make it square
+            style={{
+              position: 'fixed',
+              top: '100px', // Same height as Rocket button
+              left: '82.5px', // Right next to Rocket button (rocket width 52.5px + 10px space)
+              zIndex: 101,
+            }}
+          />
+        )}
+      </>,
+      this.toggleRoot
+    );
+  }
+
+  render() {
+    console.log("MONITOR VIEW IS RENDERING, showMonitor:", this.state.showMonitor);
+
+    return (
+      <>
+        {/* Add custom CSS for styling */}
+        <style>
+          {`
+            /* Style for active buttons */
+            .active {
+              border-style: inset !important;
+              background-color: #a0a0a0 !important;
+            }
+            
+            /* Hover effect for buttons */
+            button:hover, 
+            .monitor-controls button:hover {
+              filter: brightness(1.1);
+            }
+            
+            /* Ensure black overlay is always visible */
+            .black-overlay {
+              visibility: visible !important;
+              opacity: 1 !important;
+              display: block !important;
+            }
+            
+            /* Make sure monitor controls are clickable */
+            .monitor-controls {
+              pointer-events: auto !important;
+            }
+            
+            .monitor-controls button {
+              pointer-events: auto !important;
+              cursor: pointer !important;
+            }
+          `}
+        </style>
+
+        {/* Render the appropriate screensaver based on the active state */}
+        {this.renderDefaultStarfield()}
+        {this.renderP5jsStarfield()}
+        
+        {/* Always render the toggle buttons portal */}
+        {this.renderToggleButton()}
+
+        {/* Conditionally render the monitor view portal */}
+        {this.renderMonitorView()}
+      </>
+    );
+  }
+}
+
+export default MonitorView;

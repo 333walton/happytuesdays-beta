@@ -56,7 +56,7 @@ const programs = [
       {
         title: "Movie Player",
         icon: icons.camera16,
-        component: "VideoPlayer",
+        component: "VideoPlayerTest",
         data: {
           src: "",
           style: {

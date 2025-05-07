@@ -45,6 +45,25 @@ class CRTModeToggle extends Component {
   }
 }
 
+// Create a simple button component for monitor controls
+const MonitorButton = ({ onClick, isActive, style }) => (
+  <button 
+    onClick={onClick}
+    className={isActive ? 'active' : ''}
+    style={{
+      width: '18px',
+      height: '18px',
+      background: '#c0c0c0',
+      border: isActive ? 'inset 2px #ffffff' : 'outset 2px #ffffff',
+      boxSizing: 'content-box',
+      cursor: 'pointer',
+      margin: '0 5px',
+      padding: 0,
+      ...style
+    }}
+  />
+);
+
 class MonitorView extends Component {
   constructor(props) {
     super(props);
@@ -58,26 +77,37 @@ class MonitorView extends Component {
       isMobile: this.checkIsMobile(),
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
-      powerButtonReady: false // State to track if power button position is ready
+      powerButtonReady: false, // State to track if power button position is ready
+      zoomLevel: 0, // 0 = 100%, 1 = 110%, 2 = 125%
+      zoomActive: false // Track if zoom button is pressed
     };
 
-    // Create root elements for our portals
-    this.toggleRoot = document.createElement('div');
-    this.toggleRoot.id = 'monitor-toggle-root';
-    this.monitorRoot = document.createElement('div');
-    this.monitorRoot.id = 'monitor-root';
-    this.starfieldRoot = document.createElement('div');
-    this.starfieldRoot.id = 'starfield-root';
-    this.p5jsStarfieldRoot = document.createElement('div');
-    this.p5jsStarfieldRoot.id = 'p5js-starfield-root';
+    // Only create DOM elements if not on mobile
+    if (!this.state.isMobile) {
+      // Create root elements for our portals
+      this.toggleRoot = document.createElement('div');
+      this.toggleRoot.id = 'monitor-toggle-root';
+      this.monitorRoot = document.createElement('div');
+      this.monitorRoot.id = 'monitor-root';
+      this.starfieldRoot = document.createElement('div');
+      this.starfieldRoot.id = 'starfield-root';
+      this.p5jsStarfieldRoot = document.createElement('div');
+      this.p5jsStarfieldRoot.id = 'p5js-starfield-root';
+      
+      // Reference to the monitor frame
+      this.monitorFrameRef = React.createRef();
+    }
     
-    // Reference to the monitor frame
-    this.monitorFrameRef = React.createRef();
-
-    console.log("MonitorView constructor ran");
+    console.log("MonitorView constructor ran, isMobile:", this.state.isMobile);
   }
 
   componentDidMount() {
+    // If on mobile, don't do any of the monitor setup
+    if (this.state.isMobile) {
+      console.log("Mobile device detected, skipping MonitorView initialization");
+      return;
+    }
+
     // Append portal roots to the document body
     document.body.appendChild(this.toggleRoot);
     document.body.appendChild(this.monitorRoot);
@@ -102,6 +132,11 @@ class MonitorView extends Component {
   }
 
   componentWillUnmount() {
+    // If on mobile, there's nothing to clean up
+    if (this.state.isMobile) {
+      return;
+    }
+
     // Clean up the portal roots when component unmounts
     window.removeEventListener('resize', this.handleResize);
 
@@ -129,6 +164,9 @@ class MonitorView extends Component {
     if (rootElement) {
       rootElement.style.backgroundColor = '';
     }
+    
+    // Reset any zoom when component unmounts
+    this.resetZoom();
   }
 
   // Update background color based on current state
@@ -151,6 +189,63 @@ class MonitorView extends Component {
     }
   }
 
+  // Apply zoom level to both monitor and desktop viewport
+  applyZoom = (level) => {
+    if (this.state.isMobile) return;
+    
+    let zoomFactor;
+    switch (level) {
+      case 1:
+        zoomFactor = 1.1; // 110%
+        break;
+      case 2:
+        zoomFactor = 1.25; // 125%
+        break;
+      default:
+        zoomFactor = 1.0; // 100%
+    }
+
+    // Get references to elements
+    const monitorContainer = document.querySelector('.monitor-container');
+    
+    if (monitorContainer) {
+      if (zoomFactor > 1) {
+        // Scale the entire monitor container
+        monitorContainer.style.transform = `scale(${zoomFactor})`;
+        monitorContainer.style.transformOrigin = 'center center';
+        
+        // Add a class for CSS targeting
+        monitorContainer.classList.add('zoomed');
+      } else {
+        // Reset scaling
+        monitorContainer.style.transform = '';
+        monitorContainer.style.transformOrigin = '';
+        
+        // Remove zoomed class
+        monitorContainer.classList.remove('zoomed');
+      }
+    }
+    
+    // Set data attribute on body for CSS targeting
+    document.body.setAttribute('data-zoom', level.toString());
+  }
+  
+  // Reset zoom
+  resetZoom = () => {
+    if (this.state.isMobile) return;
+    
+    const monitorContainer = document.querySelector('.monitor-container');
+    
+    if (monitorContainer) {
+      monitorContainer.style.transform = '';
+      monitorContainer.style.transformOrigin = '';
+      monitorContainer.classList.remove('zoomed');
+    }
+    
+    // Reset zoom level data attribute on body
+    document.body.removeAttribute('data-zoom');
+  }
+
   // Detect mobile devices
   checkIsMobile = () => {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -159,8 +254,17 @@ class MonitorView extends Component {
 
   // Update mobile state on resize
   handleResize = () => {
+    const wasMobile = this.state.isMobile;
+    const isMobileNow = this.checkIsMobile();
+    
+    // If switching between mobile and desktop, reload the page for a clean slate
+    if (wasMobile !== isMobileNow) {
+      console.log("Device type changed, reloading page...");
+      window.location.reload();
+      return;
+    }
+    
     this.setState({ 
-      isMobile: this.checkIsMobile(),
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
       // Reset power button on resize to prevent incorrect positioning
@@ -176,6 +280,8 @@ class MonitorView extends Component {
   };
 
   toggleMonitorView = () => {
+    if (this.state.isMobile) return;
+    
     console.log("Monitor Mode button clicked, current state:", this.state.showMonitor);
     this.setState(prevState => ({
       showMonitor: !prevState.showMonitor,
@@ -198,6 +304,8 @@ class MonitorView extends Component {
   };
 
   toggleScreensaverMode = () => {
+    if (this.state.isMobile) return;
+    
     console.log("Screensaver Mode button clicked, current state:", this.state.showScreensaver);
     this.setState(prevState => ({
       showScreensaver: !prevState.showScreensaver,
@@ -215,6 +323,8 @@ class MonitorView extends Component {
   };
 
   toggleRocket = () => {
+    if (this.state.isMobile) return;
+    
     console.log("Rocket button clicked, current state:", this.state.rocketActive);
     this.setState(prevState => ({
       rocketActive: !prevState.rocketActive,
@@ -235,6 +345,8 @@ class MonitorView extends Component {
   };
 
   toggleNext = () => {
+    if (this.state.isMobile) return;
+    
     console.log("Next button clicked, current state:", this.state.nextActive);
     this.setState(prevState => ({
       nextActive: !prevState.nextActive,
@@ -251,6 +363,8 @@ class MonitorView extends Component {
   };
 
   toggleScreenPower = () => {
+    if (this.state.isMobile) return;
+    
     console.log("Screen Power button clicked, current state:", this.state.isScreenPoweredOn);
     this.setState(prevState => ({
       isScreenPoweredOn: !prevState.isScreenPoweredOn
@@ -259,70 +373,88 @@ class MonitorView extends Component {
     });
   };
 
-  // Calculate position for the power button relative to the monitor image
-  calculatePowerButtonPosition = () => {
-    // Default position if we can't calculate
-    let position = {
-      position: 'fixed',
-      top: '933px', // Default position
-      left: '1176px',
-      zIndex: 101,
-    };
-
-    // Calculate position based on monitor frame
-    if (this.monitorFrameRef.current) {
-      const monitorRect = this.monitorFrameRef.current.getBoundingClientRect();
+  toggleZoom = () => {
+    if (this.state.isMobile) return;
+    
+    console.log("Zoom button clicked, current level:", this.state.zoomLevel);
+    
+    // Calculate the next zoom level (cycling through 0, 1, 2)
+    const nextZoomLevel = (this.state.zoomLevel + 1) % 3;
+    
+    this.setState({
+      zoomLevel: nextZoomLevel,
+      zoomActive: nextZoomLevel > 0 // Active when zoomed in
+    }, () => {
+      console.log("Zoom level updated to:", this.state.zoomLevel);
       
-      // Position relative to the monitor's bottom-right area (power button area)
-      // These offsets position the button on the monitor's power button area
-      const powerButtonOffsetTop = 669;  
-      const powerButtonOffsetLeft = 667; 
-      
-      position = {
-        position: 'fixed',
-        top: `${monitorRect.top + powerButtonOffsetTop}px`,
-        left: `${monitorRect.left + powerButtonOffsetLeft}px`,
-        zIndex: 101,
-      };
-    }
-
-    return position;
+      // Apply the zoom scaling
+      this.applyZoom(nextZoomLevel);
+    });
   };
 
-  // Calculate position for the power indicator light relative to the monitor image
-  calculateIndicatorPosition = () => {
-    // Default position if we can't calculate
-    let position = {
-      position: 'fixed',
-      top: '920px', // Higher than the power button
-      left: '1100px', // To the left of the power button
-      zIndex: 102,
-    };
-
-    // Calculate position based on monitor frame
-    if (this.monitorFrameRef.current) {
-      const monitorRect = this.monitorFrameRef.current.getBoundingClientRect();
-      
-      // Position relative to the monitor
-      const indicatorOffsetTop = 669;  // Above the power button
-      const indicatorOffsetLeft = 605; // To the left of the power button
-      
-      position = {
-        position: 'fixed',
-        top: `${monitorRect.top + indicatorOffsetTop}px`,
-        left: `${monitorRect.left + indicatorOffsetLeft}px`,
-        zIndex: 102,
-      };
-    }
-
-    return position;
-  };
+  renderMonitorControls() {
+    if (this.state.isMobile || !this.state.powerButtonReady) return null;
+    
+    return (
+      <div className="monitor-controls" style={{
+        position: 'absolute',
+        bottom: 32,
+        right: 160, // Moved 100px left from original position
+        zIndex: 999, // Higher z-index to ensure it's above everything
+        display: 'flex',
+        alignItems: 'center',
+        pointerEvents: 'auto' // Ensure it's clickable
+      }}>
+        {/* Zoom level indicator */}
+        {this.state.zoomLevel > 0 && (
+          <div style={{
+            position: 'absolute',
+            top: -20,
+            right: 70,
+            backgroundColor: '#333',
+            color: 'white',
+            padding: '2px 4px',
+            borderRadius: '2px',
+            fontSize: '10px',
+            fontFamily: 'Arial',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.5)',
+            pointerEvents: 'none'
+          }}>
+            {this.state.zoomLevel === 1 ? '110%' : '125%'}
+          </div>
+        )}
+        
+        {/* Use proper button elements for better click handling */}
+        <MonitorButton 
+          onClick={this.toggleZoom}
+          isActive={this.state.zoomActive}
+        />
+        
+        {/* Power indicator light */}
+        <div 
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            backgroundColor: this.state.isScreenPoweredOn ? '#00ff00' : '#333333',
+            boxShadow: this.state.isScreenPoweredOn ? '0 0 4px rgba(0, 255, 0, 0.8)' : '0 0 2px rgba(0, 0, 0, 0.5)',
+            margin: '0 5px'
+          }}
+        />
+        
+        <MonitorButton 
+          onClick={this.toggleScreenPower}
+          isActive={!this.state.isScreenPoweredOn}
+        />
+      </div>
+    );
+  }
 
   renderDefaultStarfield() {
-    // Only render if screensaver mode is active and the active screensaver is 'default'
-    if (!this.state.showScreensaver || 
-        this.state.activeScreensaver !== 'default' || 
-        this.state.isMobile) {
+    // Only render if not mobile and screensaver mode is active and the active screensaver is 'default'
+    if (this.state.isMobile || 
+        !this.state.showScreensaver || 
+        this.state.activeScreensaver !== 'default') {
       return null;
     }
 
@@ -334,10 +466,10 @@ class MonitorView extends Component {
   }
 
   renderP5jsStarfield() {
-    // Only render if screensaver mode is active and the active screensaver is 'p5js'
-    if (!this.state.showScreensaver || 
-        this.state.activeScreensaver !== 'p5js' || 
-        this.state.isMobile) {
+    // Only render if not mobile and screensaver mode is active and the active screensaver is 'p5js'
+    if (this.state.isMobile || 
+        !this.state.showScreensaver || 
+        this.state.activeScreensaver !== 'p5js') {
       return null;
     }
 
@@ -348,27 +480,144 @@ class MonitorView extends Component {
     );
   }
 
-  renderPowerIndicator() {
-    // Don't render if monitor not showing, on mobile, or button not ready
-    if (!this.state.showMonitor || this.state.isMobile || !this.state.powerButtonReady) return null;
+  // Updated renderMonitorView method to handle monitor toggling correctly
+  renderMonitorView() {
+    // Don't render anything if on mobile
+    if (this.state.isMobile) return null;
 
-    // Create the indicator light
-    return ReactDOM.createPortal(
+    // Create content for monitor frame and desktop viewport
+    const monitorContent = (
       <div
-        className={`power-indicator ${this.state.isScreenPoweredOn ? 'on' : 'off'}`}
+        id="monitor-overlay"
         style={{
-          ...this.calculateIndicatorPosition(),
-          width: '8px',
-          height: '8px',
-          borderRadius: '50%',
-          backgroundColor: this.state.isScreenPoweredOn ? '#00ff00' : '#333333',
-          boxShadow: this.state.isScreenPoweredOn ? '0 0 4px rgba(0, 255, 0, 0.8)' : '0 0 2px rgba(0, 0, 0, 0.5)',
-          transition: 'all 0.3s ease',
-          pointerEvents: 'none', // Don't block clicks
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 100,
+          overflow: 'hidden',
         }}
-      />,
-      this.toggleRoot
+      >
+        {/* Monitor container - scale both the monitor and desktop together */}
+        <div
+          className={`monitor-container ${this.state.zoomLevel > 0 ? 'zoomed' : ''}`}
+          style={{
+            position: 'relative',
+            width: 'auto',
+            height: 'auto',
+            transition: 'transform 0.3s ease',
+            transformOrigin: 'center center'
+          }}
+        >
+          {/* Monitor frame - Only render if showMonitor is true */}
+          <div
+            ref={this.monitorFrameRef}
+            className="monitor-frame"
+            style={{
+              position: 'relative',
+              width: '800px',
+              height: '700px',
+            }}
+          >
+            {/* Desktop viewport / screen area - Always render regardless of showMonitor state */}
+            <div
+              className="monitor-screen"
+              style={{
+                position: 'absolute',
+                top: 110, // Fixed position to match original
+                left: 80,
+                width: 641,
+                height: 482,
+                backgroundColor: 'transparent', // Always transparent, black overlay is separate
+                zIndex: 98,
+                overflow: 'hidden',
+                transition: 'background-color 0.3s ease',
+                borderRadius: '2px',
+              }}
+            >
+              {/* This div allows us to properly pass mouse events to desktop content */}
+              <div 
+                className="desktop-content-wrapper"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'relative',
+                  // Don't block desktop interaction when power is on
+                  pointerEvents: this.state.isScreenPoweredOn ? 'auto' : 'none'
+                }}
+              >
+                {/* Only render CRT effect if zoom level is 0 */}
+                {this.state.zoomLevel === 0 && (
+                  <div 
+                    className="crt-effect"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%)',
+                      backgroundSize: '100% 4px',
+                      zIndex: 200,
+                      pointerEvents: 'none',
+                      opacity: 0.15
+                    }}
+                  />
+                )}
+                
+                {/* Children will be rendered here (desktop content) */}
+                {this.props.children}
+              </div>
+              
+              {/* Black overlay when power is off - ALWAYS ON TOP */}
+              {!this.state.isScreenPoweredOn && (
+                <div 
+                  className="black-overlay"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'black',
+                    zIndex: 999,
+                    pointerEvents: 'none',
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Only render monitor image if showMonitor is true */}
+            {this.state.showMonitor && (
+              <img
+                src="/static/monitor3.png"
+                alt="Windows 98 Monitor"
+                style={{
+                  position: 'absolute',
+                  top: -115.5,
+                  left: -155,
+                  transform: 'scale(0.766, 0.758)',
+                  transformOrigin: 'center center',
+                  zIndex: 97,
+                  userSelect: 'none', // Prevent selection
+                  pointerEvents: 'none', // Don't interfere with mouse events
+                }}
+              />
+            )}
+            
+            {/* Only render monitor buttons if showMonitor is true */}
+            {this.state.showMonitor && this.renderMonitorControls()}
+          </div>
+        </div>
+      </div>
     );
+
+    // Create a portal to render at document.body level
+    return ReactDOM.createPortal(monitorContent, this.monitorRoot);
   }
 
   renderToggleButton() {
@@ -435,105 +684,56 @@ class MonitorView extends Component {
             }}
           />
         )}
-        
-        {/* Power button using image */}
-        {this.state.showMonitor && this.state.powerButtonReady && (
-          <CRTModeToggle
-            label="Power"
-            isActive={this.state.isScreenPoweredOn}
-            onClick={this.toggleScreenPower}
-            style={{
-              ...this.calculatePowerButtonPosition(),
-              left: `${parseInt(this.calculatePowerButtonPosition().left, 10) - 43}px`, // Shift 43px to the left
-              top: `${parseInt(this.calculatePowerButtonPosition().top, 10) - 8}px`, // Shift 8px to the top
-            }}
-            className="screen-power-button"
-            imageSrc="/static/btn1.png" // Pass the image source as a prop
-          />
-        )}
       </>,
       this.toggleRoot
     );
   }
 
-  renderMonitorView() {
-    // Don't render if not showing monitor or on mobile
-    if (!this.state.showMonitor || this.state.isMobile) return null;
-
-    // Create the monitor view content
-    const monitorContent = (
-      <div
-        id="monitor-overlay"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 100,
-          overflow: 'hidden',
-          pointerEvents: 'none', // Make entire overlay click-through
-        }}
-      >
-        {/* Monitor container */}
-        <div
-          ref={this.monitorFrameRef}
-          className="monitor-frame"
-          style={{
-            position: 'relative', // Ensure the monitor-screen is positioned relative to this container
-            width: '800px', // Original monitor frame size
-            height: '700px',
-            pointerEvents: 'none',
-          }}
-        >
-          {/* Black square (screen) */}
-          <div
-            className="monitor-screen"
-            style={{
-              position: 'absolute', // Position relative to the monitor-frame
-              top: '108px', // Adjust position inside the monitor frame
-              left: '80px',
-              width: '641px', // Size relative to the monitor-frame
-              height: '482px',
-              backgroundColor: this.state.isScreenPoweredOn ? 'transparent' : 'black', // Change background color based on screen power
-              zIndex: 98,
-              pointerEvents: 'none',
-              transition: 'background-color 0.3s ease', // Add a short transition delay
-              borderRadius: '2px', // Slightly round the corners
-            }}
-          ></div>
-
-          {/* Monitor image */}
-          <img
-            src="/static/monitor3.png"
-            alt="Windows 98 Monitor"
-            style={{
-              position: 'absolute',
-              top: -115.5, // Original top position
-              left: -155, // Original left position
-              transform: 'scale(0.766, 0.758)', // Scale width by 76.5% and height by 76.4%
-              transformOrigin: 'center center', // Scale from the center of the image
-              zIndex: 97,
-              pointerEvents: 'none',
-            }}
-          />
-        </div>
-      </div>
-    );
-
-    // Create a portal to render at document.body level
-    return ReactDOM.createPortal(monitorContent, this.monitorRoot);
-  }
-
   render() {
-    console.log("MONITOR VIEW IS RENDERING, showMonitor:", this.state.showMonitor);
-    const { children } = this.props;
+    console.log("MONITOR VIEW IS RENDERING, isMobile:", this.state.isMobile);
+    
+    // If on mobile, just render children without any monitor wrapper
+    if (this.state.isMobile) {
+      console.log("Rendering children directly without monitor on mobile");
+      return this.props.children;
+    }
 
     return (
       <>
+        {/* Add custom styles scoped to monitor components */}
+        <style>
+          {`
+            /* Hide CRT effect when zoomed */
+            .monitor-container.zoomed .crt-effect,
+            [data-zoom="1"] .crt-effect,
+            [data-zoom="2"] .crt-effect {
+              display: none !important;
+            }
+            
+            /* Ensure monitor controls styles don't affect other UI elements */
+            .monitor-controls button {
+              width: 18px !important;
+              height: 18px !important;
+              background: #c0c0c0 !important;
+              border: outset 2px #ffffff !important;
+              box-sizing: content-box !important;
+              cursor: pointer !important;
+              margin: 0 5px !important;
+              padding: 0 !important;
+              pointer-events: auto !important;
+            }
+            
+            .monitor-controls button.active {
+              border-style: inset !important;
+              background-color: #a0a0a0 !important;
+            }
+            
+            .monitor-controls button:hover {
+              filter: brightness(1.1) !important;
+            }
+          `}
+        </style>
+
         {/* Render the appropriate screensaver based on the active state */}
         {this.renderDefaultStarfield()}
         {this.renderP5jsStarfield()}
@@ -541,14 +741,8 @@ class MonitorView extends Component {
         {/* Always render the toggle buttons portal */}
         {this.renderToggleButton()}
 
-        {/* Render the power indicator */}
-        {this.renderPowerIndicator()}
-
         {/* Conditionally render the monitor view portal */}
         {this.renderMonitorView()}
-
-        {/* Render any children if they exist */}
-        {children}
       </>
     );
   }

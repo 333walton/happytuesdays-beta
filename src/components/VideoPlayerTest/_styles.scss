@@ -1,0 +1,125 @@
+@font-face {
+    font-family: 'FixedSys';
+    src: url('../../assets/FixedsysStripped.woff2') format('woff2');
+    font-weight: normal;
+}
+
+.VideoPlayerTest .wmp98-container {
+    width: 294px;
+    height: 403px;
+    font-family: 'FixedSys', monospace;
+    background-color: #C0C0C0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 4px;
+}
+
+.wmp98-video-wrapper {
+    width: 288px;
+    height: 216px;
+    background-color: black;
+    margin-bottom: 4px;
+}
+
+.wmp98-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 288px;
+    background-color: #C0C0C0;
+    padding: 2px 4px;
+    position: relative;
+    image-rendering: pixelated;
+}
+
+.wmp98-btn {
+    width: 21px;
+    height: 21px;
+    background-repeat: no-repeat;
+    background-size: 63px 21px;
+    background-position: 0 0;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    image-rendering: pixelated;
+}
+
+.wmp98-btn.play {
+    background-image: url('../../assets/bar2_play.png');
+}
+
+.wmp98-btn.pause {
+    background-image: url('../../assets/bar2_pause.png');
+}
+
+.wmp98-btn.stop {
+    background-image: url('../../assets/bar2_stop.png');
+}
+
+.wmp98-btn.volume {
+    background-image: url('../../assets/bar2_open.png');
+}
+
+.wmp98-btn:hover {
+    background-position: -21px 0;
+}
+
+.wmp98-btn:active {
+    background-position: -42px 0;
+}
+
+.wmp98-seek-bar {
+    flex: 1;
+    height: 6px;
+    appearance: none;
+    background: #d0d0d0;
+    outline: none;
+    cursor: pointer;
+    margin-left: 6px;
+}
+
+.wmp98-seek-bar::-webkit-slider-thumb {
+    width: 10px;
+    height: 10px;
+    background: #000080;
+    border: 1px solid white;
+    appearance: none;
+}
+
+.wmp98-volume-slider {
+    width: 48px;
+    height: 6px;
+    appearance: none;
+    background: #d0d0d0;
+    cursor: pointer;
+}
+
+.wmp98-volume-slider::-webkit-slider-thumb {
+    width: 10px;
+    height: 10px;
+    background: #000;
+    border: 1px solid white;
+    appearance: none;
+}
+
+.wmp98-timer {
+    width: 288px;
+    text-align: right;
+    font-size: 10px;
+    color: #333;
+    padding: 2px 4px 0 0;
+}
+
+.wmp98-info {
+    width: 288px;
+    background-color: black;
+    color: white;
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    gap: 2px;
+}
