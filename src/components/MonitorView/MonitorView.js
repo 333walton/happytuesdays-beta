@@ -4,6 +4,7 @@ import "./_styles.scss";
 import StarfieldContainer from "../StarfieldContainer"; 
 import Starfield2 from "../Starfield2";
 import { SettingsContext } from "../../contexts";
+import MonitorControlsPanel from "./MonitorControlsPanel";
 
 // Create a separate component for the toggle buttons
 class CRTModeToggle extends Component {
@@ -82,14 +83,13 @@ class MonitorView extends Component {
       windowHeight: window.innerHeight,
       powerButtonReady: false, // State to track if power button position is ready
       zoomLevel: 0, // 0 = 100%, 1 = 110%, 2 = 125%
-      zoomActive: false // Track if zoom button is pressed
+      zoomActive: false, // Track if zoom button is pressed
+      viewframeColor: '#2F4F4F', // Default dark-slate-gray color for static viewframe
     };
 
     // Only create DOM elements if not on mobile
     if (!this.state.isMobile) {
       // Create root elements for our portals
-      this.toggleRoot = document.createElement('div');
-      this.toggleRoot.id = 'monitor-toggle-root';
       this.monitorRoot = document.createElement('div');
       this.monitorRoot.id = 'monitor-root';
       this.starfieldRoot = document.createElement('div');
@@ -115,7 +115,6 @@ class MonitorView extends Component {
     }
 
     // Append portal roots to the document body
-    document.body.appendChild(this.toggleRoot);
     document.body.appendChild(this.monitorRoot);
     document.body.appendChild(this.starfieldRoot);
     document.body.appendChild(this.p5jsStarfieldRoot);
@@ -145,10 +144,6 @@ class MonitorView extends Component {
 
     // Clean up the portal roots when component unmounts
     window.removeEventListener('resize', this.handleResize);
-
-    if (this.toggleRoot.parentNode) {
-      this.toggleRoot.parentNode.removeChild(this.toggleRoot);
-    }
 
     if (this.monitorRoot.parentNode) {
       this.monitorRoot.parentNode.removeChild(this.monitorRoot);
@@ -184,13 +179,25 @@ class MonitorView extends Component {
       if (rootElement) {
         rootElement.style.backgroundColor = 'transparent';
       }
+      
+      // For animated viewframe - make monitor screen transparent
+      const monitorScreen = document.querySelector('.monitor-screen');
+      if (monitorScreen) {
+        monitorScreen.style.backgroundColor = 'transparent';
+      }
     } 
-    // If only monitor is active, use normal darkslategrey background
+    // If only monitor is active, use normal darkslategrey background or the selected color
     else {
       document.body.style.backgroundColor = 'darkslategrey';
       const rootElement = document.getElementById('root');
       if (rootElement) {
         rootElement.style.backgroundColor = '';
+      }
+      
+      // For static color viewframe - use the selected color
+      const monitorScreen = document.querySelector('.monitor-screen');
+      if (monitorScreen) {
+        monitorScreen.style.backgroundColor = this.state.viewframeColor;
       }
     }
   }
@@ -308,7 +315,7 @@ class MonitorView extends Component {
     });
   };
 
-  toggleScreensaverMode = () => {
+  toggleScreensaver = () => {
     if (this.state.isMobile) return;
     
     console.log("Screensaver Mode button clicked, current state:", this.state.showScreensaver);
@@ -327,22 +334,111 @@ class MonitorView extends Component {
     });
   };
 
+  // Fixed toggle functions for MonitorView component
+// These need to be integrated into the MonitorView.js file
+
+  // Fix for the toggleRocket function
   toggleRocket = () => {
     if (this.state.isMobile) return;
     
     console.log("Rocket button clicked, current state:", this.state.rocketActive);
-    this.setState(prevState => ({
-      rocketActive: !prevState.rocketActive,
-      // Toggle between screensavers
-      activeScreensaver: !prevState.rocketActive ? 'p5js' : 'default',
-      // Make sure only one button is active at a time
-      nextActive: false,
-      // When activating rocket, hide both monitor and viewport. When deactivating, show them both again.
-      showMonitor: !prevState.rocketActive ? false : true
-    }), () => {
+    
+    this.setState(prevState => {
+      // Define the new state based on current state
+      const newRocketActive = !prevState.rocketActive;
+      
+      // Create full state update to ensure consistency
+      return {
+        rocketActive: newRocketActive,
+        // Use p5js (Stars) when activating rocket, default when deactivating
+        activeScreensaver: newRocketActive ? 'p5js' : 'default',
+        // No next button needed
+        nextActive: false,
+        // When activating rocket, hide monitor. When deactivating, show it
+        showMonitor: newRocketActive ? false : true,
+        // Always keep screensaver active when in rocket mode
+        showScreensaver: newRocketActive ? true : prevState.showScreensaver,
+        // Update active viewframe category accordingly
+        activeViewframeCategory: newRocketActive ? 'animated' : 'static'
+      };
+    }, () => {
       console.log("Rocket state updated to:", this.state.rocketActive);
       console.log("Active screensaver:", this.state.activeScreensaver);
       console.log("Monitor mode set to:", this.state.showMonitor);
+      console.log("Screensaver active:", this.state.showScreensaver);
+      
+      // Update background color
+      this.updateBackgroundColor();
+    });
+  };
+
+  // Fix for toggleCategory in the MonitorControlsPanel
+  // This function needs to be implemented in the MonitorView component 
+  // to ensure proper monitor visibility when switching categories
+  toggleCategory = (category) => {
+    // Ensure monitor and viewport restoration when switching between static/animated
+    if (this.state.rocketActive) {
+      // If rocket is active and switching to static, restore monitor and viewport
+      if (category === 'static') {
+        this.setState({
+          rocketActive: false,
+          showMonitor: true,
+          activeScreensaver: 'default'
+        });
+      }
+    }
+    
+    // Rest of the existing toggleCategory logic...
+    // Only proceed if changing category
+    if (category !== this.state.activeViewframeCategory) {
+      this.setState({ activeViewframeCategory: category });
+      
+      // If switching to animated, enable screensaver
+      if (category === 'animated' && !this.state.isScreensaverActive) {
+        // Save the current color before switching
+        this.lastColorRef.current = this.state.viewframeColor;
+        this.toggleScreensaver();
+      } 
+      // If switching to static, disable screensaver
+      else if (category === 'static' && this.state.isScreensaverActive) {
+        this.toggleScreensaver();
+        
+        // Restore the color when switching back to static
+        if (this.rootRef.current) {
+          this.rootRef.current.style.backgroundColor = this.lastColorRef.current;
+        }
+      }
+    } else {
+      // If clicking the same category button again, allow toggling off animated
+      if (category === 'animated' && this.state.isScreensaverActive) {
+        this.setState({ activeViewframeCategory: 'static' });
+        this.toggleScreensaver();
+        
+        // Restore the color when switching back to static
+        if (this.rootRef.current) {
+          this.rootRef.current.style.backgroundColor = this.lastColorRef.current;
+        }
+      }
+    }
+  };
+
+  // Modified toggleScreensaver to ensure monitor visibility
+  toggleScreensaver = () => {
+    if (this.state.isMobile) return;
+    
+    console.log("Screensaver Mode button clicked, current state:", this.state.showScreensaver);
+    this.setState(prevState => ({
+      showScreensaver: !prevState.showScreensaver,
+      // Reset to default screensaver when toggling off and back on
+      activeScreensaver: !prevState.showScreensaver ? 'default' : prevState.activeScreensaver,
+      // Reset button states when toggling screensaver off
+      rocketActive: !prevState.showScreensaver ? false : prevState.rocketActive,
+      nextActive: !prevState.showScreensaver ? false : prevState.nextActive,
+      // Ensure monitor is always visible when toggling screensaver
+      showMonitor: true 
+    }), () => {
+      console.log("Screensaver state updated to:", this.state.showScreensaver);
+      console.log("Monitor visibility:", this.state.showMonitor);
       
       // Update background color
       this.updateBackgroundColor();
@@ -378,23 +474,36 @@ class MonitorView extends Component {
     });
   };
 
-  toggleZoom = () => {
+  // Set zoom level (used by controls panel)
+  setZoomLevel = (level) => {
     if (this.state.isMobile) return;
     
-    console.log("Zoom button clicked, current level:", this.state.zoomLevel);
-    
-    // Calculate the next zoom level (cycling through 0, 1, 2)
-    const nextZoomLevel = (this.state.zoomLevel + 1) % 3;
-    
+    console.log("Zoom level button clicked, setting to:", level);
     this.setState({
-      zoomLevel: nextZoomLevel,
-      zoomActive: nextZoomLevel > 0 // Active when zoomed in
+      zoomLevel: level,
+      zoomActive: level > 0 // Active when zoomed in
     }, () => {
       console.log("Zoom level updated to:", this.state.zoomLevel);
       
       // Apply the zoom scaling
-      this.applyZoom(nextZoomLevel);
+      this.applyZoom(level);
     });
+  };
+  
+  // Set static viewframe color
+  setViewframeColor = (color) => {
+    if (this.state.isMobile) return;
+    
+    this.setState({ viewframeColor: color }, () => {
+      this.updateBackgroundColor();
+    });
+  };
+  
+  // Set which screensaver to show
+  setActiveScreensaver = (screensaverType) => {
+    if (this.state.isMobile) return;
+    
+    this.setState({ activeScreensaver: screensaverType });
   };
 
   renderMonitorControls() {
@@ -589,7 +698,7 @@ class MonitorView extends Component {
                 left: 79,
                 width: 641,
                 height: 482,
-                backgroundColor: 'transparent', // Always transparent, black overlay is separate
+                backgroundColor: this.state.showScreensaver ? 'transparent' : this.state.viewframeColor,
                 zIndex: 98,
                 overflow: 'hidden',
                 transition: 'background-color 0.3s ease !important',
@@ -679,113 +788,6 @@ class MonitorView extends Component {
     return ReactDOM.createPortal(monitorContent, this.monitorRoot);
   }
 
-  renderToggleButton() {
-    // Don't render on mobile
-    if (this.state.isMobile) return null;
-
-    // Create portal for the toggle buttons
-    return ReactDOM.createPortal(
-      <>
-        {/* Monitor Mode Button */}
-        <CRTModeToggle
-          label="Monitor Mode"
-          isActive={this.state.showMonitor}
-          onClick={this.toggleMonitorView}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            left: '20px',
-            zIndex: 101,
-            width: '105px'
-          }}
-        />
-        
-        {/* Zoom Button - directly below Monitor Mode button */}
-        <CRTModeToggle
-          label="Zoom"
-          isActive={this.state.zoomActive}
-          onClick={this.toggleZoom}
-          style={{
-            position: 'fixed',
-            top: '60px', // 40px below the Monitor Mode button
-            left: '20px',
-            zIndex: 101,
-            width: '105px'
-          }}
-        />
-        
-        {/* Zoom Level Indicator - only show when zoomed */}
-        {this.state.zoomLevel > 0 && (
-          <div style={{
-            position: 'fixed',
-            top: '60px',
-            left: '135px',
-            backgroundColor: '#333',
-            color: 'white',
-            padding: '2px 4px',
-            borderRadius: '2px',
-            fontSize: '10px',
-            fontFamily: 'Arial',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.5)',
-            pointerEvents: 'none',
-            zIndex: 101
-          }}>
-            {this.state.zoomLevel === 1 ? '110%' : '125%'}
-          </div>
-        )}
-        
-        {/* Screensaver Mode Button - below the Zoom button */}
-        <CRTModeToggle
-          label="Screensaver"
-          isActive={this.state.showScreensaver}
-          onClick={this.toggleScreensaverMode}
-          style={{
-            position: 'fixed',
-            top: '100px', // 40px below the Zoom button
-            left: '20px',
-            zIndex: 101,
-            width: '105px'
-          }}
-        />
-        
-        {/* Rocket Button - only visible when screensaver is active */}
-        {this.state.showScreensaver && (
-          <CRTModeToggle
-            label="🚀"
-            isActive={this.state.rocketActive}
-            onClick={this.toggleRocket}
-            isSquare={true} // Make it square
-            style={{
-              position: 'fixed',
-              top: '140px', // 40px below the Screensaver button
-              left: '20px',
-              zIndex: 101,
-              width: '47px' // Just under half the width of buttons above
-            }}
-          />
-        )}
-        
-        {/* Next Button - only visible when screensaver is active */}
-        {this.state.showScreensaver && (
-          <CRTModeToggle
-            label="▶️"
-            isActive={this.state.nextActive}
-            onClick={this.toggleNext}
-            isSquare={true} // Make it square
-            style={{
-              position: 'fixed',
-              top: '140px', // Same height as Rocket button
-              left: '77px', // Right next to Rocket button with 10px spacing
-              zIndex: 101,
-              width: '47px' // Just under half the width of buttons above
-            }}
-          />
-        )}
-      </>,
-      this.toggleRoot
-    );
-  }
-
   render() {
     console.log("MONITOR VIEW IS RENDERING, isMobile:", this.state.isMobile);
     
@@ -824,13 +826,26 @@ class MonitorView extends Component {
           `}
         </style>
 
+        {/* New Controls Panel */}
+        <MonitorControlsPanel 
+          showMonitor={this.state.showMonitor}
+          toggleMonitorView={this.toggleMonitorView}
+          zoomLevel={this.state.zoomLevel}
+          setZoomLevel={this.setZoomLevel}
+          isScreensaverActive={this.state.showScreensaver}
+          toggleScreensaver={this.toggleScreensaver}
+          isRocketActive={this.state.rocketActive}
+          toggleRocket={this.toggleRocket}
+          activeScreensaver={this.state.activeScreensaver}
+          setActiveScreensaver={this.setActiveScreensaver}
+          viewframeColor={this.state.viewframeColor}
+          setViewframeColor={this.setViewframeColor}
+        />
+
         {/* Render the appropriate screensaver based on the active state */}
         {this.renderDefaultStarfield()}
         {this.renderP5jsStarfield()}
         
-        {/* Always render the toggle buttons portal */}
-        {this.renderToggleButton()}
-
         {/* Conditionally render the monitor view portal */}
         {this.renderMonitorView()}
       </>
