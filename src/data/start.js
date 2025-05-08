@@ -505,7 +505,7 @@ const startMenuData = [
             icon: icons.vid16,
             component: "HookScoreHeatmap",
             multiInstance: true,
-            isDisabled: false,
+            isDisabled: true,
             data: {
               src: ""
             },
