@@ -446,7 +446,7 @@ class MonitorView extends Component {
             style={{
               width: '40px',
               height: '17px',
-              backgroundColor: isCRTActive ? '#d5cca1' : '#cabe93',
+              backgroundColor: isCRTActive ? '#d5cca1' : '#d5cca1', //'#cabe93' : '#d5cca1'
               borderRadius: '0px',
               border: isCRTActive 
                 ? 'inset 1px #888888' 
@@ -454,8 +454,11 @@ class MonitorView extends Component {
               boxShadow: isCRTActive 
                 ? 'inset 1px 1px 1.5px rgba(0,0,0,0.5)' 
                 : 'none',
+              transform: isCRTActive
+                ? 'inset 0 1px 1.5px rgba(255, 255, 255, 0.3), 0 1px 1.5px rgba(0, 0, 0, 0.2)'
+                : 'inset 0 1px 1px rgba(0, 0, 0, 0.15)',
               color: isCRTActive ? '#5c5845' : '#fff7e6',
-              transition: 'all 0.05s ease-in-out',
+              transition: 'all 0.17s ease-in-out',
               fontSize: '9px',
               display: 'flex',
               justifyContent: 'center',
@@ -479,12 +482,11 @@ class MonitorView extends Component {
             style={{
               width: '51px',
               height: '27px',
-              backgroundColor: this.state.isScreenPoweredOn ? '#d5cca1' : '##cabe93',
+              backgroundColor: this.state.isScreenPoweredOn ? '#d5cca1' : '#d5cca1', //'#cabe93' : '#d5cca1'
               borderRadius: '0px',
               border: this.state.isScreenPoweredOn 
               ? 'inset 1px #888888' 
               : 'outset 1px #ffffff',
-
             boxShadow: this.state.isScreenPoweredOn 
               ? 'inset 1px 1px 1.5px rgba(0,0,0,0.5)' 
               : 'none',
@@ -492,7 +494,7 @@ class MonitorView extends Component {
               ? 'inset 0 1px 1.5px rgba(255, 255, 255, 0.3), 0 1px 1.5px rgba(0, 0, 0, 0.2)'
               : 'inset 0 1px 1px rgba(0, 0, 0, 0.15)',
               color: this.state.isScreenPoweredOn ? '#5c5845' : '#fff7e6',
-              transition: 'all 0.05s ease-in-out'
+              transition: 'all 0.17s ease-in-out'
             }}
           >
             {this.state.isScreenPoweredOn ? '' : ''}
