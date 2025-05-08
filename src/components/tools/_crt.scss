@@ -14,16 +14,6 @@ $screen-background: #121010;
   }
 }
 
-// IMPORTANT: Add these rules to completely hide CRT effect when zoomed
-body[data-zoom="1"] .container,
-body[data-zoom="2"] .container,
-.monitor-container.zoomed~.container,
-.monitor-container[style*="scale"]~.container {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-}
-
 .container {
   width: 100%;
   height: 100%;

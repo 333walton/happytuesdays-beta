@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import "./_styles.scss";
 import StarfieldContainer from "../StarfieldContainer"; 
 import Starfield2 from "../Starfield2";
+import { SettingsContext } from "../../contexts";
 
 // Create a separate component for the toggle buttons
 class CRTModeToggle extends Component {
@@ -46,7 +47,7 @@ class CRTModeToggle extends Component {
 }
 
 // Create a simple button component for monitor controls
-const MonitorButton = ({ onClick, isActive, style }) => (
+const MonitorButton = ({ onClick, isActive, style, children }) => (
   <button 
     onClick={onClick}
     className={isActive ? 'active' : ''}
@@ -61,7 +62,9 @@ const MonitorButton = ({ onClick, isActive, style }) => (
       padding: 0,
       ...style
     }}
-  />
+  >
+    {children}
+  </button>
 );
 
 class MonitorView extends Component {
@@ -100,6 +103,9 @@ class MonitorView extends Component {
     
     console.log("MonitorView constructor ran, isMobile:", this.state.isMobile);
   }
+
+  // Set up context access
+  static contextType = SettingsContext;
 
   componentDidMount() {
     // If on mobile, don't do any of the monitor setup
@@ -189,6 +195,17 @@ class MonitorView extends Component {
     }
   }
 
+  // Direct CRT toggling that works with the context
+  handleCRTToggle = (e) => {
+    // Ensure correct cursor style is maintained by stopping event propagation
+    e.stopPropagation();
+    
+    // Access toggleCrt method from context and call it directly
+    if (this.context && typeof this.context.toggleCrt === 'function') {
+      this.context.toggleCrt();
+    }
+  }
+
   // Apply zoom level to both monitor and desktop viewport
   applyZoom = (level) => {
     if (this.state.isMobile) return;
@@ -210,24 +227,15 @@ class MonitorView extends Component {
     
     if (monitorContainer) {
       if (zoomFactor > 1) {
-        // Scale the entire monitor container
         monitorContainer.style.transform = `scale(${zoomFactor})`;
         monitorContainer.style.transformOrigin = 'center center';
-        
-        // Add a class for CSS targeting
         monitorContainer.classList.add('zoomed');
       } else {
-        // Reset scaling
         monitorContainer.style.transform = '';
         monitorContainer.style.transformOrigin = '';
-        
-        // Remove zoomed class
         monitorContainer.classList.remove('zoomed');
       }
     }
-    
-    // Set data attribute on body for CSS targeting
-    document.body.setAttribute('data-zoom', level.toString());
   }
   
   // Reset zoom
@@ -241,9 +249,6 @@ class MonitorView extends Component {
       monitorContainer.style.transformOrigin = '';
       monitorContainer.classList.remove('zoomed');
     }
-    
-    // Reset zoom level data attribute on body
-    document.body.removeAttribute('data-zoom');
   }
 
   // Detect mobile devices
@@ -395,9 +400,12 @@ class MonitorView extends Component {
   renderMonitorControls() {
     if (this.state.isMobile || !this.state.powerButtonReady) return null;
     
+    // Get CRT state directly from context
+    const isCRTActive = this.context ? this.context.crt : true;
+    
     return (
       <>
-        {/* Zoom control and indicator light */}
+        {/* Monitor controls container */}
         <div className="monitor-controls" style={{
           position: 'absolute',
           bottom: 32,
@@ -408,7 +416,7 @@ class MonitorView extends Component {
           pointerEvents: 'auto'
         }}>
           {/* Power indicator light */}
-          <div 
+           <div 
             style={{
               position: 'absolute',
               width: 8,
@@ -424,10 +432,44 @@ class MonitorView extends Component {
           />
         </div>
         
+        {/* CRT Effect toggle button */}
+        <div style={{
+          position: 'absolute',
+          bottom: 60,
+          right: 680,
+          zIndex: 999,
+          pointerEvents: 'auto'
+        }}>
+          <MonitorButton
+            onClick={this.handleCRTToggle}
+            isActive={isCRTActive}
+            style={{
+              width: '40px',
+              height: '17px',
+              backgroundColor: isCRTActive ? '#d5cca1' : '#cabe93',
+              borderRadius: '0px',
+              border: isCRTActive 
+                ? 'inset 1px #888888' 
+                : 'outset 1px #ffffff',
+              boxShadow: isCRTActive 
+                ? 'inset 1px 1px 1.5px rgba(0,0,0,0.5)' 
+                : 'none',
+              color: isCRTActive ? '#5c5845' : '#fff7e6',
+              transition: 'all 0.05s ease-in-out',
+              fontSize: '9px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              cursor: 'pointer' // Ensure cursor is always pointer
+            }}
+          >
+          </MonitorButton>
+        </div>
+        
         {/* Power button - positioned separately */}
         <div style={{
           position: 'absolute',
-          bottom: -2,
+          bottom: -0.7,
           right: 100,
           zIndex: 999,
           pointerEvents: 'auto'
@@ -453,7 +495,7 @@ class MonitorView extends Component {
               transition: 'all 0.05s ease-in-out'
             }}
           >
-            {this.state.isScreenPoweredOn ? 'ON' : 'OFF'}
+            {this.state.isScreenPoweredOn ? '' : ''}
           </MonitorButton>
         </div>
       </>
@@ -563,9 +605,9 @@ class MonitorView extends Component {
                   pointerEvents: this.state.isScreenPoweredOn ? 'auto' : 'none'
                 }}
               >
-                {/* Only render CRT effect if zoom level is 0 */}
-                {this.state.zoomLevel === 0 && (
-                  <div 
+                {/* Children will be rendered here (desktop content) WORKS*/}
+                {this.context.crt && this.state.zoomLevel > 0 && (
+                  <div
                     className="crt-effect"
                     style={{
                       position: 'absolute',
@@ -577,12 +619,11 @@ class MonitorView extends Component {
                       backgroundSize: '100% 4px',
                       zIndex: 200,
                       pointerEvents: 'none',
-                      opacity: 0.15
+                      opacity: 0.75 // Only rendered when zoomed
                     }}
                   />
                 )}
-                
-                {/* Children will be rendered here (desktop content) */}
+
                 {this.props.children}
               </div>
               
@@ -599,7 +640,8 @@ class MonitorView extends Component {
                     backgroundColor: 'black',
                     zIndex: 999,
                     pointerEvents: 'none',
-                    transition: 'background-color 0.3s ease !important', // Add a short transition delay
+                    opacity: 1,
+                    transition: 'opacity 0.3s ease'
                   }}
                 />
               )}
@@ -756,13 +798,6 @@ class MonitorView extends Component {
         {/* Add custom styles scoped to monitor components */}
         <style>
           {`
-            /* Hide CRT effect when zoomed */
-            .monitor-container.zoomed .crt-effect,
-            [data-zoom="1"] .crt-effect,
-            [data-zoom="2"] .crt-effect {
-              display: none !important;
-            }
-            
             /* Ensure monitor controls styles don't affect other UI elements */
             .monitor-controls button {
               width: 18px !important;

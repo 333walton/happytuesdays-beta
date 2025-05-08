@@ -69,37 +69,6 @@
         transition: 'background-color 0.3s ease' !important; // Add a short transition delay
     }
 
-    /* CRT effect styles - WITH EXPLICIT RULES TO HIDE WHEN ZOOMED */
-    .crt-effect {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-        background-size: 100% 4px;
-        z-index: 200;
-        pointer-events: none;
-        opacity: 0.15;
-
-        /* When this class is added, hide completely */
-        &.disabled {
-            display: none !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-        }
-    }
-
-    /* CRITICAL: Multiple selectors to ensure CRT effect is always hidden when zoomed */
-    .monitor-container[style*="scale"] .crt-effect,
-    .monitor-container[style*="transform"] .crt-effect,
-    body[data-zoom="1"] .crt-effect,
-    body[data-zoom="2"] .crt-effect {
-        display: none !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-    }
-
     /* Power Indicator Styles */
     .power-indicator {
         position: fixed;
@@ -136,6 +105,7 @@
         display: flex;
         align-items: center;
         pointer-events: auto !important;
+        //filter: brightness(.5);
     }
 
     /* Button styles for monitor controls only - scoped to prevent affecting Start Menu */
