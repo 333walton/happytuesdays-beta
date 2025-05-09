@@ -7,7 +7,6 @@ import BouncyBallsScreensaver from "../BouncyBalls";
 import FlowerBoxScreensaver from "../FlowerBoxScreensaver";
 import { SettingsContext } from "../../contexts";
 import MonitorControlsPanel from "./MonitorControlsPanel";
-//import Maze from "../Maze";
 
 // Create a separate component for the toggle buttons
 class CRTModeToggle extends Component {
@@ -641,7 +640,7 @@ class MonitorView extends Component {
         {/* Power button - positioned separately */}
         <div style={{
           position: 'absolute',
-          bottom: -0.7,
+          bottom: 1,
           right: 100,
           zIndex: 999,
           pointerEvents: 'auto'
