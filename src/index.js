@@ -4,8 +4,8 @@ import App from './App';
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
 
+// No need for global window assignments since we're using direct imports in components
 
-// Revert to original rendering without StrictMode
 ReactDOM.render(
   <React.StrictMode>
     <App />

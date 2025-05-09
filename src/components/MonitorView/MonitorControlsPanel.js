@@ -370,11 +370,13 @@ const MonitorControlsPanel = ({
     'Dusty Olive', 'Control Gray', 'Sienna', 'Silver', 'Pastel Olive'
   ];
   
-  // Screensaver options - removed 'Stars' option
+  // The screensaverOptions array should already include the 'maze3d' option:
   const screensaverOptions = [
     { value: 'default', label: 'Space' },
-    { value: 'animation1', label: 'Animation 1' },
-    { value: 'animation2', label: 'Animation 2' }
+    { value: 'bouncyballs', label: 'Bouncy Balls' },  // This line should already exist
+    //{ value: 'p5js', label: 'Stars' },      // If this was removed, add it back
+    { value: 'flowerbox', label: 'FlowerBox' },  // Added new 3D FlowerBox option
+    //{ value: 'animation2', label: 'Animation 2' }
   ];
   
   // Find the index of the current color
@@ -387,7 +389,7 @@ const MonitorControlsPanel = ({
     setViewframeColor(colorOptions[value]);
   };
   
-  // Handle screensaver select change
+  // Make sure the handleScreensaverChange function in MonitorControlsPanel.js is correctly setting the activeScreensaver:
   const handleScreensaverChange = (e) => {
     setActiveScreensaver(e.target.value);
   };

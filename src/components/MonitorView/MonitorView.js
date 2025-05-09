@@ -3,8 +3,11 @@ import ReactDOM from "react-dom";
 import "./_styles.scss";
 import StarfieldContainer from "../StarfieldContainer"; 
 import Starfield2 from "../Starfield2";
+import BouncyBallsScreensaver from "../BouncyBalls";
+import FlowerBoxScreensaver from "../FlowerBoxScreensaver";
 import { SettingsContext } from "../../contexts";
 import MonitorControlsPanel from "./MonitorControlsPanel";
+//import Maze from "../Maze";
 
 // Create a separate component for the toggle buttons
 class CRTModeToggle extends Component {
@@ -77,7 +80,7 @@ class MonitorView extends Component {
       showScreensaver: false, // Screensaver mode disabled by default
       rocketActive: false, // Rocket button state
       nextActive: false, // Next button state
-      activeScreensaver: 'default', // Which screensaver to show: 'default' or 'p5js'
+      activeScreensaver: 'default', // Which screensaver to show: 'default', 'p5js', or 'maze3d'
       isMobile: this.checkIsMobile(),
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight,
@@ -92,13 +95,21 @@ class MonitorView extends Component {
       // Create root elements for our portals
       this.monitorRoot = document.createElement('div');
       this.monitorRoot.id = 'monitor-root';
+      this.flowerboxRoot = document.createElement('div');
+      this.flowerboxRoot.id = 'flowerbox-root';
       this.starfieldRoot = document.createElement('div');
       this.starfieldRoot.id = 'starfield-root';
       this.p5jsStarfieldRoot = document.createElement('div');
       this.p5jsStarfieldRoot.id = 'p5js-starfield-root';
+      this.BouncyBallsRoot = document.createElement('div');  // Add this line
+      this.BouncyBallsRoot.id = 'BouncyBalls-root';              // Add this line
+      this.lastColorRef = React.createRef();
+      this.rootRef = React.createRef();
       
       // Reference to the monitor frame
       this.monitorFrameRef = React.createRef();
+      // Initialize with default value
+      this.lastColorRef.current = '#2F4F4F'; // Default color
     }
     
     console.log("MonitorView constructor ran, isMobile:", this.state.isMobile);
@@ -118,12 +129,17 @@ class MonitorView extends Component {
     document.body.appendChild(this.monitorRoot);
     document.body.appendChild(this.starfieldRoot);
     document.body.appendChild(this.p5jsStarfieldRoot);
+    document.body.appendChild(this.BouncyBallsRoot);  // Add this line
+    document.body.appendChild(this.flowerboxRoot);
+
 
     // Add resize listener to detect mobile/desktop changes
     window.addEventListener('resize', this.handleResize);
     
     // Set initial background color based on initial monitor state
     this.updateBackgroundColor();
+    this.lastColorRef.current = this.state.viewframeColor; // Initialize to default color
+    this.rootRef.current = document.getElementById('root'); // Get reference to root element
     
     // Wait for monitor to render, then calculate power button position
     if (this.state.showMonitor) {
@@ -145,6 +161,14 @@ class MonitorView extends Component {
     // Clean up the portal roots when component unmounts
     window.removeEventListener('resize', this.handleResize);
 
+    if (this.BouncyBallsRoot.parentNode) {
+      this.BouncyBallsRoot.parentNode.removeChild(this.BouncyBallsRoot);
+    }
+
+    if (this.flowerboxRoot.parentNode) {
+      this.flowerboxRoot.parentNode.removeChild(this.flowerboxRoot);
+    }
+    
     if (this.monitorRoot.parentNode) {
       this.monitorRoot.parentNode.removeChild(this.monitorRoot);
     }
@@ -170,6 +194,65 @@ class MonitorView extends Component {
     this.resetZoom();
   }
 
+  renderFlowerBox() {
+    console.log('⚠️ ATTEMPTING TO RENDER FLOWERBOX', {
+      isMobile: this.state.isMobile,
+      showScreensaver: this.state.showScreensaver,
+      activeScreensaver: this.state.activeScreensaver
+    });
+    
+    if (this.state.isMobile || 
+        !this.state.showScreensaver || 
+        this.state.activeScreensaver !== 'flowerbox') {
+      console.log('❌ NOT RENDERING FLOWERBOX - conditions not met');
+      return null;
+    }
+  
+    console.log('✅ RENDERING FLOWERBOX CONTAINER TO', this.flowerboxRoot);
+    // Create portal for the 3D FlowerBox
+    return ReactDOM.createPortal(
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        width: '100%', 
+        height: '100%', 
+        backgroundColor: 'black', 
+        zIndex: 89 
+      }}>
+        <FlowerBoxScreensaver />
+      </div>,
+      this.flowerboxRoot
+    );
+  }
+  
+  // Only render if not mobile and screensaver mode is active and the active screensaver is 'maze3d'
+  renderBouncyBalls() {
+    if (this.state.isMobile || 
+        !this.state.showScreensaver || 
+        this.state.activeScreensaver !== 'bouncyballs') {
+      console.log('❌ NOT RENDERING MAZE3D - conditions not met');
+      return null;
+    }
+  
+    console.log('✅ RENDERING MAZE3D CONTAINER TO', this.BouncyBallsRoot);
+    // Create portal for the 3D Maze with a fallback color
+    return ReactDOM.createPortal(
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        width: '100%', 
+        height: '100%', 
+        backgroundColor: 'black', 
+        zIndex: 89 
+      }}>
+        <BouncyBallsScreensaver />
+      </div>,
+      this.BouncyBallsRoot
+    );
+  }
+  
   // Update background color based on current state
   updateBackgroundColor = () => {
     // If screensaver is active, make background transparent to show starfield
@@ -359,7 +442,7 @@ class MonitorView extends Component {
         // Always keep screensaver active when in rocket mode
         showScreensaver: newRocketActive ? true : prevState.showScreensaver,
         // Update active viewframe category accordingly
-        activeViewframeCategory: newRocketActive ? 'animated' : 'static'
+        // activeViewframeCategory: newRocketActive ? 'animated' : 'static' - removed this since its not in my state
       };
     }, () => {
       console.log("Rocket state updated to:", this.state.rocketActive);
@@ -394,13 +477,13 @@ class MonitorView extends Component {
       this.setState({ activeViewframeCategory: category });
       
       // If switching to animated, enable screensaver
-      if (category === 'animated' && !this.state.isScreensaverActive) {
+      if (category === 'animated' && !this.state.showScreensaver) {
         // Save the current color before switching
         this.lastColorRef.current = this.state.viewframeColor;
         this.toggleScreensaver();
       } 
       // If switching to static, disable screensaver
-      else if (category === 'static' && this.state.isScreensaverActive) {
+      else if (category === 'static' && this.state.showScreensaver) {
         this.toggleScreensaver();
         
         // Restore the color when switching back to static
@@ -410,7 +493,7 @@ class MonitorView extends Component {
       }
     } else {
       // If clicking the same category button again, allow toggling off animated
-      if (category === 'animated' && this.state.isScreensaverActive) {
+      if (category === 'animated' && this.state.showScreensaver) {
         this.setState({ activeViewframeCategory: 'static' });
         this.toggleScreensaver();
         
@@ -420,29 +503,6 @@ class MonitorView extends Component {
         }
       }
     }
-  };
-
-  // Modified toggleScreensaver to ensure monitor visibility
-  toggleScreensaver = () => {
-    if (this.state.isMobile) return;
-    
-    console.log("Screensaver Mode button clicked, current state:", this.state.showScreensaver);
-    this.setState(prevState => ({
-      showScreensaver: !prevState.showScreensaver,
-      // Reset to default screensaver when toggling off and back on
-      activeScreensaver: !prevState.showScreensaver ? 'default' : prevState.activeScreensaver,
-      // Reset button states when toggling screensaver off
-      rocketActive: !prevState.showScreensaver ? false : prevState.rocketActive,
-      nextActive: !prevState.showScreensaver ? false : prevState.nextActive,
-      // Ensure monitor is always visible when toggling screensaver
-      showMonitor: true 
-    }), () => {
-      console.log("Screensaver state updated to:", this.state.showScreensaver);
-      console.log("Monitor visibility:", this.state.showMonitor);
-      
-      // Update background color
-      this.updateBackgroundColor();
-    });
   };
 
   toggleNext = () => {
@@ -694,9 +754,9 @@ class MonitorView extends Component {
               className="monitor-screen"
               style={{
                 position: 'absolute',
-                top: 110, // Fixed position to match original
-                left: 79,
-                width: 641,
+                top: 109, // Fixed position to match original
+                left: 78,
+                width: 643,
                 height: 482,
                 backgroundColor: this.state.showScreensaver ? 'transparent' : this.state.viewframeColor,
                 zIndex: 98,
@@ -765,11 +825,11 @@ class MonitorView extends Component {
                 alt="Windows 98 Monitor"
                 style={{
                   position: 'absolute',
-                  top: -115.5,
+                  top: -116.5,
                   left: -155,
-                  transform: 'scale(0.766, 0.755)',
+                  transform: 'scale(0.766, 0.752)',
                   transformOrigin: 'center center',
-                  zIndex: 97,
+                  zIndex: 998,
                   userSelect: 'none', // Prevent selection
                   pointerEvents: 'none', // Don't interfere with mouse events
                   borderRadius: '12px', //not working
@@ -845,6 +905,8 @@ class MonitorView extends Component {
         {/* Render the appropriate screensaver based on the active state */}
         {this.renderDefaultStarfield()}
         {this.renderP5jsStarfield()}
+        {this.renderBouncyBalls()}
+        {this.renderFlowerBox()}
         
         {/* Conditionally render the monitor view portal */}
         {this.renderMonitorView()}

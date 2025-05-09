@@ -21,9 +21,9 @@
     /* Monitor screen and desktop viewport styles (jsx duplicate taking priority it seems) */
     .monitor-screen {
         position: absolute;
-        top: 110px;
+        top: 110px; //doesnt work?
         /* Fixed position to match original */
-        left: 79px;
+        left: 79px; //doesnt work?
         width: 641px;
         height: 479px;
         background-color: transparent;

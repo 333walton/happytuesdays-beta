@@ -29,3 +29,7 @@ export { default as StarfieldContainer } from "./StarfieldContainer";
 export { default as Starfield2 } from "./Starfield2";
 export { default as HookScoreHeatmap } from "./HookScoreHeatmap";
 export { default as VideoPlayerTest } from "./VideoPlayerTest";
+export { default as Maze3DContainer } from "./Maze3DContainer";
+export { default as BouncyBalls } from "./BouncyBalls";
+export { default as FlowerBoxScreensaver } from "./FlowerBoxScreensaver";
+export { default as Maze } from "./Maze";
