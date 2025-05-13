@@ -116,6 +116,8 @@
       top: 0px;
       left: 0px;
       display: flex;
+      /* Added for smoother transitions */
+      transition: opacity 0.5s ease-in-out;
     }
 
     .BIOS,
@@ -133,6 +135,20 @@
       background-color: #000000;
     }
 
+    .BIOSWrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1001;
+      /* Initially high, will be repositioned by JS */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #000;
+    }
+
     .WindowsLaunchWrapper {
       background: linear-gradient(-90deg,
           #a6c7df,
@@ -141,9 +157,10 @@
           #c9d9ef,
           #a6c7df,
           #ffffff);
-      background-size: 400% 400%;
+      background-size: 100% 100%;
       animation: Gradient 5s ease infinite;
-      z-index: 1;
+      z-index: 1001;
+      /* Initially high, will be repositioned by JS */
     }
 
     .WindowsLaunch {
@@ -226,11 +243,23 @@
     }
 
     .hidden {
-      display: none;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    .WindowsLaunchWrapper.visible {
+      opacity: 1;
+      visibility: visible;
     }
   </style>
 
   <script>
+    // Create a global function that React will override
+    window.positionStartupSequencesIfReady = function () {
+      console.log("Positioning function not yet available");
+    };
+
     function hideBios() {
       document.getElementsByClassName("BIOSWrapper")[0].classList.add("hidden");
     }
@@ -241,6 +270,12 @@
       windowsLaunch.classList.add("visible");
       windowsLaunch.classList.remove("hidden");
       window.localStorage.setItem("loggedIn", "true");
+
+      // Position windows logo inside monitor if function is available
+      if (typeof window.positionStartupSequencesIfReady === 'function') {
+        window.positionStartupSequencesIfReady();
+      }
+
       setTimeout(() => {
         windowsLaunch.classList.remove("visible");
         windowsLaunch.classList.add("hidden");
@@ -261,14 +296,23 @@
     function loadScreen() {
       var biosElem = document.querySelector(".BIOS");
       biosElem.classList.remove("initial");
+
       if (window.localStorage.getItem("loggedIn")) {
         hideBios();
         return;
       }
+
       biosElem.classList.add("visible");
+
+      // Position BIOS inside monitor if function is available
+      if (typeof window.positionStartupSequencesIfReady === 'function') {
+        window.positionStartupSequencesIfReady();
+      }
+
       staggerElements(biosElem.getElementsByTagName("div"), 0);
     }
 
+    // Longer delay to ensure React has time to initialize
     setTimeout(loadScreen, 1500);
   </script>
 </head>
@@ -295,8 +339,8 @@
         <img src="%PUBLIC_URL%/static/cryptopunk.jpg" alt="Author avatar" style="width: 33px;" />
         <p>This project is by <a href="https://bit.ly/3FsgmPt">CS</a></p>
         <p>Philadelphia based, contactable via <a href="https://bit.ly/3FEdIG8">LinkedIn</a></p>
-        <p>Likes <a href="https://bit.ly/3Foun0t">chess</a> and <a
-            href="https://soundcloud.com/southbound_music/sets/best-techno">techno</a></p>
+        <p>Likes <a href="https://bit.ly/3Foun0t">chess</a> and
+          href="https://soundcloud.com/southbound_music/sets/best-techno">techno</a></p>
         <p>Is unwilling to link his Twitter because he can't remember whether anything he tweeted is embarrassing</p>
         <p>Is sorry for how weird this works on tablets</p>
       </div>

@@ -91,6 +91,35 @@ class MonitorView extends Component {
       viewframeColor: '#2F4F4F', // Default dark-slate-gray color for static viewframe
     };
 
+    this.positionStartupSequences = () => {
+      // Wait for monitor to render
+      setTimeout(() => {
+        const monitorScreen = document.querySelector('.monitor-screen');
+        const biosWrapper = document.querySelector('.BIOSWrapper');
+        const windowsLaunchWrapper = document.querySelector('.WindowsLaunchWrapper');
+        
+        if (monitorScreen && biosWrapper && windowsLaunchWrapper) {
+          const monitorRect = monitorScreen.getBoundingClientRect();
+          
+          // Position BIOS wrapper
+          biosWrapper.style.position = 'absolute';
+          biosWrapper.style.top = monitorRect.top + 'px';
+          biosWrapper.style.left = monitorRect.left + 'px';
+          biosWrapper.style.width = monitorRect.width + 'px';
+          biosWrapper.style.height = monitorRect.height + 'px';
+          biosWrapper.style.zIndex = '101';
+    
+          // Position Windows Launch wrapper
+          windowsLaunchWrapper.style.position = 'absolute';
+          windowsLaunchWrapper.style.top = monitorRect.top + 'px';
+          windowsLaunchWrapper.style.left = monitorRect.left + 'px';
+          windowsLaunchWrapper.style.width = monitorRect.width + 'px';
+          windowsLaunchWrapper.style.height = monitorRect.height + 'px';
+          windowsLaunchWrapper.style.zIndex = '101';
+        }
+      }, 300);
+    }    
+
     // Only create DOM elements if not on mobile
     if (!this.state.isMobile) {
       // Create root elements for our portals
@@ -113,6 +142,8 @@ class MonitorView extends Component {
       this.monitorFrameRef = React.createRef();
       // Initialize with default value
       this.lastColorRef.current = '#2F4F4F'; // Default color
+      window.positionStartupSequencesIfReady = this.positionStartupSequences;
+      this.positionStartupSequences();
     }
     
     console.log("MonitorView constructor ran, isMobile:", this.state.isMobile);
@@ -158,7 +189,9 @@ class MonitorView extends Component {
 
   componentWillUnmount() {
     // If on mobile, there's nothing to clean up
-    if (this.state.isMobile) {
+    if (this.state.isMobile) {if (typeof window !== 'undefined') {
+      window.positionStartupSequencesIfReady = undefined;
+    }
       return;
     }
 
@@ -765,7 +798,7 @@ class MonitorView extends Component {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          zIndex: 100,
+          zIndex: 90,
           overflow: 'hidden',
         }}
       >
