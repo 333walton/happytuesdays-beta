@@ -17,24 +17,25 @@
 .WindowExplorer {
   width: 100%;
   height: 100%;
+}
 
-  &.wait2,
-  &.wait {
-    * {
-      pointer-events: none;
-    }
-
-    footer:after {
-      width: 54px;
-      background-position: right;
-      background-repeat: no-repeat;
-      content: "Loading...";
-    }
+.WindowExplorer.wait2,
+.WindowExplorer.wait {
+  * {
+    pointer-events: none;
   }
+}
 
-  &__view {
-    display: flex;
-  }
+.WindowExplorer.wait footer:after,
+.WindowExplorer.wait2 footer:after {
+  width: 54px;
+  background-position: right;
+  background-repeat: no-repeat;
+  content: "Loading...";
+}
+
+.WindowExplorer__view {
+  display: flex;
 }
 
 .WindowAlert {
@@ -59,7 +60,7 @@
   padding: 4px;
   display: flex;
   flex-direction: column;
-  gap: 0; // tighter spacing
+  gap: 0;
 }
 
 .doodle-row {
@@ -71,11 +72,11 @@
   cursor: pointer;
   border: 1px solid transparent;
   height: 18px;
+}
 
-  &:hover {
-    background-color: #dcdcdc;
-    border-color: #a0a0a0;
-  }
+.doodle-row:hover {
+  background-color: #dcdcdc;
+  border-color: #a0a0a0;
 }
 
 .file-icon img {
@@ -122,14 +123,14 @@
   align-content: flex-start;
   color: black;
   gap: 6px;
+}
 
-  &.list-view {
-    display: block;
-  }
+.doodle-container.list-view {
+  display: block;
+}
 
-  &.icons-view {
-    display: flex;
-  }
+.doodle-container.icons-view {
+  display: flex;
 }
 
 /* ------------------------------
@@ -143,23 +144,23 @@
   border: none;
   padding: 2px;
   cursor: pointer;
+}
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+.toggle-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* Default styles for explorer options */
 .explorer-options {
-  color: inherit; /* Use the default text color */
+  color: inherit;
 }
 
 /* Mobile-specific styles */
 @media (max-width: 600px) {
   .explorer-options {
-    color: black; /* Set text color to black on mobile devices */
+    color: black;
   }
 }
 
@@ -197,8 +198,7 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
   /* Target taskbar items and minimized windows */
   .taskbar-item-text,
   .taskbar-button-text,
-  .start-menu-item,
-  .window-title {
+  .start-menu-item {
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
   }
