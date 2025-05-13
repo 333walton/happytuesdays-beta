@@ -5,6 +5,7 @@ import StarfieldContainer from "../StarfieldContainer";
 import Starfield2 from "../Starfield2";
 import BouncyBallsScreensaver from "../BouncyBalls";
 import FlowerBoxScreensaver from "../FlowerBoxScreensaver";
+import PipesScreensaver from "../PipesScreensaver";
 import { SettingsContext } from "../../contexts";
 import MonitorControlsPanel from "./MonitorControlsPanel";
 import { MonitorThemeProvider } from './ThemeWrapper';
@@ -105,6 +106,8 @@ class MonitorView extends Component {
       this.BouncyBallsRoot.id = 'BouncyBalls-root';              // Add this line
       this.lastColorRef = React.createRef();
       this.rootRef = React.createRef();
+      this.pipesRoot = document.createElement('div');
+      this.pipesRoot.id = 'pipes-root';
       
       // Reference to the monitor frame
       this.monitorFrameRef = React.createRef();
@@ -131,6 +134,7 @@ class MonitorView extends Component {
     document.body.appendChild(this.p5jsStarfieldRoot);
     document.body.appendChild(this.BouncyBallsRoot);  // Add this line
     document.body.appendChild(this.flowerboxRoot);
+    document.body.appendChild(this.pipesRoot);
 
 
     // Add resize listener to detect mobile/desktop changes
@@ -180,6 +184,10 @@ class MonitorView extends Component {
     if (this.p5jsStarfieldRoot.parentNode) {
       this.p5jsStarfieldRoot.parentNode.removeChild(this.p5jsStarfieldRoot);
     }
+
+    if (this.pipesRoot.parentNode) {
+      this.pipesRoot.parentNode.removeChild(this.pipesRoot);
+    }
     
     // Restore original background color when component unmounts
     document.body.style.backgroundColor = 'darkslategrey';
@@ -192,6 +200,38 @@ class MonitorView extends Component {
     
     // Reset any zoom when component unmounts
     this.resetZoom();
+  }
+
+  renderPipes() {
+    console.log('⚠️ ATTEMPTING TO RENDER PIPES', {
+      isMobile: this.state.isMobile,
+      showScreensaver: this.state.showScreensaver,
+      activeScreensaver: this.state.activeScreensaver
+    });
+    
+    if (this.state.isMobile || 
+        !this.state.showScreensaver || 
+        this.state.activeScreensaver !== 'pipes') {
+      console.log('❌ NOT RENDERING PIPES - conditions not met');
+      return null;
+    }
+  
+    console.log('✅ RENDERING PIPES CONTAINER TO', this.pipesRoot);
+    // Create portal for the 3D Pipes
+    return ReactDOM.createPortal(
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        width: '100%', 
+        height: '100%', 
+        backgroundColor: 'black', 
+        zIndex: 89 
+      }}>
+        <PipesScreensaver />
+      </div>,
+      this.pipesRoot
+    );
   }
 
   renderFlowerBox() {
@@ -867,6 +907,7 @@ class MonitorView extends Component {
         {this.renderBouncyBalls()}
         {this.renderFlowerBox()}
         {this.renderMonitorView()}
+        {this.renderPipes()}
         
         {/* ONLY apply theme wrapper to the controls panel */}
         <MonitorThemeProvider>

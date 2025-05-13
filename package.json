@@ -24,6 +24,7 @@
     "react-select": "^5.10.1",
     "react95": "^4.0.0",
     "styled-components": "^6.1.18",
+    "three": "^0.176.0",
     "video.js": "^8.22.0",
     "vm": "^0.1.0",
     "webamp": "^0.0.0-next-bd2022a8",
@@ -69,11 +70,11 @@
     "not op_mini all"
   ],
   "overrides": {
-  "postcss": "^8.4.31",
-  "request": "^2.88.2",
-  "ampache": {
+    "postcss": "^8.4.31",
     "request": "^2.88.2",
-    "xml2js": "^0.6.2"
+    "ampache": {
+      "request": "^2.88.2",
+      "xml2js": "^0.6.2"
+    }
   }
-}
 }

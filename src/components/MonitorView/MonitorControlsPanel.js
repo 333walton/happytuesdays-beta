@@ -938,9 +938,10 @@ const MonitorControlsPanel = ({
                          }}
                          disabled={isRocketActive}
                        >
-                         <option value="default">Space</option>
-                         <option value="bouncyballs">Bouncy Balls</option>
-                         <option value="flowerbox">FlowerBox</option>
+                        <option value="default">Space</option>
+                        <option value="bouncyballs">Bouncy Balls</option>
+                        <option value="flowerbox">FlowerBox</option>
+                        <option value="pipes">Pipes</option>
                        </select>
                        
                        {/* Visual display (non-functional, just for appearance) */}
@@ -964,10 +965,11 @@ const MonitorControlsPanel = ({
                            pointerEvents: 'none' // Don't capture pointer events
                          }}
                        >
-                         {/* Display the current value */}
-                         {activeScreensaver === 'default' ? 'Space' : 
-                         activeScreensaver === 'bouncyballs' ? 'Bouncy Balls' : 
-                         'FlowerBox'}
+                          {/* Display the current value */}
+                          {activeScreensaver === 'default' ? 'Space' : 
+                          activeScreensaver === 'bouncyballs' ? 'Bouncy Balls' : 
+                          activeScreensaver === 'flowerbox' ? 'FlowerBox' : 
+                          'Pipes'}
                        </div>
                        
                        {/* Button - purely visual, clicks pass through to select */}

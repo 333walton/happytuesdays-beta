@@ -32,3 +32,4 @@ export { default as VideoPlayerTest } from "./VideoPlayerTest";
 export { default as Maze3DContainer } from "./Maze3DContainer";
 export { default as BouncyBalls } from "./BouncyBalls";
 export { default as FlowerBoxScreensaver } from "./FlowerBoxScreensaver";
+export { default as PipesScreensaver } from "./PipesScreensaver";
