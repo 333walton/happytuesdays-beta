@@ -243,12 +243,13 @@ const TabsWrapper = styled.div`
   /* Adjust tab styles */
   & > div > button {
     font-size: 11px !important;
-    outline-color: transparent !important;
   }
   
   /* Fix tab body padding */
   & > div:last-child {
-    padding: 8px 4px 0 4px;
+    padding: 4px 4px 8px 4px; // Reduced top padding, increased bottom padding
+    display: flex;
+    flex-direction: column;
   }
 `;
 
@@ -683,6 +684,19 @@ const MonitorControlsPanel = ({
       
       {/* Content Area - Conditionally rendered */}
       <CollapsibleContent collapsed={isCollapsed}>
+        <style>
+        {`
+          /* This targets the React95 tab components */
+          .react95__tab:focus, 
+          .react95__tab:active, 
+          .react95__tab[aria-selected="true"] {
+            outline: 0.5px dotted #c0c0c0 !important;
+            outline-offset: -1px !important;
+            box-shadow: none !important;
+          }
+        `}
+        </style>
+
         <TabsWrapper>
           <Tabs value={activeTab} onChange={handleChange} style={{ height: 22, top: 0, left: 0, padding: 0, outlineColor: 'transparent', overflow: 'visible' }}>
             {/* Tab 0 */}
@@ -871,165 +885,202 @@ const MonitorControlsPanel = ({
                               border-bottom-color: #ffffff !important;
                               background-color: #b0b0b0 !important;
                               transform: translateY(1px);
-                            }
-                          `}
-                        </style>
-                      
-                        {/* Hidden native select - this gives us native functionality */}
-                        <select
-                          value={activeScreensaver}
-                          onChange={(e) => {
-                            if (!isRocketActive) {
-                              console.log("Selected:", e.target.value);
-                              setActiveScreensaver(e.target.value);
-                            }
-                          }}
-                          onMouseDown={(e) => {
-                            // Find coordinates relative to select element
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            const x = e.clientX - rect.left;
-                            
-                            // If click is in the button area (right side)
-                            if (x > rect.width - 20) {
-                              // Find the visual button element and add active class
-                              const buttonVisual = e.currentTarget.parentNode.querySelector('.win98-button-visual');
-                              if (buttonVisual) {
-                                buttonVisual.classList.add('active');
-                              }
-                            }
-                          }}
-                          onMouseUp={() => {
-                            // Remove active class from button visual on mouse up
-                            const buttonVisual = document.querySelector('.win98-button-visual');
-                            if (buttonVisual) {
-                              buttonVisual.classList.remove('active');
-                            }
-                          }}
-                          onMouseLeave={() => {
-                            // Remove active class from button visual if mouse leaves
-                            const buttonVisual = document.querySelector('.win98-button-visual');
-                            if (buttonVisual) {
-                              buttonVisual.classList.remove('active');
-                            }
-                          }}
-                          style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            opacity: 0,
-                            cursor: isRocketActive ? 'not-allowed' : 'default',
-                            zIndex: 2 // Higher than the visual elements
-                          }}
-                          disabled={isRocketActive}
-                        >
-                          <option value="default">Space</option>
-                          <option value="bouncyballs">Bouncy Balls</option>
-                          <option value="flowerbox">FlowerBox</option>
-                        </select>
-                        
-                        {/* Visual display (non-functional, just for appearance) */}
-                        <div
-                          style={{
-                            width: '100%',
-                            height: 24,
-                            backgroundColor: '#ffffff',
-                            border: '1px solid',
-                            borderTopColor: '#999999',
-                            borderLeftColor: '#999999',
-                            borderRightColor: '#ffffff',
-                            borderBottomColor: '#ffffff',
-                            boxShadow: 'inset 1px 1px 0px rgba(0, 0, 0, 0.2)',
-                            fontSize: 11,
-                            padding: '2px 20px 2px 3px',
-                            fontFamily: '"ms_sans_serif", "ms sans serif", "Microsoft Sans Serif", sans-serif',
-                            color: activeScreensaver === 'default' && isRocketActive ? '#888888' : '#000000',
-                            display: 'flex',
-                            alignItems: 'center',
-                            pointerEvents: 'none' // Don't capture pointer events
-                          }}
-                        >
-                          {/* Display the current value */}
-                          {activeScreensaver === 'default' ? 'Space' : 
-                          activeScreensaver === 'bouncyballs' ? 'Bouncy Balls' : 
-                          'FlowerBox'}
-                        </div>
-                        
-                        {/* Button - purely visual, clicks pass through to select */}
-                        <div
-                          className="win98-button-visual"
-                          style={{
-                            position: 'absolute',
-                            width: 17,
-                            height: 21.5,
-                            top: 1,
-                            right: 1,
-                            backgroundColor: '#c0c0c0',
-                            border: '1px solid',
-                            borderTopColor: '#ffffff',
-                            borderLeftColor: '#ffffff',
-                            borderRightColor: '#000000',
-                            borderBottomColor: '#000000',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: 0,
-                            pointerEvents: 'none', // Don't capture pointer events
-                            transition: 'background-color 0.05s ease' // Smooth transition for pressed state
-                          }}
-                        >
-                          <div style={{
-                            width: 0,
-                            height: 0,
-                            borderLeft: '3px solid transparent',
-                            borderRight: '3px solid transparent',
-                            borderTop: '3px solid black',
-                            marginTop: 1,
-                            pointerEvents: 'none'
-                          }}/>
-                        </div>
-                      </div>
-                    </AnimatedControlsRow>
-                  </AnimatedControlsContainer>
-                </StyledGroupBox>
-              </>
-            )}
-            
-            {activeTab === 1 && (
-              <div style={{ padding: '8px 4px' }}>
-                {isRocketActive ? (
-                  <p style={{ fontFamily: 'monospace', fontSize: '12px', whiteSpace: 'nowrap' }}>
-                    {`> turbo mode initialized... `}<span className="blinker">|</span>
+                           }
+                         `}
+                       </style>
+                     
+                       {/* Hidden native select - this gives us native functionality */}
+                       <select
+                         value={activeScreensaver}
+                         onChange={(e) => {
+                           if (!isRocketActive) {
+                             console.log("Selected:", e.target.value);
+                             setActiveScreensaver(e.target.value);
+                           }
+                         }}
+                         onMouseDown={(e) => {
+                           // Find coordinates relative to select element
+                           const rect = e.currentTarget.getBoundingClientRect();
+                           const x = e.clientX - rect.left;
+                           
+                           // If click is in the button area (right side)
+                           if (x > rect.width - 20) {
+                             // Find the visual button element and add active class
+                             const buttonVisual = e.currentTarget.parentNode.querySelector('.win98-button-visual');
+                             if (buttonVisual) {
+                               buttonVisual.classList.add('active');
+                             }
+                           }
+                         }}
+                         onMouseUp={() => {
+                           // Remove active class from button visual on mouse up
+                           const buttonVisual = document.querySelector('.win98-button-visual');
+                           if (buttonVisual) {
+                             buttonVisual.classList.remove('active');
+                           }
+                         }}
+                         onMouseLeave={() => {
+                           // Remove active class from button visual if mouse leaves
+                           const buttonVisual = document.querySelector('.win98-button-visual');
+                           if (buttonVisual) {
+                             buttonVisual.classList.remove('active');
+                           }
+                         }}
+                         style={{
+                           position: 'absolute',
+                           top: 0,
+                           left: 0,
+                           width: '100%',
+                           height: '100%',
+                           opacity: 0,
+                           cursor: isRocketActive ? 'not-allowed' : 'default',
+                           zIndex: 2 // Higher than the visual elements
+                         }}
+                         disabled={isRocketActive}
+                       >
+                         <option value="default">Space</option>
+                         <option value="bouncyballs">Bouncy Balls</option>
+                         <option value="flowerbox">FlowerBox</option>
+                       </select>
+                       
+                       {/* Visual display (non-functional, just for appearance) */}
+                       <div
+                         style={{
+                           width: '100%',
+                           height: 24,
+                           backgroundColor: '#ffffff',
+                           border: '1px solid',
+                           borderTopColor: '#999999',
+                           borderLeftColor: '#999999',
+                           borderRightColor: '#ffffff',
+                           borderBottomColor: '#ffffff',
+                           boxShadow: 'inset 1px 1px 0px rgba(0, 0, 0, 0.2)',
+                           fontSize: 11,
+                           padding: '2px 20px 2px 3px',
+                           fontFamily: '"ms_sans_serif", "ms sans serif", "Microsoft Sans Serif", sans-serif',
+                           color: activeScreensaver === 'default' && isRocketActive ? '#888888' : '#000000',
+                           display: 'flex',
+                           alignItems: 'center',
+                           pointerEvents: 'none' // Don't capture pointer events
+                         }}
+                       >
+                         {/* Display the current value */}
+                         {activeScreensaver === 'default' ? 'Space' : 
+                         activeScreensaver === 'bouncyballs' ? 'Bouncy Balls' : 
+                         'FlowerBox'}
+                       </div>
+                       
+                       {/* Button - purely visual, clicks pass through to select */}
+                       <div
+                         className="win98-button-visual"
+                         style={{
+                           position: 'absolute',
+                           width: 17,
+                           height: 21.5,
+                           top: 1,
+                           right: 1,
+                           backgroundColor: '#c0c0c0',
+                           border: '1px solid',
+                           borderTopColor: '#ffffff',
+                           borderLeftColor: '#ffffff',
+                           borderRightColor: '#000000',
+                           borderBottomColor: '#000000',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           padding: 0,
+                           pointerEvents: 'none', // Don't capture pointer events
+                           transition: 'background-color 0.05s ease' // Smooth transition for pressed state
+                         }}
+                       >
+                         <div style={{
+                           width: 0,
+                           height: 0,
+                           borderLeft: '3px solid transparent',
+                           borderRight: '3px solid transparent',
+                           borderTop: '3px solid black',
+                           marginTop: 1,
+                           pointerEvents: 'none'
+                         }}/>
+                       </div>
+                     </div>
+                   </AnimatedControlsRow>
+                 </AnimatedControlsContainer>
+               </StyledGroupBox>
+             </>
+           )}
+           
+           {activeTab === 1 && (
+            <div style={{ 
+              padding: '2px 4px', // Reduced top/bottom padding
+              minHeight: '80px',  // Ensure consistent height
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center' // Center content vertically
+            }}>
+              {isRocketActive ? (
+                <p style={{ 
+                  fontFamily: 'monospace', 
+                  fontSize: '12px', 
+                  whiteSpace: 'nowrap',
+                  margin: '8px 0' // Consistent margin
+                }}>
+                  {`> turbo mode initialized... `}<span className="blinker">|</span>
+                </p>
+              ) : (
+                <>
+                  <p style={{ 
+                    fontSize: '11px', // Slightly smaller font 
+                    textAlign: 'center', 
+                    margin: '2px 0 8px 0', // More balanced margins
+                    lineHeight: '1.3' // Tighter line height
+                  }}>
+                    <span style={{ fontWeight: 'bold' }}>Hydra98</span> is a Windows 98 desktop emulator for the web.
                   </p>
-                ) : (
-                  <>
-                    <p style={{ fontSize: '12px', margin: '0 0 8px 0' }}>
-                      <span style={{ fontWeight: 'bold' }}>Hydra98</span> is a Windows 98 desktop emulator for the web.
-                    </p>
-                    <p style={{ fontSize: '12px', margin: '0 0 8px 0' }}>
-                      Use the <span style={{ fontWeight: 'bold' }}>controls</span> to customize your experience.
-                    </p>
-                  </>
-                )}
-              </div>
-            )}
-            
-            {activeTab === 2 && (
-              <div style={{ padding: '8px 4px' }}>
-                <p style={{ fontSize: '12px', margin: '0 0 8px 0' }}>
-                  Version: 1.0.0
-                </p>
-                <p style={{ fontSize: '12px', margin: '0 0 8px 0' }}>
-                  Built with React and React95
-                </p>
-              </div>
-            )}
-          </TabBody>
-        </TabsWrapper>
-      </CollapsibleContent>
-    </div>
-  );
+                  <p style={{ 
+                    fontSize: '11px', // Slightly smaller font
+                    textAlign: 'center', 
+                    margin: '0 0 2px 0', // More balanced margins
+                    lineHeight: '1.3' // Tighter line height
+                  }}>
+                    Use the <span style={{ fontWeight: 'bold' }}>controls</span> to customize your experience.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+
+          {activeTab === 2 && (
+            <div style={{ 
+              padding: '2px 4px', // Reduced top/bottom padding
+              minHeight: '80px',  // Ensure consistent height
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center' // Center content vertically
+            }}>
+              <p style={{ 
+                fontSize: '11px', // Slightly smaller font
+                textAlign: 'center', 
+                margin: '2px 0 8px 0', // More balanced margins
+                lineHeight: '1.3' // Tighter line height
+              }}>
+                Version: 0.9.1 beta
+              </p>
+              <p style={{ 
+                fontSize: '11px', // Slightly smaller font
+                textAlign: 'center', 
+                margin: '0 0 2px 0', // More balanced margins
+                lineHeight: '1.3' // Tighter line height
+              }}>
+                Built with ReactJS and  ❤️
+              </p>
+            </div>
+          )}
+         </TabBody>
+       </TabsWrapper>
+     </CollapsibleContent>
+   </div>
+ );
 };
 
 export default MonitorControlsPanel;

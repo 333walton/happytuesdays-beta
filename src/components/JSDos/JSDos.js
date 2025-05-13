@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { WindowProgram } from "packard-belle";
 import cx from "classnames";
-import safeEval from "safe-eval";
 import Window from "../tools/Window";
 import { command16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
@@ -19,37 +18,54 @@ class JSDos extends Component {
   focusInput = () => {
     this.input.current.focus();
   };
+
   onInputBlur = () => {
-    console.log("of");
+    console.log("Input blurred");
   };
+
   onInputChange = e => {
     this.setState({ value: e.target.value });
   };
+
+  handleCommand = (command) => {
+    const trimmed = command.trim().toLowerCase();
+
+    switch (trimmed) {
+      case "help":
+        return "Available commands: help, clear, time, about";
+
+      case "clear":
+        this.setState({ content: [] });
+        return null;
+
+      case "time":
+        return new Date().toLocaleString();
+
+      case "about":
+        return "Hydra98 simulated terminal. Created by hydraburn-007.";
+
+      default:
+        return `Unknown command: "${command}". Try 'help'`;
+    }
+  };
+
   processEntry = e => {
     e.preventDefault();
-    let response;
-    try {
-      response =
-        safeEval(this.state.value) ||
-        "Err... if nothing happened then maybe check your console?";
-    } catch (e) {
-      if (this.state.content.length % 3) {
-        response = "Maybe try some JavaScript?";
-      } else {
-        response = "Invalid command entered";
-      }
-    }
+
+    const input = this.state.value;
+    const output = this.handleCommand(input);
+
     this.setState(state => ({
       value: "",
-      content: [...state.content, lineStart + state.value, response].filter(
-        entry => entry
-      )
+      content: output !== null
+        ? [...state.content, `${lineStart}${input}`, output]
+        : state.content // If output is null (e.g. for 'clear')
     }));
   };
 
   render() {
     const { props } = this;
-    const isMobile = window.innerWidth <= 768; // Define isMobile based on screen width
+    const isMobile = window.innerWidth <= 768;
 
     return (
       <Window
@@ -60,10 +76,10 @@ class JSDos extends Component {
         Component={WindowProgram}
         initialHeight={200}
         initialWidth={400}
-        initialX={isMobile ? 1 : 1} 
-        initialY={isMobile ? 1 : 1} 
-        forceNoMobileMax={true} // Prevent automatic maximization on mobile
-        onMaximize={window.innerWidth <= 768 ? null : undefined} // Disable maximize button on mobile
+        initialX={isMobile ? 1 : 1}
+        initialY={isMobile ? 1 : 1}
+        forceNoMobileMax={true}
+        onMaximize={window.innerWidth <= 768 ? null : undefined}
         className={cx("JSDos", props.className)}
       >
         <form name="hiddenForm" onSubmit={this.processEntry}>
@@ -76,13 +92,13 @@ class JSDos extends Component {
           />
         </form>
         <div className="terminal" onClick={this.focusInput}>
-          <div>Hydra(R) 98 </div>
+          <div>Hydra(R) 98</div>
           <div style={{ marginLeft: "12px", marginBottom: "6px" }}>
-            (C)Copyright Hydra Corp 1991-2025.
+            (C)Copyright Hydra Corp 1991–2025.
           </div>
           <div className="terminal__content">
-            {this.state.content.map(entry => (
-              <div>{entry}</div>
+            {this.state.content.map((entry, i) => (
+              <div key={i}>{entry}</div>
             ))}
             {lineStart}
             <span>{this.state.value}</span>

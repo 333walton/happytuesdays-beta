@@ -218,3 +218,49 @@
   background-color: #bbc3c4
 }
 
+
+/* Mobile Safari fix for calculator numbers */
+@media screen and (max-width: 768px) {
+
+  /* Calculator display (where the numbers show up) */
+  .windows98-calculator .windows98-display {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+
+  /* Number buttons */
+  .windows98-calculator button {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+
+  /* Memory buttons should keep their red color */
+  .windows98-calculator .memory-button {
+    color: red !important;
+    -webkit-text-fill-color: red !important;
+  }
+
+  /* Function buttons with blue color (like +, -, *, /) */
+  .windows98-calculator button span {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+}
+
+/* iOS Safari specific hack */
+@supports (-webkit-touch-callout: none) {
+
+  /* Calculator specific iOS Safari fixes */
+  .windows98-calculator .windows98-display,
+  .windows98-calculator button:not(.memory-button):not(.delete-button) {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+
+  /* Preserve the red color for memory and delete buttons */
+  .windows98-calculator .memory-button,
+  .windows98-calculator .delete-button {
+    color: red !important;
+    -webkit-text-fill-color: red !important;
+  }
+}

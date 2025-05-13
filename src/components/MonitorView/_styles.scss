@@ -126,7 +126,7 @@
         border-style: inset !important;
         background-color: #a0a0a0 !important;
     }
-    
+
     /* Button hover effect for monitor controls only */
     .monitor-controls button:hover {
         filter: brightness(1.1);
@@ -212,23 +212,24 @@
         }
     }
 
-/* Specific styling for monitor controls container */
-.monitor-controls-container {
+    /* Specific styling for monitor controls container */
+    .monitor-controls-container {
 
-    .react95__window,
-    .react95__window-header,
-    .react95__window-content,
-    .react95__button,
-    .react95__select,
-    .react95__menu,
-    .react95__menu-item {
-        pointer-events: auto !important;
+        .react95__window,
+        .react95__window-header,
+        .react95__window-content,
+        .react95__button,
+        .react95__select,
+        .react95__menu,
+        .react95__menu-item {
+            pointer-events: auto !important;
+        }
+
+        /* Ensure proper z-index for dropdowns */
+        .react95__select__menu {
+            z-index: 10000 !important;
+        }
     }
-
-    /* Ensure proper z-index for dropdowns */
-    .react95__select__menu {
-        z-index: 10000 !important;
-    } }
 
     /* Specific adjustments for the Power button image */
     #monitor-toggle-root .screen-power-button,
@@ -442,44 +443,80 @@
 .monitor-controls-panel .react95__select,
 .monitor-controls-panel .react95__window,
 .monitor-controls-panel .react95__window * {
-    pointer-events: auto !important; }
+    pointer-events: auto !important;
+}
 
+.blinker {
+    animation: blink 1s step-start infinite;
+}
 
-        .blinker {
-            animation: blink 1s step-start infinite;
-        }
-    
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
 
-                .win98-button-visual.active {
-                    border-top-color: #808080 !important;
-                    border-left-color: #808080 !important;
-                    border-right-color: #ffffff !important;
-                    border-bottom-color: #ffffff !important;
-                    background-color: #b0b0b0 !important;
-                    transform: translateY(1px);         }
+.win98-button-visual.active {
+    border-top-color: #808080 !important;
+    border-left-color: #808080 !important;
+    border-right-color: #ffffff !important;
+    border-bottom-color: #ffffff !important;
+    background-color: #b0b0b0 !important;
+    transform: translateY(1px);
+}
 
-                                        .black-overlay {
-                                            position: absolute;
-                                            top: 0;
-                                            left: 0;
-                                            right: 0;
-                                            bottom: 0;
-                                            background-color: black;
-                                            z-index: 999;
-                                            pointer-events: none;
-                                            transition: opacity 0.4s ease;
-                                        }
-                    
-                                        .black-overlay-on {
-                                            opacity: 0;
-                                            visibility: hidden;
-                                        }
-                    
-                                        .black-overlay-off {
-                                            opacity: 1;
-                                            visibility: visible;                     }
+.black-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: black;
+    z-index: 999;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.black-overlay-on {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.black-overlay-off {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* =================== TAB FOCUS OUTLINE STYLES =================== */
+/* Styles for React95 tab focus outlines */
+
+.react95__tab:focus,
+.react95__tab:active,
+.react95__tab[aria-selected="true"],
+[role="tab"]:focus,
+.Tabs button:focus,
+.Tabs button[aria-selected="true"] {
+    /* Change outline */
+    outline: 1px dotted #c0c0c0 !important;
+    outline-color: #c0c0c0 !important;
+    outline-style: dotted !important;
+    outline-width: 1px !important;
+    outline-offset: -1px !important;
+
+    /* Override any box-shadow being used as focus indicator */
+    box-shadow: none !important;
+}
+
+/* Additional specific selector for more specificity if needed */
+[role="tab"]:focus,
+.react95__tab:focus,
+button.react95__tab[aria-selected="true"] {
+    outline: 1px dotted #c0c0c0 !important;
+    outline-offset: -1px !important;
+    box-shadow: none !important;
+}
+
+.react95__tab:focus,
+.react95__tab:active {
+    outline: 1px dotted #c0c0c0;
+}

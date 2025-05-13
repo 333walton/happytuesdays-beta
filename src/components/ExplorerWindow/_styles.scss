@@ -166,3 +166,59 @@
 button.icon.ExplorerIcon.floppy32 .icon__text {
   overflow: visible !important;
 }
+
+/* Add these new rules to your existing CSS */
+
+/* Mobile Safari specific fix for text colors */
+@media screen and (max-width: 768px) {
+
+  /* Target all text that might be blue in IE components */
+  .WindowExplorer,
+  .WindowExplorer * {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+
+  /* Specific targeting for navigation buttons */
+  .ie-toolbar-button,
+  .ie-toolbar-button span,
+  .ie-nav-text,
+  button[title="Back"],
+  button[title="Forward"],
+  button[title="Stop"],
+  button[title="Refresh"],
+  button[title="Home"],
+  button[title="Search"],
+  button[title="Favorites"] {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+
+  /* Target taskbar items and minimized windows */
+  .taskbar-item-text,
+  .taskbar-button-text,
+  .start-menu-item,
+  .window-title {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+
+  /* Override any blue links or active indicators */
+  a,
+  a:visited,
+  .active-text,
+  .ie-address-text {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+}
+
+/* iOS Safari specific hack (if needed) */
+@supports (-webkit-touch-callout: none) {
+
+  /* iOS Safari only CSS */
+  .WindowExplorer * {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+}
