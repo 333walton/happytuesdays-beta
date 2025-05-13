@@ -29,18 +29,18 @@
         background-color: transparent;
         z-index: 98;
         overflow: hidden;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.4s ease;
         border-radius: 2px;
 
         /* Screen power states with transitions */
         &[style*="black"] {
             background-color: #000000 !important;
-            transition: background-color 0.3s ease-out !important;
+            transition: background-color 0.4s ease-out !important;
         }
 
         &[style*="transparent"] {
             background-color: transparent !important;
-            transition: background-color 0.3s ease-in !important;
+            transition: background-color 0.4s ease-in !important;
         }
     }
 
@@ -126,7 +126,7 @@
         border-style: inset !important;
         background-color: #a0a0a0 !important;
     }
-
+    
     /* Button hover effect for monitor controls only */
     .monitor-controls button:hover {
         filter: brightness(1.1);
@@ -211,6 +211,24 @@
             transform: translateY(1px);
         }
     }
+
+/* Specific styling for monitor controls container */
+.monitor-controls-container {
+
+    .react95__window,
+    .react95__window-header,
+    .react95__window-content,
+    .react95__button,
+    .react95__select,
+    .react95__menu,
+    .react95__menu-item {
+        pointer-events: auto !important;
+    }
+
+    /* Ensure proper z-index for dropdowns */
+    .react95__select__menu {
+        z-index: 10000 !important;
+    } }
 
     /* Specific adjustments for the Power button image */
     #monitor-toggle-root .screen-power-button,
@@ -410,3 +428,58 @@
         /* Move the text down slightly */
     }
 }
+
+.controls-container.monitor-controls-panel {
+    position: fixed;
+    bottom: 20px; // Use bottom positioning
+    left: 15px;
+    z-index: 101;
+    pointer-events: auto !important;
+}
+
+.monitor-controls-panel button,
+.monitor-controls-panel input,
+.monitor-controls-panel .react95__select,
+.monitor-controls-panel .react95__window,
+.monitor-controls-panel .react95__window * {
+    pointer-events: auto !important; }
+
+
+        .blinker {
+            animation: blink 1s step-start infinite;
+        }
+    
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+                .win98-button-visual.active {
+                    border-top-color: #808080 !important;
+                    border-left-color: #808080 !important;
+                    border-right-color: #ffffff !important;
+                    border-bottom-color: #ffffff !important;
+                    background-color: #b0b0b0 !important;
+                    transform: translateY(1px);         }
+
+                                        .black-overlay {
+                                            position: absolute;
+                                            top: 0;
+                                            left: 0;
+                                            right: 0;
+                                            bottom: 0;
+                                            background-color: black;
+                                            z-index: 999;
+                                            pointer-events: none;
+                                            transition: opacity 0.4s ease;
+                                        }
+                    
+                                        .black-overlay-on {
+                                            opacity: 0;
+                                            visibility: hidden;
+                                        }
+                    
+                                        .black-overlay-off {
+                                            opacity: 1;
+                                            visibility: visible;                     }

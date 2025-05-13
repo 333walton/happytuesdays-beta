@@ -14,7 +14,8 @@ import CRTOverlay from "./components/tools/CRT";
 import ShutDown from "./components/ShutDown/ShutDown";
 import Background from "./components/tools/Background";
 import MonitorView from './components/MonitorView/MonitorView';
-//import StarfieldContainer from './components/StarfieldContainer/StarfieldContainer';
+// Remove this import as we won't use it here
+// import ThemeWrapper from './components/MonitorView/ThemeWrapper';
 
 class Desktop extends Component {
   static contextType = SettingsContext;
@@ -29,6 +30,7 @@ class Desktop extends Component {
     const { context } = this;
     return (
       <ProgramProvider>
+        {/* Removed the ThemeWrapper from here */}
         <MonitorView>
           <Theme
             className={cx("desktop screen", {
@@ -58,8 +60,5 @@ const App = () => (
     <Desktop />
   </SettingsProvider>
 );
-
-// include corner thing if resizable
-// body of explorer window needs to fill space
 
 export default App;

@@ -1,267 +1,268 @@
 import React, { useState, useEffect, useRef } from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
+import './_styles.scss';
+
+// Import React95 components
+import { 
+  Tabs,
+  Tab,
+  TabBody,
+  GroupBox,
+  Button
+} from 'react95';
+
+// Import icons
 import { 
   groupbox1,
   groupbox2a,
   groupbox2b,
-  groupbox2c,
-  groupbox3,
-  groupbox4
+  groupbox2c
 } from '../../icons';
 
-// Fun rocket animation
-const rocketShake = keyframes`
-  0% { transform: rotate(0deg); }
-  25% { transform: rotate(-5deg); }
-  50% { transform: rotate(0deg); }
-  75% { transform: rotate(5deg); }
-  100% { transform: rotate(0deg); }
+// Styled components
+const StyledGroupBox = styled(GroupBox)`
+  margin-top: 6px;
+  margin-bottom: 8px;
+  padding: 8px 6px 8px 8px;
+  width: 100%;
+  
+  /* Fix font size for group box labels */
+  & > legend {
+    font-size: 11px !important;
+    font-weight: bold;
+    padding: 0 2px;
+  }
 `;
 
-const rocketGlow = keyframes`
-  0% { text-shadow: 0 0 5px rgba(255,165,0,0); }
-  50% { text-shadow: 0 0 10px rgba(255,165,0,0.7); }
-  100% { text-shadow: 0 0 5px rgba(255,165,0,0); }
+const AnimatedControlsContainer = styled.div`
+  max-height: ${props => props.visible ? '64px' : '0'};
+  opacity: ${props => props.visible ? '1' : '0'};
+  overflow: visible;
+  transform: translateY(${props => props.visible ? '0' : '-10px'});
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out, transform 0.3s ease-out;
+  margin-left: 20px;
+  width: calc(100% - 45px);
 `;
 
-// Styled components for layout
-const ControlsContainer = styled.div`
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  z-index: 101;
-`;
-
-const WindowContainer = styled.div`
-  width: 200px;
-  background-color: #c0c0c0;
-  border: 2px solid;
-  border-top-color: #ffffff;
-  border-left-color: #ffffff;
-  border-right-color: #000000;
-  border-bottom-color: #000000;
-  box-shadow: 1px 1px 0 #000000;
-`;
-
-// Make the whole title bar clickable for collapse functionality
-const WindowTitle = styled.div`
-  background-color: #000080;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2px 4px;
-  font-size: 11px;
-  cursor: pointer; /* Add cursor pointer to indicate clickable */
-`;
-
-// Fixed window content height to match screenshot
-const WindowContent = styled.div`
-  padding: 4px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-`;
-
-const GroupBox = styled.div`
-  margin-bottom: 2px;
-  padding: 13px 5px 5px; /* Increased top padding by 3px to lower content */
-  position: relative;
-  border: 1px solid;
-  border-top-color: #808080;
-  border-left-color: #808080;
-  border-right-color: #ffffff;
-  border-bottom-color: #ffffff;
-`;
-
-const GroupBoxLabel = styled.div`
-  position: absolute;
-  top: -5px; /* Keep the title at the original position */
-  left: 6px;
-  padding: 0 3px;
-  background-color: #c0c0c0;
-  font-size: 10px;
-  font-weight: bold; // Bold category titles
-`;
-
+// Compact button row for icon buttons
 const ButtonRow = styled.div`
   display: flex;
-  justify-content: flex-start;
-  gap: 5px;
+  gap: 4px;
   margin: 2px 0;
 `;
 
-// Standard button without tooltips
-const Win98Button = styled.button`
-  width: 25px;
-  height: 25px;
+// Custom styled buttons
+const IconButton = styled(Button)`
+  width: 28px;
+  height: 28px;
   padding: 0;
-  min-width: 25px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-size: 10px;
-  background-color: ${props => props.isActive ? '#b0b0b0' : '#c0c0c0'};
-  border: 2px solid;
-  border-top-color: ${props => props.isActive ? '#808080' : '#ffffff'};
-  border-left-color: ${props => props.isActive ? '#808080' : '#ffffff'};
-  border-right-color: ${props => props.isActive ? '#ffffff' : '#000000'};
-  border-bottom-color: ${props => props.isActive ? '#ffffff' : '#000000'};
-  cursor: pointer;
-  opacity: ${props => props.disabled ? 0.6 : 1};
-  position: relative;
+  justify-content: center;
   
   img {
-    width: 18px;
-    height: 18px;
-  }
-`;
-
-// Button with tooltip capability - for zoom buttons only
-const TooltipButton = styled(Win98Button)`
-  /* Tooltip with longer delay */
-  &::before {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 28px; // Position above button
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #ffffcc;
-    border: 1px solid #000;
-    padding: 2px 4px;
-    font-size: 10px;
-    white-space: nowrap;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.4s, visibility 0.4s; /* Changed from 0.2s to 0.4s for longer delay */
-    transition-delay: 0.5s; /* Added delay before showing tooltip */
+    width: 20px;
+    height: 20px;
   }
   
-  &:hover::before {
-    opacity: 1;
-    visibility: visible;
+  &:focus, &:active {
+    outline: none;
   }
 `;
 
-// Special rocket button with animation but without tooltip
-const RocketButton = styled.button`
-  width: 25px;
-  height: 25px;
-  padding: 0;
+// View options container with transparent background
+const ViewOption = styled.div`
+  margin: 4px 0;
   display: flex;
-  justify-content: center;
   align-items: center;
-  background-color: ${props => props.isActive ? '#b0b0b0' : '#c0c0c0'};
-  border: 2px solid;
-  border-top-color: ${props => props.isActive ? '#808080' : '#ffffff'};
-  border-left-color: ${props => props.isActive ? '#808080' : '#ffffff'};
-  border-right-color: ${props => props.isActive ? '#ffffff' : '#000000'};
-  border-bottom-color: ${props => props.isActive ? '#ffffff' : '#000000'};
-  cursor: pointer;
+  background-color: transparent;
+`;
+
+// Slider container with proper spacing - updated with alignment
+const SliderContainer = styled.div`
+  margin: 0px 0 8px 15px;
+  width: calc(100% - 30px);
   position: relative;
-  margin-right: 4px;
-  
-  /* Special rocket animation on hover */
-  & span {
-    font-size: 14px;
-    transition: all 0.2s ease;
-  }
-  
-  &:hover span {
-    animation: ${rocketShake} 0.5s infinite, ${rocketGlow} 1s infinite;
-    transform-origin: center;
-    font-size: 16px; // Grow slightly on hover
-  }
-`;
-
-const TreeItem = styled.div`
   display: flex;
   align-items: center;
-  margin: 2px 0; /* Reduced margin */
-  padding-left: ${({ level }) => level * 12}px;
+  gap: 9px;
 `;
 
-const TreeItemContent = styled.div`
-  margin-left: 8px;
-  width: 100%;
-  font-size: 10px;
-`;
-
-// Color preview with consistent yellow tooltip but longer delay - reduced size to 15px
+// Color preview square that matches rocket icon size
 const ColorPreview = styled.div`
-  position: relative;
-  width: 15px;
-  height: 15px;
-  border: 1px solid #000;
-  margin-right: 8px;
-  cursor: help;
-  
-  &::before {
-    content: "${props => props.colorName}";
-    position: absolute;
-    bottom: 22px;
-    left: 0;
-    background-color: #ffffcc;
-    border: 1px solid #000;
-    padding: 2px 4px;
-    font-size: 10px;
-    white-space: nowrap;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.4s, visibility 0.4s; /* Changed from 0.2s to 0.4s for longer delay */
-    transition-delay: 0.5s; /* Added delay before showing tooltip */
-  }
-  
-  &:hover::before {
-    opacity: 1;
-    visibility: visible;
-  }
-`;
-
-const StyledRangeInput = styled.input`
-  width: 100%;
-  height: 12px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: #ffffff;
-  outline: none;
-  border: 1px solid #868a8e;
-  border-radius: 0;
-  
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 10px;
-    height: 16px;
-    background: #c0c0c0;
-    cursor: pointer;
-    border: 1px solid;
-    border-top-color: #ffffff;
-    border-left-color: #ffffff;
-    border-right-color: #000000;
-    border-bottom-color: #000000;
-  }
-`;
-
-// Styled dropdown
-const Win98Select = styled.select`
-  width: 120px;
-  height: 22px;
-  background-color: white;
-  border: 2px solid;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  margin-left: -15px;
+  background-color: ${props => props.color || '#2F4F4F'};
+  border: 1px solid black;
+  border-right: 3px;
   border-top-color: #808080;
   border-left-color: #808080;
   border-right-color: white;
   border-bottom-color: white;
+  box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 #FFFFFF;
+`;
+
+// Custom slider component to fix the thumb styling and behavior
+const CustomSlider = styled.input.attrs({
+  type: 'range'
+})`
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  background-color: #c0c0c0;
+  border: 2px inset #a0a0a0;
+  margin: 0;
+  
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 20px;
+    background-color: #c0c0c0;
+    border: 2px outset #ffffff;
+    border-right-color: #808080;
+    border-bottom-color: #808080;
+    cursor: pointer;
+  }
+  
+  &::-moz-range-thumb {
+    width: 14px;
+    height: 20px;
+    background-color: #c0c0c0;
+    border: 2px outset #ffffff;
+    border-right-color: #808080;
+    border-bottom-color: #808080;
+    cursor: pointer;
+  }
+  
+  &:focus {
+    outline: none;
+  }
+`;
+
+// Styled tooltip for slider
+const SliderTooltip = styled.div`
+  position: absolute;
+  top: -22px;
+  transform: translateX(-50%);
+  background-color: #ffffcc;
+  border: 1px solid black;
+  padding: 2px 4px;
   font-size: 10px;
-  padding: 1px;
-  font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+  white-space: nowrap;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+`;
+
+const TooltipColorPreview = styled.div`
+  width: 8px;
+  height: 8px;
+  border: 1px solid black;
+  margin-right: 4px;
+  background-color: ${props => props.color || 'transparent'};
+`;
+
+const TooltipText = styled.span`
+  font-family: sans-serif;
+`;
+
+// Styled custom checkbox component
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 4px;
+`;
+
+const CheckboxBox = styled.div`
+  width: 13px;
+  height: 13px;
+  background-color: white;
+  border: 1px solid #000000;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset -1px -1px #ffffff, inset 1px 1px #808080;
+`;
+
+const CheckboxMark = styled.span`
+  position: absolute;
+  left: 50%;
+  top: 43%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  line-height: 0.7;
+  font-weight: bold;
+  color: black;
+  font-family: sans-serif;
+`;
+
+const CheckboxLabel = styled.span`
+  margin-left: 5px;
+  font-size: 12px;
+  background-color: transparent;
+  font-family: sans-serif;
+`;
+
+// Custom Checkbox Component with Win98 styling
+const CustomCheckboxComponent = ({ label, checked, onChange, onClick = null }) => (
+  <CheckboxContainer
+    onClick={(e) => {
+      onChange();
+      if (onClick) onClick(e);
+    }}
+  >
+    <CheckboxBox>
+      {checked && (
+        <CheckboxMark>✓</CheckboxMark>
+      )}
+    </CheckboxBox>
+    <CheckboxLabel>{label}</CheckboxLabel>
+  </CheckboxContainer>
+);
+
+const CollapsibleContent = styled.div`
+  max-height: ${props => props.collapsed ? '0' : '500px'};
+  overflow: visible;
+  opacity: ${props => props.collapsed ? '0' : '1'};
+  transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
+  margin-bottom: 0;
+  padding-bottom: 0;
+`;
+
+const TabsWrapper = styled.div`
+  padding: 4px;
+  background-color: #c0c0c0;
+  margin-bottom: 0;
+  
+  /* Adjust tab styles */
+  & > div > button {
+    font-size: 11px !important;
+    outline-color: transparent !important;
+  }
+  
+  /* Fix tab body padding */
+  & > div:last-child {
+    padding: 8px 4px 0 4px;
+  }
+`;
+
+// Styled container for animated controls with proper dropdown positioning
+const AnimatedControlsRow = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+  margin-left: -15px;
+  position: relative;
 `;
 
 /**
- * Monitor Controls Panel Component - Balanced version
+ * Monitor Controls Panel Component
  */
 const MonitorControlsPanel = ({
   showMonitor,
@@ -280,6 +281,11 @@ const MonitorControlsPanel = ({
   // State for window collapse and active viewframe
   const [isCollapsed, setIsCollapsed] = useState(false);
   
+  // State for active tab - defaults to Info (tab 1)
+  const [state, setState] = useState({
+    activeTab: 1
+  });
+  
   // State for tracking which category is active
   const [activeViewframeCategory, setActiveViewframeCategory] = useState(
     isScreensaverActive ? 'animated' : 'static'
@@ -292,6 +298,19 @@ const MonitorControlsPanel = ({
   const colorClickCountRef = useRef(0);
   const colorClickTimerRef = useRef(null);
   
+  // Refs for custom cursor
+  const cursorRef = useRef(null);
+  
+  // State for tracking the current color name tooltip for the slider
+  const [sliderTooltip, setSliderTooltip] = useState(null);
+  
+  // Initialize default screensaver if not set
+  useEffect(() => {
+    if (!activeScreensaver) {
+      setActiveScreensaver('default');
+    }
+  }, [activeScreensaver, setActiveScreensaver]);
+  
   // Initialize color and find root element
   useEffect(() => {
     if (!viewframeColor) {
@@ -301,7 +320,7 @@ const MonitorControlsPanel = ({
     activeColorRef.current = viewframeColor;
     lastColorRef.current = viewframeColor;
     rootRef.current = document.getElementById('root');
-  }, []);
+  }, [setViewframeColor, viewframeColor]);
   
   // Apply color to root element when active category is static
   useEffect(() => {
@@ -332,51 +351,174 @@ const MonitorControlsPanel = ({
     }
   }, [isScreensaverActive]);
   
-  // Updated color options with the new colors in the specific order requested
+  // Create and manage custom cursor for rocket mode
+  useEffect(() => {
+    // Create cursor element if it doesn't exist
+    if (!cursorRef.current) {
+      const cursor = document.createElement('div');
+      cursor.id = 'rocket-cursor';
+      cursor.style.position = 'fixed';
+      cursor.style.pointerEvents = 'none';
+      cursor.style.borderRadius = '50%';
+      cursor.style.width = '40px';
+      cursor.style.height = '40px';
+      cursor.style.border = '2px solid rgba(255, 255, 255, 0.4)';
+      cursor.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+      cursor.style.transform = 'translate(-50%, -50%)';
+      cursor.style.zIndex = '10000';
+      cursor.style.opacity = '0';
+      cursor.style.transition = 'opacity 0.2s ease';
+      cursor.style.animation = 'pulse 1.5s infinite';
+      
+      const hintText = document.createElement('div');
+      hintText.id = 'rocket-cursor-hint';
+      hintText.style.position = 'absolute';
+      hintText.style.top = '45px';
+      hintText.style.left = '50%';
+      hintText.style.transform = 'translateX(-50%)';
+      hintText.style.color = 'white';
+      hintText.style.fontSize = '10px';
+      hintText.style.whiteSpace = 'nowrap';
+      hintText.style.textShadow = '0 0 3px rgba(0,0,0,0.7)';
+      hintText.textContent = 'hold click';
+        
+      cursor.appendChild(hintText);
+      document.body.appendChild(cursor);
+      cursorRef.current = cursor;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes pulse {
+          0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+          50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.7; }
+          100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // Add mouse event listeners when rocket mode is active
+    if (isRocketActive) {
+      // Set to Info tab when rocket mode is activated
+      setState({ activeTab: 1 });
+      
+      // Add style to completely hide the default cursor except on the monitor controls panel
+      const styleTag = document.createElement('style');
+      styleTag.id = 'rocket-cursor-style';
+      styleTag.textContent = `
+        html, body, div, span, p, a, canvas, img {
+          cursor: none !important;
+        }
+        
+        /* Explicit exception for the controls container */
+        .monitor-controls-container {
+          cursor: default !important;
+        }
+        
+        .monitor-controls-container * {
+          cursor: default !important;
+        }
+        
+        /* The custom cursor will be hidden within the controls container */
+        .monitor-controls-container:hover #rocket-cursor {
+          display: none !important;
+        }
+      `;
+      document.head.appendChild(styleTag);
+      
+      const handleMouseDown = () => {
+        if (cursorRef.current) {
+          cursorRef.current.style.opacity = '1';
+          cursorRef.current.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+          
+          // Hide the hint text when clicking - access element directly
+          const hintElem = cursorRef.current.querySelector('#rocket-cursor-hint');
+          if (hintElem) {
+            hintElem.style.display = 'none';
+          }
+        }
+      };
+      
+      const handleMouseUp = () => {
+        if (cursorRef.current) {
+          cursorRef.current.style.opacity = '0.5';
+          cursorRef.current.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+          
+          // Show the hint text again when releasing click - access element directly
+          const hintElem = cursorRef.current.querySelector('#rocket-cursor-hint');
+          if (hintElem) {
+            hintElem.style.display = 'block';
+          }
+        }
+      };
+      
+      const handleMouseMove = (e) => {
+        if (cursorRef.current) {
+          // Get the element under the cursor
+          const elemUnderCursor = document.elementFromPoint(e.clientX, e.clientY);
+          
+          // Check if the cursor is over the monitor controls panel
+          const isOverControlPanel = elemUnderCursor && 
+            (elemUnderCursor.closest('.monitor-controls-container') !== null);
+          
+          // Only show the custom cursor if NOT over the control panel
+          if (!isOverControlPanel) {
+            cursorRef.current.style.left = `${e.clientX}px`;
+            cursorRef.current.style.top = `${e.clientY}px`;
+            cursorRef.current.style.opacity = '0.5';
+            cursorRef.current.style.display = 'block';
+          } else {
+            cursorRef.current.style.display = 'none';
+          }
+        }
+      };
+      
+      window.addEventListener('mousedown', handleMouseDown);
+      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mousemove', handleMouseMove);
+      
+      return () => {
+        window.removeEventListener('mousedown', handleMouseDown);
+        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mousemove', handleMouseMove);
+        
+        // Remove the style tag when component unmounts
+        const styleElement = document.getElementById('rocket-cursor-style');
+        if (styleElement) {
+          styleElement.remove();
+        }
+      };
+    } else {
+      // Remove the style tag when rocket mode is off
+      const styleElement = document.getElementById('rocket-cursor-style');
+      if (styleElement) {
+        styleElement.remove();
+      }
+      
+      // Hide cursor when rocket mode is deactivated
+      if (cursorRef.current) {
+        cursorRef.current.style.opacity = '0';
+        cursorRef.current.style.display = 'none';
+      }
+    }
+  }, [isRocketActive]);
+
+  // Color options array
   const colorOptions = [
-    '#1A1A1A', // charcoal
-    '#2F2F2F', // graphite
-    '#2F4F4F', // dark-slate-gray (default color)
-    '#3C3F41', // eclipse-gray
-    '#4B3B47', // raisin-plum
-    '#4B5320', // army-green
-    '#4D4D4D', // dim-gray
-    '#5F5F5F', // medium-gray
-    '#556B2F', // olive-drab
-    '#5C5845', // dark-khaki
-    '#5C5C8A', // moody-violet
-    '#5D6A75', // win98-steel
-    '#666666', // system-gray
-    '#696969', // dark-gray
-    '#6B4226', // saddle-brown
-    '#6E7B8B', // cadet-slate
-    '#708090', // slate-gray
-    '#7A6F9B', // retro-lavender
-    '#778899', // light-slate-gray
-    '#7F8C8D', // muted-blue-gray
-    '#8A795D', // dusty-olive
-    '#8B8589', // windows-control-gray
-    '#A0522D', // sienna
-    '#C0C0C0', // windows-silver
-    '#CDD9C4'  // pastel-olive
+    '#1A1A1A', '#2F2F2F', '#2F4F4F', '#3C3F41', '#4B3B47',
+    '#4B5320', '#4D4D4D', '#5F5F5F', '#556B2F', '#5C5845',
+    '#5C5C8A', '#5D6A75', '#666666', '#696969', '#6B4226',
+    '#6E7B8B', '#708090', '#7A6F9B', '#778899', '#7F8C8D',
+    '#8A795D', '#8B8589', '#A0522D', '#C0C0C0', '#CDD9C4'
   ];
   
-  // Color names for tooltip - updated to match new color order
+  // Color names for tooltip
   const colorNames = [
     'Charcoal', 'Graphite', 'Dark Slate', 'Eclipse', 'Raisin',
     'Army Green', 'Dim Gray', 'Medium Gray', 'Olive', 'Dark Khaki',
     'Moody Violet', 'Win98 Steel', 'System Gray', 'Dark Gray', 'Saddle Brown',
     'Cadet Slate', 'Slate Gray', 'Retro Lavender', 'Light Slate', 'Blue Gray',
     'Dusty Olive', 'Control Gray', 'Sienna', 'Silver', 'Pastel Olive'
-  ];
-  
-  // The screensaverOptions array should already include the 'maze3d' option:
-  const screensaverOptions = [
-    { value: 'default', label: 'Space' },
-    { value: 'bouncyballs', label: 'Bouncy Balls' },  // This line should already exist
-    //{ value: 'p5js', label: 'Stars' },      // If this was removed, add it back
-    { value: 'flowerbox', label: 'FlowerBox' },  // Added new 3D FlowerBox option
-    //{ value: 'animation2', label: 'Animation 2' }
   ];
   
   // Find the index of the current color
@@ -389,9 +531,27 @@ const MonitorControlsPanel = ({
     setViewframeColor(colorOptions[value]);
   };
   
-  // Make sure the handleScreensaverChange function in MonitorControlsPanel.js is correctly setting the activeScreensaver:
-  const handleScreensaverChange = (e) => {
-    setActiveScreensaver(e.target.value);
+  // Handle slider mouse movement for tooltip display
+  const handleSliderMove = (e) => {
+    const slider = e.target;
+    const rect = slider.getBoundingClientRect();
+    const position = e.clientX - rect.left;
+    const percentage = position / rect.width;
+    const index = Math.min(
+      Math.max(Math.round(percentage * (colorOptions.length - 1)), 0),
+      colorOptions.length - 1
+    );
+    
+    setSliderTooltip({
+      name: colorNames[index],
+      color: colorOptions[index],
+      left: `${percentage * 100}%`
+    });
+  };
+  
+  // Clear slider tooltip when mouse leaves
+  const handleSliderLeave = () => {
+    setSliderTooltip(null);
   };
   
   // Handle triple-click on static color button to reset color
@@ -415,26 +575,16 @@ const MonitorControlsPanel = ({
     }
   };
   
-  // Toggle the category
+  // Toggle the category - modified to handle exclusive checkbox behavior
   const toggleCategory = (category) => {
-    // Important: If we're switching from rocket mode to static, force monitor to show
-    if (isRocketActive && category === 'static') {
-      // Call toggleRocket first to disable rocket mode
-      toggleRocket();
-      
-      // Then proceed with regular category switching
-      setActiveViewframeCategory('static');
-      
-      // If screensaver is active, disable it
-      if (isScreensaverActive) {
-        toggleScreensaver();
-      }
-      
-      return; // Exit early to avoid duplicate toggles
-    }
-    
     // Only proceed if changing category
     if (category !== activeViewframeCategory) {
+      // If we're switching from rocket mode to static, force monitor to show
+      if (isRocketActive && category === 'static') {
+        // Call toggleRocket first to disable rocket mode
+        toggleRocket();
+      }
+      
       setActiveViewframeCategory(category);
       
       // If switching to animated, enable screensaver
@@ -466,187 +616,419 @@ const MonitorControlsPanel = ({
     }
   };
   
-  // Handle click on title bar to toggle collapse
-  const handleTitleClick = () => {
-    setIsCollapsed(!isCollapsed);
+  // Handle tab change
+  const handleChange = (value) => {
+    setState({ activeTab: value });
   };
   
-  // Get the current color name for tooltip
-  const getCurrentColorName = () => {
-    const index = colorOptions.findIndex(color => color === viewframeColor);
-    return index !== -1 ? colorNames[index] : 'Color';
-  };
+  // Extract activeTab from state
+  const { activeTab } = state;
   
   return (
-    <ControlsContainer>
-      <WindowContainer>
-        {/* Make entire title bar clickable */}
-        <WindowTitle onClick={handleTitleClick}>
-          <span>Monitor Controls</span>
-          <button 
-            style={{ 
-              width: '14px', 
-              height: '14px', 
-              fontSize: '9px', 
-              marginLeft: '3px', 
-              padding: 0,
-              backgroundColor: '#c0c0c0',
-              border: '1px solid',
-              borderTopColor: '#ffffff',
-              borderLeftColor: '#ffffff',
-              borderRightColor: '#000000',
-              borderBottomColor: '#000000'
-            }}
-            onClick={(e) => {
-              // Stop propagation to prevent double toggling
-              e.stopPropagation();
-              setIsCollapsed(!isCollapsed);
-            }}
-          >
-            {isCollapsed ? '▼' : '▲'}
-          </button>
-        </WindowTitle>
-        
-        {!isCollapsed && (
-          <WindowContent>
-            {/* GroupBox 1: Monitor Mode */}
-            <GroupBox>
-              <GroupBoxLabel>Monitor Mode</GroupBoxLabel>
-              <ButtonRow>
-                {/* Using regular Win98Button without tooltip capability */}
-                <Win98Button
-                  isActive={showMonitor}
-                  onClick={toggleMonitorView}
-                >
-                  <img src={groupbox1} alt="Monitor mode" style={{ width: '18px', height: '18px' }} />
-                </Win98Button>
-              </ButtonRow>
-            </GroupBox>
-            
-            {/* GroupBox 2: Zoom Options */}
-            <GroupBox>
-              <GroupBoxLabel>Zoom Options</GroupBoxLabel>
-              <ButtonRow>
-                {/* Using TooltipButton component for zoom buttons only */}
-                <TooltipButton
-                  isActive={zoomLevel === 0}
-                  onClick={() => setZoomLevel(0)}
-                  data-tooltip="100%"
-                >
-                  <img src={groupbox2a} alt="Default zoom" style={{ width: '18px', height: '18px' }} />
-                </TooltipButton>
-                <TooltipButton
-                  isActive={zoomLevel === 1}
-                  onClick={() => setZoomLevel(1)}
-                  data-tooltip="110%"
-                >
-                  <img src={groupbox2b} alt="110% zoom" style={{ width: '18px', height: '18px' }} />
-                </TooltipButton>
-                <TooltipButton
-                  isActive={zoomLevel === 2}
-                  onClick={() => setZoomLevel(2)}
-                  data-tooltip="125%"
-                >
-                  <img src={groupbox2c} alt="125% zoom" style={{ width: '18px', height: '18px' }} />
-                </TooltipButton>
-              </ButtonRow>
-            </GroupBox>
-            
-            {/* GroupBox 3: Viewframe Options */}
-            <GroupBox>
-              <GroupBoxLabel>Viewframe Options</GroupBoxLabel>
-              <div>
-                {/* Static Category - Using regular Win98Button without tooltip */}
-                <TreeItem level={0}>
-                  <Win98Button
-                    isActive={activeViewframeCategory === 'static'}
-                    onClick={() => toggleCategory('static')}
-                    onClickCapture={handleStaticColorClick}
-                  >
-                    <img src={groupbox3} alt="Static viewframe" style={{ width: '18px', height: '18px' }} />
-                  </Win98Button>
-                  <TreeItemContent>
-                    Static
-                  </TreeItemContent>
-                </TreeItem>
+    <div 
+      className="monitor-controls-container"
+      style={{
+        position: 'fixed',
+        top: '5px',
+        left: '5px',
+        width: '240px',
+        border: '2px outset #c0c0c0',
+        backgroundColor: '#c0c0c0',
+        zIndex: 9999
+      }}
+    >
+      {/* Header Bar - Entire bar is clickable for collapse */}
+      <div
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        style={{
+          background: 'navy',
+          color: 'white',
+          display: 'flex',
+          justifyContent: 'space-between',
+          padding: '0px 3px',
+          fontSize: '11px',
+          fontWeight: 'bold',
+          cursor: 'pointer'
+        }}
+      >
+        <span>Monitor Controls</span>
+        <button
+          onClick={(e) => {
+            // Stop propagation to prevent double toggling
+            e.stopPropagation();
+            setIsCollapsed(!isCollapsed);
+          }}
+          style={{
+            width: '16px',
+            height: '16px',
+            fontSize: '10px',
+            backgroundColor: '#c0c0c0',
+            border: '0px solid',
+            borderTopColor: '#ffffff',
+            borderLeftColor: '#ffffff',
+            borderRightColor: '#404040',
+            borderBottomColor: '#404040',
+            padding: 0,
+            marginLeft: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            outlineColor: 'transparent',
+          }}
+        >
+          {isCollapsed ? '▼' : '▲'}
+        </button>
+      </div>
+      
+      {/* Content Area - Conditionally rendered */}
+      <CollapsibleContent collapsed={isCollapsed}>
+        <TabsWrapper>
+          <Tabs value={activeTab} onChange={handleChange} style={{ height: 22, top: 0, left: 0, padding: 0, outlineColor: 'transparent', overflow: 'visible' }}>
+            {/* Tab 0 */}
+            <Tab
+              value={0}
+              style={{
+                height: 22,
+                width: 75,
+                top: 0,
+                padding: 0,
+                overflow: 'visible',
+                fontSize: '11px',
+                fontWeight: activeTab === 0 ? 'bold' : 'normal',
+                outlineColor: 'transparent'
+              }}
+            >
+              Controls
+            </Tab>
+            {/* Tab 1 */}
+            <Tab
+              value={1}
+              style={{
+                height: 22,
+                width: 65,
+                top: 0,
+                left: 0,
+                overflow: 'visible',
+                fontSize: '11px',
+                fontWeight: activeTab === 1 ? 'bold' : 'normal',
+                outlineColor: 'transparent'
+              }}
+            >
+              Info
+            </Tab>
+            {/* Tab 2 */}
+            <Tab
+              value={2}
+              style={{
+                height: 22,
+                width: 65,
+                top: 0,
+                left: 0,
+                overflow: 'visible',
+                fontSize: '11px',
+                fontWeight: activeTab === 2 ? 'bold' : 'normal',
+                outlineColor: 'transparent'
+              }}
+            >
+              More
+            </Tab>
+          </Tabs>
+          
+          <TabBody>
+            {activeTab === 0 && (
+              <>
+                {/* Monitor Mode */}
+                <StyledGroupBox label="Monitor Mode">
+                  <ButtonRow>
+                    <IconButton
+                      onClick={toggleMonitorView}
+                      active={!showMonitor}
+                    >
+                      {!showMonitor ? (
+                        <div style={{ 
+                          width: '16px', 
+                          height: '16px', 
+                          backgroundColor: 'black'
+                        }}></div>
+                      ) : (
+                        <img src={groupbox1} alt="Monitor mode" />
+                      )}
+                    </IconButton>
+                  </ButtonRow>
+                </StyledGroupBox>
                 
-                {/* Static Category Content - Color Selection */}
-                {activeViewframeCategory === 'static' && (
-                  <TreeItem level={1}>
-                    <TreeItemContent>
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center',
-                        height: '20px',
-                        marginTop: '1px',
-                        marginBottom: '1px'
-                      }}>
-                        <ColorPreview
-                          style={{ backgroundColor: viewframeColor }}
-                          colorName={getCurrentColorName()}
-                        />
-                        <StyledRangeInput
-                          type="range"
-                          value={initialColorIndex}
-                          onChange={handleColorChange}
-                          min={0}
-                          max={colorOptions.length - 1}
-                          step={1}
-                        />
-                      </div>
-                    </TreeItemContent>
-                  </TreeItem>
-                )}
+                {/* Zoom Options */}
+                <StyledGroupBox label="Zoom Options">
+                  <ButtonRow>
+                    <IconButton
+                      onClick={() => setZoomLevel(0)}
+                      active={zoomLevel === 0}
+                    >
+                      <img src={groupbox2a} alt="Default zoom" />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => setZoomLevel(1)}
+                      active={zoomLevel === 1}
+                    >
+                      <img src={groupbox2b} alt="110% zoom" />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => setZoomLevel(2)}
+                      active={zoomLevel === 2}
+                    >
+                      <img src={groupbox2c} alt="125% zoom" />
+                    </IconButton>
+                  </ButtonRow>
+                </StyledGroupBox>
                 
-                {/* Animated Category - Using regular Win98Button without tooltip */}
-                <TreeItem level={0}>
-                  <Win98Button
-                    isActive={activeViewframeCategory === 'animated'}
-                    onClick={() => toggleCategory('animated')}
-                  >
-                    <img src={groupbox4} alt="Animated viewframe" style={{ width: '18px', height: '18px' }} />
-                  </Win98Button>
-                  <TreeItemContent>
-                    Animated
-                  </TreeItemContent>
-                </TreeItem>
-                
-                {/* Animated Category Content */}
-                {activeViewframeCategory === 'animated' && (
-                  <TreeItem level={1}>
-                    <TreeItemContent>
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center',
-                        marginTop: '1px',
-                        marginBottom: '1px'
-                      }}>
-                        <RocketButton
-                          isActive={isRocketActive}
-                          onClick={toggleRocket}
-                        >
-                          <span role="img" aria-label="Rocket">🚀</span>
-                        </RocketButton>
-                        <Win98Select
+                {/* Viewframe Options */}
+                <StyledGroupBox label="Viewframe Options">
+                  {/* Static Option with custom checkbox */}
+                  <ViewOption>
+                    <CustomCheckboxComponent
+                      label="Static"
+                      checked={activeViewframeCategory === 'static'}
+                      onChange={() => toggleCategory('static')}
+                      onClick={handleStaticColorClick}
+                    />
+                  </ViewOption>
+                  
+                  {/* Slider for Static Option */}
+                  {activeViewframeCategory === 'static' && (
+                    <SliderContainer>
+                      <ColorPreview color={viewframeColor} />
+                      <CustomSlider
+                        value={initialColorIndex}
+                        onChange={handleColorChange}
+                        onMouseMove={handleSliderMove}
+                        onMouseLeave={handleSliderLeave}
+                        min={0}
+                        max={colorOptions.length - 1}
+                        step={1}
+                      />
+                      
+                      {/* Tooltip for slider */}
+                      {sliderTooltip && (
+                        <SliderTooltip style={{ left: sliderTooltip.left }}>
+                          <TooltipColorPreview color={sliderTooltip.color} />
+                          <TooltipText>{sliderTooltip.name}</TooltipText>
+                        </SliderTooltip>
+                      )}
+                    </SliderContainer>
+                  )}
+                  
+                  {/* Animated Option with custom checkbox */}
+                  <ViewOption style={{ marginTop: '6px' }}>
+                    <CustomCheckboxComponent
+                      label="Animated"
+                      checked={activeViewframeCategory === 'animated'}
+                      onChange={() => toggleCategory('animated')}
+                    />
+                  </ViewOption>
+
+                  {/* Animation Controls - Using the animated container */}
+                  <AnimatedControlsContainer visible={activeViewframeCategory === 'animated'}>
+                    <AnimatedControlsRow>
+                      {/* Adjusted rocket button to match ColorPreview size and position */}
+                      <IconButton
+                        onClick={toggleRocket}
+                        active={isRocketActive}
+                        style={{ 
+                          opacity: 1,
+                          cursor: 'pointer',
+                          outlineColor: 'transparent',
+                          width: '24px',
+                          height: '24px',
+                          minWidth: '24px',
+                          minHeight: '24px',
+                          padding: 0,
+                          marginLeft: '-6px',
+                          marginRight: '9px',
+                          marginBottom: '4px'
+                        }}
+                      >
+                        <span role="img" aria-label="Rocket" style={{ fontSize: '12px' }}>🚀</span>
+                      </IconButton>
+                      
+                      {/* Transparent select overlay implementation - aligned to match slider */}
+                      <div 
+                        style={{
+                          position: 'relative',
+                          width: 'calc(100% - 14px)',
+                          marginBottom: '4px',
+                          marginLeft: 0
+                        }}
+                        className="win98-select-container"
+                      >
+                        {/* Add styles for button-active state */}
+                        <style>
+                          {`
+                            .win98-button-visual.active {
+                              border-top-color: #808080 !important;
+                              border-left-color: #808080 !important;
+                              border-right-color: #ffffff !important;
+                              border-bottom-color: #ffffff !important;
+                              background-color: #b0b0b0 !important;
+                              transform: translateY(1px);
+                            }
+                          `}
+                        </style>
+                      
+                        {/* Hidden native select - this gives us native functionality */}
+                        <select
                           value={activeScreensaver}
-                          onChange={handleScreensaverChange}
+                          onChange={(e) => {
+                            if (!isRocketActive) {
+                              console.log("Selected:", e.target.value);
+                              setActiveScreensaver(e.target.value);
+                            }
+                          }}
+                          onMouseDown={(e) => {
+                            // Find coordinates relative to select element
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const x = e.clientX - rect.left;
+                            
+                            // If click is in the button area (right side)
+                            if (x > rect.width - 20) {
+                              // Find the visual button element and add active class
+                              const buttonVisual = e.currentTarget.parentNode.querySelector('.win98-button-visual');
+                              if (buttonVisual) {
+                                buttonVisual.classList.add('active');
+                              }
+                            }
+                          }}
+                          onMouseUp={() => {
+                            // Remove active class from button visual on mouse up
+                            const buttonVisual = document.querySelector('.win98-button-visual');
+                            if (buttonVisual) {
+                              buttonVisual.classList.remove('active');
+                            }
+                          }}
+                          onMouseLeave={() => {
+                            // Remove active class from button visual if mouse leaves
+                            const buttonVisual = document.querySelector('.win98-button-visual');
+                            if (buttonVisual) {
+                              buttonVisual.classList.remove('active');
+                            }
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            opacity: 0,
+                            cursor: isRocketActive ? 'not-allowed' : 'default',
+                            zIndex: 2 // Higher than the visual elements
+                          }}
+                          disabled={isRocketActive}
                         >
-                          {screensaverOptions.map(option => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </Win98Select>
+                          <option value="default">Space</option>
+                          <option value="bouncyballs">Bouncy Balls</option>
+                          <option value="flowerbox">FlowerBox</option>
+                        </select>
+                        
+                        {/* Visual display (non-functional, just for appearance) */}
+                        <div
+                          style={{
+                            width: '100%',
+                            height: 24,
+                            backgroundColor: '#ffffff',
+                            border: '1px solid',
+                            borderTopColor: '#999999',
+                            borderLeftColor: '#999999',
+                            borderRightColor: '#ffffff',
+                            borderBottomColor: '#ffffff',
+                            boxShadow: 'inset 1px 1px 0px rgba(0, 0, 0, 0.2)',
+                            fontSize: 11,
+                            padding: '2px 20px 2px 3px',
+                            fontFamily: '"ms_sans_serif", "ms sans serif", "Microsoft Sans Serif", sans-serif',
+                            color: activeScreensaver === 'default' && isRocketActive ? '#888888' : '#000000',
+                            display: 'flex',
+                            alignItems: 'center',
+                            pointerEvents: 'none' // Don't capture pointer events
+                          }}
+                        >
+                          {/* Display the current value */}
+                          {activeScreensaver === 'default' ? 'Space' : 
+                          activeScreensaver === 'bouncyballs' ? 'Bouncy Balls' : 
+                          'FlowerBox'}
+                        </div>
+                        
+                        {/* Button - purely visual, clicks pass through to select */}
+                        <div
+                          className="win98-button-visual"
+                          style={{
+                            position: 'absolute',
+                            width: 17,
+                            height: 21.5,
+                            top: 1,
+                            right: 1,
+                            backgroundColor: '#c0c0c0',
+                            border: '1px solid',
+                            borderTopColor: '#ffffff',
+                            borderLeftColor: '#ffffff',
+                            borderRightColor: '#000000',
+                            borderBottomColor: '#000000',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: 0,
+                            pointerEvents: 'none', // Don't capture pointer events
+                            transition: 'background-color 0.05s ease' // Smooth transition for pressed state
+                          }}
+                        >
+                          <div style={{
+                            width: 0,
+                            height: 0,
+                            borderLeft: '3px solid transparent',
+                            borderRight: '3px solid transparent',
+                            borderTop: '3px solid black',
+                            marginTop: 1,
+                            pointerEvents: 'none'
+                          }}/>
+                        </div>
                       </div>
-                    </TreeItemContent>
-                  </TreeItem>
+                    </AnimatedControlsRow>
+                  </AnimatedControlsContainer>
+                </StyledGroupBox>
+              </>
+            )}
+            
+            {activeTab === 1 && (
+              <div style={{ padding: '8px 4px' }}>
+                {isRocketActive ? (
+                  <p style={{ fontFamily: 'monospace', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                    {`> turbo mode initialized... `}<span className="blinker">|</span>
+                  </p>
+                ) : (
+                  <>
+                    <p style={{ fontSize: '12px', margin: '0 0 8px 0' }}>
+                      <span style={{ fontWeight: 'bold' }}>Hydra98</span> is a Windows 98 desktop emulator for the web.
+                    </p>
+                    <p style={{ fontSize: '12px', margin: '0 0 8px 0' }}>
+                      Use the <span style={{ fontWeight: 'bold' }}>controls</span> to customize your experience.
+                    </p>
+                  </>
                 )}
               </div>
-            </GroupBox>
-          </WindowContent>
-        )}
-      </WindowContainer>
-    </ControlsContainer>
+            )}
+            
+            {activeTab === 2 && (
+              <div style={{ padding: '8px 4px' }}>
+                <p style={{ fontSize: '12px', margin: '0 0 8px 0' }}>
+                  Version: 1.0.0
+                </p>
+                <p style={{ fontSize: '12px', margin: '0 0 8px 0' }}>
+                  Built with React and React95
+                </p>
+              </div>
+            )}
+          </TabBody>
+        </TabsWrapper>
+      </CollapsibleContent>
+    </div>
   );
 };
 

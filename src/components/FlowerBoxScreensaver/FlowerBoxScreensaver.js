@@ -170,9 +170,9 @@ const FlowerBoxScreensaver = () => {
     // --- ANIMATION STATE ---
     let time = 0.625;
     const state = {
-      pos: [0, 0],
-      speedX: -0.006,
-      speedY: 0.006,
+      pos: [-2.1, 0],     // Start far left
+      speedX: 0.012,      // Move right
+      speedY: 0.0,        // Optional: no vertical movement
       maxX: 2.1,
       maxY: 1.7,
     };

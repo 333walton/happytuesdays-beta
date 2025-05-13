@@ -7,6 +7,7 @@ import BouncyBallsScreensaver from "../BouncyBalls";
 import FlowerBoxScreensaver from "../FlowerBoxScreensaver";
 import { SettingsContext } from "../../contexts";
 import MonitorControlsPanel from "./MonitorControlsPanel";
+import { MonitorThemeProvider } from './ThemeWrapper';
 
 // Create a separate component for the toggle buttons
 class CRTModeToggle extends Component {
@@ -584,7 +585,7 @@ class MonitorView extends Component {
           pointerEvents: 'auto'
         }}>
           {/* Power indicator light */}
-           <div 
+          <div 
             style={{
               position: 'absolute',
               width: 8,
@@ -597,8 +598,8 @@ class MonitorView extends Component {
               margin: '0 5px',
               transition: 'background-color 0.2s ease, box-shadow 0.3s ease'
             }}
-          />
-        </div>
+            />
+            </div>
         
         {/* CRT Effect toggle button */}
         <div style={{
@@ -643,7 +644,8 @@ class MonitorView extends Component {
           bottom: 1,
           right: 100,
           zIndex: 999,
-          pointerEvents: 'auto'
+          pointerEvents: 'auto',
+          transition: 'background-color 0.4s ease, box-shadow 0.3s ease, border 0.3s ease, transform 0.3s ease, color 0.3s ease'
         }}>
           <MonitorButton
             onClick={this.toggleScreenPower}
@@ -662,7 +664,7 @@ class MonitorView extends Component {
               ? 'inset 0 1px 1.5px rgba(255, 255, 255, 0.3), 0 1px 1.5px rgba(0, 0, 0, 0.2)'
               : 'inset 0 1px 1px rgba(0, 0, 0, 0.15)',
               color: this.state.isScreenPoweredOn ? '#5c5845' : '#fff7e6',
-              transition: 'all 0.17s ease-in-out'
+              transition: 'background-color 0.4s ease, box-shadow 0.3s ease'
             }}
           >
             {this.state.isScreenPoweredOn ? '' : ''}
@@ -797,24 +799,25 @@ class MonitorView extends Component {
                 {this.props.children}
               </div>
               
-              {/* Black overlay when power is off - ALWAYS ON TOP */}
-              {!this.state.isScreenPoweredOn && (
-                <div 
-                  className="black-overlay"
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'black',
-                    zIndex: 999,
-                    pointerEvents: 'none',
-                    opacity: 1,
-                    transition: 'opacity 0.3s ease'
-                  }}
-                />
-              )}
+              {/* Black overlay ALWAYS present, but with varying opacity */}
+              <div 
+                className={`black-overlay ${this.state.isScreenPoweredOn ? 'black-overlay-on' : 'black-overlay-off'}`}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'black',
+                  zIndex: 999,
+                  pointerEvents: 'none',
+                  opacity: this.state.isScreenPoweredOn ? 0 : 1, // Key change here
+                  transition: 'opacity 0.4s ease',
+                  visibility: this.state.isScreenPoweredOn ? 'hidden' : 'visible', // Add after transition completes
+                  transitionDelay: this.state.isScreenPoweredOn ? '0s, 0.4s' : '0s', // Delay visibility change
+                  transitionProperty: 'opacity, visibility'
+                }}
+              />
             </div>
 
             {/* Only render monitor image if showMonitor is true */}
@@ -858,57 +861,30 @@ class MonitorView extends Component {
 
     return (
       <>
-        {/* Add custom styles scoped to monitor components */}
-        <style>
-          {`
-            /* Ensure monitor controls styles don't affect other UI elements */
-            .monitor-controls button {
-              width: 18px !important;
-              height: 18px !important;
-              background: #c0c0c0 !important;
-              border: outset 2px #ffffff !important;
-              box-sizing: content-box !important;
-              cursor: pointer !important;
-              margin: 0 5px !important;
-              padding: 0 !important;
-              pointer-events: auto !important;
-            }
-            
-            .monitor-controls button.active {
-              border-style: inset !important;
-              background-color: #a0a0a0 !important;
-            }
-            
-            .monitor-controls button:hover {
-              filter: brightness(1.1) !important;
-            }
-          `}
-        </style>
-
-        {/* New Controls Panel */}
-        <MonitorControlsPanel 
-          showMonitor={this.state.showMonitor}
-          toggleMonitorView={this.toggleMonitorView}
-          zoomLevel={this.state.zoomLevel}
-          setZoomLevel={this.setZoomLevel}
-          isScreensaverActive={this.state.showScreensaver}
-          toggleScreensaver={this.toggleScreensaver}
-          isRocketActive={this.state.rocketActive}
-          toggleRocket={this.toggleRocket}
-          activeScreensaver={this.state.activeScreensaver}
-          setActiveScreensaver={this.setActiveScreensaver}
-          viewframeColor={this.state.viewframeColor}
-          setViewframeColor={this.setViewframeColor}
-        />
-
-        {/* Render the appropriate screensaver based on the active state */}
+        {/* Render screensavers and monitor view WITHOUT theme wrapper */}
         {this.renderDefaultStarfield()}
         {this.renderP5jsStarfield()}
         {this.renderBouncyBalls()}
         {this.renderFlowerBox()}
-        
-        {/* Conditionally render the monitor view portal */}
         {this.renderMonitorView()}
+        
+        {/* ONLY apply theme wrapper to the controls panel */}
+        <MonitorThemeProvider>
+          <MonitorControlsPanel 
+            showMonitor={this.state.showMonitor} //essential
+            toggleMonitorView={this.toggleMonitorView} //essential
+            zoomLevel={this.state.zoomLevel}
+            setZoomLevel={this.setZoomLevel}
+            isScreensaverActive={this.state.showScreensaver}
+            toggleScreensaver={this.toggleScreensaver}
+            isRocketActive={this.state.rocketActive}
+            toggleRocket={this.toggleRocket}
+            activeScreensaver={this.state.activeScreensaver}
+            setActiveScreensaver={this.setActiveScreensaver}
+            viewframeColor={this.state.viewframeColor}
+            setViewframeColor={this.setViewframeColor}
+          />
+        </MonitorThemeProvider>
       </>
     );
   }
