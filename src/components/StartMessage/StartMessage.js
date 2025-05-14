@@ -10,13 +10,20 @@ class StartMessage extends Component {
     this.state = {
       showWelcomeAlert: false,
       isMobile: false,
-      buttonPressed: false
+      buttonPressed: false,
+      windowPosition: {
+        x: 200, // Default desktop position
+        y: 200
+      }
     };
   }
 
   componentDidMount() {
-    // Check if user is on mobile
+    // Check if user is on mobile and set position
     this.checkDeviceType();
+    
+    // Add resize listener to handle orientation changes
+    window.addEventListener('resize', this.checkDeviceType);
     
     // Listen for the BIOS sequence completion
     window.addEventListener('biosSequenceCompleted', this.handleBiosCompletion);
@@ -30,11 +37,39 @@ class StartMessage extends Component {
   
   componentWillUnmount() {
     window.removeEventListener('biosSequenceCompleted', this.handleBiosCompletion);
+    window.removeEventListener('resize', this.checkDeviceType);
   }
   
   checkDeviceType = () => {
     const isMobile = window.innerWidth <= 768;
-    this.setState({ isMobile });
+    
+    // Set window position based on device type
+    const windowPosition = this.calculateWindowPosition(isMobile);
+    
+    this.setState({ 
+      isMobile,
+      windowPosition
+    });
+  }
+  
+  // Calculate centered position based on viewport and window size
+  calculateWindowPosition = (isMobile) => {
+    const windowWidth = 280; // Your window width
+    const windowHeight = 110; // Your window height
+    
+    // For mobile, position in the center of the screen
+    if (isMobile) {
+      return {
+        x: Math.max(10, (window.innerWidth - windowWidth) / 2),
+        y: Math.max(10, (window.innerHeight - windowHeight) / 2)
+      };
+    }
+    
+    // For desktop, keep original position
+    return {
+      x: 200,
+      y: 200
+    };
   }
   
   handleBiosCompletion = () => {
@@ -70,8 +105,8 @@ class StartMessage extends Component {
         Component={WindowProgram}
         initialWidth={280}
         initialHeight={110}
-        initialX={200}
-        initialY={200}
+        initialX={this.state.windowPosition.x}
+        initialY={this.state.windowPosition.y}
         resizable={false}
         onClose={this.closeWelcomeAlert}
         className={cx(
@@ -83,6 +118,7 @@ class StartMessage extends Component {
           zIndex: 800
         }}
       >
+        {/* Rest of your component remains the same */}
         <div className="welcome-content" style={{
           padding: '8px 10px',
           backgroundColor: '#c0c0c0'
@@ -117,7 +153,7 @@ class StartMessage extends Component {
             </div>
           </div>
           
-          {/* Button area - Centered button with dotted border only on press */}
+          {/* Button area */}
           <div style={{
             display: 'flex',
             justifyContent: 'center',

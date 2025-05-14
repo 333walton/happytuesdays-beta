@@ -484,6 +484,12 @@ const startMenuData = [
         //isDisabled: true,
         options: [
           {
+            title: "UTM Tracker",
+            icon: icons.logOff24,
+            isDisabled: false,
+            component: "UTMTool"
+          },
+          {
             title: "Pre-roll Toolkit",
             icon: icons.vid16,
             component: "VideoPlayerMobile",

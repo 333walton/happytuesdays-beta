@@ -1,0 +1,484 @@
+// _styles.scss - Complete stylesheet for UTMTool and Win98Alert components
+
+// Main UTM Tool styles
+.UTMTool {
+
+    // Core component styles
+    .utm-tool {
+        height: 100%;
+        overflow: auto;
+        padding: 8px;
+        font-family: "MS Sans Serif", "Tahoma", sans-serif;
+        font-size: 11px;
+
+        // Tab navigation
+        &-tabs {
+            display: flex;
+            margin-bottom: 12px;
+
+            .utm-tool-tab {
+                padding: 4px 12px;
+                margin-right: 4px;
+                cursor: pointer;
+                border-top: 1px solid #ffffff;
+                border-left: 1px solid #ffffff;
+                border-right: 1px solid #808080;
+                border-bottom: 1px solid #808080;
+                background-color: #c0c0c0;
+                font-size: 11px;
+
+                &.active {
+                    font-weight: bold;
+                    background-color: #dfdfdf;
+                    border-bottom: 1px solid #dfdfdf;
+                }
+            }
+        }
+
+        &-content {
+            padding: 8px 0;
+        }
+
+        // Label styling
+        &-label {
+            display: block;
+            margin-bottom: 2px;
+            font-size: 11px;
+        }
+
+        &-required {
+            color: red;
+            margin-left: 2px;
+            font-weight: bold;
+        }
+
+        // Form field styling
+        &-form-field {
+            margin-bottom: 4px;
+        }
+
+        &-field-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+
+        &-form-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+
+            .utm-tool-form-field {
+                flex: 1;
+            }
+        }
+
+        // Input styling
+        &-input {
+            width: 100%;
+            padding: 2px;
+            margin-bottom: 4px;
+            font-family: "MS Sans Serif", "Tahoma", sans-serif;
+            font-size: 11px;
+            border-top: 1px solid #808080;
+            border-left: 1px solid #808080;
+            border-right: 1px solid #ffffff;
+            border-bottom: 1px solid #ffffff;
+            box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #dfdfdf inset;
+
+            &-readonly {
+                background-color: #f0f0f0;
+            }
+
+            &-key {
+                width: 30%;
+            }
+
+            &-value {
+                flex: 1;
+            }
+
+            &[title] {
+                cursor: help;
+            }
+        }
+
+        // Button styling
+        &-button {
+            padding: 3px 8px;
+            background-color: #c0c0c0;
+            font-family: "MS Sans Serif", "Tahoma", sans-serif;
+            font-size: 11px;
+            border-top: 1px solid #ffffff;
+            border-left: 1px solid #ffffff;
+            border-right: 1px solid #000000;
+            border-bottom: 1px solid #000000;
+            box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset;
+            cursor: pointer;
+
+            &:focus {
+                outline: 1px dotted #000000;
+                outline-offset: -4px;
+            }
+
+            &:active {
+                border-top: 1px solid #000000;
+                border-left: 1px solid #000000;
+                border-right: 1px solid #ffffff;
+                border-bottom: 1px solid #ffffff;
+                box-shadow: 1px 1px 0 0 #707070 inset, -1px -1px 0 0 #ffffff inset;
+                padding: 4px 7px 2px 9px;
+            }
+
+            &-small {
+                padding: 1px 4px;
+                font-size: 9px;
+
+                &:active {
+                    padding: 2px 3px 0px 5px;
+                }
+            }
+
+            &-remove {
+                margin-left: 4px;
+                padding: 1px 4px;
+                font-size: 9px;
+
+                &:active {
+                    padding: 2px 3px 0px 5px;
+                }
+            }
+        }
+
+        // Platform selector
+        &-platform-selector {
+            margin-bottom: 6px;
+            padding: 4px;
+            border: 1px solid #808080;
+            background-color: #ececec;
+        }
+
+        &-platform-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 2px;
+        }
+
+        &-platform-button {
+            padding: 1px 6px;
+            margin-right: 2px;
+            margin-bottom: 2px;
+            font-size: 10px;
+
+            &.active {
+                font-weight: bold;
+                background-color: #dfdfdf;
+            }
+        }
+
+        // Campaign presets
+        &-presets {
+            margin-bottom: 10px;
+        }
+
+        &-preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 2px;
+        }
+
+        &-preset-button {
+            font-size: 10px;
+            padding: 2px 6px;
+            white-space: nowrap;
+        }
+
+        // Custom parameters
+        &-custom-params {
+            margin-top: 6px;
+            margin-bottom: 6px;
+        }
+
+        &-custom-params-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        &-custom-param-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+
+        &-equals {
+            margin: 0 4px;
+            color: #808080;
+        }
+
+        // URL output area
+        &-result {
+            margin-top: 10px;
+        }
+
+        &-url-output {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            .utm-tool-input {
+                flex: 1;
+            }
+
+            .utm-tool-buttons {
+                display: flex;
+                gap: 4px;
+            }
+        }
+
+        &-copied-message {
+            margin-top: 4px;
+            color: green;
+            font-size: 10px;
+        }
+
+        // Decode tab
+        &-decode-input {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+
+            .utm-tool-input {
+                flex: 1;
+            }
+        }
+
+        &-decode-results {
+            margin-top: 8px;
+        }
+
+        &-subtitle {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        &-decode-table-container {
+            border: 1px inset #808080;
+            background-color: white;
+            padding: 2px;
+            height: 200px;
+            overflow-y: auto;
+        }
+
+        &-decode-table {
+            width: 100%;
+            border-collapse: collapse;
+
+            th,
+            td {
+                border: 1px solid #d4d4d4;
+                padding: 2px 4px;
+                text-align: left;
+                font-size: 10px;
+            }
+
+            th {
+                background-color: #ececec;
+                font-weight: bold;
+            }
+        }
+
+        // History tab
+        &-history-list {
+            border: 1px inset #808080;
+            background-color: white;
+            height: 250px;
+            overflow-y: auto;
+        }
+
+        &-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 6px;
+            border-bottom: 1px solid #d4d4d4;
+
+            &:hover {
+                background-color: #f0f0f0;
+            }
+        }
+
+        &-history-url {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
+            font-size: 10px;
+        }
+
+        &-history-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        &-empty-history {
+            padding: 20px;
+            text-align: center;
+            color: #777;
+            font-style: italic;
+            font-size: 10px;
+        }
+    }
+}
+
+// Win98 Alert Component Styles
+.win98-alert {
+    &-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+    }
+
+    &-dialog {
+        width: 300px;
+        background-color: #c0c0c0;
+        border-top: 1px solid #dfdfdf;
+        border-left: 1px solid #dfdfdf;
+        border-right: 2px solid #808080;
+        border-bottom: 2px solid #808080;
+        box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset;
+        font-family: "MS Sans Serif", "Tahoma", sans-serif;
+        font-size: 11px;
+    }
+
+    &-title {
+        background: linear-gradient(90deg, #000080, #1084d0);
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        padding: 3px 5px 3px 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &-text {
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    &-close {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: -2px;
+        font-weight: bold;
+        padding: 0 5px;
+        height: 18px;
+
+        &:hover {
+            background-color: #ff3232;
+        }
+
+        &:active {
+            background-color: #a00000;
+        }
+    }
+
+    &-content {
+        padding: 15px 12px;
+        display: flex;
+        align-items: flex-start;
+    }
+
+    &-content-icon {
+        margin-right: 12px;
+        width: 32px;
+        height: 32px;
+        background-color: #ffffff;
+        border: 1px solid #808080;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    &-icon-info {
+        color: #000080;
+        font-family: "Times New Roman", serif;
+        font-size: 24px;
+        font-weight: bold;
+        font-style: italic;
+        line-height: 1;
+    }
+
+    &-message {
+        font-size: 11px;
+        line-height: 1.4;
+        max-height: 200px;
+        overflow-y: auto;
+        padding-right: 5px;
+
+        &-line {
+            margin: 0;
+            padding: 0;
+
+            &:not(:last-child) {
+                margin-bottom: 8px;
+            }
+        }
+    }
+
+    &-buttons {
+        padding: 12px;
+        display: flex;
+        justify-content: center;
+        background-color: #c0c0c0;
+        border-top: 1px solid #808080;
+    }
+
+    &-button {
+        min-width: 75px;
+        padding: 4px 12px;
+        background-color: #c0c0c0;
+        color: #000000;
+        font-family: "MS Sans Serif", "Tahoma", sans-serif;
+        font-size: 11px;
+        border-top: 1px solid #ffffff;
+        border-left: 1px solid #ffffff;
+        border-right: 1px solid #000000;
+        border-bottom: 1px solid #000000;
+        box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset;
+        cursor: pointer;
+
+        &:focus {
+            outline: 1px dotted #000000;
+            outline-offset: -4px;
+        }
+
+        &:active {
+            border-top: 1px solid #000000;
+            border-left: 1px solid #000000;
+            border-right: 1px solid #ffffff;
+            border-bottom: 1px solid #ffffff;
+            box-shadow: 1px 1px 0 0 #707070 inset, -1px -1px 0 0 #ffffff inset;
+            padding: 5px 11px 3px 13px;
+        }
+    } }
