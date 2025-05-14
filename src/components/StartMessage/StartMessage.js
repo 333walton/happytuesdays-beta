@@ -62,7 +62,7 @@ class StartMessage extends Component {
     
     const welcomeMessage = this.state.isMobile 
       ? "For best experience view this site on desktop" 
-      : "Welcome to Hydra98! Please enjoy your experience";
+      : "Welcome to Hydra98! Please enjoy and don't break anything";
 
     return (
       <Window
