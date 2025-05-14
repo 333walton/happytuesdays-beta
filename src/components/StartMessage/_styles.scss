@@ -1,3 +1,6 @@
+// _styles.scss - Welcome Window Styles with fixed close button styling
+
+// Encapsulated styles for welcome-window only
 .welcome-window {
     &.Window--active {
         min-height: 110px !important;
@@ -6,22 +9,31 @@
         width: 290px !important;
         position: relative;
         overflow: hidden !important;
+        cursor: default !important;
 
         .Window__titlebar {
             height: 18px !important;
+            cursor: default !important;
         }
 
         .Window__body {
             overflow: hidden !important;
             height: calc(110px - 18px) !important;
             max-height: calc(110px - 18px) !important;
+            cursor: default !important;
         }
 
         .WindowProgram__content {
             overflow: hidden !important;
             height: calc(110px - 18px) !important;
             max-height: calc(110px - 18px) !important;
+            cursor: default !important;
         }
+    }
+
+    // Handle close button appearance
+    .Window__close {
+        cursor: default !important;
     }
 
     .welcome-content {
@@ -35,6 +47,7 @@
         overflow: hidden !important;
         z-index: 5;
         padding: 8px 10px !important;
+        cursor: default !important;
     }
 
     // Target the Rnd component
@@ -46,6 +59,7 @@
         max-height: 110px !important;
         max-width: 290px !important;
         overflow: hidden !important;
+        cursor: default !important;
     }
 
     // Fix for specific Window internals
@@ -54,6 +68,7 @@
         max-height: 92px !important;
         /* 110px - 18px titlebar height */
         overflow: hidden !important;
+        cursor: default !important;
     }
 
     &.is-mobile {
@@ -64,6 +79,7 @@
             min-width: 290px !important;
             max-height: 110px !important;
             max-width: 290px !important;
+            cursor: default !important;
         }
 
         .welcome-content {
@@ -73,5 +89,121 @@
             flex-direction: column;
             align-items: stretch;
             overflow: hidden !important;
+            cursor: default !important;
         }
-    } }
+
+        // Additional mobile specific overrides for iOS
+        button {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+            -webkit-text-fill-color: #000000 !important;
+            color: #000000 !important;
+            border-radius: 0 !important;
+            cursor: default !important;
+        }
+    }
+
+    // Force consistent cursor throughout welcome-window component
+    &,
+    // The component itself
+    & *,
+    // All direct children
+    & *::before,
+    & *::after {
+        // All pseudo-elements
+        cursor: default !important;
+    }
+
+    // Cover all interactive elements explicitly
+    button,
+    a,
+    [role="button"],
+    [draggable="true"] {
+        cursor: default !important;
+    }
+
+    // Target packard-belle components that might be used within welcome-window
+    .packard-belle {
+        cursor: default !important;
+
+        .TitleBar,
+        .Window,
+        .WindowProgram,
+        .Button,
+        .TaskBar,
+        .StartMenu {
+            cursor: default !important;
+        }
+    }
+
+    // Override any hover states for cursor only
+    *:hover,
+    *:active,
+    *:focus {
+        cursor: default !important;
+    }
+
+    // Style draggable elements
+    [draggable] {
+        cursor: default !important;
+    }
+
+    // Target specific Window elements that often have cursor changes
+    .Window__close,
+    .Window__minimize,
+    .Window__maximize,
+    .Window__restore,
+    .Frame__Header,
+    .Frame__Content,
+    .win98-titlebar {
+        cursor: default !important;
+    }
+}
+
+// Mobile-specific styles - contained inside welcome-window selectors to avoid leaking
+@media (max-width: 768px) {
+    .welcome-window {
+
+        // Contains all mobile styles within welcome-window scope
+        button,
+        a,
+        [role="button"] {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+            border-radius: 0 !important;
+            cursor: default !important;
+        }
+    }
+}
+
+// iOS-specific overrides - contained inside welcome-window selectors to avoid leaking
+@supports (-webkit-touch-callout: none) {
+    .welcome-window {
+
+        // Contains all iOS styles within welcome-window scope
+        button,
+        a,
+        [role="button"] {
+            -webkit-appearance: none !important;
+            -webkit-text-fill-color: #000000 !important;
+            border-radius: 0 !important;
+            cursor: default !important;
+        }
+    }
+}
+
+// Special fix for stuck close button - only apply when needed
+body:not(.mouse-down) {
+
+    .Window__close.pressed,
+    .Window__close.active,
+    .Window__close.down {
+        border-top-color: #dfdfdf !important;
+        border-left-color: #dfdfdf !important;
+        border-right-color: #808080 !important;
+        border-bottom-color: #808080 !important;
+        box-shadow: none !important;
+    }
+}

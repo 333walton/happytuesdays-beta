@@ -33,6 +33,13 @@ class Win98Alert extends Component {
             <button 
               className="win98-alert-button"
               onClick={onClose}
+              style={{
+                WebkitAppearance: 'none',
+                appearance: 'none',
+                WebkitTextFillColor: '#000000',
+                color: '#000000',
+                borderRadius: 0
+              }}
             >
               OK
             </button>

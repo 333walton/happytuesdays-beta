@@ -28,6 +28,10 @@ class StartMessage extends Component {
     // Listen for the BIOS sequence completion
     window.addEventListener('biosSequenceCompleted', this.handleBiosCompletion);
     
+    // Add simple document-level mouse event handlers
+    document.addEventListener('mousedown', this.handleMouseDown);
+    document.addEventListener('mouseup', this.handleMouseUp);
+    
     // For development - simulate BIOS completion if needed
     setTimeout(() => {
       console.log("Showing welcome alert");
@@ -38,6 +42,21 @@ class StartMessage extends Component {
   componentWillUnmount() {
     window.removeEventListener('biosSequenceCompleted', this.handleBiosCompletion);
     window.removeEventListener('resize', this.checkDeviceType);
+    document.removeEventListener('mousedown', this.handleMouseDown);
+    document.removeEventListener('mouseup', this.handleMouseUp);
+  }
+  
+  // Simple global mouse handlers
+  handleMouseDown = () => {
+    document.body.classList.add('mouse-down');
+  }
+  
+  handleMouseUp = () => {
+    document.body.classList.remove('mouse-down');
+    // Also reset the OK button state
+    if (this.state.buttonPressed) {
+      this.setState({ buttonPressed: false });
+    }
   }
   
   checkDeviceType = () => {
@@ -54,8 +73,8 @@ class StartMessage extends Component {
   
   // Calculate centered position based on viewport and window size
   calculateWindowPosition = (isMobile) => {
-    const windowWidth = 280; // Your window width
-    const windowHeight = 110; // Your window height
+    const windowWidth = 290;
+    const windowHeight = 110;
     
     // For mobile, position in the center of the screen
     if (isMobile) {
@@ -103,7 +122,7 @@ class StartMessage extends Component {
       <Window
         title="Welcome"
         Component={WindowProgram}
-        initialWidth={280}
+        initialWidth={290}
         initialHeight={110}
         initialX={this.state.windowPosition.x}
         initialY={this.state.windowPosition.y}
@@ -118,7 +137,6 @@ class StartMessage extends Component {
           zIndex: 800
         }}
       >
-        {/* Rest of your component remains the same */}
         <div className="welcome-content" style={{
           padding: '8px 10px',
           backgroundColor: '#c0c0c0'
@@ -176,12 +194,16 @@ class StartMessage extends Component {
                 borderRightColor: this.state.buttonPressed ? '#dfdfdf' : '#808080',
                 borderBottomColor: this.state.buttonPressed ? '#dfdfdf' : '#808080',
                 padding: '3px 6px',
-                cursor: 'pointer',
                 width: '82px',
                 textAlign: 'center',
                 position: 'relative',
                 outline: this.state.buttonPressed ? '1px dotted #000' : 'none',
-                outlineOffset: '-4px'
+                outlineOffset: '-4px',
+                cursor: 'default',
+                WebkitAppearance: 'none',
+                WebkitTextFillColor: '#000000',
+                appearance: 'none',
+                borderRadius: 0
               }}
             >
               OK

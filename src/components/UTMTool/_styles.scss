@@ -115,6 +115,12 @@
             border-right: 1px solid #000000;
             border-bottom: 1px solid #000000;
             box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            -webkit-text-fill-color: #000000; // Force black text on iOS
+            color: #000000; // Regular color property
+            border-radius: 0; // Remove default iOS rounded corners
             cursor: pointer;
 
             &:focus {
@@ -337,148 +343,152 @@
 }
 
 // Win98 Alert Component Styles
+// Add these styles to your _styles.scss file to ensure consistent rendering on mobile
+
+// Force consistent Win98Alert appearance across all devices
 .win98-alert {
+
+    // Enforce proper overlay behavior
     &-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        z-index: 9999 !important;
+        -webkit-tap-highlight-color: transparent !important;
     }
 
+    // Enforce proper dialog appearance
     &-dialog {
-        width: 300px;
-        background-color: #c0c0c0;
-        border-top: 1px solid #dfdfdf;
-        border-left: 1px solid #dfdfdf;
-        border-right: 2px solid #808080;
-        border-bottom: 2px solid #808080;
-        box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset;
-        font-family: "MS Sans Serif", "Tahoma", sans-serif;
-        font-size: 11px;
+        width: 300px !important;
+        background-color: #c0c0c0 !important;
+        border: none !important; // Reset borders first
+        border-top: 1px solid #dfdfdf !important;
+        border-left: 1px solid #dfdfdf !important;
+        border-right: 2px solid #808080 !important;
+        border-bottom: 2px solid #808080 !important;
+        box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset !important;
+        border-radius: 0 !important;
+        overflow: hidden !important; // Prevent content from spilling out
     }
 
+    // Enforce proper title bar appearance
     &-title {
-        background: linear-gradient(90deg, #000080, #1084d0);
-        color: white;
-        font-weight: bold;
-        font-size: 12px;
-        padding: 3px 5px 3px 8px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        &-text {
-            font-size: 11px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-        }
+        background: #000080 !important; // Fallback
+        background-image: linear-gradient(to right, #000080, #1084d0) !important;
+        padding: 3px 5px 3px 8px !important;
+        color: white !important;
+        font-weight: bold !important;
+        font-size: 12px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        height: auto !important;
+        border: none !important;
+        margin: 0 !important;
     }
 
-    &-close {
-        background: none;
-        border: none;
-        color: white;
-        cursor: pointer;
-        font-size: 14px;
-        margin-right: -2px;
-        font-weight: bold;
-        padding: 0 5px;
-        height: 18px;
-
-        &:hover {
-            background-color: #ff3232;
-        }
-
-        &:active {
-            background-color: #a00000;
-        }
+    // Mobile iOS Safari sometimes applies its own button styling
+    button {
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        background-color: #c0c0c0 !important;
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+        border-radius: 0 !important;
+        font-family: "MS Sans Serif", "Tahoma", sans-serif !important;
+        font-size: 11px !important;
+        text-align: center !important;
     }
 
-    &-content {
-        padding: 15px 12px;
-        display: flex;
-        align-items: flex-start;
-    }
-
-    &-content-icon {
-        margin-right: 12px;
-        width: 32px;
-        height: 32px;
-        background-color: #ffffff;
-        border: 1px solid #808080;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    &-icon-info {
-        color: #000080;
-        font-family: "Times New Roman", serif;
-        font-size: 24px;
-        font-weight: bold;
-        font-style: italic;
-        line-height: 1;
-    }
-
-    &-message {
-        font-size: 11px;
-        line-height: 1.4;
-        max-height: 200px;
-        overflow-y: auto;
-        padding-right: 5px;
-
-        &-line {
-            margin: 0;
-            padding: 0;
-
-            &:not(:last-child) {
-                margin-bottom: 8px;
-            }
-        }
-    }
-
-    &-buttons {
-        padding: 12px;
-        display: flex;
-        justify-content: center;
-        background-color: #c0c0c0;
-        border-top: 1px solid #808080;
-    }
-
+    // Enforce proper OK button styling
     &-button {
-        min-width: 75px;
-        padding: 4px 12px;
-        background-color: #c0c0c0;
-        color: #000000;
-        font-family: "MS Sans Serif", "Tahoma", sans-serif;
-        font-size: 11px;
-        border-top: 1px solid #ffffff;
-        border-left: 1px solid #ffffff;
-        border-right: 1px solid #000000;
-        border-bottom: 1px solid #000000;
-        box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset;
-        cursor: pointer;
+        min-width: 75px !important;
+        padding: 4px 12px !important;
+        background-color: #c0c0c0 !important;
+        color: #000000 !important;
+        border: none !important; // Reset borders first
+        border-top: 1px solid #ffffff !important;
+        border-left: 1px solid #ffffff !important;
+        border-right: 1px solid #000000 !important;
+        border-bottom: 1px solid #000000 !important;
+        box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        -webkit-text-fill-color: #000000 !important;
+        font-family: "MS Sans Serif", "Tahoma", sans-serif !important;
+        font-size: 11px !important;
+        cursor: pointer !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+    }
 
-        &:focus {
-            outline: 1px dotted #000000;
-            outline-offset: -4px;
+    // Ensure proper content area appearance
+    &-content {
+        padding: 15px 12px !important;
+        display: flex !important;
+        align-items: flex-start !important;
+        background-color: #c0c0c0 !important;
+        background-image: none !important;
+        border: none !important;
+        margin: 0 !important;
+    }
+
+    // Message area styling
+    &-message {
+        font-family: "MS Sans Serif", "Tahoma", sans-serif !important;
+        font-size: 11px !important;
+        line-height: 1.4 !important;
+        color: #000000 !important;
+        background-color: transparent !important;
+        background-image: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    // Icon styling
+    &-content-icon {
+        background-color: #ffffff !important;
+        border: 1px solid #808080 !important;
+        border-radius: 50% !important;
+        width: 32px !important;
+        height: 32px !important;
+        margin-right: 12px !important;
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    // Button container area
+    &-buttons {
+        padding: 12px !important;
+        display: flex !important;
+        justify-content: center !important;
+        background-color: #c0c0c0 !important;
+        border-top: 1px solid #808080 !important;
+        margin: 0 !important;
+    }
+}
+
+// Special media query for iOS Safari specific fixes
+@supports (-webkit-touch-callout: none) {
+    .win98-alert {
+        &-title {
+            background: #000080 !important; // Use solid color as fallback for iOS
         }
 
-        &:active {
-            border-top: 1px solid #000000;
-            border-left: 1px solid #000000;
-            border-right: 1px solid #ffffff;
-            border-bottom: 1px solid #ffffff;
-            box-shadow: 1px 1px 0 0 #707070 inset, -1px -1px 0 0 #ffffff inset;
-            padding: 5px 11px 3px 13px;
+        button,
+        &-button {
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            -webkit-text-fill-color: #000000 !important;
+            color: #000000 !important;
+            border-radius: 0 !important;
         }
     } }
