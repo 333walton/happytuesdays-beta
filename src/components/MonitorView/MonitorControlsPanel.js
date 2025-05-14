@@ -1014,68 +1014,125 @@ const MonitorControlsPanel = ({
            
            {activeTab === 1 && (
             <div style={{ 
-              padding: '2px 4px', // Reduced top/bottom padding
-              minHeight: '80px',  // Ensure consistent height
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center' // Center content vertically
+              textAlign: 'center', // Center content vertically
+              padding: '2px 0px', // Reduced top/bottom padding
+              fontFamily: 'monospace',
+              //minHeight: '80px',  // Ensure consistent height
+              //display: 'flex',
             }}>
               {isRocketActive ? (
                 <p style={{ 
                   fontFamily: 'monospace', 
-                  fontSize: '12px', 
-                  whiteSpace: 'nowrap',
-                  margin: '8px 0' // Consistent margin
+                  fontSize: '13px', 
+                  //whiteSpace: 'nowrap',
+                  margin: '7px 0' // Consistent margin
                 }}>
                   {`> turbo mode initialized... `}<span className="blinker">|</span>
                 </p>
               ) : (
-                <>
-                  <p style={{ 
-                    fontSize: '11px', // Slightly smaller font 
-                    textAlign: 'center', 
-                    margin: '2px 0 8px 0', // More balanced margins
-                    lineHeight: '1.3' // Tighter line height
+                <div style={{ 
+                  textAlign: 'center',
+                  padding: '3px 0',
+                  fontFamily: 'monospace'
+                }}>
+                  {/* First line */}
+                  <div style={{ 
+                    fontSize: '11px',
+                    lineHeight: '16px',
+                    height: '16px',
                   }}>
-                    <span style={{ fontWeight: 'bold' }}>Hydra98</span> is a Windows 98 desktop emulator for the web.
-                  </p>
-                  <p style={{ 
-                    fontSize: '11px', // Slightly smaller font
-                    textAlign: 'center', 
-                    margin: '0 0 2px 0', // More balanced margins
-                    lineHeight: '1.3' // Tighter line height
+                    <span style={{ 
+                      color: 'black', 
+                      fontFamily: 'monospace', 
+                      fontSize: '11px'
+                    }}>
+                      <span style={{ fontWeight: 'bold' }}>Hydra98</span> is a Windows 98 desktop
+                    </span>
+                  </div>
+                  
+                  {/* Second line */}
+                  <div style={{ 
+                    fontSize: '11px',
+                    lineHeight: '16px',
+                    height: '15px',
+                    marginBottom: '8px'  // Preserve your original bottom margin
                   }}>
-                    Use the <span style={{ fontWeight: 'bold' }}>controls</span> to customize your experience.
-                  </p>
-                </>
+                    <span style={{ 
+                      color: 'black', 
+                      fontFamily: 'monospace', 
+                      fontSize: '11px'
+                    }}>
+                      emulator for the web.
+                    </span>
+                  </div>
+                  
+                  {/* Third line */}
+                  <div style={{ 
+                    fontSize: '11px',
+                    lineHeight: '16px',
+                    height: '15px',
+                    //marginBottom: '2px'  // Preserve your original bottom margin
+                  }}>
+                    <span style={{ 
+                      color: 'black', 
+                      fontFamily: 'monospace', 
+                      fontSize: '11px'
+                    }}>
+                      Use the <span style={{ fontWeight: 'bold' }}>controls</span> to customize your
+                    </span>
+                      </div>
+                      {/* Fourth line */}
+                  <div style={{ 
+                    fontSize: '11px',
+                    lineHeight: '16px',
+                    height: '15px',
+                    //marginBottom: '0px'  // Preserve your original bottom margin
+                  }}>
+                    <span style={{ 
+                      color: 'black', 
+                      fontFamily: 'monospace', 
+                      fontSize: '11px'
+                    }}>
+                      experience.
+                    </span>
+                  </div>
+                </div>
               )}
             </div>
           )}
 
           {activeTab === 2 && (
             <div style={{ 
-              padding: '2px 4px', // Reduced top/bottom padding
-              minHeight: '80px',  // Ensure consistent height
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center' // Center content vertically
+              textAlign: 'center',
+              padding: '2px 0',
+              fontFamily: 'monospace'
             }}>
-              <p style={{ 
-                fontSize: '11px', // Slightly smaller font
-                textAlign: 'center', 
-                margin: '2px 0 8px 0', // More balanced margins
-                lineHeight: '1.3' // Tighter line height
+              <div style={{ 
+                fontSize: '11px',
+                lineHeight: '20px',
+                height: '20px',
               }}>
-                Version: 0.9.1 beta
-              </p>
-              <p style={{ 
-                fontSize: '11px', // Slightly smaller font
-                textAlign: 'center', 
-                margin: '0 0 2px 0', // More balanced margins
-                lineHeight: '1.3' // Tighter line height
+                <span style={{ 
+                  color: 'black', 
+                  fontFamily: 'monospace', 
+                  fontSize: '11px'
+                }}>
+                  Version 0.9.1 beta
+                </span>
+              </div>
+              <div style={{ 
+                fontSize: '11px',
+                lineHeight: '20px',
+                height: '20px'
               }}>
-                Built with ReactJS and  ❤️
-              </p>
+                <span style={{ 
+                  color: 'black', 
+                  fontFamily: 'monospace', 
+                  fontSize: '11px'
+                }}>
+                  Built with ReactJS and ❤️
+                </span>
+              </div>
             </div>
           )}
          </TabBody>
