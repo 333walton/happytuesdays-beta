@@ -1,0 +1,77 @@
+.welcome-window {
+    &.Window--active {
+        min-height: 110px !important;
+        height: 110px !important;
+        min-width: 290px !important;
+        width: 290px !important;
+        position: relative;
+        overflow: hidden !important;
+
+        .Window__titlebar {
+            height: 18px !important;
+        }
+
+        .Window__body {
+            overflow: hidden !important;
+            height: calc(110px - 18px) !important;
+            max-height: calc(110px - 18px) !important;
+        }
+
+        .WindowProgram__content {
+            overflow: hidden !important;
+            height: calc(110px - 18px) !important;
+            max-height: calc(110px - 18px) !important;
+        }
+    }
+
+    .welcome-content {
+        min-width: 100% !important;
+        min-height: 82px !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        overflow: hidden !important;
+        z-index: 5;
+        padding: 8px 10px !important;
+    }
+
+    // Target the Rnd component
+    &.react-draggable {
+        width: 290px !important;
+        height: 110px !important;
+        min-height: 110px !important;
+        min-width: 290px !important;
+        max-height: 110px !important;
+        max-width: 290px !important;
+        overflow: hidden !important;
+    }
+
+    // Fix for specific Window internals
+    .Frame {
+        height: auto !important;
+        max-height: 92px !important;
+        /* 110px - 18px titlebar height */
+        overflow: hidden !important;
+    }
+
+    &.is-mobile {
+        &.Window--active {
+            width: 290px !important;
+            height: 110px !important;
+            min-height: 110px !important;
+            min-width: 290px !important;
+            max-height: 110px !important;
+            max-width: 290px !important;
+        }
+
+        .welcome-content {
+            min-width: 100% !important;
+            min-height: 100% !important;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            overflow: hidden !important;
+        }
+    } }

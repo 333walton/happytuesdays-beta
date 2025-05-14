@@ -14,6 +14,7 @@ import CRTOverlay from "./components/tools/CRT";
 import ShutDown from "./components/ShutDown/ShutDown";
 import Background from "./components/tools/Background";
 import MonitorView from './components/MonitorView/MonitorView';
+import StartMessage from './components/StartMessage/StartMessage';
 // Remove this import as we won't use it here
 // import ThemeWrapper from './components/MonitorView/ThemeWrapper';
 
@@ -47,6 +48,7 @@ class Desktop extends Component {
             <TaskManager />
             <Settings />
             <ShutDown />
+            <StartMessage />
             {context.crt && <CRTOverlay />}
           </Theme>
         </MonitorView>

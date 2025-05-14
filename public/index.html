@@ -310,6 +310,22 @@
       }
 
       staggerElements(biosElem.getElementsByTagName("div"), 0);
+      function staggerElements(elems, entry) {
+        if (!elems[entry]) {
+          document.querySelector(".BIOS").classList.add("hidden");
+
+          // Dispatch event to notify that BIOS sequence has completed
+          console.log("BIOS sequence completed, dispatching event");
+          window.dispatchEvent(new Event('biosSequenceCompleted'));
+
+          windowsLogo();
+          return;
+        }
+
+        elems[entry].classList.add("visible");
+        setTimeout(() => staggerElements(elems, entry + 1), 1000);
+      }
+      window.dispatchEvent(new Event('biosSequenceCompleted'));//triggers the welcome message
     }
 
     // Longer delay to ensure React has time to initialize
