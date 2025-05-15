@@ -60,7 +60,7 @@ body {
 }
 
 .react-draggable > .Window {
-  height: 100%;
+  height: 100%; /*height: calc(100% - 28) !important*/
   width: 100%;
 }
 
@@ -71,6 +71,7 @@ body {
 
 .TaskBar {
   z-index: 75;
+  /*height: 26px;*/
 }
 
 .itIsNowSafeToTurnOffYourComputer {

@@ -199,7 +199,7 @@ class Window extends React.PureComponent {
 
 Window.defaultProps = {
   minWidth: 162,
-  minHeight: 150,
+  minHeight: '137px !important', //this is the best number for keeping windows from dragging below the taskbar - doesnt work??
   initialWidth: 200,
   initialHeight: 200,
   // maxHeight: 448,

@@ -123,7 +123,7 @@ class StartMessage extends Component {
         title="Welcome"
         Component={WindowProgram}
         initialWidth={290}
-        initialHeight={110}
+        initialHeight={137} //this is preventing the window from going below the taskbar (prob not a perm fix)
         initialX={this.state.windowPosition.x}
         initialY={this.state.windowPosition.y}
         resizable={false}

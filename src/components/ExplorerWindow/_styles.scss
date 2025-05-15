@@ -176,8 +176,8 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
   /* Target all text that might be blue in IE components */
   .WindowExplorer,
   .WindowExplorer * {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
+    //color: #000000 !important;
+    //-webkit-text-fill-color: #000000 !important;
   }
 
   /* Specific targeting for navigation buttons */
@@ -195,7 +195,7 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
     -webkit-text-fill-color: #000000 !important;
   }
 
-  /* Target taskbar items and minimized windows */
+  /* Target taskbar items and minimized windows - not working */
   .taskbar-item-text,
   .taskbar-button-text,
   .start-menu-item {
