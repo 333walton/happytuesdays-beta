@@ -374,6 +374,12 @@ const games = [
     multiInstance: true
   },
   {
+    title: "Minesweeper2",
+    icon: icons.minesweeper16,
+    component: "MinesweeperWithHelp",
+    multiInstance: true
+  },
+  {
   title: "Solitaire",
   icon: icons.soli16,
   component: "",

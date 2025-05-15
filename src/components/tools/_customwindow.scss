@@ -1,0 +1,252 @@
+/* Scoped styles for CustomWindow with properly isolated drag styling */
+.CustomWindow {
+  border: 2px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  box-shadow: 1px 1px 0 #000000, -1px -1px 0 #ffffff;
+  background-color: #c0c0c0;
+
+  .Window__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(90deg, #000080, #1084d0);
+    padding: 1px 2px;
+    height: 18px;
+    color: white;
+    font-weight: bold;
+    font-size: 11px;
+    margin: 0;
+  }
+
+  .Window__title {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    height: 100%;
+    margin-left: 1px;
+  }
+
+  .Window__title-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+  }
+
+  .Window__title-text {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    user-select: none;
+  }
+
+  .Window__controls {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin-right: 1px;
+
+    button {
+      position: relative;
+      width: 16px;
+      height: 14px;
+      margin-left: 2px;
+      padding: 0;
+      border: 1px solid;
+      border-top-color: #dfdfdf;
+      border-left-color: #dfdfdf;
+      border-right-color: #808080;
+      border-bottom-color: #808080;
+      background: #c0c0c0;
+      color: #000;
+      font-size: 10px;
+      font-weight: bold;
+      box-shadow: 1px 1px 0 #ffffff inset, -1px -1px 0 #707070 inset;
+      text-align: center;
+      line-height: 1;
+      cursor: pointer;
+      outline: none;
+      font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &:active {
+        border-color: #808080 #dfdfdf #dfdfdf #808080;
+        box-shadow: 1px 1px 0 #707070 inset, -1px -1px 0 #ffffff inset;
+        padding-top: 1px;
+        padding-left: 1px;
+      }
+    }
+  }
+
+  .Window__help-button {
+    font-size: 11px;
+    line-height: 12px;
+    padding-top: 1px;
+    padding-right: 1px;
+
+    &:active {
+      padding-top: 2px;
+      padding-left: 2px;
+      padding-right: 0;
+    }
+  }
+
+  .Window__minimize {
+    align-items: flex-end;
+    padding-bottom: 2px;
+    font-size: 14px;
+
+    &:active {
+      padding-top: 1px;
+      padding-left: 1px;
+      padding-bottom: 1px;
+    }
+  }
+
+  .Window__maximize,
+  .Window__restore {
+    font-size: 10px;
+    padding-top: 1px;
+
+    &:active {
+      padding-top: 2px;
+      padding-left: 1px;
+    }
+  }
+
+  .Window__close {
+    font-size: 12px;
+    line-height: 1;
+    padding-top: 1px;
+    padding-right: 1px;
+
+    &:active {
+      padding-top: 2px;
+      padding-left: 1px;
+      padding-right: 0;
+    }
+  }
+
+  .Window__content {
+    position: absolute;
+    top: 18px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+    background-color: #c0c0c0;
+    padding: 1px;
+    border: 1px solid;
+    border-left-color: #dfdfdf;
+    border-top-color: #dfdfdf;
+    border-right-color: #808080;
+    border-bottom-color: #808080;
+  }
+
+  .Window__footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 18px;
+    background-color: #c0c0c0;
+    border-top: 1px solid #808080;
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+  }
+}
+
+/* DRAG STATE STYLING */
+.react-draggable-dragging.CustomWindow,
+.react-draggable-dragging .CustomWindow {
+  background: transparent !important;
+  border: 1px solid #a0a0a0 !important;
+  box-shadow: none !important;
+
+  .Window__heading,
+  .Window__content,
+  .Window__footer {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+}
+
+/* Drag ghost */
+.custom-drag-ghost {
+  border: 1px solid #a0a0a0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  * {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+}
+
+/* Help window content */
+.help-window {
+  .window-alert__content {
+    padding: 12px;
+    font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+
+    h3 {
+      font-size: 12px;
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    p {
+      margin: 6px 0;
+    }
+  }
+}
+
+/* Keep controls visible during drag */
+.react-draggable-dragging .preserve-during-drag,
+.Window--changing .preserve-during-drag,
+.react-draggable-dragging .Window__controls,
+.Window--changing .Window__controls,
+.react-draggable-dragging .Window__heading,
+.Window--changing .Window__heading,
+.react-draggable-dragging .Window__controls button,
+.Window--changing .Window__controls button {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  position: relative;
+  z-index: 1000;
+  background-color: #c0c0c0;
+  border: 1px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+}
+
+/* Maximize button - always show during drag */
+.react-draggable-dragging .Window__maximize.always-show-during-drag,
+.Window--changing .Window__maximize.always-show-during-drag {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  border: 1px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  background: #c0c0c0;
+  position: relative;
+  z-index: 100;
+}

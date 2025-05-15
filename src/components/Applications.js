@@ -1,5 +1,6 @@
 export { default as ExplorerWindow } from "./ExplorerWindow";
 export { default as IframeWindow } from "./IframeWindow";
+export { default as CustomWindow } from "./CustomWindow"; // use this within a component for a window you want to really customize
 export { default as InternetExplorer } from "./InternetExplorer";
 export { default as TestExplorer } from "./TestExplorer";
 export { default as JSDos } from "./JSDos";
@@ -8,7 +9,6 @@ export { default as Doom } from "./Doom"
 export { default as Burn } from "./Burn"
 export { default as Pipes } from "./Pipes"
 export { default as Sand } from "./Sand"
-export { default as Minesweeper } from "./Minesweeper";
 export { default as ImageWindow } from "./ImageWindow";
 export { default as Calculator } from "./Calculator";
 export { default as DoodleSubmission } from "./DoodleSubmission";
@@ -35,3 +35,5 @@ export { default as FlowerBoxScreensaver } from "./FlowerBoxScreensaver";
 export { default as PipesScreensaver } from "./PipesScreensaver";
 export { default as StartMessage } from "./StartMessage"; 
 export { default as UTMTool } from "./UTMTool";
+export { default as Minesweeper } from "./Minesweeper";
+export { default as MinesweeperWithHelp } from "./MinesweeperWithHelp";

@@ -1,0 +1,298 @@
+@import "../../../node_modules/packard-belle/src/_scss/w98/mixins/box-shadows.scss";
+
+@font-face {
+  font-family: pixelmix;
+  src: url("../../assets/pixelmix.woff2") format("woff2");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: FixedSys;
+  src: url("../../assets/FixedsysStripped.woff2") format("woff2");
+}
+
+.Doom {
+  input {
+    filter: opacity(0%);
+    position: absolute;
+    left: -2000px;
+  }
+
+  .terminal {
+    @include shadow-input;
+    flex-grow: 1;
+
+    * {
+      font-family: pixelmix, FixedSys, MSSansSerif, "Courier New", Courier,
+        monospace;
+    }
+
+    background-color: black;
+    color: white;
+    font-size: 8px;
+    letter-spacing: 1px;
+    line-height: 1.5em;
+    padding: 8px 4px;
+    overflow: auto;
+
+    &::selection {
+      background-color: white;
+      color: black;
+    }
+  }
+
+  form:focus-within+.terminal .terminal__content>span:after {
+    content: "_";
+  }
+
+  &.Window:after {
+    content: none;
+    scrollbar-width: 0;
+  }
+
+  .IframeWindow {
+    >div:not(.Window__heading) {
+      width: 100%;
+      height: calc(100% - 10px);
+      overflow: hidden;
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      overflow: hidden;
+      height: calc(100% - 6px);
+    }
+
+    &--alert.WindowAlert {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      -ms-transform: translateX(-50%) translateY(-50%);
+      -webkit-transform: translateX(-50%) translateY(-50%);
+      -moz-transform: translateX(-50%) translateY(-50%);
+      -o-transform: translateX(-50%) translateY(-50%);
+      transform: translateX(-50%) translateY(-50%);
+      z-index: 8;
+    }
+  }
+}
+
+.react-draggable-dragging {
+  .IframeWindow {
+
+    >div,
+    iframe {
+      pointer-events: none;
+      overflow: hidden;
+    }
+  }
+}
+
+.Window__help-button {
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important;
+  font-size: 11px !important;
+  line-height: 12px !important;
+  position: relative !important;
+  width: 16px !important;
+  height: 14px !important;
+  margin-right: 2px !important;
+  margin-left: 0 !important;
+  padding: 0 !important;
+  border: 1px solid !important;
+  border-top-color: #dfdfdf !important;
+  border-left-color: #dfdfdf !important;
+  border-right-color: #808080 !important;
+  border-bottom-color: #808080 !important;
+  background: #c0c0c0 !important;
+  color: #000 !important;
+  font-weight: bold !important;
+  box-shadow: 1px 1px 0 #ffffff inset, -1px -1px 0 #707070 inset !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding-top: 1px !important;
+  padding-right: 1px !important;
+  overflow: hidden !important;
+}
+
+.Window__help-button:active {
+  border-color: #808080 #dfdfdf #dfdfdf #808080 !important;
+  box-shadow: 1px 1px 0 #707070 inset, -1px -1px 0 #ffffff inset !important;
+  padding-top: 2px !important;
+  padding-left: 1px !important;
+  padding-right: 0 !important;
+  overflow: hidden;
+  scrollbar-width: 0px;
+}
+
+/* Help dialog styling */
+.minesweeper-help-dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #c0c0c0;
+  border: 2px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  box-shadow: 1px 1px 0 #000000, -1px -1px 0 #ffffff;
+  padding: 10px;
+  z-index: 1000;
+  width: 80%;
+  max-width: 300px;
+
+  h3 {
+    font-size: 12px;
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+  }
+
+  p {
+    margin: 6px 0;
+    font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+    font-size: 11px;
+  }
+
+  button {
+    margin-top: 8px;
+    padding: 2px 8px;
+    font-size: 11px;
+    border: 1px solid;
+    border-top-color: #dfdfdf;
+    border-left-color: #dfdfdf;
+    border-right-color: #808080;
+    border-bottom-color: #808080;
+    background-color: #c0c0c0;
+    box-shadow: 1px 1px 0 #ffffff inset, -1px -1px 0 #707070 inset;
+    font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+    cursor: pointer;
+
+    &:active {
+      border-color: #808080 #dfdfdf #dfdfdf #808080;
+      box-shadow: 1px 1px 0 #707070 inset, -1px -1px 0 #ffffff inset;
+      padding-top: 3px;
+      padding-left: 9px;
+      padding-right: 7px;
+      padding-bottom: 1px;
+      overflow-y: 'hidden';
+    }
+  }
+}
+/* src/components/MinesweeperWithHelp/MinesweeperWithHelp.scss */
+.minesweeper-with-help-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Help button in the game area */
+.win98-help-button-container {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 100;
+}
+
+.win98-help-button {
+  width: 22px;
+  height: 22px;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  color: #000;
+  background-color: #c0c0c0;
+  border: 2px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  box-shadow: 1px 1px 0 #ffffff inset, -1px -1px 0 #707070 inset;
+  cursor: pointer;
+  outline: none;
+  text-align: center;
+  line-height: 18px;
+  padding: 0;
+  
+  &:active {
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+    box-shadow: 1px 1px 0 #707070 inset, -1px -1px 0 #ffffff inset;
+    padding-top: 1px;
+    padding-left: 1px;
+  }
+}
+
+/* Help dialog window */
+.win98-help-dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #c0c0c0;
+  border: 3px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  box-shadow: 1px 1px 0 #000000, -1px -1px 0 #ffffff;
+  min-width: 250px;
+  max-width: 300px;
+  z-index: 1000;
+}
+
+.win98-help-dialog-title {
+  background: linear-gradient(90deg, #000080, #1084d0);
+  color: white;
+  font-weight: bold;
+  font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+  font-size: 11px;
+  padding: 3px 5px;
+}
+
+.win98-help-dialog-content {
+  padding: 10px;
+  font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+  font-size: 11px;
+  
+  p {
+    margin: 6px 0;
+  }
+}
+
+.win98-help-dialog-actions {
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.win98-button {
+  min-width: 75px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+  border: 2px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  background-color: #c0c0c0;
+  box-shadow: 1px 1px 0 #ffffff inset, -1px -1px 0 #707070 inset;
+  cursor: pointer;
+  
+  &:active {
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+    box-shadow: 1px 1px 0 #707070 inset, -1px -1px 0 #ffffff inset;
+    padding-top: 5px;
+    padding-left: 11px;
+    padding-right: 9px;
+    padding-bottom: 3px;
+  }
+}
