@@ -203,6 +203,14 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
     -webkit-text-fill-color: #000000 !important;
   }
 
+// Ensure window title text is white
+.Window__title,
+.Window__title-text {
+  color: rgb(255, 255, 255) !important;
+  -webkit-text-fill-color: rgb(255, 255, 255) !important;
+}
+
+
   /* Override any blue links or active indicators */
   a,
   a:visited,
@@ -221,15 +229,14 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
   }
-}
-
-
 // Ensure window title text is white
-.WindowExplorer__title,
-.WindowExplorer__title-text {
+.Window__title,
+.Window__title-text {
   color: rgb(255, 255, 255) !important;
   -webkit-text-fill-color: rgb(255, 255, 255) !important;
-}
+}}
+
+
 /* Add only this to your CSS (either global or _styles.scss) */
 
 /* Unified resize handle CSS */

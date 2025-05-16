@@ -4,7 +4,7 @@ const generateRows = () => {
       title: "Intro",
       image: "https://appstickers-cdn.appadvice.com/1164831016/819286823/18ab4614722102b2a0def24dda1ea4bd-1.gif",
       content: `
-        Hydra98 is a web-based Windows 98-style desktop and creative sandbox, built with React and modern web technologies. It’s a fun experiment blending classic computing nostalgia with modern interactivity, featuring apps, customization, ASCII art, and DOS-style gaming.
+        Hydra98 is a web-based Windows 98-style desktop and creative sandbox, built with React and modern web technologies. It's a fun experiment blending classic computing nostalgia with modern interactivity, featuring apps, customization, ASCII art, and DOS-style gaming.
         <br><br>
         Future updates will bring web3 integrations, more mini apps, and a clippy-style help-bot. Stay tuned!
       `
@@ -30,10 +30,10 @@ const generateRows = () => {
       image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRX6w3EFRXeOcn6IvxIHNU8S7NU-HNKLtJd8CBYvAiuWZzbu0xNDvBFubV",
       content: `
         <ul>
-          <li><b>Why does the screen flicker?</b><br> → That’s a CRT effect to make it feel like an old-school monitor! If you feel a seizure coming on, you can adjust it in Control Panel settings.</li>
+          <li><b>Why does the screen flicker?</b><br> → That's a CRT effect to make it feel like an old-school monitor! If you feel a seizure coming on, you can adjust it in Control Panel settings.</li>
           <li><b>Why is the screen size weird?</b><br> → Because monitors were square (4:3 aspect ratio) in the 90s. Start > Settings > Control Panel to adjust.</li>
-          <li><b>Can I delete files?</b><br> → Not yet! But if you’re really determined, you can clear your browser’s local storage and pretend you’re a 90s IT pro.</li>
-          <li><b>Can I play the launch screen again?</b><br> → Yes, just go through the shutdown sequence, and you’ll see it again on refresh.</li>
+          <li><b>Can I delete files?</b><br> → Not yet! But if you're really determined, you can clear your browser's local storage and pretend you're a 90s IT pro.</li>
+          <li><b>Can I play the launch screen again?</b><br> → Yes, just go through the shutdown sequence, and you'll see it again on refresh.</li>
         </ul>
       `
     },
@@ -119,46 +119,122 @@ const marqueeGen = () =>
 
 const readmeHTML = `
 <style>
-font * {font-family: 'Comic Sans MS' !important;}
+/* Import Comic Neue for mobile devices */
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue&display=swap');
+
+/* Base font styles */
+font * {
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive !important;
+}
+
+/* Mobile-specific font override */
+@media (max-width: 768px) {
+  font *, .marquee-link {
+    font-family: 'Comic Neue', cursive !important;
+  }
+}
+
 blink {
-  -webkit-animation: 1s linear infinite condemned_blink_effect; // for android
+  -webkit-animation: 1s linear infinite condemned_blink_effect;
   animation: 1s linear infinite condemned_blink_effect;
 }
-@-webkit-keyframes condemned_blink_effect { // for android
-  0% {
-      visibility: hidden;
-  }
-  50% {
-      visibility: hidden;
-  }
-  100% {
-      visibility: visible;
-  }
+@-webkit-keyframes condemned_blink_effect {
+  0%, 50% { visibility: hidden; }
+  100% { visibility: visible; }
 }
 @keyframes condemned_blink_effect {
-  0% {
-      visibility: hidden;
+  0%, 50% { visibility: hidden; }
+  100% { visibility: visible; }
+}
+
+/* Styles for the marquee container with border at bottom */
+.marquee-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 2px; /* Space for the border */
+}
+
+/* Black border below the marquee */
+.marquee-container:after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background-color: black;
+}
+
+/* Styles for the marquee and links */
+marquee {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  background-color: red;
+  color: white;
+  padding: 4px 0;
+}
+
+/* Improved marquee behavior - enable CSS-based animation as a fallback */
+@supports (animation: marquee 15s linear infinite) {
+  marquee:not(.native-marquee) {
+    white-space: nowrap;
+    overflow: hidden;
   }
-  50% {
-      visibility: hidden;
+  
+  marquee:not(.native-marquee) > span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 15s linear infinite;
+    white-space: nowrap;
   }
-  100% {
-      visibility: visible;
+  
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
   }
 }
+
+/* Mobile-specific adjustments for smoother scrolling */
+@media (max-width: 768px) {
+  marquee {
+    transform: translateZ(0); /* Force hardware acceleration */
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+  }
+}
+
 .marquee-link {
-  font-size: 20px !important;
-  font-weight: normal !important;
+  font-size: 17px !important;
+  font-weight: bold !important;
   text-decoration: none;
+  color: white;
+  cursor: pointer !important;
+  padding: 0 10px;
+}
+
+/* Add hover pause functionality */
+marquee:hover {
+  -webkit-animation-play-state: paused;
+  animation-play-state: paused;
+  scroll-behavior: auto;
+}
+
+.marquee-link:hover {
+  text-decoration: underline;
 }
 </style>
 
-<font size="4" >
-  <marquee bgcolor="red" color="white">
-    <span>
-      ${marqueeGen()}
-    </span>
-  </marquee>
+<font size="4">
+  <div class="marquee-container">
+    <marquee class="native-marquee" bgcolor="red" behavior="scroll" direction="left" scrollamount="4.4" onmouseover="this.stop();" onmouseout="this.start();">
+      <span>
+        ${marqueeGen()}
+      </span>
+    </marquee>
+  </div>
 
   <table bgcolor="grey" width="100%">
     <thead>
