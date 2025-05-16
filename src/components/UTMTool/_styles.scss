@@ -1,494 +1,200 @@
-// _styles.scss - Complete stylesheet for UTMTool and Win98Alert components
-
-// Main UTM Tool styles
-.UTMTool {
-
-    // Core component styles
-    .utm-tool {
-        height: 100%;
-        overflow: auto;
-        padding: 8px;
-        font-family: "MS Sans Serif", "Tahoma", sans-serif;
-        font-size: 11px;
-
-        // Tab navigation
-        &-tabs {
-            display: flex;
-            margin-bottom: 12px;
-
-            .utm-tool-tab {
-                padding: 4px 12px;
-                margin-right: 4px;
-                cursor: pointer;
-                border-top: 1px solid #ffffff;
-                border-left: 1px solid #ffffff;
-                border-right: 1px solid #808080;
-                border-bottom: 1px solid #808080;
-                background-color: #c0c0c0;
-                font-size: 11px;
-
-                &.active {
-                    font-weight: bold;
-                    background-color: #dfdfdf;
-                    border-bottom: 1px solid #dfdfdf;
-                }
-            }
-        }
-
-        &-content {
-            padding: 8px 0;
-        }
-
-        // Label styling
-        &-label {
-            display: block;
-            margin-bottom: 2px;
-            font-size: 11px;
-        }
-
-        &-required {
-            color: red;
-            margin-left: 2px;
-            font-weight: bold;
-        }
-
-        // Form field styling
-        &-form-field {
-            margin-bottom: 4px;
-        }
-
-        &-field-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2px;
-        }
-
-        &-form-row {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 4px;
-
-            .utm-tool-form-field {
-                flex: 1;
-            }
-        }
-
-        // Input styling
-        &-input {
-            width: 100%;
-            padding: 2px;
-            margin-bottom: 4px;
-            font-family: "MS Sans Serif", "Tahoma", sans-serif;
-            font-size: 11px;
-            border-top: 1px solid #808080;
-            border-left: 1px solid #808080;
-            border-right: 1px solid #ffffff;
-            border-bottom: 1px solid #ffffff;
-            box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #dfdfdf inset;
-
-            &-readonly {
-                background-color: #f0f0f0;
-            }
-
-            &-key {
-                width: 30%;
-            }
-
-            &-value {
-                flex: 1;
-            }
-
-            &[title] {
-                cursor: help;
-            }
-        }
-
-        // Button styling
-        &-button {
-            padding: 3px 8px;
-            background-color: #c0c0c0;
-            font-family: "MS Sans Serif", "Tahoma", sans-serif;
-            font-size: 11px;
-            border-top: 1px solid #ffffff;
-            border-left: 1px solid #ffffff;
-            border-right: 1px solid #000000;
-            border-bottom: 1px solid #000000;
-            box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            -webkit-text-fill-color: #000000; // Force black text on iOS
-            color: #000000; // Regular color property
-            border-radius: 0; // Remove default iOS rounded corners
-            cursor: pointer;
-
-            &:focus {
-                outline: 1px dotted #000000;
-                outline-offset: -4px;
-            }
-
-            &:active {
-                border-top: 1px solid #000000;
-                border-left: 1px solid #000000;
-                border-right: 1px solid #ffffff;
-                border-bottom: 1px solid #ffffff;
-                box-shadow: 1px 1px 0 0 #707070 inset, -1px -1px 0 0 #ffffff inset;
-                padding: 4px 7px 2px 9px;
-            }
-
-            &-small {
-                padding: 1px 4px;
-                font-size: 9px;
-
-                &:active {
-                    padding: 2px 3px 0px 5px;
-                }
-            }
-
-            &-remove {
-                margin-left: 4px;
-                padding: 1px 4px;
-                font-size: 9px;
-
-                &:active {
-                    padding: 2px 3px 0px 5px;
-                }
-            }
-        }
-
-        // Platform selector
-        &-platform-selector {
-            margin-bottom: 6px;
-            padding: 4px;
-            border: 1px solid #808080;
-            background-color: #ececec;
-        }
-
-        &-platform-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-top: 2px;
-        }
-
-        &-platform-button {
-            padding: 1px 6px;
-            margin-right: 2px;
-            margin-bottom: 2px;
-            font-size: 10px;
-
-            &.active {
-                font-weight: bold;
-                background-color: #dfdfdf;
-            }
-        }
-
-        // Campaign presets
-        &-presets {
-            margin-bottom: 10px;
-        }
-
-        &-preset-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-top: 2px;
-        }
-
-        &-preset-button {
-            font-size: 10px;
-            padding: 2px 6px;
-            white-space: nowrap;
-        }
-
-        // Custom parameters
-        &-custom-params {
-            margin-top: 6px;
-            margin-bottom: 6px;
-        }
-
-        &-custom-params-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        &-custom-param-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 2px;
-        }
-
-        &-equals {
-            margin: 0 4px;
-            color: #808080;
-        }
-
-        // URL output area
-        &-result {
-            margin-top: 10px;
-        }
-
-        &-url-output {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-
-            .utm-tool-input {
-                flex: 1;
-            }
-
-            .utm-tool-buttons {
-                display: flex;
-                gap: 4px;
-            }
-        }
-
-        &-copied-message {
-            margin-top: 4px;
-            color: green;
-            font-size: 10px;
-        }
-
-        // Decode tab
-        &-decode-input {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 8px;
-
-            .utm-tool-input {
-                flex: 1;
-            }
-        }
-
-        &-decode-results {
-            margin-top: 8px;
-        }
-
-        &-subtitle {
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-
-        &-decode-table-container {
-            border: 1px inset #808080;
-            background-color: white;
-            padding: 2px;
-            height: 200px;
-            overflow-y: auto;
-        }
-
-        &-decode-table {
-            width: 100%;
-            border-collapse: collapse;
-
-            th,
-            td {
-                border: 1px solid #d4d4d4;
-                padding: 2px 4px;
-                text-align: left;
-                font-size: 10px;
-            }
-
-            th {
-                background-color: #ececec;
-                font-weight: bold;
-            }
-        }
-
-        // History tab
-        &-history-list {
-            border: 1px inset #808080;
-            background-color: white;
-            height: 250px;
-            overflow-y: auto;
-        }
-
-        &-history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 6px;
-            border-bottom: 1px solid #d4d4d4;
-
-            &:hover {
-                background-color: #f0f0f0;
-            }
-        }
-
-        &-history-url {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 300px;
-            font-size: 10px;
-        }
-
-        &-history-actions {
-            display: flex;
-            gap: 4px;
-        }
-
-        &-empty-history {
-            padding: 20px;
-            text-align: center;
-            color: #777;
-            font-style: italic;
-            font-size: 10px;
-        }
-    }
-}
-
-// Win98 Alert Component Styles
-// Add these styles to your _styles.scss file to ensure consistent rendering on mobile
-
-// Force consistent Win98Alert appearance across all devices
+// Encapsulated styles for win98-alert
 .win98-alert {
+  &.Window--active {
+    min-height: 137px !important;
+    height: auto !important;
+    min-width: 300px !important;
+    width: 300px !important;
+    position: relative;
+    overflow: hidden !important;
+    cursor: default !important;
 
-    // Enforce proper overlay behavior
-    &-overlay {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        background-color: rgba(0, 0, 0, 0.5) !important;
-        z-index: 9999 !important;
-        -webkit-tap-highlight-color: transparent !important;
+    .Window__titlebar {
+      height: 18px !important;
+      cursor: default !important;
     }
 
-    // Enforce proper dialog appearance
-    &-dialog {
-        width: 300px !important;
-        background-color: #c0c0c0 !important;
-        border: none !important; // Reset borders first
-        border-top: 1px solid #dfdfdf !important;
-        border-left: 1px solid #dfdfdf !important;
-        border-right: 2px solid #808080 !important;
-        border-bottom: 2px solid #808080 !important;
-        box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset !important;
-        border-radius: 0 !important;
-        overflow: hidden !important; // Prevent content from spilling out
+    .Window__body {
+      overflow: hidden !important;
+      height: calc(100% - 18px) !important;
+      max-height: calc(100% - 18px) !important;
+      cursor: default !important;
     }
 
-    // Enforce proper title bar appearance
-    &-title {
-        background: #000080 !important; // Fallback
-        background-image: linear-gradient(to right, #000080, #1084d0) !important;
-        padding: 3px 5px 3px 8px !important;
-        color: white !important;
-        font-weight: bold !important;
-        font-size: 12px !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        height: auto !important;
-        border: none !important;
-        margin: 0 !important;
+    .WindowProgram__content {
+      overflow: hidden !important;
+      height: calc(100% - 18px) !important;
+      max-height: calc(100% - 18px) !important;
+      cursor: default !important;
+    }
+  }
+
+  // Handle close button appearance
+  .Window__close {
+    cursor: default !important;
+  }
+
+  .alert-content {
+    min-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden !important;
+    z-index: 5;
+    padding: 8px 10px !important;
+    cursor: default !important;
+  }
+
+  // Target the Rnd component
+  &.react-draggable {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+    overflow: hidden !important;
+    cursor: default !important;
+  }
+
+  // Fix for specific Window internals
+  .Frame {
+    height: auto !important;
+    overflow: hidden !important;
+    cursor: default !important;
+  }
+
+  &.is-mobile {
+    &.Window--active {
+      width: 300px !important;
+      min-width: 300px !important;
+      max-width: 300px !important;
+      cursor: default !important;
     }
 
-    // Mobile iOS Safari sometimes applies its own button styling
+    .alert-content {
+      min-width: 100% !important;
+      min-height: 100% !important;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      overflow: hidden !important;
+      cursor: default !important;
+    }
+
+    // Additional mobile specific overrides for iOS
     button {
-        -webkit-appearance: none !important;
-        appearance: none !important;
-        background-color: #c0c0c0 !important;
-        color: #000000 !important;
-        -webkit-text-fill-color: #000000 !important;
-        border-radius: 0 !important;
-        font-family: "MS Sans Serif", "Tahoma", sans-serif !important;
-        font-size: 11px !important;
-        text-align: center !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      -webkit-text-fill-color: #000000 !important;
+      color: #000000 !important;
+      border-radius: 0 !important;
+      cursor: default !important;
     }
+  }
 
-    // Enforce proper OK button styling
-    &-button {
-        min-width: 75px !important;
-        padding: 4px 12px !important;
-        background-color: #c0c0c0 !important;
-        color: #000000 !important;
-        border: none !important; // Reset borders first
-        border-top: 1px solid #ffffff !important;
-        border-left: 1px solid #ffffff !important;
-        border-right: 1px solid #000000 !important;
-        border-bottom: 1px solid #000000 !important;
-        box-shadow: 1px 1px 0 0 #ffffff inset, -1px -1px 0 0 #707070 inset !important;
-        -webkit-appearance: none !important;
-        appearance: none !important;
-        -webkit-text-fill-color: #000000 !important;
-        font-family: "MS Sans Serif", "Tahoma", sans-serif !important;
-        font-size: 11px !important;
-        cursor: pointer !important;
-        border-radius: 0 !important;
-        margin: 0 !important;
-    }
+  // Force consistent cursor throughout win98-alert component
+  &,
+    // The component itself
+    & *,
+    // All direct children
+    & *::before,
+    & *::after {
+    // All pseudo-elements
+    cursor: default !important;
+  }
 
-    // Ensure proper content area appearance
-    &-content {
-        padding: 15px 12px !important;
-        display: flex !important;
-        align-items: flex-start !important;
-        background-color: #c0c0c0 !important;
-        background-image: none !important;
-        border: none !important;
-        margin: 0 !important;
-    }
+  // Cover all interactive elements explicitly
+  button,
+  a,
+  [role="button"],
+  [draggable="true"] {
+    cursor: default !important;
+  }
 
-    // Message area styling
-    &-message {
-        font-family: "MS Sans Serif", "Tahoma", sans-serif !important;
-        font-size: 11px !important;
-        line-height: 1.4 !important;
-        color: #000000 !important;
-        background-color: transparent !important;
-        background-image: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
+  // Target packard-belle components that might be used within win98-alert
+  .packard-belle {
+    cursor: default !important;
 
-    // Icon styling
-    &-content-icon {
-        background-color: #ffffff !important;
-        border: 1px solid #808080 !important;
-        border-radius: 50% !important;
-        width: 32px !important;
-        height: 32px !important;
-        margin-right: 12px !important;
-        flex-shrink: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+    .TitleBar,
+    .Window,
+    .WindowProgram,
+    .Button,
+    .TaskBar,
+    .StartMenu {
+      cursor: default !important;
     }
+  }
 
-    // Button container area
-    &-buttons {
-        padding: 12px !important;
-        display: flex !important;
-        justify-content: center !important;
-        background-color: #c0c0c0 !important;
-        border-top: 1px solid #808080 !important;
-        margin: 0 !important;
-    }
+  // Override any hover states for cursor only
+  *:hover,
+  *:active,
+  *:focus {
+    cursor: default !important;
+  }
+
+  // Style draggable elements
+  [draggable] {
+    cursor: default !important;
+  }
+
+  // Target specific Window elements that often have cursor changes
+  .Window__close,
+  .Window__minimize,
+  .Window__maximize,
+  .Window__restore,
+  .Frame__Header,
+  .Frame__Content,
+  .win98-titlebar {
+    cursor: default !important;
+  }
 }
 
-// Special media query for iOS Safari specific fixes
-@supports (-webkit-touch-callout: none) {
-    .win98-alert {
-        &-title {
-            background: #000080 !important; // Use solid color as fallback for iOS
-        }
+// Mobile-specific styles - contained inside win98-alert selectors to avoid leaking
+@media (max-width: 768px) {
+  .win98-alert {
+    // Contains all mobile styles within win98-alert scope
+    button,
+    a,
+    [role="button"] {
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      border-radius: 0 !important;
+      cursor: default !important;
+    }
+  }
+}
 
-        button,
-        &-button {
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            -webkit-text-fill-color: #000000 !important;
-            color: #000000 !important;
-            border-radius: 0 !important;
-        }
-    } }
+// iOS-specific overrides - contained inside win98-alert selectors to avoid leaking
+@supports (-webkit-touch-callout: none) {
+  .win98-alert {
+    // Contains all iOS styles within win98-alert scope
+    button,
+    a,
+    [role="button"] {
+      -webkit-appearance: none !important;
+      -webkit-text-fill-color: #000000 !important;
+      border-radius: 0 !important;
+      cursor: default !important;
+    }
+  }
+}
+
+// Modal overlay for alerts
+.win98-alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9000;
+
+  // Required to pass mouse events to the Window component
+  pointer-events: none;
+
+  // Make sure the alert itself receives events
+  .win98-alert {
+    pointer-events: auto;
+  }
+}

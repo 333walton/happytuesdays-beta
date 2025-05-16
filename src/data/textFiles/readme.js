@@ -124,13 +124,13 @@ const readmeHTML = `
 
 /* Base font styles */
 font * {
-  font-family: 'Comic Sans MS', 'Comic Sans', cursive !important;
+  font-family: 'Comic Sans MS', 'Comic Sans' !important;
 }
 
 /* Mobile-specific font override */
 @media (max-width: 768px) {
   font *, .marquee-link {
-    font-family: 'Comic Neue', cursive !important;
+    font-family: 'Comic Neue' !important;
   }
 }
 
