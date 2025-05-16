@@ -7,15 +7,76 @@ import {
   Button,
   TextInput,
   Select,
+  Window,
+  WindowHeader,
+  WindowContent,
 } from "react95";
 import styled, { ThemeProvider } from "styled-components";
 import original from "react95/dist/themes/original";
 import cx from "classnames";
 import CustomWindow from "../tools/CustomWindow";
-import StartMessage from "../StartMessage"; // Import the StartMessage component
 import { logOff24 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
+
+// Simple Alert Component using react95 components
+const AlertOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+`;
+
+// Alert Dialog styled to match Windows 98 aesthetic
+const AlertDialog = styled(Window)`
+  width: 300px;
+
+  .window-title {
+    font-weight: bold;
+    font-size: 12px;
+  }
+
+  .window-content {
+    padding: 10px;
+    font-size: 11px;
+    font-family: "Microsoft Sans Serif", Tahoma, sans-serif;
+    white-space: pre-line;
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+  }
+`;
+
+class Win98Alert extends Component {
+  render() {
+    const { title, message, onClose } = this.props;
+
+    return (
+      <AlertOverlay>
+        <AlertDialog>
+          <WindowHeader className="window-title">
+            {title || "Alert"}
+          </WindowHeader>
+          <WindowContent>
+            <div className="window-content">{message}</div>
+            <div className="button-row">
+              <Button onClick={onClose}>OK</Button>
+            </div>
+          </WindowContent>
+        </AlertDialog>
+      </AlertOverlay>
+    );
+  }
+}
 
 // Styled Components
 const TabsContainer = styled(Tabs)`
@@ -60,10 +121,6 @@ const ButtonRow = styled.div`
   gap: 4px;
   margin-top: 8px;
   flex-wrap: wrap;
-`;
-
-const UrlContainer = styled.div`
-  margin-top: 8px;
 `;
 
 const TableContainer = styled.div`
@@ -1000,13 +1057,12 @@ class UTMTool extends Component {
               )}
             </StyledTabBody>
 
-            {/* Alert dialog using StartMessage */}
+            {/* Alert dialog */}
             {this.state.showAlert && (
-              <StartMessage
-                welcomeMessage={this.state.alertMessage}
+              <Win98Alert
                 title={this.state.alertTitle}
-                closeWelcomeAlert={this.closeAlert}
-                showWelcomeAlert={this.state.showAlert}
+                message={this.state.alertMessage}
+                onClose={this.closeAlert}
               />
             )}
           </div>
