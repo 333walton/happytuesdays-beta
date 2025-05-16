@@ -31,12 +31,14 @@ class InternetExplorer extends Component {
   componentDidMount() {
     setTimeout(this.getIframeDimension, 3000);
   }
+  
   getIframeDimension = () => {
     const iframeDimensions = canAccessIframe(this.id);
     if (iframeDimensions && iframeDimensions !== this.state.dimensions) {
       this.setState({ dimensions: iframeDimensions });
     }
   };
+  
   render() {
     const { props } = this;
     return (
@@ -44,6 +46,12 @@ class InternetExplorer extends Component {
         {...props}
         Component={WindowExplorer}
         className={cx("InternetExplorer", props.className)}
+        resizable={true}  // Fixed typo here
+        style={{
+          width: '100%',
+          height: '100%',
+          border: 'none',
+        }}
         title={`${
           props.data.title || props.title !== "Internet Explorer"
             ? `${props.data.title || props.title} - `
@@ -52,6 +60,9 @@ class InternetExplorer extends Component {
         menuOptions={buildMenu(props)}
         minHeight={300}
         minWidth={300}
+        // Remove any max height/width constraints
+        maxHeight={window.innerHeight - 50} // Allow resizing to almost full screen
+        maxWidth={window.innerWidth - 50}  // Allow resizing to almost full screen
         explorerOptions={[
           {
             icon: icons.back,
@@ -108,47 +119,54 @@ class InternetExplorer extends Component {
         ]}
         maximizeOnOpen
       >
-        {props.data.__html && (
-          <div
-            style={{ margin: "2px 1px 0px 2px", minHeight: "calc(100% - 4px)" }}
-            dangerouslySetInnerHTML={props.data}
-          />
-        )}
-        {props.children}
-        {props.data &&
-          !props.data.html &&
-          props.data.src &&
-          (this.state.dimensions ? (
-            <div style={{ ...this.state.dimensions }}>
+        <div className="ie-content-wrapper" style={{ width: '100%', height: '100%' }}>
+          {props.data.__html && (
+            <div
+              style={{ margin: "2px 1px 0px 2px", minHeight: "calc(100% - 4px)" }}
+              dangerouslySetInnerHTML={props.data}
+            />
+          )}
+          
+          {props.children}
+          
+          {props.data &&
+            !props.data.html &&
+            props.data.src &&
+            (this.state.dimensions ? (
+              <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                <iframe
+                  className={this.id}
+                  frameBorder="0"
+                  src={props.data.src}
+                  title={props.data.src}
+                  importance="low"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    // Remove fixed height constraints
+                    // maxHeight: '400px !important', - Removed this constraint
+                    border: 'none'
+                  }}
+                />
+              </div>
+            ) : (
               <iframe
                 className={this.id}
                 frameBorder="0"
                 src={props.data.src}
                 title={props.data.src}
                 importance="low"
-                height="480"
-                width="640"
-                {...this.state.dimensions}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none'
+                }}
               />
-            </div>
-          ) : (
-            <iframe
-              className={cx(this.id, "crossOrigin")}
-              scrolling="no"
-              frameBorder="0"
-              src={"http://localhost:3000/" || props.data.src}
-              title={props.data.src}
-              importance="low"
-              height="480"
-              width="640"
-            />
-          ))}
+            ))}
+        </div>
       </Window>
     );
   }
 }
 
 export default InternetExplorer;
-
-// initialHeight, initialWidth, title, icon, footer, id,
-// onClose, onMaximize, isActive, explorerOptions, chidlren, data, customSelect, Component

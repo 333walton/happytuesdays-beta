@@ -59,8 +59,9 @@ body {
   transform: scale(1);
 }
 
-.react-draggable > .Window {
-  height: 100%; /*height: calc(100% - 28) !important*/
+.react-draggable>.Window {
+  height: 100%;
+  /*height: calc(100% - 28) !important*/
   width: 100%;
 }
 
@@ -78,6 +79,7 @@ body {
   background-color: #000000 !important;
   display: flex;
 }
+
 .itIsNowSafeToTurnOffYourComputer:after {
   content: "It's now safe to turn off your computer.";
   padding: 16px;
@@ -87,6 +89,7 @@ body {
   font-size: 22px;
   font-family: AMIBios, "Courier New", Courier, monospace;
 }
+
 .desktop.windowsShuttingDown {
   background-color: #a6c7df;
   background-image: url("./assets/windowsShuttingDown-min.png");
@@ -94,6 +97,7 @@ body {
   background-size: contain;
   background-repeat: no-repeat;
 }
+
 @media (min-width: 640px) and (min-height: 480px) {
   .windowsShuttingDown {
     background-size: cover;
@@ -105,8 +109,21 @@ body {
     display: none !important;
   }
 }
+
 @media (max-width: 600px) {
   .btn.ButtonNav.Window__maximize {
     display: none !important;
+  }
+}
+
+/* Fix for blue text in Taskbar on iOS Safari */
+@supports (-webkit-touch-callout: none) {
+
+  .TaskBar .taskbar-item,
+  .TaskBar .taskbar-item--active,
+  .TaskBar .taskbar-item-title,
+  [class*="taskbar"] {
+    color: rgb(0, 0, 0) !important;
+    -webkit-text-fill-color: rgb(0, 0, 0) !important;
   }
 }

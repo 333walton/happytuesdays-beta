@@ -222,3 +222,25 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
     -webkit-text-fill-color: #000000 !important;
   }
 }
+
+/* Add only this to your CSS (either global or _styles.scss) */
+
+/* Unified resize handle CSS */
+.react-resizable-handle {
+  height: 15px !important;
+  width: 15px !important;
+  z-index: 10 !important;
+  position: absolute !important;
+  right: 0 !important; /* Was -3px in one place */
+  bottom: 0 !important; /* Was -3px in one place */
+  cursor: nwse-resize !important;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"><path d="M11 9.5H9.5V11H11V9.5ZM11 12.5H9.5V14H11V12.5ZM8 9.5H6.5V11H8V9.5ZM8 12.5H6.5V14H8V12.5ZM5 9.5H3.5V11H5V9.5ZM5 12.5H3.5V14H5V12.5Z" fill="black"/></svg>') !important;
+  background-position: bottom right !important;
+  background-repeat: no-repeat !important;
+  max-height: none !important;
+}
+
+/* Make sure the handle is visible when you hover over it */
+.Window:hover .react-resizable-handle {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}

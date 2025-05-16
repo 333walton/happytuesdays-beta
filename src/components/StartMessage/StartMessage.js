@@ -14,7 +14,8 @@ class StartMessage extends Component {
       windowPosition: {
         x: 200, // Default desktop position
         y: 200
-      }
+      },
+      rocketModeToggled: false
     };
   }
 
@@ -27,6 +28,9 @@ class StartMessage extends Component {
     
     // Listen for the BIOS sequence completion
     window.addEventListener('biosSequenceCompleted', this.handleBiosCompletion);
+    
+    // Listen for rocket mode toggle events
+    window.addEventListener('rocketModeToggled', this.handleRocketModeToggle);
     
     // Add simple document-level mouse event handlers
     document.addEventListener('mousedown', this.handleMouseDown);
@@ -41,9 +45,15 @@ class StartMessage extends Component {
   
   componentWillUnmount() {
     window.removeEventListener('biosSequenceCompleted', this.handleBiosCompletion);
+    window.removeEventListener('rocketModeToggled', this.handleRocketModeToggle);
     window.removeEventListener('resize', this.checkDeviceType);
     document.removeEventListener('mousedown', this.handleMouseDown);
     document.removeEventListener('mouseup', this.handleMouseUp);
+  }
+  
+  // Handle rocket mode toggle events
+  handleRocketModeToggle = (event) => {
+    this.setState({ rocketModeToggled: true });
   }
   
   // Simple global mouse handlers
@@ -110,28 +120,26 @@ class StartMessage extends Component {
   }
 
   render() {
-    if (!this.state.showWelcomeAlert) {
+    // Don't render for mobile or after rocket mode has been toggled
+    if (this.state.isMobile || this.state.rocketModeToggled || !this.state.showWelcomeAlert) {
       return null;
     }
     
-    const welcomeMessage = this.state.isMobile 
-      ? "For best experience view this site on desktop" 
-      : "Welcome to Hydra98! Please enjoy and don't break anything";
+    const welcomeMessage = "Welcome to Hydra98! Please enjoy and don't break anything";
 
     return (
       <Window
         title="Welcome"
         Component={WindowProgram}
         initialWidth={290}
-        initialHeight={137} //this is preventing the window from going below the taskbar (prob not a perm fix)
+        initialHeight={137}
         initialX={this.state.windowPosition.x}
         initialY={this.state.windowPosition.y}
         resizable={false}
         onClose={this.closeWelcomeAlert}
         className={cx(
           'welcome-window',
-          'Window--active',
-          { 'is-mobile': this.state.isMobile }
+          'Window--active'
         )}
         style={{
           zIndex: 800

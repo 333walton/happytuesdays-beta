@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import cx from "classnames"; // Added this import
 import { WindowExplorer, ExplorerIcon, WindowAlert } from "packard-belle";
 import * as icons from "../../icons";
 import Window from "../tools/Window";
@@ -72,10 +73,20 @@ class Explorer extends Component {
           title={props.title || "Explorer"} // Dynamically set the title based on props.title
           initialWidth={dimensions.initialWidth} // Dynamically set width
           initialHeight={dimensions.initialHeight} // Dynamically set height
+          minWidth={200}  // Add explicit min constraints
+          minHeight={150} 
+          maxHeight={window.innerHeight - 50} // Allow resizing to almost full screen height
+          maxWidth={window.innerWidth - 50} // Allow resizing to almost full screen width
           maximizeOnOpen={false} // Ensure the window does not open maximized
           forceNoMobileMax={true} // Prevent maximization on mobile devices
+          resizable={true} // Explicitly set resizable to true
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+          }}
           Component={WindowExplorer}
-          className={state.loading && "wait wait2"}
+          className={cx(state.loading && "wait wait2", "Explorer")} // Added "Explorer" class
           explorerOptions={[
             { icon: icons.back, title: "Back", onClick: noop },
             { icon: icons.forward, title: "Forward", onClick: noop },
@@ -150,6 +161,3 @@ class Explorer extends Component {
 }
 
 export default Explorer;
-
-// initialHeight, initialWidth, title, icon, footer, id,
-// onClose, onMaximize, isActive, explorerOptions, chidlren, data, customSelect, Component

@@ -5,14 +5,185 @@
     display: initial;
     margin: 2px;
     height: 0px; // @todo WHAT?!
+    font-weight: 200;
   }
 
-  iframe.crossOrigin {
-    width: 200%;
-    height: 200%;
-    transform: scale(0.5);
-    left: -50%;
-    top: -50%;
+  // Improved iframe container
+  .ie-iframe-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    min-height: 300px;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
     position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+    .InternetExplorer {
+      max-height: 100%};
+
+  .ie-content {
+    width: 100%;
+    height: 100%;
+  }
+
+  // Target specifically the README content
+  div[dangerouslySetInnerHTML] {
+    font-family: "Comic Sans MS", "Comic Sans" !important;
+
+    .readme-content,
+    table,
+    tr,
+    td,
+    p,
+    div,
+    span,
+    ul,
+    li,
+    a,
+    b {
+      font-family: "Comic Sans MS", "Comic Sans" !important;
+    }
+  }
+
+  // Ensure window title text is white
+  .Window__title,
+  .Window__title-text {
+    color: rgb(255, 255, 255) !important;
+    -webkit-text-fill-color: rgb(255, 255, 255) !important;
+  }
+
+  // iOS Safari specific overrides
+  @supports (-webkit-touch-callout: none) {
+
+    // Comic Sans for content
+    div[dangerouslySetInnerHTML] {
+      font-family: "Comic Sans MS", "Comic Sans", !important;
+
+      * {
+        font-family: "Comic Sans MS", "Comic Sans", !important;
+      }
+    }
+
+    // Ensure window title text is white
+    .Window__title,
+    .Window__title-text {
+      color: rgb(255, 255, 255) !important;
+      -webkit-text-fill-color: rgb(255, 255, 255) !important;
+    }
+  }
+}
+
+/* Ensure Comic Sans MS is available */
+@font-face {
+  font-family: "Comic Sans MS";
+  src: local("Comic Sans MS"), local("ComicSansMS");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.react-resizable-handle {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+}
+
+/* Window maximized states */
+.WindowExplorer.maximized,
+.Window--maximized,
+.InternetExplorer.Window--maximized {
+  width: 100% !important;
+  height: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+  font-weight: 250;
+}
+
+.react-draggable-maximized-hack {
+  width: 100% !important;
+  height: calc(100% - 28px) !important;
+  /* Account for taskbar */
+  transform: translate(0px, 0px) !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/* Critical fix for dragging */
+.react-draggable {
+  position: absolute !important;
+  top: 0px !important;
+  left: 0px !important;
+  z-index: 7 !important;
+}
+
+.react-draggable-dragging .InternetExplorer {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.react-draggable-dragged .InternetExplorer {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.react-draggable-dragging .ie-iframe-container,
+.react-draggable-dragging iframe,
+.react-draggable-dragging .ie-content {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.WindowExplorer {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+// Fix the resize handle
+.react-resizable-handle {
+  height: 15px !important;
+  width: 15px !important;
+  z-index: 10 !important; // Higher z-index to ensure it's clickable
+  position: absolute !important;
+  right: -3px !important;
+  bottom: -3px !important;
+  cursor: nwse-resize !important; // Show resize cursor
+  background-color: rgba(255, 255, 255, 0.1) !important; // Slight highlight to find it
+}
+
+// Make sure content adapts to resizing
+.InternetExplorer {
+  max-height: none !important; // Remove height restrictions
+
+  iframe,
+  .ie-content-wrapper,
+  .ie-iframe-container {
+    max-height: none !important; // Remove all iframe height restrictions
+    height: 100% !important;
+  }
+}
+
+// Ensure resize handle is visible and grabbable
+.WindowExplorer {
+  &.InternetExplorer {
+    overflow: visible !important; // Allow the resize handle to be visible outside
+
+    // Improve visibility of resize handle
+    &:hover .react-resizable-handle {
+      background-color: rgba(255, 255, 255, 0.3) !important;
+    }
   }
 }
