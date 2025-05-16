@@ -223,6 +223,13 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
   }
 }
 
+
+// Ensure window title text is white
+.WindowExplorer__title,
+.WindowExplorer__title-text {
+  color: rgb(255, 255, 255) !important;
+  -webkit-text-fill-color: rgb(255, 255, 255) !important;
+}
 /* Add only this to your CSS (either global or _styles.scss) */
 
 /* Unified resize handle CSS */

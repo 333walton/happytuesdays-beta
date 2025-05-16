@@ -124,10 +124,10 @@
 
 /* Critical fix for dragging */
 .react-draggable {
-  position: absolute !important;
-  top: 0px !important;
-  left: 0px !important;
-  z-index: 7 !important;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 7;
 }
 
 .react-draggable-dragging .InternetExplorer {
@@ -135,7 +135,12 @@
   height: 100% !important;
 }
 
-.react-draggable-dragged .InternetExplorer {
+.react-draggable-dragged .InternetExplorer, .react-draggable .react-draggable-dragged .InternetExplorer, .react-draggable .react-draggable-dragging .react-draggable-dragged .InternetExplorer {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.react-draggable .react-draggable-dragging .react-draggable-dragged {
   width: 100% !important;
   height: 100% !important;
 }
