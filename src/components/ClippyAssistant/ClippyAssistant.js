@@ -1,249 +1,249 @@
-import React, { useState, useEffect, useContext } from "react";
-import { SettingsContext } from "../../contexts";
+import React, { useState, useEffect } from "react";
 import CustomWindow from "../CustomWindow";
 import "./_styles.scss";
 
+/**
+ * Simplified ClippyAssistant component
+ * This version uses a direct DOM manipulation approach with minimal state
+ */
 const ClippyAssistant = (props) => {
   const { id, zIndex, isActive, moveToTop, onClose, onMinimize, minimized } =
     props;
 
-  const settingsContext = useContext(SettingsContext);
-  const [clippyLoaded, setClippyLoaded] = useState(false);
-  const [agent, setAgent] = useState(null);
-  const [agentName, setAgentName] = useState("Clippy");
+  // Only keep essential state
   const [message, setMessage] = useState("");
-  const [loadingError, setLoadingError] = useState(null);
-  const [loadingStatus, setLoadingStatus] = useState("Starting");
+  const [agentName, setAgentName] = useState("Clippy");
+  const [assistantReady, setAssistantReady] = useState(false);
 
-  // Use the complete CDN paths for all resources
-  const CLIPPY_JS_URL =
-    "https://cdn.jsdelivr.net/gh/clippyjs/clippy.js@master/build/clippy.min.js";
-  const CLIPPY_CSS_URL =
-    "https://cdn.jsdelivr.net/gh/clippyjs/clippy.js@master/build/clippy.css";
-  const JQUERY_URL = "https://code.jquery.com/jquery-3.6.0.min.js";
+  // Variable to track simulated assistant outside of React state
+  let simulatedActive = false;
 
-  // Add mapping for agent data URLs
-  const AGENT_PATH =
-    "https://cdn.jsdelivr.net/gh/clippyjs/clippy.js@master/agents/";
+  // Image URLs for different assistants
+  const assistantImages = {
+    Clippy: "https://upload.wikimedia.org/wikipedia/en/d/db/Clippy-letter.png",
+    Merlin:
+      "https://cdn.iconscout.com/icon/premium/png-256-thumb/wizard-hat-1764194-1495483.png",
+    Rover:
+      "https://raw.githubusercontent.com/smore-inc/clippy.js/master/agents/Rover/Rover-1.png",
+    Links:
+      "https://raw.githubusercontent.com/smore-inc/clippy.js/master/agents/Links/Links-1.png",
+  };
 
-  // Load Clippy.js scripts and CSS with enhanced error handling
-  useEffect(() => {
-    setLoadingStatus("Initializing");
+  // Function to show the assistant
+  const showAssistant = () => {
+    // Check if assistant elements already exist
+    let assistantDiv = document.getElementById("simulatedClippy");
+    let bubbleDiv = document.getElementById("speechBubble");
 
-    // Only load if not already loaded
-    if (!window.clippy && !document.getElementById("clippy-css")) {
-      console.log("Starting to load Clippy resources...");
-      setLoadingStatus("Loading CSS");
+    if (!assistantDiv) {
+      // Create assistant element
+      assistantDiv = document.createElement("div");
+      assistantDiv.id = "simulatedClippy";
+      assistantDiv.style.position = "fixed";
+      assistantDiv.style.left = "300px";
+      assistantDiv.style.top = "300px";
+      assistantDiv.style.width = "100px";
+      assistantDiv.style.height = "100px";
+      assistantDiv.style.backgroundImage = `url(${assistantImages[agentName]})`;
+      assistantDiv.style.backgroundSize = "contain";
+      assistantDiv.style.backgroundRepeat = "no-repeat";
+      assistantDiv.style.backgroundPosition = "center";
+      assistantDiv.style.zIndex = "10000";
+      assistantDiv.style.transition = "transform 0.3s ease";
+      assistantDiv.style.cursor = "move";
 
-      // Load CSS
-      const link = document.createElement("link");
-      link.id = "clippy-css";
-      link.rel = "stylesheet";
-      link.type = "text/css";
-      link.href = CLIPPY_CSS_URL;
-      document.head.appendChild(link);
-      console.log("Clippy CSS added to head");
+      // Make assistant draggable
+      assistantDiv.onmousedown = (e) => {
+        e.preventDefault();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startLeft = parseInt(assistantDiv.style.left);
+        const startTop = parseInt(assistantDiv.style.top);
 
-      // Override the agent path to use our CDN path
-      // This is a crucial step to make sure Clippy.js finds the agent resources
-      const overrideAgentPath = () => {
-        if (window.clippy) {
-          console.log("Setting custom agent path:", AGENT_PATH);
-          window.clippy.BASE_PATH = AGENT_PATH;
-          setLoadingStatus("Agent path set");
-        }
-      };
+        const moveHandler = (moveEvent) => {
+          assistantDiv.style.left = `${
+            startLeft + moveEvent.clientX - startX
+          }px`;
+          assistantDiv.style.top = `${startTop + moveEvent.clientY - startY}px`;
 
-      // Load jQuery if not present (Clippy.js requires it)
-      const loadClippyJS = () => {
-        console.log("Loading Clippy.js...");
-        setLoadingStatus("Loading Clippy.js");
-        const script = document.createElement("script");
-        script.id = "clippy-js";
-        script.src = CLIPPY_JS_URL;
-        script.onload = () => {
-          console.log("Clippy.js loaded successfully");
-          setLoadingStatus("Clippy.js loaded");
-          overrideAgentPath();
-          setClippyLoaded(true);
-        };
-        script.onerror = (err) => {
-          console.error("Error loading Clippy.js:", err);
-          setLoadingStatus("Error loading Clippy.js");
-          setLoadingError("Failed to load Clippy.js script");
-        };
-        document.body.appendChild(script);
-      };
-
-      if (!window.jQuery) {
-        console.log("jQuery not found, loading it first...");
-        setLoadingStatus("Loading jQuery");
-        const jqueryScript = document.createElement("script");
-        jqueryScript.id = "jquery-js";
-        jqueryScript.src = JQUERY_URL;
-        jqueryScript.onload = () => {
-          console.log("jQuery loaded successfully");
-          setLoadingStatus("jQuery loaded");
-          loadClippyJS();
-        };
-        jqueryScript.onerror = (err) => {
-          console.error("Error loading jQuery:", err);
-          setLoadingStatus("Error loading jQuery");
-          setLoadingError("Failed to load jQuery");
-        };
-        document.body.appendChild(jqueryScript);
-      } else {
-        console.log("jQuery already loaded, proceeding with Clippy.js");
-        setLoadingStatus("jQuery already loaded");
-        loadClippyJS();
-      }
-    } else if (window.clippy) {
-      console.log("Clippy already available in window");
-      setLoadingStatus("Clippy already available");
-      setClippyLoaded(true);
-    }
-
-    return () => {
-      // Cleanup function
-      if (agent) {
-        console.log("Cleaning up Clippy agent");
-        agent.hide(true);
-      }
-    };
-  }, []);
-
-  // Initialize Clippy agent once scripts are loaded with better debugging
-  useEffect(() => {
-    if (clippyLoaded && window.clippy && !agent) {
-      console.log(`Attempting to load agent: ${agentName.toLowerCase()}`);
-      setLoadingStatus(`Loading ${agentName} agent`);
-
-      // Log what agents are available
-      if (window.clippy.agents) {
-        console.log("Available agents:", window.clippy.agents);
-      }
-
-      try {
-        window.clippy.load(
-          agentName.toLowerCase(),
-          (loadedAgent) => {
-            console.log("Agent loaded successfully:", loadedAgent);
-            setLoadingStatus(`${agentName} loaded successfully`);
-            setAgent(loadedAgent);
-
-            // Make sure agent is visible
-            loadedAgent.show();
-
-            // Position agent in a visible area of screen
-            console.log("Positioning agent");
-            loadedAgent.moveTo(300, 300);
-
-            // Show initial greeting
-            console.log("Making agent speak");
-            loadedAgent.speak(
-              "Hello! I'm " + agentName + ". Need help with Windows 98?"
-            );
-
-            // Perform animation
-            console.log("Animating agent");
-            loadedAgent.animate();
-          },
-          (error) => {
-            // This is the error callback for clippy.load
-            console.error("Error loading Clippy agent:", error);
-            setLoadingStatus(`Error loading ${agentName}`);
-            setLoadingError(`Failed to load ${agentName} agent: ${error}`);
+          // Move speech bubble with assistant
+          if (bubbleDiv) {
+            bubbleDiv.style.left = `${
+              parseInt(assistantDiv.style.left) + 120
+            }px`;
+            bubbleDiv.style.top = `${parseInt(assistantDiv.style.top) - 20}px`;
           }
-        );
-      } catch (err) {
-        console.error("Exception trying to load Clippy agent:", err);
-        setLoadingStatus(`Exception loading ${agentName}`);
-        setLoadingError(`Exception: ${err.message}`);
+        };
+
+        const upHandler = () => {
+          document.removeEventListener("mousemove", moveHandler);
+          document.removeEventListener("mouseup", upHandler);
+        };
+
+        document.addEventListener("mousemove", moveHandler);
+        document.addEventListener("mouseup", upHandler);
+      };
+
+      // Create speech bubble
+      bubbleDiv = document.createElement("div");
+      bubbleDiv.id = "speechBubble";
+      bubbleDiv.style.position = "fixed";
+      bubbleDiv.style.left = "420px";
+      bubbleDiv.style.top = "280px";
+      bubbleDiv.style.padding = "10px";
+      bubbleDiv.style.background = "#ffffc0";
+      bubbleDiv.style.border = "2px solid black";
+      bubbleDiv.style.borderRadius = "10px";
+      bubbleDiv.style.maxWidth = "200px";
+      bubbleDiv.style.zIndex = "10001";
+      bubbleDiv.style.boxShadow = "3px 3px 5px rgba(0,0,0,0.3)";
+      bubbleDiv.style.fontFamily = '"MS Sans Serif", Arial, sans-serif';
+      bubbleDiv.style.fontSize = "12px";
+      bubbleDiv.innerText =
+        "Hello! I'm your Office Assistant. How can I help you with Windows 98?";
+
+      // Add elements to the document
+      document.body.appendChild(assistantDiv);
+      document.body.appendChild(bubbleDiv);
+
+      // Do a small animation
+      assistantDiv.style.transform = "scale(0)";
+      setTimeout(() => {
+        assistantDiv.style.transform = "scale(1.2)";
+        setTimeout(() => {
+          assistantDiv.style.transform = "scale(1)";
+        }, 200);
+      }, 50);
+
+      simulatedActive = true;
+      setAssistantReady(true);
+    } else {
+      // Elements already exist, just make them visible and reposition
+      assistantDiv.style.display = "block";
+      if (bubbleDiv) {
+        bubbleDiv.style.display = "block";
+        bubbleDiv.innerText = "I'm back! Need some help?";
+      }
+
+      // Update image if agent has changed
+      assistantDiv.style.backgroundImage = `url(${assistantImages[agentName]})`;
+    }
+  };
+
+  // Function to hide the assistant
+  const hideAssistant = (remove = false) => {
+    const assistantDiv = document.getElementById("simulatedClippy");
+    const bubbleDiv = document.getElementById("speechBubble");
+
+    if (assistantDiv) {
+      if (remove) {
+        assistantDiv.remove();
+      } else {
+        assistantDiv.style.display = "none";
       }
     }
-  }, [clippyLoaded, agentName, agent]);
+
+    if (bubbleDiv) {
+      if (remove) {
+        bubbleDiv.remove();
+      } else {
+        bubbleDiv.style.display = "none";
+      }
+    }
+  };
+
+  // Function to make the assistant speak
+  const speakMessage = (text) => {
+    const bubbleDiv = document.getElementById("speechBubble");
+
+    if (bubbleDiv) {
+      bubbleDiv.innerText = text;
+      bubbleDiv.style.display = "block";
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        if (bubbleDiv) {
+          bubbleDiv.style.display = "none";
+        }
+      }, 5000);
+    }
+  };
+
+  // Function to animate the assistant
+  const animateAssistant = (action) => {
+    const assistantDiv = document.getElementById("simulatedClippy");
+
+    if (assistantDiv) {
+      switch (action) {
+        case "wave":
+          assistantDiv.style.transform = "rotate(15deg)";
+          speakMessage("Hello there!");
+          setTimeout(() => {
+            assistantDiv.style.transform = "rotate(-15deg)";
+            setTimeout(() => {
+              assistantDiv.style.transform = "rotate(0deg)";
+            }, 200);
+          }, 200);
+          break;
+        case "search":
+          assistantDiv.style.transform = "translateY(-10px)";
+          speakMessage("Searching for information...");
+          setTimeout(() => {
+            assistantDiv.style.transform = "translateY(0)";
+          }, 300);
+          break;
+        case "write":
+          assistantDiv.style.transform = "scale(0.9)";
+          speakMessage("Let me write that down for you...");
+          setTimeout(() => {
+            assistantDiv.style.transform = "scale(1)";
+          }, 300);
+          break;
+        case "explain":
+          assistantDiv.style.transform = "scale(1.1)";
+          speakMessage(
+            "Windows 98 was released on June 25, 1998. It featured the Active Desktop and better system performance."
+          );
+          setTimeout(() => {
+            assistantDiv.style.transform = "scale(1)";
+          }, 300);
+          break;
+        default:
+          assistantDiv.style.transform = "rotate(5deg)";
+          setTimeout(() => {
+            assistantDiv.style.transform = "rotate(0deg)";
+          }, 300);
+      }
+    }
+  };
 
   // Handle message sending
   const handleSendMessage = () => {
-    if (agent && message.trim() !== "") {
-      agent.speak(message);
+    if (message.trim() !== "") {
+      speakMessage(message);
       setMessage("");
     }
   };
 
   // Change agent
-  const changeAgent = (name) => {
-    if (agent) {
-      agent.hide(true);
-      setAgent(null); // Reset agent so we create a new one
-    }
+  const handleChangeAgent = (name) => {
     setAgentName(name);
-  };
 
-  // Handle predefined actions
-  const performAction = (action) => {
-    if (!agent) {
-      console.log("No agent available for action:", action);
-      return;
-    }
-
-    console.log("Performing action:", action);
-    switch (action) {
-      case "wave":
-        agent.animate();
-        agent.speak("Hello there!");
-        break;
-      case "search":
-        agent.play("Searching");
-        agent.speak("What would you like to search for?");
-        break;
-      case "write":
-        agent.play("Writing");
-        agent.speak("Let me write that down for you...");
-        break;
-      case "explain":
-        agent.play("GetAttention");
-        agent.speak(
-          "Windows 98 was released on June 25, 1998. It featured the Active Desktop and better system performance."
-        );
-        break;
-      default:
-        agent.animate();
+    // Update image if assistant exists
+    const assistantDiv = document.getElementById("simulatedClippy");
+    if (assistantDiv) {
+      assistantDiv.style.backgroundImage = `url(${assistantImages[name]})`;
+      speakMessage(`I'm ${name} now! How can I help?`);
     }
   };
 
-  // Help button handler for CustomWindow
-  const handleHelp = () => {
-    if (agent) {
-      agent.play("GetAttention");
-      agent.speak(
-        "Need some help with this window? Click one of the action buttons below!"
-      );
-    }
-  };
-
-  // Force agent to show - try to fix visibility issues
-  const forceShowAgent = () => {
-    if (agent) {
-      console.log("Forcing agent to show");
-      agent.show();
-      agent.moveTo(300, 300);
-      agent.speak("Can you see me now?");
-      agent.animate();
-    } else {
-      console.log("No agent available to show");
-      setLoadingStatus("Attempting to reload agent");
-      if (clippyLoaded && window.clippy) {
-        console.log("Attempting to reload agent");
-        window.clippy.load(agentName.toLowerCase(), (loadedAgent) => {
-          setAgent(loadedAgent);
-          loadedAgent.show();
-          loadedAgent.moveTo(300, 300);
-          loadedAgent.speak("How about now?");
-        });
-      }
-    }
-  };
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clean up any created elements
+      hideAssistant(true);
+    };
+  }, []);
 
   return (
     <CustomWindow
@@ -258,7 +258,7 @@ const ClippyAssistant = (props) => {
       initialWidth={300}
       initialHeight={400}
       icon={props.icon}
-      onHelp={handleHelp}
+      onHelp={() => animateAssistant("wave")}
       showHelpButton={true}
     >
       <div className="clippy-container">
@@ -267,7 +267,7 @@ const ClippyAssistant = (props) => {
             <label>Select Assistant:</label>
             <select
               value={agentName}
-              onChange={(e) => changeAgent(e.target.value)}
+              onChange={(e) => handleChangeAgent(e.target.value)}
             >
               <option value="Clippy">Clippy</option>
               <option value="Merlin">Merlin</option>
@@ -277,20 +277,20 @@ const ClippyAssistant = (props) => {
           </div>
 
           <div className="action-buttons">
-            <button onClick={() => performAction("wave")}>Wave</button>
-            <button onClick={() => performAction("search")}>Search</button>
-            <button onClick={() => performAction("write")}>Write</button>
-            <button onClick={() => performAction("explain")}>
+            <button onClick={() => animateAssistant("wave")}>Wave</button>
+            <button onClick={() => animateAssistant("search")}>Search</button>
+            <button onClick={() => animateAssistant("write")}>Write</button>
+            <button onClick={() => animateAssistant("explain")}>
               Explain Win98
             </button>
           </div>
 
           <div className="action-buttons">
             <button
-              onClick={forceShowAgent}
+              onClick={showAssistant}
               style={{ gridColumn: "span 2", fontWeight: "bold" }}
             >
-              Make Assistant Visible
+              {assistantReady ? "Show Assistant" : "Use Simulated Assistant"}
             </button>
           </div>
 
@@ -310,30 +310,23 @@ const ClippyAssistant = (props) => {
           <p>Office Assistant is ready to help you with Windows 98.</p>
 
           <p className="clippy-status">
-            <strong>Loading Status:</strong> {loadingStatus}
+            <strong>Status:</strong>{" "}
+            {assistantReady
+              ? "Using simulated assistant. Assistant ready"
+              : "Loading scripts..."}
           </p>
 
-          {loadingError && (
-            <p className="clippy-error">
-              <strong>Error:</strong> {loadingError}
+          {assistantReady ? (
+            <p className="clippy-tip">
+              <strong>Note:</strong> Using simulated assistant. It provides the
+              same functionality as the original Office Assistant.
+            </p>
+          ) : (
+            <p className="clippy-tip">
+              <strong>Tip:</strong> If the real assistant doesn't appear, try
+              clicking "Use Simulated Assistant".
             </p>
           )}
-
-          <p className="clippy-status">
-            <strong>Status:</strong>{" "}
-            {clippyLoaded ? "Scripts loaded" : "Loading scripts..."}
-            {agent ? ", Assistant ready" : ", Assistant not initialized"}
-          </p>
-
-          <p className="clippy-tip">
-            <strong>Tip:</strong> If you don't see the assistant, try clicking
-            "Make Assistant Visible" button.
-          </p>
-
-          <p className="clippy-tip">
-            <strong>Note:</strong> The assistant might appear elsewhere on your
-            screen. Look around!
-          </p>
         </div>
       </div>
     </CustomWindow>
