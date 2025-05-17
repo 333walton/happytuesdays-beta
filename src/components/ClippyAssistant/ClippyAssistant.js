@@ -3,247 +3,171 @@ import CustomWindow from "../CustomWindow";
 import "./_styles.scss";
 
 /**
- * Simplified ClippyAssistant component
- * This version uses a direct DOM manipulation approach with minimal state
+ * ClippyAssistant with GIF animation and reduced height
  */
 const ClippyAssistant = (props) => {
   const { id, zIndex, isActive, moveToTop, onClose, onMinimize, minimized } =
     props;
 
-  // Only keep essential state
+  // Keep track of essential state
   const [message, setMessage] = useState("");
   const [agentName, setAgentName] = useState("Clippy");
-  const [assistantReady, setAssistantReady] = useState(false);
+  const [showingAssistant, setShowingAssistant] = useState(false);
+  const [bubbleText, setBubbleText] = useState(
+    "Hello! I'm your Office Assistant. How can I help you with Windows 98?"
+  );
+  const [animationClass, setAnimationClass] = useState("");
+  const [imageError, setImageError] = useState(false);
 
-  // Variable to track simulated assistant outside of React state
-  let simulatedActive = false;
-
-  // Image URLs for different assistants
+  // Use GIFs for the main images and emojis as fallbacks
   const assistantImages = {
-    Clippy: "https://upload.wikimedia.org/wikipedia/en/d/db/Clippy-letter.png",
-    Merlin:
-      "https://cdn.iconscout.com/icon/premium/png-256-thumb/wizard-hat-1764194-1495483.png",
-    Rover:
-      "https://raw.githubusercontent.com/smore-inc/clippy.js/master/agents/Rover/Rover-1.png",
-    Links:
-      "https://raw.githubusercontent.com/smore-inc/clippy.js/master/agents/Links/Links-1.png",
+    Clippy: {
+      main: "https://media.tenor.com/uRRzZTvQTHgAAAAC/clippy-clip.gif", // Animated GIF
+      fallback:
+        "https://i.gifer.com/origin/8f/8fd3f22113b602d7a60263c4c5d950ff_w200.gif", // Alternative GIF
+      emoji: "📎",
+    },
+    Merlin: {
+      main: "https://media.tenor.com/oyCH_3SlJN0AAAAC/microsoft-agent-merlin.gif",
+      fallback:
+        "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWJ6emRtNnBxeXR1dWdrZG04bm5nZWd5c2F2dGRzOGVuYmVwMzkwcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/nxM1YSgYzXALvFD2Pt/giphy.gif",
+      emoji: "🧙‍♂️",
+    },
+    Rover: {
+      main: "https://media.tenor.com/AH8YsuB-4cQAAAAd/microsoft-agent-rover.gif",
+      fallback:
+        "https://media1.tenor.com/m/O9rOKPuZtTIAAAAC/microsoft-agent-rover.gif",
+      emoji: "🐶",
+    },
+    Links: {
+      main: "https://i.imgur.com/UdoGF7y.gif",
+      fallback:
+        "https://media.tenor.com/ZNXMpQ0lPqwAAAAC/microsoft-agent-links.gif",
+      emoji: "⛓️",
+    },
+  };
+
+  // Get current image with fallbacks
+  const getCurrentImage = () => {
+    if (!assistantImages[agentName]) return assistantImages["Clippy"].main;
+
+    if (imageError) {
+      // Try fallback GIF
+      return assistantImages[agentName].fallback;
+    }
+
+    return assistantImages[agentName].main;
+  };
+
+  // Function to handle image load errors
+  const handleImageError = () => {
+    console.log("Image failed to load, using fallback");
+    setImageError(true);
+  };
+
+  // Handle second image error - move to emoji
+  const handleFallbackError = () => {
+    console.log("Fallback image failed too, using emoji");
+    // We'll render emoji instead
+    return true;
   };
 
   // Function to show the assistant
   const showAssistant = () => {
-    // Check if assistant elements already exist
-    let assistantDiv = document.getElementById("simulatedClippy");
-    let bubbleDiv = document.getElementById("speechBubble");
+    setShowingAssistant(true);
+    setAnimationClass("assistant-enter");
+    setTimeout(() => {
+      setAnimationClass("");
+    }, 1000);
 
-    if (!assistantDiv) {
-      // Create assistant element
-      assistantDiv = document.createElement("div");
-      assistantDiv.id = "simulatedClippy";
-      assistantDiv.style.position = "fixed";
-      assistantDiv.style.left = "300px";
-      assistantDiv.style.top = "300px";
-      assistantDiv.style.width = "100px";
-      assistantDiv.style.height = "100px";
-      assistantDiv.style.backgroundImage = `url(${assistantImages[agentName]})`;
-      assistantDiv.style.backgroundSize = "contain";
-      assistantDiv.style.backgroundRepeat = "no-repeat";
-      assistantDiv.style.backgroundPosition = "center";
-      assistantDiv.style.zIndex = "10000";
-      assistantDiv.style.transition = "transform 0.3s ease";
-      assistantDiv.style.cursor = "move";
-
-      // Make assistant draggable
-      assistantDiv.onmousedown = (e) => {
-        e.preventDefault();
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startLeft = parseInt(assistantDiv.style.left);
-        const startTop = parseInt(assistantDiv.style.top);
-
-        const moveHandler = (moveEvent) => {
-          assistantDiv.style.left = `${
-            startLeft + moveEvent.clientX - startX
-          }px`;
-          assistantDiv.style.top = `${startTop + moveEvent.clientY - startY}px`;
-
-          // Move speech bubble with assistant
-          if (bubbleDiv) {
-            bubbleDiv.style.left = `${
-              parseInt(assistantDiv.style.left) + 120
-            }px`;
-            bubbleDiv.style.top = `${parseInt(assistantDiv.style.top) - 20}px`;
-          }
-        };
-
-        const upHandler = () => {
-          document.removeEventListener("mousemove", moveHandler);
-          document.removeEventListener("mouseup", upHandler);
-        };
-
-        document.addEventListener("mousemove", moveHandler);
-        document.addEventListener("mouseup", upHandler);
-      };
-
-      // Create speech bubble
-      bubbleDiv = document.createElement("div");
-      bubbleDiv.id = "speechBubble";
-      bubbleDiv.style.position = "fixed";
-      bubbleDiv.style.left = "420px";
-      bubbleDiv.style.top = "280px";
-      bubbleDiv.style.padding = "10px";
-      bubbleDiv.style.background = "#ffffc0";
-      bubbleDiv.style.border = "2px solid black";
-      bubbleDiv.style.borderRadius = "10px";
-      bubbleDiv.style.maxWidth = "200px";
-      bubbleDiv.style.zIndex = "10001";
-      bubbleDiv.style.boxShadow = "3px 3px 5px rgba(0,0,0,0.3)";
-      bubbleDiv.style.fontFamily = '"MS Sans Serif", Arial, sans-serif';
-      bubbleDiv.style.fontSize = "12px";
-      bubbleDiv.innerText =
-        "Hello! I'm your Office Assistant. How can I help you with Windows 98?";
-
-      // Add elements to the document
-      document.body.appendChild(assistantDiv);
-      document.body.appendChild(bubbleDiv);
-
-      // Do a small animation
-      assistantDiv.style.transform = "scale(0)";
-      setTimeout(() => {
-        assistantDiv.style.transform = "scale(1.2)";
-        setTimeout(() => {
-          assistantDiv.style.transform = "scale(1)";
-        }, 200);
-      }, 50);
-
-      simulatedActive = true;
-      setAssistantReady(true);
-    } else {
-      // Elements already exist, just make them visible and reposition
-      assistantDiv.style.display = "block";
-      if (bubbleDiv) {
-        bubbleDiv.style.display = "block";
-        bubbleDiv.innerText = "I'm back! Need some help?";
-      }
-
-      // Update image if agent has changed
-      assistantDiv.style.backgroundImage = `url(${assistantImages[agentName]})`;
-    }
-  };
-
-  // Function to hide the assistant
-  const hideAssistant = (remove = false) => {
-    const assistantDiv = document.getElementById("simulatedClippy");
-    const bubbleDiv = document.getElementById("speechBubble");
-
-    if (assistantDiv) {
-      if (remove) {
-        assistantDiv.remove();
-      } else {
-        assistantDiv.style.display = "none";
-      }
-    }
-
-    if (bubbleDiv) {
-      if (remove) {
-        bubbleDiv.remove();
-      } else {
-        bubbleDiv.style.display = "none";
-      }
-    }
+    setBubbleText(
+      "Hello! I'm your Office Assistant. How can I help you with Windows 98?"
+    );
   };
 
   // Function to make the assistant speak
   const speakMessage = (text) => {
-    const bubbleDiv = document.getElementById("speechBubble");
+    setBubbleText(text);
 
-    if (bubbleDiv) {
-      bubbleDiv.innerText = text;
-      bubbleDiv.style.display = "block";
-
-      // Auto-hide after 5 seconds
-      setTimeout(() => {
-        if (bubbleDiv) {
-          bubbleDiv.style.display = "none";
-        }
-      }, 5000);
-    }
+    // Reset bubble after 8 seconds
+    setTimeout(() => {
+      setBubbleText("");
+    }, 8000);
   };
 
   // Function to animate the assistant
   const animateAssistant = (action) => {
-    const assistantDiv = document.getElementById("simulatedClippy");
-
-    if (assistantDiv) {
-      switch (action) {
-        case "wave":
-          assistantDiv.style.transform = "rotate(15deg)";
-          speakMessage("Hello there!");
-          setTimeout(() => {
-            assistantDiv.style.transform = "rotate(-15deg)";
-            setTimeout(() => {
-              assistantDiv.style.transform = "rotate(0deg)";
-            }, 200);
-          }, 200);
-          break;
-        case "search":
-          assistantDiv.style.transform = "translateY(-10px)";
-          speakMessage("Searching for information...");
-          setTimeout(() => {
-            assistantDiv.style.transform = "translateY(0)";
-          }, 300);
-          break;
-        case "write":
-          assistantDiv.style.transform = "scale(0.9)";
-          speakMessage("Let me write that down for you...");
-          setTimeout(() => {
-            assistantDiv.style.transform = "scale(1)";
-          }, 300);
-          break;
-        case "explain":
-          assistantDiv.style.transform = "scale(1.1)";
-          speakMessage(
-            "Windows 98 was released on June 25, 1998. It featured the Active Desktop and better system performance."
-          );
-          setTimeout(() => {
-            assistantDiv.style.transform = "scale(1)";
-          }, 300);
-          break;
-        default:
-          assistantDiv.style.transform = "rotate(5deg)";
-          setTimeout(() => {
-            assistantDiv.style.transform = "rotate(0deg)";
-          }, 300);
-      }
+    if (!showingAssistant) {
+      showAssistant();
+      setTimeout(() => animateAssistant(action), 500);
+      return;
     }
+
+    switch (action) {
+      case "wave":
+        setAnimationClass("assistant-wave");
+        speakMessage("Hello there! Nice to meet you!");
+        break;
+      case "search":
+        setAnimationClass("assistant-search");
+        speakMessage(
+          "I'm searching for information. What would you like to know about Windows 98?"
+        );
+        break;
+      case "write":
+        setAnimationClass("assistant-write");
+        speakMessage(
+          "Let me write that down for you... I'll make sure to remember it!"
+        );
+        break;
+      case "explain":
+        setAnimationClass("assistant-explain");
+        speakMessage(
+          "Windows 98 was released on June 25, 1998. It featured the Active Desktop, Internet Explorer 4.0 integration, and better USB support."
+        );
+        break;
+      default:
+        setAnimationClass("assistant-bounce");
+    }
+
+    // Reset animation class after a short delay
+    setTimeout(() => {
+      setAnimationClass("");
+    }, 1000);
   };
 
   // Handle message sending
   const handleSendMessage = () => {
     if (message.trim() !== "") {
-      speakMessage(message);
+      if (!showingAssistant) {
+        showAssistant();
+        setTimeout(
+          () =>
+            speakMessage(`I heard you say: "${message}". That's interesting!`),
+          500
+        );
+      } else {
+        speakMessage(`I heard you say: "${message}". That's interesting!`);
+      }
       setMessage("");
     }
   };
 
-  // Change agent
-  const handleChangeAgent = (name) => {
-    setAgentName(name);
-
-    // Update image if assistant exists
-    const assistantDiv = document.getElementById("simulatedClippy");
-    if (assistantDiv) {
-      assistantDiv.style.backgroundImage = `url(${assistantImages[name]})`;
-      speakMessage(`I'm ${name} now! How can I help?`);
-    }
-  };
-
-  // Cleanup on unmount
+  // Reset image error when changing agent
   useEffect(() => {
-    return () => {
-      // Clean up any created elements
-      hideAssistant(true);
-    };
-  }, []);
+    setImageError(false);
+
+    // If assistant is showing, introduce the new character
+    if (showingAssistant) {
+      setTimeout(() => {
+        speakMessage(
+          `Hi! I'm ${agentName} now. How can I help you with Windows 98?`
+        );
+        setAnimationClass("assistant-wave");
+        setTimeout(() => setAnimationClass(""), 1000);
+      }, 100);
+    }
+  }, [agentName]);
 
   return (
     <CustomWindow
@@ -255,8 +179,8 @@ const ClippyAssistant = (props) => {
       moveToTop={moveToTop}
       onMinimize={onMinimize}
       minimized={minimized}
-      initialWidth={300}
-      initialHeight={400}
+      initialWidth={400}
+      initialHeight={420} // Reduced height
       icon={props.icon}
       onHelp={() => animateAssistant("wave")}
       showHelpButton={true}
@@ -267,7 +191,7 @@ const ClippyAssistant = (props) => {
             <label>Select Assistant:</label>
             <select
               value={agentName}
-              onChange={(e) => handleChangeAgent(e.target.value)}
+              onChange={(e) => setAgentName(e.target.value)}
             >
               <option value="Clippy">Clippy</option>
               <option value="Merlin">Merlin</option>
@@ -290,7 +214,7 @@ const ClippyAssistant = (props) => {
               onClick={showAssistant}
               style={{ gridColumn: "span 2", fontWeight: "bold" }}
             >
-              {assistantReady ? "Show Assistant" : "Use Simulated Assistant"}
+              Show Assistant
             </button>
           </div>
 
@@ -310,25 +234,233 @@ const ClippyAssistant = (props) => {
           <p>Office Assistant is ready to help you with Windows 98.</p>
 
           <p className="clippy-status">
-            <strong>Status:</strong>{" "}
-            {assistantReady
-              ? "Using simulated assistant. Assistant ready"
-              : "Loading scripts..."}
+            <strong>Status:</strong> Using simulated assistant
           </p>
 
-          {assistantReady ? (
-            <p className="clippy-tip">
-              <strong>Note:</strong> Using simulated assistant. It provides the
-              same functionality as the original Office Assistant.
-            </p>
-          ) : (
-            <p className="clippy-tip">
-              <strong>Tip:</strong> If the real assistant doesn't appear, try
-              clicking "Use Simulated Assistant".
-            </p>
-          )}
+          <p className="clippy-tip">
+            <strong>Note:</strong> Click "Show Assistant" to display the Office
+            Assistant.
+          </p>
         </div>
+
+        {/* Embedded Assistant Display - reduced height by 25% */}
+        {showingAssistant && (
+          <div className="embedded-assistant-container">
+            <div className={`embedded-assistant ${animationClass}`}>
+              {/* Try main GIF, then fallback GIF, then emoji */}
+              {imageError && assistantImages[agentName]?.fallback ? (
+                <img
+                  src={assistantImages[agentName].fallback}
+                  alt={agentName}
+                  className="assistant-image"
+                  onError={handleFallbackError}
+                />
+              ) : (
+                <img
+                  src={getCurrentImage()}
+                  alt={agentName}
+                  className="assistant-image"
+                  onError={handleImageError}
+                />
+              )}
+
+              {bubbleText && (
+                <div className="assistant-bubble">{bubbleText}</div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Add inline styles for animations and components */}
+      <style>
+        {`
+          .embedded-assistant-container {
+            margin-top: 10px;
+            height: 90px; /* 25% shorter than the original 120px */
+            position: relative;
+            border: 1px solid #808080;
+            border-top-color: #fff;
+            border-left-color: #fff;
+            background: #c0c0c0;
+            overflow: hidden;
+            padding: 8px;
+          }
+          
+          .embedded-assistant {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            display: flex;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+          }
+          
+          .assistant-image {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+          }
+          
+          .fallback-assistant {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #c0c0c0;
+            border: 1px solid #808080;
+            border-radius: 5px;
+            font-size: 40px;
+          }
+          
+          .assistant-bubble {
+            position: relative;
+            margin-left: 15px;
+            padding: 8px 12px;
+            background: #ffffc0;
+            border: 2px solid #000;
+            border-radius: 10px;
+            max-width: 240px;
+            font-family: "MS Sans Serif", Arial, sans-serif;
+            font-size: 11px;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+          }
+          
+          .assistant-bubble:after {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 15px;
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 12px solid #ffffc0;
+            z-index: 1;
+          }
+          
+          .assistant-bubble:before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 14px;
+            width: 0;
+            height: 0;
+            border-top: 9px solid transparent;
+            border-bottom: 9px solid transparent;
+            border-right: 13px solid #000;
+            z-index: 0;
+          }
+          
+          /* Animations */
+          .assistant-enter {
+            animation: slide-in 0.5s ease;
+          }
+          
+          .assistant-wave {
+            animation: wave 0.5s ease;
+          }
+          
+          .assistant-search {
+            animation: search 0.6s ease;
+          }
+          
+          .assistant-write {
+            animation: write 0.5s ease;
+          }
+          
+          .assistant-explain {
+            animation: explain 0.8s ease;
+          }
+          
+          .assistant-bounce {
+            animation: bounce 0.5s ease;
+          }
+          
+          @keyframes slide-in {
+            0% { transform: translateX(-100px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+          }
+          
+          @keyframes wave {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(15deg); }
+            50% { transform: rotate(-15deg); }
+            75% { transform: rotate(10deg); }
+            100% { transform: rotate(0deg); }
+          }
+          
+          @keyframes search {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px) scale(1.1); }
+            100% { transform: translateY(0); }
+          }
+          
+          @keyframes write {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+          }
+          
+          @keyframes explain {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.2); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.1); }
+            60% { transform: scale(1); }
+            100% { transform: scale(1); }
+          }
+          
+          @keyframes bounce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+          }
+          
+          /* Windows 98 styles for the controls */
+          .clippy-container {
+            font-family: "MS Sans Serif", Arial, sans-serif;
+            font-size: 11px;
+            color: #000;
+          }
+          
+          .clippy-controls button {
+            border: 2px solid;
+            border-color: #dfdfdf #808080 #808080 #dfdfdf;
+            background: #c0c0c0;
+            padding: 4px 8px;
+            font-family: "MS Sans Serif", Arial, sans-serif;
+            font-size: 11px;
+            box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #0a0a0a;
+          }
+          
+          .clippy-controls button:active {
+            border-color: #808080 #dfdfdf #dfdfdf #808080;
+            box-shadow: inset 1px 1px 0 #0a0a0a, inset -1px -1px 0 #ffffff;
+            padding-top: 5px;
+            padding-left: 9px;
+          }
+          
+          .clippy-controls select {
+            border: 2px solid;
+            border-color: #808080 #dfdfdf #dfdfdf #808080;
+            background-color: #fff;
+            padding: 2px;
+            font-family: "MS Sans Serif", Arial, sans-serif;
+            font-size: 11px;
+          }
+          
+          .clippy-controls input {
+            border: 2px solid;
+            border-color: #808080 #dfdfdf #dfdfdf #808080;
+            background-color: #fff;
+            padding: 3px 5px;
+            font-family: "MS Sans Serif", Arial, sans-serif;
+            font-size: 11px;
+          }
+        `}
+      </style>
     </CustomWindow>
   );
 };
