@@ -13,8 +13,8 @@ import Settings from "./components/Settings";
 import CRTOverlay from "./components/tools/CRT";
 import ShutDown from "./components/ShutDown/ShutDown";
 import Background from "./components/tools/Background";
-import MonitorView from './components/MonitorView/MonitorView';
-import StartMessage from './components/StartMessage/StartMessage';
+import MonitorView from "./components/MonitorView/MonitorView";
+import StartMessage from "./components/StartMessage/StartMessage";
 // Remove this import as we won't use it here
 // import ThemeWrapper from './components/MonitorView/ThemeWrapper';
 
@@ -38,7 +38,7 @@ class Desktop extends Component {
               desktopX2: context.scale === 2,
               desktopX1_5: context.scale === 1.5,
               notMobile: !context.isMobile,
-              fullScreen: context.fullScreen
+              fullScreen: context.fullScreen,
             })}
           >
             <Background />

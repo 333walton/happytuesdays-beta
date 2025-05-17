@@ -12,7 +12,6 @@ body {
   background-color: darkslategrey;
 }
 
-
 .monitor-mode-active {
   background-color: #000000 !important;
 }
@@ -59,7 +58,7 @@ body {
   transform: scale(1);
 }
 
-.react-draggable>.Window {
+.react-draggable > .Window {
   height: 100%;
   /*height: calc(100% - 28) !important*/
   width: 100%;
@@ -118,12 +117,47 @@ body {
 
 /* Fix for blue text in Taskbar on iOS Safari */
 @supports (-webkit-touch-callout: none) {
-
   .TaskBar .taskbar-item,
   .TaskBar .taskbar-item--active,
   .TaskBar .taskbar-item-title,
   [class*="taskbar"] {
     color: rgb(0, 0, 0) !important;
     -webkit-text-fill-color: rgb(0, 0, 0) !important;
+  }
+}
+
+/* Add this to your CSS file or inside a <style> tag in your <head> section */
+
+.BIOS__bootMessage4 a {
+  color: white;
+  text-decoration: underline;
+  /* Ensure link color remains white when visited */
+  -webkit-text-fill-color: white; /* For iOS Safari */
+}
+
+.BIOS__bootMessage4 a:visited {
+  color: white;
+  -webkit-text-fill-color: white; /* For iOS Safari */
+}
+
+/* Force links to stay white even with browser default styling */
+.BIOS__bootMessage4 a:link {
+  color: white !important;
+  -webkit-text-fill-color: white !important; /* For iOS Safari */
+}
+
+/* Fix for mobile Safari which might apply its own styling */
+@media screen and (max-width: 767px) {
+  .BIOS__bootMessage4 a {
+    color: white !important;
+    text-decoration: underline !important;
+    -webkit-text-fill-color: white !important;
+  }
+}
+
+/* Optional: Add a touch-friendly tap target for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .BIOS__bootMessage4 a {
+    padding: 2px 0; /* Slightly larger tap target */
   }
 }

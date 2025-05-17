@@ -1,0 +1,145 @@
+/* ClippyAssistant styles */
+.clippy-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 10px;
+  font-family: "MS Sans Serif", Arial, sans-serif;
+  font-size: 11px;
+}
+
+.clippy-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.agent-selector {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  label {
+    font-weight: bold;
+  }
+
+  select {
+    flex: 1;
+    border: 1px solid;
+    border-color: #808080 #fff #fff #808080;
+    background-color: #fff;
+    padding: 2px;
+  }
+}
+
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+
+  button {
+    border: 1px solid;
+    border-color: #fff #808080 #808080 #fff;
+    background-color: #c0c0c0;
+    padding: 4px 8px;
+    box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #808080;
+
+    &:active {
+      border-color: #808080 #fff #fff #808080;
+      box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #dfdfdf;
+      padding-top: 5px;
+      padding-left: 9px;
+    }
+  }
+}
+
+.message-input {
+  display: flex;
+  gap: 5px;
+
+  input {
+    flex: 1;
+    border: 1px solid;
+    border-color: #808080 #fff #fff #808080;
+    background-color: #fff;
+    padding: 3px 5px;
+  }
+
+  button {
+    border: 1px solid;
+    border-color: #fff #808080 #808080 #fff;
+    background-color: #c0c0c0;
+    padding: 3px 8px;
+    box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #808080;
+
+    &:active {
+      border-color: #808080 #fff #fff #808080;
+      box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #dfdfdf;
+      padding-top: 4px;
+      padding-left: 9px;
+    }
+  }
+}
+
+.clippy-info {
+  border: 1px solid;
+  border-color: #808080 #fff #fff #808080;
+  background-color: #fff;
+  padding: 10px;
+  flex: 1;
+  overflow-y: auto;
+
+  p {
+    margin: 0 0 10px 0;
+  }
+
+  .clippy-tip {
+    background-color: #ffffc0;
+    padding: 5px;
+    border: 1px solid #808080;
+  }
+}
+
+/* Override some Clippy.js styles to better fit Windows 98 theme */
+.clippy,
+.clippy-balloon {
+  z-index: 9999 !important; /* Ensure Clippy appears above other windows */
+}
+
+.clippy-balloon {
+  background: #ffffc0;
+  border: 1px solid #000;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+}
+
+.clippy-error {
+  background-color: #ffcccc;
+  border: 1px solid #cc0000;
+  padding: 5px;
+  margin-top: 10px;
+}
+
+.clippy-status {
+  background-color: #f0f0f0;
+  border: 1px solid #808080;
+  padding: 5px;
+  margin-top: 10px;
+}
+
+/* Ensure the Clippy agent is visible */
+.clippy {
+  z-index: 9999 !important;
+  position: fixed !important;
+}
+
+.clippy-balloon {
+  z-index: 10000 !important;
+}
+
+/* Add visibility to the speech balloon */
+.clippy-balloon .clippy-content {
+  background-color: #ffffc0 !important;
+  color: black !important;
+  border: 2px solid black !important;
+}

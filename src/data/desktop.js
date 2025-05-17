@@ -3,7 +3,11 @@ import readme from "./textFiles/readme";
 
 const isMobile = () => {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || window.innerWidth < 1024;
+  return (
+    /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+      userAgent
+    ) || window.innerWidth < 1024
+  );
 };
 
 const desktopData = [
@@ -48,8 +52,8 @@ const desktopData = [
     icon: icons.htmlFile32,
     component: "InternetExplorer",
     data: {
-      __html: readme
-    }
+      __html: readme,
+    },
   },
   {
     title: "DOOM",
@@ -70,16 +74,15 @@ const desktopData = [
     },
     multiInstance: true,
   },
+  // REMOVED: Office Assistant entry - this has been removed so we can add it in DesktopView.js
   {
     title: "Recycle",
     icon: icons.recycleempty32, // Default icon (This will be overridden in the component using state)
     component: "RecycleBin",
-    className: "recycle-icon" // Apply the CSS class
+    className: "recycle-icon", // Apply the CSS class
   },
   // Conditionally add any mobile-specific icons/components here
-  ...(!isMobile()
-    ? []
-    : []),
+  ...(!isMobile() ? [] : []),
 ];
 
 export default desktopData;

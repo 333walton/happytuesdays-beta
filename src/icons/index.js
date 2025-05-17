@@ -17,7 +17,7 @@ export { default as folderOpen32 } from "./folderOpen32-min.png";
 export { default as folderOptions16 } from "./folderOptions16-min.png";
 export { default as folderProgram16 } from "./folderProgram16-min.png";
 export { default as folderProgram24 } from "./folderProgram24-min.png";
-export { default as help16} from "./help16-min.png"
+export { default as help16 } from "./help16-min.png";
 export { default as help24 } from "./help24-min.png";
 export { default as htmlFile16 } from "./htmlFile16-min.png";
 export { default as htmlFile32 } from "./htmlFile32-min.png";
@@ -75,47 +75,47 @@ export { default as floppy32 } from "./floppy32-min.png";
 export { default as hdd32 } from "./hdd32-min.png";
 export { default as cd32 } from "./cd32-min.png";
 
+export { default as doom32 } from "./doom32.png";
+export { default as doom16 } from "./doom16.png";
 
-export {default as doom32} from "./doom32.png"
-export {default as doom16} from "./doom16.png"
-
-export {default as burn32} from "./Burn32.png"
-export {default as burn16} from "./burn16-min.png"
-export { default as ascii16} from "./ascii16-min.png"
-export { default as ascii24 } from "./ascii24-min.png"
-export { default as pipes16 } from "./pipes16-min.png"
-export { default as loaderbat16 } from "./loaderbat16-min.png"
-export { default as mediacd16 } from "./mediacd16-min.png"
-export { default as mediavid16 } from "./mediavid16-min.png"
-export { default as defrag16 } from "./defrag16-min.png"
-export { default as aol16 } from "./aol16-min.png"
-export { default as soli16 } from "./soli16-min.png"
-export { default as spacecadet16 } from "./spacecadet16-min.png"
-export { default as twitter32 } from "./twitter32-min.png"
-export { default as faq32 } from "./faq32-min.png"
-export { default as twitter16 } from "./twitter16-min.png"
-export { default as sand16 } from "./sand16-min.png"
-export { default as camera16 } from "./camera16-min.png"
-export { default as vid16 } from "./vid16-min.png"
-export { default as cookie16 } from "./cookie16-min.png"
-export { default as prompt16 } from "./prompt16-min.png"
-export { default as weblink16 } from "./weblink16-min.png"
-export { default as glider16 } from "./glider16-min.png"
-export { default as webglwindow32 } from "./webglwindow32-min.png"
-export { default as doodlegallery32 } from "./doodlegallery32-min.png"
-export { default as newsletter16 } from "./newsletter16-min.png"
-export { default as rampage24 } from "./rampage24-min.png"
-export { default as rampage16 } from "./rampage16-min.png"
-export { default as retrocity32 } from "./retrocity32-min.png"
-export { default as command16 } from "./command16-min.png"
-export { default as rebelcommand16 } from "./rebelcommand16-min.png"
-export { default as maze16 } from "./maze16-min.png"
-export { default as asciibanner16 } from "./asciibanner16-min.png"
-export { default as asciibanner216 } from "./asciibanner216-min.png"
-export { default as wangimg32 } from "./wangimg32-min.png"
-export { default as groupbox1 } from "./groupbox1.png"
-export { default as groupbox2a } from "./groupbox2a.png"
-export { default as groupbox2b } from "./groupbox2b.png"
-export { default as groupbox2c } from "./groupbox2c.png"
-export { default as groupbox3 } from "./groupbox3.png"
-export { default as groupbox4 } from "./groupbox4.png"
+export { default as burn32 } from "./Burn32.png";
+export { default as burn16 } from "./burn16-min.png";
+export { default as ascii16 } from "./ascii16-min.png";
+export { default as ascii24 } from "./ascii24-min.png";
+export { default as pipes16 } from "./pipes16-min.png";
+export { default as loaderbat16 } from "./loaderbat16-min.png";
+export { default as mediacd16 } from "./mediacd16-min.png";
+export { default as mediavid16 } from "./mediavid16-min.png";
+export { default as defrag16 } from "./defrag16-min.png";
+export { default as aol16 } from "./aol16-min.png";
+export { default as soli16 } from "./soli16-min.png";
+export { default as spacecadet16 } from "./spacecadet16-min.png";
+export { default as twitter32 } from "./twitter32-min.png";
+export { default as faq32 } from "./faq32-min.png";
+export { default as twitter16 } from "./twitter16-min.png";
+export { default as sand16 } from "./sand16-min.png";
+export { default as camera16 } from "./camera16-min.png";
+export { default as vid16 } from "./vid16-min.png";
+export { default as cookie16 } from "./cookie16-min.png";
+export { default as prompt16 } from "./prompt16-min.png";
+export { default as weblink16 } from "./weblink16-min.png";
+export { default as glider16 } from "./glider16-min.png";
+export { default as webglwindow32 } from "./webglwindow32-min.png";
+export { default as doodlegallery32 } from "./doodlegallery32-min.png";
+export { default as newsletter16 } from "./newsletter16-min.png";
+export { default as rampage24 } from "./rampage24-min.png";
+export { default as rampage16 } from "./rampage16-min.png";
+export { default as retrocity32 } from "./retrocity32-min.png";
+export { default as command16 } from "./command16-min.png";
+export { default as rebelcommand16 } from "./rebelcommand16-min.png";
+export { default as maze16 } from "./maze16-min.png";
+export { default as asciibanner16 } from "./asciibanner16-min.png";
+export { default as asciibanner216 } from "./asciibanner216-min.png";
+export { default as wangimg32 } from "./wangimg32-min.png";
+export { default as groupbox1 } from "./groupbox1.png";
+export { default as groupbox2a } from "./groupbox2a.png";
+export { default as groupbox2b } from "./groupbox2b.png";
+export { default as groupbox2c } from "./groupbox2c.png";
+export { default as groupbox3 } from "./groupbox3.png";
+export { default as groupbox4 } from "./groupbox4.png";
+export { default as textchat32 } from "./textchat32-min.png";

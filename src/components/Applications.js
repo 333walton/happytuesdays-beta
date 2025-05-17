@@ -5,10 +5,10 @@ export { default as InternetExplorer } from "./InternetExplorer";
 export { default as TestExplorer } from "./TestExplorer";
 export { default as JSDos } from "./JSDos";
 export { default as Notepad } from "./Notepad";
-export { default as Doom } from "./Doom"
-export { default as Burn } from "./Burn"
-export { default as Pipes } from "./Pipes"
-export { default as Sand } from "./Sand"
+export { default as Doom } from "./Doom";
+export { default as Burn } from "./Burn";
+export { default as Pipes } from "./Pipes";
+export { default as Sand } from "./Sand";
 export { default as ImageWindow } from "./ImageWindow";
 export { default as Calculator } from "./Calculator";
 export { default as DoodleSubmission } from "./DoodleSubmission";
@@ -21,7 +21,7 @@ export { default as VideoPlayerMobile } from "./VideoPlayerMobile";
 export { default as VideoPlayerDesktop } from "./VideoPlayerDesktop";
 export { default as VideoPlayer } from "./VideoPlayer";
 export { default as W95MediaPlayer } from "./W95MediaPlayer";
-export { default as VideoPlayerwebkit } from "./VideoPlayerwebkit"; 
+export { default as VideoPlayerwebkit } from "./VideoPlayerwebkit";
 export { default as MusicPlayer } from "./MusicPlayer";
 //export { default as Outlook98 } from "./Outlook98";
 export { default as MonitorView } from "./MonitorView";
@@ -33,7 +33,8 @@ export { default as Maze3DContainer } from "./Maze3DContainer";
 export { default as BouncyBalls } from "./BouncyBalls";
 export { default as FlowerBoxScreensaver } from "./FlowerBoxScreensaver";
 export { default as PipesScreensaver } from "./PipesScreensaver";
-export { default as StartMessage } from "./StartMessage"; 
+export { default as StartMessage } from "./StartMessage";
 export { default as UTMTool } from "./UTMTool";
 export { default as Minesweeper } from "./Minesweeper";
 export { default as MinesweeperWithHelp } from "./MinesweeperWithHelp";
+export { default as Clippy } from "./ClippyAssistant";
