@@ -9,11 +9,11 @@ import { ProgramContext } from ".";
 // Utility function to detect mobile devices
 // const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-const transformLinks = option => ({
+const transformLinks = (option) => ({
   ...option,
   onClick:
     option.href && !option.onClick
-      ? e => {
+      ? (e) => {
           e.preventDefault();
           if (
             window.confirm(
@@ -23,7 +23,7 @@ const transformLinks = option => ({
             window.open(option.href);
           }
         }
-      : option.onClick
+      : option.onClick,
 });
 
 const settings = (injectedData = []) => [
@@ -38,8 +38,8 @@ const settings = (injectedData = []) => [
   {
     title: "Hydra Update...",
     icon: icons.windowsUpdate16,
-    isDisabled: true
-  }
+    isDisabled: true,
+  },
 ];
 
 const startMenu = (injectedData = [], set, shutDown) => [
@@ -48,45 +48,45 @@ const startMenu = (injectedData = [], set, shutDown) => [
     {
       title: "Settings",
       icon: icons.settings24,
-      options: settings(set)
-    }
+      options: settings(set),
+    },
   ],
   {
     title: "Connect Wallet",
     icon: icons.logOff24,
-    isDisabled: true
+    isDisabled: true,
   },
   {
     title: "Shut Down...",
     icon: icons.shutDown24,
-    onClick: shutDown
-  }
+    onClick: shutDown,
+  },
 ];
 
-export const addIdsToData = data =>
+export const addIdsToData = (data) =>
   Array.isArray(data)
-    ? data.map(d => {
+    ? data.map((d) => {
         if (Array.isArray(d)) {
           return addIdsToData(d);
         }
         return {
           ...transformLinks(d),
           id: d.id || nanoid(),
-          options: addIdsToData(d.options)
+          options: addIdsToData(d.options),
         };
       })
     : undefined;
 
 const desktopWithIds = (desktopData = []) =>
-  addIdsToData(desktopData).map(entry => {
+  addIdsToData(desktopData).map((entry) => {
     const { onClick, ...data } = entry;
     return {
       ...data,
-      onDoubleClick: onClick
+      onDoubleClick: onClick,
     };
   });
 
-const mapActions = (open, doubleClick) => entry => {
+const mapActions = (open, doubleClick) => (entry) => {
   if (Array.isArray(entry)) {
     return initialize(open, entry);
   }
@@ -108,7 +108,7 @@ const mapActions = (open, doubleClick) => entry => {
     ...nestedData,
     onClick: !doubleClick ? onClickAction : undefined,
     onDoubleClick: doubleClick ? onClick : undefined,
-    options: initialize(open, entry.options)
+    options: initialize(open, entry.options),
   };
 };
 
@@ -118,32 +118,32 @@ export const initialize = (open, data, doubleClick) => {
 };
 
 const buildDesktop = (desktopData, open) => [
-  ...initialize(p => open()(p), desktopWithIds(desktopData)).map(entry => {
+  ...initialize((p) => open()(p), desktopWithIds(desktopData)).map((entry) => {
     const { onClick, ...data } = entry;
     return {
       ...data,
-      onDoubleClick: onClick
+      onDoubleClick: onClick,
     };
-  })
+  }),
 ];
 
 class ProgramProvider extends Component {
   static defaultProps = {
     startMenuData,
-    desktopData
+    desktopData,
   };
 
   state = {
     programs: Object.keys(Applications).reduce(
       (acc, p) => ({
         ...acc,
-        [p]: { ...Applications[p], programId: nanoid() }
+        [p]: { ...Applications[p], programId: nanoid() },
       }),
       {}
     ),
     recycleEmpty: true, // ✅ Added
     startMenu: initialize(
-      p => this.open(p),
+      (p) => this.open(p),
       addIdsToData(
         startMenu(
           this.props.startMenuData,
@@ -151,24 +151,26 @@ class ProgramProvider extends Component {
             {
               title: "Control Panel",
               onClick: () => this.toggleSettings(),
-              icon: icons.controlPanel16
+              icon: icons.controlPanel16,
             },
             {
               title: "CMD.exe",
               icon: icons.command16,
               component: "JSDos",
-              multiInstance: true
-            },
-            {
-              title: "Rebel CMD.exe",
-              icon: icons.rebelcommand16,
-              component: "StarWars",
-              multiInstance: false,
+              multiInstance: true,
+              options: [
+                {
+                  title: "Rebel CMD.exe",
+                  icon: icons.rebelcommand16,
+                  component: "StarWars",
+                  multiInstance: false,
+                },
+              ],
             },
             {
               title: "Task Manager",
               onClick: () => this.toggleTaskManager(),
-              icon: icons.folderProgram16
+              icon: icons.folderProgram16,
             },
           ],
           () => this.toggleShutDownMenu()
@@ -180,41 +182,40 @@ class ProgramProvider extends Component {
       {
         onClick: () => this.minimizeAll(),
         icon: icons.twitter16,
-        title: ""
-      }
+        title: "",
+      },
     ],
     activePrograms: {},
     openOrder: [],
     zIndexes: [],
     settingsDisplay: false,
-    shutDownMenu: false
+    shutDownMenu: false,
   };
 
   componentDidMount() {
     const desktopSaved = JSON.parse(window.localStorage.getItem("desktop"));
     if (desktopSaved) {
       this.setState(() => ({
-        desktop: buildDesktop(desktopSaved, () => this.open)
+        desktop: buildDesktop(desktopSaved, () => this.open),
       }));
     }
 
     window.ProgramContext = {
       onOpen: this.open,
       onClose: this.close,
-      setRecycleBinFull: this.setRecycleBinFull // ✅ add this line
+      setRecycleBinFull: this.setRecycleBinFull, // ✅ add this line
     };
-
   }
 
   toggleShutDownMenu = () =>
-    this.setState(state => ({ shutDownMenu: !state.shutDownMenu }));
+    this.setState((state) => ({ shutDownMenu: !state.shutDownMenu }));
 
   toggleTaskManager = () =>
-    this.setState(state => ({ taskManager: !state.taskManager }));
+    this.setState((state) => ({ taskManager: !state.taskManager }));
 
-  toggleSettings = val =>
-    this.setState(state => ({
-      settingsDisplay: val || !state.settingsDisplay
+  toggleSettings = (val) =>
+    this.setState((state) => ({
+      settingsDisplay: val || !state.settingsDisplay,
     }));
 
   shutDown = () => {
@@ -232,31 +233,34 @@ class ProgramProvider extends Component {
     }
   };
 
-  isProgramActive = programId => this.state.activePrograms[programId];
+  isProgramActive = (programId) => this.state.activePrograms[programId];
 
-  moveToTop = windowId => {
+  moveToTop = (windowId) => {
     this.setState({
       activePrograms: {
         ...this.state.activePrograms,
         [windowId]: {
           ...this.state.activePrograms[windowId],
-          minimized: false
-        }
+          minimized: false,
+        },
       },
       activeId: windowId,
       zIndexes: [
-        ...this.state.zIndexes.filter(v => v !== windowId),
-        windowId
-      ]
+        ...this.state.zIndexes.filter((v) => v !== windowId),
+        windowId,
+      ],
     });
   };
 
   open = (program, options = {}) => {
-    const isBlockingProgramRunning = Object.values(this.state.activePrograms).some(
-      prog => ['Doom', 'JSDos'].includes(prog.component)
-    );
+    const isBlockingProgramRunning = Object.values(
+      this.state.activePrograms
+    ).some((prog) => ["Doom", "JSDos"].includes(prog.component));
 
-    if (isBlockingProgramRunning && ['Doom', 'JSDos'].includes(program.component)) {
+    if (
+      isBlockingProgramRunning &&
+      ["Doom", "JSDos"].includes(program.component)
+    ) {
       return;
     }
 
@@ -275,27 +279,27 @@ class ProgramProvider extends Component {
       ...program,
       id: nanoid(),
       data: options.new ? {} : program.data,
-      title: options.new ? program.component : program.title
+      title: options.new ? program.component : program.title,
     };
 
     this.setState({
       activePrograms: {
         ...this.state.activePrograms,
-        [newProgram.id]: newProgram
+        [newProgram.id]: newProgram,
       },
       openOrder: [...this.state.openOrder, newProgram.id],
       zIndexes: [...this.state.zIndexes, newProgram.id],
-      activeId: newProgram.id
+      activeId: newProgram.id,
     });
   };
 
   close = (program, exit) => {
     if (!this.isProgramActive(program.id)) return;
 
-    const taskBar = this.state.openOrder.filter(p => p !== program.id);
+    const taskBar = this.state.openOrder.filter((p) => p !== program.id);
     this.setState({
       openOrder: taskBar,
-      zIndexes: this.state.zIndexes.filter(p => p !== program.id)
+      zIndexes: this.state.zIndexes.filter((p) => p !== program.id),
     });
 
     if (!program.background || exit) {
@@ -303,21 +307,24 @@ class ProgramProvider extends Component {
     }
   };
 
-  exit = programId =>
+  exit = (programId) =>
     this.setState({
-      activePrograms: Object.keys(this.state.activePrograms).reduce((acc, val) => {
-        if (programId !== val) {
-          return {
-            ...acc,
-            [val]: this.state.activePrograms[val]
-          };
-        }
-        return acc;
-      }, {}),
-      activeId: null
+      activePrograms: Object.keys(this.state.activePrograms).reduce(
+        (acc, val) => {
+          if (programId !== val) {
+            return {
+              ...acc,
+              [val]: this.state.activePrograms[val],
+            };
+          }
+          return acc;
+        },
+        {}
+      ),
+      activeId: null,
     });
 
-  minimize = programId => {
+  minimize = (programId) => {
     if (!this.state.activePrograms[programId]) return;
 
     this.setState({
@@ -325,49 +332,52 @@ class ProgramProvider extends Component {
         ...this.state.activePrograms,
         [programId]: {
           ...this.state.activePrograms[programId],
-          minimized: true
-        }
+          minimized: true,
+        },
       },
-      activeId: null
+      activeId: null,
     });
   };
 
   minimizeAll = () =>
-    this.setState(state => ({
-      activePrograms: Object.keys(state.activePrograms).reduce((acc, val) => ({
-        ...acc,
-        [val]: {
-          ...state.activePrograms[val],
-          minimized: true
-        }
-      }), {}),
-      activeId: null
+    this.setState((state) => ({
+      activePrograms: Object.keys(state.activePrograms).reduce(
+        (acc, val) => ({
+          ...acc,
+          [val]: {
+            ...state.activePrograms[val],
+            minimized: true,
+          },
+        }),
+        {}
+      ),
+      activeId: null,
     }));
 
   save = (prog, data, title, location = "desktop") => {
     const mapFunc = mapActions(this.open, location === "desktop");
     const existing = this.state[location].find(
-      p => p.title === title || p.id === prog.id
+      (p) => p.title === title || p.id === prog.id
     );
     if (existing) {
       return this.setState(
-        state => {
+        (state) => {
           const filtered = state[location].filter(
-            p => p.title !== existing.title
+            (p) => p.title !== existing.title
           );
           const updated = {
             ...existing,
             data,
-            updated: true
+            updated: true,
           };
           return {
             [location]: [
               ...filtered,
               mapFunc({
                 ...updated,
-                onClick: () => this.open(updated)
-              })
-            ]
+                onClick: () => this.open(updated),
+              }),
+            ],
           };
         },
         () => this.saveLocally(location)
@@ -377,31 +387,31 @@ class ProgramProvider extends Component {
         ...prog,
         data: {
           ...data,
-          readOnly: false
+          readOnly: false,
         },
         title,
         newFile: true,
         id: nanoid(),
-        readOnly: false
+        readOnly: false,
       };
       return this.setState(
-        state => ({
+        (state) => ({
           [location]: [
             ...state[location],
             {
               ...mapFunc({
                 ...newProg,
-                onClick: () => this.open(newProg)
-              })
-            }
-          ]
+                onClick: () => this.open(newProg),
+              }),
+            },
+          ],
         }),
         () => this.saveLocally(location)
       );
     }
   };
 
-  saveLocally = loc =>
+  saveLocally = (loc) =>
     window.localStorage.setItem(loc, JSON.stringify(this.state[loc]));
 
   // ✅ ADDED: Controls the recycle icon state globally
@@ -423,7 +433,7 @@ class ProgramProvider extends Component {
           shutDown: this.shutDown,
           onMinimize: this.minimize,
           save: this.save,
-          setRecycleBinFull: this.setRecycleBinFull // ✅ exposed here
+          setRecycleBinFull: this.setRecycleBinFull, // ✅ exposed here
         }}
       >
         {this.props.children}

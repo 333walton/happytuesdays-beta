@@ -195,8 +195,17 @@ const ClippyAssistant = (props) => {
       moveToTop={moveToTop}
       onMinimize={onMinimize}
       minimized={minimized}
+      disableMaximize={true}
+      onMaximize={null}
+      showMaximize={false}
+      disableRestore={true}
+      onRestore={null}
+      showRestore={false}
+      restored={null}
       initialWidth={400}
-      initialHeight={500}
+      initialHeight={440}
+      initialX={1}
+      initialY={1}
       icon={icons.textchat32}
       showHelpButton={true}
       onHelp={() => {
@@ -306,10 +315,12 @@ const ClippyAssistant = (props) => {
             <li>Entertain you with animations</li>
           </ul>
 
-          <div className="clippy-tip">
-            <strong>Tip:</strong> Click the ? button in any window title bar to
-            get contextual help from the Office Assistant.
-          </div>
+          {/*
+  <div className="clippy-tip">
+    <strong>Tip:</strong> Click the ? button in any window title bar to
+    get contextual help from the Office Assistant.
+  </div>
+*/}
 
           <div className="animation-list">
             <h4>Popular Animations:</h4>
@@ -492,7 +503,7 @@ const ClippyAssistant = (props) => {
           font-family: "MS Sans Serif", Arial, sans-serif;
           font-size: 11px;
           box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #808080;
-          cursor: pointer;
+          //cursor: none;
         }
 
         .office-assistant-container button:active {

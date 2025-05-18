@@ -138,23 +138,25 @@ const CustomWindowProgram = (props) => {
                   "□"
                 ),
               // Restore button
-              props.onRestore &&
-                React.createElement(
-                  "button",
-                  {
-                    className: "Window__restore",
-                    onClick: props.onRestore,
-                    "aria-label": "Restore",
-                    key: "restore",
-                    style: {
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      paddingTop: "1px",
-                    },
-                  },
-                  "▫"
-                ),
+              // props.onRestore &&
+              //   props.showRestore !== false && // <-- Added conditional rendering here
+              //   React.createElement(
+              //     "button",
+              //     {
+              //       className: "Window__restore",
+              //       onClick: props.onRestore,
+              //       "aria-label": "Restore",
+              //       key: "restore",
+              //       style: {
+              //         display: "flex", // <-- Style can be simplified
+              //         justifyContent: "center",
+              //         alignItems: "center",
+              //         paddingTop: "1px",
+              //       },
+              //     },
+              //     "▫"
+              //   ),
+
               // Close button
               props.onClose &&
                 React.createElement(

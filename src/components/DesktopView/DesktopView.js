@@ -46,12 +46,12 @@ const DesktopView = () => {
   };
 
   // Create a custom Office Assistant option
-  const officeAssistantOption = {
-    title: "Office Assistant",
-    icon: icons.textchat32,
-    component: "Clippy",
-    id: "clippy-assistant",
-  };
+  //const officeAssistantOption = {
+  //title: "Office Assistant",
+  //icon: icons.textchat32,
+  //component: "Clippy",
+  //id: "clippy-assistant",
+  //};
 
   return (
     <ExplorerView>
@@ -75,38 +75,39 @@ const DesktopView = () => {
         );
       })}
 
-      {/* Add Office Assistant as standalone styled div */}
-      <div
-        style={{
-          position: "absolute",
-          left: "545px",
-          top: "385px",
-          width: "75px",
-          textAlign: "center",
-          cursor: "pointer",
-          zIndex: 5,
-        }}
-        onClick={() => handleClick(officeAssistantOption)}
-      >
-        <img
-          src={icons.textchat32}
-          alt="Office Assistant"
-          style={{
-            width: "32px",
-            height: "32px",
-            marginBottom: "5px",
-          }}
-        />
-        <div
-          style={{
-            color: "white",
-            textShadow: "1px 1px 2px black",
-            fontSize: "11px",
-          }}
-        >
-          Office Assistant
-        </div>
-      </div>
+      {/* 
+  <div
+    style={{
+      position: "absolute",
+      left: "545px",
+      top: "385px",
+      width: "75px",
+      textAlign: "center",
+      cursor: "pointer",
+      zIndex: 5,
+    }}
+    onClick={() => handleClick(officeAssistantOption)}
+  >
+    <img
+      src={icons.textchat32}
+      alt="Office Assistant"
+      style={{
+        width: "32px",
+        height: "32px",
+        marginBottom: "5px",
+      }}
+    />
+    <div
+      style={{
+        color: "white",
+        textShadow: "1px 1px 2px black",
+        fontSize: "11px",
+      }}
+    >
+      Office Assistant
+    </div>
+  </div>
+*/}
     </ExplorerView>
   );
 };
