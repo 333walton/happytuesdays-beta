@@ -10,6 +10,7 @@ import {
   useClippy,
   ClippyProvider as ReactClippyProvider,
 } from "@react95/clippy";
+import "./_styles.scss";
 
 // Create context
 const ClippyContext = createContext(null);
@@ -17,7 +18,11 @@ const ClippyContext = createContext(null);
 /**
  * Provider component that makes Clippy available throughout the app
  */
-const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
+const ClippyProvider = ({
+  children,
+  defaultAgent = "Clippy",
+  fixedPosition = false, // New prop to fix Clippy in place
+}) => {
   // Initialize position within the desktop viewport
   const [assistantVisible, setAssistantVisible] = useState(false);
   const [currentAgent, setCurrentAgent] = useState(defaultAgent);
@@ -52,8 +57,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     window.setAssistantVisible = setAssistantVisible;
     window.setCurrentAgent = setCurrentAgent;
     window.setClippyPosition = (newPos) => {
-      setPosition(newPos);
-      setUserPositioned(false);
+      // Only allow position changes if not fixed
+      if (!fixedPosition) {
+        setPosition(newPos);
+        setUserPositioned(false);
+      }
     };
     window.getClippyInstance = () => clippyInstanceRef.current;
 
@@ -63,7 +71,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       delete window.setClippyPosition;
       delete window.getClippyInstance;
     };
-  }, []);
+  }, [fixedPosition]);
 
   // Gather all values for the context
   const contextValue = {
@@ -72,11 +80,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     currentAgent,
     setCurrentAgent,
     position,
-    setPosition,
+    setPosition: fixedPosition ? () => {} : setPosition, // Prevent position changes if fixed
     userPositioned,
-    setUserPositioned,
+    setUserPositioned: fixedPosition ? () => {} : setUserPositioned, // Prevent user positioning if fixed
     desktopRectRef,
     isMobileRef,
+    fixedPosition,
     setClippyInstance: (instance) => {
       clippyInstanceRef.current = instance;
       window.clippy = instance;
@@ -97,6 +106,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           setPosition={setPosition}
           desktopRectRef={desktopRectRef}
           isMobileRef={isMobileRef}
+          fixedPosition={fixedPosition} // Pass fixedPosition to the controller
           setClippyInstance={(instance) => {
             clippyInstanceRef.current = instance;
             window.clippy = instance;
@@ -116,6 +126,7 @@ const ClippyController = ({
   setPosition,
   desktopRectRef,
   isMobileRef,
+  fixedPosition, // Added fixedPosition prop
   setClippyInstance,
 }) => {
   const { clippy } = useClippy();
@@ -133,12 +144,156 @@ const ClippyController = ({
   const clippyElementRef = useRef(null);
   const clippySizeRef = useRef({ width: 100, height: 100 });
   const lastClickTimeRef = useRef(0); // For tracking double clicks
+  const balloonObserverRef = useRef(null); // For storing the MutationObserver reference
 
   // Relative position percentages (for responsive positioning)
   const relativePositionRef = useRef({
     xPercent: 0.81, // ~520/640
     yPercent: 0.75, // ~360/480
   });
+
+  // Function to reposition the balloon
+  const repositionClippyBalloon = useCallback(() => {
+    const clippy = document.querySelector(".clippy");
+    const balloon = document.querySelector(".clippy-balloon");
+
+    if (!clippy || !balloon) return;
+
+    // Get Clippy's position
+    const clippyRect = clippy.getBoundingClientRect();
+
+    // Get viewport bounds
+    const viewportEl = document.querySelector(".w98");
+    const viewportRect = viewportEl
+      ? viewportEl.getBoundingClientRect()
+      : {
+          left: 0,
+          top: 0,
+          right: window.innerWidth,
+          bottom: window.innerHeight,
+        };
+
+    // Style the balloon
+    balloon.style.cssText = `
+    position: fixed !important;
+    z-index: 9999 !important;
+    left: ${clippyRect.left - 10}px !important;
+    top: ${clippyRect.top - 150}px !important;
+    background-color: #fffcde !important;
+    border: 1px solid #000 !important;
+    border-radius: 5px !important;
+    padding: 8px !important;
+    max-width: 250px !important;
+  `;
+
+    balloon.style.position = "fixed";
+    balloon.style.zIndex = "1500";
+    balloon.style.backgroundColor = "#fffcde";
+    balloon.style.border = "1px solid #000";
+    balloon.style.borderRadius = "5px";
+    balloon.style.padding = "8px";
+    balloon.style.maxWidth = "250px";
+    //balloon.style.bottom = "250px";
+    //balloon.style.height = "250px";
+    //balloon.style.border = "3px solid red";
+    balloon.style.left = `${clippyRect.left - 100}px !important`;
+    balloon.style.top = `${clippyRect.top - 250}px !important`; // Use a large fixed value
+
+    // If Clippy is fixed, ensure the balloon is properly positioned
+    if (fixedPosition) {
+      // Ensure the balloon is also using fixed positioning
+      balloon.style.position = "fixed";
+      balloon.style.zIndex = "9999";
+
+      // Remove any transitions to prevent flashing
+      balloon.style.transition = "none";
+    }
+
+    // Position higher above Clippy - increase the vertical offset
+    const verticalOffset = 80; // Increase this value to position the balloon higher
+    balloon.style.left = clippyRect.left - 10 + "px";
+    balloon.style.top =
+      clippyRect.top - balloon.offsetHeight - verticalOffset + "px";
+
+    // Ensure the balloon stays within the viewport bounds
+    const balloonRect = balloon.getBoundingClientRect();
+
+    // Check if balloon goes off the top of the viewport
+    if (balloonRect.top < viewportRect.top + 10) {
+      // If it goes off the top, position it to the right of Clippy instead
+      balloon.style.left = clippyRect.right + 15 + "px";
+      balloon.style.top = clippyRect.top - 10 + "px";
+    }
+
+    // Check if balloon goes off the right side of the viewport
+    if (balloonRect.right > viewportRect.right - 10) {
+      // If it goes off the right, position it to the left of Clippy
+      balloon.style.left = clippyRect.left - balloon.offsetWidth - 15 + "px";
+      balloon.style.top = clippyRect.top - 10 + "px";
+    }
+
+    // Remove any existing custom tips
+    const existingTips = balloon.querySelectorAll(".custom-tip");
+    existingTips.forEach((tip) => {
+      if (tip && tip.parentNode) {
+        tip.parentNode.removeChild(tip);
+      }
+    });
+
+    // Hide any original tips
+    const originalTips = balloon.querySelectorAll(".clippy-tip");
+    originalTips.forEach((origTip) => {
+      origTip.style.display = "none";
+    });
+  }, []);
+
+  // Set up the balloon observer
+  const setupBalloonObserver = useCallback(() => {
+    // Clean up existing observer if any
+    if (balloonObserverRef.current) {
+      balloonObserverRef.current.disconnect();
+    }
+
+    // Create an observer
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length) {
+          for (let i = 0; i < mutation.addedNodes.length; i++) {
+            const node = mutation.addedNodes[i];
+            if (node.classList && node.classList.contains("clippy-balloon")) {
+              setTimeout(repositionClippyBalloon, 0);
+              return;
+            }
+          }
+        }
+      });
+    });
+
+    // Start observing
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Store observer reference for cleanup
+    balloonObserverRef.current = observer;
+
+    // Also check periodically
+    const intervalId = setInterval(repositionClippyBalloon, 500);
+
+    // Check on window resize
+    window.addEventListener("resize", repositionClippyBalloon);
+
+    // Call immediately in case the balloon is already present
+    repositionClippyBalloon();
+
+    // Return cleanup function
+    return () => {
+      observer.disconnect();
+      clearInterval(intervalId);
+      window.removeEventListener("resize", repositionClippyBalloon);
+    };
+  }, [repositionClippyBalloon]);
 
   // Define calculateBoundedPosition as a useCallback to avoid dependency issues
   const calculateBoundedPosition = useCallback(
@@ -182,50 +337,143 @@ const ClippyController = ({
     }
   }, [desktopRectRef]);
 
-  // Handle double-click on Clippy
-  const handleDoubleClick = useCallback(() => {
+  // Handle single click on mobile and double click on desktop
+  const handleClippyClick = useCallback(
+    (e) => {
+      if (!clippy) return;
+
+      // Check if it's a mobile device
+      const isMobile = isMobileRef.current;
+
+      // For mobile devices, handle single click
+      if (isMobile) {
+        console.log("Mobile single click detected");
+
+        // Pick a random animation for mobile
+        const mobileAnims = ["Wave", "GetAttention", "Greeting"];
+        const randomAnim =
+          mobileAnims[Math.floor(Math.random() * mobileAnims.length)];
+
+        // Play animation
+        if (clippy.play) {
+          clippy.play(randomAnim);
+        }
+
+        // Make Clippy speak (for mobile)
+        if (clippy.speak) {
+          const mobilePhrases = [
+            "Tap detected! How can I help you?",
+            "Hello mobile user!",
+            "I'm here to assist on your device!",
+            "Need help with something on your mobile device?",
+          ];
+          const randomPhrase =
+            mobilePhrases[Math.floor(Math.random() * mobilePhrases.length)];
+          clippy.speak(randomPhrase);
+        }
+      }
+    },
+    [clippy, isMobileRef]
+  );
+
+  // Handle double-click on desktop
+  const handleDoubleClick = useCallback(
+    (e) => {
+      if (!clippy) return;
+
+      // Check if it's NOT a mobile device (desktop)
+      const isMobile = isMobileRef.current;
+
+      // Only process double-clicks on desktop
+      if (!isMobile) {
+        console.log("Desktop double-click detected");
+
+        // Simulate a Clippy animation or interaction on double-click
+        try {
+          // Desktop-specific animations
+          const desktopAnims = [
+            "Congratulate",
+            "GetAttention",
+            "GetTechy",
+            "Thinking",
+          ];
+          const randomAnim =
+            desktopAnims[Math.floor(Math.random() * desktopAnims.length)];
+
+          if (clippy.play) {
+            clippy.play(randomAnim);
+          }
+
+          // Make Clippy speak (for desktop)
+          if (clippy.speak) {
+            const desktopPhrases = [
+              "Double-click detected! Need some desktop assistance?",
+              "Hello there, desktop user!",
+              "What can I help you with on your computer?",
+              "It looks like you're using a computer. Need some help?",
+            ];
+            const randomPhrase =
+              desktopPhrases[Math.floor(Math.random() * desktopPhrases.length)];
+            clippy.speak(randomPhrase);
+          }
+        } catch (error) {
+          console.error("Error handling Clippy double-click:", error);
+        }
+      }
+    },
+    [clippy, isMobileRef]
+  );
+
+  // Function to set up Clippy click handlers based on device type
+  const setupClippyClickHandlers = useCallback(() => {
+    const agentElements = document.querySelectorAll(".clippy");
+    if (agentElements.length === 0) return false;
+
+    const agentElement = agentElements[0];
+
+    // Remove any existing handlers to prevent duplicates
+    agentElement.removeEventListener("click", handleClippyClick);
+    agentElement.removeEventListener("dblclick", handleDoubleClick);
+
+    // Add the appropriate handlers
+    if (isMobileRef.current) {
+      // For mobile devices, use click (tap) handler
+      agentElement.addEventListener("click", handleClippyClick);
+      console.log("Mobile click handler setup for Clippy");
+    } else {
+      // For desktop devices, use double-click handler
+      agentElement.addEventListener("dblclick", handleDoubleClick);
+      console.log("Desktop double-click handler setup for Clippy");
+    }
+
+    return true;
+  }, [handleClippyClick, handleDoubleClick, isMobileRef]);
+
+  // Add a new useEffect to set up the click handlers
+  useEffect(() => {
     if (!clippy) return;
 
-    // Simulate a Clippy animation or interaction on double-click
-    try {
-      if (clippy.animations && clippy.animations.length > 0) {
-        // Pick a random animation
-        const animations = clippy.animations || [];
-        const randomAnim =
-          animations[Math.floor(Math.random() * animations.length)];
-        clippy.play(randomAnim);
-      } else if (clippy.play) {
-        // Try common animations
-        const commonAnims = [
-          "Greeting",
-          "Wave",
-          "Congratulate",
-          "GetAttention",
-        ];
-        const randomAnim =
-          commonAnims[Math.floor(Math.random() * commonAnims.length)];
-        clippy.play(randomAnim);
-      }
+    // Try to set up the handlers immediately
+    if (!setupClippyClickHandlers()) {
+      // If not successful, retry with an interval
+      const interval = setInterval(() => {
+        if (setupClippyClickHandlers()) {
+          clearInterval(interval);
+        }
+      }, 500);
 
-      // Optional: make Clippy speak
-      if (clippy.speak) {
-        const phrases = [
-          "Need help with something?",
-          "Hello there!",
-          "What can I help you with today?",
-          "It looks like you're trying to get my attention!",
-        ];
-        const randomPhrase =
-          phrases[Math.floor(Math.random() * phrases.length)];
-        clippy.speak(randomPhrase);
-      }
-    } catch (error) {
-      console.error("Error handling Clippy double-click:", error);
+      // Clear interval after 10 seconds maximum
+      setTimeout(() => clearInterval(interval), 10000);
+
+      return () => clearInterval(interval);
     }
-  }, [clippy]);
+  }, [clippy, setupClippyClickHandlers]);
 
   // Update Clippy's position based on current desktop dimensions and relative position
   const updateClippyPosition = useCallback(() => {
+    // Skip position updates if fixed
+    if (fixedPosition) return;
+
     if (!clippyElementRef.current || !desktopViewportRef.current) return;
 
     // Get updated desktop dimensions
@@ -268,13 +516,40 @@ const ClippyController = ({
 
     // Update position state to match
     setPosition(boundedPos);
-  }, [calculateBoundedPosition, desktopRectRef, setPosition]);
+
+    // Also reposition the balloon if it exists
+    repositionClippyBalloon();
+  }, [
+    calculateBoundedPosition,
+    desktopRectRef,
+    setPosition,
+    repositionClippyBalloon,
+    fixedPosition,
+  ]);
 
   // Listen for window resize events and reposition Clippy
   useEffect(() => {
+    // Skip setting up resize handlers if Clippy is fixed
+    if (fixedPosition) {
+      // We still need to reposition the balloon on resize
+      const handleResize = () => {
+        requestAnimationFrame(() => {
+          repositionClippyBalloon();
+        });
+      };
+
+      window.addEventListener("resize", handleResize);
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    }
+
     // Add resize listener without debounce to update in real-time
     const handleResize = () => {
-      requestAnimationFrame(updateClippyPosition);
+      requestAnimationFrame(() => {
+        updateClippyPosition();
+        repositionClippyBalloon();
+      });
     };
 
     window.addEventListener("resize", handleResize);
@@ -282,7 +557,10 @@ const ClippyController = ({
     // Add a MutationObserver to detect changes to the desktop container
     if (desktopViewportRef.current) {
       const observer = new MutationObserver(() => {
-        requestAnimationFrame(updateClippyPosition);
+        requestAnimationFrame(() => {
+          updateClippyPosition();
+          repositionClippyBalloon();
+        });
       });
 
       // Observe the desktop element for attribute changes
@@ -302,14 +580,20 @@ const ClippyController = ({
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [updateClippyPosition]);
+  }, [updateClippyPosition, repositionClippyBalloon, fixedPosition]);
 
-  // Store clippy instance
+  // Store clippy instance and set up balloon observer
   useEffect(() => {
     if (!clippy) return;
+
     console.log("Clippy instance:", clippy);
     setClippyInstance(clippy);
-  }, [clippy, setClippyInstance]);
+
+    // Initialize the balloon positioning system
+    const cleanup = setupBalloonObserver();
+
+    return cleanup;
+  }, [clippy, setClippyInstance, setupBalloonObserver]);
 
   // Reduce Clippy size by 30%
   useEffect(() => {
@@ -339,11 +623,11 @@ const ClippyController = ({
       // Add style to ensure all new balloons are also scaled
       const styleElement = document.createElement("style");
       styleElement.textContent = `
-            .clippy-balloon {
-              transform: scale(.9) !important;
-              transform-origin: center !important;
-            }
-          `;
+                  .clippy-balloon {
+                    transform: scale(.9) !important;
+                    transform-origin: center !important;
+                  }
+                `;
       document.head.appendChild(styleElement);
 
       return true;
@@ -410,20 +694,47 @@ const ClippyController = ({
         };
 
         // Position using absolute positioning
-        agentElement.style.position = "absolute";
+        agentElement.style.position = fixedPosition ? "fixed" : "absolute";
         agentElement.style.left = `${absoluteX}px`;
         agentElement.style.top = `${absoluteY}px`;
         agentElement.style.bottom = "auto";
         agentElement.style.right = "auto";
         agentElement.style.zIndex = "1000";
         agentElement.style.display = visible ? "block" : "none";
-        agentElement.style.cursor = "move";
+
+        // Set cursor to default if fixed, otherwise set to move
+        agentElement.style.cursor = fixedPosition ? "default" : "move";
+
+        if (fixedPosition) {
+          // Add direct click and double-click handlers for better interaction
+          agentElement.addEventListener("click", () => {
+            console.log("Clippy clicked directly");
+            if (clippy && clippy.speak) {
+              clippy.speak("How can I help you?");
+            }
+          });
+
+          agentElement.addEventListener("dblclick", handleDoubleClick);
+        }
+
         agentElement.style.willChange = "transform, left, top"; // Optimization for smoother animation
 
         // Add mobile-specific styles if needed
         if (isMobileRef.current) {
+          // For mobile: Position Clippy lower on the screen
+          const mobileX = position.x; // Keep horizontal position the same
+          const mobileY = Math.floor(desktopRect.height * 0.92); // Position at 75% of screen height
+
+          console.log("Using mobile position:", mobileX, mobileY);
+        } else {
+          // For desktop: Use the normal position
+        }
+        if (isMobileRef.current) {
           // Make Clippy easier to tap on mobile
-          agentElement.style.touchAction = "none"; // Disable browser handling of touch gestures
+          agentElement.style.touchAction = "none";
+
+          // Make Clippy slightly larger on mobile for easier tapping
+          agentElement.style.transform = "scale(1.1)";
         }
 
         // Log positioning info
@@ -442,8 +753,13 @@ const ClippyController = ({
           setPosition(boundedPos);
         }
 
-        // Add overlay to prevent clicks until dragged
-        addDragOverlay(agentElement);
+        // Only add drag overlay if not fixed
+        if (!fixedPosition) {
+          addDragOverlay(agentElement);
+        } else {
+          // If fixed, still provide a way to trigger animations on click
+          agentElement.addEventListener("click", handleDoubleClick);
+        }
 
         initialPositionAppliedRef.current = true;
         return true;
@@ -454,6 +770,9 @@ const ClippyController = ({
 
     // Add a transparent overlay to prevent clicks
     const addDragOverlay = (agentElement) => {
+      // Skip adding overlay if Clippy is fixed
+      if (fixedPosition) return;
+
       // Check if we already have an overlay
       let overlay = document.getElementById("clippy-drag-overlay");
       if (!overlay) {
@@ -598,6 +917,9 @@ const ClippyController = ({
 
             // Mark as has been dragged
             hasBeenDraggedRef.current = true;
+
+            // Reposition the balloon if it exists
+            repositionClippyBalloon();
           }
         };
 
@@ -657,6 +979,9 @@ const ClippyController = ({
             // Update position state
             setPosition(boundedPos);
             setUserPositioned(true);
+
+            // Reposition the balloon if it exists
+            repositionClippyBalloon();
           }
         };
 
@@ -696,6 +1021,7 @@ const ClippyController = ({
     isMobileRef,
     calculateBoundedPosition,
     handleDoubleClick,
+    fixedPosition, // Added fixedPosition dependency
   ]);
 
   // Update visibility only
@@ -714,7 +1040,8 @@ const ClippyController = ({
 
   // Set up normal drag handlers for Clippy
   useEffect(() => {
-    if (!clippy || !hasBeenDraggedRef.current) return;
+    // Skip setting up drag handlers if fixedPosition is true
+    if (!clippy || !hasBeenDraggedRef.current || fixedPosition) return;
 
     // Clean up function to remove event listeners
     let cleanupListeners = () => {};
@@ -825,6 +1152,9 @@ const ClippyController = ({
       requestAnimationFrame(() => {
         agentElement.style.left = `${newAbsX}px`;
         agentElement.style.top = `${newAbsY}px`;
+
+        // Also reposition the balloon if it exists
+        repositionClippyBalloon();
       });
     };
 
@@ -878,11 +1208,11 @@ const ClippyController = ({
 
         // Update position state with relative desktop position
         setPosition(boundedPos);
+
+        // Reposition the balloon after move completes
+        repositionClippyBalloon();
       } else {
         // Handle click (drag with no movement) - still enforce boundaries
-        // Get desktop position
-        // Handle click (drag with no movement) - still enforce boundaries
-        // Get desktop position
         const desktopRect = desktopElement
           ? desktopElement.getBoundingClientRect()
           : null;
@@ -953,6 +1283,8 @@ const ClippyController = ({
     desktopRectRef,
     isMobileRef,
     calculateBoundedPosition,
+    repositionClippyBalloon,
+    fixedPosition, // Added fixedPosition dependency
   ]);
 
   return null;

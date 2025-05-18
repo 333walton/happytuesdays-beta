@@ -1,0 +1,23 @@
+/* More comprehensive CSS to prevent library overrides */
+.clippy-balloon {
+  position: relative !important;
+  top: -400px !important; /* Adjust this value to move up/down */
+  left: 820px !important; /* Adjust this value to move left/right */
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Hide all tips */
+.clippy-balloon .clippy-tip {
+  display: none !important;
+}
+
+/* Ensure content is visible */
+.clippy-balloon .clippy-content {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}

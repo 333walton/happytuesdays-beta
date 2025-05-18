@@ -1,21 +1,21 @@
 /* Prevent icon tint/highlight on Recycle icon when selected/focused */
 .ExplorerIcon.recycle-icon:focus .icon__icon,
 .ExplorerIcon.recycle-icon:active .icon__icon {
-    filter: none !important;
-    background-color: transparent !important;
+  filter: none !important;
+  background-color: transparent !important;
 }
 
 /* Recycle icon text — no jump, and clean highlight */
 .ExplorerIcon.recycle-icon .icon__text {
-    display: inline-block;
-    padding: 1px 4px;
-    border-radius: 2px;
-    line-height: 1.2;
-    transition: background-color 0.1s ease-in-out;
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 2px;
+  line-height: 1.2;
+  transition: background-color 0.1s ease-in-out;
 }
 
 /* Only highlight the text when focused */
 .ExplorerIcon.recycle-icon:focus .icon__text {
-    background-color: #000080 !important;
-    color: white !important;
+  background-color: #000080 !important;
+  color: white !important;
 }
