@@ -1,7 +1,5 @@
 /**
  * ClippyService.js - Utility service for working with the Office Assistant
- *
- * This service uses the window.clippy global instance set by the ClippyProvider
  */
 
 // Help messages for different windows
@@ -22,18 +20,12 @@ const helpMessages = {
     text: "Looking for mines? Remember to check the numbers carefully!",
     animation: "Alert",
   },
-  calc: {
-    text: "Need help with calculations?",
-    animation: "Thinking",
-  },
+  calc: { text: "Need help with calculations?", animation: "Thinking" },
   cmd: {
     text: "Working with the command prompt? Try typing 'help' to see available commands.",
     animation: "Explain",
   },
-  default: {
-    text: "Need help with Windows 98?",
-    animation: "Greeting",
-  },
+  default: { text: "Need help with Windows 98?", animation: "Greeting" },
 };
 
 /**
@@ -44,25 +36,34 @@ const isAvailable = () => {
 };
 
 /**
+ * Execute a Clippy action if available
+ * @param {Function} action - The action to perform
+ * @returns {boolean} Whether the action was successful
+ */
+const executeIfAvailable = (action) => {
+  if (!isAvailable()) return false;
+
+  try {
+    action();
+    return true;
+  } catch (e) {
+    console.error("Error executing Clippy action:", e);
+    return false;
+  }
+};
+
+/**
  * Show Clippy
  */
 const show = () => {
-  if (isAvailable() && window.setAssistantVisible) {
-    window.setAssistantVisible(true);
-    return true;
-  }
-  return false;
+  return executeIfAvailable(() => window.setAssistantVisible(true));
 };
 
 /**
  * Hide Clippy
  */
 const hide = () => {
-  if (isAvailable() && window.setAssistantVisible) {
-    window.setAssistantVisible(false);
-    return true;
-  }
-  return false;
+  return executeIfAvailable(() => window.setAssistantVisible(false));
 };
 
 /**
@@ -70,15 +71,7 @@ const hide = () => {
  * @param {string} text - The text for Clippy to speak
  */
 const speak = (text) => {
-  if (isAvailable() && window.clippy.speak) {
-    try {
-      window.clippy.speak(text);
-      return true;
-    } catch (e) {
-      console.error("Error making Clippy speak:", e);
-    }
-  }
-  return false;
+  return executeIfAvailable(() => window.clippy.speak(text));
 };
 
 /**
@@ -86,15 +79,7 @@ const speak = (text) => {
  * @param {string} animation - The animation name
  */
 const play = (animation) => {
-  if (isAvailable() && window.clippy.play) {
-    try {
-      window.clippy.play(animation);
-      return true;
-    } catch (e) {
-      console.error(`Error playing Clippy animation "${animation}":`, e);
-    }
-  }
-  return false;
+  return executeIfAvailable(() => window.clippy.play(animation));
 };
 
 /**
@@ -102,42 +87,78 @@ const play = (animation) => {
  * @param {string} agent - The agent name (Clippy, Merlin, etc.)
  */
 const changeAgent = (agent) => {
-  if (isAvailable() && window.setCurrentAgent) {
-    window.setCurrentAgent(agent);
-    return true;
-  }
-  return false;
+  return executeIfAvailable(() => window.setCurrentAgent(agent));
 };
 
 /**
  * Set the position of Clippy
- * @param {number} x - X position (right distance in pixels)
- * @param {number} y - Y position (bottom distance in pixels)
+ * This is a convenience method that delegates to the ClippyProvider's implementation
+ * which handles actual positioning, bounds checking, and display updates.
+ *
+ * @param {number} x - X position within the viewport
+ * @param {number} y - Y position within the viewport
  */
 const setPosition = (x, y) => {
-  if (typeof window !== "undefined" && window.setClippyPosition) {
-    window.setClippyPosition({ x, y });
+  return executeIfAvailable(() => window.setClippyPosition({ x, y }));
+};
 
-    // Also try to directly position any existing clippy elements
-    try {
-      const agentElements = document.querySelectorAll(".clippy");
-      if (agentElements.length > 0) {
-        const agentElement = agentElements[0];
+/**
+ * Set the initial position of Clippy with a more intuitive approach
+ * @param {Object} options - Position options
+ * @param {string} options.position - Named position: 'bottom-right', 'top-right', 'center', etc.
+ *                                    Or percentages: '80% 50%' (80% from left, 50% from top)
+ */
+const setInitialPosition = (options) => {
+  return executeIfAvailable(() => {
+    // Check if we're dealing with a named position
+    if (typeof options.position === "string") {
+      // Convert named positions to percentages
+      let xPercent, yPercent;
 
-        // Position the agent
-        agentElement.style.position = "fixed";
-        agentElement.style.bottom = y + "px";
-        agentElement.style.right = x + "px";
-        agentElement.style.top = "auto";
-        agentElement.style.left = "auto";
+      switch (options.position.toLowerCase()) {
+        case "bottom-right":
+          xPercent = 0.85;
+          yPercent = 0.85;
+          break;
+        case "bottom-left":
+          xPercent = 0.15;
+          yPercent = 0.85;
+          break;
+        case "top-right":
+          xPercent = 0.85;
+          yPercent = 0.15;
+          break;
+        case "top-left":
+          xPercent = 0.15;
+          yPercent = 0.15;
+          break;
+        case "center":
+          xPercent = 0.5;
+          yPercent = 0.5;
+          break;
+        default:
+          // Check if it's a percentage string like "80% 50%"
+          const percentMatch = options.position.match(/(\d+)%\s+(\d+)%/);
+          if (percentMatch) {
+            xPercent = parseInt(percentMatch[1], 10) / 100;
+            yPercent = parseInt(percentMatch[2], 10) / 100;
+          } else {
+            // Default to bottom right if we can't parse
+            xPercent = 0.85;
+            yPercent = 0.85;
+          }
       }
-    } catch (e) {
-      console.error("Error positioning Clippy:", e);
-    }
 
-    return true;
-  }
-  return false;
+      // Set the position using the window global
+      if (window.setClippyInitialPosition) {
+        window.setClippyInitialPosition({ xPercent, yPercent });
+      }
+    }
+    // If it's already an object with x and y coordinates, use them directly
+    else if (options.x !== undefined && options.y !== undefined) {
+      window.setClippyPosition({ x: options.x, y: options.y });
+    }
+  });
 };
 
 /**
@@ -170,38 +191,17 @@ const getHelpForWindow = (windowTitle) => {
  * @param {string} windowTitle - The title of the window
  */
 const showHelpForWindow = (windowTitle) => {
-  if (isAvailable()) {
-    // Show Clippy
-    show();
+  if (!isAvailable()) return false;
 
-    // Get help message
-    const help = getHelpForWindow(windowTitle);
+  show();
+  const help = getHelpForWindow(windowTitle);
 
-    // Display help
-    setTimeout(() => {
-      speak(help.text);
-      play(help.animation);
-    }, 300);
+  setTimeout(() => {
+    speak(help.text);
+    play(help.animation);
+  }, 300);
 
-    return true;
-  }
-  return false;
-};
-
-/**
- * Handle window help button click
- *
- * This should be called from the CustomWindow component:
- *
- * handleHelpClick = () => {
- *   ClippyService.handleWindowHelp(this.props.title);
- *   if (this.props.onHelp) {
- *     this.props.onHelp();
- *   }
- * }
- */
-const handleWindowHelp = (windowTitle) => {
-  return showHelpForWindow(windowTitle);
+  return true;
 };
 
 // Export the service
@@ -213,9 +213,10 @@ const ClippyService = {
   play,
   changeAgent,
   setPosition,
+  setInitialPosition,
   getHelpForWindow,
   showHelpForWindow,
-  handleWindowHelp,
+  handleWindowHelp: showHelpForWindow, // Alias for backward compatibility
 };
 
 export default ClippyService;

@@ -16,6 +16,7 @@ import Background from "./components/tools/Background";
 import MonitorView from "./components/MonitorView/MonitorView";
 import StartMessage from "./components/StartMessage/StartMessage";
 import { ClippyProvider } from "./components/ClippyAssistant/index";
+import ClippyService from "./components/ClippyAssistant/ClippyService";
 
 class Desktop extends Component {
   static contextType = SettingsContext;
@@ -24,6 +25,11 @@ class Desktop extends Component {
     super(props);
     this.clippyFixedInterval = null;
     this.initialClippyPosition = null;
+    this.clippyOverlay = null;
+    this.initialMessageShown = false;
+    this.clickTimeout = null;
+    this.balloonFixTimeout = null;
+    this.isFixingBalloon = false;
   }
 
   componentDidMount() {
@@ -31,29 +37,184 @@ class Desktop extends Component {
       this.context.toggleMobile(true);
     }
 
-    // Direct approach to fix Clippy in position
+    // Initialize Clippy after a delay to ensure it's fully loaded
     setTimeout(() => {
-      this.fixClippyPosition();
-    }, 2000); // Wait for Clippy to be fully loaded and positioned
+      this.initializeClippy();
+    }, 2000);
+
+    // Add a global stylesheet to prevent balloon flashing
+    this.addGlobalBalloonStyles();
   }
 
   componentWillUnmount() {
     if (this.clippyFixedInterval) {
       clearInterval(this.clippyFixedInterval);
     }
+    if (this.clickTimeout) {
+      clearTimeout(this.clickTimeout);
+    }
+    if (this.balloonFixTimeout) {
+      clearTimeout(this.balloonFixTimeout);
+    }
+    // Remove the overlay if it exists
+    if (this.clippyOverlay && this.clippyOverlay.parentNode) {
+      this.clippyOverlay.parentNode.removeChild(this.clippyOverlay);
+    }
+    // Remove global balloon styles
+    const styleElement = document.getElementById("clippy-balloon-styles");
+    if (styleElement && styleElement.parentNode) {
+      styleElement.parentNode.removeChild(styleElement);
+    }
   }
 
-  fixClippyPosition = () => {
-    // Find Clippy element
+  // Add global styles to prevent balloon flashing
+  addGlobalBalloonStyles = () => {
+    const styleElement = document.createElement("style");
+    styleElement.id = "clippy-balloon-styles";
+    styleElement.textContent = `
+      .clippy-balloon {
+        position: fixed !important;
+        z-index: 9999 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transition: none !important;
+        animation: none !important;
+        background-color: #fffcde !important;
+        border: 1px solid #000 !important;
+        border-radius: 5px !important;
+        padding: 8px !important;
+        max-width: 250px !important;
+      }
+      
+      /* Hide original clippy balloon tips */
+      .clippy-tip {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+  };
+
+  initializeClippy = () => {
+    // Make Clippy visible without initial animation
+    ClippyService.show();
+
+    // Set initial position based on device
+    const isMobile = window.innerWidth < 800;
+    if (isMobile) {
+      // On mobile, position at bottom-right
+      ClippyService.setInitialPosition({ position: "bottom-right" });
+    } else {
+      // On desktop, position at center-right
+      ClippyService.setInitialPosition({ position: "90% 50%" });
+
+      // For desktop, completely block dragging and replace with a click overlay
+      this.preventClippyDraggingOnDesktop();
+    }
+
+    // Wait a bit longer before trying to show welcome message
+    setTimeout(() => {
+      this.showWelcomeMessage();
+    }, 3000);
+  };
+
+  showWelcomeMessage = () => {
+    if (!this.initialMessageShown && window.clippy) {
+      // Play greeting animation first
+      window.clippy.play("Greeting");
+
+      // Then speak after a delay
+      setTimeout(() => {
+        if (window.clippy && window.clippy.speak) {
+          window.clippy.speak("Welcome to Windows 98!");
+          this.initialMessageShown = true;
+
+          // Fix balloon positioning once it appears
+          this.fixBalloonOnce();
+        }
+      }, 800);
+    }
+  };
+
+  // Fix balloon positioning only once after it appears
+  fixBalloonOnce = () => {
+    if (this.isFixingBalloon) return;
+    this.isFixingBalloon = true;
+
+    // Clear any existing timeout
+    if (this.balloonFixTimeout) {
+      clearTimeout(this.balloonFixTimeout);
+    }
+
+    // Check for balloon every 100ms
+    const checkBalloon = () => {
+      const balloon = document.querySelector(".clippy-balloon");
+      if (balloon) {
+        // Position it properly once and stop checking
+        this.positionBalloon(balloon);
+        this.isFixingBalloon = false;
+      } else {
+        // Keep checking for up to 2 seconds
+        this.balloonFixTimeout = setTimeout(checkBalloon, 100);
+      }
+    };
+
+    checkBalloon();
+
+    // Set a final timeout to stop checking after 2 seconds
+    setTimeout(() => {
+      this.isFixingBalloon = false;
+      if (this.balloonFixTimeout) {
+        clearTimeout(this.balloonFixTimeout);
+      }
+    }, 2000);
+  };
+
+  // Position the balloon relative to Clippy
+  positionBalloon = (balloon) => {
+    if (!balloon) return;
+
+    const clippy = document.querySelector(".clippy");
+    if (!clippy) return;
+
+    const clippyRect = clippy.getBoundingClientRect();
+
+    // Position the balloon above Clippy
+    balloon.style.position = "fixed";
+    balloon.style.zIndex = "9999";
+    balloon.style.left = `${clippyRect.left - 20}px`;
+    balloon.style.top = `${clippyRect.top - balloon.offsetHeight - 30}px`;
+
+    // Ensure it stays visible
+    balloon.style.display = "block";
+    balloon.style.visibility = "visible";
+    balloon.style.opacity = "1";
+
+    // Prevent any transitions or animations that might cause flashing
+    balloon.style.transition = "none";
+    balloon.style.animation = "none";
+
+    // Make sure it stays above the overlay
+    if (this.clippyOverlay) {
+      this.clippyOverlay.style.pointerEvents = "none";
+
+      // Restore pointer events after balloon is likely gone
+      setTimeout(() => {
+        if (this.clippyOverlay) {
+          this.clippyOverlay.style.pointerEvents = "auto";
+        }
+      }, 5000);
+    }
+  };
+
+  // Completely prevent dragging on desktop
+  preventClippyDraggingOnDesktop = () => {
     const clippyElements = document.querySelectorAll(".clippy");
     if (clippyElements.length === 0) {
-      // Try again later if not found
-      setTimeout(this.fixClippyPosition, 500);
+      setTimeout(this.preventClippyDraggingOnDesktop, 500);
       return;
     }
 
     const clippyEl = clippyElements[0];
-    console.log("Found Clippy, fixing position");
 
     // Store initial position
     const rect = clippyEl.getBoundingClientRect();
@@ -62,89 +223,109 @@ class Desktop extends Component {
       top: rect.top,
     };
 
-    // Apply critical styles to prevent dragging
+    // Apply critical styles to completely prevent dragging
     clippyEl.style.position = "fixed";
     clippyEl.style.left = `${rect.left}px`;
     clippyEl.style.top = `${rect.top}px`;
     clippyEl.style.cursor = "default";
 
-    // Disable pointer events on Clippy for drag prevention
-    // This is drastic but will ensure it can't be dragged
+    // Completely disable pointer events on the real Clippy element
     clippyEl.style.pointerEvents = "none";
 
-    // Add a clone of Clippy that only handles clicks
-    const clickableClone = document.createElement("div");
-    clickableClone.style.position = "fixed";
-    clickableClone.style.left = `${rect.left}px`;
-    clickableClone.style.top = `${rect.top}px`;
-    clickableClone.style.width = `${rect.width}px`;
-    clickableClone.style.height = `${rect.height}px`;
-    clickableClone.style.zIndex = "2000";
-    clickableClone.style.cursor = "pointer";
-    clickableClone.id = "clippy-clickable-overlay";
+    // Create a clickable overlay that sits on top of Clippy
+    this.clippyOverlay = document.createElement("div");
+    this.clippyOverlay.id = "clippy-clickable-overlay";
+    this.clippyOverlay.style.position = "fixed";
+    this.clippyOverlay.style.left = `${rect.left}px`;
+    this.clippyOverlay.style.top = `${rect.top}px`;
+    this.clippyOverlay.style.width = `${rect.width}px`;
+    this.clippyOverlay.style.height = `${rect.height}px`;
+    this.clippyOverlay.style.zIndex = "2000";
+    this.clippyOverlay.style.cursor = "pointer";
 
-    // Add click handler to the clone
-    clickableClone.addEventListener("click", () => {
-      console.log("Clippy clicked via overlay");
-      if (window.clippy && window.clippy.speak) {
-        window.clippy.speak("How can I help you?");
+    // Track clicks to distinguish between single and double clicks
+    let clickCount = 0;
+
+    // Add click handler with delayed execution to avoid triggering on double-click
+    this.clippyOverlay.addEventListener("click", () => {
+      clickCount++;
+
+      // Clear any existing timeout
+      if (this.clickTimeout) {
+        clearTimeout(this.clickTimeout);
       }
+
+      // Set a new timeout to handle the click after a delay
+      this.clickTimeout = setTimeout(() => {
+        // Only handle single clicks (double clicks will reset this)
+        if (clickCount === 1) {
+          // For single clicks, we don't do anything
+        }
+        clickCount = 0;
+      }, 300); // Delay to distinguish between single and double clicks
     });
 
-    clickableClone.addEventListener("dblclick", () => {
-      console.log("Clippy double-clicked via overlay");
+    // Add double-click handler
+    this.clippyOverlay.addEventListener("dblclick", () => {
+      // Reset click count to prevent single-click handler from firing
+      clickCount = 0;
+      if (this.clickTimeout) {
+        clearTimeout(this.clickTimeout);
+      }
+
+      // Handle double-click with animation then speech
       if (window.clippy) {
         const anims = ["Greeting", "Wave", "Congratulate", "GetAttention"];
         const anim = anims[Math.floor(Math.random() * anims.length)];
+
+        // Play animation first
         window.clippy.play(anim);
 
-        if (window.clippy.speak) {
-          window.clippy.speak("What can I help you with today?");
-        }
+        // Then show speech after animation starts
+        setTimeout(() => {
+          if (window.clippy && window.clippy.speak) {
+            const phrases = [
+              "What can I help you with today?",
+              "Need some assistance with Windows?",
+              "Looking for some help?",
+              "How can I assist you?",
+            ];
+            const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+
+            // Speak and then fix the balloon
+            window.clippy.speak(phrase);
+            this.fixBalloonOnce();
+          }
+        }, 800);
       }
     });
 
-    // Add the clickable overlay to the document
-    document.body.appendChild(clickableClone);
+    // Add the overlay to the document
+    document.body.appendChild(this.clippyOverlay);
 
-    // Create a continuous monitor to ensure Clippy stays fixed
-    // This handles any attempt by the component to reposition Clippy
+    // Use a much simpler interval that just keeps Clippy in place
+    // and doesn't constantly mess with the balloon
     this.clippyFixedInterval = setInterval(() => {
-      const clippyEls = document.querySelectorAll(".clippy");
-      if (clippyEls.length > 0) {
-        const currEl = clippyEls[0];
-        const currRect = currEl.getBoundingClientRect();
-
-        // If position has changed significantly, reset it
-        if (
-          Math.abs(currRect.left - this.initialClippyPosition.left) > 5 ||
-          Math.abs(currRect.top - this.initialClippyPosition.top) > 5
-        ) {
-          console.log("Clippy moved, fixing position");
-          currEl.style.position = "fixed";
-          currEl.style.left = `${this.initialClippyPosition.left}px`;
-          currEl.style.top = `${this.initialClippyPosition.top}px`;
-        }
-
-        // Make sure the clickable overlay is still in the right position
-        const overlay = document.getElementById("clippy-clickable-overlay");
-        if (overlay) {
-          overlay.style.left = `${this.initialClippyPosition.left}px`;
-          overlay.style.top = `${this.initialClippyPosition.top}px`;
-        }
+      // Ensure Clippy element remains in position
+      if (clippyEl) {
+        clippyEl.style.position = "fixed";
+        clippyEl.style.left = `${this.initialClippyPosition.left}px`;
+        clippyEl.style.top = `${this.initialClippyPosition.top}px`;
+        clippyEl.style.pointerEvents = "none";
       }
 
-      // Also ensure any balloon is using fixed positioning
-      const balloon = document.querySelector(".clippy-balloon");
-      if (balloon) {
-        balloon.style.position = "fixed";
-        balloon.style.zIndex = "9999";
+      // Ensure overlay remains aligned with Clippy
+      if (this.clippyOverlay) {
+        this.clippyOverlay.style.left = `${this.initialClippyPosition.left}px`;
+        this.clippyOverlay.style.top = `${this.initialClippyPosition.top}px`;
       }
     }, 100);
   };
 
   render() {
     const { context } = this;
+    const isMobile = context.isMobile;
+
     return (
       <ProgramProvider>
         <MonitorView>
@@ -152,7 +333,7 @@ class Desktop extends Component {
             className={cx("desktop screen", {
               desktopX2: context.scale === 2,
               desktopX1_5: context.scale === 1.5,
-              notMobile: !context.isMobile,
+              notMobile: !isMobile,
               fullScreen: context.fullScreen,
             })}
           >
@@ -164,7 +345,11 @@ class Desktop extends Component {
             <Settings />
             <ShutDown />
             <StartMessage />
-            <ClippyProvider defaultAgent="Clippy"></ClippyProvider>
+            {/* Set fixedPosition based on device type */}
+            <ClippyProvider
+              defaultAgent="Clippy"
+              fixedPosition={!isMobile} // Non-draggable on desktop, draggable on mobile
+            />
             {context.crt && <CRTOverlay />}
           </Theme>
         </MonitorView>
