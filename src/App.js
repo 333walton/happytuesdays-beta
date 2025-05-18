@@ -15,8 +15,7 @@ import ShutDown from "./components/ShutDown/ShutDown";
 import Background from "./components/tools/Background";
 import MonitorView from "./components/MonitorView/MonitorView";
 import StartMessage from "./components/StartMessage/StartMessage";
-// Remove this import as we won't use it here
-// import ThemeWrapper from './components/MonitorView/ThemeWrapper';
+import { ClippyProvider } from "./components/ClippyAssistant/index";
 
 class Desktop extends Component {
   static contextType = SettingsContext;
@@ -31,7 +30,6 @@ class Desktop extends Component {
     const { context } = this;
     return (
       <ProgramProvider>
-        {/* Removed the ThemeWrapper from here */}
         <MonitorView>
           <Theme
             className={cx("desktop screen", {
@@ -49,6 +47,7 @@ class Desktop extends Component {
             <Settings />
             <ShutDown />
             <StartMessage />
+            <ClippyProvider defaultAgent="Clippy"></ClippyProvider>
             {context.crt && <CRTOverlay />}
           </Theme>
         </MonitorView>

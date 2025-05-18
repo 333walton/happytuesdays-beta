@@ -1,51 +1,38 @@
 import React, { useContext } from "react";
 import { ProgramContext } from "../../contexts";
 import * as icons from "../../icons";
+import ClippyAssistant from "./ClippyAssistant";
 
-// Desktop icon component to launch Clippy
+/**
+ * Desktop icon component to launch the Office Assistant THIS DOESNT SEEM TO EVEN WORK
+ */
 const ClippyIcon = ({ position = { x: 150, y: 220 } }) => {
-  // Extract the onOpen method from your ProgramContext
+  // Get program context
   const programContext = useContext(ProgramContext);
 
-  // Debugging info to better understand what's available
-  console.log("Program Context:", programContext);
-
+  // Launch the Office Assistant
   const handleLaunchClipper = () => {
-    // Try different methods of opening based on what's in your context
+    // Find the appropriate method to launch
     if (programContext.onOpen) {
-      // If onOpen is available (likely for desktop icons)
       programContext.onOpen({
         id: "clippy-assistant",
         title: "Office Assistant",
-        component: "Clippy", // Use string name that matches Applications.js export
+        component: ClippyAssistant,
         icon: icons.textchat32,
       });
     } else if (programContext.openProgram) {
-      // Alternative method that might be available
-      programContext.openProgram("Clippy");
+      programContext.openProgram("ClippyAssistant");
     } else if (programContext.addProgram) {
-      // If addProgram is the right method
-      import("../ClippyAssistant").then((module) => {
-        const ClippyAssistant = module.default;
-        programContext.addProgram({
-          id: "clippy-assistant",
-          title: "Office Assistant",
-          component: ClippyAssistant,
-          icon: icons.textchat32,
-        });
+      programContext.addProgram({
+        id: "clippy-assistant",
+        title: "Office Assistant",
+        component: ClippyAssistant,
+        icon: icons.textchat32,
       });
     } else {
-      // If all else fails, log what's available
-      console.error(
-        "No suitable method found to open Clippy. Available context:",
-        programContext
-      );
-      alert("Cannot open Office Assistant - see console for details");
+      console.error("Cannot find method to launch Office Assistant");
     }
   };
-
-  // Use the textchat32 icon
-  const iconSrc = icons.textchat32;
 
   return (
     <div
@@ -62,7 +49,7 @@ const ClippyIcon = ({ position = { x: 150, y: 220 } }) => {
       onDoubleClick={handleLaunchClipper}
     >
       <img
-        src={iconSrc}
+        src={icons.textchat32}
         alt="Office Assistant"
         style={{
           width: "32px",
@@ -71,6 +58,31 @@ const ClippyIcon = ({ position = { x: 150, y: 220 } }) => {
         }}
       />
       <div className="icon-label">Office Assistant</div>
+
+      <style jsx>{`
+        .desktop-icon {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 5px;
+          border: 1px solid transparent;
+          background-color: transparent;
+        }
+
+        .desktop-icon:hover {
+          background-color: rgba(0, 0, 255, 0.1);
+          border: 1px dotted rgba(255, 255, 255, 0.5);
+        }
+
+        .icon-label {
+          color: white;
+          text-shadow: 1px 1px 1px black;
+          font-family: "MS Sans Serif", Arial, sans-serif;
+          font-size: 11px;
+          margin-top: 4px;
+          text-align: center;
+        }
+      `}</style>
     </div>
   );
 };
