@@ -1,0 +1,110 @@
+MonitorView Component Structure Documentation
+This document explains the purpose and function of each file in the MonitorView component folder to assist with future edits and maintenance.
+Main Files
+MonitorView.js
+The main component that manages the state and coordinates all the sub-components. It:
+
+Initializes and maintains the component state
+Handles window resizing and mobile detection
+Contains methods for toggling monitor view, screensaver, and screen power
+Manages zoom levels and viewport colors
+Orchestrates the rendering of sub-components
+Creates the main portal for the monitor content
+
+_styles.scss
+Contains all the CSS styles for the MonitorView and its sub-components, including:
+
+Monitor frame and screen styling
+CRT effects
+Control buttons
+Screensaver containers
+Clippy integration specific styles
+
+index.js
+Simple export file that allows importing the MonitorView component with a cleaner import path:
+javascriptimport MonitorView from './MonitorView';
+MonitorControlsPanel.js
+A component that renders the control panel for adjusting monitor settings:
+
+Toggle monitor visibility
+Enable/disable screensavers
+Control zoom levels
+Set viewframe colors
+Change active screensaver
+
+ThemeWrapper.js
+Provides theming support for the control panel, ensuring consistent styling across the application.
+Component Sub-Folder
+components/ClippyIntegration.js
+Handles integration between Clippy and the monitor's power state:
+
+Notifies Clippy when screen power changes
+Observes the black overlay to detect power state changes
+Adds necessary CSS for Clippy to respect the screen power state
+Manages z-index hierarchy for proper layering of UI elements
+Ensures Clippy and its elements are hidden when screen is off
+
+components/CRTModeToggle.js
+A reusable toggle button component for CRT mode and other toggleable options:
+
+Supports both image and text based toggles
+Handles active/inactive states
+Provides consistent toggle button styling
+
+components/MonitorButton.js
+A simple button component for monitor controls:
+
+Standard styling for all monitor control buttons
+Handles active/inactive states
+Provides consistent button appearance
+
+components/MonitorControls.js
+Contains the specific controls that appear on the monitor frame:
+
+Power button
+CRT effect toggle
+Power indicator light
+Positions all controls in their correct locations
+
+components/MonitorFrame.js
+Renders the monitor frame and screen containing the desktop content:
+
+Renders the monitor image
+Contains the screen viewport
+Manages the black overlay for power off state
+Handles CRT effect and other visual treatments
+Includes the desktop content (children)
+
+components/ScreensaverRenderer.js
+Manages the rendering of all screensavers:
+
+Creates and manages all portal elements for the screensavers
+Renders different screensavers based on active state
+Handles cleanup of screensaver elements on unmount
+Conditionally renders the appropriate screensaver
+
+Flow of Operation
+
+MonitorView initializes state and creates portal containers
+It renders ScreensaverRenderer for screensavers, the monitor content via portal, and MonitorControlsPanel
+The monitor content includes MonitorFrame which renders the monitor, screen, and MonitorControls
+ClippyIntegration runs in parallel to monitor UI changes to Clippy's visibility
+User interactions with MonitorControls or MonitorControlsPanel update the state in MonitorView
+State changes trigger re-rendering of appropriate components
+
+Making Changes
+When making changes to the MonitorView component, consider:
+
+State changes: Most state should be managed in MonitorView.js
+UI updates: Modify the appropriate component for the UI element you want to change
+Style changes: Update _styles.scss for global styles or component-specific styles
+New functionality: Add to the appropriate component or create a new one if needed
+Clippy integration: Modify ClippyIntegration.js for any changes to Clippy behavior
+
+Common Edit Scenarios
+
+Adding a new monitor control: Add to MonitorControls.js
+Changing screen appearance: Modify MonitorFrame.js
+Adding a new screensaver: Update ScreensaverRenderer.js
+Modifying Clippy integration: Edit ClippyIntegration.js
+Adding a new monitor setting: Add state in MonitorView.js and UI in MonitorControlsPanel.js

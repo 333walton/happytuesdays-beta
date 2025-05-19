@@ -56,6 +56,112 @@ const ClippyController = ({
     [desktopRectRef]
   );
 
+  /**
+   * Fix animations after screen power state changes
+   * This function can be called manually if animations stop working
+   */
+  const fixAnimations = useCallback(() => {
+    if (!clippy) return;
+
+    console.log("Manually fixing Clippy animations");
+
+    // Force Clippy element to be visible
+    const clippyEl = document.querySelector(".clippy");
+    if (clippyEl) {
+      // Reset basic styles
+      clippyEl.style.visibility = "visible";
+      clippyEl.style.opacity = "1";
+      clippyEl.style.display = "block";
+
+      // Reset z-index
+      clippyEl.style.zIndex = "1001";
+
+      // Make sure pointer events are none
+      clippyEl.style.pointerEvents = "none";
+
+      // Find and make visible any SVG elements
+      const svgElements = clippyEl.querySelectorAll("svg");
+      if (svgElements.length > 0) {
+        svgElements.forEach((svg) => {
+          svg.style.visibility = "visible";
+          svg.style.opacity = "1";
+          svg.style.display = "inline";
+          // Make all SVG children visible too
+          Array.from(svg.querySelectorAll("*")).forEach((el) => {
+            el.style.visibility = "visible";
+            el.style.opacity = "1";
+            el.style.display = "inline";
+          });
+        });
+      }
+
+      // Fix animation maps
+      const maps = clippyEl.querySelectorAll(".map");
+      if (maps.length > 0) {
+        maps.forEach((map) => {
+          if (map.classList.contains("animate")) {
+            map.style.display = "block";
+            map.style.visibility = "visible";
+            map.style.opacity = "1";
+          }
+        });
+      }
+    }
+
+    // Fix overlay
+    const overlay = document.getElementById("clippy-clickable-overlay");
+    if (overlay) {
+      overlay.style.visibility = "visible";
+      overlay.style.opacity = "1";
+      overlay.style.pointerEvents = "auto";
+      overlay.style.zIndex = "1002";
+    }
+
+    // Apply temporary fix style
+    const fixStyle = document.createElement("style");
+    fixStyle.id = "clippy-manual-fix";
+    fixStyle.textContent = `
+      .clippy * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+      }
+      
+      .clippy-animate,
+      .clippy-animate * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+        animation: auto !important;
+      }
+      
+      .clippy svg,
+      .clippy svg * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: inline !important;
+      }
+    `;
+    document.head.appendChild(fixStyle);
+
+    // Play a test animation
+    setTimeout(() => {
+      try {
+        clippy.play("Wave");
+        console.log("Animation test successful");
+      } catch (e) {
+        console.error("Animation test failed:", e);
+      }
+
+      // Remove fix style after a few seconds
+      setTimeout(() => {
+        if (fixStyle.parentNode) {
+          fixStyle.parentNode.removeChild(fixStyle);
+        }
+      }, 3000);
+    }, 100);
+  }, [clippy]);
+
   // Set up the balloon observer - enhanced to redirect content
   const setupBalloonObserver = useCallback(() => {
     if (balloonObserverRef.current) {
@@ -384,6 +490,34 @@ const ClippyController = ({
       }
     }
   }, [isScreenPoweredOn]);
+
+  // Add a global function to allow manual fixing from console
+  useEffect(() => {
+    window.fixClippyAfterPowerChange = fixAnimations;
+
+    return () => {
+      delete window.fixClippyAfterPowerChange;
+    };
+  }, [fixAnimations]);
+
+  // Listen for power state changes from the parent component
+  useEffect(() => {
+    if (typeof isScreenPoweredOn !== "undefined") {
+      // Track previous power state
+      const prevPowered = clippyElementRef.current?.dataset.powered === "true";
+
+      // Store current power state
+      if (clippyElementRef.current) {
+        clippyElementRef.current.dataset.powered = isScreenPoweredOn;
+      }
+
+      // If power state changed from off to on, fix animations
+      if (isScreenPoweredOn && !prevPowered) {
+        // Wait for transition to complete
+        setTimeout(fixAnimations, 500);
+      }
+    }
+  }, [isScreenPoweredOn, fixAnimations]);
 
   // Store clippy instance and set up enhanced play method
   useEffect(() => {
@@ -768,6 +902,7 @@ const ClippyController = ({
         document.getElementById("clippy-animation-styles"),
         document.getElementById("clippy-emergency-fix"),
         document.getElementById("clippy-animation-fix-temp"),
+        document.getElementById("clippy-manual-fix"), // Add this line
       ];
 
       styleElements.forEach((el) => {
