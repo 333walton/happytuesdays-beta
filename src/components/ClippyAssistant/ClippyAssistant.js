@@ -316,11 +316,11 @@ const ClippyAssistant = (props) => {
           </ul>
 
           {/*
-  <div className="clippy-tip">
-    <strong>Tip:</strong> Click the ? button in any window title bar to
-    get contextual help from the Office Assistant.
-  </div>
-*/}
+            <div className="clippy-tip">
+              <strong>Tip:</strong> Click the ? button in any window title bar to
+              get contextual help from the Office Assistant.
+            </div>
+          */}
 
           <div className="animation-list">
             <h4>Popular Animations:</h4>
@@ -374,6 +374,65 @@ const ClippyAssistant = (props) => {
                 Goodbye
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Debug section */}
+        <div
+          className="debug-section"
+          style={
+            {
+              //marginTop: "10px",
+              //padding: "5px",
+              //border: "1px dashed red",
+            }
+          }
+        >
+          <h4>Animation Debug</h4>
+          <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
+            <button
+              onClick={() => {
+                const clippy = getClippy();
+                if (clippy && clippy.play) {
+                  console.log("Debug: Playing Wave animation");
+                  clippy.play("Wave");
+                } else {
+                  console.error(
+                    "Debug: Clippy instance or play method not found"
+                  );
+                }
+              }}
+              style={{ background: "#ff9999" }}
+            >
+              Test Wave
+            </button>
+            <button
+              onClick={() => {
+                const clippy = getClippy();
+                if (clippy && clippy.play) {
+                  console.log("Debug: Playing Greeting animation");
+                  clippy.play("Greeting");
+                } else {
+                  console.error(
+                    "Debug: Clippy instance or play method not found"
+                  );
+                }
+              }}
+              style={{ background: "#ff9999" }}
+            >
+              Test Greeting
+            </button>
+            <button
+              onClick={() => {
+                const clippy = getClippy();
+                console.log("Debug: Current clippy instance", clippy);
+                const animations = document.querySelectorAll(".clippy-animate");
+                console.log("Debug: Animation elements", animations);
+              }}
+              style={{ background: "#ffcc99" }}
+            >
+              Log Status
+            </button>
           </div>
         </div>
       </div>

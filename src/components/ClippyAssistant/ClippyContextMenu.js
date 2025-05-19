@@ -22,12 +22,13 @@ const ClippyContextMenu = ({
   ];
 
   // Common animations that work well with most assistants
+  // Using only confirmed working animations from ClippyAssistant.js
   const commonAnimations = [
     "Greeting",
     "Wave",
     "GetAttention",
-    "GetTechy",
     "Thinking",
+    "Writing", // Replaced "GetTechy" with "Writing"
     "Processing",
     "Congratulate",
     "Alert",

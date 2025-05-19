@@ -1,9 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 /**
  * CustomBalloon component for Clippy speech without any tips or close button
  */
 const CustomBalloon = ({ message, position }) => {
+  const balloonRef = useRef(null);
+
   // Add style to override any balloon tips that might be coming from CSS
   useEffect(() => {
     // Create a style element to override any ::after or :before pseudo-elements
@@ -39,6 +41,20 @@ const CustomBalloon = ({ message, position }) => {
     };
   }, []);
 
+  // Add smooth fade-in animation
+  useEffect(() => {
+    if (balloonRef.current) {
+      // Start transparent
+      balloonRef.current.style.opacity = "0";
+
+      // Fade in after a tiny delay (ensures the initial state is applied)
+      setTimeout(() => {
+        balloonRef.current.style.transition = "opacity 0.15s ease-in";
+        balloonRef.current.style.opacity = "1";
+      }, 10);
+    }
+  }, []);
+
   // Basic balloon styles without any tips
   const balloonStyle = {
     position: "fixed",
@@ -53,15 +69,18 @@ const CustomBalloon = ({ message, position }) => {
     fontSize: "12px",
     left: `${position.left}px`,
     top: `${position.top}px`,
+    // Removing transition from default styles since we're handling it in the useEffect
+    // to prevent interference with the initial opacity setting
     transition: "none",
     animation: "none",
     visibility: "visible",
     display: "block",
-    opacity: 1,
+    // Initial opacity will be overridden by the useEffect
   };
 
   return (
     <div
+      ref={balloonRef}
       style={balloonStyle}
       className="custom-clippy-balloon"
       data-notips="true" // Add a data attribute to target if needed

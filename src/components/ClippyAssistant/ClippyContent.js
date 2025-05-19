@@ -2,12 +2,12 @@
  * ClippyContent.js - Data and content for Clippy interactions
  */
 
-// Collection of Clippy animations
+// Collection of Clippy animations - Updated to use only supported animations
 export const animations = {
   greeting: ["Greeting", "Wave", "Congratulate"],
-  thinking: ["GetTechy", "Thinking", "Processing"],
-  attention: ["GetAttention", "Alert", "CheckingSomething"],
-  writing: ["Writing", "GestureDown", "GestureLeft"],
+  thinking: ["Thinking", "Processing", "Idle"],
+  attention: ["GetAttention", "Alert", "Searching"],
+  writing: ["Writing", "Explain", "Show"],
 };
 
 // Collection of Clippy interactions (animationCategory used instead of hardcoded animations)
@@ -127,7 +127,7 @@ export const chatResponses = {
   files:
     "To manage your files, open the File Explorer app or double-click on My Documents.",
   internet:
-    "Hydra98 includes a simulated Internet Explorer for browsing. You’ll find it in the Start menu.",
+    "Hydra98 includes a simulated Internet Explorer for browsing. You'll find it in the Start menu.",
   windows98:
     "Hydra98 recreates the Windows 98 desktop experience in your browser—complete with themes, classic apps, and CRT vibes.",
   programs:
@@ -142,5 +142,5 @@ export const chatResponses = {
   solitaire:
     "Solitaire is a timeless card game that comes bundled with Hydra98. Give it a try!",
   paint:
-    "Paint is a classic drawing app. You’ll find it in Start > Programs > Accessories.",
+    "Paint is a classic drawing app. You'll find it in Start > Programs > Accessories.",
 };

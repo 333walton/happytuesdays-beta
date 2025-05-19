@@ -136,11 +136,25 @@ const ClippyController = ({
     globalClickCounter = (globalClickCounter + 1) % 3;
     console.log("Double-click counter:", globalClickCounter);
 
-    // Play animation on every double-click
+    // IMPORTANT: Play animation on EVERY double-click, not just when counter is 0
+    console.log("ATTEMPTING TO PLAY ANIMATION: Greeting/Wave");
+
+    // Play animation first
     const animations = ["GetAttention", "Wave", "Greeting"];
     const randomAnim =
       animations[Math.floor(Math.random() * animations.length)];
-    if (clippy.play) clippy.play(randomAnim);
+
+    if (clippy.play) {
+      try {
+        console.log(`Playing animation: ${randomAnim}`);
+        clippy.play(randomAnim);
+        console.log("Animation started successfully");
+      } catch (e) {
+        console.error("Error playing animation:", e);
+      }
+    } else {
+      console.error("clippy.play is not a function:", clippy);
+    }
 
     // Only show speech balloon on every 3rd click (when counter is 0)
     if (globalClickCounter === 0) {
@@ -165,7 +179,7 @@ const ClippyController = ({
         } else if (clippy.speak) {
           clippy.speak(randomPhrase);
         }
-      }, 500);
+      }, 1000); // Increased delay to ensure animation has time to play
     }
   }, [clippy]);
 
@@ -310,14 +324,15 @@ const ClippyController = ({
       // Create animation submenu
       menu.appendChild(createSeparator());
 
+      // Using only supported animations
       const animations = [
         "Greeting",
         "Wave",
         "Congratulate",
         "GetAttention",
         "Alert",
-        "GetTechy",
-        "Thinking",
+        "Thinking", // Replaced GetTechy
+        "Writing",
       ];
       const animationItem = createMenuItem("Play Animation", null, true);
       menu.appendChild(animationItem);
@@ -335,7 +350,10 @@ const ClippyController = ({
       animSubmenu.style.zIndex = "10000";
 
       animations.forEach((anim) => {
-        const animItem = createMenuItem(anim, () => clippy.play(anim));
+        const animItem = createMenuItem(anim, () => {
+          console.log(`Playing animation from context menu: ${anim}`);
+          clippy.play(anim);
+        });
         animSubmenu.appendChild(animItem);
       });
 
@@ -560,14 +578,12 @@ const ClippyController = ({
       const agentElements = document.querySelectorAll(".clippy");
       if (agentElements.length === 0) return false;
 
-      // Just apply simple fixed scaling - NO viewport-based scaling
-      // This is the original approach
+      // Get the working approach from the previous version
       const clippyElement = agentElements[0];
-      clippyElement.style.transform = "scale(.9)";
-      clippyElement.style.transformOrigin = "center";
 
-      // Remove any transition effects that might affect positioning
-      clippyElement.style.transition = "none";
+      // CRITICAL CHANGE: Don't modify transform or transition directly
+      // Let animations control these properties
+      clippyElement.style.transformOrigin = "center bottom";
 
       // Apply global styles to hide the original balloon and clean up any pseudo-elements
       const styleElement = document.createElement("style");
@@ -600,8 +616,75 @@ const ClippyController = ({
             width: 0 !important;
             height: 0 !important;
           }
+          
+          /* CRITICAL: Animation fixes based on ClippyTS */
+          .clippy .maps {
+            position: relative;
+            width: 100%;
+            height: 100%;
+          }
+  
+          .clippy .map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            display: none;
+          }
+  
+          .clippy .map.animate {
+            display: block !important;
+          }
+  
+          /* Always make animated elements visible */
+          .clippy .map.animate,
+          .clippy .map.animate *,
+          .clippy [class*="animate"],
+          .clippy .animate,
+          .clippy .animate * {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+  
+          /* Ensure transform doesn't block animations */
+          .clippy {
+            transform: scale(0.9) !important;
+            transform-origin: center bottom !important;
+          }
         `;
       document.head.appendChild(styleElement);
+
+      // Override the play method to ensure animations are visible
+      if (clippy && typeof clippy.play === "function") {
+        const originalPlay = clippy.play;
+        clippy.play = function (animation) {
+          console.log(`Enhanced play: ${animation}`);
+
+          // Force animation elements to be visible
+          const clippyEl = document.querySelector(".clippy");
+          if (clippyEl) {
+            // Find animation map
+            const maps = clippyEl.querySelectorAll(".map");
+            if (maps.length > 0) {
+              console.log(`Found ${maps.length} animation maps`);
+
+              // Add animate class to all maps to ensure visibility
+              maps.forEach((map) => {
+                map.classList.add("animate");
+                map.style.display = "block";
+                map.style.visibility = "visible";
+                map.style.opacity = "1";
+              });
+            }
+          }
+
+          // Call original method
+          return originalPlay.call(this, animation);
+        };
+      }
+
       return true;
     };
 
@@ -820,8 +903,8 @@ const ClippyController = ({
       agentElement.style.display = visible ? "block" : "none";
       agentElement.style.cursor = isDraggable ? "move" : "default";
       agentElement.style.willChange = "transform, left, top";
-      agentElement.style.transform = "scale(.9)";
-      agentElement.style.transformOrigin = "center";
+      // IMPORTANT: Don't set transform directly - let animations control this
+      agentElement.style.transformOrigin = "center bottom";
 
       // Update position state
       if (boundedPos.x !== position.x || boundedPos.y !== position.y) {
@@ -912,6 +995,46 @@ const ClippyController = ({
       }
     }
   }, [clippy, visible]);
+
+  // Add animation debugging helper
+  useEffect(() => {
+    window.fixClippyAnimations = () => {
+      console.log("Applying emergency animation fix...");
+
+      // Force animations to work
+      const styleEl = document.createElement("style");
+      styleEl.id = "clippy-emergency-fix";
+      styleEl.textContent = `
+        .clippy * {
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: block !important;
+        }
+        
+        .clippy-animate,
+        .clippy-animate * {
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: block !important;
+          animation: auto !important;
+        }
+        
+        /* Ensure transform doesn't block animations */
+        .clippy {
+          transform: scale(0.9) !important;
+          transform-origin: center bottom !important;
+        }
+      `;
+      document.head.appendChild(styleEl);
+
+      console.log("Animation fix applied");
+      return "Animation fix applied";
+    };
+
+    return () => {
+      delete window.fixClippyAnimations;
+    };
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {

@@ -68,15 +68,20 @@ class ClippyManager {
     // Show welcome message after a delay
     setTimeout(() => {
       if (!this.initialMessageShown) {
-        ClippyService.play("Greeting");
+        try {
+          console.log("Playing initial Greeting animation");
+          ClippyService.play("Greeting");
 
-        // Add a delay between animation and speech
-        setTimeout(() => {
-          ClippyService.speak(
-            "Welcome to Hydra98! Please enjoy and don't break anything"
-          );
-          this.initialMessageShown = true;
-        }, 800);
+          // Add a delay between animation and speech
+          setTimeout(() => {
+            ClippyService.speak(
+              "Welcome to Hydra98! Please enjoy and don't break anything"
+            );
+            this.initialMessageShown = true;
+          }, 800);
+        } catch (e) {
+          console.error("Error during initial animation/speech:", e);
+        }
       }
     }, 3000);
 
@@ -119,6 +124,43 @@ class ClippyManager {
         z-index: 2000 !important;
       }
       
+      /* CRITICAL: Ensure animations are visible */
+      .clippy-animate,
+      .clippy-animate * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+        animation: auto !important;
+      }
+      
+      /* Animation fixes from ClippyTS */
+      .clippy .maps {
+        position: relative !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .clippy .map {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        height: 100% !important;
+        width: 100% !important;
+        display: none !important;
+      }
+
+      .clippy .map.animate {
+        display: block !important;
+      }
+
+      /* SVG animation support */
+      .clippy svg,
+      .clippy svg * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: inline !important;
+      }
+
       /* Custom balloon styles */
       .custom-clippy-balloon {
         position: fixed !important;
@@ -273,6 +315,59 @@ class ClippyManager {
     this.clippyOverlay.style.zIndex = "2001";
     this.clippyOverlay.style.cursor = "pointer";
 
+    // Add test animation button (for debugging)
+    const testAnimButton = document.createElement("button");
+    testAnimButton.textContent = "Test Animation";
+    testAnimButton.style.position = "absolute";
+    testAnimButton.style.left = "0";
+    testAnimButton.style.top = "-25px";
+    testAnimButton.style.background = "#ff9999";
+    testAnimButton.style.fontSize = "8px";
+    testAnimButton.style.padding = "2px 5px";
+    testAnimButton.style.cursor = "pointer";
+    testAnimButton.style.zIndex = "2002";
+    testAnimButton.onclick = (e) => {
+      e.stopPropagation(); // Don't trigger overlay's handlers
+
+      if (window.clippy) {
+        console.log("Test animation button clicked");
+
+        // Force Clippy to be visible
+        const clippyEl = document.querySelector(".clippy");
+        if (clippyEl) {
+          clippyEl.style.visibility = "visible";
+          clippyEl.style.opacity = "1";
+          clippyEl.style.display = "block";
+
+          // Find and make visible any SVG elements
+          const svgElements = clippyEl.querySelectorAll("svg");
+          if (svgElements.length > 0) {
+            svgElements.forEach((svg) => {
+              svg.style.visibility = "visible";
+              svg.style.opacity = "1";
+              svg.style.display = "inline";
+
+              // Make all SVG children visible too
+              Array.from(svg.querySelectorAll("*")).forEach((el) => {
+                el.style.visibility = "visible";
+                el.style.opacity = "1";
+                el.style.display = "inline";
+              });
+            });
+          }
+        }
+
+        try {
+          window.clippy.play("Wave");
+        } catch (e) {
+          console.error("Test animation error:", e);
+        }
+      }
+    };
+
+    // Add debug button to overlay
+    this.clippyOverlay.appendChild(testAnimButton);
+
     // Track clicks to distinguish between single and double clicks
     let clickCount = 0;
 
@@ -305,6 +400,8 @@ class ClippyManager {
 
       // Handle double-click with animation then speech with options
       if (window.clippy) {
+        console.log("Double clicked clippy overlay - playing animation");
+
         // Use animations from content file
         const animsArray = animations.greeting || [
           "Greeting",
@@ -314,20 +411,52 @@ class ClippyManager {
         ];
         const anim = animsArray[Math.floor(Math.random() * animsArray.length)];
 
-        // Play animation first
-        window.clippy.play(anim);
+        // Force the clippy element to be visible
+        const clippyEl = document.querySelector(".clippy");
+        if (clippyEl) {
+          clippyEl.style.visibility = "visible";
+          clippyEl.style.opacity = "1";
+          clippyEl.style.display = "block";
 
-        // Then show custom balloon with speech and options
+          // Find and make visible any SVG elements
+          const svgElements = clippyEl.querySelectorAll("svg");
+          if (svgElements.length > 0) {
+            svgElements.forEach((svg) => {
+              svg.style.visibility = "visible";
+              svg.style.opacity = "1";
+              svg.style.display = "inline";
+
+              // Make all SVG children visible too
+              Array.from(svg.querySelectorAll("*")).forEach((el) => {
+                el.style.visibility = "visible";
+                el.style.opacity = "1";
+                el.style.display = "inline";
+              });
+            });
+          }
+        }
+
+        // Play animation first with a slight delay to ensure visibility
         setTimeout(() => {
-          // Pick a random interaction from content file
-          const interaction =
-            interactions[Math.floor(Math.random() * interactions.length)];
-          this.showCustomBalloon(
-            interaction.message,
-            false,
-            interaction.options
-          );
-        }, 800);
+          try {
+            window.clippy.play(anim);
+            console.log(`Animation started: ${anim}`);
+          } catch (e) {
+            console.error(`Error playing animation: ${anim}`, e);
+          }
+
+          // Then show custom balloon with speech and options
+          setTimeout(() => {
+            // Pick a random interaction from content file
+            const interaction =
+              interactions[Math.floor(Math.random() * interactions.length)];
+            this.showCustomBalloon(
+              interaction.message,
+              false,
+              interaction.options
+            );
+          }, 800);
+        }, 50);
       }
     };
 
@@ -336,7 +465,20 @@ class ClippyManager {
       e.preventDefault(); // Prevent default context menu
 
       if (window.clippy) {
-        window.clippy.play("GetAttention");
+        // Force the clippy element to be visible first
+        const clippyEl = document.querySelector(".clippy");
+        if (clippyEl) {
+          clippyEl.style.visibility = "visible";
+          clippyEl.style.opacity = "1";
+          clippyEl.style.display = "block";
+        }
+
+        // Then play animation
+        try {
+          window.clippy.play("GetAttention");
+        } catch (e) {
+          console.error("Error playing GetAttention animation:", e);
+        }
 
         // Show interactive chat balloon
         setTimeout(() => {

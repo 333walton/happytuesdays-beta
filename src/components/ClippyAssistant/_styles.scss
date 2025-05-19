@@ -3,7 +3,7 @@
   position: fixed !important;
   z-index: 2000 !important;
   transform-origin: center bottom !important;
-  will-change: transform, left, top;
+  will-change: transform, left, top !important;
   animation: auto !important;
 
   /* Ensure visibility */
@@ -231,8 +231,13 @@
   flex-direction: column !important;
 }
 
-/* Disable any transforms that might interfere with layout */
-.clippy,
+/* Allow transforms for animations but constrain to scale only */
+.clippy {
+  transform: scale(0.9) !important;
+  transform-origin: center bottom !important;
+}
+
+/* Other elements can have transform: none */
 .custom-clippy-balloon,
 .custom-clippy-chat-balloon,
 #clippy-clickable-overlay {
@@ -243,11 +248,24 @@
 //.needs-redraw {
 //animation: forceRedraw 0.1s forwards;
 
-/* Ensure animation frames are visible */
+/* Ensure animations work */
 .clippy-animate,
 .clippy-animate * {
   visibility: visible !important;
   opacity: 1 !important;
   display: block !important;
   animation: auto !important;
+}
+
+/* Ensure animation elements are visible */
+.clippy-animate,
+.clippy-animate *,
+.clippy [class*="clippy-animate-"],
+.clippy .clippy-animated {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  animation: auto !important;
+  transition: none !important;
+  pointer-events: none !important;
 }
