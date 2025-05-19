@@ -2,7 +2,82 @@ const commits = `
 ============================================================
 >>HYDRA98 CHANGELOG.TXT
 ============================================================
-
+[2025-05-19]  b2d844d  - clippy
+[2025-05-19]  21c379c  - .
+[2025-05-19]  c6d6fd3  - .
+[2025-05-19]  4ded0c8  - clippy
+[2025-05-18]  74d8a71  - more clippy
+[2025-05-18]  171b2a4  - headache
+[2025-05-18]  7ab843a  - css
+[2025-05-18]  6a18623  - clippy
+[2025-05-16]  333ec4b  - clippy
+[2025-05-16]  95d45b3  - .
+[2025-05-16]  8bd8b55  - clippy
+[2025-05-16]  5db45fa  - .
+[2025-05-16]  38d7319  - utm refresh
+[2025-05-16]  8db5d4c  - .
+[2025-05-16]  88dca77  - .
+[2025-05-16]  cc6899a  - .
+[2025-05-16]  f659af6  - revert to db8e3d8
+[2025-05-15]  db8e3d8  - more css
+[2025-05-15]  6f9a39b  - css
+[2025-05-14]  66d22dc  - css
+[2025-05-14]  4d71b53  - UTM Tool
+[2025-05-14]  63adbf4  - .
+[2025-05-14]  6c4377e  - welcome msg
+[2025-05-13]  7c819dd  - small bios
+[2025-05-13]  77883a8  - bios update
+[2025-05-13]  1acfa81  - .
+[2025-05-13]  936ccab  - pipes
+[2025-05-13]  421323b  - debug and monitorpanel styles
+[2025-05-13]  c010b02  - monitorcontrols refresh big
+[2025-05-09]  75b83e4  - Remove Maze and fix BouncyBallsScreensaver
+[2025-05-09]  9777fd2  - bouncyballs
+[2025-05-08]  182f41a  - .
+[2025-05-08]  a7c4a1b  - monitor controls big
+[2025-05-07]  772bd6d  - .
+[2025-05-07]  615dfc2  - css
+[2025-05-07]  db4b619  - monitor css
+[2025-05-07]  1f0913b  - monitorview and videotest big
+[2025-05-06]  db5bb0d  - hookscore
+[2025-05-06]  26b734f  - starfield2
+[2025-05-06]  10667d7  - ss mode
+[2025-05-06]  cef8a7e  - .
+[2025-05-06]  fede4bf  - .
+[2025-05-06]  ef6efb1  - monitor css
+[2025-05-06]  c1cf716  - monitor power btn
+[2025-05-06]  3f81b0c  - .
+[2025-05-05]  b4849f6  - global fixes and monitorview
+[2025-05-05]  dedb3d4  - monitorview updates
+[2025-05-05]  be7d8be  - monitor mode
+[2025-05-05]  3edb5eb  - fix case sensitivity for MonitorView/index.js
+[2025-05-05]  8ad13d2  - small
+[2025-05-05]  c874e7b  - small
+[2025-05-05]  5138dbd  - .
+[2025-05-05]  8a133bf  - .
+[2025-05-05]  d0adeec  - new components
+[2025-05-05]  2799fa7  - doodle submit
+[2025-05-05]  3edefd1  - doodle submit
+[2025-05-04]  638bba5  - ascii banners options/css
+[2025-05-04]  5aad2bf  - .
+[2025-05-04]  4a1fa2e  - .
+[2025-05-04]  33b15eb  - .
+[2025-05-03]  162bfc7  - .
+[2025-05-03]  4f32d1b  - vid players
+[2025-05-03]  3489ce8  - .
+[2025-05-03]  a58de71  - css
+[2025-05-03]  788c659  - ascii css
+[2025-05-03]  93a88bd  - ascii banners
+[2025-05-03]  667621c  - ascii
+[2025-05-02]  278a65b  - pre-roll player
+[2025-05-02]  973acd7  - .
+[2025-05-02]  3ec95ad  - .
+[2025-05-02]  1d9bd42  - .
+[2025-05-02]  35d04a2  - m compat
+[2025-05-02]  28c1c87  - .
+[2025-05-02]  ac2f436  - .
+[2025-05-02]  6d15d8e  - ismobile
+[2025-05-02]  2b70e22  - winamp stubborn css
 [2025-05-02]  e3155fc  - ismobile
 [2025-05-02]  85fa448  - winamp stubborn css
 [2025-05-02]  7b78803  - .
