@@ -1,7 +1,3 @@
-/**
- * ClippyService.js - Utility service for working with the Office Assistant
- */
-
 // Help messages for different windows
 const helpMessages = {
   notepad: {
@@ -67,11 +63,44 @@ const hide = () => {
 };
 
 /**
- * Make Clippy speak
+ * Make Clippy speak using our custom balloon
  * @param {string} text - The text for Clippy to speak
  */
 const speak = (text) => {
+  // Try using the custom balloon first
+  if (window.showClippyCustomBalloon) {
+    return executeIfAvailable(() => window.showClippyCustomBalloon(text));
+  }
+
+  // Fall back to the default speak method if custom balloon isn't available
   return executeIfAvailable(() => window.clippy.speak(text));
+};
+
+/**
+ * Show interactive chat balloon
+ * @param {string} initialMessage - Initial message to show in the chat
+ */
+const showChat = (initialMessage = "How can I help you today?") => {
+  if (window.showClippyChatBalloon) {
+    return executeIfAvailable(() =>
+      window.showClippyChatBalloon(initialMessage)
+    );
+  }
+
+  // Fall back to regular speech if chat isn't implemented
+  return speak(initialMessage);
+};
+
+/**
+ * Hide the custom balloon
+ */
+const hideBalloon = () => {
+  if (window.hideClippyCustomBalloon) {
+    return executeIfAvailable(() => window.hideClippyCustomBalloon());
+  }
+
+  // No equivalent in original clippy
+  return true;
 };
 
 /**
@@ -115,43 +144,66 @@ const setInitialPosition = (options) => {
       // Convert named positions to percentages
       let xPercent, yPercent;
 
-      switch (options.position.toLowerCase()) {
-        case "bottom-right":
-          xPercent = 0.85;
-          yPercent = 0.85;
-          break;
-        case "bottom-left":
-          xPercent = 0.15;
-          yPercent = 0.85;
-          break;
-        case "top-right":
-          xPercent = 0.85;
-          yPercent = 0.15;
-          break;
-        case "top-left":
-          xPercent = 0.15;
-          yPercent = 0.15;
-          break;
-        case "center":
-          xPercent = 0.5;
-          yPercent = 0.5;
-          break;
-        default:
-          // Check if it's a percentage string like "80% 50%"
-          const percentMatch = options.position.match(/(\d+)%\s+(\d+)%/);
-          if (percentMatch) {
-            xPercent = parseInt(percentMatch[1], 10) / 100;
-            yPercent = parseInt(percentMatch[2], 10) / 100;
-          } else {
+      // First, check if it's a percentage string like "80% 50%"
+      const percentMatch = options.position.match(/(\d+)%\s+(\d+)%/);
+      if (percentMatch) {
+        xPercent = parseInt(percentMatch[1], 10) / 100;
+        yPercent = parseInt(percentMatch[2], 10) / 100;
+      } else {
+        // Otherwise, check for named positions
+        switch (options.position.toLowerCase()) {
+          case "bottom-right":
+            xPercent = 0.85;
+            yPercent = 0.85;
+            break;
+          case "bottom-left":
+            xPercent = 0.15;
+            yPercent = 0.85;
+            break;
+          case "top-right":
+            xPercent = 0.85;
+            yPercent = 0.15;
+            break;
+          case "top-left":
+            xPercent = 0.15;
+            yPercent = 0.15;
+            break;
+          case "center":
+            xPercent = 0.5;
+            yPercent = 0.5;
+            break;
+          default:
             // Default to bottom right if we can't parse
             xPercent = 0.85;
             yPercent = 0.85;
-          }
+        }
       }
+
+      // Calculate the desktop dimensions for percentage calculations
+      const desktopElement = document.querySelector(".w98");
+      const desktopHeight = desktopElement
+        ? desktopElement.getBoundingClientRect().height
+        : window.innerHeight;
+
+      // Apply 40px offset downward
+      const extraYOffset = 40 / desktopHeight;
+      yPercent += extraYOffset;
+
+      // Cap at 95% to ensure it doesn't go off-screen
+      yPercent = Math.min(yPercent, 0.95);
 
       // Set the position using the window global
       if (window.setClippyInitialPosition) {
         window.setClippyInitialPosition({ xPercent, yPercent });
+      } else if (window.setClippyPosition) {
+        // Find the desktop element to calculate pixel positions
+        if (desktopElement) {
+          const desktopRect = desktopElement.getBoundingClientRect();
+          window.setClippyPosition({
+            x: desktopRect.width * xPercent,
+            y: desktopRect.height * yPercent,
+          });
+        }
       }
     }
     // If it's already an object with x and y coordinates, use them directly
@@ -197,11 +249,61 @@ const showHelpForWindow = (windowTitle) => {
   const help = getHelpForWindow(windowTitle);
 
   setTimeout(() => {
-    speak(help.text);
     play(help.animation);
+    setTimeout(() => {
+      speak(help.text);
+    }, 200); // Small delay to ensure animation starts first
   }, 300);
 
   return true;
+};
+
+/**
+ * Debug clippy - logs status and checks for issues
+ * Useful for troubleshooting in the browser console
+ */
+const debug = () => {
+  console.log("Clippy Status:");
+  console.log("- Available:", isAvailable());
+  console.log("- Clippy instance:", window.clippy);
+  console.log("- Custom balloon functions:", {
+    showCustomBalloon: !!window.showClippyCustomBalloon,
+    hideCustomBalloon: !!window.hideClippyCustomBalloon,
+    showChatBalloon: !!window.showClippyChatBalloon,
+  });
+
+  // Check elements in DOM
+  const clippyElement = document.querySelector(".clippy");
+  console.log("- Clippy DOM element:", clippyElement);
+
+  const balloonElement = document.querySelector(".clippy-balloon");
+  console.log("- Default balloon DOM element:", balloonElement);
+
+  const customBalloonElement = document.querySelector(".custom-clippy-balloon");
+  console.log("- Custom balloon DOM element:", customBalloonElement);
+
+  // Try to fetch clippy styles
+  const clippyStyles = window.getComputedStyle(clippyElement || document.body);
+  console.log(
+    "- Clippy visibility:",
+    clippyElement
+      ? {
+          display: clippyStyles.display,
+          visibility: clippyStyles.visibility,
+          opacity: clippyStyles.opacity,
+          zIndex: clippyStyles.zIndex,
+          transform: clippyStyles.transform,
+        }
+      : "N/A"
+  );
+
+  // Test balloon
+  if (isAvailable() && window.showClippyCustomBalloon) {
+    window.showClippyCustomBalloon("Testing balloon visibility");
+    console.log("- Test balloon triggered");
+  }
+
+  return "Clippy debug complete. Check console for details.";
 };
 
 // Export the service
@@ -210,6 +312,8 @@ const ClippyService = {
   show,
   hide,
   speak,
+  showChat,
+  hideBalloon,
   play,
   changeAgent,
   setPosition,
@@ -217,6 +321,7 @@ const ClippyService = {
   getHelpForWindow,
   showHelpForWindow,
   handleWindowHelp: showHelpForWindow, // Alias for backward compatibility
+  debug, // Add debug function
 };
 
 export default ClippyService;

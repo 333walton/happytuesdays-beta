@@ -1,13 +1,32 @@
-/* More comprehensive CSS to prevent library overrides */
+/* Base Clippy styles */
+.clippy {
+  position: fixed !important;
+  z-index: 2000 !important;
+  transform-origin: center bottom !important;
+  will-change: transform, left, top;
+  animation: auto !important;
+
+  /* Ensure visibility */
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  pointer-events: none !important; /* Let overlay handle events */
+}
+
+/* Fix for original clippy balloon */
 .clippy-balloon {
   position: relative !important;
-  top: -400px !important; /* Adjust this value to move up/down */
-  left: 820px !important; /* Adjust this value to move left/right */
+  top: -400px !important;
+  left: 820px !important;
   right: auto !important;
   bottom: auto !important;
   transform: none !important;
   transition: none !important;
-  animation: none !important;
+  //animation: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  display: none !important;
+  pointer-events: none !important;
 }
 
 /* Hide all tips */
@@ -15,9 +34,220 @@
   display: none !important;
 }
 
-/* Ensure content is visible */
+/* Ensure content is properly hidden */
 .clippy-balloon .clippy-content {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  display: none !important;
+}
+
+/* Custom balloon styles */
+.custom-clippy-balloon {
+  position: fixed !important;
+  z-index: 9999 !important;
+  background-color: #fffcde !important;
+  border: 1px solid #000 !important;
+  border-radius: 5px !important;
+  padding: 8px 12px !important;
+  font-family: "Tahoma", sans-serif !important;
+  font-size: 13px !important;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2) !important;
+  max-width: 250px !important;
+  max-height: calc(480px - 120px) !important; /* Ensure it fits in viewport */
+  overflow: auto !important;
+  visibility: visible !important;
+  display: block !important;
+  opacity: 1 !important;
+}
+
+/* Balloon tip */
+.custom-clippy-balloon:after {
+  content: "";
+  position: absolute !important;
+  bottom: -10px !important;
+  left: 20px !important;
+  border-width: 10px 10px 0 !important;
+  border-style: solid !important;
+  border-color: #fffcde transparent !important;
+  display: block !important;
+  width: 0 !important;
+}
+
+.custom-clippy-balloon:before {
+  content: "";
+  position: absolute !important;
+  bottom: -11px !important;
+  left: 20px !important;
+  border-width: 10px 10px 0 !important;
+  border-style: solid !important;
+  border-color: #000 transparent !important;
+  display: block !important;
+  width: 0 !important;
+}
+
+/* Close button */
+.custom-clippy-balloon-close {
+  position: absolute !important;
+  top: 2px !important;
+  right: 5px !important;
+  cursor: pointer !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+  color: #666 !important;
+}
+
+.custom-clippy-balloon-close:hover {
+  color: #000 !important;
+}
+
+/* Option buttons */
+.clippy-option-button {
+  background: #d4d0c8 !important;
+  border: 2px solid !important;
+  border-color: #fff #888 #888 #fff !important;
+  padding: 3px 8px !important;
+  margin: 3px 5px 3px 0 !important;
+  font-family: "Tahoma", sans-serif !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+}
+
+.clippy-option-button:hover {
+  background: #e2e0da !important;
+}
+
+.clippy-option-button:active {
+  border-color: #888 #fff #fff #888 !important;
+}
+
+/* Input area */
+.clippy-input-container {
+  margin-top: 8px !important;
+  border-top: 1px solid #ccc !important;
+  padding-top: 8px !important;
+  display: flex !important;
+}
+
+.clippy-input-container.collapsed {
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.clippy-input {
+  flex: 1 !important;
+  border: 1px solid #888 !important;
+  padding: 3px !important;
+  font-family: "Tahoma", sans-serif !important;
+  font-size: 12px !important;
+}
+
+.clippy-toggle-input {
+  background: #d4d0c8 !important;
+  border: 1px solid #888 !important;
+  border-radius: 3px !important;
+  padding: 2px 5px !important;
+  margin-top: 5px !important;
+  font-size: 11px !important;
+  cursor: pointer !important;
+  align-self: flex-end !important;
+}
+
+/* Custom balloon chat styles */
+.custom-clippy-chat-balloon {
+  position: fixed !important;
+  z-index: 9999 !important;
+  background-color: #fffcde !important;
+  border: 1px solid #000 !important;
+  border-radius: 5px !important;
+  padding: 8px !important;
+  width: 220px !important;
+  height: 180px !important;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2) !important;
+  font-family: "Tahoma", sans-serif !important;
+  font-size: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure balloon max-width is consistent */
+.custom-clippy-balloon,
+.custom-clippy-chat-balloon {
+  max-width: 250px !important;
+}
+
+/* Ensure the custom balloons are always visible */
+.custom-clippy-balloon,
+.custom-clippy-chat-balloon {
   visibility: visible !important;
   opacity: 1 !important;
   display: block !important;
+}
+
+/* Ensure Clippy displays properly */
+.clippy {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+/* Clickable overlay */
+#clippy-clickable-overlay {
+  position: fixed !important;
+  z-index: 2001 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  display: block !important;
+  visibility: visible !important;
+  background: transparent !important;
+}
+
+/* Fix any overflow issues with desktop container */
+.desktop.screen,
+.w98 {
+  overflow: visible !important;
+  position: relative !important;
+}
+
+/* Ensure correct taskbar positioning */
+.taskbar,
+.start-bar,
+.windows-taskbar {
+  position: relative !important;
+  bottom: 0 !important;
+  width: 100% !important;
+}
+
+/* Desktop container adjustments */
+.desktop-container,
+.w98 {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Disable any transforms that might interfere with layout */
+.clippy,
+.custom-clippy-balloon,
+.custom-clippy-chat-balloon,
+#clippy-clickable-overlay {
+  transform: none !important;
+}
+
+/* Apply animation only if needed */
+//.needs-redraw {
+//animation: forceRedraw 0.1s forwards;
+
+/* Ensure animation frames are visible */
+.clippy-animate,
+.clippy-animate * {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  animation: auto !important;
 }
