@@ -72,7 +72,9 @@ class ClippyManager {
 
         // Add a delay between animation and speech
         setTimeout(() => {
-          ClippyService.speak("Welcome to Windows 98!");
+          ClippyService.speak(
+            "Welcome to Hydra98! Please enjoy and don't break anything"
+          );
           this.initialMessageShown = true;
         }, 800);
       }

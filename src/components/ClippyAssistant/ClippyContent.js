@@ -63,7 +63,7 @@ export const interactions = [
           "Hydra98 is a web-based Windows 98 sandbox built with predominantly ReactJS. It recreates the classic desktop experience with modern web tech.",
       },
       {
-        text: "How do I open and manage windows?",
+        text: "How can I manage windows?",
         response:
           "Double-click any icon to open an app. Windows can be moved, resized, minimized, or closed—just like the real Win98.",
       },
