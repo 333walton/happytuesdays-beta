@@ -21,7 +21,7 @@ const helpMessages = {
     text: "Working with the command prompt? Try typing 'help' to see available commands.",
     animation: "Explain",
   },
-  default: { text: "Need help with Windows 98?", animation: "Greeting" },
+  default: { text: "Need help?", animation: "Greeting" },
 };
 
 /**
@@ -67,6 +67,33 @@ const hide = () => {
  * @param {string} text - The text for Clippy to speak
  */
 const speak = (text) => {
+  // Force Clippy element to be visible first
+  if (typeof window !== "undefined") {
+    const clippyEl = document.querySelector(".clippy");
+    if (clippyEl) {
+      clippyEl.style.visibility = "visible";
+      clippyEl.style.opacity = "1";
+      clippyEl.style.display = "block";
+
+      // Find and make visible any SVG elements
+      const svgElements = clippyEl.querySelectorAll("svg");
+      if (svgElements.length > 0) {
+        svgElements.forEach((svg) => {
+          svg.style.visibility = "visible";
+          svg.style.opacity = "1";
+          svg.style.display = "inline";
+
+          // Make all SVG children visible too
+          Array.from(svg.querySelectorAll("*")).forEach((el) => {
+            el.style.visibility = "visible";
+            el.style.opacity = "1";
+            el.style.display = "inline";
+          });
+        });
+      }
+    }
+  }
+
   // Try using the custom balloon first
   if (window.showClippyCustomBalloon) {
     return executeIfAvailable(() => window.showClippyCustomBalloon(text));
@@ -81,6 +108,16 @@ const speak = (text) => {
  * @param {string} initialMessage - Initial message to show in the chat
  */
 const showChat = (initialMessage = "How can I help you today?") => {
+  // Force Clippy element to be visible first
+  if (typeof window !== "undefined") {
+    const clippyEl = document.querySelector(".clippy");
+    if (clippyEl) {
+      clippyEl.style.visibility = "visible";
+      clippyEl.style.opacity = "1";
+      clippyEl.style.display = "block";
+    }
+  }
+
   if (window.showClippyChatBalloon) {
     return executeIfAvailable(() =>
       window.showClippyChatBalloon(initialMessage)
@@ -108,7 +145,86 @@ const hideBalloon = () => {
  * @param {string} animation - The animation name
  */
 const play = (animation) => {
-  return executeIfAvailable(() => window.clippy.play(animation));
+  // Force Clippy element to be visible first
+  if (typeof window !== "undefined") {
+    const clippyEl = document.querySelector(".clippy");
+    if (clippyEl) {
+      clippyEl.style.visibility = "visible";
+      clippyEl.style.opacity = "1";
+      clippyEl.style.display = "block";
+
+      // Find and make visible any SVG elements
+      const svgElements = clippyEl.querySelectorAll("svg");
+      if (svgElements.length > 0) {
+        svgElements.forEach((svg) => {
+          svg.style.visibility = "visible";
+          svg.style.opacity = "1";
+          svg.style.display = "inline";
+
+          // Make all SVG children visible too
+          Array.from(svg.querySelectorAll("*")).forEach((el) => {
+            el.style.visibility = "visible";
+            el.style.opacity = "1";
+            el.style.display = "inline";
+          });
+        });
+      }
+    }
+  }
+
+  // Apply temporary animation fix
+  const fixStyle = document.createElement("style");
+  fixStyle.id = "clippy-anim-fix-temp";
+  fixStyle.textContent = `
+      .clippy * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+      }
+      
+      .clippy-animate,
+      .clippy-animate * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+        animation: auto !important;
+      }
+  
+      /* Animation fixes from ClippyTS */
+      .clippy .maps {
+        position: relative !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+  
+      .clippy .map {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        height: 100% !important;
+        width: 100% !important;
+        display: none !important;
+      }
+  
+      .clippy .map.animate {
+        display: block !important;
+      }
+    `;
+  document.head.appendChild(fixStyle);
+
+  // Play animation with small delay
+  setTimeout(() => {
+    executeIfAvailable(() => window.clippy.play(animation));
+  }, 50);
+
+  // Remove the style after animation
+  setTimeout(() => {
+    if (fixStyle.parentNode) {
+      fixStyle.parentNode.removeChild(fixStyle);
+    }
+  }, 3000);
+
+  return true;
 };
 
 /**
@@ -121,9 +237,6 @@ const changeAgent = (agent) => {
 
 /**
  * Set the position of Clippy
- * This is a convenience method that delegates to the ClippyProvider's implementation
- * which handles actual positioning, bounds checking, and display updates.
- *
  * @param {number} x - X position within the viewport
  * @param {number} y - Y position within the viewport
  */
@@ -134,8 +247,7 @@ const setPosition = (x, y) => {
 /**
  * Set the initial position of Clippy with a more intuitive approach
  * @param {Object} options - Position options
- * @param {string} options.position - Named position: 'bottom-right', 'top-right', 'center', etc.
- *                                    Or percentages: '80% 50%' (80% from left, 50% from top)
+ * @param {string} options.position - Named position or percentages
  */
 const setInitialPosition = (options) => {
   return executeIfAvailable(() => {
@@ -179,24 +291,12 @@ const setInitialPosition = (options) => {
         }
       }
 
-      // Calculate the desktop dimensions for percentage calculations
-      const desktopElement = document.querySelector(".w98");
-      const desktopHeight = desktopElement
-        ? desktopElement.getBoundingClientRect().height
-        : window.innerHeight;
-
-      // Apply 40px offset downward
-      const extraYOffset = 40 / desktopHeight;
-      yPercent += extraYOffset;
-
-      // Cap at 95% to ensure it doesn't go off-screen
-      yPercent = Math.min(yPercent, 0.95);
-
       // Set the position using the window global
       if (window.setClippyInitialPosition) {
         window.setClippyInitialPosition({ xPercent, yPercent });
       } else if (window.setClippyPosition) {
         // Find the desktop element to calculate pixel positions
+        const desktopElement = document.querySelector(".w98");
         if (desktopElement) {
           const desktopRect = desktopElement.getBoundingClientRect();
           window.setClippyPosition({
@@ -248,11 +348,21 @@ const showHelpForWindow = (windowTitle) => {
   show();
   const help = getHelpForWindow(windowTitle);
 
+  // Force Clippy element to be visible
+  if (typeof window !== "undefined") {
+    const clippyEl = document.querySelector(".clippy");
+    if (clippyEl) {
+      clippyEl.style.visibility = "visible";
+      clippyEl.style.opacity = "1";
+      clippyEl.style.display = "block";
+    }
+  }
+
   setTimeout(() => {
     play(help.animation);
     setTimeout(() => {
       speak(help.text);
-    }, 200); // Small delay to ensure animation starts first
+    }, 800); // Larger delay to ensure animation starts first
   }, 300);
 
   return true;
@@ -260,47 +370,83 @@ const showHelpForWindow = (windowTitle) => {
 
 /**
  * Debug clippy - logs status and checks for issues
- * Useful for troubleshooting in the browser console
  */
 const debug = () => {
   console.log("Clippy Status:");
   console.log("- Available:", isAvailable());
   console.log("- Clippy instance:", window.clippy);
-  console.log("- Custom balloon functions:", {
-    showCustomBalloon: !!window.showClippyCustomBalloon,
-    hideCustomBalloon: !!window.hideClippyCustomBalloon,
-    showChatBalloon: !!window.showClippyChatBalloon,
-  });
 
   // Check elements in DOM
   const clippyElement = document.querySelector(".clippy");
   console.log("- Clippy DOM element:", clippyElement);
 
-  const balloonElement = document.querySelector(".clippy-balloon");
-  console.log("- Default balloon DOM element:", balloonElement);
-
-  const customBalloonElement = document.querySelector(".custom-clippy-balloon");
-  console.log("- Custom balloon DOM element:", customBalloonElement);
-
   // Try to fetch clippy styles
-  const clippyStyles = window.getComputedStyle(clippyElement || document.body);
-  console.log(
-    "- Clippy visibility:",
-    clippyElement
-      ? {
-          display: clippyStyles.display,
-          visibility: clippyStyles.visibility,
-          opacity: clippyStyles.opacity,
-          zIndex: clippyStyles.zIndex,
-          transform: clippyStyles.transform,
-        }
-      : "N/A"
-  );
+  if (clippyElement) {
+    const clippyStyles = window.getComputedStyle(clippyElement);
+    console.log("- Clippy visibility:", {
+      display: clippyStyles.display,
+      visibility: clippyStyles.visibility,
+      opacity: clippyStyles.opacity,
+      zIndex: clippyStyles.zIndex,
+      transform: clippyStyles.transform,
+    });
+  }
 
-  // Test balloon
-  if (isAvailable() && window.showClippyCustomBalloon) {
-    window.showClippyCustomBalloon("Testing balloon visibility");
-    console.log("- Test balloon triggered");
+  // Test animation
+  if (isAvailable()) {
+    console.log("Testing animation...");
+    play("Wave");
+
+    setTimeout(() => {
+      console.log("Testing speech...");
+      speak("Clippy debug test is complete!");
+    }, 1000);
+  }
+
+  // Add emergency animation fix
+  if (window.fixClippyAnimations) {
+    window.fixClippyAnimations();
+  } else {
+    console.log("Emergency animation fix not available");
+
+    // Apply fix directly
+    const styleEl = document.createElement("style");
+    styleEl.id = "clippy-emergency-fix";
+    styleEl.textContent = `
+        .clippy * {
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: block !important;
+        }
+        
+        .clippy-animate,
+        .clippy-animate * {
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: block !important;
+          animation: auto !important;
+        }
+        
+        /* Ensure transform doesn't block animations */
+        .clippy {
+          transform: scale(0.9) !important;
+          transform-origin: center bottom !important;
+          pointer-events: none !important;
+        }
+        
+        /* Ensure overlay works */
+        #clippy-clickable-overlay {
+          position: fixed !important;
+          z-index: 2001 !important;
+          cursor: pointer !important;
+          pointer-events: auto !important;
+          display: block !important;
+          visibility: visible !important;
+          background: transparent !important;
+        }
+      `;
+    document.head.appendChild(styleEl);
+    console.log("Emergency animation fix applied directly");
   }
 
   return "Clippy debug complete. Check console for details.";
@@ -321,7 +467,7 @@ const ClippyService = {
   getHelpForWindow,
   showHelpForWindow,
   handleWindowHelp: showHelpForWindow, // Alias for backward compatibility
-  debug, // Add debug function
+  debug,
 };
 
 export default ClippyService;

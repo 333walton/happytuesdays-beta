@@ -1,10 +1,13 @@
+/* CSS styles to ensure Clippy properly hides when screen power is off */
+
 /* Base Clippy styles */
 .clippy {
   position: fixed !important;
-  z-index: 2000 !important;
+  z-index: 1001 !important; /* Higher than black-overlay (1000) */
   transform-origin: center bottom !important;
   will-change: transform, left, top !important;
   animation: auto !important;
+  transition: visibility 0.3s, opacity 0.3s !important;
 
   /* Ensure visibility */
   visibility: visible !important;
@@ -22,7 +25,6 @@
   bottom: auto !important;
   transform: none !important;
   transition: none !important;
-  //animation: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
   display: none !important;
@@ -44,7 +46,7 @@
 /* Custom balloon styles */
 .custom-clippy-balloon {
   position: fixed !important;
-  z-index: 9999 !important;
+  z-index: 1003 !important; /* Above everything */
   background-color: #fffcde !important;
   border: 1px solid #000 !important;
   border-radius: 5px !important;
@@ -53,11 +55,24 @@
   font-size: 13px !important;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2) !important;
   max-width: 250px !important;
-  max-height: calc(480px - 120px) !important; /* Ensure it fits in viewport */
-  overflow: auto !important;
+
+  /* Remove scrollbar */
+  overflow: visible !important; /* Changed from auto to visible */
+  max-height: none !important; /* Remove height restriction */
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
+
   visibility: visible !important;
   display: block !important;
   opacity: 1 !important;
+  transition: visibility 0.3s, opacity 0.3s !important;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.custom-clippy-balloon::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Balloon tip */
@@ -85,81 +100,10 @@
   width: 0 !important;
 }
 
-/* Close button */
-.custom-clippy-balloon-close {
-  position: absolute !important;
-  top: 2px !important;
-  right: 5px !important;
-  cursor: pointer !important;
-  font-weight: bold !important;
-  font-size: 16px !important;
-  color: #666 !important;
-}
-
-.custom-clippy-balloon-close:hover {
-  color: #000 !important;
-}
-
-/* Option buttons */
-.clippy-option-button {
-  background: #d4d0c8 !important;
-  border: 2px solid !important;
-  border-color: #fff #888 #888 #fff !important;
-  padding: 3px 8px !important;
-  margin: 3px 5px 3px 0 !important;
-  font-family: "Tahoma", sans-serif !important;
-  font-size: 12px !important;
-  cursor: pointer !important;
-  display: inline-block !important;
-}
-
-.clippy-option-button:hover {
-  background: #e2e0da !important;
-}
-
-.clippy-option-button:active {
-  border-color: #888 #fff #fff #888 !important;
-}
-
-/* Input area */
-.clippy-input-container {
-  margin-top: 8px !important;
-  border-top: 1px solid #ccc !important;
-  padding-top: 8px !important;
-  display: flex !important;
-}
-
-.clippy-input-container.collapsed {
-  height: 0 !important;
-  overflow: hidden !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-}
-
-.clippy-input {
-  flex: 1 !important;
-  border: 1px solid #888 !important;
-  padding: 3px !important;
-  font-family: "Tahoma", sans-serif !important;
-  font-size: 12px !important;
-}
-
-.clippy-toggle-input {
-  background: #d4d0c8 !important;
-  border: 1px solid #888 !important;
-  border-radius: 3px !important;
-  padding: 2px 5px !important;
-  margin-top: 5px !important;
-  font-size: 11px !important;
-  cursor: pointer !important;
-  align-self: flex-end !important;
-}
-
 /* Custom balloon chat styles */
 .custom-clippy-chat-balloon {
   position: fixed !important;
-  z-index: 9999 !important;
+  z-index: 1003 !important;
   background-color: #fffcde !important;
   border: 1px solid #000 !important;
   border-radius: 5px !important;
@@ -173,82 +117,35 @@
   flex-direction: column !important;
   visibility: visible !important;
   opacity: 1 !important;
+  transition: visibility 0.3s, opacity 0.3s !important;
+
+  /* Remove scrollbar */
+  overflow: visible !important;
+  max-height: none !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
-/* Ensure balloon max-width is consistent */
-.custom-clippy-balloon,
-.custom-clippy-chat-balloon {
-  max-width: 250px !important;
-}
-
-/* Ensure the custom balloons are always visible */
-.custom-clippy-balloon,
-.custom-clippy-chat-balloon {
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: block !important;
-}
-
-/* Ensure Clippy displays properly */
-.clippy {
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: block !important;
+/* Hide scrollbar for Chrome, Safari and Opera */
+.custom-clippy-chat-balloon::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Clickable overlay */
 #clippy-clickable-overlay {
   position: fixed !important;
-  z-index: 2001 !important;
+  z-index: 1002 !important; /* Above Clippy but below balloons */
   cursor: pointer !important;
   pointer-events: auto !important;
   display: block !important;
   visibility: visible !important;
   background: transparent !important;
+  transition: visibility 0.3s !important;
 }
 
-/* Fix any overflow issues with desktop container */
-.desktop.screen,
-.w98 {
-  overflow: visible !important;
-  position: relative !important;
-}
-
-/* Ensure correct taskbar positioning */
-.taskbar,
-.start-bar,
-.windows-taskbar {
-  position: relative !important;
-  bottom: 0 !important;
-  width: 100% !important;
-}
-
-/* Desktop container adjustments */
-.desktop-container,
-.w98 {
-  position: relative !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-/* Allow transforms for animations but constrain to scale only */
-.clippy {
-  transform: scale(0.9) !important;
-  transform-origin: center bottom !important;
-}
-
-/* Other elements can have transform: none */
-.custom-clippy-balloon,
-.custom-clippy-chat-balloon,
-#clippy-clickable-overlay {
-  transform: none !important;
-}
-
-/* Apply animation only if needed */
-//.needs-redraw {
-//animation: forceRedraw 0.1s forwards;
-
-/* Ensure animations work */
+/* CRITICAL: Animation fixes */
 .clippy-animate,
 .clippy-animate * {
   visibility: visible !important;
@@ -257,15 +154,55 @@
   animation: auto !important;
 }
 
-/* Ensure animation elements are visible */
-.clippy-animate,
-.clippy-animate *,
-.clippy [class*="clippy-animate-"],
-.clippy .clippy-animated {
+/* Animation fixes from ClippyTS */
+.clippy .maps {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.clippy .map {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  display: none !important;
+}
+
+.clippy .map.animate {
+  display: block !important;
+}
+
+/* SVG animation support */
+.clippy svg,
+.clippy svg * {
   visibility: visible !important;
   opacity: 1 !important;
-  display: block !important;
-  animation: auto !important;
-  transition: none !important;
+  display: inline !important;
+}
+
+/* CRITICAL: Screen-off state for Clippy elements */
+body.screen-off .clippy,
+body.screen-off #clippy-clickable-overlay,
+body.screen-off .custom-clippy-balloon,
+body.screen-off .custom-clippy-chat-balloon {
+  visibility: hidden !important;
+  opacity: 0 !important;
   pointer-events: none !important;
+  transition: visibility 0.3s, opacity 0.3s !important;
+}
+
+/* MonitorView black overlay handling */
+.black-overlay {
+  z-index: 1000 !important; /* Below Clippy and its elements */
+}
+
+/* Ensure proper transition when screen power changes */
+.black-overlay-on {
+  transition: opacity 0.4s ease !important;
+}
+
+.black-overlay-off {
+  transition: opacity 0.4s ease !important;
 }

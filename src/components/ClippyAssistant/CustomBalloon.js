@@ -1,61 +1,60 @@
 import React, { useEffect, useRef } from "react";
 
 /**
- * CustomBalloon component for Clippy speech without any tips or close button
+ * CustomBalloon component for Clippy speech - Updated with positioning fixes
  */
 const CustomBalloon = ({ message, position }) => {
   const balloonRef = useRef(null);
 
-  // Add style to override any balloon tips that might be coming from CSS
-  useEffect(() => {
-    // Create a style element to override any ::after or :before pseudo-elements
-    const styleEl = document.createElement("style");
-    styleEl.id = "clippy-balloon-tip-remover";
-    styleEl.textContent = `
-      .custom-clippy-balloon::after,
-      .custom-clippy-balloon:after,
-      .custom-clippy-balloon::before,
-      .custom-clippy-balloon:before {
-        display: none !important;
-        visibility: hidden !important;
-        content: none !important;
-        border: none !important;
-        width: 0 !important;
-        height: 0 !important;
-      }
-    `;
-
-    // Add the style element if it doesn't already exist
-    if (!document.getElementById("clippy-balloon-tip-remover")) {
-      document.head.appendChild(styleEl);
-    }
-
-    // Clean up on unmount
-    return () => {
-      const existingStyle = document.getElementById(
-        "clippy-balloon-tip-remover"
-      );
-      if (existingStyle) {
-        existingStyle.parentNode.removeChild(existingStyle);
-      }
-    };
-  }, []);
-
-  // Add smooth fade-in animation
+  // Add smooth fade-in animation and positioning
   useEffect(() => {
     if (balloonRef.current) {
       // Start transparent
       balloonRef.current.style.opacity = "0";
 
-      // Fade in after a tiny delay (ensures the initial state is applied)
+      // Position balloon correctly above Clippy's head
+      const positionBalloon = () => {
+        const clippyElement = document.querySelector(".clippy");
+        if (clippyElement) {
+          const rect = clippyElement.getBoundingClientRect();
+
+          // Center the balloon above Clippy's head
+          const balloonWidth = balloonRef.current.offsetWidth;
+          const left = rect.left + rect.width / 2 - balloonWidth / 2;
+
+          // Position above with a gap
+          const top = rect.top - balloonRef.current.offsetHeight - 15;
+
+          balloonRef.current.style.left = `${left}px`;
+          balloonRef.current.style.top = `${top}px`;
+        }
+      };
+
+      // Position balloon immediately
+      positionBalloon();
+
+      // Fade in after positioning
       setTimeout(() => {
         balloonRef.current.style.transition = "opacity 0.15s ease-in";
         balloonRef.current.style.opacity = "1";
       }, 10);
+
+      // Listen for clippy movement to reposition balloon
+      const handleClippyMove = () => {
+        positionBalloon();
+      };
+
+      document.addEventListener("clippy-moved", handleClippyMove);
+      document.addEventListener("clippy-resize", handleClippyMove);
+
+      return () => {
+        document.removeEventListener("clippy-moved", handleClippyMove);
+        document.removeEventListener("clippy-resize", handleClippyMove);
+      };
     }
   }, []);
 
-  // Basic balloon styles without any tips
+  // Basic balloon styles
   const balloonStyle = {
     position: "fixed",
     zIndex: 9999,
@@ -69,13 +68,51 @@ const CustomBalloon = ({ message, position }) => {
     fontSize: "12px",
     left: `${position.left}px`,
     top: `${position.top}px`,
-    // Removing transition from default styles since we're handling it in the useEffect
-    // to prevent interference with the initial opacity setting
     transition: "none",
     animation: "none",
     visibility: "visible",
     display: "block",
-    // Initial opacity will be overridden by the useEffect
+    opacity: "1",
+    // Remove scrollbars
+    overflow: "visible",
+    maxHeight: "none",
+    scrollbarWidth: "none",
+    msOverflowStyle: "none",
+  };
+
+  // Balloon tip styles
+  const tipStyle = {
+    position: "absolute",
+    bottom: "-10px",
+    left: "20px",
+    borderWidth: "10px 10px 0",
+    borderStyle: "solid",
+    borderColor: "#fffcde transparent",
+    display: "block",
+    width: "0",
+  };
+
+  // Balloon tip border
+  const tipBorderStyle = {
+    position: "absolute",
+    bottom: "-11px",
+    left: "20px",
+    borderWidth: "10px 10px 0",
+    borderStyle: "solid",
+    borderColor: "#000 transparent",
+    display: "block",
+    width: "0",
+  };
+
+  // Close button style
+  const closeButtonStyle = {
+    position: "absolute",
+    top: "2px",
+    right: "5px",
+    cursor: "pointer",
+    fontWeight: "bold",
+    fontSize: "16px",
+    color: "#666",
   };
 
   return (
@@ -83,8 +120,19 @@ const CustomBalloon = ({ message, position }) => {
       ref={balloonRef}
       style={balloonStyle}
       className="custom-clippy-balloon"
-      data-notips="true" // Add a data attribute to target if needed
     >
+      <div style={tipBorderStyle}></div>
+      <div style={tipStyle}></div>
+      <span
+        style={closeButtonStyle}
+        onClick={() => {
+          if (balloonRef.current && balloonRef.current.parentNode) {
+            balloonRef.current.parentNode.removeChild(balloonRef.current);
+          }
+        }}
+      >
+        ×
+      </span>
       <div>{message}</div>
     </div>
   );

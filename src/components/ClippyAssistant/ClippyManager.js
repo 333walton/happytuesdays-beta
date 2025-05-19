@@ -22,6 +22,7 @@ class ClippyManager {
     this.showChatBalloon = this.showChatBalloon.bind(this);
     this.toggleInputArea = this.toggleInputArea.bind(this);
     this.cleanup = this.cleanup.bind(this);
+    this.removeDuplicateClippys = this.removeDuplicateClippys.bind(this);
   }
 
   // Initialize Clippy manager
@@ -30,6 +31,9 @@ class ClippyManager {
 
     // Add global styles
     this.addClippyStyles();
+
+    // Remove any duplicate Clippy instances
+    this.removeDuplicateClippys();
 
     // Make Clippy visible
     ClippyService.show();
@@ -279,15 +283,71 @@ class ClippyManager {
     document.head.appendChild(styleElement);
   }
 
+  // Remove duplicate Clippy instances
+  removeDuplicateClippys() {
+    const clippyElements = document.querySelectorAll(".clippy");
+    if (clippyElements.length > 1) {
+      console.log(
+        `Found ${clippyElements.length} Clippy instances - removing duplicates`
+      );
+
+      // Keep only the first one (assumed to be the one inside our app container)
+      const mainContainer =
+        document.querySelector(".w98") ||
+        document.querySelector(".desktop.screen");
+
+      // Find which Clippy is inside our container
+      let insideClippy = null;
+      let outsideClippys = [];
+
+      clippyElements.forEach((clippy) => {
+        if (mainContainer && mainContainer.contains(clippy)) {
+          insideClippy = clippy;
+        } else {
+          outsideClippys.push(clippy);
+        }
+      });
+
+      // If we found an inside Clippy, remove all others
+      if (insideClippy) {
+        outsideClippys.forEach((clippy) => {
+          if (clippy.parentNode) {
+            clippy.parentNode.removeChild(clippy);
+          }
+        });
+      }
+      // Otherwise, keep only the first one
+      else if (clippyElements.length > 1) {
+        for (let i = 1; i < clippyElements.length; i++) {
+          if (clippyElements[i].parentNode) {
+            clippyElements[i].parentNode.removeChild(clippyElements[i]);
+          }
+        }
+      }
+    }
+  }
+
   // Ensure Clippy stays in fixed position on desktop and handle interactions
   enforceFixedPositionOnDesktop() {
-    const clippyElements = document.querySelectorAll(".clippy");
-    if (clippyElements.length === 0) {
-      setTimeout(this.enforceFixedPositionOnDesktop, 500);
-      return;
+    // Find Clippy but ensure we're getting the one inside our app
+    const mainContainer =
+      document.querySelector(".desktop.screen") ||
+      document.querySelector(".w98");
+    let clippyEl = null;
+
+    if (mainContainer) {
+      clippyEl = mainContainer.querySelector(".clippy");
     }
 
-    const clippyEl = clippyElements[0];
+    // Fall back to any Clippy if we didn't find one in the container
+    if (!clippyEl) {
+      const allClippys = document.querySelectorAll(".clippy");
+      if (allClippys.length === 0) {
+        setTimeout(this.enforceFixedPositionOnDesktop, 500);
+        return;
+      }
+      clippyEl = allClippys[0];
+    }
 
     // Store initial position
     const rect = clippyEl.getBoundingClientRect();
@@ -314,59 +374,6 @@ class ClippyManager {
     this.clippyOverlay.style.height = `${rect.height}px`;
     this.clippyOverlay.style.zIndex = "2001";
     this.clippyOverlay.style.cursor = "pointer";
-
-    // Add test animation button (for debugging)
-    const testAnimButton = document.createElement("button");
-    testAnimButton.textContent = "Test Animation";
-    testAnimButton.style.position = "absolute";
-    testAnimButton.style.left = "0";
-    testAnimButton.style.top = "-25px";
-    testAnimButton.style.background = "#ff9999";
-    testAnimButton.style.fontSize = "8px";
-    testAnimButton.style.padding = "2px 5px";
-    testAnimButton.style.cursor = "pointer";
-    testAnimButton.style.zIndex = "2002";
-    testAnimButton.onclick = (e) => {
-      e.stopPropagation(); // Don't trigger overlay's handlers
-
-      if (window.clippy) {
-        console.log("Test animation button clicked");
-
-        // Force Clippy to be visible
-        const clippyEl = document.querySelector(".clippy");
-        if (clippyEl) {
-          clippyEl.style.visibility = "visible";
-          clippyEl.style.opacity = "1";
-          clippyEl.style.display = "block";
-
-          // Find and make visible any SVG elements
-          const svgElements = clippyEl.querySelectorAll("svg");
-          if (svgElements.length > 0) {
-            svgElements.forEach((svg) => {
-              svg.style.visibility = "visible";
-              svg.style.opacity = "1";
-              svg.style.display = "inline";
-
-              // Make all SVG children visible too
-              Array.from(svg.querySelectorAll("*")).forEach((el) => {
-                el.style.visibility = "visible";
-                el.style.opacity = "1";
-                el.style.display = "inline";
-              });
-            });
-          }
-        }
-
-        try {
-          window.clippy.play("Wave");
-        } catch (e) {
-          console.error("Test animation error:", e);
-        }
-      }
-    };
-
-    // Add debug button to overlay
-    this.clippyOverlay.appendChild(testAnimButton);
 
     // Track clicks to distinguish between single and double clicks
     let clickCount = 0;
@@ -411,8 +418,14 @@ class ClippyManager {
         ];
         const anim = animsArray[Math.floor(Math.random() * animsArray.length)];
 
-        // Force the clippy element to be visible
-        const clippyEl = document.querySelector(".clippy");
+        // Force the clippy element to be visible - target the one inside our container
+        const mainContainer =
+          document.querySelector(".desktop.screen") ||
+          document.querySelector(".w98");
+        const clippyEl = mainContainer
+          ? mainContainer.querySelector(".clippy")
+          : document.querySelector(".clippy");
+
         if (clippyEl) {
           clippyEl.style.visibility = "visible";
           clippyEl.style.opacity = "1";
@@ -465,12 +478,35 @@ class ClippyManager {
       e.preventDefault(); // Prevent default context menu
 
       if (window.clippy) {
-        // Force the clippy element to be visible first
-        const clippyEl = document.querySelector(".clippy");
+        // Force the clippy element to be visible first - target the one inside our container
+        const mainContainer =
+          document.querySelector(".desktop.screen") ||
+          document.querySelector(".w98");
+        const clippyEl = mainContainer
+          ? mainContainer.querySelector(".clippy")
+          : document.querySelector(".clippy");
+
         if (clippyEl) {
           clippyEl.style.visibility = "visible";
           clippyEl.style.opacity = "1";
           clippyEl.style.display = "block";
+
+          // Find and make visible any SVG elements
+          const svgElements = clippyEl.querySelectorAll("svg");
+          if (svgElements.length > 0) {
+            svgElements.forEach((svg) => {
+              svg.style.visibility = "visible";
+              svg.style.opacity = "1";
+              svg.style.display = "inline";
+
+              // Make all SVG children visible too
+              Array.from(svg.querySelectorAll("*")).forEach((el) => {
+                el.style.visibility = "visible";
+                el.style.opacity = "1";
+                el.style.display = "inline";
+              });
+            });
+          }
         }
 
         // Then play animation
@@ -482,7 +518,7 @@ class ClippyManager {
 
         // Show interactive chat balloon
         setTimeout(() => {
-          this.showChatBalloon("How can I help you with Windows 98 today?");
+          this.showChatBalloon("How can I help you with Hydra 98 today?");
         }, 500);
       }
     };
@@ -672,7 +708,7 @@ class ClippyManager {
     // Let's implement an actual response system instead of showing an alert
     // Import chatResponses at the top of the file to use this
     let response =
-      "I'm not sure how to help with that. Can you try asking something about Windows 98?"; // Default response
+      "I'm not sure how to help with that. Can you try asking something about Hydra 98?"; // response
 
     // Look for keyword matches
     const textLower = text.toLowerCase();
@@ -682,19 +718,19 @@ class ClippyManager {
       response = "Hello there! How can I assist you today?";
     } else if (textLower.includes("help")) {
       response =
-        "I'm here to help! What would you like to know about Windows 98?";
+        "I'm here to help! What would you like to know about Hydra 98?";
     } else if (textLower.includes("file")) {
       response =
-        "To manage files, open Windows Explorer from the Start menu or double-click My Computer.";
+        "To manage files, open Hydra Explorer from the Start menu or double-click My Computer.";
     } else if (textLower.includes("internet") || textLower.includes("web")) {
       response =
         "You can browse the web using Internet Explorer. Find it in the Start menu!";
     } else if (
-      textLower.includes("windows 98") ||
-      textLower.includes("windows98")
+      textLower.includes("Hydra 98") ||
+      textLower.includes("Hydra98")
     ) {
       response =
-        "Windows 98 is a graphical operating system by Microsoft, released on June 25, 1998.";
+        "Hydra 98 is a graphical operating system by Microsoft, released on June 25, 1998.";
     }
 
     // Show response with custom balloon
@@ -804,7 +840,7 @@ class ClippyManager {
       {
         text: "I need help with files",
         response:
-          "To manage files, open Windows Explorer from the Start menu or double-click My Computer.",
+          "To manage files, open Hydra Explorer from the Start menu or double-click My Computer.",
       },
       {
         text: "How do I use the internet?",
@@ -812,9 +848,9 @@ class ClippyManager {
           "You can browse the web using Internet Explorer. Find it in the Start menu!",
       },
       {
-        text: "Tell me about Windows 98",
+        text: "Tell me about Hydra 98",
         response:
-          "Windows 98 is a graphical operating system by Microsoft, released on June 25, 1998. It includes many new features like better USB support and Internet Explorer 4.0.",
+          "Hydra 98 is a graphical operating system by Microsoft, released on June 25, 1998. It includes many new features like better USB support and Internet Explorer 4.0.",
       },
     ];
 
@@ -853,6 +889,22 @@ class ClippyManager {
 
     // Remove balloon
     this.hideCustomBalloon();
+
+    // Find all Clippy instances and remove them
+    const allClippys = document.querySelectorAll(".clippy");
+    allClippys.forEach((clippy) => {
+      if (clippy.parentNode) {
+        clippy.parentNode.removeChild(clippy);
+      }
+    });
+
+    // Remove any clippy overlays
+    const overlays = document.querySelectorAll("#clippy-clickable-overlay");
+    overlays.forEach((overlay) => {
+      if (overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    });
 
     // Reset flags
     this.initialMessageShown = false;

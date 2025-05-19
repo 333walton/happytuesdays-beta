@@ -14,7 +14,7 @@ import CRTOverlay from "./components/tools/CRT";
 import ShutDown from "./components/ShutDown/ShutDown";
 import Background from "./components/tools/Background";
 import MonitorView from "./components/MonitorView/MonitorView";
-import StartMessage from "./components/StartMessage/StartMessage";
+//import StartMessage from "./components/StartMessage/StartMessage";
 import { ClippyProvider } from "./components/ClippyAssistant/index";
 import ClippyService from "./components/ClippyAssistant/ClippyService";
 import clippyManager from "./components/ClippyAssistant/ClippyManager"; // Import the manager
@@ -61,7 +61,6 @@ class Desktop extends Component {
             <TaskManager />
             <Settings />
             <ShutDown />
-            <StartMessage />
             {/* Set fixedPosition based on device type */}
             <ClippyProvider
               defaultAgent="Clippy"

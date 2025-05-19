@@ -1,3 +1,5 @@
+// Modified ClippyProvider.js section to handle screen power state
+
 import React, {
   createContext,
   useState,
@@ -16,49 +18,6 @@ import ChatBalloon from "./ChatBalloon";
 import ClippyController from "./ClippyController";
 
 import "./_styles.scss";
-
-// CSS for improved Clippy styling
-const improvedClippyStyles = `
-    /* Reset clippy position styles */
-    .clippy {
-      position: absolute;
-      transition: transform 0.2s ease;
-      will-change: transform, left, top;
-      z-index: 2000 !important;
-    }
-    
-    /* Fix original balloon visibility */
-    .clippy-balloon {
-      opacity: 0 !important;
-      visibility: hidden !important;
-      display: none !important;
-      pointer-events: none !important;
-    }
-    
-    /* Custom balloon styles */
-    .custom-clippy-balloon {
-      position: fixed !important;
-      z-index: 9999 !important;
-      background-color: #fffcde !important;
-      border: 1px solid #000 !important;
-      border-radius: 5px !important;
-      padding: 8px 12px !important;
-      box-shadow: 2px 2px 4px rgba(0,0,0,0.2) !important;
-      max-width: 250px !important;
-      font-family: 'Tahoma', sans-serif !important;
-      font-size: 13px !important;
-      visibility: visible !important;
-      display: block !important;
-      opacity: 1 !important;
-    }
-    
-    /* Ensure chat balloon is visible */
-    .custom-clippy-chat-balloon {
-      visibility: visible !important;
-      opacity: 1 !important;
-      display: block !important;
-    }
-    `;
 
 // Create context
 const ClippyContext = createContext(null);
@@ -95,21 +54,8 @@ const ClippyProvider = ({
     yPercent: 0.75,
   });
 
-  // Add improved styles
-  useEffect(() => {
-    if (document.getElementById("improved-clippy-styles")) return;
-
-    const styleEl = document.createElement("style");
-    styleEl.id = "improved-clippy-styles";
-    styleEl.textContent = improvedClippyStyles;
-    document.head.appendChild(styleEl);
-
-    return () => {
-      if (styleEl && styleEl.parentNode) {
-        styleEl.parentNode.removeChild(styleEl);
-      }
-    };
-  }, []);
+  // Track screen power state from MonitorView
+  const [isScreenPoweredOn, setIsScreenPoweredOn] = useState(true);
 
   // Detect if the user is on mobile
   useEffect(() => {
@@ -119,35 +65,63 @@ const ClippyProvider = ({
       );
   }, []);
 
-  // Add debugging helper
+  // Monitor the black overlay state from MonitorView
   useEffect(() => {
-    window.debugClippy = () => {
-      console.log("Clippy Elements:", document.querySelectorAll(".clippy"));
-      console.log(
-        "Default Balloon:",
-        document.querySelector(".clippy-balloon")
-      );
-      console.log(
-        "Custom Balloon:",
-        document.querySelector(".custom-clippy-balloon")
-      );
-      console.log(
-        "Chat Balloon:",
-        document.querySelector(".custom-clippy-chat-balloon")
-      );
+    const checkScreenPower = () => {
+      const blackOverlay = document.querySelector(".black-overlay");
+      if (blackOverlay) {
+        // Check if the black overlay is visible (screen is powered off)
+        const isVisible = window.getComputedStyle(blackOverlay).opacity !== "0";
 
-      // Test balloon display
-      if (window.clippy && window.showClippyCustomBalloon) {
-        window.showClippyCustomBalloon("Testing custom balloon visibility");
-        return "Test balloon triggered";
+        // If screen power state changed, update our state
+        if (isVisible !== !isScreenPoweredOn) {
+          setIsScreenPoweredOn(!isVisible);
+        }
       }
-      return "Clippy or custom balloon not available";
     };
 
-    return () => {
-      delete window.debugClippy;
-    };
-  }, []);
+    // Set up a periodic check for the black overlay visibility
+    const intervalId = setInterval(checkScreenPower, 500);
+
+    return () => clearInterval(intervalId);
+  }, [isScreenPoweredOn]);
+
+  // Handle Clippy visibility based on screen power state
+  useEffect(() => {
+    // Only run after clippy is initialized
+    if (clippyInstanceRef.current) {
+      const clippyElement = document.querySelector(".clippy");
+      const overlayElement = document.getElementById(
+        "clippy-clickable-overlay"
+      );
+
+      if (clippyElement) {
+        if (isScreenPoweredOn) {
+          // Show Clippy when screen is on
+          clippyElement.style.visibility = "visible";
+          clippyElement.style.opacity = "1";
+
+          if (overlayElement) {
+            overlayElement.style.visibility = "visible";
+            overlayElement.style.pointerEvents = "auto";
+          }
+        } else {
+          // Hide Clippy when screen is off
+          clippyElement.style.visibility = "hidden";
+          clippyElement.style.opacity = "0";
+
+          // Also hide any balloons
+          setCustomBalloonVisible(false);
+          setChatBalloonVisible(false);
+
+          if (overlayElement) {
+            overlayElement.style.visibility = "hidden";
+            overlayElement.style.pointerEvents = "none";
+          }
+        }
+      }
+    }
+  }, [isScreenPoweredOn]);
 
   // Make context values available globally for ClippyService
   useEffect(() => {
@@ -159,6 +133,11 @@ const ClippyProvider = ({
         setPosition(newPos);
         setUserPositioned(false);
       }
+    };
+
+    // Add function to update screen power state
+    window.setScreenPowerState = (isPoweredOn) => {
+      setIsScreenPoweredOn(isPoweredOn);
     };
 
     // Add new function for the simplified initial position setting
@@ -184,13 +163,18 @@ const ClippyProvider = ({
 
     // Add custom balloon functions
     window.showClippyCustomBalloon = (message) => {
+      // Don't show balloons when screen is off
+      if (!isScreenPoweredOn) return false;
+
       // Calculate position based on Clippy's position
       const clippyElement = document.querySelector(".clippy");
       if (clippyElement) {
         const rect = clippyElement.getBoundingClientRect();
+
+        // Position the balloon centered above Clippy
         setBalloonPosition({
-          left: rect.left - 50,
-          top: rect.top - 100,
+          left: rect.left + rect.width / 2 - 125, // Assuming 250px max-width for balloon, center it
+          top: rect.top - 120, // Higher above Clippy's head
         });
       }
 
@@ -198,7 +182,7 @@ const ClippyProvider = ({
       setCustomBalloonVisible(true);
       setChatBalloonVisible(false); // Hide chat if visible
 
-      // Auto-hide after 8 seconds - increased since there's no close button
+      // Auto-hide after 8 seconds
       setTimeout(() => {
         setCustomBalloonVisible(false);
       }, 8000);
@@ -213,13 +197,18 @@ const ClippyProvider = ({
     };
 
     window.showClippyChatBalloon = (initialMessage) => {
+      // Don't show balloons when screen is off
+      if (!isScreenPoweredOn) return false;
+
       // Calculate position based on Clippy's position
       const clippyElement = document.querySelector(".clippy");
       if (clippyElement) {
         const rect = clippyElement.getBoundingClientRect();
+
+        // Position the chat balloon centered above Clippy
         setBalloonPosition({
-          left: rect.left - 100,
-          top: rect.top - 200,
+          left: rect.left + rect.width / 2 - 110, // Center 220px wide balloon
+          top: rect.top - 200, // Position well above Clippy
         });
       }
 
@@ -241,37 +230,35 @@ const ClippyProvider = ({
       delete window.showClippyCustomBalloon;
       delete window.hideClippyCustomBalloon;
       delete window.showClippyChatBalloon;
+      delete window.setScreenPowerState;
     };
-  }, [fixedPosition, desktopRectRef]);
+  }, [fixedPosition, desktopRectRef, isScreenPoweredOn]);
 
   // Handle chat messages
   const handleChatMessage = (message, callback) => {
-    // Here you could integrate with a real AI service
-    // For now, we'll just respond with some basic responses
+    // Simple chat response handling
     setTimeout(() => {
       let response;
       const lowercaseMsg = message.toLowerCase();
 
       if (lowercaseMsg.includes("hello") || lowercaseMsg.includes("hi")) {
-        response = "Hello there! How can I assist you with Windows 98?";
+        response = "Hello there! How can I assist you?";
       } else if (lowercaseMsg.includes("help")) {
         response =
-          "I can help with many Windows tasks. What specifically do you need assistance with?";
+          "I can help with many tasks. What specifically do you need assistance with?";
       } else if (
         lowercaseMsg.includes("file") ||
         lowercaseMsg.includes("explorer")
       ) {
-        response =
-          "To manage your files, open Windows Explorer from the Start menu or double-click on My Computer.";
+        response = "To manage your files, you can access the file explorer.";
       } else if (
         lowercaseMsg.includes("internet") ||
         lowercaseMsg.includes("web")
       ) {
-        response =
-          "You can browse the web using Internet Explorer. Find it in the Start menu!";
+        response = "You can browse the web using a web browser.";
       } else {
         response =
-          "I'm not sure about that. Is there something specific about Windows 98 you'd like to know?";
+          "I'm not sure about that. Is there something specific you'd like to know?";
       }
 
       callback(response);
@@ -291,12 +278,19 @@ const ClippyProvider = ({
     desktopRectRef,
     isMobileRef,
     fixedPosition,
+    isScreenPoweredOn,
+    setIsScreenPoweredOn,
     setClippyInstance: (instance) => {
       clippyInstanceRef.current = instance;
       window.clippy = instance;
     },
     getClippyInstance: () => clippyInstanceRef.current,
   };
+
+  // Set assistantVisible to true when component mounts
+  useEffect(() => {
+    setAssistantVisible(true);
+  }, []);
 
   return (
     <ClippyContext.Provider value={contextValue}>
@@ -316,21 +310,22 @@ const ClippyProvider = ({
           currentAgent={currentAgent}
           setCurrentAgent={setCurrentAgent}
           setAssistantVisible={setAssistantVisible}
+          isScreenPoweredOn={isScreenPoweredOn}
           setClippyInstance={(instance) => {
             clippyInstanceRef.current = instance;
             window.clippy = instance;
           }}
         />
 
-        {/* Add custom balloon components */}
-        {customBalloonVisible && (
+        {/* Add custom balloon components - only when screen is on */}
+        {isScreenPoweredOn && customBalloonVisible && (
           <CustomBalloon
             message={customBalloonMessage}
             position={balloonPosition}
           />
         )}
 
-        {chatBalloonVisible && (
+        {isScreenPoweredOn && chatBalloonVisible && (
           <ChatBalloon
             initialMessage={chatInitialMessage}
             position={balloonPosition}
