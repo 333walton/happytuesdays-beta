@@ -319,7 +319,16 @@ const ClippyController = ({
     // Play animation with slight delay to ensure visibility
     setTimeout(() => {
       // List of common animations that work well
-      const animations = ["Greeting", "Wave", "GetAttention"];
+      const animations = [
+        "Greeting",
+        "Wave",
+        "GetAttention",
+        "Thinking",
+        "Writing",
+        "Processing",
+        "Congratulate",
+        "Alert",
+      ];
       const randomAnim =
         animations[Math.floor(Math.random() * animations.length)];
 
@@ -327,20 +336,20 @@ const ClippyController = ({
       const fixStyle = document.createElement("style");
       fixStyle.id = "clippy-temp-fix";
       fixStyle.textContent = `
-      .clippy * {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-      }
-      
-      .clippy-animate,
-      .clippy-animate * {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-        animation: auto !important;
-      }
-    `;
+        .clippy * {
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: block !important;
+        }
+        
+        .clippy-animate,
+        .clippy-animate * {
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: block !important;
+          animation: auto !important;
+        }
+      `;
       document.head.appendChild(fixStyle);
 
       console.log(`Playing animation: ${randomAnim}`);
@@ -363,21 +372,26 @@ const ClippyController = ({
         }
       }, 3000);
 
-      // Show speech balloon after animation
+      // Show speech balloon after animation - only on every 3rd click
       setTimeout(() => {
         if (!isScreenPoweredOn) return; // Don't show balloon if screen is off
 
         // Increment counter
         clickCounterRef.current = (clickCounterRef.current + 1) % 3;
 
-        // Only show speech on every 3rd click or first click
-        if (clickCounterRef.current === 0 || clickCounterRef.current === 1) {
+        // Only show speech on every 3rd click (when counter is 0)
+        if (clickCounterRef.current === 0) {
           const phrases = [
             "Hello there! How can I help you?",
             "Need some assistance?",
             "I'm here to help! What can I do for you?",
             "Looking for some help?",
             "What can I help you with today?",
+            "Windows 98 at your service!",
+            "Need a tip? Try the Start menu!",
+            "You can right-click me for more options!",
+            "Double-clicking files opens them!",
+            "Did you know you can play Minesweeper here?",
           ];
 
           // Choose random phrase
@@ -393,7 +407,7 @@ const ClippyController = ({
         }
       }, 800); // Delay to let animation play first
     }, 50);
-  }, [clippy, isScreenPoweredOn]); // Add isScreenPoweredOn as dependency
+  }, [clippy, isScreenPoweredOn]); // Add isScreenPoweredOn as dependency // Add isScreenPoweredOn as dependency
 
   // Setup double-click and right-click handlers with overlay
   useEffect(() => {

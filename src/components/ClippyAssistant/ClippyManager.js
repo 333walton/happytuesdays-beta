@@ -1,6 +1,7 @@
 import { animations, interactions } from "./ClippyContent";
 // Import chatResponses when you're ready to use it
 // import { chatResponses } from "./ClippyContent";
+import { Menu, MenuList, MenuItem, Separator } from "@react95/core";
 
 // Mobile detection
 const isMobile =
@@ -483,6 +484,9 @@ class ClippyManager {
             "Wave",
             "Congratulate",
             "GetAttention",
+            "Thinking",
+            "Writing",
+            "Alert",
           ];
           const anim =
             animsArray[Math.floor(Math.random() * animsArray.length)];
@@ -523,48 +527,574 @@ class ClippyManager {
               }, 2000); // Allow 2 seconds for animation to complete
             }
 
-            // Then show custom balloon with speech and options
-            setTimeout(() => {
-              // Pick a random interaction from content file
-              const interaction =
-                interactions[Math.floor(Math.random() * interactions.length)];
-              this.showCustomBalloon(
-                interaction.message,
-                false,
-                interaction.options
-              );
-            }, 800);
+            // Track double-click count using a global variable
+            if (!window._clippyDoubleClickCount) {
+              window._clippyDoubleClickCount = 0;
+            }
+
+            // Increment counter
+            window._clippyDoubleClickCount =
+              (window._clippyDoubleClickCount + 1) % 3;
+
+            // Only show speech bubble on every 3rd double-click
+            if (window._clippyDoubleClickCount === 0) {
+              // Then show custom balloon with speech and options after animation
+              setTimeout(() => {
+                // Pick a random interaction from content file
+                const interaction =
+                  interactions[Math.floor(Math.random() * interactions.length)];
+                this.showCustomBalloon(
+                  interaction.message,
+                  false,
+                  interaction.options
+                );
+              }, 800);
+            }
           }, 50);
         }
       };
 
-      // Right-click handler for chat
+      // Right-click handler for context menu with proper positioning and behavior
       const handleRightClick = (e) => {
         e.preventDefault(); // Prevent default context menu
 
-        if (window.clippy) {
-          // Force the clippy element to be visible first
-          const clippyEl = document.querySelector(".clippy");
-          if (clippyEl) {
-            clippyEl.style.visibility = "visible";
-            clippyEl.style.opacity = "1";
-            clippyEl.style.display = "block";
-          }
+        // First, hide any existing menus or balloons
+        if (this.customBalloon && this.customBalloon.parentNode) {
+          this.customBalloon.parentNode.removeChild(this.customBalloon);
+          this.customBalloon = null;
+        }
 
-          // Then play animation
-          try {
-            window.clippy.play("GetAttention");
-          } catch (e) {
-            console.error("Error playing GetAttention animation:", e);
-          }
+        // Define createDOMMenu within handleRightClick's scope to avoid the undefined error
+        const createDOMMenu = (event) => {
+          // Simple DOM-based menu as fallback
+          const menuEl = document.createElement("div");
+          menuEl.style.position = "fixed";
+          menuEl.style.left = `${event.clientX}px`;
+          menuEl.style.top = `${event.clientY}px`;
+          menuEl.style.backgroundColor = "#c0c0c0";
+          menuEl.style.border = "2px solid";
+          menuEl.style.borderColor = "#ffffff #808080 #808080 #ffffff";
+          menuEl.style.padding = "1px";
+          menuEl.style.zIndex = "9999";
+          menuEl.style.fontFamily = "'MS Sans Serif', sans-serif";
+          menuEl.style.fontSize = "11px";
 
-          // Show interactive chat balloon
-          setTimeout(() => {
-            this.showChatBalloon("How can I help you with Hydra 98 today?");
-          }, 500);
+          // Create menu items
+          const createMenuItem = (text, onClick) => {
+            const item = document.createElement("div");
+            item.innerText = text;
+            item.style.padding = "1px 8px";
+            item.style.cursor = "default";
+            item.style.whiteSpace = "nowrap";
+
+            item.addEventListener("mouseover", () => {
+              item.style.backgroundColor = "#000080";
+              item.style.color = "white";
+            });
+
+            item.addEventListener("mouseout", () => {
+              item.style.backgroundColor = "";
+              item.style.color = "black";
+            });
+
+            if (onClick) {
+              item.addEventListener("click", () => {
+                onClick();
+                document.body.removeChild(menuEl);
+              });
+            }
+
+            menuEl.appendChild(item);
+            return item;
+          };
+
+          createMenuItem("Hide Assistant", () => {
+            if (window.setAssistantVisible) {
+              window.setAssistantVisible(false);
+            }
+          });
+
+          // Add separator
+          const separator = document.createElement("div");
+          separator.style.height = "1px";
+          separator.style.margin = "1px 0";
+          separator.style.backgroundColor = "#808080";
+          separator.style.borderBottom = "1px solid #ffffff";
+          menuEl.appendChild(separator);
+
+          // Add more items...
+          createMenuItem("About", () => {
+            const currentAgent = window.currentAgent || "Clippy";
+            const message = `I'm ${currentAgent}, ready to help!`;
+            if (window.showClippyCustomBalloon) {
+              window.showClippyCustomBalloon(message);
+            }
+          });
+
+          document.body.appendChild(menuEl);
+
+          // Close when clicking outside
+          document.addEventListener(
+            "mousedown",
+            function handleOutsideClick(evt) {
+              if (!menuEl.contains(evt.target)) {
+                if (menuEl.parentNode) {
+                  menuEl.parentNode.removeChild(menuEl);
+                }
+                document.removeEventListener("mousedown", handleOutsideClick);
+              }
+            }
+          );
+        };
+
+        try {
+          // Dynamically import the required components
+          import("react95")
+            .then((React95) => {
+              const { MenuList, MenuListItem, Separator } = React95;
+
+              // Import React and ReactDOM
+              const React = window.React || require("react");
+              const ReactDOM = window.ReactDOM || require("react-dom");
+
+              if (!React || !ReactDOM) {
+                console.error("React or ReactDOM not available");
+                return;
+              }
+
+              // Create a container for the menu
+              let menuContainer = document.getElementById(
+                "clippy-context-menu"
+              );
+              if (menuContainer) {
+                ReactDOM.unmountComponentAtNode(menuContainer);
+                menuContainer.parentNode.removeChild(menuContainer);
+              }
+
+              // Check if the menu would go outside the viewport and adjust position
+              const viewportWidth = window.innerWidth;
+              const viewportHeight = window.innerHeight;
+
+              let menuX = e.clientX;
+              let menuY = e.clientY;
+
+              // Estimate menu dimensions
+              const menuWidth = 150;
+              const menuHeight = 150;
+
+              // Adjust position if needed to stay in viewport
+              if (menuX + menuWidth > viewportWidth) {
+                menuX = viewportWidth - menuWidth - 10;
+              }
+
+              if (menuY + menuHeight > viewportHeight) {
+                menuY = viewportHeight - menuHeight - 10;
+              }
+
+              menuContainer = document.createElement("div");
+              menuContainer.id = "clippy-context-menu";
+              menuContainer.style.position = "fixed";
+              menuContainer.style.left = `${menuX}px`;
+              menuContainer.style.top = `${menuY}px`;
+              menuContainer.style.zIndex = "9999";
+              menuContainer.style.transform = "scale(0.86)";
+              menuContainer.style.transformOrigin = "top left";
+              document.body.appendChild(menuContainer);
+
+              // Add a style element for Windows 98 styling
+              const styleEl = document.createElement("style");
+              styleEl.textContent = `
+        .react95-MenuList {
+          background-color: #c0c0c0 !important;
+          border: 4px solid !important;
+          border-color: #ffffff #808080 #808080 #ffffff !important;
+          box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3) !important;
+          padding: 4px !important;
+          font-family: 'MS Sans Serif', sans-serif !important;
+          font-size: 11px !important;
+          min-width: 130px !important;
+          color: black !important;
+        }
+        
+        .react95-MenuListItem {
+          padding: 2px 12px !important;
+          height: 18px !important;
+          line-height: 25px !important;
+          cursor: default !important;
+          display: flex !important;
+          align-items: center !important;
+          position: relative !important;
+          color: black !important;
+          padding-right: 18px !important;
+        }
+        
+        .react95-MenuListItem:hover {
+          background-color: #000080 !important;
+          color: white !important;
+        }
+        
+        .react95-MenuListItem:hover * {
+          color: white !important;
+        }
+        
+        .react95-Separator {
+          height: 2px !important;
+          margin: 1px 0 !important;
+          background-color: #808080 !important;
+          border-bottom: 1px solid #ffffff !important;
+        }
+        
+        .submenu {
+          box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4) !important;
+          position: absolute !important;
+          display: none !important;
+        }
+        
+        .submenu-arrow {
+          position: absolute;
+          right: 2px;
+          padding: 2px;
+          font-size: 9px;
+        }
+        
+        .checkmark {
+          display: inline-block;
+          width: 10px;
+          margin-right: 4px;
+          font-weight: bold;
+        }
+        
+        .showOnHover:hover .submenu {
+          display: block !important;
+        }
+      `;
+              document.head.appendChild(styleEl);
+
+              // Get current agent
+              const currentAgent = window.currentAgent || "Clippy";
+
+              // Helper function for playing animations
+              const playAnimation = (animation) => {
+                if (window.clippy && window.clippy.play) {
+                  const wasPositionLocked = window._clippyPositionLocked;
+                  if (wasPositionLocked) window._clippyPositionLocked = false;
+
+                  window.clippy.play(animation);
+
+                  if (wasPositionLocked) {
+                    setTimeout(() => {
+                      window._clippyPositionLocked = true;
+                    }, 2000);
+                  }
+                }
+              };
+
+              // Create the About function
+              const handleAbout = () => {
+                const aboutMessages = {
+                  Clippy:
+                    "Hi, I'm Clippy! I'm here to help you with Windows 98. I was created by Microsoft as an Office Assistant in 1997.",
+                  Links:
+                    "Hi, I'm Links the cat! I'm here to help you with Windows 98. I was one of Microsoft's Office Assistants.",
+                  Bonzi:
+                    "Hi, I'm Bonzi! I'm a friendly purple gorilla here to help you with Windows 98.",
+                  Genie:
+                    "Hi, I'm Genie! I'm here to grant your Windows 98 wishes and help you navigate the system.",
+                  Merlin:
+                    "Greetings, I'm Merlin the Wizard! I use my magic to help you navigate Windows 98.",
+                  Rover:
+                    "Woof! I'm Rover, the friendly dog assistant. I'll help you find your way around Windows 98!",
+                };
+
+                const message =
+                  aboutMessages[currentAgent] ||
+                  "I'm your Windows 98 assistant, ready to help you navigate the system!";
+
+                if (window.showClippyCustomBalloon) {
+                  window.showClippyCustomBalloon(message);
+                }
+              };
+
+              // Create the menu component
+              class ClippyContextMenu extends React.Component {
+                // Use state to track which submenu is open
+                constructor(props) {
+                  super(props);
+                  this.state = {
+                    activeSubmenu: null,
+                  };
+                }
+
+                // Function to close the menu
+                closeMenu = () => {
+                  ReactDOM.unmountComponentAtNode(menuContainer);
+                  if (menuContainer.parentNode) {
+                    menuContainer.parentNode.removeChild(menuContainer);
+                  }
+                  if (styleEl.parentNode) {
+                    styleEl.parentNode.removeChild(styleEl);
+                  }
+                };
+
+                render() {
+                  // Windows 98 menu styling
+                  const menuListStyle = {
+                    backgroundColor: "#c0c0c0",
+                    border: "2px solid",
+                    borderColor: "#ffffff #808080 #808080 #ffffff",
+                    boxShadow: "2px 2px 3px rgba(0, 0, 0, 0.3)",
+                    padding: "1px",
+                    fontFamily: "'MS Sans Serif', sans-serif",
+                    fontSize: "11px",
+                    minWidth: "120px",
+                    color: "black",
+                  };
+
+                  const menuItemStyle = {
+                    padding: "1px 8px",
+                    height: "18px",
+                    lineHeight: "18px",
+                    cursor: "default",
+                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center",
+                    position: "relative",
+                    color: "black",
+                  };
+
+                  const submenuLeftStyle = {
+                    ...menuListStyle,
+                    position: "absolute",
+                    right: "100%",
+                    top: "0",
+                    marginRight: "0",
+                    boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.4)",
+                    display: "none",
+                  };
+
+                  const submenuRightStyle = {
+                    ...menuListStyle,
+                    position: "absolute",
+                    left: "100%",
+                    top: "0",
+                    marginLeft: "0",
+                    boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.4)",
+                    display: "none",
+                  };
+
+                  const separatorStyle = {
+                    height: "1px",
+                    margin: "1px 0",
+                    backgroundColor: "#808080",
+                    borderBottom: "1px solid #ffffff",
+                  };
+
+                  // Define a list of agents and animations
+                  const agents = [
+                    "Clippy",
+                    "Links",
+                    "Bonzi",
+                    "Genie",
+                    "Merlin",
+                    "Rover",
+                  ];
+                  const animations = [
+                    "Greeting",
+                    "Wave",
+                    "GetAttention",
+                    "Thinking",
+                    "Writing",
+                  ];
+
+                  // Check if submenus should be on the left
+                  const viewportWidth = window.innerWidth;
+                  const menuRect = menuContainer.getBoundingClientRect();
+                  const useLeftSubmenu = menuRect.right + 150 > viewportWidth;
+
+                  return React.createElement(
+                    MenuList,
+                    { style: menuListStyle, className: "react95-MenuList" },
+
+                    // Hide Assistant
+                    React.createElement(
+                      MenuListItem,
+                      {
+                        onClick: () => {
+                          if (window.setAssistantVisible) {
+                            window.setAssistantVisible(false);
+                          }
+                          this.closeMenu();
+                        },
+                        style: menuItemStyle,
+                        className: "react95-MenuListItem",
+                      },
+                      "Hide Assistant"
+                    ),
+
+                    // Select Assistant submenu
+                    React.createElement(
+                      "div",
+                      { className: "showOnHover" },
+                      React.createElement(
+                        MenuListItem,
+                        {
+                          style: menuItemStyle,
+                          className: "react95-MenuListItem",
+                        },
+                        "Select Assistant",
+                        // Submenu arrow
+                        React.createElement(
+                          "span",
+                          { className: "submenu-arrow" },
+                          useLeftSubmenu ? "◀" : "▶"
+                        )
+                      ),
+                      React.createElement(
+                        MenuList,
+                        {
+                          style: useLeftSubmenu
+                            ? submenuLeftStyle
+                            : submenuRightStyle,
+                          className: "react95-MenuList submenu",
+                        },
+                        agents.map((agent) =>
+                          React.createElement(
+                            MenuListItem,
+                            {
+                              key: agent,
+                              onClick: () => {
+                                if (window.setCurrentAgent) {
+                                  window.setCurrentAgent(agent);
+                                }
+                                this.closeMenu();
+                              },
+                              style: menuItemStyle,
+                              className: "react95-MenuListItem",
+                            },
+                            agent === currentAgent
+                              ? React.createElement(
+                                  "span",
+                                  { className: "checkmark" },
+                                  "✓"
+                                )
+                              : React.createElement(
+                                  "span",
+                                  { className: "checkmark" },
+                                  " "
+                                ),
+                            agent
+                          )
+                        )
+                      )
+                    ),
+
+                    // Play Animation submenu
+                    React.createElement(
+                      "div",
+                      { className: "showOnHover" },
+                      React.createElement(
+                        MenuListItem,
+                        {
+                          style: menuItemStyle,
+                          className: "react95-MenuListItem",
+                        },
+                        "Play Animation",
+                        // Submenu arrow
+                        React.createElement(
+                          "span",
+                          { className: "submenu-arrow" },
+                          useLeftSubmenu ? "◀" : "▶"
+                        )
+                      ),
+                      React.createElement(
+                        MenuList,
+                        {
+                          style: useLeftSubmenu
+                            ? submenuLeftStyle
+                            : submenuRightStyle,
+                          className: "react95-MenuList submenu",
+                        },
+                        animations.map((anim) =>
+                          React.createElement(
+                            MenuListItem,
+                            {
+                              key: anim,
+                              onClick: () => {
+                                playAnimation(anim);
+                                this.closeMenu();
+                              },
+                              style: menuItemStyle,
+                              className: "react95-MenuListItem",
+                            },
+                            anim
+                          )
+                        )
+                      )
+                    ),
+
+                    // Separator
+                    React.createElement("div", {
+                      style: separatorStyle,
+                      className: "react95-Separator",
+                    }),
+
+                    // About
+                    React.createElement(
+                      MenuListItem,
+                      {
+                        onClick: () => {
+                          handleAbout();
+                          this.closeMenu();
+                        },
+                        style: menuItemStyle,
+                        className: "react95-MenuListItem",
+                      },
+                      "About"
+                    )
+                  );
+                }
+              }
+
+              // Render the menu
+              ReactDOM.render(
+                React.createElement(ClippyContextMenu),
+                menuContainer
+              );
+
+              // Close menu when clicking outside
+              document.addEventListener(
+                "mousedown",
+                function handleClickOutside(event) {
+                  const container = document.getElementById(
+                    "clippy-context-menu"
+                  );
+                  if (container && !container.contains(event.target)) {
+                    ReactDOM.unmountComponentAtNode(container);
+                    if (container.parentNode) {
+                      container.parentNode.removeChild(container);
+                    }
+                    if (styleEl.parentNode) {
+                      styleEl.parentNode.removeChild(styleEl);
+                    }
+                    document.removeEventListener(
+                      "mousedown",
+                      handleClickOutside
+                    );
+                  }
+                }
+              );
+            })
+            .catch((error) => {
+              console.error("Error importing React95 components:", error);
+              // Fallback to the simple DOM menu
+              createDOMMenu(e);
+            });
+        } catch (error) {
+          console.error("Error creating context menu:", error);
+          // Fallback to the simple DOM menu
+          createDOMMenu(e);
         }
       };
-
       // Add the event listeners
       this.clippyOverlay.addEventListener("click", handleClick);
       this.clippyOverlay.addEventListener("dblclick", handleDoubleClick);
@@ -657,7 +1187,7 @@ class ClippyManager {
       );
 
       // Apply scale transform
-      clippyEl.style.transform = `scale(${scaleFactor * 0.9})`;
+      clippyEl.style.transform = `scale(${scaleFactor * 1})`;
       clippyEl.style.transformOrigin = "center bottom";
 
       // Also scale the overlay

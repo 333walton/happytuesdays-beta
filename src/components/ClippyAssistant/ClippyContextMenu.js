@@ -1,71 +1,60 @@
-import React from "react";
-import { Menu, MenuList, MenuButton, MenuItem, Separator } from "@react95/core";
+// Create a new file: src/components/ClippyAssistant/ClippyContextMenu.jsx
 
-/**
- * Context menu for Clippy with options like hide, select assistant, etc.
- */
+import React from "react";
+import { Menu, MenuList, MenuItem, Separator } from "@react95/core";
+
 const ClippyContextMenu = ({
+  position,
+  onClose,
   onHide,
-  onSelect,
+  onSelectAgent,
   onPlayAnimation,
   onAbout,
-  currentAgent = "Clippy",
+  currentAgent,
+  availableAgents,
+  availableAnimations,
 }) => {
-  // Available assistants
-  const availableAgents = [
-    "Clippy",
-    "Links",
-    "Bonzi",
-    "Genie",
-    "Merlin",
-    "Rover",
-  ];
-
-  // Common animations that work well with most assistants
-  // Using only confirmed working animations from ClippyAssistant.js
-  const commonAnimations = [
-    "Greeting",
-    "Wave",
-    "GetAttention",
-    "Thinking",
-    "Writing", // Replaced "GetTechy" with "Writing"
-    "Processing",
-    "Congratulate",
-    "Alert",
-  ];
-
   return (
-    <Menu>
-      <MenuList>
-        <MenuItem onClick={onHide}>Hide Assistant</MenuItem>
-        <MenuItem>
-          Select Assistant
-          <MenuList>
-            {availableAgents.map((agent) => (
-              <MenuItem
-                key={agent}
-                onClick={() => onSelect(agent)}
-                checked={agent === currentAgent}
-              >
-                {agent}
-              </MenuItem>
-            ))}
-          </MenuList>
-        </MenuItem>
-        <MenuItem>
-          Play Animation
-          <MenuList>
-            {commonAnimations.map((anim) => (
-              <MenuItem key={anim} onClick={() => onPlayAnimation(anim)}>
-                {anim}
-              </MenuItem>
-            ))}
-          </MenuList>
-        </MenuItem>
-        <Separator />
-        <MenuItem onClick={onAbout}>About</MenuItem>
-      </MenuList>
-    </Menu>
+    <div
+      style={{
+        position: "fixed",
+        left: position.x,
+        top: position.y,
+        zIndex: 9999,
+      }}
+    >
+      <Menu open={true} onClick={onClose}>
+        <MenuList>
+          <MenuItem onClick={onHide}>Hide Assistant</MenuItem>
+          <MenuItem>
+            Select Assistant
+            <MenuList>
+              {availableAgents.map((agent) => (
+                <MenuItem
+                  key={agent}
+                  onClick={() => onSelectAgent(agent)}
+                  checked={agent === currentAgent}
+                >
+                  {agent}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </MenuItem>
+          <MenuItem>
+            Play Animation
+            <MenuList>
+              {availableAnimations.map((anim) => (
+                <MenuItem key={anim} onClick={() => onPlayAnimation(anim)}>
+                  {anim}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </MenuItem>
+          <Separator />
+          <MenuItem onClick={onAbout}>About</MenuItem>
+        </MenuList>
+      </Menu>
+    </div>
   );
 };
 
