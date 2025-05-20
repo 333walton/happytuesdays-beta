@@ -2,15 +2,25 @@ import { animations, interactions } from "./ClippyContent";
 // Import chatResponses when you're ready to use it
 // import { chatResponses } from "./ClippyContent";
 
+// Mobile detection
+const isMobile =
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+let isPositioningLocked = false;
+
 class ClippyManager {
   constructor() {
-    this.clippyFixedInterval = null;
+    this.rafId = null;
+    this.lastUpdateTime = 0;
+    this.updateInterval = isMobile ? 1000 : 250; // Less frequent updates on mobile
     this.initialClippyPosition = null;
     this.clippyOverlay = null;
     this.customBalloon = null;
     this.clickTimeout = null;
     this.initialMessageShown = false;
     this.isInitialized = false;
+    this._retryCount = 0;
 
     // Bind methods to preserve 'this' context
     this.initialize = this.initialize.bind(this);
@@ -27,6 +37,17 @@ class ClippyManager {
 
   // Initialize Clippy manager
   initialize(ClippyService, isMobile = false) {
+    // Check if another Clippy is already running
+    if (window._clippyInstanceRunning) {
+      console.warn(
+        "A Clippy instance is already running, aborting initialization"
+      );
+      return;
+    }
+
+    // Mark this as the running instance
+    window._clippyInstanceRunning = true;
+
     if (this.isInitialized) return;
 
     // Add global styles
@@ -102,17 +123,19 @@ class ClippyManager {
     styleElement.textContent = `
       /* Original balloon styles - hidden but preserved for compatibility */
       .clippy-balloon {
-        position: relative !important;
-        top: -400px !important;
-        left: 820px !important;
+        position: absolute !important;
+        top: -1000px !important; /* Position far off-screen to avoid any interaction */
+        left: -1000px !important;
         right: auto !important;
         bottom: auto !important;
         transform: none !important;
         transition: none !important;
-        animation: none !important;
         opacity: 0 !important;
         visibility: hidden !important;
         display: none !important;
+        pointer-events: none !important;
+        width: 1px !important;
+        height: 1px !important;
       }
       
       /* Hide all tips */
@@ -126,6 +149,8 @@ class ClippyManager {
         transition: transform 0.2s ease !important;
         will-change: transform, left, top !important;
         z-index: 2000 !important;
+        transform: translateZ(0) scale(0.9) !important;
+        backface-visibility: hidden !important;
       }
       
       /* CRITICAL: Ensure animations are visible */
@@ -182,6 +207,8 @@ class ClippyManager {
         visibility: visible !important;
         display: block !important;
         opacity: 1 !important;
+        transform: translateZ(0) !important;
+        backface-visibility: hidden !important;
       }
       
       /* Balloon tip */
@@ -279,6 +306,30 @@ class ClippyManager {
         cursor: pointer;
         align-self: flex-end;
       }
+      
+      /* Mobile optimizations */
+      @media (max-width: 768px) {
+        .clippy {
+          transform: scale(0.8) !important; /* Slightly smaller on mobile */
+        }
+        
+        .custom-clippy-balloon,
+        .custom-clippy-chat-balloon {
+          font-size: 14px !important; /* Larger text on mobile */
+          max-width: 280px !important; /* Wider balloons on mobile */
+        }
+        
+        .clippy-option-button {
+          padding: 6px 10px !important; /* Larger touch targets */
+          margin: 5px 5px 5px 0 !important;
+          min-width: 80px !important;
+        }
+        
+        .custom-clippy-balloon-close {
+          padding: 5px 8px !important;
+          font-size: 20px !important;
+        }
+      }
     `;
     document.head.appendChild(styleElement);
   }
@@ -329,6 +380,16 @@ class ClippyManager {
 
   // Ensure Clippy stays in fixed position on desktop and handle interactions
   enforceFixedPositionOnDesktop() {
+    // Check if positioning is already being enforced to prevent duplicate enforcement
+    if (isPositioningLocked) {
+      console.log(
+        "Positioning already being enforced, skipping duplicate call"
+      );
+      return;
+    }
+
+    isPositioningLocked = true;
+
     // Find Clippy but ensure we're getting the one inside our app
     const mainContainer =
       document.querySelector(".desktop.screen") ||
@@ -343,7 +404,13 @@ class ClippyManager {
     if (!clippyEl) {
       const allClippys = document.querySelectorAll(".clippy");
       if (allClippys.length === 0) {
-        setTimeout(this.enforceFixedPositionOnDesktop, 500);
+        // Try again later but don't retry excessively
+        if (!this._retryCount) this._retryCount = 0;
+        this._retryCount++;
+
+        if (this._retryCount < 5) {
+          setTimeout(this.enforceFixedPositionOnDesktop, 500);
+        }
         return;
       }
       clippyEl = allClippys[0];
@@ -364,197 +431,195 @@ class ClippyManager {
     clippyEl.style.pointerEvents = "none";
     clippyEl.style.zIndex = "2000";
 
-    // Create a clickable overlay that sits on top of Clippy to handle interactions
-    this.clippyOverlay = document.createElement("div");
-    this.clippyOverlay.id = "clippy-clickable-overlay";
-    this.clippyOverlay.style.position = "fixed";
-    this.clippyOverlay.style.left = `${rect.left}px`;
-    this.clippyOverlay.style.top = `${rect.top}px`;
-    this.clippyOverlay.style.width = `${rect.width}px`;
-    this.clippyOverlay.style.height = `${rect.height}px`;
-    this.clippyOverlay.style.zIndex = "2001";
-    this.clippyOverlay.style.cursor = "pointer";
+    // Create overlay if it doesn't exist
+    if (!this.clippyOverlay) {
+      this.clippyOverlay = document.createElement("div");
+      this.clippyOverlay.id = "clippy-clickable-overlay";
+      this.clippyOverlay.style.position = "fixed";
+      this.clippyOverlay.style.left = `${rect.left}px`;
+      this.clippyOverlay.style.top = `${rect.top}px`;
+      this.clippyOverlay.style.width = `${rect.width}px`;
+      this.clippyOverlay.style.height = `${rect.height}px`;
+      this.clippyOverlay.style.zIndex = "2001";
+      this.clippyOverlay.style.cursor = "pointer";
 
-    // Track clicks to distinguish between single and double clicks
-    let clickCount = 0;
+      // Track clicks to distinguish between single and double clicks
+      let clickCount = 0;
 
-    // Click handler with delayed execution
-    const handleClick = () => {
-      clickCount++;
+      // Click handler with delayed execution
+      const handleClick = () => {
+        clickCount++;
 
-      // Clear any existing timeout
-      if (this.clickTimeout) {
-        clearTimeout(this.clickTimeout);
-      }
-
-      // Set a new timeout to handle the click after a delay
-      this.clickTimeout = setTimeout(() => {
-        // Only handle single clicks
-        if (clickCount === 1) {
-          // We don't do anything for single clicks
+        // Clear any existing timeout
+        if (this.clickTimeout) {
+          clearTimeout(this.clickTimeout);
         }
+
+        // Set a new timeout to handle the click after a delay
+        this.clickTimeout = setTimeout(() => {
+          // Only handle single clicks
+          if (clickCount === 1) {
+            // We don't do anything for single clicks
+          }
+          clickCount = 0;
+        }, 300);
+      };
+
+      // Double-click handler
+      const handleDoubleClick = () => {
+        // Reset click count to prevent single-click handler from firing
         clickCount = 0;
-      }, 300);
-    };
-
-    // Double-click handler
-    const handleDoubleClick = () => {
-      // Reset click count to prevent single-click handler from firing
-      clickCount = 0;
-      if (this.clickTimeout) {
-        clearTimeout(this.clickTimeout);
-      }
-
-      // Handle double-click with animation then speech with options
-      if (window.clippy) {
-        console.log("Double clicked clippy overlay - playing animation");
-
-        // Use animations from content file
-        const animsArray = animations.greeting || [
-          "Greeting",
-          "Wave",
-          "Congratulate",
-          "GetAttention",
-        ];
-        const anim = animsArray[Math.floor(Math.random() * animsArray.length)];
-
-        // Force the clippy element to be visible - target the one inside our container
-        const mainContainer =
-          document.querySelector(".desktop.screen") ||
-          document.querySelector(".w98");
-        const clippyEl = mainContainer
-          ? mainContainer.querySelector(".clippy")
-          : document.querySelector(".clippy");
-
-        if (clippyEl) {
-          clippyEl.style.visibility = "visible";
-          clippyEl.style.opacity = "1";
-          clippyEl.style.display = "block";
-
-          // Find and make visible any SVG elements
-          const svgElements = clippyEl.querySelectorAll("svg");
-          if (svgElements.length > 0) {
-            svgElements.forEach((svg) => {
-              svg.style.visibility = "visible";
-              svg.style.opacity = "1";
-              svg.style.display = "inline";
-
-              // Make all SVG children visible too
-              Array.from(svg.querySelectorAll("*")).forEach((el) => {
-                el.style.visibility = "visible";
-                el.style.opacity = "1";
-                el.style.display = "inline";
-              });
-            });
-          }
+        if (this.clickTimeout) {
+          clearTimeout(this.clickTimeout);
         }
 
-        // Play animation first with a slight delay to ensure visibility
-        setTimeout(() => {
-          try {
-            window.clippy.play(anim);
-            console.log(`Animation started: ${anim}`);
-          } catch (e) {
-            console.error(`Error playing animation: ${anim}`, e);
+        // Handle double-click with animation then speech with options
+        if (window.clippy) {
+          console.log("Double clicked clippy overlay - playing animation");
+
+          // Use animations from content file
+          const animsArray = animations.greeting || [
+            "Greeting",
+            "Wave",
+            "Congratulate",
+            "GetAttention",
+          ];
+          const anim =
+            animsArray[Math.floor(Math.random() * animsArray.length)];
+
+          // Force the clippy element to be visible - target the one inside our container
+          const mainContainer =
+            document.querySelector(".desktop.screen") ||
+            document.querySelector(".w98");
+          const clippyEl = mainContainer
+            ? mainContainer.querySelector(".clippy")
+            : document.querySelector(".clippy");
+
+          if (clippyEl) {
+            clippyEl.style.visibility = "visible";
+            clippyEl.style.opacity = "1";
+            clippyEl.style.display = "block";
           }
 
-          // Then show custom balloon with speech and options
+          // Play animation first with a slight delay to ensure visibility
           setTimeout(() => {
-            // Pick a random interaction from content file
-            const interaction =
-              interactions[Math.floor(Math.random() * interactions.length)];
-            this.showCustomBalloon(
-              interaction.message,
-              false,
-              interaction.options
-            );
-          }, 800);
-        }, 50);
-      }
-    };
+            try {
+              window.clippy.play(anim);
+              console.log(`Animation started: ${anim}`);
+            } catch (e) {
+              console.error(`Error playing animation: ${anim}`, e);
+            }
 
-    // Right-click handler for chat
-    const handleRightClick = (e) => {
-      e.preventDefault(); // Prevent default context menu
+            // Then show custom balloon with speech and options
+            setTimeout(() => {
+              // Pick a random interaction from content file
+              const interaction =
+                interactions[Math.floor(Math.random() * interactions.length)];
+              this.showCustomBalloon(
+                interaction.message,
+                false,
+                interaction.options
+              );
+            }, 800);
+          }, 50);
+        }
+      };
 
-      if (window.clippy) {
-        // Force the clippy element to be visible first - target the one inside our container
-        const mainContainer =
-          document.querySelector(".desktop.screen") ||
-          document.querySelector(".w98");
-        const clippyEl = mainContainer
-          ? mainContainer.querySelector(".clippy")
-          : document.querySelector(".clippy");
+      // Right-click handler for chat
+      const handleRightClick = (e) => {
+        e.preventDefault(); // Prevent default context menu
 
-        if (clippyEl) {
-          clippyEl.style.visibility = "visible";
-          clippyEl.style.opacity = "1";
-          clippyEl.style.display = "block";
-
-          // Find and make visible any SVG elements
-          const svgElements = clippyEl.querySelectorAll("svg");
-          if (svgElements.length > 0) {
-            svgElements.forEach((svg) => {
-              svg.style.visibility = "visible";
-              svg.style.opacity = "1";
-              svg.style.display = "inline";
-
-              // Make all SVG children visible too
-              Array.from(svg.querySelectorAll("*")).forEach((el) => {
-                el.style.visibility = "visible";
-                el.style.opacity = "1";
-                el.style.display = "inline";
-              });
-            });
+        if (window.clippy) {
+          // Force the clippy element to be visible first
+          const clippyEl = document.querySelector(".clippy");
+          if (clippyEl) {
+            clippyEl.style.visibility = "visible";
+            clippyEl.style.opacity = "1";
+            clippyEl.style.display = "block";
           }
+
+          // Then play animation
+          try {
+            window.clippy.play("GetAttention");
+          } catch (e) {
+            console.error("Error playing GetAttention animation:", e);
+          }
+
+          // Show interactive chat balloon
+          setTimeout(() => {
+            this.showChatBalloon("How can I help you with Hydra 98 today?");
+          }, 500);
         }
+      };
 
-        // Then play animation
-        try {
-          window.clippy.play("GetAttention");
-        } catch (e) {
-          console.error("Error playing GetAttention animation:", e);
-        }
+      // Add the event listeners
+      this.clippyOverlay.addEventListener("click", handleClick);
+      this.clippyOverlay.addEventListener("dblclick", handleDoubleClick);
+      this.clippyOverlay.addEventListener("contextmenu", handleRightClick);
 
-        // Show interactive chat balloon
-        setTimeout(() => {
-          this.showChatBalloon("How can I help you with Hydra 98 today?");
-        }, 500);
-      }
-    };
-
-    // Add the event listeners
-    this.clippyOverlay.addEventListener("click", handleClick);
-    this.clippyOverlay.addEventListener("dblclick", handleDoubleClick);
-    this.clippyOverlay.addEventListener("contextmenu", handleRightClick);
-
-    // Add the overlay to the document
-    document.body.appendChild(this.clippyOverlay);
+      // Add the overlay to the document
+      document.body.appendChild(this.clippyOverlay);
+    }
 
     // Set up viewport scaling
     this.setupViewportScaling(clippyEl);
 
-    // Use a simple interval to keep Clippy and the overlay in the right position
-    this.clippyFixedInterval = setInterval(() => {
-      // Keep Clippy fixed in place
-      if (clippyEl) {
-        clippyEl.style.position = "fixed";
-        clippyEl.style.left = `${this.initialClippyPosition.left}px`;
-        clippyEl.style.top = `${this.initialClippyPosition.top}px`;
-        clippyEl.style.pointerEvents = "none";
+    // Cancel any existing animation frame
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+    }
+
+    // Store timing variables with better throttling for mobile
+    this.lastUpdateTime = 0;
+
+    // Flag to track if we're already updating position
+    let isUpdatingPosition = false;
+
+    const updateFrame = (timestamp) => {
+      // Only update if sufficient time has passed and we're not already updating
+      if (
+        !isUpdatingPosition &&
+        timestamp - this.lastUpdateTime >= this.updateInterval
+      ) {
+        isUpdatingPosition = true;
+
+        try {
+          // Keep Clippy fixed in place
+          if (clippyEl && this.initialClippyPosition) {
+            clippyEl.style.position = "fixed";
+            clippyEl.style.left = `${this.initialClippyPosition.left}px`;
+            clippyEl.style.top = `${this.initialClippyPosition.top}px`;
+            clippyEl.style.pointerEvents = "none";
+          }
+
+          // Keep the overlay aligned with Clippy
+          if (this.clippyOverlay && this.initialClippyPosition) {
+            this.clippyOverlay.style.left = `${this.initialClippyPosition.left}px`;
+            this.clippyOverlay.style.top = `${this.initialClippyPosition.top}px`;
+          }
+
+          // Reposition any visible balloon
+          if (this.customBalloon) {
+            this.positionCustomBalloon();
+          }
+        } catch (e) {
+          console.error("Error updating Clippy position:", e);
+        } finally {
+          isUpdatingPosition = false;
+          this.lastUpdateTime = timestamp;
+        }
       }
 
-      // Keep the overlay aligned with Clippy
-      if (this.clippyOverlay) {
-        this.clippyOverlay.style.left = `${this.initialClippyPosition.left}px`;
-        this.clippyOverlay.style.top = `${this.initialClippyPosition.top}px`;
-      }
+      this.rafId = requestAnimationFrame(updateFrame);
+    };
 
-      // Reposition any visible balloon
-      if (this.customBalloon) {
-        this.positionCustomBalloon();
-      }
-    }, 100);
+    this.rafId = requestAnimationFrame(updateFrame);
+
+    // Store reference for global cleanup
+    if (!window._clippyAnimationFrames) {
+      window._clippyAnimationFrames = [];
+    }
+    window._clippyAnimationFrames.push(this.rafId);
   }
 
   // Setup viewport scaling for Clippy
@@ -595,7 +660,7 @@ class ClippyManager {
     };
 
     // Create ResizeObserver
-    const resizeObserver = new ResizeObserver((entries) => {
+    const resizeObserver = new ResizeObserver(() => {
       updateClippyScale();
     });
 
@@ -656,7 +721,7 @@ class ClippyManager {
     const toggleBtn = document.createElement("button");
     toggleBtn.className = "clippy-toggle-input";
     toggleBtn.innerHTML = "Ask Clippy...";
-    toggleBtn.onclick = () => this.toggleInputArea(); // Ensure correct 'this' binding
+    toggleBtn.onclick = this.toggleInputArea;
 
     // Create input container (initially collapsed)
     const inputContainer = document.createElement("div");
@@ -726,11 +791,11 @@ class ClippyManager {
       response =
         "You can browse the web using Internet Explorer. Find it in the Start menu!";
     } else if (
-      textLower.includes("Hydra 98") ||
-      textLower.includes("Hydra98")
+      textLower.includes("hydra 98") ||
+      textLower.includes("hydra98")
     ) {
       response =
-        "Hydra 98 is a graphical operating system by Microsoft, released on June 25, 1998.";
+        "Hydra 98 is a Windows 98-themed web application that recreates the classic desktop experience in your browser.";
     }
 
     // Show response with custom balloon
@@ -850,7 +915,7 @@ class ClippyManager {
       {
         text: "Tell me about Hydra 98",
         response:
-          "Hydra 98 is a graphical operating system by Microsoft, released on June 25, 1998. It includes many new features like better USB support and Internet Explorer 4.0.",
+          "Hydra 98 is a web-based Windows 98 experience built with React. It recreates the classic desktop experience in your browser.",
       },
     ];
 
@@ -869,10 +934,17 @@ class ClippyManager {
 
   // Clean up all Clippy resources
   cleanup() {
-    // Clear intervals
-    if (this.clippyFixedInterval) {
-      clearInterval(this.clippyFixedInterval);
-      this.clippyFixedInterval = null;
+    // Cancel animation frame if running
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+
+      // Remove from global list
+      if (window._clippyAnimationFrames) {
+        window._clippyAnimationFrames = window._clippyAnimationFrames.filter(
+          (id) => id !== this.rafId
+        );
+      }
     }
 
     // Clear timeouts
@@ -906,9 +978,16 @@ class ClippyManager {
       }
     });
 
+    // Reset position lock
+    isPositioningLocked = false;
+
+    // Clear marker of running instance
+    delete window._clippyInstanceRunning;
+
     // Reset flags
     this.initialMessageShown = false;
     this.isInitialized = false;
+    this._retryCount = 0;
   }
 }
 

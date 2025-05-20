@@ -81,7 +81,11 @@ const ClippyProvider = ({
     };
 
     // Set up a periodic check for the black overlay visibility
-    const intervalId = setInterval(checkScreenPower, 500);
+    // Use less frequent checks on mobile
+    const intervalId = setInterval(
+      checkScreenPower,
+      isMobileRef.current ? 1000 : 500
+    );
 
     return () => clearInterval(intervalId);
   }, [isScreenPoweredOn]);
@@ -288,8 +292,21 @@ const ClippyProvider = ({
   };
 
   // Set assistantVisible to true when component mounts
+  // Only allow one Clippy to be initialized
   useEffect(() => {
+    if (window._clippyInitializing) {
+      return;
+    }
+
+    window._clippyInitializing = true;
+
+    // Set assistantVisible to true when component mounts
     setAssistantVisible(true);
+
+    return () => {
+      // Clear flag when unmounting
+      delete window._clippyInitializing;
+    };
   }, []);
 
   return (

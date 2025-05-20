@@ -1,10 +1,17 @@
 import React, { useEffect, useRef } from "react";
 
+// Mobile detection
+const isMobile =
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+
 /**
- * CustomBalloon component for Clippy speech - Updated with positioning fixes
+ * CustomBalloon component for Clippy speech - Updated with positioning fixes and mobile optimizations
  */
 const CustomBalloon = ({ message, position }) => {
   const balloonRef = useRef(null);
+  const positioningRafRef = useRef(null);
 
   // Add smooth fade-in animation and positioning
   useEffect(() => {
@@ -14,16 +21,26 @@ const CustomBalloon = ({ message, position }) => {
 
       // Position balloon correctly above Clippy's head
       const positionBalloon = () => {
+        // Cancel any existing animation frame
+        if (positioningRafRef.current) {
+          cancelAnimationFrame(positioningRafRef.current);
+        }
+
         const clippyElement = document.querySelector(".clippy");
         if (clippyElement) {
           const rect = clippyElement.getBoundingClientRect();
 
           // Center the balloon above Clippy's head
           const balloonWidth = balloonRef.current.offsetWidth;
-          const left = rect.left + rect.width / 2 - balloonWidth / 2;
 
-          // Position above with a gap
-          const top = rect.top - balloonRef.current.offsetHeight - 15;
+          // For mobile, position slightly more to the side to prevent edge clipping
+          const offsetX = isMobile ? 0 : rect.width / 2 - balloonWidth / 2;
+          const left = position?.left || rect.left + offsetX;
+
+          // Position above with a gap - bigger gap on mobile
+          const gap = isMobile ? 25 : 15;
+          const top =
+            position?.top || rect.top - balloonRef.current.offsetHeight - gap;
 
           balloonRef.current.style.left = `${left}px`;
           balloonRef.current.style.top = `${top}px`;
@@ -39,33 +56,40 @@ const CustomBalloon = ({ message, position }) => {
         balloonRef.current.style.opacity = "1";
       }, 10);
 
-      // Listen for clippy movement to reposition balloon
-      const handleClippyMove = () => {
-        positionBalloon();
+      // Optimize repositioning with requestAnimationFrame for smoother performance
+      let lastUpdateTime = 0;
+      const updateInterval = isMobile ? 500 : 100; // Less frequent updates on mobile
+
+      const updatePosition = (timestamp) => {
+        if (timestamp - lastUpdateTime >= updateInterval) {
+          positionBalloon();
+          lastUpdateTime = timestamp;
+        }
+        positioningRafRef.current = requestAnimationFrame(updatePosition);
       };
 
-      document.addEventListener("clippy-moved", handleClippyMove);
-      document.addEventListener("clippy-resize", handleClippyMove);
+      positioningRafRef.current = requestAnimationFrame(updatePosition);
 
       return () => {
-        document.removeEventListener("clippy-moved", handleClippyMove);
-        document.removeEventListener("clippy-resize", handleClippyMove);
+        if (positioningRafRef.current) {
+          cancelAnimationFrame(positioningRafRef.current);
+        }
       };
     }
-  }, []);
+  }, [position]);
 
-  // Basic balloon styles
+  // Basic balloon styles - optimized for mobile
   const balloonStyle = {
     position: "fixed",
     zIndex: 9999,
     backgroundColor: "#fffcde",
     border: "1px solid #000",
     borderRadius: "5px",
-    padding: "8px 12px",
-    maxWidth: "250px",
+    padding: isMobile ? "10px 14px" : "8px 12px", // Larger touch targets on mobile
+    maxWidth: isMobile ? "280px" : "250px", // Slightly wider on mobile
     boxShadow: "2px 2px 5px rgba(0,0,0,0.2)",
     fontFamily: "Tahoma, Arial, sans-serif",
-    fontSize: "12px",
+    fontSize: isMobile ? "14px" : "12px", // Larger text on mobile
     left: `${position.left}px`,
     top: `${position.top}px`,
     transition: "none",
@@ -78,6 +102,9 @@ const CustomBalloon = ({ message, position }) => {
     maxHeight: "none",
     scrollbarWidth: "none",
     msOverflowStyle: "none",
+    // Fix for iOS rendering
+    WebkitBackfaceVisibility: "hidden",
+    backfaceVisibility: "hidden",
   };
 
   // Balloon tip styles
@@ -104,15 +131,16 @@ const CustomBalloon = ({ message, position }) => {
     width: "0",
   };
 
-  // Close button style
+  // Close button style - larger on mobile
   const closeButtonStyle = {
     position: "absolute",
     top: "2px",
     right: "5px",
     cursor: "pointer",
     fontWeight: "bold",
-    fontSize: "16px",
+    fontSize: isMobile ? "20px" : "16px", // Larger on mobile for easier tapping
     color: "#666",
+    padding: isMobile ? "5px 8px" : "0", // Add padding for mobile touch target
   };
 
   return (
@@ -128,6 +156,10 @@ const CustomBalloon = ({ message, position }) => {
         onClick={() => {
           if (balloonRef.current && balloonRef.current.parentNode) {
             balloonRef.current.parentNode.removeChild(balloonRef.current);
+          }
+          // Clean up animation frame
+          if (positioningRafRef.current) {
+            cancelAnimationFrame(positioningRafRef.current);
           }
         }}
       >

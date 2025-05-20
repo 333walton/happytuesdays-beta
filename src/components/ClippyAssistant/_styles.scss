@@ -1,5 +1,29 @@
 /* CSS styles to ensure Clippy properly hides when screen power is off */
 
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  .clippy {
+    transform: scale(0.8) !important; /* Slightly smaller on mobile */
+  }
+
+  .custom-clippy-balloon,
+  .custom-clippy-chat-balloon {
+    font-size: 14px !important; /* Larger text on mobile */
+    max-width: 280px !important; /* Wider balloons on mobile */
+  }
+
+  .clippy-option-button {
+    padding: 6px 10px !important; /* Larger touch targets */
+    margin: 5px 5px 5px 0 !important;
+    min-width: 80px !important;
+  }
+
+  .custom-clippy-balloon-close {
+    padding: 5px 8px !important;
+    font-size: 20px !important;
+  }
+}
+
 /* Base Clippy styles */
 .clippy {
   position: fixed !important;
@@ -14,13 +38,21 @@
   opacity: 1 !important;
   display: block !important;
   pointer-events: none !important; /* Let overlay handle events */
+
+  /* Hardware acceleration for better performance on mobile */
+  transform: translateZ(0) scale(0.9) !important;
+  -webkit-transform: translateZ(0) scale(0.9) !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  perspective: 1000px !important;
+  -webkit-perspective: 1000px !important;
 }
 
 /* Fix for original clippy balloon */
 .clippy-balloon {
-  position: relative !important;
-  top: -400px !important;
-  left: 820px !important;
+  position: absolute !important;
+  top: -1000px !important; /* Position far off-screen to avoid any interaction */
+  left: -1000px !important;
   right: auto !important;
   bottom: auto !important;
   transform: none !important;
@@ -29,6 +61,8 @@
   visibility: hidden !important;
   display: none !important;
   pointer-events: none !important;
+  width: 1px !important;
+  height: 1px !important;
 }
 
 /* Hide all tips */
@@ -66,10 +100,17 @@
   display: block !important;
   opacity: 1 !important;
   transition: visibility 0.3s, opacity 0.3s !important;
+
+  /* Hardware acceleration */
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
-.custom-clippy-balloon::-webkit-scrollbar {
+.custom-clippy-balloon::-webkit-scrollbar,
+.custom-clippy-chat-balloon::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
@@ -124,13 +165,17 @@
   max-height: none !important;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
+
+  /* Hardware acceleration */
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.custom-clippy-chat-balloon::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
+/* Message container scrolling - smooth on mobile */
+.custom-clippy-chat-balloon > div:first-of-type {
+  -webkit-overflow-scrolling: touch !important;
 }
 
 /* Clickable overlay */
@@ -143,6 +188,9 @@
   visibility: visible !important;
   background: transparent !important;
   transition: visibility 0.3s !important;
+  /* Make touch target bigger on mobile */
+  min-width: 60px !important;
+  min-height: 60px !important;
 }
 
 /* CRITICAL: Animation fixes */

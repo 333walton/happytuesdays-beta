@@ -1,7 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 
+// Mobile detection
+const isMobile =
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+
 /**
  * Interactive chat balloon component for Clippy
+ * Optimized for mobile devices
  */
 const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
   const [messages, setMessages] = useState([
@@ -9,11 +16,60 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
   ]);
   const [inputValue, setInputValue] = useState("");
   const messageEndRef = useRef(null);
+  const balloonRef = useRef(null);
+  const positioningRafRef = useRef(null);
 
   // Scroll to bottom when messages change
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Handle positioning with requestAnimationFrame for better performance
+  useEffect(() => {
+    if (balloonRef.current) {
+      const positionBalloon = () => {
+        // Apply position from props
+        if (position) {
+          balloonRef.current.style.left = `${position.left}px`;
+          balloonRef.current.style.top = `${position.top}px`;
+        } else {
+          // Position relative to Clippy if no position provided
+          const clippyElement = document.querySelector(".clippy");
+          if (clippyElement) {
+            const rect = clippyElement.getBoundingClientRect();
+            const left = rect.left + rect.width / 2 - 110; // Center 220px wide balloon
+            const top = rect.top - 200; // Well above Clippy
+            balloonRef.current.style.left = `${left}px`;
+            balloonRef.current.style.top = `${top}px`;
+          }
+        }
+      };
+
+      // Initial positioning
+      positionBalloon();
+
+      // Set up continuous positioning with requestAnimationFrame
+      // Use less frequent updates on mobile
+      let lastUpdateTime = 0;
+      const updateInterval = isMobile ? 500 : 100;
+
+      const updatePosition = (timestamp) => {
+        if (timestamp - lastUpdateTime >= updateInterval) {
+          positionBalloon();
+          lastUpdateTime = timestamp;
+        }
+        positioningRafRef.current = requestAnimationFrame(updatePosition);
+      };
+
+      positioningRafRef.current = requestAnimationFrame(updatePosition);
+
+      return () => {
+        if (positioningRafRef.current) {
+          cancelAnimationFrame(positioningRafRef.current);
+        }
+      };
+    }
+  }, [position]);
 
   const handleSend = () => {
     if (inputValue.trim() === "") return;
@@ -38,18 +94,19 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
     }
   };
 
+  // Optimized balloon style for mobile
   const balloonStyle = {
     position: "fixed",
     zIndex: 9999,
     backgroundColor: "#fffcde",
     border: "1px solid #000",
     borderRadius: "5px",
-    padding: "8px",
-    width: "220px",
-    height: "180px",
+    padding: isMobile ? "10px" : "8px",
+    width: isMobile ? "260px" : "220px",
+    height: isMobile ? "220px" : "180px",
     boxShadow: "2px 2px 5px rgba(0,0,0,0.2)",
     fontFamily: "Tahoma, Arial, sans-serif",
-    fontSize: "12px",
+    fontSize: isMobile ? "14px" : "12px",
     left: `${position.left}px`,
     top: `${position.top}px`,
     display: "flex",
@@ -58,6 +115,9 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
     animation: "none",
     visibility: "visible",
     opacity: 1,
+    // Fix for iOS rendering
+    WebkitBackfaceVisibility: "hidden",
+    backfaceVisibility: "hidden",
   };
 
   const messageContainerStyle = {
@@ -65,6 +125,7 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
     overflowY: "auto",
     marginBottom: "5px",
     padding: "5px",
+    WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
   };
 
   const inputContainerStyle = {
@@ -76,8 +137,8 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
   const inputStyle = {
     flex: 1,
     border: "1px solid #999",
-    padding: "4px",
-    fontSize: "12px",
+    padding: isMobile ? "6px" : "4px",
+    fontSize: isMobile ? "14px" : "12px",
     fontFamily: "Tahoma, Arial, sans-serif",
     borderRadius: "3px",
     marginRight: "5px",
@@ -86,11 +147,12 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
   const buttonStyle = {
     background: "#d4d0c8",
     border: "1px solid #888",
-    padding: "2px 8px",
-    borderRadius: "2px",
+    padding: isMobile ? "4px 10px" : "2px 8px",
+    borderRadius: "3px",
     fontFamily: "Tahoma, Arial, sans-serif",
-    fontSize: "12px",
+    fontSize: isMobile ? "14px" : "12px",
     cursor: "pointer",
+    minWidth: isMobile ? "60px" : "auto", // Larger touch target on mobile
   };
 
   const closeButtonStyle = {
@@ -98,11 +160,11 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
     top: "2px",
     right: "2px",
     cursor: "pointer",
-    fontSize: "12px",
+    fontSize: isMobile ? "20px" : "12px",
     fontWeight: "bold",
     background: "none",
     border: "none",
-    padding: "2px 5px",
+    padding: isMobile ? "5px 8px" : "2px 5px",
   };
 
   const clippyMessageStyle = {
@@ -149,9 +211,25 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
     zIndex: 9997,
   };
 
+  const handleClose = () => {
+    // Clean up animation frame
+    if (positioningRafRef.current) {
+      cancelAnimationFrame(positioningRafRef.current);
+    }
+
+    // Call onClose handler
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <div style={balloonStyle} className="custom-clippy-chat-balloon">
-      <button style={closeButtonStyle} onClick={onClose}>
+    <div
+      ref={balloonRef}
+      style={balloonStyle}
+      className="custom-clippy-chat-balloon"
+    >
+      <button style={closeButtonStyle} onClick={handleClose}>
         ×
       </button>
 

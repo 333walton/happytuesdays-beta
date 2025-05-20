@@ -24,6 +24,11 @@ const helpMessages = {
   default: { text: "Need help?", animation: "Greeting" },
 };
 
+// Define the variables that were referenced but not defined
+// These should match the ones in ClippyController.js and ClippyManager.js
+let isAnimationPlaying = false;
+let isPositioningLocked = false;
+
 /**
  * Check if Clippy is available
  */
@@ -144,7 +149,11 @@ const hideBalloon = () => {
  * Play an animation
  * @param {string} animation - The animation name
  */
+// Update the play method to include throttling
 const play = (animation) => {
+  // If we're in emergency mode, don't allow animations
+  if (window._clippyEmergencyReset) return false;
+
   // Force Clippy element to be visible first
   if (typeof window !== "undefined") {
     const clippyEl = document.querySelector(".clippy");
@@ -160,69 +169,15 @@ const play = (animation) => {
           svg.style.visibility = "visible";
           svg.style.opacity = "1";
           svg.style.display = "inline";
-
-          // Make all SVG children visible too
-          Array.from(svg.querySelectorAll("*")).forEach((el) => {
-            el.style.visibility = "visible";
-            el.style.opacity = "1";
-            el.style.display = "inline";
-          });
         });
       }
     }
   }
 
-  // Apply temporary animation fix
-  const fixStyle = document.createElement("style");
-  fixStyle.id = "clippy-anim-fix-temp";
-  fixStyle.textContent = `
-      .clippy * {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-      }
-      
-      .clippy-animate,
-      .clippy-animate * {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-        animation: auto !important;
-      }
-  
-      /* Animation fixes from ClippyTS */
-      .clippy .maps {
-        position: relative !important;
-        width: 100% !important;
-        height: 100% !important;
-      }
-  
-      .clippy .map {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-        height: 100% !important;
-        width: 100% !important;
-        display: none !important;
-      }
-  
-      .clippy .map.animate {
-        display: block !important;
-      }
-    `;
-  document.head.appendChild(fixStyle);
-
   // Play animation with small delay
   setTimeout(() => {
     executeIfAvailable(() => window.clippy.play(animation));
   }, 50);
-
-  // Remove the style after animation
-  setTimeout(() => {
-    if (fixStyle.parentNode) {
-      fixStyle.parentNode.removeChild(fixStyle);
-    }
-  }, 3000);
 
   return true;
 };
@@ -452,7 +407,127 @@ const debug = () => {
   return "Clippy debug complete. Check console for details.";
 };
 
-// Export the service
+/**
+ * Emergency reset function to completely remove all Clippy instances and clean up
+ */
+const emergencyReset = () => {
+  console.log("Emergency Clippy reset initiated");
+
+  // Flag to track if we're in emergency mode
+  window._clippyEmergencyReset = true;
+
+  // Reset animation and positioning flags
+  isAnimationPlaying = false;
+  isPositioningLocked = false;
+
+  // Stop all animation frames
+  if (window._clippyAnimationFrames) {
+    window._clippyAnimationFrames.forEach((id) => {
+      cancelAnimationFrame(id);
+    });
+    window._clippyAnimationFrames = [];
+  }
+
+  // Reset all global flags
+  delete window._clippyInstanceRunning;
+  delete window._clippyInitializing;
+
+  // Clear all timeouts and intervals
+  const highestTimeoutId = setTimeout(() => {}, 0);
+  for (let i = 0; i < highestTimeoutId; i++) {
+    clearTimeout(i);
+    clearInterval(i);
+  }
+
+  // Remove all Clippy-related DOM elements
+  const clippyElements = document.querySelectorAll(".clippy");
+  clippyElements.forEach((el) => {
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+  });
+
+  // Remove overlays
+  const overlays = document.querySelectorAll("#clippy-clickable-overlay");
+  overlays.forEach((el) => {
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+  });
+
+  // Remove balloons
+  const balloons = document.querySelectorAll(
+    ".clippy-balloon, .custom-clippy-balloon, .custom-clippy-chat-balloon"
+  );
+  balloons.forEach((el) => {
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+  });
+
+  // Remove any Clippy-related styles
+  const styles = document.querySelectorAll('style[id^="clippy-"]');
+  styles.forEach((el) => {
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+  });
+
+  // Reset all Clippy-related globals
+  window.clippy = null;
+  window.setAssistantVisible = null;
+  window.setCurrentAgent = null;
+  window.setClippyPosition = null;
+  window.setClippyInitialPosition = null;
+  window.getClippyInstance = null;
+  window.showClippyCustomBalloon = null;
+  window.hideClippyCustomBalloon = null;
+  window.showClippyChatBalloon = null;
+
+  // Clear the emergency flag after 3 seconds
+  setTimeout(() => {
+    delete window._clippyEmergencyReset;
+  }, 3000);
+
+  return "Clippy emergency reset complete. Refresh the page to restart with a clean slate.";
+};
+
+/**
+ * More aggressive kill switch for unresponsive situations
+ */
+const killClippy = () => {
+  try {
+    // Immediately remove all Clippy elements from DOM
+    const elements = document.querySelectorAll(
+      ".clippy, #clippy-clickable-overlay, .clippy-balloon, .custom-clippy-balloon, .custom-clippy-chat-balloon"
+    );
+    elements.forEach((el) => el.parentNode && el.parentNode.removeChild(el));
+
+    // Remove all Clippy styles
+    const styles = document.querySelectorAll('style[id^="clippy-"]');
+    styles.forEach((el) => el.parentNode && el.parentNode.removeChild(el));
+
+    // Nullify all Clippy-related globals
+    for (const key in window) {
+      if (key.toLowerCase().includes("clippy")) {
+        window[key] = null;
+      }
+    }
+
+    return "Clippy killed. Refresh the page to start over.";
+  } catch (e) {
+    console.error("Error during emergency kill:", e);
+    return "Error killing Clippy. Try refreshing the page.";
+  }
+};
+
+// Expose these globally
+if (typeof window !== "undefined") {
+  window.resetClippy = emergencyReset;
+  window.killClippy = killClippy;
+}
+
+// Export the updated service
 const ClippyService = {
   isAvailable,
   show,
@@ -468,6 +543,8 @@ const ClippyService = {
   showHelpForWindow,
   handleWindowHelp: showHelpForWindow, // Alias for backward compatibility
   debug,
+  emergencyReset,
+  killClippy,
 };
 
 export default ClippyService;
