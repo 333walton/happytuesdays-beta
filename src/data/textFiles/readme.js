@@ -2,60 +2,73 @@ const generateRows = () => {
   const rows = [
     {
       title: "Intro",
-      image: "https://appstickers-cdn.appadvice.com/1164831016/819286823/18ab4614722102b2a0def24dda1ea4bd-1.gif",
+      image:
+        "//appstickers-cdn.appadvice.com/1164831016/819286823/18ab4614722102b2a0def24dda1ea4bd-1.gif",
       content: `
-        Hydra98 is a web-based Windows 98-style desktop and creative sandbox, built with React and modern web technologies. It's a fun experiment blending classic computing nostalgia with modern interactivity, featuring apps, customization, ASCII art, and DOS-style gaming.
-        <br><br>
-        Future updates will bring web3 integrations, more mini apps, and a clippy-style help-bot. Stay tuned!
-      `
+        <div class="intro-paragraph">
+          Hydra98 is a React-based application that faithfully recreates the nostalgic Windows 98 desktop experience for the modern web. It's a fun experiment blending classic computing aesthetics with modern interactivity, featuring interactive windows, authentic styling, and retro applications.
+          <br><br>
+          This digital time capsule delivers an immersive computing experience that's both nostalgic and accessible across different devices. More features coming soon!
+        </div>
+      `,
     },
     {
       title: "Features",
-      image: "http://clipart-library.com/image_gallery/91835.jpg",
+      image: "//clipart-library.com/image_gallery/91835.jpg",
       content: `
+      <div class="intro-paragraph">
         <ul>
-          <li>Windows 98 UI with authentic styling</li>
+          <li>Complete Windows 98 Desktop with authentic styling</li>
+          <li>Window Management (open, close, minimize, maximize, resize)</li>
           <li>Classic Windows 'start' & 'shutdown' sequences</li>
-          <li>Control Panel settings for screen sizes, themes, and more</li>
-          <li>Resizable Windows & Desktop Interface</li>
-          <li><b>Apps:</b> Notepad, Paint, DOOM, IE, ASCII</li>
-          <li><b>Customization:</b> Add wallpapers & change themes</li>
-          <li><b>File Saving:</b> Save Game, Paint and Notepad files for later</li>
-          <li>Runs Doom</li>
+          <li>Responsive design for desktop and mobile</li>
+          <li><b>Apps:</b> Notepad, Paint, DOOM, Internet Explorer, Command Prompt</li>
+          <li><b>Customization:</b> Wallpapers, themes, display settings</li>
+          <li><b>File Saving:</b> LocalStorage persistence for your digital artifacts</li>
+          <li>CRT Effect toggle for that authentic retro feel</li>
         </ul>
-      `
+        </div>
+      `,
     },
     {
       title: "FAQ",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRX6w3EFRXeOcn6IvxIHNU8S7NU-HNKLtJd8CBYvAiuWZzbu0xNDvBFubV",
+      image:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRX6w3EFRXeOcn6IvxIHNU8S7NU-HNKLtJd8CBYvAiuWZzbu0xNDvBFubV",
+      //image: "../../assets/faq.png",
       content: `
+      <div class="intro-paragraph">
         <ul>
-          <li><b>Why does the screen flicker?</b><br> → That's a CRT effect to make it feel like an old-school monitor! If you feel a seizure coming on, you can adjust it in Control Panel settings.</li>
-          <li><b>Why is the screen size weird?</b><br> → Because monitors were square (4:3 aspect ratio) in the 90s. Start > Settings > Control Panel to adjust.</li>
-          <li><b>Can I delete files?</b><br> → Not yet! But if you're really determined, you can clear your browser's local storage and pretend you're a 90s IT pro.</li>
-          <li><b>Can I play the launch screen again?</b><br> → Yes, just go through the shutdown sequence, and you'll see it again on refresh.</li>
+          <li><b>Why does the screen flicker?</b><br> → That's the CRT effect simulating an old-school monitor! You can adjust or disable it in the Control Panel settings.</li>
+          <li><b>Why is the screen size weird?</b><br> → Monitors were square (4:3 aspect ratio) in the 90s. Visit Start > Settings > Control Panel to adjust scaling.</li>
+          <li><b>Can I delete files?</b><br> → Not yet! But clearing your browser's local storage gives you that authentic "I just reinstalled Windows" feeling.</li>
+          <li><b>Can I see the launch screen again?</b><br> → Just go through the shutdown sequence, and it'll appear on refresh.</li>
         </ul>
-      `
+        </div>
+      `,
     },
     {
-      title: "Technical Stuff",
-      image: "https://i.imgur.com/PcmaUvV.png",
+      title: "Tech",
+      image: "/static/cryptopunk.jpg",
       content: `
+      <div class="intro-paragraph">
         <ul>
           <li>Built with React & Context API for state management</li>
-          <li>Dynamic window management via React-RND</li>
-          <li>In-browser gaming via WebAssembly</li>
-          <li>Data persistence via LocalStorage for saving files and preferences</li>
+          <li>Packard Belle & React95 UI libraries for authentic components</li>
+          <li>CSS Modules & Styled Components for Windows 98 aesthetic</li>
+          <li>react-rnd for window resizing and dragging functionality</li>
+          <li>Organized component structure for maximum maintainability</li>
         </ul>
-      `
+        </div>
+      `,
     },
     {
-      title: "Goals",
-      image: "http://clipart-library.com/img/1577254.png",
+      title: "About",
+      image: "//clipart-library.com/img/1577254.png",
       content: `
-        <ul style="margin-bottom: 0;">
-          <li>To the moon</li>
-        </ul><pre style="font-family: 'Courier New', monospace; margin-top: 0;"><code>
+      <div class="intro-paragraph">
+        <p>Developed with a thoughtful architecture emphasizing component reusability, authentic styling, and interactive window management. Created by a developer with a passion for merging past aesthetics with modern web capabilities.</p>
+        <p>Perfect for nostalgic browsing or as a technical showcase of advanced UI/UX patterns in React.</p>
+        <pre style="font-family: 'Courier New', monospace; margin-top: 0;"><code>
                                🌕
                          🚀
                      .
@@ -69,18 +82,21 @@ const generateRows = () => {
     .
  💥
         </code></pre>
-      `
-    }
+      </div>
+      `,
+    },
   ];
 
   return rows
     .map(
-      r => `
+      (r) => `
         <tr>
-          <td bgcolor="black" width="80px" align="right">
-            <font color="white" id="introduction">
+          <td bgcolor="black" width="80px" align="right" class="title-cell">
+            <font color="white" id="introduction" class="title-text">
               ${r.title}<br/>
-              <img src="${r.image}" width="60px" />
+              <img src="${r.image}" width="60px" class="${
+        r.title === "Intro" ? "hamster-gif" : ""
+      }" />
             </font>
           </td>
           <td bgcolor="lightgrey">
@@ -96,23 +112,23 @@ const marqueeGen = () =>
   [
     {
       href: "https://www.w3schools.com/code/tryit.asp?filename=GL3DXQD5BRPJ",
-      title: "Source Code"
+      title: "Source Code",
     },
     {
       href: "https://react95.github.io/React95",
-      title: "Component Library"
+      title: "Component Library",
     },
     {
       href: "https://www.muse.place/moonwalkervault-steven",
-      title: "HQ"
+      title: "HQ",
     },
     {
       href: "https://buymeacoffee.com/",
-      title: "Coffee?"
+      title: "Coffee?",
     },
   ]
     .map(
-      l =>
+      (l) =>
         `<a href="${l.href}" target="_blank" class="marquee-link">${l.title}</a>`
     )
     .join(" | ");
@@ -131,6 +147,21 @@ font * {
 @media (max-width: 768px) {
   font *, .marquee-link {
     font-family: 'Comic Neue' !important;
+    font-weight: bold;
+  }
+  
+  /* Override only for .intro-paragraph */
+  .intro-paragraph {
+    font-stretch: condensed !important;
+    font-size: 0.92em !important;
+    line-height: 1.35 !important;
+    letter-spacing: 0.03em !important;
+    color: rgba(0, 0, 0, 0.83) !important;
+  }
+  
+  /* Fix for title text color on mobile */
+  .title-text {
+    color: white !important;
   }
 }
 
@@ -172,10 +203,20 @@ marquee {
   width: 100%;
   overflow: hidden;
   background-color: red;
-  color: white;
   padding: 4px 0;
 }
 
+/* Marquee links must be white on ALL devices */
+.marquee-link {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  text-decoration: none;
+  color: white !important; /* Added !important to override any browser defaults */
+  cursor: pointer !important;
+  padding: 0 10px;
+}
+
+/* Add back other marquee styles */
 /* Improved marquee behavior - enable CSS-based animation as a fallback */
 @supports (animation: marquee 15s linear infinite) {
   marquee:not(.native-marquee) {
@@ -206,15 +247,6 @@ marquee {
   }
 }
 
-.marquee-link {
-  font-size: 17px !important;
-  font-weight: bold !important;
-  text-decoration: none;
-  color: white;
-  cursor: pointer !important;
-  padding: 0 10px;
-}
-
 /* Add hover pause functionality */
 marquee:hover {
   -webkit-animation-play-state: paused;
@@ -229,7 +261,7 @@ marquee:hover {
 
 <font size="4">
   <div class="marquee-container">
-    <marquee class="native-marquee" bgcolor="red" behavior="scroll" direction="left" scrollamount="4.4" onmouseover="this.stop();" onmouseout="this.start();">
+    <marquee id="scrollMarquee" class="native-marquee" bgcolor="red" behavior="scroll" direction="left" scrollamount="4.4" onmouseover="this.stop();" onmouseout="this.start();">
       <span>
         ${marqueeGen()}
       </span>
@@ -247,13 +279,14 @@ marquee:hover {
     <tbody valign="top">
       ${generateRows()}
     </tbody>
-    <tfoot valign="top">
-      <tr><td>(c)2025</td>
-      <td>
-      <blink>
-      <img align="right" width="200px" src="" />
-      </blink>
-      </td></tr>
+    <tfoot valign="bottom">
+      <tr>
+        <td>&copy;2025</td>
+        <td colspan="1" bgcolor="grey" height="18px" valign="middle">
+          <div style="text-align: center;">
+            <img id="constructionImg" src="/static/underconstruction.gif" alt="Soon" title="Soon™" style="width: 30px; vertical-align: middle;" />
+        </td>
+      </tr>
     </tfoot>
   </table>
 </font>
