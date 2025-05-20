@@ -149,7 +149,7 @@ const hideBalloon = () => {
  * Play an animation
  * @param {string} animation - The animation name
  */
-// Update the play method to include throttling
+// Replace the play function in ClippyService.js
 const play = (animation) => {
   // If we're in emergency mode, don't allow animations
   if (window._clippyEmergencyReset) return false;
@@ -174,9 +174,22 @@ const play = (animation) => {
     }
   }
 
+  // Temporarily unlock positioning to ensure animations work
+  const wasPositionLocked = window._clippyPositionLocked;
+  if (wasPositionLocked) {
+    window._clippyPositionLocked = false;
+  }
+
   // Play animation with small delay
   setTimeout(() => {
     executeIfAvailable(() => window.clippy.play(animation));
+
+    // Re-lock position after a delay to let animation complete
+    if (wasPositionLocked) {
+      setTimeout(() => {
+        window._clippyPositionLocked = true;
+      }, 2000); // Allow 2 seconds for animation to complete
+    }
   }, 50);
 
   return true;

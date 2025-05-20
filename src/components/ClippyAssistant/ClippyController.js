@@ -275,7 +275,7 @@ const ClippyController = ({
     }
   }, [desktopRectRef]);
 
-  // Handle interactions for Clippy using our custom balloon
+  // Replace the entire handleClippyInteraction function in ClippyController.js
   const handleClippyInteraction = useCallback(() => {
     if (!clippy || !isScreenPoweredOn) return; // Don't interact when screen is off
 
@@ -310,6 +310,12 @@ const ClippyController = ({
       });
     }
 
+    // Temporarily unlock positioning during animation to ensure animations work
+    const wasPositionLocked = window._clippyPositionLocked;
+    if (wasPositionLocked) {
+      window._clippyPositionLocked = false;
+    }
+
     // Play animation with slight delay to ensure visibility
     setTimeout(() => {
       // List of common animations that work well
@@ -321,20 +327,20 @@ const ClippyController = ({
       const fixStyle = document.createElement("style");
       fixStyle.id = "clippy-temp-fix";
       fixStyle.textContent = `
-        .clippy * {
-          visibility: visible !important;
-          opacity: 1 !important;
-          display: block !important;
-        }
-        
-        .clippy-animate,
-        .clippy-animate * {
-          visibility: visible !important;
-          opacity: 1 !important;
-          display: block !important;
-          animation: auto !important;
-        }
-      `;
+      .clippy * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+      }
+      
+      .clippy-animate,
+      .clippy-animate * {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+        animation: auto !important;
+      }
+    `;
       document.head.appendChild(fixStyle);
 
       console.log(`Playing animation: ${randomAnim}`);
@@ -349,6 +355,11 @@ const ClippyController = ({
       setTimeout(() => {
         if (fixStyle.parentNode) {
           fixStyle.parentNode.removeChild(fixStyle);
+        }
+
+        // Re-lock position after animation completes
+        if (wasPositionLocked) {
+          window._clippyPositionLocked = true;
         }
       }, 3000);
 
@@ -872,6 +883,7 @@ const ClippyController = ({
   }, [clippy, setPosition, isScreenPoweredOn]);
 
   // Handle window resize - Keep Clippy at bottom right with requestAnimationFrame
+  // Find this in ClippyController.js around line 890-930
   useEffect(() => {
     const updatePositionFrame = (timestamp) => {
       // Significantly reduce updates on mobile
@@ -882,7 +894,11 @@ const ClippyController = ({
           const desktopElement =
             desktopViewportRef.current || document.querySelector(".w98");
 
-          if (desktopElement && !isAnimationPlaying) {
+          if (
+            desktopElement &&
+            !isAnimationPlaying &&
+            !window._clippyPositionLocked
+          ) {
             const desktopRect = desktopElement.getBoundingClientRect();
             const agentElement = document.querySelector(".clippy");
 
@@ -895,22 +911,36 @@ const ClippyController = ({
               const absoluteX = desktopRect.left + posX;
               const absoluteY = desktopRect.top + posY;
 
-              agentElement.style.left = `${absoluteX}px`;
-              agentElement.style.top = `${absoluteY}px`;
-
-              // Update overlay position too
-              const overlay = document.getElementById(
-                "clippy-clickable-overlay"
-              );
-              if (overlay) {
-                overlay.style.left = `${absoluteX}px`;
-                overlay.style.top = `${absoluteY}px`;
-                overlay.style.width = `${agentElement.offsetWidth}px`;
-                overlay.style.height = `${agentElement.offsetHeight}px`;
+              // Store last position to detect significant changes
+              if (!window._lastClippyPosition) {
+                window._lastClippyPosition = { x: absoluteX, y: absoluteY };
               }
 
-              // Update position state (less frequently)
-              setPosition({ x: posX, y: posY });
+              // Only update if position changed significantly (by more than 2px)
+              const xDiff = Math.abs(window._lastClippyPosition.x - absoluteX);
+              const yDiff = Math.abs(window._lastClippyPosition.y - absoluteY);
+
+              if (xDiff > 2 || yDiff > 2) {
+                agentElement.style.left = `${absoluteX}px`;
+                agentElement.style.top = `${absoluteY}px`;
+
+                // Update overlay position too
+                const overlay = document.getElementById(
+                  "clippy-clickable-overlay"
+                );
+                if (overlay) {
+                  overlay.style.left = `${absoluteX}px`;
+                  overlay.style.top = `${absoluteY}px`;
+                  overlay.style.width = `${agentElement.offsetWidth}px`;
+                  overlay.style.height = `${agentElement.offsetHeight}px`;
+                }
+
+                // Save new position
+                window._lastClippyPosition = { x: absoluteX, y: absoluteY };
+
+                // Update position state (less frequently)
+                setPosition({ x: posX, y: posY });
+              }
             }
           }
         }

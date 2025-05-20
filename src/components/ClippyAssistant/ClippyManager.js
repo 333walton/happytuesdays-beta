@@ -501,6 +501,12 @@ class ClippyManager {
             clippyEl.style.display = "block";
           }
 
+          // Temporarily unlock positioning to ensure animations work properly
+          const wasPositionLocked = window._clippyPositionLocked;
+          if (wasPositionLocked) {
+            window._clippyPositionLocked = false;
+          }
+
           // Play animation first with a slight delay to ensure visibility
           setTimeout(() => {
             try {
@@ -508,6 +514,13 @@ class ClippyManager {
               console.log(`Animation started: ${anim}`);
             } catch (e) {
               console.error(`Error playing animation: ${anim}`, e);
+            }
+
+            // Re-lock position after a delay to let animation complete
+            if (wasPositionLocked) {
+              setTimeout(() => {
+                window._clippyPositionLocked = true;
+              }, 2000); // Allow 2 seconds for animation to complete
             }
 
             // Then show custom balloon with speech and options
@@ -574,6 +587,10 @@ class ClippyManager {
 
     // Flag to track if we're already updating position
     let isUpdatingPosition = false;
+
+    // Set a global position lock to prevent ClippyController from also updating position
+    // This prevents the two positioning systems from fighting with each other
+    window._clippyPositionLocked = true;
 
     const updateFrame = (timestamp) => {
       // Only update if sufficient time has passed and we're not already updating
@@ -980,6 +997,7 @@ class ClippyManager {
 
     // Reset position lock
     isPositioningLocked = false;
+    window._clippyPositionLocked = false;
 
     // Clear marker of running instance
     delete window._clippyInstanceRunning;
