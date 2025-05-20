@@ -1,5 +1,9 @@
-const generateRows = () => {
-  const rows = [
+// Windows 98 README Component
+// This file contains a single clean export with no duplicated code
+
+// Create README content objects
+const readmeContent = {
+  rows: [
     {
       title: "Intro",
       image:
@@ -34,7 +38,6 @@ const generateRows = () => {
       title: "FAQ",
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRX6w3EFRXeOcn6IvxIHNU8S7NU-HNKLtJd8CBYvAiuWZzbu0xNDvBFubV",
-      //image: "../../assets/faq.png",
       content: `
       <div class="intro-paragraph">
         <ul>
@@ -85,8 +88,30 @@ const generateRows = () => {
       </div>
       `,
     },
-  ];
+  ],
 
+  marqueeLinks: [
+    {
+      href: "https://www.w3schools.com/code/tryit.asp?filename=GL3DXQD5BRPJ",
+      title: "Source Code",
+    },
+    {
+      href: "https://react95.github.io/React95",
+      title: "Component Library",
+    },
+    {
+      href: "https://www.muse.place/moonwalkervault-steven",
+      title: "HQ",
+    },
+    {
+      href: "https://buymeacoffee.com/",
+      title: "Coffee?",
+    },
+  ],
+};
+
+// Helper function to generate HTML for rows
+const generateTableRows = (rows) => {
   return rows
     .map(
       (r) => `
@@ -108,32 +133,22 @@ const generateRows = () => {
     .join("");
 };
 
-const marqueeGen = () =>
-  [
-    {
-      href: "https://www.w3schools.com/code/tryit.asp?filename=GL3DXQD5BRPJ",
-      title: "Source Code",
-    },
-    {
-      href: "https://react95.github.io/React95",
-      title: "Component Library",
-    },
-    {
-      href: "https://www.muse.place/moonwalkervault-steven",
-      title: "HQ",
-    },
-    {
-      href: "https://buymeacoffee.com/",
-      title: "Coffee?",
-    },
-  ]
+// Helper function to generate marquee links
+const generateMarqueeLinks = (links) => {
+  return links
     .map(
       (l) =>
         `<a href="${l.href}" target="_blank" class="marquee-link">${l.title}</a>`
     )
     .join(" | ");
+};
 
-const readmeHTML = `
+// Main function to generate the complete HTML
+const generateReadmeHTML = () => {
+  const tableRows = generateTableRows(readmeContent.rows);
+  const marqueeLinks = generateMarqueeLinks(readmeContent.marqueeLinks);
+
+  return `
 <style>
 /* Import Comic Neue for mobile devices */
 @import url('https://fonts.googleapis.com/css2?family=Comic+Neue&display=swap');
@@ -158,11 +173,18 @@ font * {
     letter-spacing: 0.03em !important;
     color: rgba(0, 0, 0, 0.83) !important;
   }
-  
-  /* Fix for title text color on mobile */
-  .title-text {
-    color: white !important;
-  }
+}
+
+/* Explicit color overrides - specifically target iOS Safari */
+.title-text {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+}
+
+/* Additional override for iOS Safari and other stubborn browsers */
+td[bgcolor="black"] font[color="white"] {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
 }
 
 blink {
@@ -212,8 +234,19 @@ marquee {
   font-weight: 600 !important;
   text-decoration: none;
   color: white !important; /* Added !important to override any browser defaults */
+  -webkit-text-fill-color: white !important; /* For iOS Safari */
   cursor: pointer !important;
   padding: 0 10px;
+  text-shadow: 0 0 0 white !important; /* Additional override for stubborn browsers */
+}
+
+/* Force all links in the marquee to be white */
+marquee a, 
+#scrollMarquee a,
+marquee a:link,
+marquee a:visited {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
 }
 
 /* Add back other marquee styles */
@@ -262,8 +295,8 @@ marquee:hover {
 <font size="4">
   <div class="marquee-container">
     <marquee id="scrollMarquee" class="native-marquee" bgcolor="red" behavior="scroll" direction="left" scrollamount="4.4" onmouseover="this.stop();" onmouseout="this.start();">
-      <span>
-        ${marqueeGen()}
+      <span style="color: white !important; -webkit-text-fill-color: white !important;">
+        ${marqueeLinks}
       </span>
     </marquee>
   </div>
@@ -277,7 +310,7 @@ marquee:hover {
       </tr>
     </thead>
     <tbody valign="top">
-      ${generateRows()}
+      ${tableRows}
     </tbody>
     <tfoot valign="bottom">
       <tr>
@@ -285,11 +318,17 @@ marquee:hover {
         <td colspan="1" bgcolor="grey" height="18px" valign="middle">
           <div style="text-align: center;">
             <img id="constructionImg" src="/static/underconstruction.gif" alt="Soon" title="Soon™" style="width: 30px; vertical-align: middle;" />
+          </div>
         </td>
       </tr>
     </tfoot>
   </table>
 </font>
 `;
+};
 
+// Generate the final HTML
+const readmeHTML = generateReadmeHTML();
+
+// Export a single default
 export default readmeHTML;
