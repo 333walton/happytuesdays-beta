@@ -10,34 +10,51 @@
 
 /* Mobile-specific optimizations */
 @media (max-width: 768px) {
-  .clippy {
+  /* Clippy-specific styles */
+  .clippy[class] {
     transform: scale(0.8) !important; /* Smaller on mobile */
     transform-origin: center bottom !important;
   }
 
-  .custom-clippy-balloon,
-  .custom-clippy-chat-balloon {
+  /* Balloon styles with more specific selectors */
+  div.custom-clippy-balloon,
+  div.custom-clippy-chat-balloon {
     font-size: 16px !important; /* Larger text on mobile (min 16px for iOS) */
     max-width: 280px !important; /* Wider balloons on mobile */
     padding: 12px 16px !important; /* Larger padding */
   }
 
-  .clippy-option-button {
+  /* More specific button styles */
+  .clippy-option-button[class] {
     padding: 8px 12px !important; /* Larger touch targets */
     margin: 6px 6px 6px 0 !important;
     min-width: 80px !important;
     font-size: 16px !important;
   }
 
-  .custom-clippy-balloon-close {
+  /* More specific close button */
+  .custom-clippy-balloon-close[class] {
     padding: 6px 10px !important;
     font-size: 24px !important;
   }
 
-  /* Add extra spacing for touch devices */
+  /* REMOVE or scope these selectors to Clippy components only */
+  /* These are affecting your entire application: */
+  /* 
   input,
   select,
   button {
+    min-height: 44px !important;
+  }
+  */
+
+  /* Replace with these scoped selectors: */
+  .custom-clippy-balloon input,
+  .custom-clippy-balloon select,
+  .custom-clippy-balloon button,
+  .custom-clippy-chat-balloon input,
+  .custom-clippy-chat-balloon select,
+  .custom-clippy-chat-balloon button {
     min-height: 44px !important; /* Apple's recommended minimum touch target */
   }
 }
@@ -369,11 +386,11 @@ body.screen-off .custom-clippy-chat-balloon {
     position: absolute !important; /* Change to absolute on mobile */
     transform: scale(0.7) !important; /* Smaller scale on mobile */
     transform-origin: center bottom !important;
-    max-width: 93px !important;
+    max-width: 123px !important;
     max-height: 93px !important;
     /* Shift position to avoid content overlap */
-    bottom: 10px !important;
-    right: 10px !important;
+    bottom: 220px !important;
+    right: 20px !important;
     left: auto !important;
     top: auto !important;
     /* Ensure it's always visible but not obstructing */
@@ -382,8 +399,8 @@ body.screen-off .custom-clippy-chat-balloon {
 
   #clippy-clickable-overlay {
     position: absolute !important;
-    bottom: 10px !important;
-    right: 10px !important;
+    bottom: 220px !important;
+    right: 20px !important;
     left: auto !important;
     top: auto !important;
     width: 93px !important;

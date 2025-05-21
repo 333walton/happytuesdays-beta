@@ -371,6 +371,11 @@ const ClippyController = ({
   useEffect(() => {
     if (!clippy) return;
 
+    // First, clean up any duplicate overlays
+    if (window.cleanupDuplicateClippyOverlays) {
+      window.cleanupDuplicateClippyOverlays();
+    }
+
     const setupHandlers = () => {
       // Find the Clippy element
       const agentElements = document.querySelectorAll(".clippy");
@@ -597,11 +602,15 @@ const ClippyController = ({
         // Don't play animations when screen is off
         if (!isScreenPoweredOn) return;
 
-        // CRITICAL: Prevent animation spam
-        if (isAnimationPlaying) {
+        // CRITICAL: Prevent animation spam - BUT allow if specifically requested
+        const forcedAnimation = window._forceNextAnimation;
+        if (isAnimationPlaying && !forcedAnimation) {
           console.log(`Animation already in progress, skipping: ${animation}`);
           return;
         }
+
+        // Clear forced flag if it was set
+        window._forceNextAnimation = false;
 
         // Set flag to prevent multiple animations
         isAnimationPlaying = true;
@@ -895,12 +904,21 @@ const ClippyController = ({
       desktopRectRef.current = desktopRect;
 
       // Position at bottom right with margins - use percentages for better scaling
-      // Use more conservative margins in MonitorView to keep Clippy visible
-      const rightMarginPercent = inMonitorView ? 0.12 : isMobile ? 0.15 : 0.1;
-      const bottomMarginPercent = inMonitorView ? 0.12 : isMobile ? 0.15 : 0.1;
+      // Use more conservative margins in MonitorView
+      const leftMarginPercent = inMonitorView ? 0.12 : isMobile ? 0.15 : 0.8; // Left margin for desktop
+      const rightMarginPercent = inMonitorView ? 0.12 : isMobile ? 0.15 : 0.0; // Not used for desktop
+      const bottomMarginPercent = inMonitorView ? 0.12 : isMobile ? 0.15 : 0.7;
 
-      const posX = desktopRect.width * (1 - rightMarginPercent);
-      const posY = desktopRect.height * (1 - bottomMarginPercent);
+      let posX, posY;
+      if (isMobile) {
+        // For mobile: keep at bottom right
+        posX = desktopRect.width * (1 - rightMarginPercent);
+        posY = desktopRect.height * (1 - bottomMarginPercent);
+      } else {
+        // For desktop: position at left side, higher up
+        posX = desktopRect.width * 0.8; // Position from left instead of right
+        posY = desktopRect.height * 0.7; // Position at 70% from top (already changed)
+      }
 
       // Apply position
       const absoluteX = desktopRect.left + posX;
@@ -995,21 +1013,33 @@ const ClippyController = ({
             const agentElement = document.querySelector(".clippy");
 
             if (agentElement) {
-              // Position at bottom right with margins - use percentages for better scaling
               // Use more conservative margins in MonitorView
+              const leftMarginPercent = inMonitorView
+                ? 0.12
+                : isMobile
+                ? 0.15
+                : 0.8; // Left margin for desktop
               const rightMarginPercent = inMonitorView
                 ? 0.12
                 : isMobile
                 ? 0.15
-                : 0.1;
+                : 0.0; // Not used for desktop
               const bottomMarginPercent = inMonitorView
                 ? 0.12
                 : isMobile
                 ? 0.15
-                : 0.1;
+                : 0.7;
 
-              const posX = desktopRect.width * (1 - rightMarginPercent);
-              const posY = desktopRect.height * (1 - bottomMarginPercent);
+              let posX, posY;
+              if (isMobile) {
+                // For mobile: keep at bottom right
+                posX = desktopRect.width * (1 - rightMarginPercent);
+                posY = desktopRect.height * (1 - bottomMarginPercent);
+              } else {
+                // For desktop: position at left side, higher up
+                posX = desktopRect.width * 0.8; // Position from left instead of right
+                posY = desktopRect.height * 0.7; // Position at 70% from top (already changed)
+              }
 
               // Apply position
               const absoluteX = desktopRect.left + posX;

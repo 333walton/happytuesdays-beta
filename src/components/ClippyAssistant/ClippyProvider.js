@@ -319,10 +319,10 @@ const ClippyProvider = ({
           position: absolute !important;
           transform: scale(0.7) !important;
           transform-origin: center bottom !important;
-          max-width: 93px !important;
+          max-width: 123px !important;
           max-height: 93px !important;
-          bottom: 10px !important;
-          right: 10px !important;
+          bottom: 220px !important;
+          right: 20px !important;
           left: auto !important;
           top: auto !important;
           z-index: 1500 !important;
@@ -332,8 +332,8 @@ const ClippyProvider = ({
         
         #clippy-clickable-overlay {
           position: absolute !important;
-          bottom: 10px !important;
-          right: 10px !important;
+          bottom: 220px !important;
+          right: 20px !important;
           left: auto !important;
           top: auto !important;
           width: 93px !important;

@@ -90,6 +90,8 @@ class ClippyManager {
       if (!this.initialMessageShown) {
         try {
           console.log("Playing initial Greeting animation");
+          // Allow this animation to play even if another is in progress
+          window._forceNextAnimation = true;
           ClippyService.play("Greeting");
 
           // Add a delay between animation and speech
@@ -522,6 +524,8 @@ class ClippyManager {
         // Play animation first with a slight delay to ensure visibility
         setTimeout(() => {
           try {
+            // Allow this animation to play even if another is in progress
+            window._forceNextAnimation = true;
             window.clippy.play(anim);
             console.log(`Animation started: ${anim}`);
           } catch (e) {

@@ -232,6 +232,10 @@ const setInitialPosition = (options) => {
       } else {
         // Otherwise, check for named positions
         switch (options.position.toLowerCase()) {
+          case "higher-right": // New position added
+            xPercent = 0.85;
+            yPercent = 0.65; // Higher than bottom-right
+            break;
           case "bottom-right":
             xPercent = 0.85;
             yPercent = 0.85;
@@ -253,11 +257,17 @@ const setInitialPosition = (options) => {
             yPercent = 0.5;
             break;
           default:
-            // Default to bottom right if we can't parse
+            // Modified default to use higher position
             xPercent = 0.85;
-            yPercent = 0.85;
+            yPercent = 0.65; // Changed from 0.85 to position higher
         }
       }
+
+      // Check if we're on desktop and not on mobile
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
 
       // Set the position using the window global
       if (window.setClippyInitialPosition) {
