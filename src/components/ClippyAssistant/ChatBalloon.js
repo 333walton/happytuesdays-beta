@@ -69,17 +69,16 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
             const balloonHeight = balloonRef.current.offsetHeight;
 
             // Calculate responsive positioning
-            const left = rect.left + rect.width / 2 - balloonWidth / 2;
-
-            // On mobile, position higher to avoid keyboard overlap
-            const topOffset = isMobile ? 150 : 200;
-            let top = rect.top - topOffset;
+            // FIXED: Use let variables from parent scope instead of redeclaring
+            let left = rect.left + rect.width / 2 - balloonWidth / 2;
+            let top = rect.top - (isMobile ? 150 : 200); // On mobile, position higher to avoid keyboard overlap
 
             // Ensure balloon stays within viewport
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
 
-            if (left < 10) top = 10;
+            // FIXED: Corrected boundary check (was setting top when checking left)
+            if (left < 10) left = 10;
             if (left + balloonWidth > viewportWidth - 10)
               left = viewportWidth - balloonWidth - 10;
 
