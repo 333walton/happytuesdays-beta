@@ -1,33 +1,51 @@
-/* CSS styles to ensure Clippy properly hides when screen power is off */
+/* 
+ * Updated Clippy Component Styles
+ * Comprehensive fixes for mobile compatibility
+ * Standardized z-index hierarchy:
+ * - Screen black overlay: 1000
+ * - Clippy character: 2000
+ * - Clippy overlay: 2010
+ * - Clippy balloons: 2100
+ */
 
 /* Mobile-specific optimizations */
 @media (max-width: 768px) {
   .clippy {
-    transform: scale(0.8) !important; /* Slightly smaller on mobile */
+    transform: scale(0.8) !important; /* Smaller on mobile */
+    transform-origin: center bottom !important;
   }
 
   .custom-clippy-balloon,
   .custom-clippy-chat-balloon {
-    font-size: 14px !important; /* Larger text on mobile */
+    font-size: 16px !important; /* Larger text on mobile (min 16px for iOS) */
     max-width: 280px !important; /* Wider balloons on mobile */
+    padding: 12px 16px !important; /* Larger padding */
   }
 
   .clippy-option-button {
-    padding: 6px 10px !important; /* Larger touch targets */
-    margin: 5px 5px 5px 0 !important;
+    padding: 8px 12px !important; /* Larger touch targets */
+    margin: 6px 6px 6px 0 !important;
     min-width: 80px !important;
+    font-size: 16px !important;
   }
 
   .custom-clippy-balloon-close {
-    padding: 5px 8px !important;
-    font-size: 20px !important;
+    padding: 6px 10px !important;
+    font-size: 24px !important;
+  }
+
+  /* Add extra spacing for touch devices */
+  input,
+  select,
+  button {
+    min-height: 44px !important; /* Apple's recommended minimum touch target */
   }
 }
 
 /* Base Clippy styles */
 .clippy {
   position: fixed !important;
-  z-index: 1001 !important; /* Higher than black-overlay (1000) */
+  z-index: 2000 !important; /* Standardized z-index */
   transform-origin: center bottom !important;
   will-change: transform, left, top !important;
   animation: auto !important;
@@ -48,10 +66,39 @@
   -webkit-perspective: 1000px !important;
 }
 
-/* Fix for original clippy balloon */
+/* Common visibility classes */
+.clippy-visible {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+.clippy-hidden {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.clippy-no-events {
+  pointer-events: none !important;
+}
+
+.clippy-overlay-visible {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.clippy-overlay-hidden {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Hide original clippy balloon completely */
 .clippy-balloon {
   position: absolute !important;
-  top: -1000px !important; /* Position far off-screen to avoid any interaction */
+  top: -1000px !important; /* Position far off-screen to avoid interaction */
   left: -1000px !important;
   right: auto !important;
   bottom: auto !important;
@@ -80,7 +127,7 @@
 /* Custom balloon styles */
 .custom-clippy-balloon {
   position: fixed !important;
-  z-index: 1003 !important; /* Above everything */
+  z-index: 2100 !important; /* Standardized z-index */
   background-color: #fffcde !important;
   border: 1px solid #000 !important;
   border-radius: 5px !important;
@@ -91,8 +138,8 @@
   max-width: 250px !important;
 
   /* Remove scrollbar */
-  overflow: visible !important; /* Changed from auto to visible */
-  max-height: none !important; /* Remove height restriction */
+  overflow: visible !important;
+  max-height: none !important;
   scrollbar-width: none !important; /* Firefox */
   -ms-overflow-style: none !important; /* IE and Edge */
 
@@ -101,7 +148,7 @@
   opacity: 1 !important;
   transition: visibility 0.3s, opacity 0.3s !important;
 
-  /* Hardware acceleration */
+  /* Hardware acceleration for smoother animations */
   transform: translateZ(0) !important;
   -webkit-transform: translateZ(0) !important;
   backface-visibility: hidden !important;
@@ -118,7 +165,7 @@
 
 /* Balloon tip */
 .custom-clippy-balloon:after {
-  content: "";
+  content: "" !important;
   position: absolute !important;
   bottom: -10px !important;
   left: 20px !important;
@@ -130,10 +177,10 @@
 }
 
 .custom-clippy-balloon:before {
-  content: "";
+  content: "" !important;
   position: absolute !important;
   bottom: -11px !important;
-  left: 20px !important;
+  left: 19px !important;
   border-width: 10px 10px 0 !important;
   border-style: solid !important;
   border-color: #000 transparent !important;
@@ -144,7 +191,7 @@
 /* Custom balloon chat styles */
 .custom-clippy-chat-balloon {
   position: fixed !important;
-  z-index: 1003 !important;
+  z-index: 2100 !important; /* Standardized z-index */
   background-color: #fffcde !important;
   border: 1px solid #000 !important;
   border-radius: 5px !important;
@@ -166,7 +213,7 @@
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 
-  /* Hardware acceleration */
+  /* Hardware acceleration for smoother animations */
   transform: translateZ(0) !important;
   -webkit-transform: translateZ(0) !important;
   backface-visibility: hidden !important;
@@ -181,7 +228,7 @@
 /* Clickable overlay */
 #clippy-clickable-overlay {
   position: fixed !important;
-  z-index: 1002 !important; /* Above Clippy but below balloons */
+  z-index: 2010 !important; /* Standardized z-index */
   cursor: pointer !important;
   pointer-events: auto !important;
   display: block !important;
@@ -243,7 +290,7 @@ body.screen-off .custom-clippy-chat-balloon {
 
 /* MonitorView black overlay handling */
 .black-overlay {
-  z-index: 1000 !important; /* Below Clippy and its elements */
+  z-index: 1000 !important; /* Standardized z-index - below Clippy */
 }
 
 /* Ensure proper transition when screen power changes */
@@ -253,4 +300,65 @@ body.screen-off .custom-clippy-chat-balloon {
 
 .black-overlay-off {
   transition: opacity 0.4s ease !important;
+}
+
+/* Option buttons styling */
+.clippy-option-button {
+  background: #d4d0c8 !important;
+  border: 2px solid !important;
+  border-color: #fff #888 #888 #fff !important;
+  padding: 3px 8px !important;
+  margin: 3px 5px 3px 0 !important;
+  font-family: "Tahoma", sans-serif !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+}
+
+.clippy-option-button:hover {
+  background: #e2e0da !important;
+}
+
+.clippy-option-button:active {
+  border-color: #888 #fff #fff #888 !important;
+}
+
+/* Input styling */
+.clippy-input {
+  flex: 1 !important;
+  border: 1px solid #888 !important;
+  padding: 3px !important;
+  font-family: "Tahoma", sans-serif !important;
+  font-size: 13px !important;
+}
+
+/* Chat balloon message styles */
+.clippy-message {
+  margin-bottom: 8px !important;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  max-width: 80% !important;
+}
+
+.clippy-message-user {
+  background: #d4d0c8 !important;
+  border-radius: 8px 8px 0 8px !important;
+  align-self: flex-end !important;
+  text-align: right !important;
+}
+
+.clippy-message-clippy {
+  background: #ffffcc !important;
+  border-radius: 8px 8px 8px 0 !important;
+  align-self: flex-start !important;
+}
+
+/* Fix for iOS rendering issues */
+.ios-fix {
+  -webkit-transform: translateZ(0) !important;
+  transform: translateZ(0) !important;
+  -webkit-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
+  -webkit-perspective: 1000 !important;
+  perspective: 1000 !important;
 }

@@ -1,21 +1,22 @@
 import React, { useEffect, useRef, useCallback } from "react";
 import { useClippy } from "@react95/clippy";
 
-// Mobile detection
-const isMobile =
-  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
-
-// Animation throttling variables
+// Global animation throttling variables
 let isAnimationPlaying = false;
 let animationDebounceTimeout = null;
+let globalPositioningLock = false;
 
 /**
  * Component to handle Clippy positioning and interactions
  * This is a standalone controller that will add necessary DOM elements
  * and handle all the interactions for Clippy.
  */
+
+const isMobile =
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+
 const ClippyController = ({
   visible,
   position,
@@ -44,6 +45,10 @@ const ClippyController = ({
   const rafIdRef = useRef(null);
   const lastUpdateRef = useRef(0);
 
+  // We're now using a single global RAF for all Clippy positioning
+  // This prevents redundant updates and improves performance
+  const useGlobalPositioning = true;
+
   // Calculate bounded position helper
   const calculateBoundedPosition = useCallback(
     (x, y, desktopRect = null) => {
@@ -53,10 +58,12 @@ const ClippyController = ({
       const desktopWidth = rect.width;
       const desktopHeight = rect.height;
 
+      // Get actual Clippy dimensions or use defaults
       const clippyWidth = clippySizeRef.current.width || 100;
       const clippyHeight = clippySizeRef.current.height || 100;
 
-      const padding = 5;
+      // Ensure padding is proportional on smaller screens
+      const padding = Math.max(5, Math.min(desktopWidth, desktopHeight) * 0.01);
       const maxX = Math.max(0, desktopWidth - clippyWidth - padding);
       const maxY = Math.max(0, desktopHeight - clippyHeight - padding);
 
@@ -75,35 +82,23 @@ const ClippyController = ({
   const fixAnimations = useCallback(() => {
     if (!clippy) return;
 
-    console.log("Manually fixing Clippy animations");
+    console.log("Fixing Clippy animations");
 
-    // Force Clippy element to be visible
+    // Force Clippy element to be visible via CSS classes
     const clippyEl = document.querySelector(".clippy");
     if (clippyEl) {
-      // Reset basic styles
-      clippyEl.style.visibility = "visible";
-      clippyEl.style.opacity = "1";
-      clippyEl.style.display = "block";
+      // Use classList instead of direct style manipulation
+      clippyEl.classList.add("clippy-visible");
+      clippyEl.classList.remove("clippy-hidden");
 
-      // Reset z-index
-      clippyEl.style.zIndex = "1001";
+      // Reset z-index - use standard value from our hierarchy
+      clippyEl.style.zIndex = "2000";
 
-      // Make sure pointer events are none
-      clippyEl.style.pointerEvents = "none";
-
-      // Find and make visible any SVG elements
+      // Find SVG elements and ensure they're visible
       const svgElements = clippyEl.querySelectorAll("svg");
       if (svgElements.length > 0) {
         svgElements.forEach((svg) => {
-          svg.style.visibility = "visible";
-          svg.style.opacity = "1";
-          svg.style.display = "inline";
-          // Make all SVG children visible too
-          Array.from(svg.querySelectorAll("*")).forEach((el) => {
-            el.style.visibility = "visible";
-            el.style.opacity = "1";
-            el.style.display = "inline";
-          });
+          svg.classList.add("clippy-visible");
         });
       }
 
@@ -112,9 +107,7 @@ const ClippyController = ({
       if (maps.length > 0) {
         maps.forEach((map) => {
           if (map.classList.contains("animate")) {
-            map.style.display = "block";
-            map.style.visibility = "visible";
-            map.style.opacity = "1";
+            map.classList.add("clippy-visible");
           }
         });
       }
@@ -123,40 +116,58 @@ const ClippyController = ({
     // Fix overlay
     const overlay = document.getElementById("clippy-clickable-overlay");
     if (overlay) {
-      overlay.style.visibility = "visible";
-      overlay.style.opacity = "1";
-      overlay.style.pointerEvents = "auto";
-      overlay.style.zIndex = "1002";
+      overlay.classList.add("clippy-overlay-visible");
+      overlay.style.zIndex = "2010"; // Use standard z-index
     }
 
-    // Apply temporary fix style
-    const fixStyle = document.createElement("style");
-    fixStyle.id = "clippy-manual-fix";
-    fixStyle.textContent = `
-      .clippy * {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-      }
-      
-      .clippy-animate,
-      .clippy-animate * {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-        animation: auto !important;
-      }
-      
-      .clippy svg,
-      .clippy svg * {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: inline !important;
-      }
-    `;
-    document.head.appendChild(fixStyle);
+    // Apply temporary fix style - only if not already present
+    if (!document.getElementById("clippy-animation-fix")) {
+      const fixStyle = document.createElement("style");
+      fixStyle.id = "clippy-animation-fix";
+      fixStyle.textContent = `
+        .clippy-visible {
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: block !important;
+        }
+        
+        .clippy-hidden {
+          visibility: hidden !important;
+          opacity: 0 !important;
+        }
+        
+        .clippy-animate,
+        .clippy-animate * {
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: block !important;
+        }
+        
+        .clippy svg,
+        .clippy svg * {
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: inline !important;
+        }
+        
+        /* Temporary fix for z-index */
+        .clippy {
+          z-index: 2000 !important;
+        }
+        
+        #clippy-clickable-overlay {
+          z-index: 2010 !important;
+        }
+        
+        .custom-clippy-balloon, 
+        .custom-clippy-chat-balloon {
+          z-index: 2100 !important;
+        }
+      `;
+      document.head.appendChild(fixStyle);
+    }
 
-    // Play a test animation
+    // Play a test animation with delay to ensure styles have applied
     setTimeout(() => {
       try {
         clippy.play("Wave");
@@ -164,14 +175,9 @@ const ClippyController = ({
       } catch (e) {
         console.error("Animation test failed:", e);
       }
+    }, 300);
 
-      // Remove fix style after a few seconds
-      setTimeout(() => {
-        if (fixStyle.parentNode) {
-          fixStyle.parentNode.removeChild(fixStyle);
-        }
-      }, 3000);
-    }, 100);
+    return true;
   }, [clippy]);
 
   // Set up the balloon observer - enhanced to redirect content
@@ -180,9 +186,9 @@ const ClippyController = ({
       balloonObserverRef.current.disconnect();
     }
 
-    // Find the clippy element to observe instead of body
+    // Find the clippy element to observe
     const clippyEl = document.querySelector(".clippy");
-    if (!clippyEl) return;
+    if (!clippyEl) return null; // Return null instead of undefined
 
     // Create an observer with more limited scope
     const observer = new MutationObserver((mutations) => {
@@ -194,9 +200,7 @@ const ClippyController = ({
           for (const node of mutation.addedNodes) {
             if (node.classList && node.classList.contains("clippy-balloon")) {
               // Hide the default balloon
-              node.style.visibility = "hidden";
-              node.style.opacity = "0";
-              node.style.display = "none";
+              node.classList.add("clippy-hidden");
 
               // Redirect to custom balloon
               const content = node.querySelector(".clippy-content");
@@ -218,50 +222,12 @@ const ClippyController = ({
     observer.observe(clippyEl, { childList: true, subtree: true });
     balloonObserverRef.current = observer;
 
-    // On mobile, don't use polling interval at all
-    if (isMobile) {
-      // Just do one check now
-      const balloon = document.querySelector(".clippy-balloon");
-      if (balloon) {
-        const content = balloon.querySelector(".clippy-content");
-        if (content && content.textContent && window.showClippyCustomBalloon) {
-          balloon.style.visibility = "hidden";
-          balloon.style.opacity = "0";
-          balloon.style.display = "none";
-          window.showClippyCustomBalloon(content.textContent);
-        }
-      }
-
-      return () => observer.disconnect();
-    } else {
-      // On desktop, use a less frequent interval (1000ms instead of 300ms)
-      const intervalId = setInterval(() => {
-        if (!isScreenPoweredOn) return;
-        const balloon = document.querySelector(".clippy-balloon");
-        if (balloon) {
-          const content = balloon.querySelector(".clippy-content");
-          if (
-            content &&
-            content.textContent &&
-            window.showClippyCustomBalloon
-          ) {
-            balloon.style.visibility = "hidden";
-            balloon.style.opacity = "0";
-            balloon.style.display = "none";
-            window.showClippyCustomBalloon(content.textContent);
-          } else {
-            balloon.style.visibility = "hidden";
-            balloon.style.opacity = "0";
-            balloon.style.display = "none";
-          }
-        }
-      }, 1000);
-
-      return () => {
+    // IMPORTANT: Return a proper cleanup function, not the observer itself
+    return () => {
+      if (observer) {
         observer.disconnect();
-        clearInterval(intervalId);
-      };
-    }
+      }
+    };
   }, [isScreenPoweredOn]);
 
   // Find desktop viewport container
@@ -275,82 +241,36 @@ const ClippyController = ({
     }
   }, [desktopRectRef]);
 
-  // Replace the entire handleClippyInteraction function in ClippyController.js
+  // Replace the entire handleClippyInteraction function
   const handleClippyInteraction = useCallback(() => {
     if (!clippy || !isScreenPoweredOn) return; // Don't interact when screen is off
 
     console.log("Handling Clippy interaction");
 
-    // Force Clippy element to be visible
+    // Force Clippy element to be visible using classList
     const clippyEl = document.querySelector(".clippy");
     if (!clippyEl) {
       console.error("Clippy element not found");
       return;
     }
 
-    // CRITICAL: Make clippy and its children visible
-    clippyEl.style.visibility = "visible";
-    clippyEl.style.opacity = "1";
-    clippyEl.style.display = "block";
+    // CRITICAL: Make clippy and its children visible with classes
+    clippyEl.classList.add("clippy-visible");
+    clippyEl.classList.remove("clippy-hidden");
 
-    // Find and make visible any SVG elements
-    const svgElements = clippyEl.querySelectorAll("svg");
-    if (svgElements.length > 0) {
-      svgElements.forEach((svg) => {
-        svg.style.visibility = "visible";
-        svg.style.opacity = "1";
-        svg.style.display = "inline";
-
-        // Make all SVG children visible too
-        Array.from(svg.querySelectorAll("*")).forEach((el) => {
-          el.style.visibility = "visible";
-          el.style.opacity = "1";
-          el.style.display = "inline";
-        });
-      });
-    }
-
-    // Temporarily unlock positioning during animation to ensure animations work
-    const wasPositionLocked = window._clippyPositionLocked;
+    // Temporarily unlock positioning during animation
+    const wasPositionLocked = globalPositioningLock;
     if (wasPositionLocked) {
+      globalPositioningLock = false;
       window._clippyPositionLocked = false;
     }
 
     // Play animation with slight delay to ensure visibility
     setTimeout(() => {
-      // List of common animations that work well
-      const animations = [
-        "Greeting",
-        "Wave",
-        "GetAttention",
-        "Thinking",
-        "Writing",
-        "Processing",
-        "Congratulate",
-        "Alert",
-      ];
+      // Use a reduced set of reliable animations
+      const animations = ["Greeting", "Wave", "GetAttention", "Thinking"];
       const randomAnim =
         animations[Math.floor(Math.random() * animations.length)];
-
-      // Apply temporary animation fix
-      const fixStyle = document.createElement("style");
-      fixStyle.id = "clippy-temp-fix";
-      fixStyle.textContent = `
-        .clippy * {
-          visibility: visible !important;
-          opacity: 1 !important;
-          display: block !important;
-        }
-        
-        .clippy-animate,
-        .clippy-animate * {
-          visibility: visible !important;
-          opacity: 1 !important;
-          display: block !important;
-          animation: auto !important;
-        }
-      `;
-      document.head.appendChild(fixStyle);
 
       console.log(`Playing animation: ${randomAnim}`);
       try {
@@ -360,17 +280,13 @@ const ClippyController = ({
         console.error("Error playing animation:", e);
       }
 
-      // Remove the style after animation
-      setTimeout(() => {
-        if (fixStyle.parentNode) {
-          fixStyle.parentNode.removeChild(fixStyle);
-        }
-
-        // Re-lock position after animation completes
-        if (wasPositionLocked) {
+      // Re-lock position after animation completes
+      if (wasPositionLocked) {
+        setTimeout(() => {
+          globalPositioningLock = true;
           window._clippyPositionLocked = true;
-        }
-      }, 3000);
+        }, 2000);
+      }
 
       // Show speech balloon after animation - only on every 3rd click
       setTimeout(() => {
@@ -386,12 +302,6 @@ const ClippyController = ({
             "Need some assistance?",
             "I'm here to help! What can I do for you?",
             "Looking for some help?",
-            "What can I help you with today?",
-            "Windows 98 at your service!",
-            "Need a tip? Try the Start menu!",
-            "You can right-click me for more options!",
-            "Double-clicking files opens them!",
-            "Did you know you can play Minesweeper here?",
           ];
 
           // Choose random phrase
@@ -405,9 +315,9 @@ const ClippyController = ({
             clippy.speak(randomPhrase);
           }
         }
-      }, 800); // Delay to let animation play first
-    }, 50);
-  }, [clippy, isScreenPoweredOn]); // Add isScreenPoweredOn as dependency // Add isScreenPoweredOn as dependency
+      }, 800);
+    }, 100);
+  }, [clippy, isScreenPoweredOn]);
 
   // Setup double-click and right-click handlers with overlay
   useEffect(() => {
@@ -421,14 +331,20 @@ const ClippyController = ({
       const agentElement = agentElements[0];
       clippyElementRef.current = agentElement;
 
-      // CRITICAL: Make Clippy non-interactive (pointer-events: none)
-      // This is key to fixing animation issues
-      agentElement.style.pointerEvents = "none";
-      agentElement.style.visibility = isScreenPoweredOn ? "visible" : "hidden";
-      agentElement.style.opacity = isScreenPoweredOn ? "1" : "0";
-      agentElement.style.display = "block";
-      agentElement.style.transition = "visibility 0.3s, opacity 0.3s";
-      agentElement.style.zIndex = "1001"; // Set z-index higher than black overlay
+      // CRITICAL: Make Clippy non-interactive with classes
+      agentElement.classList.add("clippy-no-events");
+
+      // Set initial visibility based on screen power
+      if (isScreenPoweredOn) {
+        agentElement.classList.add("clippy-visible");
+        agentElement.classList.remove("clippy-hidden");
+      } else {
+        agentElement.classList.add("clippy-hidden");
+        agentElement.classList.remove("clippy-visible");
+      }
+
+      // Set z-index properly
+      agentElement.style.zIndex = "2000"; // Standard z-index
 
       // Create clickable overlay if it doesn't exist
       if (!clippyOverlayRef.current) {
@@ -440,27 +356,57 @@ const ClippyController = ({
         overlay.style.top = `${rect.top}px`;
         overlay.style.width = `${rect.width}px`;
         overlay.style.height = `${rect.height}px`;
-        overlay.style.zIndex = "1002"; // Higher than Clippy
+        overlay.style.zIndex = "2010"; // Higher than Clippy
         overlay.style.cursor = "pointer";
         overlay.style.background = "transparent";
-        overlay.style.pointerEvents = isScreenPoweredOn ? "auto" : "none";
-        overlay.style.visibility = isScreenPoweredOn ? "visible" : "hidden";
-        overlay.style.transition = "visibility 0.3s";
+
+        // Set initial visibility based on screen power
+        if (isScreenPoweredOn) {
+          overlay.classList.add("clippy-overlay-visible");
+        } else {
+          overlay.classList.add("clippy-overlay-hidden");
+        }
 
         clippyOverlayRef.current = overlay;
         document.body.appendChild(overlay);
 
-        // Add double-click handler
+        // Add double-click handler with better touch handling
+        let touchStartTime = 0;
+        let lastTapTime = 0;
+
+        // Handle touch events specially for mobile
+        overlay.addEventListener("touchstart", (e) => {
+          touchStartTime = Date.now();
+        });
+
+        overlay.addEventListener("touchend", (e) => {
+          if (!isScreenPoweredOn) return;
+
+          const touchDuration = Date.now() - touchStartTime;
+          const currentTime = Date.now();
+          const tapTimeDiff = currentTime - lastTapTime;
+
+          // Detect double tap (two quick taps less than 300ms apart)
+          if (tapTimeDiff < 300 && touchDuration < 200) {
+            e.preventDefault();
+            handleClippyInteraction();
+            lastTapTime = 0; // Reset
+          } else {
+            lastTapTime = currentTime;
+          }
+        });
+
+        // Regular double-click for desktop
         overlay.addEventListener("dblclick", (e) => {
-          if (!isScreenPoweredOn) return; // Don't interact when screen is off
+          if (!isScreenPoweredOn) return;
           e.preventDefault();
           e.stopPropagation();
           handleClippyInteraction();
         });
 
-        // Add right-click handler
+        // Add right-click/contextmenu handler
         overlay.addEventListener("contextmenu", (e) => {
-          if (!isScreenPoweredOn) return; // Don't interact when screen is off
+          if (!isScreenPoweredOn) return;
           e.preventDefault();
           e.stopPropagation();
 
@@ -469,19 +415,26 @@ const ClippyController = ({
             // Force Clippy visible first
             const clippyEl = document.querySelector(".clippy");
             if (clippyEl) {
-              clippyEl.style.visibility = "visible";
-              clippyEl.style.opacity = "1";
-              clippyEl.style.display = "block";
+              clippyEl.classList.add("clippy-visible");
+              clippyEl.classList.remove("clippy-hidden");
             }
 
             setTimeout(() => {
-              clippy.play("GetAttention");
+              try {
+                clippy.play("GetAttention");
 
-              setTimeout(() => {
+                setTimeout(() => {
+                  window.showClippyCustomBalloon(
+                    "Right-click me for more options!"
+                  );
+                }, 500);
+              } catch (e) {
+                console.error("Error showing context menu message:", e);
+                // Fallback if animation fails
                 window.showClippyCustomBalloon(
                   "Right-click me for more options!"
                 );
-              }, 500);
+              }
             }, 50);
           }
         });
@@ -495,10 +448,10 @@ const ClippyController = ({
       const interval = setInterval(() => {
         if (setupHandlers()) clearInterval(interval);
       }, 500);
-      setTimeout(() => clearInterval(interval), 10000);
+      setTimeout(() => clearInterval(interval), 5000);
       return () => clearInterval(interval);
     }
-  }, [clippy, handleClippyInteraction, isScreenPoweredOn]); // Add isScreenPoweredOn as dependency
+  }, [clippy, handleClippyInteraction, isScreenPoweredOn]);
 
   // Update Clippy visibility when screen power changes
   useEffect(() => {
@@ -511,16 +464,22 @@ const ClippyController = ({
       document.getElementById("clippy-clickable-overlay");
 
     if (clippyElement) {
-      clippyElement.style.visibility = isScreenPoweredOn ? "visible" : "hidden";
-      clippyElement.style.opacity = isScreenPoweredOn ? "1" : "0";
+      if (isScreenPoweredOn) {
+        clippyElement.classList.add("clippy-visible");
+        clippyElement.classList.remove("clippy-hidden");
+      } else {
+        clippyElement.classList.add("clippy-hidden");
+        clippyElement.classList.remove("clippy-visible");
+      }
 
       if (overlayElement) {
-        overlayElement.style.visibility = isScreenPoweredOn
-          ? "visible"
-          : "hidden";
-        overlayElement.style.pointerEvents = isScreenPoweredOn
-          ? "auto"
-          : "none";
+        if (isScreenPoweredOn) {
+          overlayElement.classList.add("clippy-overlay-visible");
+          overlayElement.classList.remove("clippy-overlay-hidden");
+        } else {
+          overlayElement.classList.add("clippy-overlay-hidden");
+          overlayElement.classList.remove("clippy-overlay-visible");
+        }
       }
 
       // Hide any speech balloons when screen is off
@@ -541,9 +500,7 @@ const ClippyController = ({
         // Also clear any original clippy balloons
         const originalBalloon = document.querySelector(".clippy-balloon");
         if (originalBalloon) {
-          originalBalloon.style.visibility = "hidden";
-          originalBalloon.style.opacity = "0";
-          originalBalloon.style.display = "none";
+          originalBalloon.classList.add("clippy-hidden");
         }
       }
     }
@@ -603,22 +560,19 @@ const ClippyController = ({
           clearTimeout(animationDebounceTimeout);
         }
 
-        console.log(`Playing animation (throttled): ${animation}`);
+        console.log(`Playing animation: ${animation}`);
 
-        // Force Clippy element to be visible
+        // Force Clippy element to be visible with classes
         const clippyEl = document.querySelector(".clippy");
         if (clippyEl) {
-          clippyEl.style.visibility = "visible";
-          clippyEl.style.opacity = "1";
-          clippyEl.style.display = "block";
+          clippyEl.classList.add("clippy-visible");
+          clippyEl.classList.remove("clippy-hidden");
 
-          // Find and make visible any SVG elements
+          // Find SVG elements and ensure they're visible
           const svgElements = clippyEl.querySelectorAll("svg");
           if (svgElements.length > 0) {
             svgElements.forEach((svg) => {
-              svg.style.visibility = "visible";
-              svg.style.opacity = "1";
-              svg.style.display = "inline";
+              svg.classList.add("clippy-visible");
             });
           }
 
@@ -628,9 +582,7 @@ const ClippyController = ({
             // Add animate class to all maps to ensure visibility
             maps.forEach((map) => {
               map.classList.add("animate");
-              map.style.display = "block";
-              map.style.visibility = "visible";
-              map.style.opacity = "1";
+              map.classList.add("clippy-visible");
             });
           }
         }
@@ -658,9 +610,54 @@ const ClippyController = ({
 
   // Add critical CSS styles for animations
   useEffect(() => {
+    if (document.getElementById("clippy-critical-styles")) return;
+
     const styleElement = document.createElement("style");
-    styleElement.id = "clippy-animation-styles";
+    styleElement.id = "clippy-critical-styles";
     styleElement.textContent = `
+      /* Common visibility classes */
+      .clippy-visible {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+      }
+      
+      .clippy-hidden {
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+      
+      .clippy-no-events {
+        pointer-events: none !important;
+      }
+      
+      .clippy-overlay-visible {
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+      
+      .clippy-overlay-hidden {
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+      
+      /* Z-index standardization */
+      .clippy {
+        z-index: 2000 !important;
+      }
+      
+      #clippy-clickable-overlay {
+        z-index: 2010 !important;
+      }
+      
+      .custom-clippy-balloon, 
+      .custom-clippy-chat-balloon {
+        z-index: 2100 !important;
+      }
+      
       /* Hide original clippy balloon */
       .clippy-balloon {
         visibility: hidden !important;
@@ -674,14 +671,14 @@ const ClippyController = ({
         visibility: visible !important;
         opacity: 1 !important;
         display: block !important;
-        overflow: visible !important; /* Remove scrollbars */
-        max-height: none !important; /* Remove height restriction */
-        scrollbar-width: none !important; /* Firefox */
+        overflow: visible !important;
+        max-height: none !important;
+        scrollbar-width: none !important;
       }
       
       .custom-clippy-balloon::-webkit-scrollbar,
       .custom-clippy-chat-balloon::-webkit-scrollbar {
-        display: none !important; /* Chrome/Safari/Edge */
+        display: none !important;
       }
       
       /* Ensure Clippy displays properly */
@@ -692,8 +689,20 @@ const ClippyController = ({
         pointer-events: none !important;
         transform: scale(0.9) !important;
         transform-origin: center bottom !important;
-        z-index: 1001 !important; /* Higher than black overlay (999) */
         transition: visibility 0.3s, opacity 0.3s !important;
+      }
+      
+      /* Mobile optimizations */
+      @media (max-width: 768px) {
+        .clippy {
+          transform: scale(0.8) !important;
+        }
+        
+        .custom-clippy-balloon,
+        .custom-clippy-chat-balloon {
+          font-size: 16px !important;
+          max-width: 280px !important;
+        }
       }
       
       /* CRITICAL: Animation fixes */
@@ -738,7 +747,6 @@ const ClippyController = ({
       /* Clickable overlay */
       #clippy-clickable-overlay {
         position: fixed !important;
-        z-index: 1002 !important; /* Higher than clippy */
         cursor: pointer !important;
         pointer-events: auto !important;
         display: block !important;
@@ -770,59 +778,13 @@ const ClippyController = ({
   useEffect(() => {
     window.fixClippyAnimations = () => {
       console.log("Applying emergency animation fix...");
-
-      // Force animations to work
-      const styleEl = document.createElement("style");
-      styleEl.id = "clippy-emergency-fix";
-      styleEl.textContent = `
-        .clippy * {
-          visibility: visible !important;
-          opacity: 1 !important;
-          display: block !important;
-        }
-        
-        .clippy-animate,
-        .clippy-animate * {
-          visibility: visible !important;
-          opacity: 1 !important;
-          display: block !important;
-          animation: auto !important;
-        }
-        
-        /* Ensure transform doesn't block animations */
-        .clippy {
-          transform: scale(0.9) !important;
-          transform-origin: center bottom !important;
-          z-index: 1001 !important; /* Higher than black overlay */
-        }
-        
-        /* Keep overlay above clippy */
-        #clippy-clickable-overlay {
-          z-index: 1002 !important;
-        }
-      `;
-      document.head.appendChild(styleEl);
-
-      // Force play a test animation
-      setTimeout(() => {
-        if (window.clippy && window.clippy.play && isScreenPoweredOn) {
-          try {
-            window.clippy.play("Wave");
-            console.log("Test animation triggered");
-          } catch (e) {
-            console.error("Test animation failed:", e);
-          }
-        }
-      }, 100);
-
-      console.log("Animation fix applied");
-      return "Animation fix applied";
+      return fixAnimations();
     };
 
     return () => {
       delete window.fixClippyAnimations;
     };
-  }, [isScreenPoweredOn]);
+  }, [fixAnimations, isScreenPoweredOn]);
 
   // Position Clippy at the bottom right of the screen
   useEffect(() => {
@@ -844,13 +806,19 @@ const ClippyController = ({
       const desktopRect = desktopElement.getBoundingClientRect();
       desktopRectRef.current = desktopRect;
 
-      // Position at bottom right with margins
-      const posX = desktopRect.width - 120; // 120px from right edge
-      const posY = desktopRect.height - 150; // 150px from bottom
+      // Position at bottom right with margins - use percentages for better scaling
+      const rightMarginPercent = isMobile ? 0.15 : 0.1; // 15% on mobile, 10% on desktop
+      const bottomMarginPercent = isMobile ? 0.15 : 0.1;
+
+      const posX = desktopRect.width * (1 - rightMarginPercent);
+      const posY = desktopRect.height * (1 - bottomMarginPercent);
 
       // Apply position
       const absoluteX = desktopRect.left + posX;
       const absoluteY = desktopRect.top + posY;
+
+      // Add a class to handle styles
+      agentElement.classList.add("clippy-positioned");
 
       // Directly position the Clippy element
       agentElement.style.position = "fixed";
@@ -858,12 +826,15 @@ const ClippyController = ({
       agentElement.style.top = `${absoluteY}px`;
       agentElement.style.right = "auto";
       agentElement.style.bottom = "auto";
-      agentElement.style.visibility = isScreenPoweredOn ? "visible" : "hidden";
-      agentElement.style.opacity = isScreenPoweredOn ? "1" : "0";
-      agentElement.style.display = "block";
-      agentElement.style.pointerEvents = "none";
-      agentElement.style.transformOrigin = "center bottom";
-      agentElement.style.zIndex = "1001"; // Higher than black overlay (999)
+
+      // Set visibility based on screen power
+      if (isScreenPoweredOn) {
+        agentElement.classList.add("clippy-visible");
+        agentElement.classList.remove("clippy-hidden");
+      } else {
+        agentElement.classList.add("clippy-hidden");
+        agentElement.classList.remove("clippy-visible");
+      }
 
       // Position the overlay
       if (clippyOverlayRef.current) {
@@ -871,13 +842,14 @@ const ClippyController = ({
         clippyOverlayRef.current.style.top = `${absoluteY}px`;
         clippyOverlayRef.current.style.width = `${agentElement.offsetWidth}px`;
         clippyOverlayRef.current.style.height = `${agentElement.offsetHeight}px`;
-        clippyOverlayRef.current.style.visibility = isScreenPoweredOn
-          ? "visible"
-          : "hidden";
-        clippyOverlayRef.current.style.pointerEvents = isScreenPoweredOn
-          ? "auto"
-          : "none";
-        clippyOverlayRef.current.style.zIndex = "1002"; // Higher than clippy
+
+        if (isScreenPoweredOn) {
+          clippyOverlayRef.current.classList.add("clippy-overlay-visible");
+          clippyOverlayRef.current.classList.remove("clippy-overlay-hidden");
+        } else {
+          clippyOverlayRef.current.classList.add("clippy-overlay-hidden");
+          clippyOverlayRef.current.classList.remove("clippy-overlay-visible");
+        }
       }
 
       // Update position state
@@ -894,32 +866,44 @@ const ClippyController = ({
       }, 500);
       setTimeout(() => clearInterval(interval), 5000);
     }
-  }, [clippy, setPosition, isScreenPoweredOn]);
+  }, [clippy, setPosition, isScreenPoweredOn, isMobile]);
 
   // Handle window resize - Keep Clippy at bottom right with requestAnimationFrame
-  // Find this in ClippyController.js around line 890-930
+  // This is the ONLY positioning RAF we'll use - all others will be disabled
   useEffect(() => {
+    // Skip if we're using global positioning from ClippyManager
+    if (useGlobalPositioning && window._clippyGlobalPositioningActive) {
+      console.log(
+        "Using global positioning system, skipping local positioning"
+      );
+      return;
+    }
+
+    // Mark that we're using global positioning
+    window._clippyGlobalPositioningActive = true;
+    globalPositioningLock = true;
+    window._clippyPositionLocked = true;
+
     const updatePositionFrame = (timestamp) => {
-      // Significantly reduce updates on mobile
-      const updateInterval = isMobile ? 800 : 250;
+      // Significantly reduce updates on mobile - use very conservative values
+      const updateInterval = isMobile ? 1000 : 250;
 
       if (timestamp - lastUpdateRef.current > updateInterval) {
-        if (initialPositionAppliedRef.current) {
+        if (initialPositionAppliedRef.current && !globalPositioningLock) {
           const desktopElement =
             desktopViewportRef.current || document.querySelector(".w98");
 
-          if (
-            desktopElement &&
-            !isAnimationPlaying &&
-            !window._clippyPositionLocked
-          ) {
+          if (desktopElement && !isAnimationPlaying) {
             const desktopRect = desktopElement.getBoundingClientRect();
             const agentElement = document.querySelector(".clippy");
 
             if (agentElement) {
-              // Position at bottom right with margins
-              const posX = desktopRect.width - 120; // 120px from right
-              const posY = desktopRect.height - 150; // 150px from bottom
+              // Position at bottom right with margins - use percentages for better scaling
+              const rightMarginPercent = isMobile ? 0.15 : 0.1; // 15% on mobile, 10% on desktop
+              const bottomMarginPercent = isMobile ? 0.15 : 0.1;
+
+              const posX = desktopRect.width * (1 - rightMarginPercent);
+              const posY = desktopRect.height * (1 - bottomMarginPercent);
 
               // Apply position
               const absoluteX = desktopRect.left + posX;
@@ -931,10 +915,11 @@ const ClippyController = ({
               }
 
               // Only update if position changed significantly (by more than 2px)
+              // This significantly reduces DOM operations
               const xDiff = Math.abs(window._lastClippyPosition.x - absoluteX);
               const yDiff = Math.abs(window._lastClippyPosition.y - absoluteY);
 
-              if (xDiff > 2 || yDiff > 2) {
+              if (xDiff > 5 || yDiff > 5) {
                 agentElement.style.left = `${absoluteX}px`;
                 agentElement.style.top = `${absoluteY}px`;
 
@@ -978,6 +963,19 @@ const ClippyController = ({
     const handleResize = () => {
       // Reset last update time to force an immediate update on resize
       lastUpdateRef.current = 0;
+
+      // Temporarily unlock positioning during resize
+      const wasPosLocked = globalPositioningLock;
+      if (wasPosLocked) {
+        globalPositioningLock = false;
+        window._clippyPositionLocked = false;
+
+        // Re-lock after resize completes
+        setTimeout(() => {
+          globalPositioningLock = true;
+          window._clippyPositionLocked = true;
+        }, 500);
+      }
     };
 
     window.addEventListener("resize", handleResize);
@@ -993,9 +991,13 @@ const ClippyController = ({
           );
         }
       }
+
+      // Clean up global positioning flag
+      delete window._clippyGlobalPositioningActive;
+
       window.removeEventListener("resize", handleResize);
     };
-  }, [setPosition, isMobile]);
+  }, [setPosition, isMobile, initialPositionAppliedRef, useGlobalPositioning]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -1015,8 +1017,8 @@ const ClippyController = ({
 
       // Remove any custom styles
       const styleElements = [
-        document.getElementById("clippy-animation-styles"),
-        document.getElementById("clippy-emergency-fix"),
+        document.getElementById("clippy-critical-styles"),
+        document.getElementById("clippy-animation-fix"),
         document.getElementById("clippy-animation-fix-temp"),
         document.getElementById("clippy-manual-fix"),
       ];
@@ -1038,6 +1040,9 @@ const ClippyController = ({
       if (balloonObserverRef.current) {
         balloonObserverRef.current.disconnect();
       }
+
+      // Reset global flags
+      delete window._clippyGlobalPositioningActive;
     };
   }, []);
 
