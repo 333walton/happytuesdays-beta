@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useCallback } from "react";
 import { useClippy } from "@react95/clippy";
 
+// Check if we're inside MonitorView
+const isInsideMonitorView = () => {
+  return document.getElementById("monitor-root") !== null;
+};
+
 // Global animation throttling variables
 let isAnimationPlaying = false;
 let animationDebounceTimeout = null;
@@ -92,7 +97,7 @@ const ClippyController = ({
       clippyEl.classList.remove("clippy-hidden");
 
       // Reset z-index - use standard value from our hierarchy
-      clippyEl.style.zIndex = "2000";
+      clippyEl.style.zIndex = isInsideMonitorView() ? "1001" : "2000";
 
       // Find SVG elements and ensure they're visible
       const svgElements = clippyEl.querySelectorAll("svg");
@@ -117,7 +122,7 @@ const ClippyController = ({
     const overlay = document.getElementById("clippy-clickable-overlay");
     if (overlay) {
       overlay.classList.add("clippy-overlay-visible");
-      overlay.style.zIndex = "2010"; // Use standard z-index
+      overlay.style.zIndex = isInsideMonitorView() ? "1002" : "2010"; // Use correct z-index
     }
 
     // Apply temporary fix style - only if not already present
@@ -152,16 +157,16 @@ const ClippyController = ({
         
         /* Temporary fix for z-index */
         .clippy {
-          z-index: 2000 !important;
+          z-index: ${isInsideMonitorView() ? "1001" : "2000"} !important;
         }
         
         #clippy-clickable-overlay {
-          z-index: 2010 !important;
+          z-index: ${isInsideMonitorView() ? "1002" : "2010"} !important;
         }
         
         .custom-clippy-balloon, 
         .custom-clippy-chat-balloon {
-          z-index: 2100 !important;
+          z-index: ${isInsideMonitorView() ? "1003" : "2100"} !important;
         }
       `;
       document.head.appendChild(fixStyle);
@@ -189,6 +194,9 @@ const ClippyController = ({
     // Find the clippy element to observe
     const clippyEl = document.querySelector(".clippy");
     if (!clippyEl) return null; // Return null instead of undefined
+
+    // Adjust observer behavior for MonitorView
+    const inMonitorView = isInsideMonitorView();
 
     // Create an observer with more limited scope
     const observer = new MutationObserver((mutations) => {
@@ -222,6 +230,19 @@ const ClippyController = ({
     observer.observe(clippyEl, { childList: true, subtree: true });
     balloonObserverRef.current = observer;
 
+    // On mobile, don't use polling interval at all
+    if (isMobile) {
+      // Just do one check now
+      const balloon = document.querySelector(".clippy-balloon");
+      if (balloon) {
+        const content = balloon.querySelector(".clippy-content");
+        if (content && content.textContent && window.showClippyCustomBalloon) {
+          balloon.classList.add("clippy-hidden");
+          window.showClippyCustomBalloon(content.textContent);
+        }
+      }
+    }
+
     // IMPORTANT: Return a proper cleanup function, not the observer itself
     return () => {
       if (observer) {
@@ -233,7 +254,12 @@ const ClippyController = ({
   // Find desktop viewport container
   useEffect(() => {
     if (!desktopViewportRef.current) {
-      const desktopElement = document.querySelector(".w98");
+      // For MonitorView compatibility, try to find the monitor screen first
+      const monitorScreen = isInsideMonitorView()
+        ? document.querySelector(".monitor-screen")
+        : null;
+      const desktopElement = monitorScreen || document.querySelector(".w98");
+
       if (desktopElement) {
         desktopViewportRef.current = desktopElement;
         desktopRectRef.current = desktopElement.getBoundingClientRect();
@@ -243,7 +269,7 @@ const ClippyController = ({
 
   // Replace the entire handleClippyInteraction function
   const handleClippyInteraction = useCallback(() => {
-    if (!clippy || !isScreenPoweredOn) return; // Don't interact when screen is off
+    if (!clippy || !isScreenPoweredOn || isInsideMonitorView()) return; // Skip if inside MonitorView
 
     console.log("Handling Clippy interaction");
 
@@ -343,8 +369,8 @@ const ClippyController = ({
         agentElement.classList.remove("clippy-visible");
       }
 
-      // Set z-index properly
-      agentElement.style.zIndex = "2000"; // Standard z-index
+      // Set z-index properly based on environment
+      agentElement.style.zIndex = isInsideMonitorView() ? "1001" : "2000";
 
       // Create clickable overlay if it doesn't exist
       if (!clippyOverlayRef.current) {
@@ -356,7 +382,7 @@ const ClippyController = ({
         overlay.style.top = `${rect.top}px`;
         overlay.style.width = `${rect.width}px`;
         overlay.style.height = `${rect.height}px`;
-        overlay.style.zIndex = "2010"; // Higher than Clippy
+        overlay.style.zIndex = isInsideMonitorView() ? "1002" : "2010"; // Set z-index based on environment
         overlay.style.cursor = "pointer";
         overlay.style.background = "transparent";
 
@@ -528,8 +554,11 @@ const ClippyController = ({
 
       // If power state changed from off to on, fix animations
       if (isScreenPoweredOn && !prevPowered) {
-        // Wait for transition to complete
-        setTimeout(fixAnimations, 500);
+        // Only try to restore animations if not inside MonitorView
+        if (!isInsideMonitorView()) {
+          // Wait for transition to complete
+          setTimeout(fixAnimations, 500);
+        }
       }
     }
   }, [isScreenPoweredOn, fixAnimations]);
@@ -608,43 +637,178 @@ const ClippyController = ({
     }
   }, [clippy, setClippyInstance, setupBalloonObserver, isScreenPoweredOn]);
 
-  // Add critical CSS styles for animations
+  // Modified useEffect for CSS styles
   useEffect(() => {
     if (document.getElementById("clippy-critical-styles")) return;
 
     const styleElement = document.createElement("style");
     styleElement.id = "clippy-critical-styles";
-    styleElement.textContent = `
-      /* Common visibility classes */
-      .clippy-visible {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
+
+    // Common styles that don't change
+    const commonStyles = `
+    /* Common visibility classes */
+    .clippy-visible {
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: block !important;
+    }
+    
+    .clippy-hidden {
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    
+    .clippy-no-events {
+      pointer-events: none !important;
+    }
+    
+    .clippy-overlay-visible {
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+    
+    .clippy-overlay-hidden {
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    
+    /* Hide original clippy balloon */
+    .clippy-balloon {
+      visibility: hidden !important;
+      opacity: 0 !important;
+      display: none !important;
+    }
+    
+    /* Ensure custom balloons are visible */
+    .custom-clippy-balloon,
+    .custom-clippy-chat-balloon {
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: block !important;
+      overflow: visible !important;
+      max-height: none !important;
+      scrollbar-width: none !important;
+    }
+    
+    .custom-clippy-balloon::-webkit-scrollbar,
+    .custom-clippy-chat-balloon::-webkit-scrollbar {
+      display: none !important;
+    }
+    
+    /* Ensure Clippy displays properly */
+    .clippy {
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: block !important;
+      pointer-events: none !important;
+      transform: scale(0.9) !important;
+      transform-origin: center bottom !important;
+      transition: visibility 0.3s, opacity 0.3s !important;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .clippy {
+        transform: scale(0.8) !important;
       }
       
-      .clippy-hidden {
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
+      .custom-clippy-balloon,
+      .custom-clippy-chat-balloon {
+        font-size: 16px !important;
+        max-width: 280px !important;
+      }
+    }
+    
+    /* CRITICAL: Animation fixes */
+    .clippy .maps {
+      position: relative !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .clippy .map {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      height: 100% !important;
+      width: 100% !important;
+      display: none !important;
+    }
+
+    .clippy .map.animate {
+      display: block !important;
+    }
+    
+    /* Always make animated elements visible */
+    .clippy .map.animate,
+    .clippy .map.animate *,
+    .clippy [class*="animate"],
+    .clippy .animate,
+    .clippy .animate * {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    /* SVG animation support */
+    .clippy svg,
+    .clippy svg * {
+      visibility: visible !important;
+      opacity: 1 !important;
+      display: inline !important;
+    }
+    
+    /* Clickable overlay */
+    #clippy-clickable-overlay {
+      position: fixed !important;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      display: block !important;
+      visibility: visible !important;
+      background: transparent !important;
+      transition: visibility 0.3s !important;
+    }
+    
+    /* Override screen power state for Clippy */
+    body.screen-off .clippy,
+    body.screen-off #clippy-clickable-overlay,
+    body.screen-off .custom-clippy-balloon,
+    body.screen-off .custom-clippy-chat-balloon {
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  `;
+
+    // Check if we're inside MonitorView and set appropriate z-index values
+    if (isInsideMonitorView()) {
+      // Use MonitorView compatible z-index values
+      styleElement.textContent = `
+      ${commonStyles}
+      
+      /* Z-index standardization for MonitorView compatibility */
+      .clippy {
+        z-index: 1001 !important;
       }
       
-      .clippy-no-events {
-        pointer-events: none !important;
+      #clippy-clickable-overlay {
+        z-index: 1002 !important;
       }
       
-      .clippy-overlay-visible {
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
+      .custom-clippy-balloon, 
+      .custom-clippy-chat-balloon {
+        z-index: 1003 !important;
       }
+    `;
+    } else {
+      // Use original z-index values
+      styleElement.textContent = `
+      ${commonStyles}
       
-      .clippy-overlay-hidden {
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-      }
-      
-      /* Z-index standardization */
+      /* Original z-index standardization */
       .clippy {
         z-index: 2000 !important;
       }
@@ -657,114 +821,9 @@ const ClippyController = ({
       .custom-clippy-chat-balloon {
         z-index: 2100 !important;
       }
-      
-      /* Hide original clippy balloon */
-      .clippy-balloon {
-        visibility: hidden !important;
-        opacity: 0 !important;
-        display: none !important;
-      }
-      
-      /* Ensure custom balloons are visible */
-      .custom-clippy-balloon,
-      .custom-clippy-chat-balloon {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-        overflow: visible !important;
-        max-height: none !important;
-        scrollbar-width: none !important;
-      }
-      
-      .custom-clippy-balloon::-webkit-scrollbar,
-      .custom-clippy-chat-balloon::-webkit-scrollbar {
-        display: none !important;
-      }
-      
-      /* Ensure Clippy displays properly */
-      .clippy {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-        pointer-events: none !important;
-        transform: scale(0.9) !important;
-        transform-origin: center bottom !important;
-        transition: visibility 0.3s, opacity 0.3s !important;
-      }
-      
-      /* Mobile optimizations */
-      @media (max-width: 768px) {
-        .clippy {
-          transform: scale(0.8) !important;
-        }
-        
-        .custom-clippy-balloon,
-        .custom-clippy-chat-balloon {
-          font-size: 16px !important;
-          max-width: 280px !important;
-        }
-      }
-      
-      /* CRITICAL: Animation fixes */
-      .clippy .maps {
-        position: relative !important;
-        width: 100% !important;
-        height: 100% !important;
-      }
-
-      .clippy .map {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-        height: 100% !important;
-        width: 100% !important;
-        display: none !important;
-      }
-
-      .clippy .map.animate {
-        display: block !important;
-      }
-      
-      /* Always make animated elements visible */
-      .clippy .map.animate,
-      .clippy .map.animate *,
-      .clippy [class*="animate"],
-      .clippy .animate,
-      .clippy .animate * {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-      }
-      
-      /* SVG animation support */
-      .clippy svg,
-      .clippy svg * {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: inline !important;
-      }
-      
-      /* Clickable overlay */
-      #clippy-clickable-overlay {
-        position: fixed !important;
-        cursor: pointer !important;
-        pointer-events: auto !important;
-        display: block !important;
-        visibility: visible !important;
-        background: transparent !important;
-        transition: visibility 0.3s !important;
-      }
-      
-      /* Override screen power state for Clippy */
-      body.screen-off .clippy,
-      body.screen-off #clippy-clickable-overlay,
-      body.screen-off .custom-clippy-balloon,
-      body.screen-off .custom-clippy-chat-balloon {
-        visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-      }
     `;
+    }
+
     document.head.appendChild(styleElement);
 
     return () => {
@@ -797,9 +856,16 @@ const ClippyController = ({
       const agentElement = agentElements[0];
       clippyElementRef.current = agentElement;
 
-      // Get desktop container
+      // Get desktop container - handle MonitorView specially
+      const inMonitorView = isInsideMonitorView();
+      const monitorScreen = inMonitorView
+        ? document.querySelector(".monitor-screen")
+        : null;
       const desktopElement =
-        desktopViewportRef.current || document.querySelector(".w98");
+        monitorScreen ||
+        desktopViewportRef.current ||
+        document.querySelector(".w98");
+
       if (!desktopElement) return false;
 
       // Calculate position - position at bottom right
@@ -807,8 +873,9 @@ const ClippyController = ({
       desktopRectRef.current = desktopRect;
 
       // Position at bottom right with margins - use percentages for better scaling
-      const rightMarginPercent = isMobile ? 0.15 : 0.1; // 15% on mobile, 10% on desktop
-      const bottomMarginPercent = isMobile ? 0.15 : 0.1;
+      // Use more conservative margins in MonitorView to keep Clippy visible
+      const rightMarginPercent = inMonitorView ? 0.12 : isMobile ? 0.15 : 0.1;
+      const bottomMarginPercent = inMonitorView ? 0.12 : isMobile ? 0.15 : 0.1;
 
       const posX = desktopRect.width * (1 - rightMarginPercent);
       const posY = desktopRect.height * (1 - bottomMarginPercent);
@@ -885,13 +952,21 @@ const ClippyController = ({
     window._clippyPositionLocked = true;
 
     const updatePositionFrame = (timestamp) => {
-      // Significantly reduce updates on mobile - use very conservative values
-      const updateInterval = isMobile ? 1000 : 250;
+      // Adjust timing based on environment
+      // Use even slower updates in MonitorView
+      const inMonitorView = isInsideMonitorView();
+      const updateInterval = inMonitorView ? 1500 : isMobile ? 1000 : 250;
 
       if (timestamp - lastUpdateRef.current > updateInterval) {
         if (initialPositionAppliedRef.current && !globalPositioningLock) {
+          // Get appropriate container based on environment
+          const monitorScreen = inMonitorView
+            ? document.querySelector(".monitor-screen")
+            : null;
           const desktopElement =
-            desktopViewportRef.current || document.querySelector(".w98");
+            monitorScreen ||
+            desktopViewportRef.current ||
+            document.querySelector(".w98");
 
           if (desktopElement && !isAnimationPlaying) {
             const desktopRect = desktopElement.getBoundingClientRect();
@@ -899,8 +974,17 @@ const ClippyController = ({
 
             if (agentElement) {
               // Position at bottom right with margins - use percentages for better scaling
-              const rightMarginPercent = isMobile ? 0.15 : 0.1; // 15% on mobile, 10% on desktop
-              const bottomMarginPercent = isMobile ? 0.15 : 0.1;
+              // Use more conservative margins in MonitorView
+              const rightMarginPercent = inMonitorView
+                ? 0.12
+                : isMobile
+                ? 0.15
+                : 0.1;
+              const bottomMarginPercent = inMonitorView
+                ? 0.12
+                : isMobile
+                ? 0.15
+                : 0.1;
 
               const posX = desktopRect.width * (1 - rightMarginPercent);
               const posY = desktopRect.height * (1 - bottomMarginPercent);
@@ -914,12 +998,13 @@ const ClippyController = ({
                 window._lastClippyPosition = { x: absoluteX, y: absoluteY };
               }
 
-              // Only update if position changed significantly (by more than 2px)
-              // This significantly reduces DOM operations
+              // Only update if position changed significantly
+              // Use larger threshold in MonitorView for better performance
+              const positionThreshold = inMonitorView ? 8 : 5;
               const xDiff = Math.abs(window._lastClippyPosition.x - absoluteX);
               const yDiff = Math.abs(window._lastClippyPosition.y - absoluteY);
 
-              if (xDiff > 5 || yDiff > 5) {
+              if (xDiff > positionThreshold || yDiff > positionThreshold) {
                 agentElement.style.left = `${absoluteX}px`;
                 agentElement.style.top = `${absoluteY}px`;
 
