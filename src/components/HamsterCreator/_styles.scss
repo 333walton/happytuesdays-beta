@@ -1,31 +1,77 @@
-/* Only keeping the hamster glow effect, since we're using react95 for windows */
-@keyframes hamsterGlow {
-  0% {
-    box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.7),
-      0 0 4px 2px rgba(255, 215, 0, 0.5), 0 0 6px 3px rgba(255, 140, 0, 0.3);
+/* Base hamster style — no glow on desktop */
+.hamster-gif {
+  cursor: pointer !important;
+  border-radius: 1px;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* Hover effect (applies to all devices) */
+.hamster-gif:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+/* Glow animation only for mobile screens */
+@media (max-width: 768px) {
+  @keyframes hamsterGlow {
+    0% {
+      box-shadow: 0 0 1px 0px rgba(255, 255, 255, 0.2),
+        0 0 2px 1px rgba(255, 215, 0, 0.3), 0 0 3px 2px rgba(255, 140, 0, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 1.5px 0.5px rgba(255, 255, 255, 0.6),
+        0 0 4px 2px rgba(255, 215, 0, 0.4), 0 0 6px 3px rgba(255, 140, 0, 0.3);
+    }
   }
-  50% {
-    box-shadow: 0 0 4px 2px rgba(255, 255, 255, 0.9),
-      0 0 8px 4px rgba(255, 215, 0, 0.7), 0 0 12px 6px rgba(255, 140, 0, 0.5);
-  }
-  100% {
-    box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.7),
-      0 0 4px 2px rgba(255, 215, 0, 0.5), 0 0 6px 3px rgba(255, 140, 0, 0.3);
+
+  .hamster-gif {
+    animation: hamsterGlow 1.75s infinite ease-in-out;
   }
 }
 
-/* Style for original hamster GIF */
-.hamster-gif {
-  cursor: pointer !important;
-  border-radius: 3px;
-  animation: hamsterGlow 1.5s infinite ease-in-out;
-  position: relative;
-  z-index: 2;
+/* iOS Safari & Mobile Enhancements */
+html,
+body {
+  height: 100%;
+  overflow: hidden; /* Prevent background scroll on iOS during fixed content */
+  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optional: Boost GPU acceleration in Safari */
+@supports (-webkit-touch-callout: none) {
+  .window-removing,
+  .hamster-gif,
+  .Window {
+    transform: translateZ(0); // triggers GPU rendering
+  }
 }
 
 /* Ensure React95 windows use correct styling */
 .Window:focus {
   outline: none !important;
+}
+
+@keyframes dots {
+  0% {
+    content: "";
+  }
+  33% {
+    content: ".";
+  }
+  66% {
+    content: "..";
+  }
+  100% {
+    content: "...";
+  }
+}
+
+.dots::after {
+  content: "...";
+  animation: dots 1s steps(3, end) infinite;
 }
 
 /* Enhanced window removal animation */
@@ -43,4 +89,18 @@
 .window-removing {
   animation: fadeOut 0.5s ease-out forwards;
   pointer-events: none; /* Prevent interaction during fade out */
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.5s ease-out;
+}
+
+/* Init message style */
+.hamster-init-message {
+  color: #ff4d4d !important;
+  font-family: ms_sans_serif, sans-serif;
+  font-size: 10px;
+  margin-top: 6px;
+  text-align: center;
+  z-index: 99999;
+  position: relative;
 }

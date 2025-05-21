@@ -12,27 +12,31 @@ class HamsterCreator extends Component {
       hamsterWindows: [],
       marqueeIsPaused: false,
       originalScrollAmount: 4.4,
+      showInitMessage: false,
+      colorToggled: false, // track if background color has been toggled
     };
 
     this.marqueeLinkRefs = new Map();
-    this.maxHamsters = 10;
+    this.maxHamsters = 15;
+    this.originalHamsterGif = null;
   }
 
   componentDidMount() {
-    // Set up a delay to ensure DOM is ready
     setTimeout(() => {
       this.setupMarquee();
       this.setupHamster();
-    }, 800); // Increased delay to ensure DOM is fully rendered
+    }, 800);
+
+    // Prevent iOS Safari bounce and improve touch responsiveness
+    document.body.style.overscrollBehavior = "none";
+    document.body.style.touchAction = "manipulation";
   }
 
   componentWillUnmount() {
-    // Clean up hamster windows
     this.state.hamsterWindows.forEach((window) => {
       if (window.timeoutId) clearTimeout(window.timeoutId);
     });
 
-    // Reset marquee links
     this.marqueeLinkRefs.forEach((originalHref, link) => {
       if (link) {
         link.href = originalHref;
@@ -42,7 +46,7 @@ class HamsterCreator extends Component {
 
     const marquee = document.getElementById("scrollMarquee");
     if (marquee) {
-      marquee.removeEventListener("click", this.handleMarqueeClick);
+      marquee.removeEventListener("click", this.handleMarqueeBackgroundClick);
     }
   }
 
@@ -53,26 +57,19 @@ class HamsterCreator extends Component {
       return;
     }
 
-    // Store original scroll amount
     this.setState({ originalScrollAmount: marquee.scrollAmount });
 
-    // Find all marquee links and store their hrefs
     const links = marquee.querySelectorAll(".marquee-link");
     links.forEach((link) => {
-      // Store original href
       const originalHref = link.href;
       this.marqueeLinkRefs.set(link, originalHref);
 
-      // Change href to prevent navigation and add our custom handler
       link.href = "javascript:void(0)";
-
-      // Add click listener
       link.addEventListener("click", (e) =>
         this.handleMarqueeLinkClick(e, link, originalHref)
       );
     });
 
-    // Add click listener to marquee itself
     marquee.addEventListener("click", this.handleMarqueeBackgroundClick);
   };
 
@@ -90,14 +87,11 @@ class HamsterCreator extends Component {
       return;
     }
 
-    // Add class for styling and make the gif stand out
+    this.originalHamsterGif = hamsterGif;
+
     hamsterGif.classList.add("hamster-gif");
     hamsterGif.style.cursor = "pointer";
-
-    // Add a title attribute to provide a hint
     hamsterGif.setAttribute("title", "Click me to unleash hamster madness!");
-
-    // Add click handler
     hamsterGif.addEventListener("click", this.createHamsterWindow);
   };
 
@@ -109,14 +103,11 @@ class HamsterCreator extends Component {
     if (!marquee) return;
 
     if (this.state.marqueeIsPaused) {
-      // Second click - navigate
       window.location.href = originalHref;
     } else {
-      // First click - pause
       this.setState({ marqueeIsPaused: true });
       marquee.scrollAmount = 0;
 
-      // Resume after 2 seconds
       setTimeout(() => {
         if (marquee) {
           marquee.scrollAmount = this.state.originalScrollAmount;
@@ -127,7 +118,6 @@ class HamsterCreator extends Component {
   };
 
   handleMarqueeBackgroundClick = (e) => {
-    // Only handle clicks directly on the marquee, not on links
     if (e.target.tagName === "A") return;
 
     const marquee = document.getElementById("scrollMarquee");
@@ -136,7 +126,6 @@ class HamsterCreator extends Component {
     this.setState({ marqueeIsPaused: true });
     marquee.scrollAmount = 0;
 
-    // Resume after 2 seconds
     setTimeout(() => {
       if (marquee) {
         marquee.scrollAmount = this.state.originalScrollAmount;
@@ -146,99 +135,155 @@ class HamsterCreator extends Component {
   };
 
   createHamsterWindow = (e) => {
-    if (e) {
-      e.stopPropagation();
+    if (e) e.stopPropagation();
+
+    if (!this.state.showInitMessage) {
+      this.setState({ showInitMessage: true });
+      setTimeout(() => this.setState({ showInitMessage: false }), 12000);
     }
 
-    if (this.state.hamsterWindows.length >= this.maxHamsters) {
-      console.log(
-        "Maximum hamster count reached:",
-        this.state.hamsterWindows.length
-      );
-      return;
-    }
+    if (this.state.hamsterWindows.length >= this.maxHamsters) return;
 
-    // Check if it's a mobile device
     const isMobile = window.innerWidth <= 768;
+    const padding = 20;
+    const availWidth = Math.max(200, window.innerWidth - 100);
+    const availHeight = Math.max(200, window.innerHeight - 120);
 
-    // Generate random position - ensure it's visible on screen
-    // Use different calculations for mobile vs desktop
-    let posX, posY;
+    const posX = Math.floor(
+      padding + Math.random() * (availWidth - padding * 2)
+    );
+    const posY = Math.floor(
+      padding + Math.random() * (availHeight - padding * 2)
+    );
 
-    if (isMobile) {
-      // For mobile, keep the hamsters more centered and visible
-      const padding = 20;
-      const availWidth = Math.max(200, window.innerWidth - 100);
-      const availHeight = Math.max(200, window.innerHeight - 120);
-
-      posX = Math.max(
-        padding,
-        Math.min(
-          window.innerWidth - 150,
-          Math.floor(padding + Math.random() * (availWidth - padding * 2))
-        )
-      );
-      posY = Math.max(
-        padding,
-        Math.min(
-          window.innerHeight - 150,
-          Math.floor(padding + Math.random() * (availHeight - padding * 2))
-        )
-      );
-    } else {
-      // For desktop, use the full screen
-      const margin = 20;
-      const maxX = Math.max(50, window.innerWidth - 150);
-      const maxY = Math.max(50, window.innerHeight - 150);
-
-      posX = Math.floor(margin + Math.random() * (maxX - margin * 2));
-      posY = Math.floor(margin + Math.random() * (maxY - margin * 2));
-    }
-
-    // Create new hamster window with a unique key
     const newWindow = {
-      id: `hamster-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      id: `hamster-${Date.now()}-${Math.floor(Math.random() * 12000)}`,
       x: posX,
       y: posY,
       zIndex: 9999999 + this.state.hamsterWindows.length,
+      closeAttempts: 0, // <--- new field
     };
 
-    // Add the new window to state
-    this.setState((prevState) => ({
-      hamsterWindows: [...prevState.hamsterWindows, newWindow],
-    }));
-
-    // Set a timeout to remove the window after 10 seconds
     const timeoutId = setTimeout(() => {
       this.removeHamsterWindow(newWindow.id);
-    }, 10000);
+    }, 12000);
 
-    // Save the timeout ID for cleanup
     newWindow.timeoutId = timeoutId;
+
+    // Toggle background color after every 2nd click
+    this.setState((prevState) => {
+      const newColorToggled = prevState.colorToggled ? false : true; // toggle the color
+      return {
+        hamsterWindows: [...prevState.hamsterWindows, newWindow],
+        colorToggled: newColorToggled, // update the state
+      };
+    });
   };
 
   removeHamsterWindow = (id) => {
-    // First mark the window for removal to trigger animation
     this.setState((prevState) => ({
       hamsterWindows: prevState.hamsterWindows.map((window) =>
         window.id === id ? { ...window, removing: true } : window
       ),
     }));
 
-    // Then after animation completes, actually remove it
     setTimeout(() => {
       this.setState((prevState) => ({
         hamsterWindows: prevState.hamsterWindows.filter(
           (window) => window.id !== id
         ),
       }));
-    }, 500); // Match this to the CSS animation duration
+    }, 500);
+  };
+
+  handleCloseClick = (id) => {
+    const padding = 20;
+    const availWidth = Math.max(200, window.innerWidth - 100);
+    const availHeight = Math.max(200, window.innerHeight - 120);
+
+    this.setState((prevState) => {
+      return {
+        hamsterWindows: prevState.hamsterWindows.flatMap((window) => {
+          if (window.id !== id) return [window];
+
+          const newAttempts = (window.closeAttempts || 0) + 1;
+
+          // First click: Change button color to red and clone the window
+          if (newAttempts === 1) {
+            const updatedWindow = {
+              ...window,
+              closeAttempts: newAttempts,
+              backgroundColor: "#ff4c4c", // Red color after the first click
+            };
+
+            const clonedWindow = {
+              ...window,
+              id: `hamster-${Date.now()}-${Math.floor(Math.random() * 12000)}`,
+              x: Math.floor(
+                padding + Math.random() * (availWidth - padding * 2)
+              ),
+              y: Math.floor(
+                padding + Math.random() * (availHeight - padding * 2)
+              ),
+              closeAttempts: 0,
+              zIndex: window.zIndex + 1,
+            };
+
+            const timeoutId = setTimeout(() => {
+              this.removeHamsterWindow(clonedWindow.id);
+            }, 12000);
+
+            clonedWindow.timeoutId = timeoutId;
+
+            return [updatedWindow, clonedWindow]; // Clone the window
+          }
+
+          // Second click: Revert background color and clone the window again
+          if (newAttempts === 2) {
+            const updatedWindow = {
+              ...window,
+              closeAttempts: newAttempts,
+              backgroundColor: undefined, // Revert to original color
+            };
+
+            const clonedWindow = {
+              ...window,
+              id: `hamster-${Date.now()}-${Math.floor(Math.random() * 12000)}`,
+              x: Math.floor(
+                padding + Math.random() * (availWidth - padding * 2)
+              ),
+              y: Math.floor(
+                padding + Math.random() * (availHeight - padding * 2)
+              ),
+              closeAttempts: 0,
+              zIndex: window.zIndex + 1,
+            };
+
+            const timeoutId = setTimeout(() => {
+              this.removeHamsterWindow(clonedWindow.id);
+            }, 12000);
+
+            clonedWindow.timeoutId = timeoutId;
+
+            return [updatedWindow, clonedWindow]; // Clone the window again
+          }
+
+          // Third click: Remove the window (no more cloning)
+          if (newAttempts === 3) {
+            this.removeHamsterWindow(window.id);
+            return []; // Do not clone or change anything, just remove the window
+          }
+
+          // Continue to increment for the first and second click
+          return [{ ...window, closeAttempts: newAttempts }];
+        }),
+      };
+    });
   };
 
   startDrag = (e, id) => {
     e.preventDefault();
 
-    // Bring window to front
     this.setState((prevState) => ({
       hamsterWindows: prevState.hamsterWindows.map((window) =>
         window.id === id
@@ -247,45 +292,30 @@ class HamsterCreator extends Component {
       ),
     }));
 
-    const window = this.state.hamsterWindows.find((w) => w.id === id);
-    if (!window) return;
+    const targetWindow = this.state.hamsterWindows.find((w) => w.id === id);
+    if (!targetWindow) return;
 
     const startX = e.clientX;
     const startY = e.clientY;
-    const startLeft = window.x;
-    const startTop = window.y;
+    const startLeft = targetWindow.x;
+    const startTop = targetWindow.y;
 
-    // Check if it's a mobile device
     const isMobile = window.innerWidth <= 768;
 
     const handleMouseMove = (moveEvent) => {
       const dx = moveEvent.clientX - startX;
       const dy = moveEvent.clientY - startY;
 
-      // Adjust bounds based on device type
-      let newX, newY;
+      let newX = startLeft + dx;
+      let newY = startTop + dy;
 
       if (isMobile) {
-        // Keep the window fully visible on mobile
         const padding = 10;
-        newX = Math.max(
-          padding,
-          Math.min(window.innerWidth - 120, startLeft + dx)
-        );
-        newY = Math.max(
-          padding,
-          Math.min(window.innerHeight - 120, startTop + dy)
-        );
+        newX = Math.max(padding, Math.min(window.innerWidth - 120, newX));
+        newY = Math.max(padding, Math.min(window.innerHeight - 120, newY));
       } else {
-        // Desktop can be a bit more flexible
-        newX = Math.max(
-          -60,
-          Math.min(document.body.clientWidth - 60, startLeft + dx)
-        );
-        newY = Math.max(
-          -10,
-          Math.min(document.body.clientHeight - 40, startTop + dy)
-        );
+        newX = Math.max(-60, Math.min(document.body.clientWidth - 60, newX));
+        newY = Math.max(-10, Math.min(document.body.clientHeight - 40, newY));
       }
 
       this.setState((prevState) => ({
@@ -298,13 +328,10 @@ class HamsterCreator extends Component {
     const handleMouseUp = () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
-
-      // For touch devices
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchend", handleMouseUp);
     };
 
-    // Handle touch events for mobile
     const handleTouchMove = (touchEvent) => {
       const touch = touchEvent.touches[0];
       const moveEvent = {
@@ -314,18 +341,34 @@ class HamsterCreator extends Component {
       handleMouseMove(moveEvent);
     };
 
-    // Set up mouse events for desktop
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
-
-    // Set up touch events for mobile
     document.addEventListener("touchmove", handleTouchMove);
     document.addEventListener("touchend", handleMouseUp);
+  };
+
+  startTouchDrag = (e, id) => {
+    const touch = e.touches[0];
+    const touchEvent = {
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      preventDefault: () => e.preventDefault(),
+    };
+    this.startDrag(touchEvent, id);
   };
 
   render() {
     return (
       <>
+        {this.state.showInitMessage &&
+          this.originalHamsterGif &&
+          ReactDOM.createPortal(
+            <div className="hamster-init-message">
+              hamster.exe initiating<span className="dots"></span>
+            </div>,
+            this.originalHamsterGif.parentElement
+          )}
+
         {this.state.hamsterWindows.map((window) =>
           ReactDOM.createPortal(
             <ThemeProvider theme={original}>
@@ -341,36 +384,45 @@ class HamsterCreator extends Component {
                   margin: 0,
                   width: "auto",
                   height: "auto",
+                  transform: "translateZ(0)", // <-- added
                 }}
               >
                 <WindowHeader
                   style={{
-                    padding: "5px 7px",
+                    padding: "5px 1px",
+                    //margin: "0px",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    height: "22px", // Increased height
-                    cursor: "default", // Normal cursor instead of pointer
+                    height: "22px",
+                    cursor: "grab",
+                    touchAction: "none",
                   }}
                   onMouseDown={(e) => this.startDrag(e, window.id)}
+                  onTouchStart={(e) => this.startTouchDrag(e, window.id)}
                 >
-                  <span style={{ fontSize: "12px" }}>Hamster.exe</span>
+                  <span style={{ fontSize: "12px", marginLeft: "5px" }}>
+                    {" "}
+                    hamster.exe
+                  </span>
                   <Button
                     style={{
-                      fontSize: "12px", // Larger font
+                      fontSize: "12px",
                       fontWeight: "bold",
-                      width: "18px", // Larger button
-                      height: "16px", // Larger button
+                      width: "18px",
+                      height: "16px",
                       padding: 0,
                       margin: 0,
-                      marginLeft: "4px",
+                      marginLeft: "8px",
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
-                      lineHeight: "10px", // Lower line height to raise the X
-                      paddingBottom: "2px", // Push the X up a bit more
+                      lineHeight: "10px",
+                      paddingBottom: "8px",
+                      backgroundColor:
+                        window.closeAttempts === 1 ? "#ff4c4c" : undefined, // Red color only after the first click
                     }}
-                    onClick={() => this.removeHamsterWindow(window.id)}
+                    onClick={() => this.handleCloseClick(window.id)}
                   >
                     ×
                   </Button>
@@ -391,14 +443,14 @@ class HamsterCreator extends Component {
                       border: "none",
                       margin: 0,
                       padding: 0,
-                      cursor: "pointer", // Show pointer cursor on hover
+                      cursor: "pointer",
                     }}
-                    onClick={this.createHamsterWindow} // Same click handler as the original
+                    onClick={this.createHamsterWindow}
                   />
                 </WindowContent>
               </Window>
             </ThemeProvider>,
-            document.body // Attach directly to document body
+            document.body
           )
         )}
       </>

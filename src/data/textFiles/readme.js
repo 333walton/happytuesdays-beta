@@ -116,10 +116,21 @@ const generateTableRows = (rows) => {
     .map(
       (r) => `
         <tr>
-          <td bgcolor="black" width="80px" align="right" class="title-cell">
-            <font color="white" id="introduction" class="title-text">
-              ${r.title}<br/>
-              <img src="${r.image}" width="60px" class="${
+          <td bgcolor="black" width="80px" align="center" class="title-cell">
+            <font color="white" id="introduction">
+              <div style="margin-top: 3px; margin-bottom: ${
+                r.title === "Intro" ||
+                r.title === "Features" ||
+                r.title === "FAQ" ||
+                r.title === "Tech" ||
+                r.title === "About"
+                  ? "11px"
+                  : "0"
+              };">
+
+                ${r.title}
+              </div>
+              <img src="${r.image}" width="60px" font color="#ff4d4d" class="${
         r.title === "Intro" ? "hamster-gif" : ""
       }" />
             </font>
@@ -177,13 +188,13 @@ font * {
 
 /* Explicit color overrides - specifically target iOS Safari */
 .title-text {
-  color: white !important;
+  color: white ;
   -webkit-text-fill-color: white !important;
 }
 
 /* Additional override for iOS Safari and other stubborn browsers */
-td[bgcolor="black"] font[color="white"] {
-  color: white !important;
+td[bgcolor="black"] font[color="white"] font[color="red"]{
+  color: white;
   -webkit-text-fill-color: white !important;
 }
 
