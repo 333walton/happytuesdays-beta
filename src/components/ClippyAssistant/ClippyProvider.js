@@ -1,4 +1,4 @@
-// Modified ClippyProvider.js section to handle screen power state
+// Modified ClippyProvider.js with mobile fix
 
 import React, {
   createContext,
@@ -16,6 +16,10 @@ import {
 import CustomBalloon from "./CustomBalloon";
 import ChatBalloon from "./ChatBalloon";
 import ClippyController from "./ClippyController";
+import {
+  applyMobileClippyFix,
+  cleanupMobileClippyFix,
+} from "./mobile-clippy-fix";
 
 import "./_styles.scss";
 
@@ -303,9 +307,103 @@ const ClippyProvider = ({
     // Set assistantVisible to true when component mounts
     setAssistantVisible(true);
 
+    // Apply mobile-specific fixes if on a mobile device
+    if (isMobileRef.current) {
+      console.log("Applying mobile Clippy positioning fix");
+
+      // Add mobile-specific styles
+      const styleEl = document.createElement("style");
+      styleEl.id = "clippy-mobile-fix";
+      styleEl.textContent = `
+        .clippy {
+          position: absolute !important;
+          transform: scale(0.7) !important;
+          transform-origin: center bottom !important;
+          max-width: 93px !important;
+          max-height: 93px !important;
+          bottom: 10px !important;
+          right: 10px !important;
+          left: auto !important;
+          top: auto !important;
+          z-index: 1500 !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+        
+        #clippy-clickable-overlay {
+          position: absolute !important;
+          bottom: 10px !important;
+          right: 10px !important;
+          left: auto !important;
+          top: auto !important;
+          width: 93px !important;
+          height: 93px !important;
+          z-index: 1510 !important;
+        }
+        
+        .custom-clippy-balloon,
+        .custom-clippy-chat-balloon {
+          max-width: 70% !important;
+          z-index: 1520 !important;
+          font-size: 16px !important;
+        }
+      `;
+      document.head.appendChild(styleEl);
+
+      // Disable complex positioning on mobile
+      window._clippyPositionLocked = true;
+
+      // Override the position setter function for mobile
+      const originalSetPosition = window.setClippyPosition;
+      window.setClippyPosition = function (newPos) {
+        // Apply fixed mobile position
+        const clippyEl = document.querySelector(".clippy");
+        if (clippyEl) {
+          clippyEl.style.position = "absolute";
+          clippyEl.style.bottom = "10px";
+          clippyEl.style.right = "10px";
+          clippyEl.style.left = "auto";
+          clippyEl.style.top = "auto";
+          clippyEl.style.visibility = "visible";
+          clippyEl.style.opacity = "1";
+        }
+
+        // Also fix the overlay position
+        const overlay = document.getElementById("clippy-clickable-overlay");
+        if (overlay) {
+          overlay.style.position = "absolute";
+          overlay.style.bottom = "10px";
+          overlay.style.right = "10px";
+          overlay.style.left = "auto";
+          overlay.style.top = "auto";
+
+          // Make sure the overlay matches clippy size
+          if (clippyEl) {
+            overlay.style.width = `${clippyEl.offsetWidth}px`;
+            overlay.style.height = `${clippyEl.offsetHeight}px`;
+          }
+        }
+      };
+
+      // Apply the position fix once after a delay to ensure Clippy is loaded
+      setTimeout(() => {
+        if (window.setClippyPosition) {
+          window.setClippyPosition();
+        }
+      }, 1000);
+    }
+
     return () => {
       // Clear flag when unmounting
       delete window._clippyInitializing;
+
+      // Clean up the mobile fix styles if added
+      if (isMobileRef.current) {
+        const styleEl = document.getElementById("clippy-mobile-fix");
+        if (styleEl && styleEl.parentNode) {
+          styleEl.parentNode.removeChild(styleEl);
+        }
+      }
     };
   }, []);
 

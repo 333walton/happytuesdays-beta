@@ -362,3 +362,38 @@ body.screen-off .custom-clippy-chat-balloon {
   -webkit-perspective: 1000 !important;
   perspective: 1000 !important;
 }
+
+/* Standardized mobile styles with proper positioning */
+@media (max-width: 768px) {
+  .clippy {
+    position: absolute !important; /* Change to absolute on mobile */
+    transform: scale(0.7) !important; /* Smaller scale on mobile */
+    transform-origin: center bottom !important;
+    max-width: 93px !important;
+    max-height: 93px !important;
+    /* Shift position to avoid content overlap */
+    bottom: 10px !important;
+    right: 10px !important;
+    left: auto !important;
+    top: auto !important;
+    /* Ensure it's always visible but not obstructing */
+    z-index: 1500 !important; /* Lower z-index on mobile */
+  }
+
+  #clippy-clickable-overlay {
+    position: absolute !important;
+    bottom: 10px !important;
+    right: 10px !important;
+    left: auto !important;
+    top: auto !important;
+    width: 93px !important;
+    height: 93px !important;
+    z-index: 1510 !important;
+  }
+
+  .custom-clippy-balloon,
+  .custom-clippy-chat-balloon {
+    max-width: 70% !important;
+    z-index: 1520 !important;
+  }
+}

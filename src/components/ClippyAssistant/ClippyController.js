@@ -280,6 +280,28 @@ const ClippyController = ({
       return;
     }
 
+    // Modify the enforcement for mobile
+    if (isMobileRef.current) {
+      // On mobile, position at bottom right corner with padding
+      clippyEl.style.position = "absolute";
+      clippyEl.style.bottom = "10px";
+      clippyEl.style.right = "10px";
+      clippyEl.style.left = "auto";
+      clippyEl.style.top = "auto";
+
+      // Also position the overlay
+      if (clippyOverlayRef.current) {
+        clippyOverlayRef.current.style.position = "absolute";
+        clippyOverlayRef.current.style.bottom = "10px";
+        clippyOverlayRef.current.style.right = "10px";
+        clippyOverlayRef.current.style.left = "auto";
+        clippyOverlayRef.current.style.top = "auto";
+      }
+
+      // Skip the animation frame positioning on mobile
+      return;
+    }
+
     // CRITICAL: Make clippy and its children visible with classes
     clippyEl.classList.add("clippy-visible");
     clippyEl.classList.remove("clippy-hidden");
