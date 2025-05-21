@@ -18,7 +18,7 @@ const readmeContent = {
     },
     {
       title: "Features",
-      image: "//clipart-library.com/image_gallery/91835.jpg",
+      image: "/static/computer-01.gif", // Corrected image path
       content: `
       <div class="intro-paragraph">
         <ul>
@@ -35,21 +35,6 @@ const readmeContent = {
       `,
     },
     {
-      title: "FAQ",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRX6w3EFRXeOcn6IvxIHNU8S7NU-HNKLtJd8CBYvAiuWZzbu0xNDvBFubV",
-      content: `
-      <div class="intro-paragraph">
-        <ul>
-          <li><b>Why does the screen flicker?</b><br> → That's the CRT effect simulating an old-school monitor! You can adjust or disable it in the Control Panel settings.</li>
-          <li><b>Why is the screen size weird?</b><br> → Monitors were square (4:3 aspect ratio) in the 90s. Visit Start > Settings > Control Panel to adjust scaling.</li>
-          <li><b>Can I delete files?</b><br> → Not yet! But clearing your browser's local storage gives you that authentic "I just reinstalled Windows" feeling.</li>
-          <li><b>Can I see the launch screen again?</b><br> → Just go through the shutdown sequence, and it'll appear on refresh.</li>
-        </ul>
-        </div>
-      `,
-    },
-    {
       title: "Tech",
       image: "/static/cryptopunk.jpg",
       content: `
@@ -60,6 +45,21 @@ const readmeContent = {
           <li>CSS Modules & Styled Components for Windows 98 aesthetic</li>
           <li>react-rnd for window resizing and dragging functionality</li>
           <li>Organized component structure for maximum maintainability</li>
+        </ul>
+        </div>
+      `,
+    },
+    {
+      title: "FAQ",
+      image:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRX6w3EFRXeOcn6IvxIHNU8S7NU-HNKLtJd8CBYvAiuWZzbu0xNDvBFubV",
+      content: `
+      <div class="intro-paragraph">
+        <ul>
+          <li><b>Why does the screen flicker?</b><br> → That's the CRT effect simulating an old-school monitor! You can adjust or disable it in the Control Panel settings.</li>
+          <li><b>Why is the screen size weird?</b><br> → Monitors were square (4:3 aspect ratio) in the 90s. Visit Start > Settings > Control Panel to adjust scaling.</li>
+          <li><b>Can I delete files?</b><br> → Not yet! But clearing your browser's local storage gives you that authentic "I just reinstalled Windows" feeling.</li>
+          <li><b>Can I see the launch screen again?</b><br> → Just go through the shutdown sequence, and it'll appear on refresh.</li>
         </ul>
         </div>
       `,
@@ -119,27 +119,30 @@ const generateTableRows = (rows) => {
           <td bgcolor="black" width="80px" align="center" class="title-cell">
             <font color="white" id="introduction">
               <div style="margin-top: 3px; margin-bottom: ${
-                r.title === "Intro" ||
-                r.title === "Features" ||
-                r.title === "FAQ" ||
-                r.title === "Tech" ||
-                r.title === "About"
+                ["Intro", "Features", "Tech", "FAQ", "About"].includes(r.title)
                   ? "11px"
                   : "0"
               };">
-
                 ${r.title}
               </div>
-              <img src="${r.image}" width="60px" font color="#ff4d4d" class="${
-        r.title === "Intro" ? "hamster-gif" : ""
-      }" />
+              <img
+                src="${r.image}"
+                width="${r.title === "Features" ? "70px" : "60px"}"
+                font color="#ff4d4d"
+                class="${
+                  r.title === "Intro"
+                    ? "hamster-gif"
+                    : r.title === "Features"
+                    ? "computer-01"
+                    : ""
+                }"
+              />
             </font>
           </td>
           <td bgcolor="lightgrey">
             ${r.content}
           </td>
-        </tr>
-      `
+        </tr>`
     )
     .join("");
 };
