@@ -1107,4 +1107,10 @@ class ClippyManager {
 
 // Export a singleton instance
 const clippyManager = new ClippyManager();
+
+// Expose the manager instance to window for easier access
+if (typeof window !== "undefined") {
+  window.ClippyManager = clippyManager;
+}
+
 export default clippyManager;

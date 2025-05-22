@@ -570,4 +570,9 @@ const ClippyService = {
   killClippy,
 };
 
+// Expose service to window for external access
+if (typeof window !== "undefined") {
+  window.ClippyService = ClippyService;
+}
+
 export default ClippyService;

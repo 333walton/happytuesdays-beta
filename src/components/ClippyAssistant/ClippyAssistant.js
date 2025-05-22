@@ -1,14 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { AGENTS } from "@react95/clippy";
 import { useClippy } from "@react95/clippy";
 import { useClippyContext } from "./ClippyProvider";
 import CustomWindow from "../CustomWindow";
 import * as icons from "../../icons";
+import { fixClippyContextMenu } from "./ClippyContextMenuFix";
+import {
+  applyClippyNuclearFix,
+  watchForClippyElements,
+} from "./ClippyNuclearFix";
+// Import the script that gives access to emergency destroy function
+import "./ClippyDestroyAll.js";
 
 /**
  * Office Assistant (Clippy) settings and control panel
+ * Optimized for mobile performance
  */
-const ClippyAssistant = (props) => {
+const ClippyAssistant = memo((props) => {
   const { id, zIndex, isActive, moveToTop, onClose, onMinimize, minimized } =
     props;
 
@@ -31,26 +39,38 @@ const ClippyAssistant = (props) => {
   const [xPosition, setXPosition] = useState(position?.x || 400);
   const [yPosition, setYPosition] = useState(position?.y || 300);
 
-  // List of available assistants and hardcoded animations
-  const agents = Object.keys(AGENTS || {});
-  const animations = [
-    "Greeting",
-    "Wave",
-    "Congratulate",
-    "GetAttention",
-    "Thinking",
-    "Writing",
-    "GoodBye",
-    "Processing",
-    "Alert",
-    "GetArtsy",
-    "Searching",
-    "Explain",
-    "Confused",
-    "Hide",
-    "Show",
-    "Idle",
-  ];
+  // Check if we're on a mobile device - memoized to avoid recalculating
+  const isMobile = useMemo(() => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+  }, []);
+
+  // List of available assistants - memoized to prevent recreation on each render
+  const agents = useMemo(() => Object.keys(AGENTS || {}), []);
+
+  // Animations list - memoized to prevent recreation on each render
+  const animations = useMemo(
+    () => [
+      "Greeting",
+      "Wave",
+      "Congratulate",
+      "GetAttention",
+      "Thinking",
+      "Writing",
+      "GoodBye",
+      "Processing",
+      "Alert",
+      "GetArtsy",
+      "Searching",
+      "Explain",
+      "Confused",
+      "Hide",
+      "Show",
+      "Idle",
+    ],
+    []
+  );
 
   // When component mounts, make sure Clippy is visible
   useEffect(() => {
@@ -59,8 +79,29 @@ const ClippyAssistant = (props) => {
     }
   }, [minimized, setAssistantVisible]);
 
+  // Apply context menu fix and nuclear fix when component mounts
+  useEffect(() => {
+    // Delay fix application to ensure ClippyManager is available
+    const timeoutId = setTimeout(() => {
+      // Apply the fix to make the right-click context menu hide functionality work
+      if (window.ClippyManager) {
+        console.log("Applying context menu fix to ClippyManager");
+        fixClippyContextMenu();
+
+        // Apply the nuclear fix for guaranteed hide functionality
+        console.log("Applying nuclear fix for guaranteed hide functionality");
+        applyClippyNuclearFix();
+
+        // Set up mutation observer to catch any new Clippy elements
+        const observer = watchForClippyElements();
+      }
+    }, 1500); // Delay to ensure everything is loaded
+
+    return () => clearTimeout(timeoutId);
+  }, []);
+
   // Function to safely access the clippy object
-  const getClippy = () => {
+  const getClippy = useCallback(() => {
     // Check all possible sources for clippy
     if (clippyHook && clippyHook.clippy) {
       return clippyHook.clippy;
@@ -69,44 +110,37 @@ const ClippyAssistant = (props) => {
       return window.clippy;
     }
     return null;
-  };
+  }, [clippyHook]);
 
-  // Function to play a selected animation
-  const handlePlayAnimation = () => {
+  // Function to play a selected animation - memoized to prevent recreation
+  const handlePlayAnimation = useCallback(() => {
     const clippy = getClippy();
     if (clippy && clippy.play) {
       try {
-        console.log("Playing animation:", selectedAnimation);
         clippy.play(selectedAnimation);
       } catch (e) {
-        console.error(`Error playing animation "${selectedAnimation}":`, e);
+        // Animation error handled internally
       }
-    } else {
-      console.warn("Could not find Clippy instance to play animation");
     }
-  };
+  }, [getClippy, selectedAnimation]);
 
-  // Function to send a message to Clippy
-  const handleSendMessage = () => {
+  // Function to send a message to Clippy - memoized for performance
+  const handleSendMessage = useCallback(() => {
     const clippy = getClippy();
     if (message.trim() && clippy && clippy.speak) {
       try {
-        console.log("Making Clippy speak:", message);
         clippy.speak(message);
         setMessage("");
       } catch (e) {
-        console.error("Error having Clippy speak:", e);
+        // Speech error handled internally
       }
-    } else {
-      console.warn("Could not find Clippy instance to speak");
     }
-  };
+  }, [getClippy, message, setMessage]);
 
-  // Toggle visibility
-  const toggleAssistant = () => {
+  // Toggle visibility - memoized to prevent recreation
+  const toggleAssistant = useCallback(() => {
     if (setAssistantVisible) {
       const newVisibility = !assistantVisible;
-      console.log("Setting assistant visibility to:", newVisibility);
       setAssistantVisible(newVisibility);
 
       // If showing, give feedback
@@ -124,52 +158,55 @@ const ClippyAssistant = (props) => {
         }
       }
     }
-  };
+  }, [assistantVisible, getClippy, setAssistantVisible]);
 
-  // Handle agent change
-  const handleAgentChange = (e) => {
-    const newAgent = e.target.value;
-    if (setCurrentAgent) {
-      console.log("Changing agent to:", newAgent);
-      setCurrentAgent(newAgent);
+  // Handle agent change - memoized for performance
+  const handleAgentChange = useCallback(
+    (e) => {
+      const newAgent = e.target.value;
+      if (setCurrentAgent) {
+        setCurrentAgent(newAgent);
 
-      // Welcome message for new agent
-      setTimeout(() => {
-        const clippy = getClippy();
-        if (clippy) {
-          if (clippy.speak) {
-            clippy.speak(`Hi! I'm ${newAgent} now. How can I help you?`);
+        // Welcome message for new agent
+        setTimeout(() => {
+          const clippy = getClippy();
+          if (clippy) {
+            if (clippy.speak) {
+              clippy.speak(`Hi! I'm ${newAgent} now. How can I help you?`);
+            }
+            if (clippy.play) {
+              clippy.play("Wave");
+            }
           }
-          if (clippy.play) {
-            clippy.play("Wave");
-          }
-        }
-      }, 500);
-    }
-  };
+        }, 500);
+      }
+    },
+    [getClippy, setCurrentAgent]
+  );
 
-  // Update position
-  const updatePosition = () => {
+  // Update position - optimized for performance and memoized
+  const updatePosition = useCallback(() => {
     if (setPosition) {
       const newPosition = { x: Number(xPosition), y: Number(yPosition) };
-      console.log("Setting position to:", newPosition);
       setPosition(newPosition);
 
-      // Also try direct DOM manipulation for immediate feedback
-      try {
-        const agentElements = document.querySelectorAll(".clippy");
-        if (agentElements.length > 0) {
-          const agentElement = agentElements[0];
+      // Update DOM directly for immediate feedback
+      const clippyElement = document.querySelector(".clippy");
+      if (clippyElement) {
+        // Apply hardware-accelerated positioning
+        clippyElement.style.position = "absolute";
+        clippyElement.style.left = `${xPosition}px`;
+        clippyElement.style.top = `${yPosition}px`;
+        clippyElement.style.right = "auto";
+        clippyElement.style.bottom = "auto";
+        clippyElement.style.willChange = "transform"; // Optimize for animations
 
-          // Position using absolute positioning
-          agentElement.style.position = "absolute";
-          agentElement.style.left = `${xPosition}px`;
-          agentElement.style.top = `${yPosition}px`;
-          agentElement.style.right = "auto";
-          agentElement.style.bottom = "auto";
-        }
-      } catch (e) {
-        console.error("Error directly positioning clippy:", e);
+        // Reset willChange after animation would be complete
+        setTimeout(() => {
+          if (clippyElement) {
+            clippyElement.style.willChange = "auto";
+          }
+        }, 500);
       }
 
       // Give feedback
@@ -183,7 +220,33 @@ const ClippyAssistant = (props) => {
         }
       }
     }
-  };
+  }, [getClippy, setPosition, xPosition, yPosition]);
+
+  // Help handler function - memoized
+  const handleHelp = useCallback(() => {
+    const clippy = getClippy();
+    if (clippy) {
+      if (clippy.speak) {
+        clippy.speak(
+          "Need help with the Office Assistant? Just select an animation or type a message!"
+        );
+      }
+      if (clippy.play) {
+        clippy.play("Explain");
+      }
+    }
+  }, [getClippy]);
+
+  // Quick animation handler - memoized
+  const playQuickAnimation = useCallback(
+    (animation) => {
+      const clippy = getClippy();
+      if (clippy && clippy.play) {
+        clippy.play(animation);
+      }
+    },
+    [getClippy]
+  );
 
   return (
     <CustomWindow
@@ -208,19 +271,7 @@ const ClippyAssistant = (props) => {
       initialY={1}
       icon={icons.textchat32}
       showHelpButton={true}
-      onHelp={() => {
-        const clippy = getClippy();
-        if (clippy) {
-          if (clippy.speak) {
-            clippy.speak(
-              "Need help with the Office Assistant? Just select an animation or type a message!"
-            );
-          }
-          if (clippy.play) {
-            clippy.play("Explain");
-          }
-        }
-      }}
+      onHelp={handleHelp}
     >
       <div className="office-assistant-container">
         <div className="clippy-controls">
@@ -325,116 +376,27 @@ const ClippyAssistant = (props) => {
           <div className="animation-list">
             <h4>Popular Animations:</h4>
             <div className="quick-animations">
-              <button
-                onClick={() => {
-                  const clippy = getClippy();
-                  if (clippy && clippy.play) clippy.play("Wave");
-                }}
-              >
-                Wave
-              </button>
-              <button
-                onClick={() => {
-                  const clippy = getClippy();
-                  if (clippy && clippy.play) clippy.play("Congratulate");
-                }}
-              >
+              <button onClick={() => playQuickAnimation("Wave")}>Wave</button>
+              <button onClick={() => playQuickAnimation("Congratulate")}>
                 Congratulate
               </button>
-              <button
-                onClick={() => {
-                  const clippy = getClippy();
-                  if (clippy && clippy.play) clippy.play("GetAttention");
-                }}
-              >
+              <button onClick={() => playQuickAnimation("GetAttention")}>
                 Attention
               </button>
-              <button
-                onClick={() => {
-                  const clippy = getClippy();
-                  if (clippy && clippy.play) clippy.play("Thinking");
-                }}
-              >
+              <button onClick={() => playQuickAnimation("Thinking")}>
                 Think
               </button>
-              <button
-                onClick={() => {
-                  const clippy = getClippy();
-                  if (clippy && clippy.play) clippy.play("Writing");
-                }}
-              >
+              <button onClick={() => playQuickAnimation("Writing")}>
                 Write
               </button>
-              <button
-                onClick={() => {
-                  const clippy = getClippy();
-                  if (clippy && clippy.play) clippy.play("GoodBye");
-                }}
-              >
+              <button onClick={() => playQuickAnimation("GoodBye")}>
                 Goodbye
               </button>
             </div>
           </div>
         </div>
 
-        {/* Debug section */}
-        <div
-          className="debug-section"
-          style={
-            {
-              //marginTop: "10px",
-              //padding: "5px",
-              //border: "1px dashed red",
-            }
-          }
-        >
-          <h4>Animation Debug</h4>
-          <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
-            <button
-              onClick={() => {
-                const clippy = getClippy();
-                if (clippy && clippy.play) {
-                  console.log("Debug: Playing Wave animation");
-                  clippy.play("Wave");
-                } else {
-                  console.error(
-                    "Debug: Clippy instance or play method not found"
-                  );
-                }
-              }}
-              style={{ background: "#ff9999" }}
-            >
-              Test Wave
-            </button>
-            <button
-              onClick={() => {
-                const clippy = getClippy();
-                if (clippy && clippy.play) {
-                  console.log("Debug: Playing Greeting animation");
-                  clippy.play("Greeting");
-                } else {
-                  console.error(
-                    "Debug: Clippy instance or play method not found"
-                  );
-                }
-              }}
-              style={{ background: "#ff9999" }}
-            >
-              Test Greeting
-            </button>
-            <button
-              onClick={() => {
-                const clippy = getClippy();
-                console.log("Debug: Current clippy instance", clippy);
-                const animations = document.querySelectorAll(".clippy-animate");
-                console.log("Debug: Animation elements", animations);
-              }}
-              style={{ background: "#ffcc99" }}
-            >
-              Log Status
-            </button>
-          </div>
-        </div>
+        {/* Debug section removed for mobile optimization */}
       </div>
 
       <style jsx>{`
@@ -442,9 +404,9 @@ const ClippyAssistant = (props) => {
           display: flex;
           flex-direction: column;
           height: 100%;
-          padding: 10px;
+          padding: ${isMobile ? "15px" : "10px"};
           font-family: "MS Sans Serif", Arial, sans-serif;
-          font-size: 11px;
+          font-size: ${isMobile ? "14px" : "11px"};
           overflow: hidden;
         }
 
@@ -499,13 +461,15 @@ const ClippyAssistant = (props) => {
         }
 
         .position-inputs input {
-          width: 50px;
+          width: ${isMobile ? "70px" : "50px"};
           border: 2px solid;
           border-color: #808080 #fff #fff #808080;
           background-color: #fff;
-          padding: 2px 5px;
+          padding: ${isMobile ? "6px 5px" : "2px 5px"};
           font-family: "MS Sans Serif", Arial, sans-serif;
-          font-size: 11px;
+          font-size: ${isMobile ? "14px" : "11px"};
+          min-height: ${isMobile ? "36px" : "auto"};
+          touch-action: manipulation;
         }
 
         .clippy-info {
@@ -558,18 +522,19 @@ const ClippyAssistant = (props) => {
           border: 2px solid;
           border-color: #fff #808080 #808080 #fff;
           background-color: #c0c0c0;
-          padding: 4px 8px;
+          padding: ${isMobile ? "8px 12px" : "4px 8px"};
           font-family: "MS Sans Serif", Arial, sans-serif;
-          font-size: 11px;
+          font-size: ${isMobile ? "14px" : "11px"};
           box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #808080;
-          //cursor: none;
+          min-height: ${isMobile ? "36px" : "auto"}; /* Larger touch targets */
+          touch-action: manipulation; /* Improves touch response */
         }
 
         .office-assistant-container button:active {
           border-color: #808080 #fff #fff #808080;
           box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #dfdfdf;
-          padding-top: 5px;
-          padding-left: 9px;
+          padding-top: ${isMobile ? "9px" : "5px"};
+          padding-left: ${isMobile ? "13px" : "9px"};
         }
 
         .message-input {
@@ -582,13 +547,24 @@ const ClippyAssistant = (props) => {
           border: 2px solid;
           border-color: #808080 #fff #fff #808080;
           background-color: #fff;
-          padding: 3px 5px;
+          padding: ${isMobile ? "6px 8px" : "3px 5px"};
           font-family: "MS Sans Serif", Arial, sans-serif;
-          font-size: 11px;
+          font-size: ${isMobile ? "14px" : "11px"};
+          min-height: ${isMobile
+            ? "36px"
+            : "auto"}; /* Taller input on mobile */
+        }
+
+        /* Larger, more touch-friendly selects on mobile */
+        .agent-selector select,
+        .animation-controls select {
+          padding: ${isMobile ? "6px 4px" : "2px"};
+          font-size: ${isMobile ? "14px" : "11px"};
+          min-height: ${isMobile ? "36px" : "auto"};
         }
       `}</style>
     </CustomWindow>
   );
-};
+});
 
 export default ClippyAssistant;

@@ -66,7 +66,7 @@ const readmeContent = {
     },
     {
       title: "About",
-      image: "//clipart-library.com/img/1577254.png",
+      image: "/static/goals.png",
       content: `
       <div class="intro-paragraph">
         <p>Developed with a thoughtful architecture emphasizing component reusability, authentic styling, and interactive window management. Created by a developer with a passion for merging past aesthetics with modern web capabilities.</p>
@@ -189,16 +189,33 @@ font * {
   }
 }
 
-/* Explicit color overrides - specifically target iOS Safari */
-.title-text {
-  color: white ;
+/* Explicit color overrides for all title text - especially for mobile and iOS Safari */
+.title-text,
+td[bgcolor="black"] font[color="white"],
+td[bgcolor="black"] font[color="white"] div,
+td[bgcolor="black"] font {
+  color: white !important;
   -webkit-text-fill-color: white !important;
+  text-shadow: 0 0 0 white !important;
+  -webkit-text-stroke: 0 !important;
 }
 
-/* Additional override for iOS Safari and other stubborn browsers */
-td[bgcolor="black"] font[color="white"] font[color="red"]{
-  color: white;
-  -webkit-text-fill-color: white !important;
+/* Force all text in black cells to be white on mobile devices */
+@media (max-width: 768px) {
+  td[bgcolor="black"] * {
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+  }
+  
+  /* Special iOS Safari targeting */
+  @supports (-webkit-touch-callout: none) {
+    td[bgcolor="black"] font,
+    td[bgcolor="black"] div,
+    .title-cell * {
+      color: white !important;
+      -webkit-text-fill-color: white !important;
+    }
+  }
 }
 
 blink {
