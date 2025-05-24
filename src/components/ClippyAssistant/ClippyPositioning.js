@@ -170,7 +170,7 @@ class ClippyPositioning {
         const rect = desktop.getBoundingClientRect();
         const taskbarHeight = 30;
         return {
-          x: rect.left + rect.width - 135, // 15px more to the right
+          x: rect.left + rect.width - 120, // Restored to original desktop position
           y: rect.top + rect.height - taskbarHeight - 100,
         };
       }

@@ -79,6 +79,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             (newPosition.x !== undefined || newPosition.y !== undefined)
           ) {
             setPosition(newPosition);
+
+            // Immediately apply the new position
+            const clippyEl = document.querySelector(".clippy");
+            if (clippyEl) {
+              ClippyPositioning.positionClippy(clippyEl, newPosition);
+            }
             return true;
           }
         } catch (error) {
@@ -356,8 +362,11 @@ const SimplifiedClippyController = ({
       if (!clippyEl) return false;
 
       try {
-        // Use centralized positioning - SINGLE SOURCE OF TRUTH
-        ClippyPositioning.positionClippy(clippyEl, isMobile ? null : position);
+        // Use centralized positioning - ALWAYS calculate fresh for desktop
+        const currentPosition = isMobile
+          ? null
+          : ClippyPositioning.calculateDesktopPosition();
+        ClippyPositioning.positionClippy(clippyEl, currentPosition);
 
         // Set visibility
         ClippyPositioning.applyStyles(clippyEl, {
