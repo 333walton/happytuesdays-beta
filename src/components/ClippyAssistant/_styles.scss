@@ -39,8 +39,8 @@
 @media (max-width: 768px), (max-height: 600px) {
   .clippy {
     position: fixed !important;
-    bottom: 100px !important;
-    right: 35px !important; /* 15px more to the right than before */
+    bottom: 110px !important;
+    right: 15px !important; /* lower number means more to the right */
     left: auto !important;
     top: auto !important;
     transform: translateZ(0) scale(0.8) !important;
