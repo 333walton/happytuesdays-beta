@@ -49,16 +49,115 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   const overlayRef = useRef(null);
   const welcomeShownRef = useRef(false);
 
-  // Position state
-  const [position, setPosition] = useState(() => ({
-    x: isMobile ? window.innerWidth - 100 : 520,
-    y: isMobile ? window.innerHeight - 150 : 360,
-  }));
+  // Position state with proper desktop viewport positioning
+  const [position, setPosition] = useState(() => {
+    // Initialize with default values; will be updated after component mount
+    return {
+      x: isMobile ? window.innerWidth - 100 : 520,
+      y: isMobile ? window.innerHeight - 150 : 360,
+    };
+  });
+
+  // Set initial position after component mount
+  useEffect(() => {
+    if (isMobile || positionLocked) return; // Don't reposition on mobile or when locked
+
+    // Helper to find the actual desktop viewport element
+    const getDesktopViewport = () => {
+      // Try to find the teal desktop area using various selectors
+      return (
+        document.querySelector(".desktop.screen") ||
+        document.querySelector(".desktop") ||
+        document.querySelector(".w98")
+      );
+    };
+
+    // Position Clippy within the desktop viewport
+    const updatePosition = () => {
+      const desktop = getDesktopViewport();
+      if (desktop) {
+        const rect = desktop.getBoundingClientRect();
+        const taskbarHeight = 30; // Approximate height of the taskbar
+
+        // Position in bottom-right of the teal desktop area, above the taskbar
+        setPosition({
+          x: rect.left + rect.width - 120, // 120px from right edge
+          y: rect.top + rect.height - taskbarHeight - 100, // 100px above taskbar
+        });
+      }
+    };
+
+    // Update on resize
+    const handleResize = () => {
+      updatePosition();
+    };
+
+    // Initial positioning
+    updatePosition();
+
+    // Set up resize listener
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMobile, positionLocked]);
+
+  // Define global functions immediately, not in useEffect
+  // This ensures they're available right away for other components
+  if (typeof window !== "undefined" && !window._clippyPositioningDefined) {
+    window._clippyPositioningDefined = true;
+
+    // Define setClippyPosition globally
+    window.setClippyPosition = function (newPosition) {
+      // Will be assigned the real implementation after component mounts
+      console.log("ClippyPosition function called before fully initialized");
+
+      // Store early calls to replay later
+      if (!window._earlyClippyPositionCalls) {
+        window._earlyClippyPositionCalls = [];
+      }
+      window._earlyClippyPositionCalls.push(newPosition);
+      return true;
+    };
+  }
 
   // Initialize global functions and welcome message
   useEffect(() => {
     if (window._clippyProviderInitialized) return;
     window._clippyProviderInitialized = true;
+
+    // Replace the temporary function with the real implementation
+    window.setClippyPosition = (newPosition) => {
+      if (isMobile) {
+        console.log("Position changes not supported on mobile devices");
+        return false;
+      }
+
+      if (
+        newPosition &&
+        (newPosition.x !== undefined || newPosition.y !== undefined)
+      ) {
+        setPosition((prevPosition) => ({
+          x: newPosition.x !== undefined ? newPosition.x : prevPosition.x,
+          y: newPosition.y !== undefined ? newPosition.y : prevPosition.y,
+        }));
+        return true;
+      }
+      return false;
+    };
+
+    // Process any early calls that happened before initialization
+    if (
+      window._earlyClippyPositionCalls &&
+      window._earlyClippyPositionCalls.length > 0
+    ) {
+      console.log(
+        "Processing early position calls:",
+        window._earlyClippyPositionCalls.length
+      );
+      window._earlyClippyPositionCalls.forEach((pos) =>
+        window.setClippyPosition(pos)
+      );
+      window._earlyClippyPositionCalls = [];
+    }
 
     // Global functions for external control
     window.setAssistantVisible = (visible) => {

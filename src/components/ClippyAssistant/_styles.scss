@@ -30,6 +30,14 @@
     z-index: 1500 !important;
     max-width: 123px !important;
     max-height: 93px !important;
+
+    /* Enhanced mobile performance optimizations */
+    contain: layout size !important;
+    will-change: transform, opacity !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    transition: opacity 0.2s linear !important;
+    touch-action: none !important;
   }
 }
 
@@ -280,6 +288,10 @@ body.screen-off .custom-clippy-chat-balloon {
   backface-visibility: hidden !important;
   perspective: 1000px !important;
   will-change: transform, opacity !important;
+
+  /* Additional performance optimizations */
+  contain: layout style !important;
+  -webkit-font-smoothing: antialiased !important;
 }
 
 /* Reduced motion support */

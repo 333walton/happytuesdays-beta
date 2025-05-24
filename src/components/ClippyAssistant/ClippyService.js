@@ -162,24 +162,48 @@ const setInitialPosition = (options) => {
     );
 
   if (isMobile) {
-    return true;
+    return true; // Mobile positioning is handled by CSS
   }
 
   return executeIfAvailable(() => {
+    // Helper to find the actual desktop viewport element (same as in ClippyProvider)
+    const getDesktopViewport = () => {
+      // Try to find the teal desktop area using various selectors
+      return (
+        document.querySelector(".desktop.screen") ||
+        document.querySelector(".desktop") ||
+        document.querySelector(".w98")
+      );
+    };
+
+    // Get the desktop viewport rectangle
+    const desktop = getDesktopViewport();
+    const rect = desktop ? desktop.getBoundingClientRect() : null;
+
+    // If we couldn't find the desktop viewport, use window dimensions
+    const viewportWidth = rect ? rect.width : window.innerWidth;
+    const viewportHeight = rect ? rect.height : window.innerHeight;
+    // Reference point (top-left corner of viewport)
+    const offsetX = rect ? rect.left : 0;
+    const offsetY = rect ? rect.top : 0;
+    // Taskbar height approximation for positioning
+    const taskbarHeight = 30;
+
     if (typeof options.position === "string") {
+      // Handle percentage-based positioning (e.g. "85% 65%")
       const percentMatch = options.position.match(/(\d+)%\s+(\d+)%/);
       if (percentMatch) {
         const xPercent = parseInt(percentMatch[1], 10) / 100;
         const yPercent = parseInt(percentMatch[2], 10) / 100;
 
-        const viewport =
-          document.querySelector(".w98") || document.querySelector(".desktop");
-        if (viewport) {
-          const rect = viewport.getBoundingClientRect();
-          return setPosition(rect.width * xPercent, rect.height * yPercent);
-        }
+        // Calculate position relative to desktop viewport
+        const x = offsetX + viewportWidth * xPercent;
+        const y = offsetY + viewportHeight * yPercent;
+
+        return setPosition(x, y);
       }
 
+      // Named positions with specific viewport percentages
       const namedPositions = {
         "higher-right": { x: 0.85, y: 0.65 },
         "bottom-right": { x: 0.85, y: 0.85 },
@@ -189,17 +213,44 @@ const setInitialPosition = (options) => {
         center: { x: 0.5, y: 0.5 },
       };
 
+      // Default to higher-right if position name not found
       const position =
         namedPositions[options.position.toLowerCase()] ||
         namedPositions["higher-right"];
-      const viewport =
-        document.querySelector(".w98") || document.querySelector(".desktop");
-      if (viewport) {
-        const rect = viewport.getBoundingClientRect();
-        return setPosition(rect.width * position.x, rect.height * position.y);
+
+      // If position is "bottom-right", ensure we're above the taskbar
+      if (options.position.toLowerCase() === "bottom-right" && rect) {
+        const x = offsetX + viewportWidth - 120;
+        const y = offsetY + viewportHeight - taskbarHeight - 100;
+
+        if (window.setClippyPosition) {
+          return window.setClippyPosition({ x, y });
+        } else {
+          return setPosition(x, y);
+        }
+      }
+
+      // For other positions, calculate based on desktop viewport
+      const x = offsetX + viewportWidth * position.x;
+      const y = offsetY + viewportHeight * position.y;
+
+      // Use the window.setClippyPosition global function added in ClippyProvider
+      if (window.setClippyPosition) {
+        return window.setClippyPosition({ x, y });
+      } else {
+        // Fallback to the local setPosition function
+        return setPosition(x, y);
       }
     } else if (options.x !== undefined && options.y !== undefined) {
-      return setPosition(options.x, options.y);
+      // For direct pixel positioning, add desktop viewport offsets
+      const x = offsetX + options.x;
+      const y = offsetY + options.y;
+
+      if (window.setClippyPosition) {
+        return window.setClippyPosition({ x, y });
+      } else {
+        return setPosition(x, y);
+      }
     }
 
     return false;
