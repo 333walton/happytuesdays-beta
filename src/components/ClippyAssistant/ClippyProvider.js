@@ -72,62 +72,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     window.setCurrentAgent = setCurrentAgent;
     window.setScreenPowerState = setIsScreenPoweredOn;
 
-    // Position functions
-    window.setClippyPosition = (pos) => {
-      if (typeof pos === "object" && pos !== null) {
-        if (pos.x !== undefined && pos.y !== undefined) {
-          setPosition({ x: pos.x, y: pos.y });
-          return true;
-        }
-      }
-      return false;
-    };
-
-    window.setClippyInitialPosition = (options) => {
-      if (typeof options !== "object" || options === null) {
-        return false;
-      }
-
-      const desktop = document.querySelector(".desktop") || document.body;
-      const rect = desktop.getBoundingClientRect();
-
-      if (typeof options.position === "string") {
-        const percentMatch = options.position.match(/(\d+)%\s+(\d+)%/);
-        if (percentMatch) {
-          const xPercent = parseInt(percentMatch[1], 10) / 100;
-          const yPercent = parseInt(percentMatch[2], 10) / 100;
-          setPosition({
-            x: rect.left + rect.width * xPercent,
-            y: rect.top + rect.height * yPercent,
-          });
-          return true;
-        }
-
-        const namedPositions = {
-          "higher-right": { x: 0.85, y: 0.65 },
-          "bottom-right": { x: 0.85, y: 0.85 },
-          "bottom-left": { x: 0.15, y: 0.85 },
-          "top-right": { x: 0.85, y: 0.15 },
-          "top-left": { x: 0.15, y: 0.15 },
-          center: { x: 0.5, y: 0.5 },
-        };
-
-        const position =
-          namedPositions[options.position.toLowerCase()] ||
-          namedPositions["higher-right"];
-        setPosition({
-          x: rect.left + rect.width * position.x - 30,
-          y: rect.top + rect.height * position.y + 30,
-        });
-        return true;
-      } else if (options.x !== undefined && options.y !== undefined) {
-        setPosition({ x: options.x, y: options.y });
-        return true;
-      }
-
-      return false;
-    };
-
     // Position lock functions
     window._clippyPositionLocked = positionLocked;
 
@@ -204,8 +148,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       delete window.setAssistantVisible;
       delete window.setCurrentAgent;
       delete window.setScreenPowerState;
-      delete window.setClippyPosition;
-      delete window.setClippyInitialPosition;
       delete window.showClippyCustomBalloon;
       delete window.hideClippyCustomBalloon;
       delete window.showClippyChatBalloon;
@@ -357,37 +299,26 @@ const ClippyController = ({
       }
     };
 
-    // Setup Clippy element with delayed positioning for stability
+    // Setup Clippy element
     const setupClippy = () => {
       const clippyEl = document.querySelector(".clippy");
       if (!clippyEl || !mounted) return false;
 
-      // CSS will handle most of the styling and positioning
-      // We just need to add delayed desktop positioning
-
-      // For desktop only, calculate position after layout is stable
-      if (window.innerWidth > 768) {
-        // Delay desktop positioning to allow layout to stabilize
-        setTimeout(() => {
-          if (!mounted || !clippyEl) return;
-
-          // Get desktop after delay when it should be stable
-          const desktop = document.querySelector(".desktop") || document.body;
-          const rect = desktop.getBoundingClientRect();
-
-          // Only apply positioning if desktop has a valid size
-          if (rect.width > 0 && rect.height > 0) {
-            // Use position if explicitly set, otherwise calculate optimal position
-            if (position.x !== 0 || position.y !== 0) {
-              clippyEl.style.left = `${position.x}px`;
-              clippyEl.style.top = `${position.y}px`;
-            } else {
-              // Perfected desktop formula with delay to ensure stability
-              clippyEl.style.left = `${rect.left + rect.width * 0.85 - 30}px`;
-              clippyEl.style.top = `${rect.top + rect.height * 0.65 + 30}px`;
-            }
-          }
-        }, 1000); // Initial delay for layout stabilization
+      // Mobile vs Desktop positioning
+      if (isMobile) {
+        clippyEl.style.position = "fixed";
+        clippyEl.style.bottom = "100px";
+        clippyEl.style.right = "20px";
+        clippyEl.style.transform = "scale(0.8)";
+        clippyEl.style.transformOrigin = "center bottom";
+        clippyEl.style.zIndex = "1500";
+      } else {
+        clippyEl.style.position = "fixed";
+        clippyEl.style.left = `${position.x}px`;
+        clippyEl.style.top = `${position.y}px`;
+        clippyEl.style.transform = "scale(0.9)";
+        clippyEl.style.transformOrigin = "center bottom";
+        clippyEl.style.zIndex = "2000";
       }
 
       clippyEl.style.pointerEvents = "none";
@@ -448,48 +379,14 @@ const ClippyController = ({
       return true;
     };
 
-    // Add window resize handler to trigger position updates
-    const resizeHandler = () => {
-      window._clippyLastResize = Date.now();
-    };
-    window.addEventListener("resize", resizeHandler);
-
-    // Update overlay position separately from clippy positioning
-    const updateOverlayPosition = () => {
-      if (!overlayRef.current) return;
-
-      const clippyEl = document.querySelector(".clippy");
-      if (!clippyEl) return;
-
-      const rect = clippyEl.getBoundingClientRect();
-      const overlay = overlayRef.current;
-
-      overlay.style.left = `${rect.left}px`;
-      overlay.style.top = `${rect.top}px`;
-      overlay.style.width = `${rect.width}px`;
-      overlay.style.height = `${rect.height}px`;
-      overlay.style.visibility = isScreenPoweredOn ? "visible" : "hidden";
-    };
-
-    // Modified RAF loop with reduced frequency
+    // Single RAF for positioning
     const updateLoop = (timestamp) => {
       if (!mounted) return;
 
-      // Use consistent interval for better performance
-      const interval = 1000; // 1 second interval regardless of device
+      const interval = isMobile ? 1000 : 500;
 
       if (timestamp - lastUpdateRef.current > interval) {
-        // Check if resize happened recently
-        if (
-          window._clippyLastResize &&
-          Date.now() - window._clippyLastResize < 2000
-        ) {
-          setupClippy();
-          window._clippyLastResize = null;
-        }
-
-        // Always update overlay position
-        updateOverlayPosition();
+        setupClippy();
         lastUpdateRef.current = timestamp;
       }
 
@@ -509,22 +406,13 @@ const ClippyController = ({
 
     return () => {
       mounted = false;
-      // Clean up resize handler
-      window.removeEventListener("resize", resizeHandler);
-
-      // Clean up animation frame
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
-
-      // Clean up overlay element
       if (overlayRef.current && overlayRef.current.parentNode) {
         overlayRef.current.parentNode.removeChild(overlayRef.current);
         overlayRef.current = null;
       }
-
-      // Reset resize tracking
-      window._clippyLastResize = null;
     };
   }, [clippy, visible, isScreenPoweredOn, position, positionLocked]);
 

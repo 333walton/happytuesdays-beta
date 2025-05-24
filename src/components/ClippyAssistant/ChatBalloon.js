@@ -1,324 +1,161 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 /**
- * Interactive chat balloon component for Clippy
- * Optimized for mobile devices
+ * Interactive chat balloon for Clippy assistant
+ * Allows for two-way communication with the assistant
  */
-
-// At the top of ChatBalloon.js
-const isMobile =
-  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
 const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
-  const [messages, setMessages] = useState([
-    { text: initialMessage, sender: "clippy" },
-  ]);
+  const [visible, setVisible] = useState(false);
+  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
-  const messageEndRef = useRef(null);
-  const balloonRef = useRef(null);
-  const positioningRafRef = useRef(null);
-  const lastPositionRef = useRef({ left: 0, top: 0 });
+  const [loading, setLoading] = useState(false);
+
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Add initial message and focus input field when mounted
+  useEffect(() => {
+    if (initialMessage) {
+      setMessages([{ text: initialMessage, sender: "clippy" }]);
+    }
+
+    // Animation timing
+    const showTimer = setTimeout(() => {
+      setVisible(true);
+
+      // Focus input after animation completes
+      const focusTimer = setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 300);
+
+      return () => clearTimeout(focusTimer);
+    }, 50);
+
+    return () => clearTimeout(showTimer);
+  }, [initialMessage]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
-  // Handle positioning with requestAnimationFrame for better performance
-  useEffect(() => {
-    if (balloonRef.current) {
-      const positionBalloon = () => {
-        // Apply position from props with better boundary detection
-        if (position) {
-          // Get viewport dimensions
-          const viewportWidth = window.innerWidth;
-          const viewportHeight = window.innerHeight;
-          const balloonWidth = balloonRef.current.offsetWidth;
-          const balloonHeight = balloonRef.current.offsetHeight;
-
-          // Calculate position with boundaries
-          let left = position.left;
-          let top = position.top;
-
-          // Ensure balloon stays within horizontal bounds
-          if (left < 10) left = 10;
-          if (left + balloonWidth > viewportWidth - 10)
-            left = viewportWidth - balloonWidth - 10;
-
-          // Ensure balloon stays within vertical bounds
-          if (top < 10) top = 10;
-          if (top + balloonHeight > viewportHeight - 10)
-            top = viewportHeight - balloonHeight - 10;
-
-          // Only update DOM if position changed significantly (reduces reflows)
-          if (
-            Math.abs(lastPositionRef.current.left - left) > 2 ||
-            Math.abs(lastPositionRef.current.top - top) > 2
-          ) {
-            balloonRef.current.style.left = `${left}px`;
-            balloonRef.current.style.top = `${top}px`;
-            lastPositionRef.current = { left, top };
-          }
-        } else {
-          // Position relative to Clippy if no position provided
-          const clippyElement = document.querySelector(".clippy");
-          if (clippyElement) {
-            const rect = clippyElement.getBoundingClientRect();
-            const balloonWidth = balloonRef.current.offsetWidth;
-            const balloonHeight = balloonRef.current.offsetHeight;
-
-            // Calculate responsive positioning
-            // FIXED: Use let variables from parent scope instead of redeclaring
-            let left = rect.left + rect.width / 2 - balloonWidth / 2;
-            let top = rect.top - (isMobile ? 150 : 200); // On mobile, position higher to avoid keyboard overlap
-
-            // Ensure balloon stays within viewport
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-
-            // FIXED: Corrected boundary check (was setting top when checking left)
-            if (left < 10) left = 10;
-            if (left + balloonWidth > viewportWidth - 10)
-              left = viewportWidth - balloonWidth - 10;
-
-            if (top < 10) top = 10;
-            if (top + balloonHeight > viewportHeight - 10)
-              top = viewportHeight - balloonHeight - 10;
-
-            // Only update DOM if position changed significantly
-            if (
-              Math.abs(lastPositionRef.current.left - left) > 2 ||
-              Math.abs(lastPositionRef.current.top - top) > 2
-            ) {
-              balloonRef.current.style.left = `${left}px`;
-              balloonRef.current.style.top = `${top}px`;
-              lastPositionRef.current = { left, top };
-            }
-          }
-        }
-      };
-
-      // Initial positioning
-      positionBalloon();
-
-      // Set up continuous positioning with requestAnimationFrame
-      // Use less frequent updates on mobile with dynamic interval
-      let lastUpdateTime = 0;
-      const updateInterval = isMobile ? 750 : 250; // Even more reduced frequency
-
-      const updatePosition = (timestamp) => {
-        if (timestamp - lastUpdateTime >= updateInterval) {
-          positionBalloon();
-          lastUpdateTime = timestamp;
-        }
-        positioningRafRef.current = requestAnimationFrame(updatePosition);
-      };
-
-      positioningRafRef.current = requestAnimationFrame(updatePosition);
-
-      return () => {
-        if (positioningRafRef.current) {
-          cancelAnimationFrame(positioningRafRef.current);
-        }
-      };
-    }
-  }, [position]);
-
-  const handleSend = () => {
-    if (inputValue.trim() === "") return;
+  // Handle message submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (inputValue.trim() === "" || loading) return;
 
     // Add user message
-    setMessages([...messages, { text: inputValue, sender: "user" }]);
-
-    // Send to parent handler for processing
-    if (onSendMessage) {
-      onSendMessage(inputValue, (response) => {
-        // Add clippy response when it comes back
-        setMessages((prev) => [...prev, { text: response, sender: "clippy" }]);
-      });
-    }
-
+    const userMessage = inputValue.trim();
+    setMessages((prev) => [...prev, { text: userMessage, sender: "user" }]);
     setInputValue("");
-  };
+    setLoading(true);
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleSend();
-    }
-  };
-
-  // Optimized balloon style for mobile
-  const balloonStyle = {
-    position: "fixed",
-    zIndex: 2100, // Standardized z-index hierarchy
-    backgroundColor: "#fffcde",
-    border: "1px solid #000",
-    borderRadius: "5px",
-    padding: isMobile ? "10px" : "8px",
-    width: isMobile ? "280px" : "220px", // Wider on mobile
-    height: isMobile ? "250px" : "180px", // Taller on mobile
-    boxShadow: "2px 2px 5px rgba(0,0,0,0.2)",
-    fontFamily: "Tahoma, Arial, sans-serif",
-    fontSize: isMobile ? "14px" : "12px",
-    display: "flex",
-    flexDirection: "column",
-    // Hardware acceleration for better performance
-    transform: "translateZ(0)",
-    backfaceVisibility: "hidden",
-    WebkitBackfaceVisibility: "hidden",
-  };
-
-  const messageContainerStyle = {
-    flex: 1,
-    overflowY: "auto",
-    marginBottom: "5px",
-    padding: "5px",
-    WebkitOverflowScrolling: "touch", // Smooth scrolling on iOS
-  };
-
-  const inputContainerStyle = {
-    display: "flex",
-    borderTop: "1px solid #ccc",
-    padding: "5px 0 0 0",
-  };
-
-  const inputStyle = {
-    flex: 1,
-    border: "1px solid #999",
-    padding: isMobile ? "8px" : "4px", // Larger input on mobile
-    fontSize: isMobile ? "16px" : "12px", // Larger font on mobile (iOS min 16px)
-    fontFamily: "Tahoma, Arial, sans-serif",
-    borderRadius: "3px",
-    marginRight: "5px",
-  };
-
-  const buttonStyle = {
-    background: "#d4d0c8",
-    border: "1px solid #888",
-    padding: isMobile ? "8px 12px" : "2px 8px", // Larger touch target on mobile
-    borderRadius: "3px",
-    fontFamily: "Tahoma, Arial, sans-serif",
-    fontSize: isMobile ? "14px" : "12px",
-    cursor: "pointer",
-    minWidth: isMobile ? "70px" : "auto", // Larger touch target on mobile
-  };
-
-  const closeButtonStyle = {
-    position: "absolute",
-    top: "2px",
-    right: "2px",
-    cursor: "pointer",
-    fontSize: isMobile ? "24px" : "16px",
-    fontWeight: "bold",
-    background: "none",
-    border: "none",
-    padding: isMobile ? "6px 10px" : "2px 5px", // Larger touch target
-  };
-
-  const clippyMessageStyle = {
-    background: "#ffffcc",
-    padding: "4px 8px",
-    borderRadius: "8px 8px 8px 0",
-    marginBottom: "6px",
-    maxWidth: "80%",
-    alignSelf: "flex-start",
-  };
-
-  const userMessageStyle = {
-    background: "#d4d0c8",
-    padding: "4px 8px",
-    borderRadius: "8px 8px 0 8px",
-    marginBottom: "6px",
-    maxWidth: "80%",
-    alignSelf: "flex-end",
-    textAlign: "right",
-  };
-
-  // Add a triangle tip at the bottom
-  const tipStyle = {
-    position: "absolute",
-    bottom: "-10px",
-    left: "20px",
-    width: "0",
-    height: "0",
-    borderLeft: "10px solid transparent",
-    borderRight: "10px solid transparent",
-    borderTop: "10px solid #fffcde",
-    zIndex: 2099, // Just below balloon
-  };
-
-  const tipBorderStyle = {
-    position: "absolute",
-    bottom: "-11px",
-    left: "19px",
-    width: "0",
-    height: "0",
-    borderLeft: "11px solid transparent",
-    borderRight: "11px solid transparent",
-    borderTop: "11px solid #000",
-    zIndex: 2098, // Just below tip
-  };
-
-  const handleClose = () => {
-    // Clean up animation frame
-    if (positioningRafRef.current) {
-      cancelAnimationFrame(positioningRafRef.current);
-    }
-
-    // Call onClose handler
-    if (onClose) {
-      onClose();
+    // Get response from Clippy
+    if (onSendMessage) {
+      onSendMessage(userMessage, (response) => {
+        setMessages((prev) => [...prev, { text: response, sender: "clippy" }]);
+        setLoading(false);
+      });
+    } else {
+      // Fallback response if no handler provided
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          { text: "I'm not sure how to respond to that.", sender: "clippy" },
+        ]);
+        setLoading(false);
+      }, 1000);
     }
   };
 
   return (
     <div
-      ref={balloonRef}
-      style={balloonStyle}
       className="custom-clippy-chat-balloon"
+      style={{
+        position: "fixed",
+        left: `${position.left}px`,
+        top: `${position.top}px`,
+        opacity: visible ? 1 : 0,
+        transform: `translateY(${visible ? 0 : "10px"})`,
+        transition: "opacity 0.3s, transform 0.3s",
+        zIndex: 2100,
+        display: "flex",
+        flexDirection: "column",
+      }}
     >
-      <button style={closeButtonStyle} onClick={handleClose}>
+      {/* Close button */}
+      <button
+        className="custom-clippy-balloon-close"
+        onClick={onClose}
+        aria-label="Close chat"
+      >
         ×
       </button>
 
-      <div style={messageContainerStyle}>
+      {/* Messages container */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "4px",
+          marginBottom: "4px",
+        }}
+      >
         {messages.map((msg, index) => (
           <div
             key={index}
             style={{
-              display: "flex",
-              justifyContent: msg.sender === "user" ? "flex-end" : "flex-start",
+              marginBottom: "8px",
+              textAlign: msg.sender === "user" ? "right" : "left",
+              color: msg.sender === "user" ? "#000080" : "#000000",
             }}
           >
-            <div
-              style={
-                msg.sender === "user" ? userMessageStyle : clippyMessageStyle
-              }
-            >
-              {msg.text}
-            </div>
+            {msg.text}
           </div>
         ))}
-        <div ref={messageEndRef} />
+
+        {loading && (
+          <div style={{ textAlign: "left", color: "#666" }}>Thinking...</div>
+        )}
+
+        {/* Invisible element to scroll to */}
+        <div ref={messagesEndRef} />
       </div>
 
-      <div style={inputContainerStyle}>
+      {/* Input form */}
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          display: "flex",
+          gap: "4px",
+          marginTop: "auto",
+        }}
+      >
         <input
+          ref={inputRef}
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          onKeyPress={handleKeyPress}
-          style={inputStyle}
-          placeholder="Type your message..."
+          placeholder="Type a message..."
+          className="clippy-input"
+          style={{
+            flex: 1,
+            padding: "4px",
+          }}
+          disabled={loading}
         />
-        <button onClick={handleSend} style={buttonStyle}>
+        <button
+          type="submit"
+          className="clippy-option-button"
+          disabled={loading}
+        >
           Send
         </button>
-      </div>
-
-      <div style={tipBorderStyle}></div>
-      <div style={tipStyle}></div>
+      </form>
     </div>
   );
 };

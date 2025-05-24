@@ -1,0 +1,10 @@
+{
+  "name": "clippy-assistant-performance-test",
+  "version": "1.0.0",
+  "description": "Performance testing tools for ClippyAssistant component",
+  "scripts": {
+    "test:performance": "node run-test.js",
+    "open:test-page": "start test-runner.html"
+  },
+  "private": true
+}

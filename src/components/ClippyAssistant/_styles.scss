@@ -14,33 +14,22 @@
   backface-visibility: hidden !important;
   will-change: transform, opacity !important;
 
-  /* Common properties */
+  /* Desktop z-index */
   z-index: 2000 !important;
 }
 
 /* Mobile-specific optimizations */
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 600px) {
   .clippy {
-    left: auto !important;
-    top: auto !important;
-    right: 0px !important;
-    bottom: 250px !important;
-    transform: translateZ(0) scale(0.8) !important;
-    z-index: 1500 !important;
-    max-width: 123px !important;
-    max-height: 93px !important;
-  }
-}
-
-/* Handle small height screens */
-@media (max-height: 600px) {
-  .clippy {
+    position: fixed !important;
     bottom: 100px !important;
     right: 20px !important;
     left: auto !important;
     top: auto !important;
-    transform: translateZ(0) scale(0.7) !important;
+    transform: translateZ(0) scale(0.8) !important;
     z-index: 1500 !important;
+    max-width: 123px !important;
+    max-height: 93px !important;
   }
 }
 

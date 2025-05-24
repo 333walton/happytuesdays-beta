@@ -14,7 +14,7 @@ import CRTOverlay from "./components/tools/CRT";
 import ShutDown from "./components/ShutDown/ShutDown";
 import Background from "./components/tools/Background";
 import MonitorView from "./components/MonitorView/MonitorView";
-import ClippyProvider from "./components/ClippyAssistant/ClippyProvider";
+import { ClippyProvider } from "./components/ClippyAssistant/index";
 import ClippyService from "./components/ClippyAssistant/ClippyService";
 
 class Desktop extends Component {
@@ -25,28 +25,42 @@ class Desktop extends Component {
       this.context.toggleMobile(true);
     }
 
-    // Simple Clippy initialization
+    // Simplified Clippy initialization
     this.initializeClippy();
   }
 
   initializeClippy = () => {
-    const isMobile = this.context.isMobile;
+    // Prevent multiple initializations
+    if (window._clippyInitialized) {
+      return;
+    }
+    window._clippyInitialized = true;
 
+    // Simple initialization after delay
     setTimeout(() => {
-      console.log("Initializing Clippy...");
+      try {
+        console.log("Initializing Clippy");
 
-      if (!isMobile) {
+        // Show welcome message after Clippy is ready
         setTimeout(() => {
-          ClippyService.setInitialPosition({ position: "higher-right" });
-        }, 1000);
+          if (ClippyService.isAvailable()) {
+            ClippyService.play("Greeting");
+            setTimeout(() => {
+              ClippyService.speak(
+                "Welcome to Hydra98! How can I help you today?"
+              );
+            }, 1000);
+          }
+        }, 2000);
+      } catch (error) {
+        console.error("Clippy initialization error:", error);
       }
-    }, 1500);
+    }, 1000);
   };
 
   componentWillUnmount() {
-    if (ClippyService.emergencyReset) {
-      ClippyService.emergencyReset();
-    }
+    // Clean up
+    delete window._clippyInitialized;
   }
 
   render() {
@@ -72,6 +86,7 @@ class Desktop extends Component {
             <Settings />
             <ShutDown />
 
+            {/* Simplified ClippyProvider - always non-draggable for stability */}
             <ClippyProvider defaultAgent="Clippy" />
 
             {context.crt && <CRTOverlay />}
