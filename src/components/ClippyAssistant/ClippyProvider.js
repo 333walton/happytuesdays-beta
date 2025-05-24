@@ -13,27 +13,47 @@ import {
 
 import CustomBalloon from "./CustomBalloon";
 import ChatBalloon from "./ChatBalloon";
-import ClippyPositioning from "./ClippyPositioning"; // Import centralized positioning
+import ClippyPositioning from "./ClippyPositioning";
 import "./_styles.scss";
 
 const ClippyContext = createContext(null);
 
-// Get device info from centralized positioning
-const isMobile =
-  ClippyPositioning?.isMobile ||
-  (() => {
-    try {
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      const mobileRegex =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-      return mobileRegex.test(userAgent) || window.innerWidth < 768;
-    } catch {
-      return false;
-    }
-  })();
+// Safe device detection with fallbacks
+const detectMobile = () => {
+  try {
+    if (typeof window === "undefined") return false;
+
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const mobileRegex =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+    const isSmallScreen = window.innerWidth < 768 || window.innerHeight < 600;
+    const isTouchDevice =
+      "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
+    return mobileRegex.test(userAgent) || isSmallScreen || isTouchDevice;
+  } catch (error) {
+    console.warn("Error detecting mobile device:", error);
+    return false;
+  }
+};
+
+const isMobile = detectMobile();
+
+// Safe error wrapper for all operations
+const safeExecute = (operation, fallback = null, context = "operation") => {
+  try {
+    return operation();
+  } catch (error) {
+    console.error(`Safe execution failed in ${context}:`, error);
+    return fallback;
+  }
+};
 
 const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
-  // Core state
+  // Startup sequence state - Clippy hidden until startup completes
+  const [startupComplete, setStartupComplete] = useState(false);
+
+  // Core state with safe defaults
   const [assistantVisible, setAssistantVisible] = useState(true);
   const [currentAgent, setCurrentAgent] = useState(defaultAgent);
   const [isScreenPoweredOn, setIsScreenPoweredOn] = useState(true);
@@ -45,22 +65,126 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   const [chatInitialMessage, setChatInitialMessage] = useState("");
   const [balloonPosition, setBalloonPosition] = useState({ left: 0, top: 0 });
 
-  // Refs for cleanup
+  // Refs for cleanup and crash prevention
   const clippyInstanceRef = useRef(null);
   const overlayRef = useRef(null);
   const welcomeShownRef = useRef(false);
   const initializationRef = useRef(false);
   const mountedRef = useRef(false);
+  const errorCountRef = useRef(0);
+  const lastErrorRef = useRef(0);
+  const startupTimeoutRef = useRef(null);
 
   // Position state - only used for desktop
   const [position, setPosition] = useState(() => {
     if (isMobile) {
-      return { x: 0, y: 0 }; // Not used on mobile - positioning handled by CSS
+      return { x: 0, y: 0 }; // Not used on mobile
     }
-    return ClippyPositioning.calculateDesktopPosition();
+    return safeExecute(
+      () => ClippyPositioning.calculateDesktopPosition(),
+      { x: 520, y: 360 },
+      "initial position calculation"
+    );
   });
 
-  // Initialize global functions once
+  // Monitor startup sequence completion
+  useEffect(() => {
+    const checkStartupStatus = () => {
+      // Check if user has already logged in (skips startup)
+      if (window.localStorage.getItem("loggedIn")) {
+        console.log("User already logged in, allowing Clippy to appear");
+        setStartupComplete(true);
+        return;
+      }
+
+      // Check if BIOS and Windows Launch elements are hidden
+      const biosWrapper = document.querySelector(".BIOSWrapper");
+      const windowsLaunchWrapper = document.querySelector(
+        ".WindowsLaunchWrapper"
+      );
+
+      if (biosWrapper && windowsLaunchWrapper) {
+        const biosHidden =
+          biosWrapper.classList.contains("hidden") ||
+          getComputedStyle(biosWrapper).opacity === "0" ||
+          getComputedStyle(biosWrapper).visibility === "hidden";
+
+        const windowsHidden =
+          windowsLaunchWrapper.classList.contains("hidden") ||
+          getComputedStyle(windowsLaunchWrapper).opacity === "0" ||
+          getComputedStyle(windowsLaunchWrapper).visibility === "hidden";
+
+        if (biosHidden && windowsHidden) {
+          console.log("Startup sequence completed, allowing Clippy to appear");
+          setStartupComplete(true);
+        } else {
+          console.log("Startup sequence still running, Clippy remains hidden");
+          // Check again in a moment
+          startupTimeoutRef.current = setTimeout(checkStartupStatus, 500);
+        }
+      } else {
+        // Elements not found, assume startup complete
+        console.log("Startup elements not found, assuming startup complete");
+        setStartupComplete(true);
+      }
+    };
+
+    // Initial check
+    checkStartupStatus();
+
+    // Listen for localStorage changes (in case user logs in)
+    const handleStorageChange = (e) => {
+      if (e.key === "loggedIn" && e.newValue === "true") {
+        setStartupComplete(true);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      if (startupTimeoutRef.current) {
+        clearTimeout(startupTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Error rate limiting
+  const isErrorRateLimited = useCallback(() => {
+    const now = Date.now();
+    if (now - lastErrorRef.current < 1000) {
+      errorCountRef.current++;
+    } else {
+      errorCountRef.current = 1;
+    }
+    lastErrorRef.current = now;
+
+    if (errorCountRef.current > 5) {
+      console.warn("Clippy error rate limit exceeded, throttling operations");
+      return true;
+    }
+    return false;
+  }, []);
+
+  // Safe global function wrapper
+  const createSafeGlobalFunction = useCallback(
+    (fn, functionName) => {
+      return (...args) => {
+        if (!mountedRef.current || isErrorRateLimited() || !startupComplete) {
+          return false;
+        }
+
+        return safeExecute(
+          () => fn(...args),
+          false,
+          `global function ${functionName}`
+        );
+      };
+    },
+    [isErrorRateLimited, startupComplete]
+  );
+
+  // Initialize global functions once with crash protection
   useEffect(() => {
     if (initializationRef.current) return;
     initializationRef.current = true;
@@ -69,116 +193,89 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     if (typeof window !== "undefined" && !window._clippyGlobalsInitialized) {
       window._clippyGlobalsInitialized = true;
 
-      // Position functions
-      window.setClippyPosition = (newPosition) => {
-        if (!mountedRef.current || isMobile) return false;
+      // Position functions with mobile checks
+      window.setClippyPosition = createSafeGlobalFunction((newPosition) => {
+        if (isMobile) {
+          console.log("Position setting not supported on mobile devices");
+          return false;
+        }
 
-        try {
-          if (
-            newPosition &&
-            (newPosition.x !== undefined || newPosition.y !== undefined)
-          ) {
-            setPosition(newPosition);
+        if (
+          newPosition &&
+          (newPosition.x !== undefined || newPosition.y !== undefined)
+        ) {
+          setPosition(newPosition);
 
-            // Immediately apply the new position
-            const clippyEl = document.querySelector(".clippy");
-            if (clippyEl) {
-              ClippyPositioning.positionClippy(clippyEl, newPosition);
-            }
-            return true;
+          // Immediately apply the new position
+          const clippyEl = document.querySelector(".clippy");
+          if (clippyEl && ClippyPositioning) {
+            return ClippyPositioning.positionClippy(clippyEl, newPosition);
           }
-        } catch (error) {
-          console.error("Error setting Clippy position:", error);
         }
         return false;
-      };
+      }, "setClippyPosition");
 
       // Visibility functions
-      window.setAssistantVisible = (visible) => {
-        if (!mountedRef.current) return false;
-        try {
-          setAssistantVisible(visible);
-          if (!visible) {
-            setCustomBalloonVisible(false);
-            setChatBalloonVisible(false);
-          }
-          return true;
-        } catch (error) {
-          console.error("Error setting assistant visibility:", error);
-          return false;
-        }
-      };
-
-      window.setCurrentAgent = (agent) => {
-        if (!mountedRef.current) return false;
-        try {
-          setCurrentAgent(agent);
-          return true;
-        } catch (error) {
-          console.error("Error setting current agent:", error);
-          return false;
-        }
-      };
-
-      window.setScreenPowerState = (powered) => {
-        if (!mountedRef.current) return false;
-        try {
-          setIsScreenPoweredOn(powered);
-          return true;
-        } catch (error) {
-          console.error("Error setting screen power state:", error);
-          return false;
-        }
-      };
-
-      // Balloon functions using centralized positioning
-      window.showClippyCustomBalloon = (message) => {
-        if (!mountedRef.current || !isScreenPoweredOn) return false;
-
-        try {
-          const clippyElement = document.querySelector(".clippy");
-          const position = ClippyPositioning.getBalloonPosition(
-            clippyElement,
-            "speech"
-          );
-
-          setBalloonPosition(position);
-          setCustomBalloonMessage(message);
-          setCustomBalloonVisible(true);
-          setChatBalloonVisible(false);
-
-          setTimeout(() => {
-            if (mountedRef.current) {
-              setCustomBalloonVisible(false);
-            }
-          }, 6000);
-          return true;
-        } catch (error) {
-          console.error("Error showing custom balloon:", error);
-          return false;
-        }
-      };
-
-      window.hideClippyCustomBalloon = () => {
-        if (!mountedRef.current) return false;
-        try {
+      window.setAssistantVisible = createSafeGlobalFunction((visible) => {
+        setAssistantVisible(visible);
+        if (!visible) {
           setCustomBalloonVisible(false);
           setChatBalloonVisible(false);
-          return true;
-        } catch (error) {
-          console.error("Error hiding custom balloon:", error);
-          return false;
         }
-      };
+        return true;
+      }, "setAssistantVisible");
 
-      window.showClippyChatBalloon = (initialMessage) => {
-        if (!mountedRef.current || !isScreenPoweredOn) return false;
+      window.setCurrentAgent = createSafeGlobalFunction((agent) => {
+        setCurrentAgent(agent);
+        return true;
+      }, "setCurrentAgent");
 
-        try {
+      window.setScreenPowerState = createSafeGlobalFunction((powered) => {
+        setIsScreenPoweredOn(powered);
+        return true;
+      }, "setScreenPowerState");
+
+      // Balloon functions with safe positioning
+      window.showClippyCustomBalloon = createSafeGlobalFunction((message) => {
+        if (!isScreenPoweredOn) return false;
+
+        const clippyElement = document.querySelector(".clippy");
+        const position = safeExecute(
+          () => ClippyPositioning?.getBalloonPosition(clippyElement, "speech"),
+          { left: 50, top: 50 },
+          "balloon position calculation"
+        );
+
+        setBalloonPosition(position);
+        setCustomBalloonMessage(message);
+        setCustomBalloonVisible(true);
+        setChatBalloonVisible(false);
+
+        // Auto-hide after 6 seconds
+        setTimeout(() => {
+          if (mountedRef.current) {
+            setCustomBalloonVisible(false);
+          }
+        }, 6000);
+
+        return true;
+      }, "showClippyCustomBalloon");
+
+      window.hideClippyCustomBalloon = createSafeGlobalFunction(() => {
+        setCustomBalloonVisible(false);
+        setChatBalloonVisible(false);
+        return true;
+      }, "hideClippyCustomBalloon");
+
+      window.showClippyChatBalloon = createSafeGlobalFunction(
+        (initialMessage) => {
+          if (!isScreenPoweredOn) return false;
+
           const clippyElement = document.querySelector(".clippy");
-          const position = ClippyPositioning.getBalloonPosition(
-            clippyElement,
-            "chat"
+          const position = safeExecute(
+            () => ClippyPositioning?.getBalloonPosition(clippyElement, "chat"),
+            { left: 50, top: 50 },
+            "chat balloon position calculation"
           );
 
           setBalloonPosition(position);
@@ -186,102 +283,150 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           setChatBalloonVisible(true);
           setCustomBalloonVisible(false);
           return true;
-        } catch (error) {
-          console.error("Error showing chat balloon:", error);
-          return false;
-        }
-      };
+        },
+        "showClippyChatBalloon"
+      );
 
       window.getClippyInstance = () => clippyInstanceRef.current;
+
+      // Emergency reset function
+      window.resetClippy = () => {
+        console.log("🔄 Resetting Clippy...");
+        safeExecute(
+          () => {
+            setCustomBalloonVisible(false);
+            setChatBalloonVisible(false);
+            setAssistantVisible(true);
+            errorCountRef.current = 0;
+          },
+          null,
+          "clippy reset"
+        );
+      };
     }
 
-    // BIOS completion handler
+    // Enhanced BIOS completion handler with startup sequence awareness
     const handleBiosComplete = () => {
-      if (!welcomeShownRef.current && mountedRef.current) {
+      if (
+        !welcomeShownRef.current &&
+        mountedRef.current &&
+        assistantVisible &&
+        startupComplete
+      ) {
+        // Wait a bit longer for startup sequence to fully complete
         setTimeout(() => {
-          if (window.clippy && assistantVisible && mountedRef.current) {
-            try {
-              window.clippy.play("Greeting");
-              setTimeout(() => {
-                if (window.showClippyCustomBalloon && mountedRef.current) {
-                  window.showClippyCustomBalloon(
-                    "Welcome to Hydra98! Tap me for help."
-                  );
-                }
-              }, 1000);
-              welcomeShownRef.current = true;
-            } catch (error) {
-              console.error("Error playing welcome animation:", error);
-            }
-          }
-        }, 2000);
+          safeExecute(
+            () => {
+              if (window.clippy && mountedRef.current && startupComplete) {
+                window.clippy.play("Greeting");
+                setTimeout(() => {
+                  if (window.showClippyCustomBalloon && mountedRef.current) {
+                    const welcomeMessage = isMobile
+                      ? "Welcome to Hydra98! Tap me for help."
+                      : "Welcome to Hydra98! Double-click me for help.";
+                    window.showClippyCustomBalloon(welcomeMessage);
+                  }
+                }, 1000);
+                welcomeShownRef.current = true;
+              }
+            },
+            null,
+            "welcome sequence"
+          );
+        }, 3000); // Longer delay to ensure startup is fully complete
       }
     };
 
-    window.addEventListener("biosSequenceCompleted", handleBiosComplete);
+    const safeEventListener = (event) => {
+      safeExecute(() => handleBiosComplete(), null, "BIOS completion handler");
+    };
+
+    window.addEventListener("biosSequenceCompleted", safeEventListener);
 
     return () => {
       mountedRef.current = false;
-      window.removeEventListener("biosSequenceCompleted", handleBiosComplete);
+      window.removeEventListener("biosSequenceCompleted", safeEventListener);
     };
-  }, [assistantVisible, isScreenPoweredOn]);
+  }, [
+    assistantVisible,
+    isScreenPoweredOn,
+    createSafeGlobalFunction,
+    startupComplete,
+  ]);
 
-  // Chat message handler
-  const handleChatMessage = useCallback((message, callback) => {
-    if (!mountedRef.current) return;
+  // Safe chat message handler
+  const handleChatMessage = useCallback(
+    (message, callback) => {
+      if (!mountedRef.current || !startupComplete) return;
 
-    try {
-      setTimeout(() => {
-        if (!mountedRef.current) return;
+      safeExecute(
+        () => {
+          setTimeout(() => {
+            if (!mountedRef.current || !startupComplete) return;
 
-        let response;
-        const lowercaseMsg = message.toLowerCase();
+            let response;
+            const lowercaseMsg = message.toLowerCase();
 
-        if (lowercaseMsg.includes("hello") || lowercaseMsg.includes("hi")) {
-          response = "Hello there! How can I assist you?";
-        } else if (lowercaseMsg.includes("help")) {
-          response =
-            "I can help with many tasks. What specifically do you need assistance with?";
-        } else if (
-          lowercaseMsg.includes("hydra") ||
-          lowercaseMsg.includes("98")
-        ) {
-          response =
-            "Hydra98 is a Windows 98-themed web application that recreates the classic desktop experience!";
-        } else {
-          response =
-            "I'm not sure about that. Is there something specific you'd like to know?";
-        }
+            if (lowercaseMsg.includes("hello") || lowercaseMsg.includes("hi")) {
+              response = "Hello there! How can I assist you today?";
+            } else if (lowercaseMsg.includes("help")) {
+              response =
+                "I can help with many tasks. What specifically do you need assistance with?";
+            } else if (
+              lowercaseMsg.includes("hydra") ||
+              lowercaseMsg.includes("98")
+            ) {
+              response =
+                "Hydra98 is a Windows 98-themed web application that recreates the classic desktop experience!";
+            } else if (
+              lowercaseMsg.includes("mobile") ||
+              lowercaseMsg.includes("touch")
+            ) {
+              response = isMobile
+                ? "I'm optimized for mobile! Tap me for quick help, or long-press for this chat."
+                : "This appears to be a desktop environment. Double-click me for interactions!";
+            } else {
+              response =
+                "I'm not sure about that. Is there something specific you'd like to know about Hydra98?";
+            }
 
-        if (mountedRef.current && callback) {
-          callback(response);
-        }
-      }, 1000);
-    } catch (error) {
-      console.error("Error handling chat message:", error);
-      if (callback) {
-        callback("Sorry, I encountered an error processing your message.");
-      }
-    }
-  }, []);
+            if (mountedRef.current && callback) {
+              callback(response);
+            }
+          }, 1000);
+        },
+        null,
+        "chat message handling"
+      );
+    },
+    [startupComplete]
+  );
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       mountedRef.current = false;
-      if (typeof window !== "undefined") {
-        delete window._clippyGlobalsInitialized;
-        delete window.setAssistantVisible;
-        delete window.setCurrentAgent;
-        delete window.setScreenPowerState;
-        delete window.showClippyCustomBalloon;
-        delete window.hideClippyCustomBalloon;
-        delete window.showClippyChatBalloon;
-        delete window.getClippyInstance;
-        delete window.setClippyPosition;
-      }
+
+      safeExecute(
+        () => {
+          if (typeof window !== "undefined") {
+            delete window._clippyGlobalsInitialized;
+            delete window.setAssistantVisible;
+            delete window.setCurrentAgent;
+            delete window.setScreenPowerState;
+            delete window.showClippyCustomBalloon;
+            delete window.hideClippyCustomBalloon;
+            delete window.showClippyChatBalloon;
+            delete window.getClippyInstance;
+            delete window.setClippyPosition;
+            delete window.resetClippy;
+          }
+        },
+        null,
+        "cleanup"
+      );
     };
-  }, [clippyInstanceRef, overlayRef]);
+  }, []);
 
   const contextValue = {
     assistantVisible,
@@ -292,6 +437,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     setPosition,
     isScreenPoweredOn,
     setIsScreenPoweredOn,
+    startupComplete, // Expose startup state
     setClippyInstance: (instance) => {
       clippyInstanceRef.current = instance;
       window.clippy = instance;
@@ -305,36 +451,46 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       <ReactClippyProvider agentName={currentAgent}>
         {children}
 
-        <SimplifiedClippyController
-          visible={assistantVisible}
-          isScreenPoweredOn={isScreenPoweredOn}
-          position={position}
-          clippyInstanceRef={clippyInstanceRef}
-          overlayRef={overlayRef}
-        />
-
-        {mountedRef.current && isScreenPoweredOn && customBalloonVisible && (
-          <CustomBalloon
-            message={customBalloonMessage}
-            position={balloonPosition}
+        {/* Only render Clippy components after startup completes */}
+        {startupComplete && (
+          <StartupAwareClippyController
+            visible={assistantVisible}
+            isScreenPoweredOn={isScreenPoweredOn}
+            position={position}
+            clippyInstanceRef={clippyInstanceRef}
+            overlayRef={overlayRef}
           />
         )}
 
-        {mountedRef.current && isScreenPoweredOn && chatBalloonVisible && (
-          <ChatBalloon
-            initialMessage={chatInitialMessage}
-            position={balloonPosition}
-            onClose={() => setChatBalloonVisible(false)}
-            onSendMessage={handleChatMessage}
-          />
-        )}
+        {/* Only render balloons after startup completes */}
+        {mountedRef.current &&
+          isScreenPoweredOn &&
+          customBalloonVisible &&
+          startupComplete && (
+            <CustomBalloon
+              message={customBalloonMessage}
+              position={balloonPosition}
+            />
+          )}
+
+        {mountedRef.current &&
+          isScreenPoweredOn &&
+          chatBalloonVisible &&
+          startupComplete && (
+            <ChatBalloon
+              initialMessage={chatInitialMessage}
+              position={balloonPosition}
+              onClose={() => setChatBalloonVisible(false)}
+              onSendMessage={handleChatMessage}
+            />
+          )}
       </ReactClippyProvider>
     </ClippyContext.Provider>
   );
 };
 
-// Simplified controller using centralized positioning
-const SimplifiedClippyController = ({
+// Startup-aware controller with additional startup checks
+const StartupAwareClippyController = ({
   visible,
   isScreenPoweredOn,
   position,
@@ -347,6 +503,12 @@ const SimplifiedClippyController = ({
   const tapCountRef = useRef(0);
   const mountedRef = useRef(false);
   const tapTimeoutRef = useRef(null);
+  const errorCountRef = useRef(0);
+  const setupAttemptRef = useRef(0);
+
+  // Mobile-optimized update intervals
+  const updateInterval = isMobile ? 2000 : 1000;
+  const maxSetupAttempts = 5;
 
   useEffect(() => {
     if (!clippy || !visible) return;
@@ -356,132 +518,213 @@ const SimplifiedClippyController = ({
     window.clippy = clippy;
 
     const setupClippy = () => {
-      if (!mountedRef.current) return false;
-
-      const clippyEl = document.querySelector(".clippy");
-      if (!clippyEl) return false;
-
-      try {
-        // Use centralized positioning - ALWAYS calculate fresh for desktop
-        const currentPosition = isMobile
-          ? null
-          : ClippyPositioning.calculateDesktopPosition();
-        ClippyPositioning.positionClippy(clippyEl, currentPosition);
-
-        // Set visibility
-        ClippyPositioning.applyStyles(clippyEl, {
-          visibility: isScreenPoweredOn ? "visible" : "hidden",
-          opacity: isScreenPoweredOn ? "1" : "0",
-          pointerEvents: "none",
-        });
-
-        // Setup overlay using synchronized positioning
-        if (!overlayRef.current && mountedRef.current) {
-          const overlay = document.createElement("div");
-          overlay.id = "clippy-clickable-overlay";
-
-          // Event handlers (simplified - no positioning logic here)
-          const handleInteraction = (e) => {
-            if (!mountedRef.current) return;
-
-            try {
-              e.preventDefault();
-              e.stopPropagation();
-
-              if (clippy.play) {
-                clippy.play("Greeting");
-
-                setTimeout(() => {
-                  if (window.showClippyCustomBalloon && mountedRef.current) {
-                    const messages = [
-                      "Hello! Tap me again for more help!",
-                      "Need assistance? I'm here to help!",
-                      "What can I help you with today?",
-                    ];
-                    tapCountRef.current =
-                      (tapCountRef.current + 1) % messages.length;
-                    window.showClippyCustomBalloon(
-                      messages[tapCountRef.current]
-                    );
-                  }
-                }, 800);
-              }
-            } catch (error) {
-              console.error("Error handling interaction:", error);
-            }
-          };
-
-          // Add appropriate event listeners
-          if (isMobile) {
-            overlay.addEventListener("touchstart", handleInteraction, {
-              passive: false,
-            });
-
-            // Long press for chat
-            let longPressTimer;
-            overlay.addEventListener(
-              "touchstart",
-              (e) => {
-                longPressTimer = setTimeout(() => {
-                  if (window.showClippyChatBalloon && mountedRef.current) {
-                    window.showClippyChatBalloon(
-                      "Hi! What would you like to chat about?"
-                    );
-                  }
-                }, 800);
-              },
-              { passive: false }
-            );
-
-            overlay.addEventListener(
-              "touchend",
-              () => {
-                clearTimeout(longPressTimer);
-              },
-              { passive: false }
-            );
-          } else {
-            overlay.addEventListener("dblclick", handleInteraction);
-          }
-
-          overlayRef.current = overlay;
-          document.body.appendChild(overlay);
-        }
-
-        // Use synchronized positioning to ensure overlay matches Clippy exactly
-        ClippyPositioning.positionClippyAndOverlay(
-          clippyEl,
-          overlayRef.current,
-          currentPosition
-        );
-
-        ClippyPositioning.applyStyles(overlayRef.current, {
-          visibility: isScreenPoweredOn ? "visible" : "hidden",
-        });
-
-        return true;
-      } catch (error) {
-        console.error("Error setting up Clippy:", error);
+      if (!mountedRef.current || setupAttemptRef.current >= maxSetupAttempts) {
         return false;
       }
+
+      setupAttemptRef.current++;
+
+      return safeExecute(
+        () => {
+          const clippyEl = document.querySelector(".clippy");
+          if (!clippyEl) return false;
+
+          // Use centralized positioning with fallbacks
+          const currentPosition = isMobile
+            ? null
+            : safeExecute(
+                () => ClippyPositioning?.calculateDesktopPosition(),
+                position,
+                "desktop position calculation"
+              );
+
+          const positionSuccess = safeExecute(
+            () => ClippyPositioning?.positionClippy(clippyEl, currentPosition),
+            false,
+            "clippy positioning"
+          );
+
+          // Set visibility with fallback
+          const visibilityStyles = {
+            visibility: isScreenPoweredOn ? "visible" : "hidden",
+            opacity: isScreenPoweredOn ? "1" : "0",
+            pointerEvents: "none",
+          };
+
+          safeExecute(
+            () => ClippyPositioning?.applyStyles(clippyEl, visibilityStyles),
+            false,
+            "visibility styling"
+          );
+
+          // Setup overlay with crash protection
+          if (!overlayRef.current && mountedRef.current) {
+            const overlay = safeExecute(
+              () => {
+                const el = document.createElement("div");
+                el.id = "clippy-clickable-overlay";
+                return el;
+              },
+              null,
+              "overlay creation"
+            );
+
+            if (!overlay) return false;
+
+            // Mobile-optimized event handlers
+            const handleInteraction = (e) => {
+              if (!mountedRef.current) return;
+
+              safeExecute(
+                () => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  if (clippy.play) {
+                    clippy.play("Greeting");
+
+                    setTimeout(() => {
+                      if (
+                        window.showClippyCustomBalloon &&
+                        mountedRef.current
+                      ) {
+                        const messages = [
+                          isMobile
+                            ? "Tap me again for more help!"
+                            : "Double-click me again for more help!",
+                          "Need assistance? I'm here to help!",
+                          "What can I help you with today?",
+                        ];
+                        tapCountRef.current =
+                          (tapCountRef.current + 1) % messages.length;
+                        window.showClippyCustomBalloon(
+                          messages[tapCountRef.current]
+                        );
+                      }
+                    }, 800);
+                  }
+                },
+                null,
+                "interaction handling"
+              );
+            };
+
+            // Add event listeners based on device type
+            if (isMobile) {
+              // Mobile: tap and long press
+              overlay.addEventListener("touchstart", handleInteraction, {
+                passive: false,
+              });
+
+              // Long press for chat with safety
+              let longPressTimer;
+              overlay.addEventListener(
+                "touchstart",
+                (e) => {
+                  safeExecute(
+                    () => {
+                      longPressTimer = setTimeout(() => {
+                        if (
+                          window.showClippyChatBalloon &&
+                          mountedRef.current
+                        ) {
+                          window.showClippyChatBalloon(
+                            "Hi! What would you like to chat about?"
+                          );
+                        }
+                      }, 800);
+                    },
+                    null,
+                    "long press setup"
+                  );
+                },
+                { passive: false }
+              );
+
+              overlay.addEventListener(
+                "touchend",
+                () => {
+                  safeExecute(
+                    () => {
+                      clearTimeout(longPressTimer);
+                    },
+                    null,
+                    "long press cleanup"
+                  );
+                },
+                { passive: false }
+              );
+            } else {
+              // Desktop: double-click
+              overlay.addEventListener("dblclick", handleInteraction);
+            }
+
+            overlayRef.current = overlay;
+            document.body.appendChild(overlay);
+          }
+
+          // Synchronized positioning with error handling
+          const syncSuccess = safeExecute(
+            () =>
+              ClippyPositioning?.positionClippyAndOverlay(
+                clippyEl,
+                overlayRef.current,
+                currentPosition
+              ),
+            false,
+            "synchronized positioning"
+          );
+
+          if (overlayRef.current) {
+            safeExecute(
+              () =>
+                ClippyPositioning?.applyStyles(overlayRef.current, {
+                  visibility: isScreenPoweredOn ? "visible" : "hidden",
+                }),
+              false,
+              "overlay visibility"
+            );
+          }
+
+          return positionSuccess && syncSuccess;
+        },
+        false,
+        "clippy setup"
+      );
     };
 
-    // Simple update loop
+    // Throttled update loop for mobile performance
     const updateLoop = (timestamp) => {
       if (!mountedRef.current) return;
 
-      const interval = 1000; // Update every second
-
-      if (timestamp - lastUpdateRef.current > interval) {
-        setupClippy();
+      if (timestamp - lastUpdateRef.current > updateInterval) {
+        if (setupClippy()) {
+          errorCountRef.current = 0;
+        } else {
+          errorCountRef.current++;
+          if (errorCountRef.current > 10) {
+            console.warn(
+              "Clippy setup failing repeatedly, reducing update frequency"
+            );
+            return;
+          }
+        }
         lastUpdateRef.current = timestamp;
       }
 
       rafRef.current = requestAnimationFrame(updateLoop);
     };
 
-    // Initial setup
-    if (setupClippy()) {
+    // Initial setup with retry logic
+    let setupSuccess = false;
+    for (let i = 0; i < 3 && !setupSuccess; i++) {
+      setupSuccess = setupClippy();
+      if (!setupSuccess) {
+        console.warn(`Clippy setup attempt ${i + 1} failed, retrying...`);
+      }
+    }
+
+    if (setupSuccess) {
       rafRef.current = requestAnimationFrame(updateLoop);
     }
 
@@ -489,31 +732,25 @@ const SimplifiedClippyController = ({
 
     return () => {
       mountedRef.current = false;
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-      if (currentTapTimeout) {
-        // ✅ Now uses the copied variable
-        clearTimeout(currentTapTimeout);
-      }
-      if (overlayRef.current && overlayRef.current.parentNode) {
-        try {
-          overlayRef.current.parentNode.removeChild(overlayRef.current);
-        } catch (error) {
-          console.error("Error removing overlay:", error);
-        }
-        overlayRef.current = null;
-      }
+
+      safeExecute(
+        () => {
+          if (rafRef.current) {
+            cancelAnimationFrame(rafRef.current);
+          }
+          if (currentTapTimeout) {
+            clearTimeout(currentTapTimeout);
+          }
+          if (overlayRef.current && overlayRef.current.parentNode) {
+            overlayRef.current.parentNode.removeChild(overlayRef.current);
+            overlayRef.current = null;
+          }
+        },
+        null,
+        "controller cleanup"
+      );
     };
-  }, [
-    clippy,
-    visible,
-    isScreenPoweredOn,
-    position,
-    tapTimeoutRef,
-    clippyInstanceRef,
-    overlayRef,
-  ]);
+  }, [clippy, visible, isScreenPoweredOn, position, updateInterval]);
 
   return null;
 };
