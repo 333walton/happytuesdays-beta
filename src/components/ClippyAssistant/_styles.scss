@@ -39,7 +39,7 @@
 @media (max-width: 768px), (max-height: 600px) {
   .clippy {
     position: fixed !important;
-    bottom: 110px !important;
+    bottom: 120px !important; /* higher number means higher up */
     right: 15px !important; /* lower number means more to the right */
     left: auto !important;
     top: auto !important;
