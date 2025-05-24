@@ -59,19 +59,38 @@
   // Test centralized positioning system performance
   console.log("Testing centralized positioning system performance...");
   const positioningStart = performance.now();
+
+  let mobilePositionSuccess = false;
+  let desktopPositionSuccess = false;
+  let syncSuccess = false;
+
   try {
     // Test mobile positioning
     const mobilePos = window.ClippyPositioning.calculateMobilePosition();
-    console.log("Mobile positioning calculation:", mobilePos ? "✅ Success" : "❌ Failed");
-    
+    mobilePositionSuccess = !!mobilePos;
+    console.log(
+      "Mobile positioning calculation:",
+      mobilePositionSuccess ? "✅ Success" : "❌ Failed"
+    );
+
     // Test desktop positioning
     const desktopPos = window.ClippyPositioning.calculateDesktopPosition();
-    console.log("Desktop positioning calculation:", desktopPos ? "✅ Success" : "❌ Failed");
-    
+    desktopPositionSuccess = !!desktopPos;
+    console.log(
+      "Desktop positioning calculation:",
+      desktopPositionSuccess ? "✅ Success" : "❌ Failed"
+    );
+
     // Test synchronized positioning
     if (clippyEl) {
-      const syncSuccess = window.ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl);
-      console.log("Synchronized positioning:", syncSuccess ? "✅ Success" : "❌ Failed");
+      syncSuccess = window.ClippyPositioning.positionClippyAndOverlay(
+        clippyEl,
+        overlayEl
+      );
+      console.log(
+        "Synchronized positioning:",
+        syncSuccess ? "✅ Success" : "❌ Failed"
+      );
     }
   } catch (e) {
     console.error("Error testing positioning system:", e);
@@ -80,56 +99,64 @@
   const positioningTime = performance.now() - positioningStart;
   console.log(
     `Centralized positioning time: ${positioningTime.toFixed(2)}ms ${
-      positioningTime < 50 ? "✅ Excellent" : positioningTime < 100 ? "✅ Good" : "❌ Slow"
+      positioningTime < 50
+        ? "✅ Excellent"
+        : positioningTime < 100
+        ? "✅ Good"
+        : "❌ Slow"
     }`
   );
 
   // Animation test with positioning
   console.log("Testing animation performance with centralized positioning...");
   const start = performance.now();
+  let animationSuccess = false;
+  let positionDuringAnimSuccess = false;
+
   try {
-    window.ClippyService.play("Wave");
-    
+    animationSuccess = window.ClippyService.play("Wave");
+
     // Test positioning during animation
     if (clippyEl) {
-      const positionSuccess = window.ClippyPositioning.positionClippy(clippyEl);
-      console.log("Animation + positioning:", positionSuccess ? "✅ Success" : "❌ Failed");
+      positionDuringAnimSuccess =
+        window.ClippyPositioning.positionClippy(clippyEl);
+      console.log(
+        "Animation + positioning:",
+        positionDuringAnimSuccess ? "✅ Success" : "❌ Failed"
+      );
     }
   } catch (e) {
     console.error("Error playing animation:", e);
   }
 
   // Save animation time for later reference
-  window.__clippy_perf_anim_time = null;
+  let animationTime = null;
 
   // Check how quickly the animation starts
   requestAnimationFrame(() => {
-    const animTime = performance.now() - start;
-    window.__clippy_perf_anim_time = animTime;
+    animationTime = performance.now() - start;
     console.log(
-      `Animation + positioning start time: ${animTime.toFixed(2)}ms ${
-        animTime < 100 ? "✅ Good" : "❌ Slow"
+      `Animation + positioning start time: ${animationTime.toFixed(2)}ms ${
+        animationTime < 100 ? "✅ Good" : "❌ Slow"
       }`
     );
   });
 
   // Visibility test
+  let clippyVisible = false;
+  let clippyShown = false;
+  let clippyOpaque = false;
+
   const clippy = document.querySelector(".clippy");
   if (clippy) {
     const style = window.getComputedStyle(clippy);
-    console.log(
-      `Visibility: ${
-        style.visibility === "visible" ? "✅ Visible" : "❌ Hidden"
-      }`
-    );
-    console.log(
-      `Display: ${style.display !== "none" ? "✅ Shown" : "❌ Hidden"}`
-    );
-    console.log(
-      `Opacity: ${
-        parseFloat(style.opacity) > 0 ? "✅ Visible" : "❌ Transparent"
-      }`
-    );
+    clippyVisible = style.visibility === "visible";
+    clippyShown = style.display !== "none";
+    clippyOpaque = parseFloat(style.opacity) > 0;
+
+    console.log(`Visibility: ${clippyVisible ? "✅ Visible" : "❌ Hidden"}`);
+    console.log(`Display: ${clippyShown ? "✅ Shown" : "❌ Hidden"}`);
+    console.log(`Opacity: ${clippyOpaque ? "✅ Visible" : "❌ Transparent"}`);
   } else {
     console.error("❌ Clippy element not found in DOM");
   }
@@ -152,20 +179,22 @@
 
   // Device detection using centralized system
   const isMobile = window.ClippyPositioning.isMobile;
-  const actualMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
+  const actualMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+  const deviceDetectionAccurate = isMobile === actualMobile;
 
   console.log(
     `Device detection: ${
-      isMobile === actualMobile ? "✅ Accurate" : "❌ Inaccurate"
+      deviceDetectionAccurate ? "✅ Accurate" : "❌ Inaccurate"
     } (Detected: ${isMobile}, Actual: ${actualMobile})`
   );
 
   // Positioning accuracy test
   let clippyMobilePositioned = false;
   let clippyDesktopPositioned = false;
-  
+
   if (clippy) {
     const style = window.getComputedStyle(clippy);
 
@@ -191,7 +220,7 @@
   // Touch target test
   let isTouchFriendly = false;
   let positionMatch = false;
-  
+
   const overlay = document.getElementById("clippy-clickable-overlay");
   if (overlay) {
     const rect = overlay.getBoundingClientRect();
@@ -201,15 +230,18 @@
         isTouchFriendly ? "✅ Good" : "❌ Too small"
       } (${rect.width.toFixed(0)}x${rect.height.toFixed(0)}px)`
     );
-    
+
     // Test overlay synchronization
     if (clippy) {
       const clippyRect = clippy.getBoundingClientRect();
-      positionMatch = Math.abs(rect.left - clippyRect.left) < 5 &&
-                     Math.abs(rect.top - clippyRect.top) < 5;
-      
+      positionMatch =
+        Math.abs(rect.left - clippyRect.left) < 5 &&
+        Math.abs(rect.top - clippyRect.top) < 5;
+
       console.log(
-        `Overlay synchronization: ${positionMatch ? "✅ Synchronized" : "❌ Misaligned"}`
+        `Overlay synchronization: ${
+          positionMatch ? "✅ Synchronized" : "❌ Misaligned"
+        }`
       );
     }
   } else {
@@ -219,17 +251,27 @@
   // Test balloon positioning
   let validSpeech = false;
   let validChat = false;
-  
+
   if (clippy) {
     try {
-      const speechPos = window.ClippyPositioning.getBalloonPosition(clippy, 'speech');
-      const chatPos = window.ClippyPositioning.getBalloonPosition(clippy, 'chat');
-      
+      const speechPos = window.ClippyPositioning.getBalloonPosition(
+        clippy,
+        "speech"
+      );
+      const chatPos = window.ClippyPositioning.getBalloonPosition(
+        clippy,
+        "chat"
+      );
+
       validSpeech = speechPos && speechPos.left >= 0 && speechPos.top >= 0;
       validChat = chatPos && chatPos.left >= 0 && chatPos.top >= 0;
-      
-      console.log(`Speech balloon positioning: ${validSpeech ? "✅ Valid" : "❌ Invalid"}`);
-      console.log(`Chat balloon positioning: ${validChat ? "✅ Valid" : "❌ Invalid"}`);
+
+      console.log(
+        `Speech balloon positioning: ${validSpeech ? "✅ Valid" : "❌ Invalid"}`
+      );
+      console.log(
+        `Chat balloon positioning: ${validChat ? "✅ Valid" : "❌ Invalid"}`
+      );
     } catch (e) {
       console.error("❌ Error testing balloon positioning:", e);
     }
@@ -238,26 +280,32 @@
   // Positioning system stress test
   console.log("Testing positioning system stress test...");
   const stressStart = performance.now();
-  
+  let stressTestSuccess = false;
+
   try {
     for (let i = 0; i < 100; i++) {
       window.ClippyPositioning.calculateMobilePosition();
       window.ClippyPositioning.calculateDesktopPosition();
     }
+    stressTestSuccess = true;
   } catch (e) {
     console.error("Error in stress test:", e);
   }
-  
+
   const stressTime = performance.now() - stressStart;
   console.log(
     `Stress test (200 calculations): ${stressTime.toFixed(2)}ms ${
-      stressTime < 100 ? "✅ Excellent" : stressTime < 200 ? "✅ Good" : "❌ Slow"
+      stressTime < 100
+        ? "✅ Excellent"
+        : stressTime < 200
+        ? "✅ Good"
+        : "❌ Slow"
     }`
   );
 
   // Animation stability test
   console.log("Testing animation stability...");
-  
+
   // Check if we can access the Clippy element's animation
   const clippyMaps = document.querySelectorAll(".clippy .map");
   console.log(`Animation maps found: ${clippyMaps.length}`);
@@ -267,71 +315,69 @@
     const after = performance.memory?.usedJSHeapSize || 0;
     const usage = after - before;
     const usageMB = ((usage || 2000000) / (1024 * 1024)).toFixed(2);
+    const memoryGood = usage < 5000000;
+
     console.log(
-      `Memory usage: ${usageMB}MB ${usage < 5000000 ? "✅ Good" : "❌ High"}`
+      `Memory usage: ${usageMB}MB ${memoryGood ? "✅ Good" : "❌ High"}`
     );
 
     // Feature check for centralized system
     console.log("\nCentralized system feature verification:");
+    const hasClippyPositioning = !!window.ClippyPositioning;
     console.log(
-      `- ClippyPositioning available: ${window.ClippyPositioning ? "✅" : "❌"}`
+      `- ClippyPositioning available: ${hasClippyPositioning ? "✅" : "❌"}`
     );
 
     const clippyPositioning = window.ClippyPositioning;
     const positioningMethods = [
-      'calculateMobilePosition',
-      'calculateDesktopPosition',
-      'getClippyPosition',
-      'positionClippy',
-      'positionOverlay',
-      'getBalloonPosition',
-      'positionClippyAndOverlay'
+      "calculateMobilePosition",
+      "calculateDesktopPosition",
+      "getClippyPosition",
+      "positionClippy",
+      "positionOverlay",
+      "getBalloonPosition",
+      "positionClippyAndOverlay",
     ];
 
-    positioningMethods.forEach(method => {
-      console.log(`- ${method}: ${clippyPositioning && clippyPositioning[method] ? "✅" : "❌"}`);
+    let methodsAvailable = 0;
+    positioningMethods.forEach((method) => {
+      const available = !!(clippyPositioning && clippyPositioning[method]);
+      console.log(`- ${method}: ${available ? "✅" : "❌"}`);
+      if (available) methodsAvailable++;
     });
 
     const clippyServiceInstance = window.ClippyService;
-    console.log(`- ClippyService speak: ${clippyServiceInstance && clippyServiceInstance.speak ? "✅" : "❌"}`);
+    const hasSpeak = !!(clippyServiceInstance && clippyServiceInstance.speak);
+    const hasEmergencyReset = !!(
+      clippyServiceInstance && clippyServiceInstance.emergencyReset
+    );
+
+    console.log(`- ClippyService speak: ${hasSpeak ? "✅" : "❌"}`);
     console.log(
-      `- ClippyService emergencyReset: ${
-        clippyServiceInstance && clippyServiceInstance.emergencyReset ? "✅" : "❌"
-      }`
+      `- ClippyService emergencyReset: ${hasEmergencyReset ? "✅" : "❌"}`
     );
 
     // Final summary
-    let totalTests = 12; // Updated for new centralized system tests
+    let totalTests = 15; // Core tests
     let passedTests = 0;
 
-    // Count passing tests from above results
+    // Count passing tests
     if (clippy) passedTests++;
-
-    // Make sure we're using the style from clippy
-    if (clippy && parseFloat(window.getComputedStyle(clippy).opacity) > 0) passedTests++;
-
-    // Get hardware acceleration status
+    if (clippyVisible && clippyShown && clippyOpaque) passedTests++;
     if (clippyHasHardwareAcceleration) passedTests++;
-
-    // Get positioning status
-    if (clippy && (isMobile ? clippyMobilePositioned : clippyDesktopPositioned))
+    if (isMobile ? clippyMobilePositioned : clippyDesktopPositioned)
       passedTests++;
-
-    // Check for touch friendly overlay
     if (overlay && isTouchFriendly) passedTests++;
-
-    // Check centralized system availability
-    if (window.ClippyPositioning) passedTests++;
+    if (hasClippyPositioning) passedTests++;
     if (positioningTime < 100) passedTests++;
-    if (stressTime < 200) passedTests++;
-    if (clippyServiceInstance && clippyServiceInstance.speak) passedTests++;
-    if (clippyServiceInstance && clippyServiceInstance.emergencyReset) passedTests++;
-
-    // Device detection accuracy
-    if (isMobile === actualMobile) passedTests++;
-
-    // Memory usage
-    if (usage < 5000000) passedTests++;
+    if (stressTestSuccess && stressTime < 200) passedTests++;
+    if (hasSpeak) passedTests++;
+    if (hasEmergencyReset) passedTests++;
+    if (deviceDetectionAccurate) passedTests++;
+    if (memoryGood) passedTests++;
+    if (mobilePositionSuccess && desktopPositionSuccess) passedTests++;
+    if (validSpeech && validChat) passedTests++;
+    if (positionMatch) passedTests++;
 
     const successRate = Math.round((passedTests / totalTests) * 100);
 
@@ -343,17 +389,18 @@
       `Success rate: ${successRate}% (${passedTests}/${totalTests} tests passed)`
     );
 
-    // Get animation time from earlier test or default to null
-    let animationTime = window.__clippy_perf_anim_time || null;
-
     console.log(
       `Centralized positioning: ${
-        window.ClippyPositioning ? "✅ Available" : "❌ Missing"
+        hasClippyPositioning ? "✅ Available" : "❌ Missing"
       }`
     );
     console.log(
       `Positioning performance: ${
-        positioningTime < 50 ? "✅ Excellent" : positioningTime < 100 ? "✅ Good" : "❌ Needs improvement"
+        positioningTime < 50
+          ? "✅ Excellent"
+          : positioningTime < 100
+          ? "✅ Good"
+          : "❌ Needs improvement"
       }`
     );
     console.log(
@@ -364,11 +411,15 @@
       }`
     );
     console.log(
-      `Memory usage: ${usageMB}MB ${usage < 5000000 ? "✅ Good" : "❌ High"}`
+      `Memory usage: ${usageMB}MB ${memoryGood ? "✅ Good" : "❌ High"}`
     );
     console.log(
       `System stress test: ${
-        stressTime < 100 ? "✅ Excellent" : stressTime < 200 ? "✅ Good" : "❌ Needs improvement"
+        stressTime < 100
+          ? "✅ Excellent"
+          : stressTime < 200
+          ? "✅ Good"
+          : "❌ Needs improvement"
       }`
     );
 
@@ -402,98 +453,6 @@
         testNotification.parentNode.removeChild(testNotification);
       }
     }, 5000);
-
-    // Clean up global variables
-    delete window.__clippy_perf_anim_time;
-  }, 3000);
-
-  console.log(
-    "Running centralized positioning system tests... results will be available in 3 seconds"
-  );
-})(); passedTests++;
-    if (positioningTime < 100) passedTests++;
-    if (stressTime < 200) passedTests++;
-    if (clippyServiceInstance && clippyServiceInstance.speak) passedTests++;
-    if (clippyServiceInstance && clippyServiceInstance.emergencyReset) passedTests++;
-
-    // Device detection accuracy
-    if (isMobile === actualMobile) passedTests++;
-
-    // Memory usage
-    if (usage < 5000000) passedTests++;
-
-    const successRate = Math.round((passedTests / totalTests) * 100);
-
-    console.log(
-      `\n%c=== ClippyPositioning Performance Test Summary ===`,
-      "font-weight: bold; font-size: 14px; color: #4a86e8;"
-    );
-    console.log(
-      `Success rate: ${successRate}% (${passedTests}/${totalTests} tests passed)`
-    );
-
-    // Get animation time from earlier test or default to null
-    let animationTime = window.__clippy_perf_anim_time || null;
-
-    console.log(
-      `Centralized positioning: ${
-        window.ClippyPositioning ? "✅ Available" : "❌ Missing"
-      }`
-    );
-    console.log(
-      `Positioning performance: ${
-        positioningTime < 50 ? "✅ Excellent" : positioningTime < 100 ? "✅ Good" : "❌ Needs improvement"
-      }`
-    );
-    console.log(
-      `Animation performance: ${
-        animationTime && animationTime < 100
-          ? "✅ Good"
-          : "❌ Needs improvement"
-      }`
-    );
-    console.log(
-      `Memory usage: ${usageMB}MB ${usage < 5000000 ? "✅ Good" : "❌ High"}`
-    );
-    console.log(
-      `System stress test: ${
-        stressTime < 100 ? "✅ Excellent" : stressTime < 200 ? "✅ Good" : "❌ Needs improvement"
-      }`
-    );
-
-    if (successRate >= 85) {
-      console.log(
-        "%c✅ CENTRALIZED POSITIONING SYSTEM: EXCELLENT!",
-        "color: green; font-weight: bold; font-size: 14px;"
-      );
-      testNotification.textContent = "✅ ClippyPositioning Test: EXCELLENT";
-      testNotification.style.background = "rgba(0, 128, 0, 0.7)";
-    } else if (successRate >= 70) {
-      console.log(
-        "%c✅ CENTRALIZED POSITIONING SYSTEM: GOOD",
-        "color: green; font-weight: bold; font-size: 14px;"
-      );
-      testNotification.textContent = "✅ ClippyPositioning Test: GOOD";
-      testNotification.style.background = "rgba(0, 128, 0, 0.7)";
-    } else {
-      console.log(
-        "%c❌ CENTRALIZED POSITIONING SYSTEM: NEEDS IMPROVEMENT",
-        "color: red; font-weight: bold; font-size: 14px;"
-      );
-      testNotification.textContent =
-        "⚠️ ClippyPositioning Test: NEEDS IMPROVEMENT";
-      testNotification.style.background = "rgba(255, 165, 0, 0.7)";
-    }
-
-    // Remove notification after 5 seconds
-    setTimeout(() => {
-      if (testNotification.parentNode) {
-        testNotification.parentNode.removeChild(testNotification);
-      }
-    }, 5000);
-
-    // Clean up global variables
-    delete window.__clippy_perf_anim_time;
   }, 3000);
 
   console.log(

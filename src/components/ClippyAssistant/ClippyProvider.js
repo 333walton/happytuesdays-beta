@@ -281,7 +281,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         delete window.setClippyPosition;
       }
     };
-  }, []);
+  }, [clippyInstanceRef, overlayRef]);
 
   const contextValue = {
     assistantVisible,
@@ -485,13 +485,16 @@ const SimplifiedClippyController = ({
       rafRef.current = requestAnimationFrame(updateLoop);
     }
 
+    const currentTapTimeout = tapTimeoutRef.current;
+
     return () => {
       mountedRef.current = false;
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
-      if (tapTimeoutRef.current) {
-        clearTimeout(tapTimeoutRef.current);
+      if (currentTapTimeout) {
+        // ✅ Now uses the copied variable
+        clearTimeout(currentTapTimeout);
       }
       if (overlayRef.current && overlayRef.current.parentNode) {
         try {
@@ -502,7 +505,15 @@ const SimplifiedClippyController = ({
         overlayRef.current = null;
       }
     };
-  }, [clippy, visible, isScreenPoweredOn, position]);
+  }, [
+    clippy,
+    visible,
+    isScreenPoweredOn,
+    position,
+    tapTimeoutRef,
+    clippyInstanceRef,
+    overlayRef,
+  ]);
 
   return null;
 };

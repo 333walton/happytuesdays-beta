@@ -62,6 +62,75 @@ All tests now validate:
 
 ---
 
+## 🔧 Common Error Fixes
+
+### **React Hook Dependency Warnings**
+
+**Pattern: Missing dependencies in useEffect**
+
+```javascript
+// ❌ Wrong - Missing dependencies
+useEffect(() => {
+  // Uses clippyInstanceRef, overlayRef, tapTimeoutRef
+}, [clippy, visible]);
+
+// ✅ Correct - Include all dependencies
+useEffect(() => {
+  // Same code
+}, [clippy, visible, clippyInstanceRef, overlayRef, tapTimeoutRef]);
+```
+
+**Pattern: Ref cleanup warnings**
+
+```javascript
+// ❌ Wrong - Using ref.current directly in cleanup
+useEffect(() => {
+  return () => {
+    if (tapTimeoutRef.current) {
+      clearTimeout(tapTimeoutRef.current);
+    }
+  };
+}, [deps]);
+
+// ✅ Correct - Copy ref value to variable
+useEffect(() => {
+  const currentTapTimeout = tapTimeoutRef.current; // Before return
+
+  return () => {
+    if (currentTapTimeout) {
+      clearTimeout(currentTapTimeout);
+    }
+  };
+}, [deps]);
+```
+
+### **Test File Variable Declaration Issues**
+
+**Pattern: Undefined variable errors**
+
+```javascript
+// ❌ Wrong - Using variables without declaration
+if (hasValidPosition) passedTests++; // Error: hasValidPosition not defined
+
+// ✅ Correct - Declare all variables
+let hasValidPosition = false;
+let overlayPosition = null;
+let animationSuccess = false;
+// ... then use them
+```
+
+**Pattern: Browser-only function calls**
+
+```javascript
+// ❌ Wrong - getEventListeners not available everywhere
+if (typeof getEventListeners === "function") {
+
+// ✅ Correct - Check window object first
+if (typeof window !== "undefined" && typeof window.getEventListeners === "function") {
+```
+
+---
+
 ## 📱 Mobile Requirements
 
 ### Always ensure:
@@ -78,6 +147,8 @@ All tests now validate:
 - [ ] Android Chrome interaction works
 - [ ] Balloons stay within viewport
 - [ ] No crashes on mobile devices
+- [ ] Test files run without syntax errors
+- [ ] React Hook warnings resolved
 
 ---
 
@@ -110,6 +181,25 @@ Add crash-resistant error handling with:
 - Emergency reset functions
 ```
 
+### Test File Fixes
+
+```
+Fix test file syntax errors:
+- Declare all variables with let/const
+- Add try-catch around error-prone operations
+- Use proper window object checks for browser APIs
+- Remove duplicate code sections
+```
+
+### React Hook Fixes
+
+```
+Fix React Hook warnings:
+- Add missing dependencies to useEffect arrays
+- Copy ref.current values to variables before cleanup
+- Include all referenced variables in dependency arrays
+```
+
 ---
 
 ## 🚨 Critical Don'ts
@@ -119,6 +209,9 @@ Add crash-resistant error handling with:
 - ❌ Don't forget mobile touch event handling
 - ❌ Don't skip error handling in DOM operations
 - ❌ Don't position balloons without viewport checks
+- ❌ Don't use undeclared variables in test files
+- ❌ Don't ignore React Hook dependency warnings
+- ❌ Don't use browser-only APIs without checking availability
 
 ---
 
@@ -142,6 +235,12 @@ ClippyPositioning.js → Calculate Position → Apply to Element → Update Over
 Standard Error → Emergency Reset → Nuclear Reset → Page Refresh
 ```
 
+### Test File Structure
+
+```
+Core Systems Check → Positioning Tests → Mobile Tests → Performance Tests → Summary
+```
+
 ---
 
 ## 📋 Quick Checklist
@@ -154,6 +253,29 @@ When making changes, ensure:
 - [ ] Performance optimized
 - [ ] Balloons positioned correctly
 - [ ] No memory leaks or cleanup issues
+- [ ] Test files run without errors
+- [ ] React Hook warnings resolved
+- [ ] All variables declared before use
+- [ ] Browser API checks included
+
+---
+
+## 🐛 Recent Fixes Applied
+
+### Test File Syntax Errors (Latest)
+
+- **Fixed undefined variables** in performanceTest.js and verification-test.js
+- **Removed duplicate code** in console-test-runner.js
+- **Added proper variable declarations** with let/const
+- **Fixed browser API checks** for getEventListeners
+
+### React Hook Warnings (Latest)
+
+- **Added missing dependencies** to useEffect arrays
+- **Fixed ref cleanup warnings** by copying ref values to variables
+- **Resolved tapTimeoutRef warning** in ClippyProvider
+
+These patterns should be applied to any future similar issues.
 
 ---
 

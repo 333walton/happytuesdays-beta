@@ -384,9 +384,12 @@ function testMobileInteractions() {
     // Note: getEventListeners is only available in Chrome dev tools
     let hasEventListeners = true; // Assume true since we can't reliably detect
     try {
-      if (typeof getEventListeners === "function") {
+      if (
+        typeof window !== "undefined" &&
+        typeof window.getEventListeners === "function"
+      ) {
         hasEventListeners =
-          Object.keys(getEventListeners(overlayEl)).length > 0;
+          Object.keys(window.getEventListeners(overlayEl)).length > 0;
       }
     } catch (e) {
       // getEventListeners not available, skip this check
@@ -540,7 +543,9 @@ function testPerformance() {
 }
 
 // Export for console use
-window.verifyClippyFunctionality = verifyClippyFunctionality;
+if (typeof window !== "undefined") {
+  window.verifyClippyFunctionality = verifyClippyFunctionality;
+}
 
 // Auto-run after delay if in browser context
 if (typeof window !== "undefined") {
