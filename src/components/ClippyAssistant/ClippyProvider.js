@@ -750,7 +750,16 @@ const StartupAwareClippyController = ({
         "controller cleanup"
       );
     };
-  }, [clippy, visible, isScreenPoweredOn, position, updateInterval]);
+  }, [
+    clippy,
+    visible,
+    isScreenPoweredOn,
+    position,
+    tapTimeoutRef,
+    clippyInstanceRef,
+    updateInterval,
+    overlayRef,
+  ]);
 
   return null;
 };
