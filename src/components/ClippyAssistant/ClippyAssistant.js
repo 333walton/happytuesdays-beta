@@ -4,13 +4,6 @@ import { useClippy } from "@react95/clippy";
 import { useClippyContext } from "./ClippyProvider";
 import CustomWindow from "../CustomWindow";
 import * as icons from "../../icons";
-import { fixClippyContextMenu } from "./ClippyContextMenuFix";
-import {
-  applyClippyNuclearFix,
-  watchForClippyElements,
-} from "./ClippyNuclearFix";
-// Import the script that gives access to emergency destroy function
-import "./ClippyDestroyAll.js";
 
 /**
  * Office Assistant (Clippy) settings and control panel
@@ -78,27 +71,6 @@ const ClippyAssistant = memo((props) => {
       setAssistantVisible(true);
     }
   }, [minimized, setAssistantVisible]);
-
-  // Apply context menu fix and nuclear fix when component mounts
-  useEffect(() => {
-    // Delay fix application to ensure ClippyManager is available
-    const timeoutId = setTimeout(() => {
-      // Apply the fix to make the right-click context menu hide functionality work
-      if (window.ClippyManager) {
-        console.log("Applying context menu fix to ClippyManager");
-        fixClippyContextMenu();
-
-        // Apply the nuclear fix for guaranteed hide functionality
-        console.log("Applying nuclear fix for guaranteed hide functionality");
-        applyClippyNuclearFix();
-
-        // Set up mutation observer to catch any new Clippy elements
-        const observer = watchForClippyElements();
-      }
-    }, 1500); // Delay to ensure everything is loaded
-
-    return () => clearTimeout(timeoutId);
-  }, []);
 
   // Function to safely access the clippy object
   const getClippy = useCallback(() => {

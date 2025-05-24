@@ -1,5 +1,3 @@
-// Modified ClippyProvider.js with mobile fix
-
 import React, {
   createContext,
   useState,
@@ -12,189 +10,145 @@ import {
   ClippyProvider as ReactClippyProvider,
 } from "@react95/clippy";
 
-// Import extracted components
 import CustomBalloon from "./CustomBalloon";
 import ChatBalloon from "./ChatBalloon";
-import ClippyController from "./ClippyController";
-import {
-  applyMobileClippyFix,
-  cleanupMobileClippyFix,
-} from "./mobile-clippy-fix";
-
 import "./_styles.scss";
 
-// Create context
 const ClippyContext = createContext(null);
 
-/**
- * Provider component that makes Clippy available throughout the app
- */
-const ClippyProvider = ({
-  children,
-  defaultAgent = "Clippy",
-  fixedPosition = false,
-}) => {
-  const [assistantVisible, setAssistantVisible] = useState(false);
-  const [currentAgent, setCurrentAgent] = useState(defaultAgent);
-  const [position, setPosition] = useState(() => ({
-    x: 520,
-    y: 360,
-  }));
-  const [userPositioned, setUserPositioned] = useState(false);
-  const clippyInstanceRef = useRef(null);
-  const desktopRectRef = useRef(null);
-  const isMobileRef = useRef(false);
+// Device detection - run once
+const isMobile =
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
 
-  // Custom balloon states
+const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
+  // Core state
+  const [assistantVisible, setAssistantVisible] = useState(true);
+  const [currentAgent, setCurrentAgent] = useState(defaultAgent);
+  const [isScreenPoweredOn, setIsScreenPoweredOn] = useState(true);
+
+  // Custom features state
+  const [positionLocked, setPositionLocked] = useState(() => {
+    try {
+      return localStorage.getItem("clippy_position_locked") !== "false";
+    } catch {
+      return true;
+    }
+  });
+
+  // Balloon state
   const [customBalloonVisible, setCustomBalloonVisible] = useState(false);
   const [customBalloonMessage, setCustomBalloonMessage] = useState("");
   const [chatBalloonVisible, setChatBalloonVisible] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState("");
   const [balloonPosition, setBalloonPosition] = useState({ left: 0, top: 0 });
 
-  // Reference to track initial position settings
-  const relativePositionRef = useRef({
-    xPercent: 0.81,
-    yPercent: 0.75,
-  });
+  // Refs for cleanup
+  const clippyInstanceRef = useRef(null);
+  const overlayRef = useRef(null);
+  const welcomeShownRef = useRef(false);
 
-  // Track screen power state from MonitorView
-  const [isScreenPoweredOn, setIsScreenPoweredOn] = useState(true);
+  // Position state
+  const [position, setPosition] = useState(() => ({
+    x: isMobile ? window.innerWidth - 100 : 520,
+    y: isMobile ? window.innerHeight - 150 : 360,
+  }));
 
-  // Detect if the user is on mobile
+  // Initialize global functions and welcome message
   useEffect(() => {
-    isMobileRef.current =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      );
-  }, []);
+    if (window._clippyProviderInitialized) return;
+    window._clippyProviderInitialized = true;
 
-  // Monitor the black overlay state from MonitorView
-  useEffect(() => {
-    const checkScreenPower = () => {
-      const blackOverlay = document.querySelector(".black-overlay");
-      if (blackOverlay) {
-        // Check if the black overlay is visible (screen is powered off)
-        const isVisible = window.getComputedStyle(blackOverlay).opacity !== "0";
-
-        // If screen power state changed, update our state
-        if (isVisible !== !isScreenPoweredOn) {
-          setIsScreenPoweredOn(!isVisible);
-        }
+    // Global functions for external control
+    window.setAssistantVisible = (visible) => {
+      setAssistantVisible(visible);
+      if (!visible) {
+        setCustomBalloonVisible(false);
+        setChatBalloonVisible(false);
       }
     };
 
-    // Set up a periodic check for the black overlay visibility
-    // Use less frequent checks on mobile
-    const intervalId = setInterval(
-      checkScreenPower,
-      isMobileRef.current ? 1000 : 500
-    );
-
-    return () => clearInterval(intervalId);
-  }, [isScreenPoweredOn]);
-
-  // Handle Clippy visibility based on screen power state
-  useEffect(() => {
-    // Only run after clippy is initialized
-    if (clippyInstanceRef.current) {
-      const clippyElement = document.querySelector(".clippy");
-      const overlayElement = document.getElementById(
-        "clippy-clickable-overlay"
-      );
-
-      if (clippyElement) {
-        if (isScreenPoweredOn) {
-          // Show Clippy when screen is on
-          clippyElement.style.visibility = "visible";
-          clippyElement.style.opacity = "1";
-
-          if (overlayElement) {
-            overlayElement.style.visibility = "visible";
-            overlayElement.style.pointerEvents = "auto";
-          }
-        } else {
-          // Hide Clippy when screen is off
-          clippyElement.style.visibility = "hidden";
-          clippyElement.style.opacity = "0";
-
-          // Also hide any balloons
-          setCustomBalloonVisible(false);
-          setChatBalloonVisible(false);
-
-          if (overlayElement) {
-            overlayElement.style.visibility = "hidden";
-            overlayElement.style.pointerEvents = "none";
-          }
-        }
-      }
-    }
-  }, [isScreenPoweredOn]);
-
-  // Make context values available globally for ClippyService
-  useEffect(() => {
-    // These window globals are used by ClippyService to control the assistant
-    window.setAssistantVisible = setAssistantVisible;
     window.setCurrentAgent = setCurrentAgent;
-    window.setClippyPosition = (newPos) => {
-      if (!fixedPosition) {
-        setPosition(newPos);
-        setUserPositioned(false);
+    window.setScreenPowerState = setIsScreenPoweredOn;
+
+    // Position functions
+    window.setClippyPosition = (pos) => {
+      if (typeof pos === "object" && pos !== null) {
+        if (pos.x !== undefined && pos.y !== undefined) {
+          setPosition({ x: pos.x, y: pos.y });
+          return true;
+        }
       }
+      return false;
     };
 
-    // Add function to update screen power state
-    window.setScreenPowerState = (isPoweredOn) => {
-      setIsScreenPoweredOn(isPoweredOn);
-    };
+    window.setClippyInitialPosition = (options) => {
+      if (typeof options !== "object" || options === null) {
+        return false;
+      }
 
-    // Add new function for the simplified initial position setting
-    window.setClippyInitialPosition = (percentPos) => {
-      if (!fixedPosition) {
-        relativePositionRef.current = {
-          xPercent: percentPos.xPercent || 0.85,
-          yPercent: percentPos.yPercent || 0.85,
+      const desktop = document.querySelector(".desktop") || document.body;
+      const rect = desktop.getBoundingClientRect();
+
+      if (typeof options.position === "string") {
+        const percentMatch = options.position.match(/(\d+)%\s+(\d+)%/);
+        if (percentMatch) {
+          const xPercent = parseInt(percentMatch[1], 10) / 100;
+          const yPercent = parseInt(percentMatch[2], 10) / 100;
+          setPosition({
+            x: rect.left + rect.width * xPercent,
+            y: rect.top + rect.height * yPercent,
+          });
+          return true;
+        }
+
+        const namedPositions = {
+          "higher-right": { x: 0.85, y: 0.65 },
+          "bottom-right": { x: 0.85, y: 0.85 },
+          "bottom-left": { x: 0.15, y: 0.85 },
+          "top-right": { x: 0.85, y: 0.15 },
+          "top-left": { x: 0.15, y: 0.15 },
+          center: { x: 0.5, y: 0.5 },
         };
 
-        // If we already have a desktop element, calculate and apply position now
-        if (desktopRectRef.current) {
-          const desktopRect = desktopRectRef.current;
-          const newPos = {
-            x: desktopRect.width * relativePositionRef.current.xPercent,
-            y: desktopRect.height * relativePositionRef.current.yPercent,
-          };
-          setPosition(newPos);
-          setUserPositioned(false);
-        }
+        const position =
+          namedPositions[options.position.toLowerCase()] ||
+          namedPositions["higher-right"];
+        setPosition({
+          x: rect.left + rect.width * position.x - 30,
+          y: rect.top + rect.height * position.y + 30,
+        });
+        return true;
+      } else if (options.x !== undefined && options.y !== undefined) {
+        setPosition({ x: options.x, y: options.y });
+        return true;
       }
+
+      return false;
     };
 
-    // Add custom balloon functions
+    // Position lock functions
+    window._clippyPositionLocked = positionLocked;
+
+    // Balloon functions
     window.showClippyCustomBalloon = (message) => {
-      // Don't show balloons when screen is off
       if (!isScreenPoweredOn) return false;
 
-      // Calculate position based on Clippy's position
       const clippyElement = document.querySelector(".clippy");
       if (clippyElement) {
         const rect = clippyElement.getBoundingClientRect();
-
-        // Position the balloon centered above Clippy
         setBalloonPosition({
-          left: rect.left + rect.width / 2 - 125, // Assuming 250px max-width for balloon, center it
-          top: rect.top - 120, // Higher above Clippy's head
+          left: rect.left + rect.width / 2 - 125,
+          top: rect.top - 120,
         });
       }
 
       setCustomBalloonMessage(message);
       setCustomBalloonVisible(true);
-      setChatBalloonVisible(false); // Hide chat if visible
+      setChatBalloonVisible(false);
 
-      // Auto-hide after 8 seconds
-      setTimeout(() => {
-        setCustomBalloonVisible(false);
-      }, 8000);
-
+      setTimeout(() => setCustomBalloonVisible(false), 6000);
       return true;
     };
 
@@ -205,46 +159,73 @@ const ClippyProvider = ({
     };
 
     window.showClippyChatBalloon = (initialMessage) => {
-      // Don't show balloons when screen is off
       if (!isScreenPoweredOn) return false;
 
-      // Calculate position based on Clippy's position
       const clippyElement = document.querySelector(".clippy");
       if (clippyElement) {
         const rect = clippyElement.getBoundingClientRect();
-
-        // Position the chat balloon centered above Clippy
         setBalloonPosition({
-          left: rect.left + rect.width / 2 - 110, // Center 220px wide balloon
-          top: rect.top - 200, // Position well above Clippy
+          left: rect.left + rect.width / 2 - 110,
+          top: rect.top - 200,
         });
       }
 
       setChatInitialMessage(initialMessage);
       setChatBalloonVisible(true);
-      setCustomBalloonVisible(false); // Hide regular balloon if visible
-
+      setCustomBalloonVisible(false);
       return true;
     };
 
     window.getClippyInstance = () => clippyInstanceRef.current;
 
+    // Listen for BIOS completion for welcome message
+    const handleBiosComplete = () => {
+      if (!welcomeShownRef.current) {
+        setTimeout(() => {
+          if (window.clippy && assistantVisible) {
+            window.clippy.play("Greeting");
+            setTimeout(() => {
+              if (window.showClippyCustomBalloon) {
+                window.showClippyCustomBalloon(
+                  "Welcome to Hydra98! Double-click me for help."
+                );
+              }
+            }, 1000);
+            welcomeShownRef.current = true;
+          }
+        }, 2000);
+      }
+    };
+
+    window.addEventListener("biosSequenceCompleted", handleBiosComplete);
+
     return () => {
+      delete window._clippyProviderInitialized;
       delete window.setAssistantVisible;
       delete window.setCurrentAgent;
+      delete window.setScreenPowerState;
       delete window.setClippyPosition;
       delete window.setClippyInitialPosition;
-      delete window.getClippyInstance;
       delete window.showClippyCustomBalloon;
       delete window.hideClippyCustomBalloon;
       delete window.showClippyChatBalloon;
-      delete window.setScreenPowerState;
+      delete window.getClippyInstance;
+      window.removeEventListener("biosSequenceCompleted", handleBiosComplete);
     };
-  }, [fixedPosition, desktopRectRef, isScreenPoweredOn]);
+  }, [isScreenPoweredOn, assistantVisible, positionLocked]);
 
-  // Handle chat messages
+  // Handle position lock changes
+  useEffect(() => {
+    window._clippyPositionLocked = positionLocked;
+    try {
+      localStorage.setItem("clippy_position_locked", positionLocked.toString());
+    } catch (e) {
+      console.error("Error saving position lock state:", e);
+    }
+  }, [positionLocked]);
+
+  // Chat message handler
   const handleChatMessage = (message, callback) => {
-    // Simple chat response handling
     setTimeout(() => {
       let response;
       const lowercaseMsg = message.toLowerCase();
@@ -264,6 +245,12 @@ const ClippyProvider = ({
         lowercaseMsg.includes("web")
       ) {
         response = "You can browse the web using a web browser.";
+      } else if (
+        lowercaseMsg.includes("hydra") ||
+        lowercaseMsg.includes("98")
+      ) {
+        response =
+          "Hydra98 is a Windows 98-themed web application that recreates the classic desktop experience!";
       } else {
         response =
           "I'm not sure about that. Is there something specific you'd like to know?";
@@ -273,19 +260,16 @@ const ClippyProvider = ({
     }, 1000);
   };
 
-  // Gather all values for the context
+  // Context value
   const contextValue = {
     assistantVisible,
     setAssistantVisible,
     currentAgent,
     setCurrentAgent,
     position,
-    setPosition: fixedPosition ? () => {} : setPosition,
-    userPositioned,
-    setUserPositioned: fixedPosition ? () => {} : setUserPositioned,
-    desktopRectRef,
-    isMobileRef,
-    fixedPosition,
+    setPosition,
+    positionLocked,
+    setPositionLocked,
     isScreenPoweredOn,
     setIsScreenPoweredOn,
     setClippyInstance: (instance) => {
@@ -293,119 +277,8 @@ const ClippyProvider = ({
       window.clippy = instance;
     },
     getClippyInstance: () => clippyInstanceRef.current,
+    isMobile,
   };
-
-  // Set assistantVisible to true when component mounts
-  // Only allow one Clippy to be initialized
-  useEffect(() => {
-    if (window._clippyInitializing) {
-      return;
-    }
-
-    window._clippyInitializing = true;
-
-    // Set assistantVisible to true when component mounts
-    setAssistantVisible(true);
-
-    // Apply mobile-specific fixes if on a mobile device
-    if (isMobileRef.current) {
-      console.log("Applying mobile Clippy positioning fix");
-
-      // Add mobile-specific styles
-      const styleEl = document.createElement("style");
-      styleEl.id = "clippy-mobile-fix";
-      styleEl.textContent = `
-        .clippy {
-          position: absolute !important;
-          transform: scale(0.7) !important;
-          transform-origin: center bottom !important;
-          max-width: 123px !important;
-          max-height: 93px !important;
-          bottom: 220px !important;
-          right: 20px !important;
-          left: auto !important;
-          top: auto !important;
-          z-index: 1500 !important;
-          visibility: visible !important;
-          opacity: 1 !important;
-        }
-        
-        #clippy-clickable-overlay {
-          position: absolute !important;
-          bottom: 220px !important;
-          right: 20px !important;
-          left: auto !important;
-          top: auto !important;
-          width: 93px !important;
-          height: 93px !important;
-          z-index: 1510 !important;
-        }
-        
-        .custom-clippy-balloon,
-        .custom-clippy-chat-balloon {
-          max-width: 70% !important;
-          z-index: 1520 !important;
-          font-size: 16px !important;
-        }
-      `;
-      document.head.appendChild(styleEl);
-
-      // Disable complex positioning on mobile
-      window._clippyPositionLocked = true;
-
-      // Override the position setter function for mobile
-      const originalSetPosition = window.setClippyPosition;
-      window.setClippyPosition = function (newPos) {
-        // Apply fixed mobile position
-        const clippyEl = document.querySelector(".clippy");
-        if (clippyEl) {
-          clippyEl.style.position = "absolute";
-          clippyEl.style.bottom = "10px";
-          clippyEl.style.right = "10px";
-          clippyEl.style.left = "auto";
-          clippyEl.style.top = "auto";
-          clippyEl.style.visibility = "visible";
-          clippyEl.style.opacity = "1";
-        }
-
-        // Also fix the overlay position
-        const overlay = document.getElementById("clippy-clickable-overlay");
-        if (overlay) {
-          overlay.style.position = "absolute";
-          overlay.style.bottom = "10px";
-          overlay.style.right = "10px";
-          overlay.style.left = "auto";
-          overlay.style.top = "auto";
-
-          // Make sure the overlay matches clippy size
-          if (clippyEl) {
-            overlay.style.width = `${clippyEl.offsetWidth}px`;
-            overlay.style.height = `${clippyEl.offsetHeight}px`;
-          }
-        }
-      };
-
-      // Apply the position fix once after a delay to ensure Clippy is loaded
-      setTimeout(() => {
-        if (window.setClippyPosition) {
-          window.setClippyPosition();
-        }
-      }, 1000);
-    }
-
-    return () => {
-      // Clear flag when unmounting
-      delete window._clippyInitializing;
-
-      // Clean up the mobile fix styles if added
-      if (isMobileRef.current) {
-        const styleEl = document.getElementById("clippy-mobile-fix");
-        if (styleEl && styleEl.parentNode) {
-          styleEl.parentNode.removeChild(styleEl);
-        }
-      }
-    };
-  }, []);
 
   return (
     <ClippyContext.Provider value={contextValue}>
@@ -414,25 +287,15 @@ const ClippyProvider = ({
 
         <ClippyController
           visible={assistantVisible}
-          position={position}
-          userPositioned={userPositioned}
-          setUserPositioned={setUserPositioned}
-          setPosition={setPosition}
-          desktopRectRef={desktopRectRef}
-          isMobileRef={isMobileRef}
-          fixedPosition={fixedPosition}
-          relativePositionRef={relativePositionRef}
-          currentAgent={currentAgent}
-          setCurrentAgent={setCurrentAgent}
-          setAssistantVisible={setAssistantVisible}
           isScreenPoweredOn={isScreenPoweredOn}
-          setClippyInstance={(instance) => {
-            clippyInstanceRef.current = instance;
-            window.clippy = instance;
-          }}
+          position={position}
+          setPosition={setPosition}
+          positionLocked={positionLocked}
+          clippyInstanceRef={clippyInstanceRef}
+          overlayRef={overlayRef}
         />
 
-        {/* Add custom balloon components - only when screen is on */}
+        {/* Balloons - only when screen is on */}
         {isScreenPoweredOn && customBalloonVisible && (
           <CustomBalloon
             message={customBalloonMessage}
@@ -453,7 +316,220 @@ const ClippyProvider = ({
   );
 };
 
-// Hook for using the clippy context
-export const useClippyContext = () => useContext(ClippyContext);
+// Simplified ClippyController
+const ClippyController = ({
+  visible,
+  isScreenPoweredOn,
+  position,
+  setPosition,
+  positionLocked,
+  clippyInstanceRef,
+  overlayRef,
+}) => {
+  const { clippy } = useClippy();
+  const rafRef = useRef(null);
+  const lastUpdateRef = useRef(0);
+  const doubleClickCountRef = useRef(0);
 
+  useEffect(() => {
+    if (!clippy || !visible) return;
+
+    let mounted = true;
+    clippyInstanceRef.current = clippy;
+    window.clippy = clippy;
+
+    // Enhanced play method
+    const originalPlay = clippy.play;
+    clippy.play = function (animation) {
+      if (!isScreenPoweredOn || !mounted) return;
+
+      const clippyEl = document.querySelector(".clippy");
+      if (clippyEl) {
+        clippyEl.style.visibility = "visible";
+        clippyEl.style.opacity = "1";
+        clippyEl.style.display = "block";
+      }
+
+      try {
+        return originalPlay.call(this, animation);
+      } catch (e) {
+        console.error(`Error playing animation ${animation}:`, e);
+      }
+    };
+
+    // Setup Clippy element with delayed positioning for stability
+    const setupClippy = () => {
+      const clippyEl = document.querySelector(".clippy");
+      if (!clippyEl || !mounted) return false;
+
+      // CSS will handle most of the styling and positioning
+      // We just need to add delayed desktop positioning
+
+      // For desktop only, calculate position after layout is stable
+      if (window.innerWidth > 768) {
+        // Delay desktop positioning to allow layout to stabilize
+        setTimeout(() => {
+          if (!mounted || !clippyEl) return;
+
+          // Get desktop after delay when it should be stable
+          const desktop = document.querySelector(".desktop") || document.body;
+          const rect = desktop.getBoundingClientRect();
+
+          // Only apply positioning if desktop has a valid size
+          if (rect.width > 0 && rect.height > 0) {
+            // Use position if explicitly set, otherwise calculate optimal position
+            if (position.x !== 0 || position.y !== 0) {
+              clippyEl.style.left = `${position.x}px`;
+              clippyEl.style.top = `${position.y}px`;
+            } else {
+              // Perfected desktop formula with delay to ensure stability
+              clippyEl.style.left = `${rect.left + rect.width * 0.85 - 30}px`;
+              clippyEl.style.top = `${rect.top + rect.height * 0.65 + 30}px`;
+            }
+          }
+        }, 1000); // Initial delay for layout stabilization
+      }
+
+      clippyEl.style.pointerEvents = "none";
+      clippyEl.style.visibility = isScreenPoweredOn ? "visible" : "hidden";
+      clippyEl.style.opacity = isScreenPoweredOn ? "1" : "0";
+
+      // Create/update overlay
+      if (!overlayRef.current) {
+        const overlay = document.createElement("div");
+        overlay.id = "clippy-clickable-overlay";
+        overlay.style.position = "fixed";
+        overlay.style.cursor = "pointer";
+        overlay.style.background = "transparent";
+        overlay.style.pointerEvents = "auto";
+        overlay.style.zIndex = isMobile ? "1510" : "2010";
+
+        // Double-click handler
+        overlay.addEventListener("dblclick", (e) => {
+          e.preventDefault();
+
+          if (clippy.play) {
+            clippy.play("Greeting");
+
+            // Only show balloon every 3rd double-click
+            doubleClickCountRef.current = (doubleClickCountRef.current + 1) % 3;
+
+            if (doubleClickCountRef.current === 0) {
+              setTimeout(() => {
+                if (window.showClippyCustomBalloon) {
+                  window.showClippyCustomBalloon("Hello! How can I help you?");
+                }
+              }, 800);
+            }
+          }
+        });
+
+        // Right-click handler
+        overlay.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          if (window.showClippyCustomBalloon) {
+            window.showClippyCustomBalloon("Right-click me for more options!");
+          }
+        });
+
+        overlayRef.current = overlay;
+        document.body.appendChild(overlay);
+      }
+
+      // Position overlay
+      const rect = clippyEl.getBoundingClientRect();
+      const overlay = overlayRef.current;
+      overlay.style.left = `${rect.left}px`;
+      overlay.style.top = `${rect.top}px`;
+      overlay.style.width = `${rect.width}px`;
+      overlay.style.height = `${rect.height}px`;
+      overlay.style.visibility = isScreenPoweredOn ? "visible" : "hidden";
+
+      return true;
+    };
+
+    // Add window resize handler to trigger position updates
+    const resizeHandler = () => {
+      window._clippyLastResize = Date.now();
+    };
+    window.addEventListener("resize", resizeHandler);
+
+    // Update overlay position separately from clippy positioning
+    const updateOverlayPosition = () => {
+      if (!overlayRef.current) return;
+
+      const clippyEl = document.querySelector(".clippy");
+      if (!clippyEl) return;
+
+      const rect = clippyEl.getBoundingClientRect();
+      const overlay = overlayRef.current;
+
+      overlay.style.left = `${rect.left}px`;
+      overlay.style.top = `${rect.top}px`;
+      overlay.style.width = `${rect.width}px`;
+      overlay.style.height = `${rect.height}px`;
+      overlay.style.visibility = isScreenPoweredOn ? "visible" : "hidden";
+    };
+
+    // Modified RAF loop with reduced frequency
+    const updateLoop = (timestamp) => {
+      if (!mounted) return;
+
+      // Use consistent interval for better performance
+      const interval = 1000; // 1 second interval regardless of device
+
+      if (timestamp - lastUpdateRef.current > interval) {
+        // Check if resize happened recently
+        if (
+          window._clippyLastResize &&
+          Date.now() - window._clippyLastResize < 2000
+        ) {
+          setupClippy();
+          window._clippyLastResize = null;
+        }
+
+        // Always update overlay position
+        updateOverlayPosition();
+        lastUpdateRef.current = timestamp;
+      }
+
+      rafRef.current = requestAnimationFrame(updateLoop);
+    };
+
+    // Initial setup
+    const initialSetup = () => {
+      if (setupClippy()) {
+        rafRef.current = requestAnimationFrame(updateLoop);
+      } else {
+        setTimeout(initialSetup, 500);
+      }
+    };
+
+    initialSetup();
+
+    return () => {
+      mounted = false;
+      // Clean up resize handler
+      window.removeEventListener("resize", resizeHandler);
+
+      // Clean up animation frame
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+
+      // Clean up overlay element
+      if (overlayRef.current && overlayRef.current.parentNode) {
+        overlayRef.current.parentNode.removeChild(overlayRef.current);
+        overlayRef.current = null;
+      }
+
+      // Reset resize tracking
+      window._clippyLastResize = null;
+    };
+  }, [clippy, visible, isScreenPoweredOn, position, positionLocked]);
+
+  return null;
+};
+
+export const useClippyContext = () => useContext(ClippyContext);
 export default ClippyProvider;
