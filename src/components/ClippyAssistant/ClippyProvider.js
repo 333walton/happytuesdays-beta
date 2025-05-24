@@ -87,67 +87,102 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     );
   });
 
-  // Monitor startup sequence completion
+  // Monitor startup and shutdown sequence completion (CLEANED UP)
   useEffect(() => {
-    const checkStartupStatus = () => {
-      // Check if user has already logged in (skips startup)
-      if (window.localStorage.getItem("loggedIn")) {
-        console.log("User already logged in, allowing Clippy to appear");
-        setStartupComplete(true);
-        return;
-      }
+    let isMonitoring = true;
+    let lastLogTime = 0;
 
-      // Check if BIOS and Windows Launch elements are hidden
+    const checkSequenceStatus = () => {
+      if (!isMonitoring) return;
+
       const biosWrapper = document.querySelector(".BIOSWrapper");
       const windowsLaunchWrapper = document.querySelector(
         ".WindowsLaunchWrapper"
       );
+      const desktop = document.querySelector(".desktop");
+      const shutdownScreen = document.querySelector(
+        ".itIsNowSafeToTurnOffYourComputer"
+      );
 
+      let sequenceActive = false;
+
+      // Check startup/shutdown screens
       if (biosWrapper && windowsLaunchWrapper) {
-        const biosHidden =
-          biosWrapper.classList.contains("hidden") ||
-          getComputedStyle(biosWrapper).opacity === "0" ||
-          getComputedStyle(biosWrapper).visibility === "hidden";
+        const biosStyles = getComputedStyle(biosWrapper);
+        const windowsStyles = getComputedStyle(windowsLaunchWrapper);
 
-        const windowsHidden =
-          windowsLaunchWrapper.classList.contains("hidden") ||
-          getComputedStyle(windowsLaunchWrapper).opacity === "0" ||
-          getComputedStyle(windowsLaunchWrapper).visibility === "hidden";
+        const biosVisible =
+          !biosWrapper.classList.contains("hidden") &&
+          biosStyles.opacity !== "0" &&
+          biosStyles.visibility !== "hidden" &&
+          biosStyles.display !== "none";
 
-        if (biosHidden && windowsHidden) {
-          console.log("Startup sequence completed, allowing Clippy to appear");
-          setStartupComplete(true);
-        } else {
-          console.log("Startup sequence still running, Clippy remains hidden");
-          // Check again in a moment
-          startupTimeoutRef.current = setTimeout(checkStartupStatus, 500);
-        }
-      } else {
-        // Elements not found, assume startup complete
-        console.log("Startup elements not found, assuming startup complete");
-        setStartupComplete(true);
+        const windowsVisible =
+          !windowsLaunchWrapper.classList.contains("hidden") &&
+          windowsStyles.opacity !== "0" &&
+          windowsStyles.visibility !== "hidden" &&
+          windowsStyles.display !== "none";
+
+        const biosTransitioning =
+          parseFloat(biosStyles.opacity) > 0 ||
+          biosWrapper.style.opacity === "1" ||
+          biosWrapper.classList.contains("visible");
+
+        const windowsTransitioning =
+          parseFloat(windowsStyles.opacity) > 0 ||
+          windowsLaunchWrapper.style.opacity === "1" ||
+          windowsLaunchWrapper.classList.contains("visible");
+
+        sequenceActive =
+          biosVisible ||
+          windowsVisible ||
+          biosTransitioning ||
+          windowsTransitioning;
       }
+
+      // Check for Windows shutting down screen
+      if (desktop && desktop.classList.contains("windowsShuttingDown")) {
+        sequenceActive = true;
+      }
+
+      // Check for final shutdown screen
+      if (shutdownScreen) {
+        sequenceActive = true;
+      }
+
+      // Only update state if it actually changed
+      if (sequenceActive !== !startupComplete) {
+        const now = Date.now();
+
+        if (sequenceActive) {
+          console.log("🔄 Shutdown/startup sequence detected - Hiding Clippy");
+          setStartupComplete(false);
+        } else {
+          console.log("✅ Shutdown/startup sequence ended - Showing Clippy");
+          setStartupComplete(true);
+        }
+
+        lastLogTime = now;
+      }
+
+      // Adaptive monitoring - check more frequently during active sequences, less when idle
+      const nextCheckDelay = sequenceActive ? 500 : 2000; // Reduced frequency
+      startupTimeoutRef.current = setTimeout(
+        checkSequenceStatus,
+        nextCheckDelay
+      );
     };
 
     // Initial check
-    checkStartupStatus();
-
-    // Listen for localStorage changes (in case user logs in)
-    const handleStorageChange = (e) => {
-      if (e.key === "loggedIn" && e.newValue === "true") {
-        setStartupComplete(true);
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
+    checkSequenceStatus();
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
+      isMonitoring = false;
       if (startupTimeoutRef.current) {
         clearTimeout(startupTimeoutRef.current);
       }
     };
-  }, []);
+  }, [startupComplete]);
 
   // Error rate limiting
   const isErrorRateLimited = useCallback(() => {
@@ -237,7 +272,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       // Balloon functions with safe positioning
       window.showClippyCustomBalloon = createSafeGlobalFunction((message) => {
-        if (!isScreenPoweredOn) return false;
+        if (!isScreenPoweredOn || !startupComplete) return false;
 
         const clippyElement = document.querySelector(".clippy");
         const position = safeExecute(
@@ -269,7 +304,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       window.showClippyChatBalloon = createSafeGlobalFunction(
         (initialMessage) => {
-          if (!isScreenPoweredOn) return false;
+          if (!isScreenPoweredOn || !startupComplete) return false;
 
           const clippyElement = document.querySelector(".clippy");
           const position = safeExecute(
@@ -750,16 +785,7 @@ const StartupAwareClippyController = ({
         "controller cleanup"
       );
     };
-  }, [
-    clippy,
-    visible,
-    isScreenPoweredOn,
-    position,
-    tapTimeoutRef,
-    clippyInstanceRef,
-    updateInterval,
-    overlayRef,
-  ]);
+  }, [clippy, visible, isScreenPoweredOn, position, updateInterval]);
 
   return null;
 };

@@ -255,6 +255,9 @@
   </style>
 
   <script>
+    // Global shutdown detection
+    window.isShutdownSequenceActive = false;
+
     // Create a global function that React will override
     window.positionStartupSequencesIfReady = function () {
       console.log("Positioning function not yet available");
@@ -328,6 +331,205 @@
       window.dispatchEvent(new Event('biosSequenceCompleted'));//triggers the welcome message
     }
 
+    // Enhanced shutdown detection system
+    function setupShutdownDetection() {
+      // Monitor when shutdown screens become visible
+      const shutdownObserver = new MutationObserver((mutations) => {
+        const biosWrapper = document.querySelector(".BIOSWrapper");
+        const windowsLaunchWrapper = document.querySelector(".WindowsLaunchWrapper");
+        const desktop = document.querySelector(".desktop");
+        const shutdownScreen = document.querySelector(".itIsNowSafeToTurnOffYourComputer");
+
+        let sequenceActive = false;
+
+        // Check startup/shutdown screens
+        if (biosWrapper && windowsLaunchWrapper) {
+          const biosStyles = getComputedStyle(biosWrapper);
+          const windowsStyles = getComputedStyle(windowsLaunchWrapper);
+
+          const biosVisible = !biosWrapper.classList.contains("hidden") &&
+            biosStyles.opacity !== "0" &&
+            biosStyles.visibility !== "hidden" &&
+            biosStyles.display !== "none";
+
+          const windowsVisible = !windowsLaunchWrapper.classList.contains("hidden") &&
+            windowsStyles.opacity !== "0" &&
+            windowsStyles.visibility !== "hidden" &&
+            windowsStyles.display !== "none";
+
+          // Also check for transition states
+          const biosTransitioning = parseFloat(biosStyles.opacity) > 0 ||
+            biosWrapper.style.opacity === "1" ||
+            biosWrapper.classList.contains("visible");
+
+          const windowsTransitioning = parseFloat(windowsStyles.opacity) > 0 ||
+            windowsLaunchWrapper.style.opacity === "1" ||
+            windowsLaunchWrapper.classList.contains("visible");
+
+          sequenceActive = biosVisible || windowsVisible || biosTransitioning || windowsTransitioning;
+        }
+
+        // Check for Windows shutting down screen (desktop.windowsShuttingDown)
+        if (desktop && desktop.classList.contains("windowsShuttingDown")) {
+          sequenceActive = true;
+          console.log("🔄 Desktop has windowsShuttingDown class");
+        }
+
+        // Check for final shutdown screen
+        if (shutdownScreen) {
+          sequenceActive = true;
+          console.log("🔄 itIsNowSafeToTurnOffYourComputer screen detected");
+        }
+
+        const wasShutdownActive = window.isShutdownSequenceActive;
+        window.isShutdownSequenceActive = sequenceActive;
+
+        // If shutdown state changed, notify React
+        if (wasShutdownActive !== window.isShutdownSequenceActive) {
+          console.log("🔄 Shutdown sequence state changed:", window.isShutdownSequenceActive, {
+            windowsShuttingDown: desktop?.classList.contains("windowsShuttingDown"),
+            shutdownScreen: !!shutdownScreen
+          });
+
+          // Dispatch custom event for React to listen to
+          window.dispatchEvent(new CustomEvent('shutdownStateChanged', {
+            detail: { isActive: window.isShutdownSequenceActive }
+          }));
+
+          // Also add/remove body class immediately
+          if (window.isShutdownSequenceActive) {
+            document.body.classList.add("startup-sequence-active");
+            document.body.classList.add("shutdown-sequence-active");
+            console.log("🔄 Added shutdown sequence classes via index.html");
+          } else {
+            document.body.classList.remove("startup-sequence-active");
+            document.body.classList.remove("shutdown-sequence-active");
+            console.log("✅ Removed shutdown sequence classes via index.html");
+          }
+        }
+      });
+
+      // Start observing
+      const biosWrapper = document.querySelector(".BIOSWrapper");
+      const windowsLaunchWrapper = document.querySelector(".WindowsLaunchWrapper");
+      const desktop = document.querySelector(".desktop");
+
+      if (biosWrapper) {
+        shutdownObserver.observe(biosWrapper, {
+          attributes: true,
+          attributeFilter: ['class', 'style'],
+          subtree: true
+        });
+
+        // Also observe parent if it exists
+        if (biosWrapper.parentElement) {
+          shutdownObserver.observe(biosWrapper.parentElement, {
+            attributes: true,
+            attributeFilter: ['class', 'style'],
+            childList: true
+          });
+        }
+      }
+
+      if (windowsLaunchWrapper) {
+        shutdownObserver.observe(windowsLaunchWrapper, {
+          attributes: true,
+          attributeFilter: ['class', 'style'],
+          subtree: true
+        });
+
+        // Also observe parent if it exists
+        if (windowsLaunchWrapper.parentElement) {
+          shutdownObserver.observe(windowsLaunchWrapper.parentElement, {
+            attributes: true,
+            attributeFilter: ['class', 'style'],
+            childList: true
+          });
+        }
+      }
+
+      // IMPORTANT: Watch the desktop element for windowsShuttingDown class
+      if (desktop) {
+        shutdownObserver.observe(desktop, {
+          attributes: true,
+          attributeFilter: ['class'],
+          subtree: false
+        });
+      }
+
+      // Watch for shutdown screen elements being added
+      shutdownObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class']
+      });
+
+      // Additional polling for safety - check for all shutdown states (REDUCED FREQUENCY)
+      setInterval(() => {
+        const biosWrapper = document.querySelector(".BIOSWrapper");
+        const windowsLaunchWrapper = document.querySelector(".WindowsLaunchWrapper");
+        const desktop = document.querySelector(".desktop");
+        const shutdownScreen = document.querySelector(".itIsNowSafeToTurnOffYourComputer");
+
+        let sequenceActive = false;
+
+        // Check startup screens
+        if (biosWrapper && windowsLaunchWrapper) {
+          const biosStyles = getComputedStyle(biosWrapper);
+          const windowsStyles = getComputedStyle(windowsLaunchWrapper);
+
+          const biosActive = (!biosWrapper.classList.contains("hidden") &&
+            biosStyles.opacity !== "0") ||
+            parseFloat(biosStyles.opacity) > 0;
+
+          const windowsActive = (!windowsLaunchWrapper.classList.contains("hidden") &&
+            windowsStyles.opacity !== "0") ||
+            parseFloat(windowsStyles.opacity) > 0;
+
+          sequenceActive = biosActive || windowsActive;
+        }
+
+        // Check for shutdown-specific states
+        if (desktop && desktop.classList.contains("windowsShuttingDown")) {
+          sequenceActive = true;
+        }
+
+        if (shutdownScreen) {
+          sequenceActive = true;
+        }
+
+        const wasShutdownActive = window.isShutdownSequenceActive;
+        window.isShutdownSequenceActive = sequenceActive;
+
+        // Only log and dispatch when state actually changes
+        if (wasShutdownActive !== window.isShutdownSequenceActive) {
+          console.log("🔄 Polling detected shutdown state change:", window.isShutdownSequenceActive);
+
+          window.dispatchEvent(new CustomEvent('shutdownStateChanged', {
+            detail: { isActive: window.isShutdownSequenceActive }
+          }));
+
+          if (window.isShutdownSequenceActive) {
+            document.body.classList.add("startup-sequence-active");
+            document.body.classList.add("shutdown-sequence-active");
+          } else {
+            document.body.classList.remove("startup-sequence-active");
+            document.body.classList.remove("shutdown-sequence-active");
+          }
+        }
+      }, 1000); // Reduced from 100ms to 1000ms (1 second)
+    }
+
+    // Initialize shutdown detection
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(setupShutdownDetection, 100);
+      });
+    } else {
+      setTimeout(setupShutdownDetection, 100);
+    }
+
     // Longer delay to ensure React has time to initialize
     setTimeout(loadScreen, 1500);
   </script>
@@ -356,9 +558,10 @@
         <p>This project is by <a href="https://bit.ly/3FsgmPt"><strong>CS</a></strong></p>
         <p>Philadelphia based, contactable via <a href="https://bit.ly/3FEdIG8"><strong>LinkedIn</strong></a></p>
         <p><a href="https://soundcloud.com/southbound_music/sets/best-techno"><strong>Builds</strong></a> things,
-          <u><strong>markets</strong></u> things, likes <a href="https://bit.ly/3Foun0t"><strong>chess</strong></a></p>
+          <u><strong>markets</strong></u> things, likes <a href="https://bit.ly/3Foun0t"><strong>chess</strong></a>
+        </p>
         <p>Open for work</p>
-        </div>
+      </div>
     </div>
   </div>
 

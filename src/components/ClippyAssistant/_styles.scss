@@ -448,3 +448,129 @@ body.screen-off .custom-clippy-chat-balloon {
   font-smoothing: antialiased !important;
   box-sizing: border-box !important;
 }
+
+/* ===== STARTUP/SHUTDOWN SEQUENCE HIDING ===== */
+/* Hide Clippy completely during startup and shutdown sequences */
+
+/* When BIOS screen is visible (startup or shutdown) */
+.BIOSWrapper:not(.hidden) ~ * .clippy,
+.BIOSWrapper:not(.hidden) ~ * #clippy-clickable-overlay,
+.BIOSWrapper:not(.hidden) ~ * .custom-clippy-balloon,
+.BIOSWrapper:not(.hidden) ~ * .custom-clippy-chat-balloon {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
+}
+
+/* When Windows Launch screen is visible (startup or shutdown) */
+.WindowsLaunchWrapper:not(.hidden) ~ * .clippy,
+.WindowsLaunchWrapper:not(.hidden) ~ * #clippy-clickable-overlay,
+.WindowsLaunchWrapper:not(.hidden) ~ * .custom-clippy-balloon,
+.WindowsLaunchWrapper:not(.hidden) ~ * .custom-clippy-chat-balloon {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
+}
+
+/* When Windows is shutting down (desktop has windowsShuttingDown class) */
+.desktop.windowsShuttingDown .clippy,
+.desktop.windowsShuttingDown #clippy-clickable-overlay,
+.desktop.windowsShuttingDown .custom-clippy-balloon,
+.desktop.windowsShuttingDown .custom-clippy-chat-balloon {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
+}
+
+/* When showing "It's now safe to turn off your computer" */
+.itIsNowSafeToTurnOffYourComputer .clippy,
+.itIsNowSafeToTurnOffYourComputer #clippy-clickable-overlay,
+.itIsNowSafeToTurnOffYourComputer .custom-clippy-balloon,
+.itIsNowSafeToTurnOffYourComputer .custom-clippy-chat-balloon,
+body:has(.itIsNowSafeToTurnOffYourComputer) .clippy,
+body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay,
+body:has(.itIsNowSafeToTurnOffYourComputer) .custom-clippy-balloon,
+body:has(.itIsNowSafeToTurnOffYourComputer) .custom-clippy-chat-balloon {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
+}
+
+/* Alternative approach - hide when startup screens are NOT hidden */
+body:has(.BIOSWrapper:not(.hidden)) .clippy,
+body:has(.BIOSWrapper:not(.hidden)) #clippy-clickable-overlay,
+body:has(.BIOSWrapper:not(.hidden)) .custom-clippy-balloon,
+body:has(.BIOSWrapper:not(.hidden)) .custom-clippy-chat-balloon,
+body:has(.WindowsLaunchWrapper:not(.hidden)) .clippy,
+body:has(.WindowsLaunchWrapper:not(.hidden)) #clippy-clickable-overlay,
+body:has(.WindowsLaunchWrapper:not(.hidden)) .custom-clippy-balloon,
+body:has(.WindowsLaunchWrapper:not(.hidden)) .custom-clippy-chat-balloon,
+body:has(.desktop.windowsShuttingDown) .clippy,
+body:has(.desktop.windowsShuttingDown) #clippy-clickable-overlay,
+body:has(.desktop.windowsShuttingDown) .custom-clippy-balloon,
+body:has(.desktop.windowsShuttingDown) .custom-clippy-chat-balloon {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
+}
+
+/* Fallback for browsers that don't support :has() */
+.startup-sequence-active .clippy,
+.startup-sequence-active #clippy-clickable-overlay,
+.startup-sequence-active .custom-clippy-balloon,
+.startup-sequence-active .custom-clippy-chat-balloon,
+.shutdown-sequence-active .clippy,
+.shutdown-sequence-active #clippy-clickable-overlay,
+.shutdown-sequence-active .custom-clippy-balloon,
+.shutdown-sequence-active .custom-clippy-chat-balloon {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
+  position: fixed !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  z-index: -1000 !important;
+}
+
+/* More specific targeting for shutdown sequences */
+.BIOSWrapper.visible .clippy,
+.BIOSWrapper.visible #clippy-clickable-overlay,
+.BIOSWrapper.visible .custom-clippy-balloon,
+.BIOSWrapper.visible .custom-clippy-chat-balloon,
+.WindowsLaunchWrapper.visible .clippy,
+.WindowsLaunchWrapper.visible #clippy-clickable-overlay,
+.WindowsLaunchWrapper.visible .custom-clippy-balloon,
+.WindowsLaunchWrapper.visible .custom-clippy-chat-balloon {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
+}
+
+/* Nuclear option - hide during any transition states */
+.BIOSWrapper[style*="opacity: 1"],
+.WindowsLaunchWrapper[style*="opacity: 1"] {
+  ~ * .clippy,
+  ~ * #clippy-clickable-overlay,
+  ~ * .custom-clippy-balloon,
+  ~ * .custom-clippy-chat-balloon {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateX(-9999px) translateY(-9999px) !important;
+  }
+}
