@@ -375,7 +375,7 @@ const SimplifiedClippyController = ({
           pointerEvents: "none",
         });
 
-        // Setup overlay using centralized positioning
+        // Setup overlay using synchronized positioning
         if (!overlayRef.current && mountedRef.current) {
           const overlay = document.createElement("div");
           overlay.id = "clippy-clickable-overlay";
@@ -448,14 +448,16 @@ const SimplifiedClippyController = ({
           document.body.appendChild(overlay);
         }
 
-        // Position overlay using centralized positioning
-        if (overlayRef.current) {
-          ClippyPositioning.positionOverlay(overlayRef.current, clippyEl);
+        // Use synchronized positioning to ensure overlay matches Clippy exactly
+        ClippyPositioning.positionClippyAndOverlay(
+          clippyEl,
+          overlayRef.current,
+          currentPosition
+        );
 
-          ClippyPositioning.applyStyles(overlayRef.current, {
-            visibility: isScreenPoweredOn ? "visible" : "hidden",
-          });
-        }
+        ClippyPositioning.applyStyles(overlayRef.current, {
+          visibility: isScreenPoweredOn ? "visible" : "hidden",
+        });
 
         return true;
       } catch (error) {

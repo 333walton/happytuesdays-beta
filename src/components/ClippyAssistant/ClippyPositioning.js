@@ -19,16 +19,13 @@ const isMobile = (() => {
 
 // ===== SINGLE SOURCE OF TRUTH FOR POSITIONING =====
 const CLIPPY_POSITIONS = {
-  // Mobile positioning (fixed)
+  // Mobile positioning (now dynamic-ready)
   mobile: {
     position: "fixed",
-    bottom: "120px",
-    right: "11px", // 15px more to the right than original
-    left: "auto",
-    top: "auto",
     transform: "translateZ(0) scale(0.8)",
     transformOrigin: "center bottom",
     zIndex: "1500",
+    // bottom and right will be calculated dynamically
   },
 
   // Desktop positioning (calculated)
@@ -38,6 +35,21 @@ const CLIPPY_POSITIONS = {
     transformOrigin: "center bottom",
     zIndex: "2000",
     // left and top calculated dynamically
+  },
+
+  // Mobile positioning values (centralized)
+  mobileValues: {
+    bottom: 100, // pixels from bottom
+    right: 35, // pixels from right (your 15px shift)
+    scale: 0.8, // scale factor
+  },
+
+  // Desktop positioning values (centralized)
+  desktopValues: {
+    rightOffset: 120, // pixels from right edge (original value)
+    bottomOffset: 100, // pixels from bottom
+    taskbarHeight: 30, // taskbar height
+    scale: 0.9,
   },
 
   // Overlay positioning (matches Clippy exactly)
@@ -60,7 +72,7 @@ const CLIPPY_POSITIONS = {
 class ClippyPositioning {
   static getClippyPosition(customPosition = null) {
     if (isMobile) {
-      return CLIPPY_POSITIONS.mobile;
+      return this.calculateMobilePosition();
     }
 
     // Desktop positioning
@@ -77,6 +89,25 @@ class ClippyPositioning {
     }
 
     return desktop;
+  }
+
+  static calculateMobilePosition() {
+    // Dynamic mobile positioning based on viewport
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const values = CLIPPY_POSITIONS.mobileValues;
+
+    // Calculate responsive mobile position
+    const bottom = Math.min(values.bottom, viewportHeight * 0.2); // Max 20% from bottom
+    const right = Math.min(values.right, viewportWidth * 0.1); // Max 10% from right
+
+    return {
+      ...CLIPPY_POSITIONS.mobile,
+      bottom: `${bottom}px`,
+      right: `${right}px`,
+      left: "auto",
+      top: "auto",
+    };
   }
 
   static getOverlayPosition(clippyElement) {
@@ -125,20 +156,29 @@ class ClippyPositioning {
         top: Math.max(50, (viewportHeight - balloonHeight) / 2),
       };
     } else {
-      // Speech balloon - above Clippy
-      const balloonWidth = 280;
+      // Speech balloon - position relative to dynamic Clippy position
+      const balloonWidth = Math.min(280, viewportWidth - 40);
       const balloonHeight = 120;
+
+      // Use the current mobile positioning values for consistent spacing
+      const mobileValues = CLIPPY_POSITIONS.mobileValues;
+      const clippyBottom = Math.min(mobileValues.bottom, viewportHeight * 0.2);
+      const clippyRight = Math.min(mobileValues.right, viewportWidth * 0.1);
+
+      // Calculate balloon position relative to expected Clippy position
+      const clippyLeft = viewportWidth - clippyRight - 60; // Approximate Clippy width
+      const clippyTop = viewportHeight - clippyBottom - 80; // Approximate Clippy height
 
       let left = Math.max(
         10,
-        Math.min(clippyRect.left - 100, viewportWidth - balloonWidth - 10)
+        Math.min(clippyLeft - 100, viewportWidth - balloonWidth - 10)
       );
 
-      let top = Math.max(10, clippyRect.top - balloonHeight - 20);
+      let top = Math.max(10, clippyTop - balloonHeight - 20);
 
       // If goes above screen, put below Clippy
       if (top < 10) {
-        top = clippyRect.bottom + 10;
+        top = clippyTop + 80 + 10; // Below Clippy
       }
 
       return { left, top };
@@ -168,10 +208,12 @@ class ClippyPositioning {
 
       if (desktop) {
         const rect = desktop.getBoundingClientRect();
-        const taskbarHeight = 30;
+        const values = CLIPPY_POSITIONS.desktopValues;
+
         return {
-          x: rect.left + rect.width - 120, // Restored to original desktop position
-          y: rect.top + rect.height - taskbarHeight - 100,
+          x: rect.left + rect.width - values.rightOffset, // Centralized value
+          y:
+            rect.top + rect.height - values.taskbarHeight - values.bottomOffset,
         };
       }
     } catch (error) {
@@ -211,6 +253,36 @@ class ClippyPositioning {
 
     const position = this.getOverlayPosition(clippyElement);
     return this.applyStyles(overlayElement, position);
+  }
+
+  // Combined positioning function to ensure synchronization
+  static positionClippyAndOverlay(
+    clippyElement,
+    overlayElement,
+    customPosition = null
+  ) {
+    if (!clippyElement) return false;
+
+    // Position Clippy first
+    const clippySuccess = this.positionClippy(clippyElement, customPosition);
+
+    // Then position overlay to match
+    const overlaySuccess = overlayElement
+      ? this.positionOverlay(overlayElement, clippyElement)
+      : true;
+
+    return clippySuccess && overlaySuccess;
+  }
+
+  // Get current expected Clippy dimensions for calculations
+  static getExpectedClippyDimensions() {
+    const scale = isMobile
+      ? CLIPPY_POSITIONS.mobileValues.scale
+      : CLIPPY_POSITIONS.desktopValues.scale;
+    return {
+      width: 124 * scale, // Base Clippy width * scale
+      height: 93 * scale, // Base Clippy height * scale
+    };
   }
 }
 

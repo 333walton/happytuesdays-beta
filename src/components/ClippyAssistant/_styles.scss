@@ -1,5 +1,5 @@
 /* ===== SIMPLIFIED CLIPPY STYLES ===== */
-/* Positioning is handled by ClippyPositioning.js - this only handles visual styles */
+/* ALL positioning is handled by ClippyPositioning.js - this only handles visual styles */
 
 /* ===== CORE CLIPPY ELEMENT ===== */
 .clippy {
@@ -25,7 +25,8 @@
   /* Ensure animations work */
   overflow: visible !important;
 
-  /* NOTE: Position, transform, z-index handled by ClippyPositioning.js */
+  /* NOTE: ALL position, transform, z-index handled by ClippyPositioning.js */
+  /* NO MORE STATIC CSS POSITIONING */
 }
 
 /* ===== CLICKABLE OVERLAY ===== */
