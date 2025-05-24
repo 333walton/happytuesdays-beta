@@ -1,5 +1,4 @@
-/* ===== CLIPPY ASSISTANT STYLES ===== */
-/* Mobile-optimized and crash-resistant styles */
+/* ===== ENHANCED MOBILE TOUCH SUPPORT ===== */
 
 /* ===== CORE CLIPPY ELEMENT ===== */
 .clippy {
@@ -35,12 +34,12 @@
   overflow: visible !important;
 }
 
-/* ===== MOBILE OPTIMIZATIONS ===== */
-@media (max-width: 768px), (max-height: 600px) {
+/* ===== ENHANCED MOBILE OPTIMIZATIONS ===== */
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   .clippy {
     position: fixed !important;
-    bottom: 120px !important; /* higher number means higher up */
-    right: 11px !important; /* lower number means more to the right */
+    bottom: 100px !important;
+    right: 35px !important; /* 15px more to the right than before */
     left: auto !important;
     top: auto !important;
     transform: translateZ(0) scale(0.8) !important;
@@ -66,7 +65,7 @@
   }
 }
 
-/* ===== CLICKABLE OVERLAY ===== */
+/* ===== ENHANCED CLICKABLE OVERLAY FOR MOBILE ===== */
 #clippy-clickable-overlay {
   position: fixed !important;
   cursor: pointer !important;
@@ -87,21 +86,67 @@
   /* Ensure proper interaction */
   border: none !important;
   outline: none !important;
+
+  /* Prevent iOS Safari zoom on touch */
+  -webkit-user-select: none !important;
+  user-select: none !important;
 }
 
-@media (max-width: 768px), (max-height: 600px) {
+/* Enhanced mobile touch support */
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   #clippy-clickable-overlay {
     z-index: 1510 !important;
-    min-width: 80px !important;
-    min-height: 80px !important;
+    min-width: 100px !important; /* Larger touch area */
+    min-height: 100px !important; /* Larger touch area */
 
-    /* Mobile touch optimizations */
+    /* Enhanced mobile touch optimizations */
     -webkit-tap-highlight-color: transparent !important;
     tap-highlight-color: transparent !important;
     touch-action: manipulation !important;
 
     /* Prevent scrolling when interacting */
     overscroll-behavior: contain !important;
+
+    /* iOS Safari specific fixes */
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+
+    /* Prevent pinch zoom */
+    touch-action: manipulation !important;
+
+    /* Force hardware acceleration on iOS */
+    -webkit-transform: translateZ(0) !important;
+
+    /* Better touch response timing */
+    transition: none !important;
+  }
+}
+
+/* ===== iOS SAFARI SPECIFIC FIXES ===== */
+/* Target iOS Safari specifically */
+@supports (-webkit-touch-callout: none) {
+  .clippy,
+  #clippy-clickable-overlay {
+    /* Force hardware acceleration */
+    -webkit-transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+
+    /* Prevent iOS Safari issues */
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+  }
+
+  #clippy-clickable-overlay {
+    /* Larger touch targets for iOS */
+    min-width: 120px !important;
+    min-height: 120px !important;
+
+    /* Better touch responsiveness */
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
   }
 }
 
@@ -150,7 +195,7 @@
   z-index: -1 !important;
 }
 
-/* ===== CUSTOM SPEECH BALLOON ===== */
+/* ===== CUSTOM SPEECH BALLOON WITH MOBILE POSITIONING ===== */
 .custom-clippy-balloon {
   position: fixed !important;
   z-index: 2100 !important;
@@ -218,8 +263,8 @@
   height: 0 !important;
 }
 
-/* Mobile balloon optimizations */
-@media (max-width: 768px), (max-height: 600px) {
+/* Enhanced mobile balloon optimizations */
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   .custom-clippy-balloon {
     z-index: 1520 !important;
     max-width: 280px !important;
@@ -232,10 +277,33 @@
     /* Prevent mobile viewport issues */
     position: fixed !important;
     contain: layout style !important;
+
+    /* Ensure balloon stays on screen */
+    max-width: calc(100vw - 20px) !important;
+
+    /* Mobile-specific positioning adjustments */
+    left: 10px !important;
+    right: auto !important;
+    top: auto !important;
+
+    /* iOS Safari specific */
+    -webkit-transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+  }
+
+  /* Adjust tail for mobile positioning */
+  .custom-clippy-balloon:after {
+    right: 20px !important;
+    left: auto !important;
+  }
+
+  .custom-clippy-balloon:before {
+    right: 19px !important;
+    left: auto !important;
   }
 }
 
-/* ===== INTERACTIVE CHAT BALLOON ===== */
+/* ===== INTERACTIVE CHAT BALLOON WITH MOBILE SUPPORT ===== */
 .custom-clippy-chat-balloon {
   position: fixed !important;
   z-index: 2100 !important;
@@ -266,22 +334,31 @@
   -webkit-user-select: text !important;
 }
 
-/* Mobile chat balloon */
-@media (max-width: 768px), (max-height: 600px) {
+/* Enhanced mobile chat balloon */
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   .custom-clippy-chat-balloon {
     z-index: 1520 !important;
-    width: 280px !important;
-    height: 220px !important;
+    width: min(320px, calc(100vw - 20px)) !important;
+    height: min(250px, calc(100vh - 160px)) !important;
     font-size: 16px !important;
     padding: 12px !important;
 
     /* Ensure proper mobile positioning */
     position: fixed !important;
     contain: layout style !important;
+
+    /* Center on mobile */
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) translateZ(0) !important;
+
+    /* iOS Safari specific */
+    -webkit-transform: translate(-50%, -50%) translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
   }
 }
 
-/* ===== BALLOON CLOSE BUTTON ===== */
+/* ===== BALLOON CLOSE BUTTON WITH ENHANCED TOUCH ===== */
 .custom-clippy-balloon-close {
   position: absolute !important;
   top: 2px !important;
@@ -297,6 +374,10 @@
 
   /* Smooth hover transition */
   transition: color 0.2s ease !important;
+
+  /* Touch optimizations */
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 .custom-clippy-balloon-close:hover {
@@ -308,19 +389,23 @@
   background-color: #e0e0e0 !important;
 }
 
-/* Mobile close button - larger touch target */
-@media (max-width: 768px), (max-height: 600px) {
+/* Enhanced mobile close button */
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   .custom-clippy-balloon-close {
     font-size: 24px !important;
-    padding: 6px 10px !important;
-    min-width: 44px !important;
-    min-height: 44px !important;
+    padding: 8px 12px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
     top: 5px !important;
     right: 5px !important;
 
     /* Better touch response */
     touch-action: manipulation !important;
     -webkit-tap-highlight-color: transparent !important;
+
+    /* iOS Safari fixes */
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
   }
 }
 
@@ -340,6 +425,10 @@
 
   /* Focus styling */
   transition: border-color 0.2s ease !important;
+
+  /* Touch optimizations */
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 .clippy-input:focus {
@@ -347,21 +436,27 @@
   box-shadow: 0 0 0 1px #0078d4 !important;
 }
 
-/* Mobile input optimization */
-@media (max-width: 768px), (max-height: 600px) {
+/* Enhanced mobile input optimization */
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   .clippy-input {
     font-size: 16px !important; /* Prevent zoom on iOS */
-    padding: 8px !important;
-    min-height: 44px !important;
+    padding: 12px !important;
+    min-height: 48px !important;
 
     /* Better mobile input handling */
     -webkit-appearance: none !important;
     appearance: none !important;
     touch-action: manipulation !important;
+
+    /* iOS Safari specific fixes */
+    -webkit-border-radius: 0 !important;
+    border-radius: 0 !important;
+    -webkit-background-clip: padding-box !important;
+    background-clip: padding-box !important;
   }
 }
 
-/* ===== BALLOON BUTTONS ===== */
+/* ===== BALLOON BUTTONS WITH ENHANCED TOUCH ===== */
 .clippy-option-button {
   background: #d4d0c8 !important;
   border: 2px solid !important;
@@ -379,6 +474,10 @@
 
   /* Smooth interaction */
   transition: all 0.1s ease !important;
+
+  /* Touch optimizations */
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
 
 .clippy-option-button:hover {
@@ -399,23 +498,29 @@
   border-color: #c0c0c0 !important;
 }
 
-/* Mobile button optimization */
-@media (max-width: 768px), (max-height: 600px) {
+/* Enhanced mobile button optimization */
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   .clippy-option-button {
-    padding: 8px 12px !important;
-    margin: 5px 5px 5px 0 !important;
-    min-width: 80px !important;
+    padding: 12px 16px !important;
+    margin: 8px 8px 8px 0 !important;
+    min-width: 100px !important;
     font-size: 16px !important;
-    min-height: 44px !important;
+    min-height: 48px !important;
 
     /* Better mobile touch response */
     touch-action: manipulation !important;
     -webkit-tap-highlight-color: transparent !important;
+
+    /* iOS Safari specific */
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
   }
 
   .clippy-option-button:active {
-    padding-top: 9px !important;
-    padding-left: 13px !important;
+    padding-top: 13px !important;
+    padding-left: 17px !important;
   }
 }
 
@@ -491,27 +596,6 @@ body.screen-off .custom-clippy-chat-balloon {
   transform: translateX(-9999px) !important;
 }
 
-/* ===== LOADING STATES ===== */
-.clippy-loading {
-  opacity: 0.7 !important;
-  filter: grayscale(50%) !important;
-  pointer-events: none !important;
-}
-
-.clippy-loading::after {
-  content: "Loading..." !important;
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  background: rgba(0, 0, 0, 0.8) !important;
-  color: white !important;
-  padding: 5px 10px !important;
-  border-radius: 3px !important;
-  font-size: 12px !important;
-  z-index: 9999 !important;
-}
-
 /* ===== Z-INDEX HIERARCHY ===== */
 /* Ensure proper layering */
 .black-overlay {
@@ -522,7 +606,7 @@ body.screen-off .custom-clippy-chat-balloon {
   z-index: 2000 !important; /* Desktop */
 }
 
-@media (max-width: 768px), (max-height: 600px) {
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   .clippy {
     z-index: 1500 !important; /* Mobile */
   }
@@ -532,7 +616,7 @@ body.screen-off .custom-clippy-chat-balloon {
   z-index: 2010 !important; /* Desktop */
 }
 
-@media (max-width: 768px), (max-height: 600px) {
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   #clippy-clickable-overlay {
     z-index: 1510 !important; /* Mobile */
   }
@@ -543,7 +627,7 @@ body.screen-off .custom-clippy-chat-balloon {
   z-index: 2100 !important; /* Desktop */
 }
 
-@media (max-width: 768px), (max-height: 600px) {
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   .custom-clippy-balloon,
   .custom-clippy-chat-balloon {
     z-index: 1520 !important; /* Mobile */

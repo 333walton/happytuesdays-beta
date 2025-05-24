@@ -17,14 +17,29 @@ import "./_styles.scss";
 
 const ClippyContext = createContext(null);
 
-// Device detection - run once and cache
+// Enhanced device detection
 const isMobile = (() => {
   try {
-    return (
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      ) || window.innerWidth < 768
-    );
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const mobileRegex =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+    const isSmallScreen = window.innerWidth < 768 || window.innerHeight < 600;
+    const isTouchDevice =
+      "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
+    return mobileRegex.test(userAgent) || isSmallScreen || isTouchDevice;
+  } catch {
+    return false;
+  }
+})();
+
+// iOS Safari specific detection
+const isIOSSafari = (() => {
+  try {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+    return isIOS || (isSafari && /iPhone|iPad|iPod/i.test(userAgent));
   } catch {
     return false;
   }
@@ -199,7 +214,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         }
       };
 
-      // Balloon functions with safety checks
+      // Enhanced balloon functions with mobile positioning
       window.showClippyCustomBalloon = (message) => {
         if (!mountedRef.current || !isScreenPoweredOn) return false;
 
@@ -207,10 +222,19 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           const clippyElement = safeQuerySelector(".clippy");
           if (clippyElement) {
             const rect = clippyElement.getBoundingClientRect();
-            setBalloonPosition({
-              left: rect.left + rect.width / 2 - 125,
-              top: rect.top - 120,
-            });
+
+            // Mobile-specific balloon positioning
+            if (isMobile) {
+              setBalloonPosition({
+                left: Math.max(10, rect.left - 100),
+                top: Math.max(10, rect.top - 140),
+              });
+            } else {
+              setBalloonPosition({
+                left: rect.left + rect.width / 2 - 125,
+                top: rect.top - 120,
+              });
+            }
           }
 
           setCustomBalloonMessage(message);
@@ -248,10 +272,19 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           const clippyElement = safeQuerySelector(".clippy");
           if (clippyElement) {
             const rect = clippyElement.getBoundingClientRect();
-            setBalloonPosition({
-              left: rect.left + rect.width / 2 - 110,
-              top: rect.top - 200,
-            });
+
+            // Mobile-specific chat balloon positioning
+            if (isMobile) {
+              setBalloonPosition({
+                left: Math.max(10, rect.left - 120),
+                top: Math.max(10, rect.top - 180),
+              });
+            } else {
+              setBalloonPosition({
+                left: rect.left + rect.width / 2 - 110,
+                top: rect.top - 200,
+              });
+            }
           }
 
           setChatInitialMessage(initialMessage);
@@ -289,7 +322,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               setTimeout(() => {
                 if (window.showClippyCustomBalloon && mountedRef.current) {
                   window.showClippyCustomBalloon(
-                    "Welcome to Hydra98! Double-click me for help."
+                    "Welcome to Hydra98! Tap me for help."
                   );
                 }
               }, 1000);
@@ -411,6 +444,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     },
     getClippyInstance: () => clippyInstanceRef.current,
     isMobile,
+    isIOSSafari,
   };
 
   return (
@@ -449,7 +483,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   );
 };
 
-// Crash-resistant ClippyController
+// Enhanced ClippyController with mobile touch support
 const ClippyController = ({
   visible,
   isScreenPoweredOn,
@@ -462,8 +496,9 @@ const ClippyController = ({
   const { clippy } = useClippy();
   const rafRef = useRef(null);
   const lastUpdateRef = useRef(0);
-  const doubleClickCountRef = useRef(0);
+  const tapCountRef = useRef(0);
   const mountedRef = useRef(false);
+  const tapTimeoutRef = useRef(null);
 
   // Safe DOM manipulation
   const safeSetStyle = useCallback((element, styles) => {
@@ -543,7 +578,7 @@ const ClippyController = ({
           });
         }
 
-        // Create/update overlay with safety checks
+        // Create/update overlay with enhanced mobile support
         if (!overlayRef.current && mountedRef.current) {
           const overlay = document.createElement("div");
           overlay.id = "clippy-clickable-overlay";
@@ -554,33 +589,94 @@ const ClippyController = ({
             background: "transparent",
             pointerEvents: "auto",
             zIndex: isMobile ? "1510" : "2010",
+            // Larger touch area for mobile
+            minWidth: isMobile ? "100px" : "60px",
+            minHeight: isMobile ? "100px" : "60px",
           });
 
-          // Safe event handlers
-          const handleDoubleClick = (e) => {
+          // Enhanced mobile event handlers
+          const handleTouch = (e) => {
             if (!mountedRef.current) return;
 
             try {
               e.preventDefault();
+              e.stopPropagation();
 
-              if (clippy.play) {
-                clippy.play("Greeting");
+              tapCountRef.current++;
 
-                doubleClickCountRef.current =
-                  (doubleClickCountRef.current + 1) % 3;
+              // Clear existing timeout
+              if (tapTimeoutRef.current) {
+                clearTimeout(tapTimeoutRef.current);
+              }
 
-                if (doubleClickCountRef.current === 0) {
+              // Handle tap/click logic
+              if (isMobile || isIOSSafari) {
+                // Mobile: Single tap triggers animation and balloon
+                if (clippy.play) {
+                  clippy.play("Greeting");
+
                   setTimeout(() => {
                     if (window.showClippyCustomBalloon && mountedRef.current) {
-                      window.showClippyCustomBalloon(
-                        "Hello! How can I help you?"
-                      );
+                      const messages = [
+                        "Hello! Tap me again for more help!",
+                        "Need assistance? I'm here to help!",
+                        "What can I help you with today?",
+                        "Tap and hold for chat mode!",
+                      ];
+                      const message =
+                        messages[tapCountRef.current % messages.length];
+                      window.showClippyCustomBalloon(message);
                     }
                   }, 800);
                 }
+
+                // Reset tap count after delay
+                tapTimeoutRef.current = setTimeout(() => {
+                  tapCountRef.current = 0;
+                }, 2000);
+              } else {
+                // Desktop: Traditional double-click
+                if (tapCountRef.current === 1) {
+                  tapTimeoutRef.current = setTimeout(() => {
+                    tapCountRef.current = 0;
+                  }, 300);
+                } else if (tapCountRef.current === 2) {
+                  if (clippy.play) {
+                    clippy.play("Greeting");
+
+                    setTimeout(() => {
+                      if (
+                        window.showClippyCustomBalloon &&
+                        mountedRef.current
+                      ) {
+                        window.showClippyCustomBalloon(
+                          "Hello! How can I help you?"
+                        );
+                      }
+                    }, 800);
+                  }
+                  tapCountRef.current = 0;
+                }
               }
             } catch (error) {
-              console.error("Error handling double click:", error);
+              console.error("Error handling touch:", error);
+            }
+          };
+
+          const handleLongPress = (e) => {
+            if (!mountedRef.current || !isMobile) return;
+
+            try {
+              e.preventDefault();
+              e.stopPropagation();
+
+              if (window.showClippyChatBalloon) {
+                window.showClippyChatBalloon(
+                  "Hi! What would you like to chat about?"
+                );
+              }
+            } catch (error) {
+              console.error("Error handling long press:", error);
             }
           };
 
@@ -591,7 +687,9 @@ const ClippyController = ({
               e.preventDefault();
               if (window.showClippyCustomBalloon) {
                 window.showClippyCustomBalloon(
-                  "Right-click me for more options!"
+                  isMobile
+                    ? "Tap and hold for chat mode!"
+                    : "Right-click me for more options!"
                 );
               }
             } catch (error) {
@@ -599,7 +697,54 @@ const ClippyController = ({
             }
           };
 
-          overlay.addEventListener("dblclick", handleDoubleClick);
+          // Add event listeners based on device type
+          if (isMobile || isIOSSafari) {
+            // Mobile touch events
+            overlay.addEventListener("touchstart", handleTouch, {
+              passive: false,
+            });
+            overlay.addEventListener(
+              "touchend",
+              (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              },
+              { passive: false }
+            );
+
+            // Long press for chat
+            let longPressTimer;
+            overlay.addEventListener(
+              "touchstart",
+              (e) => {
+                longPressTimer = setTimeout(() => {
+                  handleLongPress(e);
+                }, 800);
+              },
+              { passive: false }
+            );
+
+            overlay.addEventListener(
+              "touchend",
+              () => {
+                clearTimeout(longPressTimer);
+              },
+              { passive: false }
+            );
+
+            overlay.addEventListener(
+              "touchmove",
+              () => {
+                clearTimeout(longPressTimer);
+              },
+              { passive: false }
+            );
+          } else {
+            // Desktop mouse events
+            overlay.addEventListener("click", handleTouch);
+            overlay.addEventListener("dblclick", handleTouch);
+          }
+
           overlay.addEventListener("contextmenu", handleContextMenu);
 
           overlayRef.current = overlay;
@@ -609,11 +754,13 @@ const ClippyController = ({
         // Position overlay safely
         if (overlayRef.current) {
           const rect = clippyEl.getBoundingClientRect();
+          const padding = isMobile ? 20 : 10;
+
           safeSetStyle(overlayRef.current, {
-            left: `${rect.left}px`,
-            top: `${rect.top}px`,
-            width: `${rect.width}px`,
-            height: `${rect.height}px`,
+            left: `${rect.left - padding}px`,
+            top: `${rect.top - padding}px`,
+            width: `${rect.width + padding * 2}px`,
+            height: `${rect.height + padding * 2}px`,
             visibility: isScreenPoweredOn ? "visible" : "hidden",
           });
         }
@@ -656,6 +803,9 @@ const ClippyController = ({
       mountedRef.current = false;
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
+      }
+      if (tapTimeoutRef.current) {
+        clearTimeout(tapTimeoutRef.current);
       }
       if (overlayRef.current && overlayRef.current.parentNode) {
         try {
