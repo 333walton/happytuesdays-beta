@@ -24,26 +24,65 @@ const helpMessages = {
   default: { text: "Need help?", animation: "Greeting" },
 };
 
-const isAvailable = () => {
-  return typeof window !== "undefined" && window.clippy !== undefined;
+// Device detection cache
+const isMobile = (() => {
+  try {
+    return (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      ) || window.innerWidth < 768
+    );
+  } catch {
+    return false;
+  }
+})();
+
+// Safe execution wrapper
+const safeExecute = (action, fallbackReturn = false) => {
+  try {
+    if (typeof window === "undefined") {
+      return fallbackReturn;
+    }
+    return action();
+  } catch (error) {
+    console.error("ClippyService error:", error);
+    return fallbackReturn;
+  }
 };
 
-const executeIfAvailable = (action) => {
-  if (!isAvailable()) {
-    console.warn("Clippy not available");
-    return false;
-  }
+// Check if Clippy is available
+const isAvailable = () => {
+  return safeExecute(() => window.clippy !== undefined);
+};
 
-  try {
+// Execute action only if Clippy is available
+const executeIfAvailable = (action) => {
+  return safeExecute(() => {
+    if (!isAvailable()) {
+      console.warn("Clippy not available");
+      return false;
+    }
     return action();
-  } catch (e) {
-    console.error("Error executing Clippy action:", e);
+  });
+};
+
+// Safe DOM element manipulation
+const ensureClippyVisible = () => {
+  return safeExecute(() => {
+    const clippyEl = document.querySelector(".clippy");
+    if (clippyEl) {
+      clippyEl.style.visibility = "visible";
+      clippyEl.style.opacity = "1";
+      clippyEl.style.display = "block";
+      return true;
+    }
     return false;
-  }
+  });
 };
 
 const show = () => {
   return executeIfAvailable(() => {
+    ensureClippyVisible();
     if (window.setAssistantVisible) {
       window.setAssistantVisible(true);
       return true;
@@ -64,12 +103,7 @@ const hide = () => {
 
 const speak = (text) => {
   return executeIfAvailable(() => {
-    const clippyEl = document.querySelector(".clippy");
-    if (clippyEl) {
-      clippyEl.style.visibility = "visible";
-      clippyEl.style.opacity = "1";
-      clippyEl.style.display = "block";
-    }
+    ensureClippyVisible();
 
     if (window.showClippyCustomBalloon) {
       return window.showClippyCustomBalloon(text);
@@ -82,12 +116,7 @@ const speak = (text) => {
 
 const showChat = (initialMessage = "How can I help you today?") => {
   return executeIfAvailable(() => {
-    const clippyEl = document.querySelector(".clippy");
-    if (clippyEl) {
-      clippyEl.style.visibility = "visible";
-      clippyEl.style.opacity = "1";
-      clippyEl.style.display = "block";
-    }
+    ensureClippyVisible();
 
     if (window.showClippyChatBalloon) {
       return window.showClippyChatBalloon(initialMessage);
@@ -97,20 +126,17 @@ const showChat = (initialMessage = "How can I help you today?") => {
 };
 
 const hideBalloon = () => {
-  if (window.hideClippyCustomBalloon) {
-    return window.hideClippyCustomBalloon();
-  }
-  return true;
+  return safeExecute(() => {
+    if (window.hideClippyCustomBalloon) {
+      return window.hideClippyCustomBalloon();
+    }
+    return true;
+  });
 };
 
 const play = (animation) => {
   return executeIfAvailable(() => {
-    const clippyEl = document.querySelector(".clippy");
-    if (clippyEl) {
-      clippyEl.style.visibility = "visible";
-      clippyEl.style.opacity = "1";
-      clippyEl.style.display = "block";
-    }
+    ensureClippyVisible();
 
     if (window.clippy && window.clippy.play) {
       try {
@@ -136,11 +162,6 @@ const changeAgent = (agent) => {
 };
 
 const setPosition = (x, y) => {
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-
   if (isMobile) {
     console.log("Position changes not supported on mobile devices");
     return false;
@@ -156,24 +177,20 @@ const setPosition = (x, y) => {
 };
 
 const setInitialPosition = (options) => {
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-
   if (isMobile) {
     return true; // Mobile positioning is handled by CSS
   }
 
   return executeIfAvailable(() => {
-    // Helper to find the actual desktop viewport element (same as in ClippyProvider)
+    // Helper to find the actual desktop viewport element
     const getDesktopViewport = () => {
-      // Try to find the teal desktop area using various selectors
-      return (
-        document.querySelector(".desktop.screen") ||
-        document.querySelector(".desktop") ||
-        document.querySelector(".w98")
-      );
+      return safeExecute(() => {
+        return (
+          document.querySelector(".desktop.screen") ||
+          document.querySelector(".desktop") ||
+          document.querySelector(".w98")
+        );
+      });
     };
 
     // Get the desktop viewport rectangle
@@ -220,7 +237,7 @@ const setInitialPosition = (options) => {
 
       // If position is "bottom-right", ensure we're above the taskbar
       if (options.position.toLowerCase() === "bottom-right" && rect) {
-        const x = offsetX + viewportWidth - 120;
+        const x = offsetX + viewportWidth - 135; // 15px more to the right
         const y = offsetY + viewportHeight - taskbarHeight - 100;
 
         if (window.setClippyPosition) {
@@ -281,70 +298,84 @@ const getHelpForWindow = (windowTitle) => {
 const showHelpForWindow = (windowTitle) => {
   if (!isAvailable()) return false;
 
-  show();
-  const help = getHelpForWindow(windowTitle);
+  return safeExecute(() => {
+    show();
+    const help = getHelpForWindow(windowTitle);
 
-  const clippyEl = document.querySelector(".clippy");
-  if (clippyEl) {
-    clippyEl.style.visibility = "visible";
-    clippyEl.style.opacity = "1";
-    clippyEl.style.display = "block";
-  }
+    ensureClippyVisible();
 
-  setTimeout(() => {
-    play(help.animation);
     setTimeout(() => {
-      speak(help.text);
-    }, 800);
-  }, 300);
+      play(help.animation);
+      setTimeout(() => {
+        speak(help.text);
+      }, 800);
+    }, 300);
 
-  return true;
+    return true;
+  });
 };
 
 const debug = () => {
-  console.log("=== Clippy Debug Info ===");
-  console.log("Available:", isAvailable());
-  console.log("Clippy instance:", window.clippy);
+  return safeExecute(() => {
+    console.log("=== Clippy Debug Info ===");
+    console.log("Available:", isAvailable());
+    console.log("Clippy instance:", window.clippy);
+    console.log("Is mobile:", isMobile);
 
-  const clippyElement = document.querySelector(".clippy");
-  console.log("Clippy DOM element:", clippyElement);
+    const clippyElement = document.querySelector(".clippy");
+    console.log("Clippy DOM element:", clippyElement);
 
-  if (clippyElement) {
-    const styles = window.getComputedStyle(clippyElement);
-    console.log("Clippy styles:", {
-      display: styles.display,
-      visibility: styles.visibility,
-      opacity: styles.opacity,
-      position: styles.position,
-      left: styles.left,
-      top: styles.top,
-      transform: styles.transform,
-    });
-  }
+    if (clippyElement) {
+      const styles = window.getComputedStyle(clippyElement);
+      console.log("Clippy styles:", {
+        display: styles.display,
+        visibility: styles.visibility,
+        opacity: styles.opacity,
+        position: styles.position,
+        left: styles.left,
+        top: styles.top,
+        right: styles.right,
+        bottom: styles.bottom,
+        transform: styles.transform,
+      });
+    }
 
-  const overlay = document.getElementById("clippy-clickable-overlay");
-  console.log("Overlay element:", overlay);
+    const overlay = document.getElementById("clippy-clickable-overlay");
+    console.log("Overlay element:", overlay);
 
-  if (isAvailable()) {
-    console.log("Testing animation...");
-    play("Wave");
-    setTimeout(() => {
-      console.log("Testing speech...");
-      speak("Debug test complete!");
-    }, 1000);
-  }
+    if (overlay) {
+      const overlayStyles = window.getComputedStyle(overlay);
+      console.log("Overlay styles:", {
+        display: overlayStyles.display,
+        visibility: overlayStyles.visibility,
+        position: overlayStyles.position,
+        zIndex: overlayStyles.zIndex,
+      });
+    }
 
-  return "Debug complete. Check console for details.";
+    if (isAvailable()) {
+      console.log("Testing animation...");
+      play("Wave");
+      setTimeout(() => {
+        console.log("Testing speech...");
+        speak("Debug test complete!");
+      }, 1000);
+    }
+
+    return "Debug complete. Check console for details.";
+  }, "Debug failed");
 };
 
 const emergencyReset = () => {
   console.log("🚨 Emergency Clippy reset");
 
-  try {
+  return safeExecute(() => {
+    // Hide via global functions first
     if (window.setAssistantVisible) {
       window.setAssistantVisible(false);
     }
 
+    // Force hide all Clippy-related elements
     const elementsToHide = [
       ".clippy",
       "#clippy-clickable-overlay",
@@ -354,14 +385,20 @@ const emergencyReset = () => {
     ];
 
     elementsToHide.forEach((selector) => {
-      const elements = document.querySelectorAll(selector);
-      elements.forEach((el) => {
-        el.style.display = "none";
-        el.style.visibility = "hidden";
-        el.style.opacity = "0";
-      });
+      try {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach((el) => {
+          el.style.display = "none";
+          el.style.visibility = "hidden";
+          el.style.opacity = "0";
+          el.style.pointerEvents = "none";
+        });
+      } catch (e) {
+        console.error(`Error hiding ${selector}:`, e);
+      }
     });
 
+    // Add emergency hide styles
     const hideStyle = document.createElement("style");
     hideStyle.id = "clippy-emergency-hide";
     hideStyle.textContent = `
@@ -372,6 +409,7 @@ const emergencyReset = () => {
         visibility: hidden !important;
         opacity: 0 !important;
         pointer-events: none !important;
+        transform: translateX(-9999px) !important;
       }
     `;
 
@@ -380,11 +418,64 @@ const emergencyReset = () => {
 
     document.head.appendChild(hideStyle);
 
+    // Clear any running animations
+    if (window.clippy && window.clippy.stop) {
+      try {
+        window.clippy.stop();
+      } catch (e) {
+        console.error("Error stopping clippy animations:", e);
+      }
+    }
+
     return "Emergency reset complete. Refresh the page to restore Clippy.";
-  } catch (e) {
-    console.error("Error during emergency reset:", e);
-    return "Error during reset. Try refreshing the page.";
-  }
+  }, "Emergency reset failed. Try refreshing the page.");
+};
+
+// Nuclear option - completely remove Clippy
+const nuclearReset = () => {
+  console.log("💥 Nuclear Clippy reset - removing all elements");
+
+  return safeExecute(() => {
+    // Remove all Clippy-related elements from DOM
+    const elementsToRemove = [
+      ".clippy",
+      "#clippy-clickable-overlay",
+      ".clippy-balloon",
+      ".custom-clippy-balloon",
+      ".custom-clippy-chat-balloon",
+    ];
+
+    elementsToRemove.forEach((selector) => {
+      try {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach((el) => {
+          if (el.parentNode) {
+            el.parentNode.removeChild(el);
+          }
+        });
+      } catch (e) {
+        console.error(`Error removing ${selector}:`, e);
+      }
+    });
+
+    // Clear global variables
+    try {
+      delete window.clippy;
+      delete window.setAssistantVisible;
+      delete window.setCurrentAgent;
+      delete window.setScreenPowerState;
+      delete window.showClippyCustomBalloon;
+      delete window.hideClippyCustomBalloon;
+      delete window.showClippyChatBalloon;
+      delete window.getClippyInstance;
+      delete window.setClippyPosition;
+      delete window._clippyGlobalsInitialized;
+    } catch (e) {
+      console.error("Error clearing global variables:", e);
+    }
+
+    return "Nuclear reset complete. All Clippy elements removed. Refresh to restore.";
+  }, "Nuclear reset failed. Try refreshing the page.");
 };
 
 const ClippyService = {
@@ -403,11 +494,15 @@ const ClippyService = {
   handleWindowHelp: showHelpForWindow,
   debug,
   emergencyReset,
+  nuclearReset, // Added nuclear option
+  isMobile, // Expose mobile detection
 };
 
+// Global exposure with safety checks
 if (typeof window !== "undefined") {
   window.ClippyService = ClippyService;
   window.resetClippy = emergencyReset;
+  window.killClippy = nuclearReset; // Nuclear option
 }
 
 export default ClippyService;
