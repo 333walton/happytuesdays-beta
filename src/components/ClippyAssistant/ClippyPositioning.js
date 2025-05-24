@@ -37,14 +37,14 @@ const CLIPPY_POSITIONS = {
     // left and top calculated dynamically
   },
 
-  // Mobile positioning values (centralized)
+  // MOBILE positioning values (centralized)
   mobileValues: {
-    bottom: 100, // pixels from bottom
-    right: 35, // pixels from right (your 15px shift)
+    bottom: 120, // pixels from bottom
+    right: 11, // pixels from right
     scale: 0.8, // scale factor
   },
 
-  // Desktop positioning values (centralized)
+  // DESKTOP positioning values (centralized)
   desktopValues: {
     rightOffset: 120, // pixels from right edge (original value)
     bottomOffset: 100, // pixels from bottom
