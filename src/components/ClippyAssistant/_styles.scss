@@ -9,24 +9,40 @@
   opacity: 1 !important;
   display: block !important;
 
-  /* Performance optimizations */
+  /* Performance optimizations for real-time resize */
   backface-visibility: hidden !important;
   will-change: transform, opacity !important;
   contain: layout style !important;
   -webkit-font-smoothing: antialiased !important;
 
+  /* CRITICAL: Remove ALL transitions during resize for smooth real-time updates */
+  transition: none !important;
+
   /* Prevent text selection */
   user-select: none !important;
   -webkit-user-select: none !important;
-
-  /* Smooth transitions */
-  transition: opacity 0.3s ease !important;
 
   /* Ensure animations work */
   overflow: visible !important;
 
   /* NOTE: ALL position, transform, z-index handled by ClippyPositioning.js */
   /* NO MORE STATIC CSS POSITIONING */
+}
+
+/* Special state for anchored Clippy - maximum performance during resize */
+.clippy.clippy-anchored {
+  /* Force GPU acceleration for real-time positioning */
+  transform-style: preserve-3d !important;
+  backface-visibility: hidden !important;
+  perspective: 1000px !important;
+
+  /* Lock down layout to prevent flicker during resize */
+  contain: layout style paint !important;
+  isolation: isolate !important;
+
+  /* Remove all transitions for instant positioning updates */
+  transition: none !important;
+  animation: none !important;
 }
 
 /* ===== CLICKABLE OVERLAY ===== */
@@ -38,9 +54,13 @@
   visibility: visible !important;
   opacity: 1 !important;
 
-  /* Performance */
+  /* Performance optimizations for real-time sync with Clippy */
   transform: translateZ(0) !important;
   backface-visibility: hidden !important;
+  contain: layout !important;
+
+  /* Remove transitions for instant sync during resize */
+  transition: none !important;
 
   /* Remove default styling */
   border: none !important;
@@ -486,22 +506,45 @@ body.screen-off .custom-clippy-chat-balloon {
   }
 }
 
-/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+/* ===== REAL-TIME RESIZE PERFORMANCE OPTIMIZATIONS ===== */
 .clippy,
 .custom-clippy-balloon,
 .custom-clippy-chat-balloon,
 #clippy-clickable-overlay {
-  /* Force hardware acceleration */
+  /* Force GPU acceleration for smooth real-time updates */
   transform: translateZ(0) !important;
   backface-visibility: hidden !important;
   perspective: 1000px !important;
   will-change: transform, opacity !important;
 
-  /* Prevent layout thrashing */
+  /* Prevent layout thrashing during resize */
   contain: layout style !important;
   -webkit-font-smoothing: antialiased !important;
   font-smoothing: antialiased !important;
   box-sizing: border-box !important;
+}
+
+/* Special handling during window resize for maximum performance */
+.clippy.clippy-anchored {
+  /* Lock down all animations and transitions during resize */
+  animation-play-state: paused !important;
+  transition: none !important;
+
+  /* Force hardware compositing */
+  transform-style: preserve-3d !important;
+  will-change: transform !important;
+
+  /* Prevent sub-pixel rendering issues */
+  -webkit-transform-style: preserve-3d !important;
+  -webkit-backface-visibility: hidden !important;
+}
+
+/* Override any inherited transitions during real-time resize */
+.clippy-anchored *,
+.clippy-anchored::before,
+.clippy-anchored::after {
+  transition: none !important;
+  animation: none !important;
 }
 
 /* ===== STARTUP/SHUTDOWN SEQUENCE HIDING ===== */
@@ -630,30 +673,25 @@ body:has(.desktop.windowsShuttingDown) .custom-clippy-chat-balloon {
   }
 }
 
-/* ===== RESIZE HANDLING OPTIMIZATIONS ===== */
-/* Ensure smooth repositioning during resize events */
-.clippy {
-  /* Optimize for frequent position changes during resize */
-  contain: layout style paint !important;
-  isolation: isolate !important;
-}
-
-#clippy-clickable-overlay {
-  /* Ensure overlay stays synchronized during resize */
-  contain: layout !important;
+/* ===== SPECIAL RESIZE HANDLING OPTIMIZATIONS ===== */
+/* Remove any transitions during active window resize for instant visual updates */
+@media screen {
+  /* Target browsers during resize events */
+  .clippy,
+  #clippy-clickable-overlay {
+    /* Optimize for frequent position changes */
+    contain: layout style paint !important;
+    isolation: isolate !important;
+  }
 }
 
 /* Reduce motion during resize events on mobile for performance */
 @media (max-width: 768px) and (pointer: coarse) {
   .clippy,
   #clippy-clickable-overlay {
-    transition: none !important; /* Remove transitions on mobile during resize */
-  }
-
-  /* Only apply smooth transitions when not resizing */
-  .clippy:not(.resizing),
-  #clippy-clickable-overlay:not(.resizing) {
-    transition: opacity 0.3s ease !important;
+    /* Remove all transitions on mobile for better performance */
+    transition: none !important;
+    animation: none !important;
   }
 }
 
@@ -666,5 +704,9 @@ body:has(.desktop.windowsShuttingDown) .custom-clippy-chat-balloon {
     /* Lock down layout during orientation changes */
     transform-style: flat !important;
     backface-visibility: hidden !important;
+
+    /* Prevent sub-pixel shifting */
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
   }
 }
