@@ -188,7 +188,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     };
   }, [startupComplete]);
 
-  // ZOOM-AWARE: Monitor for zoom level changes
+  // Replace the zoom monitoring useEffect in ClippyProvider.js with this enhanced version:
+
+  // ENHANCED ZOOM-AWARE: Monitor for zoom level changes with IMMEDIATE response
   useEffect(() => {
     if (isMobile || !mountedRef.current) return;
 
@@ -203,24 +205,61 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           `📏 ClippyProvider detected zoom change: ${oldZoomLevel} → ${currentZoomLevel}`
         );
 
-        // Get the Clippy element and handle zoom change
+        // Get the Clippy element and handle zoom change IMMEDIATELY
         const clippyElement = document.querySelector(".clippy");
-        if (clippyElement && ClippyPositioning.handleZoomChange) {
-          ClippyPositioning.handleZoomChange(currentZoomLevel, clippyElement);
+        const overlayElement = document.getElementById(
+          "clippy-clickable-overlay"
+        );
+
+        if (clippyElement) {
+          console.log(
+            `⚡ Applying immediate positioning for zoom level ${currentZoomLevel}`
+          );
+
+          // ENHANCED: Use the centralized positioning system directly
+          if (ClippyPositioning.forceImmediateZoomPositioning) {
+            const positioned = ClippyPositioning.forceImmediateZoomPositioning(
+              clippyElement,
+              currentZoomLevel
+            );
+
+            // Update overlay if positioning succeeded
+            if (positioned && overlayElement) {
+              ClippyPositioning.positionOverlay(overlayElement, clippyElement);
+            }
+
+            console.log(
+              `✅ ClippyProvider positioning: ${
+                positioned ? "success" : "failed"
+              }`
+            );
+          } else {
+            // Fallback to standard zoom change handling
+            ClippyPositioning.handleZoomChange?.(
+              currentZoomLevel,
+              clippyElement
+            );
+          }
+        } else {
+          console.warn("⚠️ Clippy element not found for zoom change");
         }
       }
     };
 
-    // Check for zoom changes periodically
-    const zoomCheckInterval = setInterval(checkZoomChange, 500);
+    // IMMEDIATE response checking - frequent for immediate updates
+    const zoomCheckInterval = setInterval(checkZoomChange, 50);
 
-    // Also listen for data-zoom attribute changes on body
+    // Listen for data-zoom attribute changes with immediate response
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (
           mutation.type === "attributes" &&
           mutation.attributeName === "data-zoom"
         ) {
+          console.log(
+            "📏 data-zoom attribute changed, applying immediate positioning"
+          );
+          // No delay - immediate response
           checkZoomChange();
         }
       });
@@ -231,11 +270,37 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       attributeFilter: ["data-zoom"],
     });
 
+    // Listen for custom zoom change events from MonitorControlsPanel with immediate response
+    const handleZoomLevelChangedEvent = (event) => {
+      const { newZoomLevel, source, immediate } = event.detail;
+      console.log(
+        `📏 ClippyProvider received zoom change event from ${source}: ${newZoomLevel} (immediate: ${immediate})`
+      );
+
+      // ENHANCED: Always respond immediately to centralized positioning events
+      if (source === "monitor-controls-centralized" || immediate) {
+        console.log("⚡ Immediate response triggered by centralized event");
+        checkZoomChange();
+      } else if (immediate) {
+        // No delay for immediate events
+        checkZoomChange();
+      } else {
+        // Small delay for non-immediate events
+        setTimeout(checkZoomChange, 10);
+      }
+    };
+
+    window.addEventListener("zoomLevelChanged", handleZoomLevelChangedEvent);
+
     return () => {
       clearInterval(zoomCheckInterval);
       observer.disconnect();
+      window.removeEventListener(
+        "zoomLevelChanged",
+        handleZoomLevelChangedEvent
+      );
     };
-  }, []);
+  }, []); // No dependencies - run once and monitor continuously
 
   // Error rate limiting
   const isErrorRateLimited = useCallback(() => {
@@ -628,19 +693,83 @@ const StartupAwareClippyController = ({
           const clippyEl = document.querySelector(".clippy");
           if (!clippyEl) return false;
 
-          // Use centralized positioning with fallbacks
-          const currentPosition = isMobile
-            ? null
-            : safeExecute(
-                () => ClippyPositioning?.calculateDesktopPosition(),
-                position,
-                "desktop position calculation"
-              );
+          // ENHANCED: Ensure correct initial positioning from the start
+          const setupInitialPositioning = () => {
+            // Get current zoom level from body attribute or default to 0
+            const initialZoomLevel =
+              parseInt(document.body.getAttribute("data-zoom")) || 0;
+            console.log(
+              `⚡ Setting up initial Clippy positioning for zoom level ${initialZoomLevel}`
+            );
 
-          const positionSuccess = safeExecute(
-            () => ClippyPositioning?.positionClippy(clippyEl, currentPosition),
-            false,
-            "clippy positioning"
+            if (isMobile) {
+              // Mobile: use responsive positioning
+              const mobilePosition = safeExecute(
+                () => ClippyPositioning?.calculateMobilePosition(),
+                null,
+                "mobile position calculation"
+              );
+              return safeExecute(
+                () =>
+                  ClippyPositioning?.positionClippy(clippyEl, mobilePosition),
+                false,
+                "mobile clippy positioning"
+              );
+            } else {
+              // Desktop: force immediate zoom-aware positioning
+              if (ClippyPositioning?.forceImmediateZoomPositioning) {
+                console.log(
+                  `⚡ Using forceImmediateZoomPositioning for zoom level ${initialZoomLevel}`
+                );
+                return ClippyPositioning.forceImmediateZoomPositioning(
+                  clippyEl,
+                  initialZoomLevel
+                );
+              } else {
+                // Fallback: cache anchor and position manually
+                console.log(
+                  `⚓ Fallback: Manual anchor caching for zoom level ${initialZoomLevel}`
+                );
+                const anchorCached =
+                  ClippyPositioning?.cacheClippyAnchorPosition?.(
+                    clippyEl,
+                    initialZoomLevel
+                  );
+                console.log(
+                  `⚓ Initial anchor cache: ${
+                    anchorCached ? "success" : "failed"
+                  }`
+                );
+
+                if (anchorCached) {
+                  return (
+                    safeExecute(
+                      () =>
+                        ClippyPositioning?.applyAnchoredPosition?.(clippyEl),
+                      false,
+                      "anchored positioning"
+                    ) ||
+                    safeExecute(
+                      () => ClippyPositioning?.positionClippy?.(clippyEl, null),
+                      false,
+                      "fallback positioning"
+                    )
+                  );
+                } else {
+                  return safeExecute(
+                    () => ClippyPositioning?.positionClippy?.(clippyEl, null),
+                    false,
+                    "default positioning"
+                  );
+                }
+              }
+            }
+          };
+
+          // Use enhanced initial positioning instead of the previous logic
+          const positionSuccess = setupInitialPositioning();
+          console.log(
+            `🎯 Initial positioning: ${positionSuccess ? "success" : "failed"}`
           );
 
           // Set visibility with fallback
@@ -670,7 +799,7 @@ const StartupAwareClippyController = ({
 
             if (!overlay) return false;
 
-            // Mobile-optimized event handlers
+            // Mobile-optimized event handlers (keeping existing code...)
             const handleInteraction = (e) => {
               if (!mountedRef.current) return;
 
@@ -708,7 +837,7 @@ const StartupAwareClippyController = ({
               );
             };
 
-            // Add event listeners based on device type
+            // Add event listeners based on device type (keeping existing mobile/desktop logic...)
             if (isMobile) {
               // Mobile: tap and long press
               overlay.addEventListener("touchstart", handleInteraction, {
@@ -762,13 +891,13 @@ const StartupAwareClippyController = ({
             document.body.appendChild(overlay);
           }
 
-          // Synchronized positioning with error handling
+          // ENHANCED: Synchronized positioning with immediate application
           const syncSuccess = safeExecute(
             () =>
               ClippyPositioning?.positionClippyAndOverlay(
                 clippyEl,
                 overlayRef.current,
-                currentPosition
+                null // Let it determine position based on zoom level
               ),
             false,
             "synchronized positioning"
@@ -785,7 +914,7 @@ const StartupAwareClippyController = ({
             );
           }
 
-          // ===== ZOOM-AWARE: START RESIZE HANDLING =====
+          // ===== ENHANCED ZOOM-AWARE: START RESIZE HANDLING IMMEDIATELY =====
           if (!resizeHandlingActiveRef.current && clippyEl) {
             const resizeStarted = safeExecute(
               () =>
@@ -800,18 +929,20 @@ const StartupAwareClippyController = ({
 
             if (resizeStarted) {
               resizeHandlingActiveRef.current = true;
-              console.log("✅ Clippy zoom-aware resize handling activated");
+              console.log(
+                "✅ Clippy zoom-aware resize handling activated immediately"
+              );
             }
           }
 
           return positionSuccess && syncSuccess;
         },
         false,
-        "clippy setup"
+        "enhanced clippy setup"
       );
     };
 
-    // Throttled update loop for mobile performance
+    // Rest of the code remains the same...
     const updateLoop = (timestamp) => {
       if (!mountedRef.current) return;
 
