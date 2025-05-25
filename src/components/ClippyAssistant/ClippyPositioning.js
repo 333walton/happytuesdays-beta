@@ -1,4 +1,4 @@
-// ClippyPositioning.js - Centralized positioning logic
+// ClippyPositioning.js - Centralized positioning logic with real-time resize handling
 // This is the SINGLE source of truth for all Clippy positioning
 
 // Device detection
@@ -68,6 +68,259 @@ const CLIPPY_POSITIONS = {
   },
 };
 
+// ===== RESIZE HANDLING SYSTEM =====
+class ResizeHandler {
+  constructor() {
+    this.listeners = new Set();
+    this.isListening = false;
+    this.resizeTimeout = null;
+    this.lastWidth = window.innerWidth;
+    this.lastHeight = window.innerHeight;
+    this.orientationChangeTimeout = null;
+
+    // iOS Safari specific handling
+    this.iosViewportHeight = window.innerHeight;
+    this.iosViewportChangeTimeout = null;
+
+    // Cache initial desktop viewport and Clippy's anchored position
+    this.initialDesktopRect = null;
+    this.clippyAnchorOffset = null; // Stores Clippy's fixed offset from desktop
+    this.desktopCacheTimeout = null;
+
+    this.handleResize = this.handleResize.bind(this);
+    this.handleOrientationChange = this.handleOrientationChange.bind(this);
+    this.handleIOSViewportChange = this.handleIOSViewportChange.bind(this);
+  }
+
+  addListener(callback) {
+    this.listeners.add(callback);
+    this.startListening();
+  }
+
+  removeListener(callback) {
+    this.listeners.delete(callback);
+    if (this.listeners.size === 0) {
+      this.stopListening();
+      // Clear cached data when no more listeners
+      this.clippyAnchorOffset = null;
+      this.initialDesktopRect = null;
+    }
+  }
+
+  cacheClippyAnchorPosition(clippyElement) {
+    if (this.clippyAnchorOffset || !clippyElement) return; // Already cached or no element
+
+    const desktop =
+      document.querySelector(".desktop.screen") ||
+      document.querySelector(".desktop") ||
+      document.querySelector(".w98");
+
+    if (!desktop) {
+      console.warn("⚠️ Cannot cache Clippy anchor - desktop not found");
+      return;
+    }
+
+    const desktopRect = desktop.getBoundingClientRect();
+    const clippyRect = clippyElement.getBoundingClientRect();
+
+    // Calculate Clippy's current offset from desktop edges
+    this.clippyAnchorOffset = {
+      // Distance from desktop edges
+      fromDesktopRight: desktopRect.right - clippyRect.right,
+      fromDesktopBottom: desktopRect.bottom - clippyRect.bottom,
+      fromDesktopLeft: clippyRect.left - desktopRect.left,
+      fromDesktopTop: clippyRect.top - desktopRect.top,
+
+      // Store original dimensions for reference
+      clippyWidth: clippyRect.width,
+      clippyHeight: clippyRect.height,
+
+      // Cache the desktop rect for reference
+      originalDesktopRect: { ...desktopRect },
+    };
+
+    console.log("⚓ Clippy anchor position cached:", this.clippyAnchorOffset);
+  }
+
+  getAnchoredPosition() {
+    if (!this.clippyAnchorOffset) {
+      console.warn("⚠️ Clippy anchor offset not cached");
+      return null;
+    }
+
+    const desktop =
+      document.querySelector(".desktop.screen") ||
+      document.querySelector(".desktop") ||
+      document.querySelector(".w98");
+
+    if (!desktop) {
+      console.warn("⚠️ Desktop viewport not found for anchored positioning");
+      return null;
+    }
+
+    const currentDesktopRect = desktop.getBoundingClientRect();
+
+    // Apply the cached offset to current desktop position
+    // Use the right/bottom offset for consistent positioning
+    const anchoredPosition = {
+      left:
+        currentDesktopRect.right -
+        this.clippyAnchorOffset.fromDesktopRight -
+        this.clippyAnchorOffset.clippyWidth,
+      top:
+        currentDesktopRect.bottom -
+        this.clippyAnchorOffset.fromDesktopBottom -
+        this.clippyAnchorOffset.clippyHeight,
+    };
+
+    return anchoredPosition;
+  }
+
+  startListening() {
+    if (this.isListening) return;
+
+    this.isListening = true;
+
+    // Standard resize event
+    window.addEventListener("resize", this.handleResize, { passive: true });
+
+    // Orientation change for mobile
+    if (isMobile) {
+      window.addEventListener(
+        "orientationchange",
+        this.handleOrientationChange,
+        { passive: true }
+      );
+
+      // iOS Safari viewport changes (address bar show/hide)
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        window.addEventListener("scroll", this.handleIOSViewportChange, {
+          passive: true,
+        });
+        // Also listen for visual viewport API if available
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener(
+            "resize",
+            this.handleIOSViewportChange,
+            { passive: true }
+          );
+        }
+      }
+    }
+  }
+
+  stopListening() {
+    if (!this.isListening) return;
+
+    this.isListening = false;
+
+    window.removeEventListener("resize", this.handleResize);
+    window.removeEventListener(
+      "orientationchange",
+      this.handleOrientationChange
+    );
+
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      window.removeEventListener("scroll", this.handleIOSViewportChange);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener(
+          "resize",
+          this.handleIOSViewportChange
+        );
+      }
+    }
+
+    // Clear any pending timeouts
+    if (this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout);
+    }
+    if (this.orientationChangeTimeout) {
+      clearTimeout(this.orientationChangeTimeout);
+    }
+    if (this.iosViewportChangeTimeout) {
+      clearTimeout(this.iosViewportChangeTimeout);
+    }
+    if (this.desktopCacheTimeout) {
+      clearTimeout(this.desktopCacheTimeout);
+    }
+
+    // Clear cached data
+    this.clippyAnchorOffset = null;
+    this.initialDesktopRect = null;
+  }
+
+  handleResize() {
+    // Throttle resize events for performance
+    if (this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout);
+    }
+
+    this.resizeTimeout = setTimeout(
+      () => {
+        // Simply notify listeners that a resize occurred
+        // The actual repositioning will use anchored positioning
+        this.notifyListeners("resize", {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          type: "resize",
+        });
+      },
+      isMobile ? 150 : 100
+    );
+  }
+
+  handleOrientationChange() {
+    // iOS needs extra time for orientation changes to complete
+    if (this.orientationChangeTimeout) {
+      clearTimeout(this.orientationChangeTimeout);
+    }
+
+    this.orientationChangeTimeout = setTimeout(() => {
+      this.notifyListeners("orientationchange", {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        orientation: window.orientation || 0,
+        type: "orientationchange",
+      });
+    }, 500); // iOS needs time for orientation to complete
+  }
+
+  handleIOSViewportChange() {
+    // Handle iOS Safari address bar show/hide
+    if (this.iosViewportChangeTimeout) {
+      clearTimeout(this.iosViewportChangeTimeout);
+    }
+
+    this.iosViewportChangeTimeout = setTimeout(() => {
+      const currentHeight = window.innerHeight;
+
+      // Check if this is a significant viewport change (not just scroll)
+      if (Math.abs(currentHeight - this.iosViewportHeight) > 50) {
+        this.iosViewportHeight = currentHeight;
+
+        this.notifyListeners("iosviewport", {
+          width: window.innerWidth,
+          height: currentHeight,
+          type: "iosviewport",
+        });
+      }
+    }, 100);
+  }
+
+  notifyListeners(eventType, data) {
+    this.listeners.forEach((callback) => {
+      try {
+        callback(eventType, data);
+      } catch (error) {
+        console.error("Error in resize listener:", error);
+      }
+    });
+  }
+}
+
+// Global resize handler instance
+const resizeHandler = new ResizeHandler();
+
 // ===== POSITIONING CALCULATOR =====
 class ClippyPositioning {
   static getClippyPosition(customPosition = null) {
@@ -77,6 +330,11 @@ class ClippyPositioning {
 
     // Desktop positioning
     const desktop = { ...CLIPPY_POSITIONS.desktop };
+
+    // Get current monitor zoom factor and apply to scale
+    const zoomFactor = this.getMonitorZoomFactor();
+    const adjustedScale = 0.9 * zoomFactor; // Base desktop scale * zoom factor
+    desktop.transform = `translateZ(0) scale(${adjustedScale})`;
 
     if (customPosition) {
       desktop.left = `${customPosition.x}px`;
@@ -92,7 +350,7 @@ class ClippyPositioning {
   }
 
   static calculateMobilePosition() {
-    // Dynamic mobile positioning based on viewport
+    // Dynamic mobile positioning based on current viewport
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const values = CLIPPY_POSITIONS.mobileValues;
@@ -108,6 +366,74 @@ class ClippyPositioning {
       left: "auto",
       top: "auto",
     };
+  }
+
+  static calculateDesktopPosition() {
+    try {
+      const desktop =
+        document.querySelector(".desktop.screen") ||
+        document.querySelector(".desktop") ||
+        document.querySelector(".w98");
+
+      if (desktop) {
+        const rect = desktop.getBoundingClientRect();
+        const values = CLIPPY_POSITIONS.desktopValues;
+
+        // Check if monitor is zoomed by looking for zoom classes/transforms
+        const monitorContainer = document.querySelector(".monitor-container");
+        let zoomFactor = 1.0;
+
+        if (monitorContainer) {
+          const transform = window.getComputedStyle(monitorContainer).transform;
+          if (transform && transform !== "none") {
+            // Extract scale from transform matrix
+            const matrixMatch = transform.match(/matrix\(([^)]+)\)/);
+            if (matrixMatch) {
+              const values = matrixMatch[1].split(",");
+              zoomFactor = parseFloat(values[0]) || 1.0;
+            }
+          }
+
+          // Also check for zoom classes
+          if (monitorContainer.classList.contains("zoomed")) {
+            // Get the zoom level from data attribute or other source
+            const zoomLevel =
+              parseInt(document.body.getAttribute("data-zoom")) || 0;
+            switch (zoomLevel) {
+              case 1:
+                zoomFactor = 1.1;
+                break; // 110%
+              case 2:
+                zoomFactor = 1.25;
+                break; // 125%
+              default:
+                zoomFactor = 1.0;
+                break; // 100%
+            }
+          }
+        }
+
+        // Always calculate position relative to the current desktop viewport
+        // This ensures Clippy stays anchored to the desktop container
+        const basePosition = {
+          x: rect.left + rect.width - values.rightOffset, // Centralized value
+          y:
+            rect.top + rect.height - values.taskbarHeight - values.bottomOffset,
+        };
+
+        console.log(
+          `🔍 Desktop position calculated with zoom factor: ${zoomFactor}`,
+          basePosition
+        );
+
+        return basePosition;
+      }
+    } catch (error) {
+      console.warn("Error calculating desktop position:", error);
+    }
+
+    // Fallback position
+    return { x: 520, y: 360 };
   }
 
   static getOverlayPosition(clippyElement) {
@@ -199,39 +525,31 @@ class ClippyPositioning {
     }
   }
 
-  static calculateDesktopPosition() {
-    try {
-      const desktop =
-        document.querySelector(".desktop.screen") ||
-        document.querySelector(".desktop") ||
-        document.querySelector(".w98");
-
-      if (desktop) {
-        const rect = desktop.getBoundingClientRect();
-        const values = CLIPPY_POSITIONS.desktopValues;
-
-        return {
-          x: rect.left + rect.width - values.rightOffset, // Centralized value
-          y:
-            rect.top + rect.height - values.taskbarHeight - values.bottomOffset,
-        };
-      }
-    } catch (error) {
-      console.warn("Error calculating desktop position:", error);
-    }
-
-    // Fallback position
-    return { x: 520, y: 360 };
-  }
-
   // Apply positioning styles to an element
   static applyStyles(element, styles) {
     if (!element) return false;
 
     try {
+      console.log(`🎨 Applying styles to element:`, element.className, styles);
+
       Object.entries(styles).forEach(([key, value]) => {
         element.style[key] = value;
       });
+
+      // Verify transform was applied correctly
+      if (styles.transform) {
+        const actualTransform = element.style.transform;
+        console.log(`🎨 Transform applied: ${actualTransform}`);
+
+        // Add important flag if transform isn't sticking
+        if (actualTransform !== styles.transform) {
+          console.warn(
+            `⚠️ Transform not applied correctly, trying with !important`
+          );
+          element.style.setProperty("transform", styles.transform, "important");
+        }
+      }
+
       return true;
     } catch (error) {
       console.error("Error applying styles:", error);
@@ -239,10 +557,122 @@ class ClippyPositioning {
     }
   }
 
+  // Apply anchored positioning to Clippy element
+  static applyAnchoredPosition(clippyElement) {
+    if (!clippyElement) return false;
+
+    const anchoredPos = resizeHandler.getAnchoredPosition();
+    if (!anchoredPos) {
+      console.warn("⚠️ Cannot apply anchored position - not cached");
+      return false;
+    }
+
+    // Get current monitor zoom factor
+    const zoomFactor = this.getMonitorZoomFactor();
+    const adjustedScale = 0.9 * zoomFactor; // Base desktop scale * zoom factor
+
+    const anchoredStyles = {
+      position: "fixed",
+      left: `${anchoredPos.left}px`,
+      top: `${anchoredPos.top}px`,
+      right: "auto",
+      bottom: "auto",
+      transform: `translateZ(0) scale(${adjustedScale})`, // Scaled with monitor zoom
+      transformOrigin: "center bottom",
+      zIndex: "2000",
+    };
+
+    console.log(`🎨 About to apply styles to Clippy:`, anchoredStyles);
+
+    const success = this.applyStyles(clippyElement, anchoredStyles);
+
+    if (success) {
+      // Verify the styles were actually applied
+      const computedTransform =
+        window.getComputedStyle(clippyElement).transform;
+      console.log(
+        `🎨 Clippy element transform after applying: ${computedTransform}`
+      );
+      console.log(
+        `⚓ Applied anchored position with zoom factor ${zoomFactor}:`,
+        anchoredPos
+      );
+    }
+
+    return success;
+  }
+
+  // Get current monitor zoom factor
+  static getMonitorZoomFactor() {
+    try {
+      // Method 1: Check data attribute on body (set by MonitorView)
+      const dataZoom = parseInt(document.body.getAttribute("data-zoom")) || 0;
+      console.log(`📏 Data zoom attribute: ${dataZoom}`);
+
+      if (dataZoom > 0) {
+        let factor;
+        switch (dataZoom) {
+          case 1:
+            factor = 1.1;
+            break; // 110%
+          case 2:
+            factor = 1.25;
+            break; // 125%
+          default:
+            factor = 1.0;
+            break; // 100%
+        }
+        console.log(
+          `📏 Zoom factor from data attribute: ${factor} (level ${dataZoom})`
+        );
+        return factor;
+      }
+
+      // Method 2: Check monitor container for zoom classes
+      const monitorContainer = document.querySelector(".monitor-container");
+
+      if (!monitorContainer) {
+        console.log("📏 No monitor container found, using default zoom 1.0");
+        return 1.0;
+      }
+
+      // Check for zoom classes
+      if (monitorContainer.classList.contains("zoomed")) {
+        console.log('📏 Monitor container has "zoomed" class');
+
+        // Try to extract zoom from transform
+        const transform = window.getComputedStyle(monitorContainer).transform;
+        console.log(`📏 Monitor container transform: ${transform}`);
+
+        if (transform && transform !== "none") {
+          const matrixMatch = transform.match(/matrix\(([^)]+)\)/);
+          if (matrixMatch) {
+            const values = matrixMatch[1].split(",");
+            const factor = parseFloat(values[0]) || 1.0;
+            console.log(`📏 Zoom factor from transform matrix: ${factor}`);
+            return factor;
+          }
+        }
+      }
+
+      console.log("📏 No zoom detected, using default factor 1.0");
+      return 1.0; // Default no zoom
+    } catch (error) {
+      console.warn("Error getting monitor zoom factor:", error);
+      return 1.0;
+    }
+  }
+
   // Main positioning function - call this to position Clippy
   static positionClippy(clippyElement, customPosition = null) {
     if (!clippyElement) return false;
 
+    // On desktop, try to use anchored positioning if available
+    if (!isMobile && resizeHandler.clippyAnchorOffset) {
+      return this.applyAnchoredPosition(clippyElement);
+    }
+
+    // Fallback to normal positioning (initial setup or mobile)
     const position = this.getClippyPosition(customPosition);
     return this.applyStyles(clippyElement, position);
   }
@@ -252,6 +682,13 @@ class ClippyPositioning {
     if (!overlayElement || !clippyElement) return false;
 
     const position = this.getOverlayPosition(clippyElement);
+
+    // Don't override Clippy's transform - let overlay inherit the scale
+    if (position) {
+      // Remove transform from overlay positioning to avoid conflicts
+      delete position.transform;
+    }
+
     return this.applyStyles(overlayElement, position);
   }
 
@@ -263,8 +700,16 @@ class ClippyPositioning {
   ) {
     if (!clippyElement) return false;
 
-    // Position Clippy first
+    // Position Clippy first (using anchored positioning if available)
     const clippySuccess = this.positionClippy(clippyElement, customPosition);
+
+    // Cache anchor position after first positioning (desktop only)
+    if (!isMobile && !resizeHandler.clippyAnchorOffset && clippySuccess) {
+      // Wait a frame for positioning to take effect, then cache
+      requestAnimationFrame(() => {
+        resizeHandler.cacheClippyAnchorPosition(clippyElement);
+      });
+    }
 
     // Then position overlay to match
     const overlaySuccess = overlayElement
@@ -284,9 +729,165 @@ class ClippyPositioning {
       height: 93 * scale, // Base Clippy height * scale
     };
   }
+
+  // ===== NEW RESIZE HANDLING METHODS =====
+
+  /**
+   * Start listening for resize events and maintain Clippy's anchored position
+   * Clippy will stay locked to its exact position relative to the desktop viewport
+   * @param {HTMLElement} clippyElement - The Clippy DOM element
+   * @param {HTMLElement} overlayElement - The overlay DOM element
+   * @param {Function} customPositionGetter - Optional function to get custom position (ignored after anchoring)
+   */
+  static startResizeHandling(
+    clippyElement,
+    overlayElement,
+    customPositionGetter = null
+  ) {
+    if (!clippyElement) {
+      console.warn("Cannot start resize handling: Clippy element not provided");
+      return false;
+    }
+
+    const resizeCallback = (eventType, data) => {
+      try {
+        console.log(`🔄 Resize callback triggered: ${eventType}`, data);
+
+        if (isMobile) {
+          // Mobile: use normal responsive positioning
+          const customPosition = customPositionGetter
+            ? customPositionGetter()
+            : null;
+          const success = this.positionClippyAndOverlay(
+            clippyElement,
+            overlayElement,
+            customPosition
+          );
+          console.log(
+            `📱 Mobile repositioning on ${eventType}: ${
+              success ? "success" : "failed"
+            }`
+          );
+        } else {
+          // Desktop: use anchored positioning to maintain exact position
+          if (resizeHandler.clippyAnchorOffset) {
+            // For zoom changes, we need to reposition with new scaling
+            const clippySuccess = this.applyAnchoredPosition(clippyElement);
+            const overlaySuccess = overlayElement
+              ? this.positionOverlay(overlayElement, clippyElement)
+              : true;
+
+            console.log(
+              `⚓ Anchored repositioning on ${eventType}: ${
+                clippySuccess && overlaySuccess ? "success" : "failed"
+              }`
+            );
+
+            // Log the current zoom factor being applied
+            const zoomFactor = this.getMonitorZoomFactor();
+            console.log(`📏 Applied zoom factor: ${zoomFactor}`);
+          } else {
+            // No anchor yet, use normal positioning (this will establish the anchor)
+            const success = this.positionClippyAndOverlay(
+              clippyElement,
+              overlayElement,
+              customPositionGetter ? customPositionGetter() : null
+            );
+            console.log(
+              `🔄 Normal repositioning on ${eventType}: ${
+                success ? "success" : "failed"
+              }`
+            );
+          }
+        }
+
+        // Trigger custom event for other components
+        window.dispatchEvent(
+          new CustomEvent("clippyRepositioned", {
+            detail: {
+              eventType,
+              data,
+              anchored: !isMobile && !!resizeHandler.clippyAnchorOffset,
+              zoomFactor: this.getMonitorZoomFactor(),
+            },
+          })
+        );
+      } catch (error) {
+        console.error("Error during anchored repositioning:", error);
+      }
+    };
+
+    // Store callback reference for cleanup
+    clippyElement._resizeCallback = resizeCallback;
+
+    resizeHandler.addListener(resizeCallback);
+
+    const mode = isMobile ? "responsive mobile" : "desktop anchored";
+    console.log(`⚓ Clippy resize handling started in ${mode} mode`);
+    return true;
+  }
+
+  /**
+   * Stop listening for resize events
+   * @param {HTMLElement} clippyElement - The Clippy DOM element (used to get stored callback)
+   */
+  static stopResizeHandling(clippyElement) {
+    if (clippyElement && clippyElement._resizeCallback) {
+      resizeHandler.removeListener(clippyElement._resizeCallback);
+      delete clippyElement._resizeCallback;
+      console.log("⚓ Clippy resize handling stopped");
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Manually trigger a resize event (useful for testing or forced updates)
+   */
+  static triggerResize() {
+    resizeHandler.handleResize();
+  }
+
+  /**
+   * Manually trigger repositioning (useful for zoom changes)
+   */
+  static triggerRepositioning() {
+    resizeHandler.notifyListeners("manual-reposition", {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      type: "manual-reposition",
+      reason: "zoom-change",
+    });
+  }
+
+  /**
+   * Get information about current viewport and device
+   */
+  static getViewportInfo() {
+    return {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      isMobile,
+      orientation: window.orientation || 0,
+      devicePixelRatio: window.devicePixelRatio || 1,
+      visualViewport: window.visualViewport
+        ? {
+            width: window.visualViewport.width,
+            height: window.visualViewport.height,
+            scale: window.visualViewport.scale,
+          }
+        : null,
+    };
+  }
+
+  // Expose mobile detection
+  static get isMobile() {
+    return isMobile;
+  }
 }
 
 // ===== GLOBAL ACCESS =====
 window.ClippyPositioning = ClippyPositioning;
+window.ClippyResizeHandler = resizeHandler;
 
 export default ClippyPositioning;

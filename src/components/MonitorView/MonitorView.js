@@ -144,8 +144,10 @@ class MonitorView extends Component {
 
     // Reset any zoom when component unmounts
     this.resetZoom();
-  }
 
+    // Clear zoom data attribute for Clippy
+    document.body.removeAttribute("data-zoom");
+  }
   // Update background color based on current state
   updateBackgroundColor = () => {
     // If screensaver is active, make background transparent to show starfield
@@ -489,8 +491,22 @@ class MonitorView extends Component {
       () => {
         console.log("Zoom level updated to:", this.state.zoomLevel);
 
-        // Apply the zoom scaling
+        // Set data attribute on body for Clippy to detect zoom level
+        document.body.setAttribute("data-zoom", level.toString());
+        console.log(`📏 Set data-zoom attribute to: ${level}`);
+
+        // Apply the zoom scaling to monitor
         this.applyZoom(level);
+
+        // Give the monitor time to apply zoom, then trigger Clippy repositioning
+        setTimeout(() => {
+          if (window.ClippyPositioning) {
+            console.log("🔄 Triggering Clippy repositioning for zoom change");
+            window.ClippyPositioning.triggerRepositioning();
+          } else {
+            console.warn("⚠️ ClippyPositioning not available for zoom trigger");
+          }
+        }, 100);
       }
     );
   };

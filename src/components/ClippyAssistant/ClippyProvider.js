@@ -74,6 +74,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   const errorCountRef = useRef(0);
   const lastErrorRef = useRef(0);
   const startupTimeoutRef = useRef(null);
+  const resizeHandlingActiveRef = useRef(false); // Track resize handling state
 
   // Position state - only used for desktop
   const [position, setPosition] = useState(() => {
@@ -87,7 +88,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     );
   });
 
-  // Monitor startup and shutdown sequence completion (CLEANED UP)
+  // Monitor startup and shutdown sequence completion
   useEffect(() => {
     let isMonitoring = true;
     let lastLogTime = 0;
@@ -437,6 +438,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     [startupComplete]
   );
 
+  // Custom position getter for resize handling (desktop only)
+  const getCustomPosition = useCallback(() => {
+    if (isMobile) return null;
+    return position;
+  }, [position]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -478,6 +485,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       window.clippy = instance;
     },
     getClippyInstance: () => clippyInstanceRef.current,
+    getCustomPosition, // Expose for resize handling
     isMobile,
   };
 
@@ -494,6 +502,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             position={position}
             clippyInstanceRef={clippyInstanceRef}
             overlayRef={overlayRef}
+            getCustomPosition={getCustomPosition}
+            resizeHandlingActiveRef={resizeHandlingActiveRef}
           />
         )}
 
@@ -524,13 +534,15 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   );
 };
 
-// Startup-aware controller with additional startup checks
+// Startup-aware controller with resize handling integration
 const StartupAwareClippyController = ({
   visible,
   isScreenPoweredOn,
   position,
   clippyInstanceRef,
   overlayRef,
+  getCustomPosition,
+  resizeHandlingActiveRef,
 }) => {
   const { clippy } = useClippy();
   const rafRef = useRef(null);
@@ -721,6 +733,25 @@ const StartupAwareClippyController = ({
             );
           }
 
+          // ===== NEW: START RESIZE HANDLING =====
+          if (!resizeHandlingActiveRef.current && clippyEl) {
+            const resizeStarted = safeExecute(
+              () =>
+                ClippyPositioning?.startResizeHandling(
+                  clippyEl,
+                  overlayRef.current,
+                  getCustomPosition
+                ),
+              false,
+              "resize handling startup"
+            );
+
+            if (resizeStarted) {
+              resizeHandlingActiveRef.current = true;
+              console.log("✅ Clippy resize handling activated");
+            }
+          }
+
           return positionSuccess && syncSuccess;
         },
         false,
@@ -770,6 +801,14 @@ const StartupAwareClippyController = ({
 
       safeExecute(
         () => {
+          // ===== NEW: STOP RESIZE HANDLING =====
+          const clippyEl = document.querySelector(".clippy");
+          if (resizeHandlingActiveRef.current && clippyEl) {
+            ClippyPositioning?.stopResizeHandling(clippyEl);
+            resizeHandlingActiveRef.current = false;
+            console.log("🔄 Clippy resize handling deactivated");
+          }
+
           if (rafRef.current) {
             cancelAnimationFrame(rafRef.current);
           }
@@ -785,7 +824,15 @@ const StartupAwareClippyController = ({
         "controller cleanup"
       );
     };
-  }, [clippy, visible, isScreenPoweredOn, position, updateInterval]);
+  }, [
+    clippy,
+    visible,
+    isScreenPoweredOn,
+    position,
+    updateInterval,
+    getCustomPosition,
+    resizeHandlingActiveRef,
+  ]);
 
   return null;
 };
