@@ -1,4 +1,4 @@
-// ClippyPositioning.js - Centralized positioning logic with REAL-TIME resize handling
+// ClippyPositioning.js - Centralized positioning logic with ZOOM-AWARE anchor positioning
 // This is the SINGLE source of truth for all Clippy positioning
 
 // Device detection
@@ -68,8 +68,8 @@ const CLIPPY_POSITIONS = {
   },
 };
 
-// ===== REAL-TIME RESIZE HANDLING SYSTEM =====
-class RealTimeResizeHandler {
+// ===== ZOOM-AWARE REAL-TIME RESIZE HANDLING SYSTEM =====
+class ZoomAwareResizeHandler {
   constructor() {
     this.listeners = new Set();
     this.isListening = false;
@@ -82,9 +82,9 @@ class RealTimeResizeHandler {
     this.iosViewportHeight = window.innerHeight;
     this.iosViewportChangeTimeout = null;
 
-    // Cache initial desktop viewport and Clippy's anchored position
-    this.initialDesktopRect = null;
-    this.clippyAnchorOffset = null; // Stores Clippy's fixed offset from desktop
+    // ZOOM-AWARE ANCHOR CACHING: Store anchor per zoom level
+    this.zoomLevelAnchors = new Map(); // Maps zoom level to anchor data
+    this.currentZoomLevel = 0; // Track current zoom level
     this.isResizing = false; // Track active resize state
 
     this.handleResizeImmediate = this.handleResizeImmediate.bind(this);
@@ -102,14 +102,23 @@ class RealTimeResizeHandler {
     this.listeners.delete(callback);
     if (this.listeners.size === 0) {
       this.stopListening();
-      // Clear cached data when no more listeners
-      this.clippyAnchorOffset = null;
-      this.initialDesktopRect = null;
+      // Clear ALL cached data when no more listeners
+      this.zoomLevelAnchors.clear();
+      this.currentZoomLevel = 0;
     }
   }
 
-  cacheClippyAnchorPosition(clippyElement) {
-    if (this.clippyAnchorOffset || !clippyElement) return; // Already cached or no element
+  // ZOOM-AWARE: Cache anchor position with size-aware boundary constraints
+  cacheClippyAnchorPosition(clippyElement, zoomLevel = null) {
+    if (!clippyElement) return false;
+
+    // Get current zoom level if not provided
+    const currentZoom =
+      zoomLevel !== null ? zoomLevel : this.getCurrentZoomLevel();
+
+    console.log(
+      `⚓ Caching size-aware anchor position for zoom level ${currentZoom}`
+    );
 
     const desktop =
       document.querySelector(".desktop.screen") ||
@@ -118,44 +127,98 @@ class RealTimeResizeHandler {
 
     if (!desktop) {
       console.warn("⚠️ Cannot cache Clippy anchor - desktop not found");
-      return;
+      return false;
     }
 
     const desktopRect = desktop.getBoundingClientRect();
-    const clippyRect = clippyElement.getBoundingClientRect();
 
-    // Calculate Clippy's current offset from desktop edges
-    this.clippyAnchorOffset = {
-      // Distance from desktop edges (as percentages for scaling)
+    // Calculate expected Clippy dimensions for this zoom level
+    const baseClippyWidth = 124; // Base Clippy width
+    const baseClippyHeight = 93; // Base Clippy height
+    const zoomFactor = this.getZoomFactorForLevel(currentZoom);
+    const scaledClippyWidth = baseClippyWidth * 0.9 * zoomFactor; // Apply desktop scale + zoom
+    const scaledClippyHeight = baseClippyHeight * 0.9 * zoomFactor;
+
+    // SIZE-AWARE BOUNDARY CONSTRAINTS: Calculate safe positioning
+    const safeMargin = 10; // Pixels from edge
+    const maxRight = desktopRect.width - scaledClippyWidth - safeMargin;
+    const maxBottom = desktopRect.height - scaledClippyHeight - safeMargin;
+
+    // Position Clippy in bottom-right, but adjust inward based on its scaled size
+    const targetRightOffset = 15; // Desired distance from right edge
+    const targetBottomOffset = 15; // Desired distance from bottom edge
+
+    // Calculate safe position that keeps Clippy fully within bounds
+    const safeRightOffset = Math.min(targetRightOffset, maxRight);
+    const safeBottomOffset = Math.min(targetBottomOffset, maxBottom);
+
+    const safeLeft = desktopRect.width - scaledClippyWidth - safeRightOffset;
+    const safeTop = desktopRect.height - scaledClippyHeight - safeBottomOffset;
+
+    // Calculate anchor data based on safe positioning
+    const zoomAnchorData = {
+      zoomLevel: currentZoom,
+      timestamp: Date.now(),
+      zoomFactor: zoomFactor,
+
+      // Store the safe positioning as percentages for scaling
       fromDesktopRightPercent:
-        (desktopRect.right - clippyRect.right) / desktopRect.width,
+        (desktopRect.width - safeLeft - scaledClippyWidth) / desktopRect.width,
       fromDesktopBottomPercent:
-        (desktopRect.bottom - clippyRect.bottom) / desktopRect.height,
-      fromDesktopLeftPercent:
-        (clippyRect.left - desktopRect.left) / desktopRect.width,
-      fromDesktopTopPercent:
-        (clippyRect.top - desktopRect.top) / desktopRect.height,
+        (desktopRect.height - safeTop - scaledClippyHeight) /
+        desktopRect.height,
+      fromDesktopLeftPercent: safeLeft / desktopRect.width,
+      fromDesktopTopPercent: safeTop / desktopRect.height,
 
-      // Also store original pixel values for reference
-      fromDesktopRight: desktopRect.right - clippyRect.right,
-      fromDesktopBottom: desktopRect.bottom - clippyRect.bottom,
-      fromDesktopLeft: clippyRect.left - desktopRect.left,
-      fromDesktopTop: clippyRect.top - desktopRect.top,
+      // Store safe pixel values
+      safeLeft: safeLeft,
+      safeTop: safeTop,
+      safeRightOffset: safeRightOffset,
+      safeBottomOffset: safeBottomOffset,
 
-      // Store original dimensions for reference
-      clippyWidth: clippyRect.width,
-      clippyHeight: clippyRect.height,
+      // Store expected dimensions for this zoom level
+      expectedWidth: scaledClippyWidth,
+      expectedHeight: scaledClippyHeight,
 
-      // Cache the desktop rect for reference
-      originalDesktopRect: { ...desktopRect },
+      // Cache the desktop rect for this zoom level
+      desktopRect: { ...desktopRect },
     };
 
-    console.log("⚓ Clippy anchor position cached:", this.clippyAnchorOffset);
+    // Store anchor data for this specific zoom level
+    this.zoomLevelAnchors.set(currentZoom, zoomAnchorData);
+    this.currentZoomLevel = currentZoom;
+
+    console.log(`⚓ Cached size-aware anchor for zoom ${currentZoom}:`, {
+      zoomFactor,
+      expectedSize: `${scaledClippyWidth.toFixed(
+        1
+      )}x${scaledClippyHeight.toFixed(1)}`,
+      safePosition: `(${safeLeft.toFixed(1)}, ${safeTop.toFixed(1)})`,
+      offsets: `right: ${safeRightOffset}px, bottom: ${safeBottomOffset}px`,
+    });
+    return true;
   }
 
-  getAnchoredPosition() {
-    if (!this.clippyAnchorOffset) {
-      console.warn("⚠️ Clippy anchor offset not cached");
+  // Helper method to get zoom factor for a specific level
+  getZoomFactorForLevel(zoomLevel) {
+    switch (zoomLevel) {
+      case 1:
+        return 1.1; // 110%
+      case 2:
+        return 1.25; // 125%
+      default:
+        return 1.0; // 100%
+    }
+  }
+
+  // ZOOM-AWARE: Get size-aware anchor position for current zoom level
+  getAnchoredPosition(zoomLevel = null) {
+    const currentZoom =
+      zoomLevel !== null ? zoomLevel : this.getCurrentZoomLevel();
+    const anchorData = this.zoomLevelAnchors.get(currentZoom);
+
+    if (!anchorData) {
+      console.warn(`⚠️ No anchor data cached for zoom level ${currentZoom}`);
       return null;
     }
 
@@ -171,21 +234,129 @@ class RealTimeResizeHandler {
 
     const currentDesktopRect = desktop.getBoundingClientRect();
 
-    // Use percentage-based positioning for better scaling during resize
+    // SIZE-AWARE: Calculate position using expected dimensions and safe margins
+    const zoomFactor = this.getZoomFactorForLevel(currentZoom);
+    const baseClippyWidth = 124;
+    const baseClippyHeight = 93;
+    const currentScaledWidth = baseClippyWidth * 0.9 * zoomFactor;
+    const currentScaledHeight = baseClippyHeight * 0.9 * zoomFactor;
+
+    // Calculate safe position that keeps Clippy within bounds
+    const safeMargin = 10;
+    const targetRightOffset = 15;
+    const targetBottomOffset = 15;
+
+    const maxRight = currentDesktopRect.width - currentScaledWidth - safeMargin;
+    const maxBottom =
+      currentDesktopRect.height - currentScaledHeight - safeMargin;
+
+    const safeRightOffset = Math.min(targetRightOffset, maxRight);
+    const safeBottomOffset = Math.min(targetBottomOffset, maxBottom);
+
     const anchoredPosition = {
       left:
-        currentDesktopRect.right -
-        this.clippyAnchorOffset.fromDesktopRightPercent *
-          currentDesktopRect.width -
-        this.clippyAnchorOffset.clippyWidth,
+        currentDesktopRect.left +
+        currentDesktopRect.width -
+        currentScaledWidth -
+        safeRightOffset,
       top:
-        currentDesktopRect.bottom -
-        this.clippyAnchorOffset.fromDesktopBottomPercent *
-          currentDesktopRect.height -
-        this.clippyAnchorOffset.clippyHeight,
+        currentDesktopRect.top +
+        currentDesktopRect.height -
+        currentScaledHeight -
+        safeBottomOffset,
+      zoomLevel: currentZoom,
+      appliedWidth: currentScaledWidth,
+      appliedHeight: currentScaledHeight,
     };
 
     return anchoredPosition;
+  }
+
+  // ZOOM-AWARE: Clear cached anchor for specific zoom level or all
+  clearZoomAnchor(zoomLevel = null) {
+    if (zoomLevel !== null) {
+      this.zoomLevelAnchors.delete(zoomLevel);
+      console.log(`🗑️ Cleared anchor cache for zoom level ${zoomLevel}`);
+    } else {
+      this.zoomLevelAnchors.clear();
+      console.log("🗑️ Cleared all zoom level anchor caches");
+    }
+  }
+
+  // ZOOM-AWARE: Handle zoom level changes with immediate positioning
+  handleZoomChange(newZoomLevel, clippyElement) {
+    const oldZoomLevel = this.currentZoomLevel;
+
+    if (oldZoomLevel !== newZoomLevel) {
+      console.log(`📏 Zoom level changed: ${oldZoomLevel} → ${newZoomLevel}`);
+
+      // Update current zoom level immediately
+      this.currentZoomLevel = newZoomLevel;
+
+      // Clear any existing anchor for the new zoom level to force fresh calculation
+      this.clearZoomAnchor(newZoomLevel);
+
+      // If we have a clippyElement, immediately calculate and apply new positioning
+      if (clippyElement) {
+        // IMMEDIATE POSITIONING: Calculate size-aware position for new zoom level
+        const newAnchorSuccess = this.cacheClippyAnchorPosition(
+          clippyElement,
+          newZoomLevel
+        );
+
+        if (newAnchorSuccess) {
+          // Apply the new position immediately
+          this.notifyListeners("zoom-change-immediate", {
+            oldZoomLevel,
+            newZoomLevel,
+            type: "zoom-change-immediate",
+            requiresImmedateUpdate: true,
+          });
+        }
+      }
+
+      // Also notify with regular zoom change event
+      this.notifyListeners("zoom-change", {
+        oldZoomLevel,
+        newZoomLevel,
+        type: "zoom-change",
+      });
+    }
+  }
+
+  // Get current zoom level from various sources
+  getCurrentZoomLevel() {
+    try {
+      // Method 1: Check data attribute on body (set by MonitorView)
+      const dataZoom = parseInt(document.body.getAttribute("data-zoom")) || 0;
+      if (dataZoom >= 0) {
+        return dataZoom;
+      }
+
+      // Method 2: Check monitor container for zoom classes
+      const monitorContainer = document.querySelector(".monitor-container");
+      if (monitorContainer?.classList.contains("zoomed")) {
+        // Try to extract zoom from transform
+        const transform = window.getComputedStyle(monitorContainer).transform;
+        if (transform && transform !== "none") {
+          const matrixMatch = transform.match(/matrix\(([^)]+)\)/);
+          if (matrixMatch) {
+            const values = matrixMatch[1].split(",");
+            const factor = parseFloat(values[0]) || 1.0;
+
+            // Convert factor back to zoom level
+            if (Math.abs(factor - 1.25) < 0.01) return 2;
+            if (Math.abs(factor - 1.1) < 0.01) return 1;
+            return 0;
+          }
+        }
+      }
+
+      return 0; // Default zoom level
+    } catch (error) {
+      console.warn("Error getting current zoom level:", error);
+      return 0;
+    }
   }
 
   startListening() {
@@ -258,12 +429,12 @@ class RealTimeResizeHandler {
       clearTimeout(this.iosViewportChangeTimeout);
     }
 
-    // Clear cached data
-    this.clippyAnchorOffset = null;
-    this.initialDesktopRect = null;
+    // Clear ALL cached data
+    this.zoomLevelAnchors.clear();
+    this.currentZoomLevel = 0;
   }
 
-  // NEW: Real-time monitoring using requestAnimationFrame
+  // Real-time monitoring using requestAnimationFrame
   startRealTimeMonitoring() {
     this.checkForResize();
   }
@@ -276,7 +447,7 @@ class RealTimeResizeHandler {
     this.isResizing = false;
   }
 
-  // NEW: Check for size changes every frame during resize
+  // Check for size changes every frame during resize
   checkForResize() {
     if (!this.isListening) return;
 
@@ -374,8 +545,8 @@ class RealTimeResizeHandler {
   }
 }
 
-// Global resize handler instance
-const resizeHandler = new RealTimeResizeHandler();
+// Global zoom-aware resize handler instance
+const resizeHandler = new ZoomAwareResizeHandler();
 
 // ===== POSITIONING CALCULATOR =====
 class ClippyPositioning {
@@ -602,24 +773,53 @@ class ClippyPositioning {
     }
   }
 
-  // Apply anchored positioning to Clippy element - NOW WITH REAL-TIME UPDATES
+  // ZOOM-AWARE: Apply anchored positioning with size-aware boundary constraints
   static applyAnchoredPosition(clippyElement) {
     if (!clippyElement) return false;
 
-    const anchoredPos = resizeHandler.getAnchoredPosition();
+    const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
+    const anchoredPos = resizeHandler.getAnchoredPosition(currentZoomLevel);
+
     if (!anchoredPos) {
-      console.warn("⚠️ Cannot apply anchored position - not cached");
+      console.warn(
+        `⚠️ Cannot apply anchored position - no anchor cached for zoom ${currentZoomLevel}`
+      );
+      // If no anchor exists, create one immediately based on current size
+      const anchorCreated = resizeHandler.cacheClippyAnchorPosition(
+        clippyElement,
+        currentZoomLevel
+      );
+      if (anchorCreated) {
+        const newAnchoredPos =
+          resizeHandler.getAnchoredPosition(currentZoomLevel);
+        if (newAnchoredPos) {
+          return this.applyCalculatedPosition(
+            clippyElement,
+            newAnchoredPos,
+            currentZoomLevel
+          );
+        }
+      }
       return false;
     }
 
+    return this.applyCalculatedPosition(
+      clippyElement,
+      anchoredPos,
+      currentZoomLevel
+    );
+  }
+
+  // Helper method to apply calculated position with proper scaling
+  static applyCalculatedPosition(clippyElement, positionData, zoomLevel) {
     // Get current monitor zoom factor
     const zoomFactor = this.getMonitorZoomFactor();
     const adjustedScale = 0.9 * zoomFactor; // Base desktop scale * zoom factor
 
     const anchoredStyles = {
       position: "fixed",
-      left: `${anchoredPos.left}px`,
-      top: `${anchoredPos.top}px`,
+      left: `${positionData.left}px`,
+      top: `${positionData.top}px`,
       right: "auto",
       bottom: "auto",
       transform: `translateZ(0) scale(${adjustedScale})`, // Scaled with monitor zoom
@@ -630,8 +830,23 @@ class ClippyPositioning {
     const success = this.applyStyles(clippyElement, anchoredStyles);
 
     if (success) {
-      // Add class to indicate Clippy is properly anchored
+      // Add class to indicate Clippy is properly anchored for this zoom level
       clippyElement.classList.add("clippy-anchored");
+      clippyElement.setAttribute("data-zoom-anchored", zoomLevel.toString());
+      console.log(
+        `⚓ Applied size-aware anchored position for zoom level ${zoomLevel}`,
+        {
+          position: `(${positionData.left.toFixed(
+            1
+          )}, ${positionData.top.toFixed(1)})`,
+          scale: adjustedScale,
+          expectedSize: positionData.appliedWidth
+            ? `${positionData.appliedWidth.toFixed(
+                1
+              )}x${positionData.appliedHeight.toFixed(1)}`
+            : "calculated",
+        }
+      );
     }
 
     return success;
@@ -643,7 +858,7 @@ class ClippyPositioning {
       // Method 1: Check data attribute on body (set by MonitorView)
       const dataZoom = parseInt(document.body.getAttribute("data-zoom")) || 0;
 
-      if (dataZoom > 0) {
+      if (dataZoom >= 0) {
         let factor;
         switch (dataZoom) {
           case 1:
@@ -688,12 +903,14 @@ class ClippyPositioning {
     }
   }
 
-  // Main positioning function - call this to position Clippy
+  // ZOOM-AWARE: Main positioning function
   static positionClippy(clippyElement, customPosition = null) {
     if (!clippyElement) return false;
 
-    // On desktop, try to use anchored positioning if available
-    if (!isMobile && resizeHandler.clippyAnchorOffset) {
+    const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
+
+    // On desktop, try to use zoom-aware anchored positioning if available
+    if (!isMobile && resizeHandler.zoomLevelAnchors.has(currentZoomLevel)) {
       return this.applyAnchoredPosition(clippyElement);
     }
 
@@ -717,7 +934,7 @@ class ClippyPositioning {
     return this.applyStyles(overlayElement, position);
   }
 
-  // Combined positioning function to ensure synchronization
+  // ZOOM-AWARE: Combined positioning function with zoom handling
   static positionClippyAndOverlay(
     clippyElement,
     overlayElement,
@@ -725,14 +942,23 @@ class ClippyPositioning {
   ) {
     if (!clippyElement) return false;
 
-    // Position Clippy first (using anchored positioning if available)
+    const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
+
+    // Position Clippy first (using zoom-aware anchored positioning if available)
     const clippySuccess = this.positionClippy(clippyElement, customPosition);
 
-    // Cache anchor position after first positioning (desktop only)
-    if (!isMobile && !resizeHandler.clippyAnchorOffset && clippySuccess) {
-      // Wait a frame for positioning to take effect, then cache
+    // ZOOM-AWARE: Cache anchor position for the current zoom level if not already cached
+    if (
+      !isMobile &&
+      !resizeHandler.zoomLevelAnchors.has(currentZoomLevel) &&
+      clippySuccess
+    ) {
+      // Wait a frame for positioning to take effect, then cache for this zoom level
       requestAnimationFrame(() => {
-        resizeHandler.cacheClippyAnchorPosition(clippyElement);
+        resizeHandler.cacheClippyAnchorPosition(
+          clippyElement,
+          currentZoomLevel
+        );
       });
     }
 
@@ -755,14 +981,13 @@ class ClippyPositioning {
     };
   }
 
-  // ===== UPDATED RESIZE HANDLING METHODS =====
+  // ===== ZOOM-AWARE RESIZE HANDLING METHODS =====
 
   /**
-   * Start listening for resize events with REAL-TIME updates
-   * Clippy will stay locked to its exact position relative to the desktop viewport
+   * ZOOM-AWARE: Start listening for resize events with zoom awareness
    * @param {HTMLElement} clippyElement - The Clippy DOM element
    * @param {HTMLElement} overlayElement - The overlay DOM element
-   * @param {Function} customPositionGetter - Optional function to get custom position (ignored after anchoring)
+   * @param {Function} customPositionGetter - Optional function to get custom position
    */
   static startResizeHandling(
     clippyElement,
@@ -776,6 +1001,61 @@ class ClippyPositioning {
 
     const resizeCallback = (eventType, data) => {
       try {
+        // Handle immediate zoom changes - apply positioning right away
+        if (eventType === "zoom-change-immediate") {
+          console.log(
+            `📏 Handling immediate zoom change: ${data.oldZoomLevel} → ${data.newZoomLevel}`
+          );
+
+          // Apply new positioning immediately without waiting
+          if (isMobile) {
+            const customPosition = customPositionGetter
+              ? customPositionGetter()
+              : null;
+            this.positionClippyAndOverlay(
+              clippyElement,
+              overlayElement,
+              customPosition
+            );
+          } else {
+            // Desktop: Apply fresh size-aware positioning immediately
+            const positioned = this.applyAnchoredPosition(clippyElement);
+            if (positioned && overlayElement) {
+              this.positionOverlay(overlayElement, clippyElement);
+            }
+          }
+          return;
+        }
+
+        // Handle regular zoom changes - for any cleanup or secondary effects
+        if (eventType === "zoom-change") {
+          console.log(
+            `📏 Handling zoom change: ${data.oldZoomLevel} → ${data.newZoomLevel}`
+          );
+
+          // Small delay to ensure any DOM changes are complete
+          setTimeout(() => {
+            if (isMobile) {
+              const customPosition = customPositionGetter
+                ? customPositionGetter()
+                : null;
+              this.positionClippyAndOverlay(
+                clippyElement,
+                overlayElement,
+                customPosition
+              );
+            } else {
+              // Desktop: Ensure positioning is correct
+              this.positionClippyAndOverlay(
+                clippyElement,
+                overlayElement,
+                null
+              );
+            }
+          }, 50);
+          return;
+        }
+
         // Handle real-time resize events for smooth visual updates
         if (eventType === "realtime-resize" || eventType === "resize-start") {
           if (isMobile) {
@@ -789,15 +1069,16 @@ class ClippyPositioning {
               customPosition
             );
           } else {
-            // Desktop: use anchored positioning to maintain exact position
-            if (resizeHandler.clippyAnchorOffset) {
-              // Real-time anchored positioning during resize
+            // Desktop: use zoom-aware anchored positioning to maintain exact position
+            const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
+            if (resizeHandler.zoomLevelAnchors.has(currentZoomLevel)) {
+              // Real-time zoom-aware anchored positioning during resize
               this.applyAnchoredPosition(clippyElement);
               if (overlayElement) {
                 this.positionOverlay(overlayElement, clippyElement);
               }
             } else {
-              // No anchor yet, use normal positioning (this will establish the anchor)
+              // No anchor for current zoom level, use normal positioning
               this.positionClippyAndOverlay(
                 clippyElement,
                 overlayElement,
@@ -818,13 +1099,18 @@ class ClippyPositioning {
             detail: {
               eventType,
               data,
-              anchored: !isMobile && !!resizeHandler.clippyAnchorOffset,
+              anchored:
+                !isMobile &&
+                resizeHandler.zoomLevelAnchors.has(
+                  resizeHandler.getCurrentZoomLevel()
+                ),
+              zoomLevel: resizeHandler.getCurrentZoomLevel(),
               zoomFactor: this.getMonitorZoomFactor(),
             },
           })
         );
       } catch (error) {
-        console.error("Error during real-time repositioning:", error);
+        console.error("Error during zoom-aware repositioning:", error);
       }
     };
 
@@ -833,7 +1119,7 @@ class ClippyPositioning {
 
     resizeHandler.addListener(resizeCallback);
 
-    const mode = isMobile ? "responsive mobile" : "desktop real-time anchored";
+    const mode = isMobile ? "responsive mobile" : "desktop zoom-aware anchored";
     console.log(`⚓ Clippy resize handling started in ${mode} mode`);
     return true;
   }
@@ -846,10 +1132,59 @@ class ClippyPositioning {
     if (clippyElement && clippyElement._resizeCallback) {
       resizeHandler.removeListener(clippyElement._resizeCallback);
       delete clippyElement._resizeCallback;
-      console.log("⚓ Clippy resize handling stopped");
+      console.log("⚓ Clippy zoom-aware resize handling stopped");
       return true;
     }
     return false;
+  }
+
+  /**
+   * ZOOM-AWARE: Handle zoom level changes
+   * @param {number} newZoomLevel - The new zoom level (0, 1, or 2)
+   * @param {HTMLElement} clippyElement - The Clippy DOM element
+   */
+  static handleZoomChange(newZoomLevel, clippyElement) {
+    console.log(
+      `📏 ClippyPositioning.handleZoomChange called: zoom → ${newZoomLevel}`
+    );
+
+    // Delegate to the resize handler's zoom change logic
+    resizeHandler.handleZoomChange(newZoomLevel, clippyElement);
+  }
+
+  /**
+   * ZOOM-AWARE: Clear cached anchors for specific or all zoom levels
+   * @param {number|null} zoomLevel - Specific zoom level to clear, or null for all
+   */
+  static clearZoomAnchor(zoomLevel = null) {
+    resizeHandler.clearZoomAnchor(zoomLevel);
+  }
+
+  /**
+   * ZOOM-AWARE: Get current zoom level
+   * @returns {number} Current zoom level (0, 1, or 2)
+   */
+  static getCurrentZoomLevel() {
+    return resizeHandler.getCurrentZoomLevel();
+  }
+
+  /**
+   * ZOOM-AWARE: Force refresh of anchor for current zoom level
+   * @param {HTMLElement} clippyElement - The Clippy DOM element
+   */
+  static refreshZoomAnchor(clippyElement) {
+    if (!clippyElement) return false;
+
+    const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
+
+    // Clear existing anchor for current zoom
+    resizeHandler.clearZoomAnchor(currentZoomLevel);
+
+    // Cache fresh anchor for current zoom
+    return resizeHandler.cacheClippyAnchorPosition(
+      clippyElement,
+      currentZoomLevel
+    );
   }
 
   /**
@@ -860,15 +1195,42 @@ class ClippyPositioning {
   }
 
   /**
-   * Manually trigger repositioning (useful for zoom changes)
+   * ZOOM-AWARE: Manually trigger repositioning with zoom consideration
    */
   static triggerRepositioning() {
+    const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
+
     resizeHandler.notifyListeners("manual-reposition", {
       width: window.innerWidth,
       height: window.innerHeight,
       type: "manual-reposition",
       reason: "zoom-change",
+      zoomLevel: currentZoomLevel,
     });
+  }
+
+  /**
+   * ZOOM-AWARE: Get debug information about zoom and anchoring
+   */
+  static getZoomDebugInfo() {
+    const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
+    const zoomFactor = this.getMonitorZoomFactor();
+    const hasAnchor = resizeHandler.zoomLevelAnchors.has(currentZoomLevel);
+    const anchorData = resizeHandler.zoomLevelAnchors.get(currentZoomLevel);
+
+    return {
+      currentZoomLevel,
+      zoomFactor,
+      hasAnchor,
+      cachedZoomLevels: Array.from(resizeHandler.zoomLevelAnchors.keys()),
+      anchorData: anchorData
+        ? {
+            timestamp: anchorData.timestamp,
+            fromDesktopRightPercent: anchorData.fromDesktopRightPercent,
+            fromDesktopBottomPercent: anchorData.fromDesktopBottomPercent,
+          }
+        : null,
+    };
   }
 
   /**
@@ -888,6 +1250,7 @@ class ClippyPositioning {
             scale: window.visualViewport.scale,
           }
         : null,
+      zoom: this.getZoomDebugInfo(),
     };
   }
 

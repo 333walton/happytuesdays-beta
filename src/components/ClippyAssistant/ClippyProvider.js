@@ -76,6 +76,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   const startupTimeoutRef = useRef(null);
   const resizeHandlingActiveRef = useRef(false); // Track resize handling state
 
+  // ZOOM-AWARE: Track current zoom level for change detection
+  const currentZoomLevelRef = useRef(0);
+
   // Position state - only used for desktop
   const [position, setPosition] = useState(() => {
     if (isMobile) {
@@ -184,6 +187,55 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       }
     };
   }, [startupComplete]);
+
+  // ZOOM-AWARE: Monitor for zoom level changes
+  useEffect(() => {
+    if (isMobile || !mountedRef.current) return;
+
+    const checkZoomChange = () => {
+      const currentZoomLevel = ClippyPositioning.getCurrentZoomLevel();
+
+      if (currentZoomLevel !== currentZoomLevelRef.current) {
+        const oldZoomLevel = currentZoomLevelRef.current;
+        currentZoomLevelRef.current = currentZoomLevel;
+
+        console.log(
+          `📏 ClippyProvider detected zoom change: ${oldZoomLevel} → ${currentZoomLevel}`
+        );
+
+        // Get the Clippy element and handle zoom change
+        const clippyElement = document.querySelector(".clippy");
+        if (clippyElement && ClippyPositioning.handleZoomChange) {
+          ClippyPositioning.handleZoomChange(currentZoomLevel, clippyElement);
+        }
+      }
+    };
+
+    // Check for zoom changes periodically
+    const zoomCheckInterval = setInterval(checkZoomChange, 500);
+
+    // Also listen for data-zoom attribute changes on body
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "data-zoom"
+        ) {
+          checkZoomChange();
+        }
+      });
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["data-zoom"],
+    });
+
+    return () => {
+      clearInterval(zoomCheckInterval);
+      observer.disconnect();
+    };
+  }, []);
 
   // Error rate limiting
   const isErrorRateLimited = useCallback(() => {
@@ -534,7 +586,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   );
 };
 
-// Startup-aware controller with resize handling integration
+// ZOOM-AWARE: Startup-aware controller with zoom-aware resize handling integration
 const StartupAwareClippyController = ({
   visible,
   isScreenPoweredOn,
@@ -733,7 +785,7 @@ const StartupAwareClippyController = ({
             );
           }
 
-          // ===== NEW: START RESIZE HANDLING =====
+          // ===== ZOOM-AWARE: START RESIZE HANDLING =====
           if (!resizeHandlingActiveRef.current && clippyEl) {
             const resizeStarted = safeExecute(
               () =>
@@ -743,12 +795,12 @@ const StartupAwareClippyController = ({
                   getCustomPosition
                 ),
               false,
-              "resize handling startup"
+              "zoom-aware resize handling startup"
             );
 
             if (resizeStarted) {
               resizeHandlingActiveRef.current = true;
-              console.log("✅ Clippy resize handling activated");
+              console.log("✅ Clippy zoom-aware resize handling activated");
             }
           }
 
@@ -801,12 +853,12 @@ const StartupAwareClippyController = ({
 
       safeExecute(
         () => {
-          // ===== NEW: STOP RESIZE HANDLING =====
+          // ===== ZOOM-AWARE: STOP RESIZE HANDLING =====
           const clippyEl = document.querySelector(".clippy");
           if (resizeHandlingActiveRef.current && clippyEl) {
             ClippyPositioning?.stopResizeHandling(clippyEl);
             resizeHandlingActiveRef.current = false;
-            console.log("🔄 Clippy resize handling deactivated");
+            console.log("🔄 Clippy zoom-aware resize handling deactivated");
           }
 
           if (rafRef.current) {

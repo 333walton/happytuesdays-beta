@@ -1,12 +1,12 @@
 /**
- * ClippyAssistant Console Test Runner
- * Updated for centralized ClippyPositioning system
+ * ClippyAssistant Console Test Runner - Real-time Resize Testing
+ * Updated for real-time resize handling validation
  * Run this by copying and pasting into browser console
  */
 
-(function runClippyPerformanceTest() {
+(function runClippyRealTimeResizeTest() {
   console.log(
-    "%c=== Clippy Performance Test (ClippyPositioning System) ===",
+    "%c=== Clippy Real-time Resize Performance Test ===",
     "font-weight: bold; font-size: 14px; color: #4a86e8;"
   );
 
@@ -22,7 +22,7 @@
   testNotification.style.zIndex = "9999";
   testNotification.style.fontFamily = "Arial, sans-serif";
   testNotification.style.fontSize = "14px";
-  testNotification.textContent = "Running Clippy ClippyPositioning Test...";
+  testNotification.textContent = "Running Real-time Resize Test...";
   document.body.appendChild(testNotification);
 
   // Memory test
@@ -32,7 +32,7 @@
   // Check if ClippyPositioning is available
   if (!window.ClippyPositioning) {
     console.error(
-      "❌ ClippyPositioning not available. Make sure you're running this on a page with the centralized positioning system."
+      "❌ ClippyPositioning not available. Make sure you're running this on a page with the real-time positioning system."
     );
     testNotification.textContent =
       "Performance Test Failed - ClippyPositioning not available";
@@ -56,236 +56,114 @@
   const clippyEl = document.querySelector(".clippy");
   const overlayEl = document.getElementById("clippy-clickable-overlay");
 
-  // Test centralized positioning system performance
-  console.log("Testing centralized positioning system performance...");
-  const positioningStart = performance.now();
+  if (!clippyEl) {
+    console.error("❌ Clippy element not found - cannot test real-time resize");
+    testNotification.textContent = "Test Failed - Clippy element not found";
+    testNotification.style.background = "rgba(255, 0, 0, 0.7)";
+    setTimeout(() => testNotification.remove(), 5000);
+    return;
+  }
 
-  let mobilePositionSuccess = false;
-  let desktopPositionSuccess = false;
-  let syncSuccess = false;
+  // Test real-time resize handling system
+  console.log("Testing real-time resize handling system...");
+  const resizeTestStart = performance.now();
 
+  let realTimeEventsReceived = 0;
+  let resizeStartReceived = false;
+  let resizeCompleteReceived = false;
+  let anchorCached = false;
+  let positionStable = true;
+
+  // Test anchor caching
   try {
-    // Test mobile positioning
-    const mobilePos = window.ClippyPositioning.calculateMobilePosition();
-    mobilePositionSuccess = !!mobilePos;
-    console.log(
-      "Mobile positioning calculation:",
-      mobilePositionSuccess ? "✅ Success" : "❌ Failed"
-    );
-
-    // Test desktop positioning
-    const desktopPos = window.ClippyPositioning.calculateDesktopPosition();
-    desktopPositionSuccess = !!desktopPos;
-    console.log(
-      "Desktop positioning calculation:",
-      desktopPositionSuccess ? "✅ Success" : "❌ Failed"
-    );
-
-    // Test synchronized positioning
-    if (clippyEl) {
-      syncSuccess = window.ClippyPositioning.positionClippyAndOverlay(
-        clippyEl,
-        overlayEl
-      );
+    const resizeHandler = window.ClippyResizeHandler;
+    if (resizeHandler) {
+      resizeHandler.cacheClippyAnchorPosition(clippyEl);
+      anchorCached = !!resizeHandler.clippyAnchorOffset;
       console.log(
-        "Synchronized positioning:",
-        syncSuccess ? "✅ Success" : "❌ Failed"
+        `Anchor caching: ${anchorCached ? "✅ Success" : "❌ Failed"}`
       );
     }
   } catch (e) {
-    console.error("Error testing positioning system:", e);
+    console.error("Error testing anchor caching:", e);
   }
 
-  const positioningTime = performance.now() - positioningStart;
-  console.log(
-    `Centralized positioning time: ${positioningTime.toFixed(2)}ms ${
-      positioningTime < 50
-        ? "✅ Excellent"
-        : positioningTime < 100
-        ? "✅ Good"
-        : "❌ Slow"
-    }`
-  );
+  // Test real-time positioning during simulated resize
+  console.log("Testing real-time positioning updates...");
 
-  // Animation test with positioning
-  console.log("Testing animation performance with centralized positioning...");
-  const start = performance.now();
-  let animationSuccess = false;
-  let positionDuringAnimSuccess = false;
+  // Store initial position
+  const initialRect = clippyEl.getBoundingClientRect();
+  let positionDriftDetected = false;
+  let maxDrift = 0;
 
-  try {
-    animationSuccess = window.ClippyService.play("Wave");
+  // Listen for real-time resize events
+  const resizeListener = (eventType, data) => {
+    realTimeEventsReceived++;
 
-    // Test positioning during animation
-    if (clippyEl) {
-      positionDuringAnimSuccess =
-        window.ClippyPositioning.positionClippy(clippyEl);
-      console.log(
-        "Animation + positioning:",
-        positionDuringAnimSuccess ? "✅ Success" : "❌ Failed"
-      );
+    if (eventType === "resize-start") {
+      resizeStartReceived = true;
+      console.log("🔄 Resize start event received");
     }
-  } catch (e) {
-    console.error("Error playing animation:", e);
-  }
 
-  // Save animation time for later reference
-  let animationTime = null;
+    if (eventType === "realtime-resize") {
+      // Check if Clippy position drifted during resize
+      const currentRect = clippyEl.getBoundingClientRect();
+      const drift =
+        Math.abs(currentRect.left - initialRect.left) +
+        Math.abs(currentRect.top - initialRect.top);
 
-  // Check how quickly the animation starts
-  requestAnimationFrame(() => {
-    animationTime = performance.now() - start;
-    console.log(
-      `Animation + positioning start time: ${animationTime.toFixed(2)}ms ${
-        animationTime < 100 ? "✅ Good" : "❌ Slow"
-      }`
-    );
-  });
+      if (drift > maxDrift) {
+        maxDrift = drift;
+      }
 
-  // Visibility test
-  let clippyVisible = false;
-  let clippyShown = false;
-  let clippyOpaque = false;
-
-  const clippy = document.querySelector(".clippy");
-  if (clippy) {
-    const style = window.getComputedStyle(clippy);
-    clippyVisible = style.visibility === "visible";
-    clippyShown = style.display !== "none";
-    clippyOpaque = parseFloat(style.opacity) > 0;
-
-    console.log(`Visibility: ${clippyVisible ? "✅ Visible" : "❌ Hidden"}`);
-    console.log(`Display: ${clippyShown ? "✅ Shown" : "❌ Hidden"}`);
-    console.log(`Opacity: ${clippyOpaque ? "✅ Visible" : "❌ Transparent"}`);
-  } else {
-    console.error("❌ Clippy element not found in DOM");
-  }
-
-  // Hardware acceleration test
-  let clippyHasHardwareAcceleration = false;
-  if (clippy) {
-    const style = window.getComputedStyle(clippy);
-    clippyHasHardwareAcceleration =
-      style.transform.includes("translateZ") ||
-      style.transform.includes("translate3d") ||
-      style.willChange.includes("transform");
-
-    console.log(
-      `Hardware acceleration: ${
-        clippyHasHardwareAcceleration ? "✅ Enabled" : "❌ Disabled"
-      }`
-    );
-  }
-
-  // Device detection using centralized system
-  const isMobile = window.ClippyPositioning.isMobile;
-  const actualMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-  const deviceDetectionAccurate = isMobile === actualMobile;
-
-  console.log(
-    `Device detection: ${
-      deviceDetectionAccurate ? "✅ Accurate" : "❌ Inaccurate"
-    } (Detected: ${isMobile}, Actual: ${actualMobile})`
-  );
-
-  // Positioning accuracy test
-  let clippyMobilePositioned = false;
-  let clippyDesktopPositioned = false;
-
-  if (clippy) {
-    const style = window.getComputedStyle(clippy);
-
-    if (isMobile) {
-      clippyMobilePositioned =
-        style.bottom && style.right && style.transform.includes("scale");
-      console.log(
-        `Mobile positioning: ${
-          clippyMobilePositioned ? "✅ Correct" : "❌ Incorrect"
-        }`
-      );
-    } else {
-      clippyDesktopPositioned =
-        style.left && style.top && style.transform.includes("scale");
-      console.log(
-        `Desktop positioning: ${
-          clippyDesktopPositioned ? "✅ Correct" : "❌ Incorrect"
-        }`
-      );
+      if (drift > 5) {
+        // Allow 5px tolerance
+        positionDriftDetected = true;
+      }
     }
-  }
 
-  // Touch target test
-  let isTouchFriendly = false;
-  let positionMatch = false;
-
-  const overlay = document.getElementById("clippy-clickable-overlay");
-  if (overlay) {
-    const rect = overlay.getBoundingClientRect();
-    isTouchFriendly = rect.width >= 44 && rect.height >= 44;
-    console.log(
-      `Touch targets: ${
-        isTouchFriendly ? "✅ Good" : "❌ Too small"
-      } (${rect.width.toFixed(0)}x${rect.height.toFixed(0)}px)`
-    );
-
-    // Test overlay synchronization
-    if (clippy) {
-      const clippyRect = clippy.getBoundingClientRect();
-      positionMatch =
-        Math.abs(rect.left - clippyRect.left) < 5 &&
-        Math.abs(rect.top - clippyRect.top) < 5;
-
-      console.log(
-        `Overlay synchronization: ${
-          positionMatch ? "✅ Synchronized" : "❌ Misaligned"
-        }`
-      );
+    if (eventType === "resize-complete") {
+      resizeCompleteReceived = true;
+      console.log("✅ Resize complete event received");
     }
-  } else {
-    console.error("❌ Clippy overlay not found");
+  };
+
+  // Add our test listener
+  if (window.ClippyResizeHandler) {
+    window.ClippyResizeHandler.addListener(resizeListener);
   }
 
-  // Test balloon positioning
-  let validSpeech = false;
-  let validChat = false;
+  // Simulate window resize events to test real-time handling
+  console.log("Simulating window resize events...");
 
-  if (clippy) {
-    try {
-      const speechPos = window.ClippyPositioning.getBalloonPosition(
-        clippy,
-        "speech"
-      );
-      const chatPos = window.ClippyPositioning.getBalloonPosition(
-        clippy,
-        "chat"
-      );
+  // Trigger multiple resize events in rapid succession
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => {
+      // Simulate resize by dispatching events and manually calling handler
+      window.dispatchEvent(new Event("resize"));
 
-      validSpeech = speechPos && speechPos.left >= 0 && speechPos.top >= 0;
-      validChat = chatPos && chatPos.left >= 0 && chatPos.top >= 0;
-
-      console.log(
-        `Speech balloon positioning: ${validSpeech ? "✅ Valid" : "❌ Invalid"}`
-      );
-      console.log(
-        `Chat balloon positioning: ${validChat ? "✅ Valid" : "❌ Invalid"}`
-      );
-    } catch (e) {
-      console.error("❌ Error testing balloon positioning:", e);
-    }
+      if (window.ClippyResizeHandler) {
+        window.ClippyResizeHandler.handleResizeImmediate();
+      }
+    }, i * 50); // 50ms intervals
   }
 
-  // Positioning system stress test
-  console.log("Testing positioning system stress test...");
+  // Test positioning performance under stress
+  console.log("Testing positioning performance under stress...");
   const stressStart = performance.now();
   let stressTestSuccess = false;
 
   try {
-    for (let i = 0; i < 100; i++) {
-      window.ClippyPositioning.calculateMobilePosition();
-      window.ClippyPositioning.calculateDesktopPosition();
+    // Rapid positioning updates to simulate resize stress
+    for (let i = 0; i < 50; i++) {
+      const success = window.ClippyPositioning.positionClippyAndOverlay(
+        clippyEl,
+        overlayEl
+      );
+      if (!success) {
+        console.warn(`Positioning failed at iteration ${i}`);
+        break;
+      }
     }
     stressTestSuccess = true;
   } catch (e) {
@@ -294,7 +172,7 @@
 
   const stressTime = performance.now() - stressStart;
   console.log(
-    `Stress test (200 calculations): ${stressTime.toFixed(2)}ms ${
+    `Stress test (50 rapid updates): ${stressTime.toFixed(2)}ms ${
       stressTime < 100
         ? "✅ Excellent"
         : stressTime < 200
@@ -303,15 +181,119 @@
     }`
   );
 
-  // Animation stability test
-  console.log("Testing animation stability...");
+  // Test anchored positioning accuracy
+  let anchoredPositionAccurate = false;
+  if (!window.ClippyPositioning.isMobile && anchorCached) {
+    try {
+      const beforePosition = clippyEl.getBoundingClientRect();
 
-  // Check if we can access the Clippy element's animation
-  const clippyMaps = document.querySelectorAll(".clippy .map");
-  console.log(`Animation maps found: ${clippyMaps.length}`);
+      // Apply anchored positioning
+      window.ClippyPositioning.applyAnchoredPosition(clippyEl);
 
-  // Memory usage after tests
+      const afterPosition = clippyEl.getBoundingClientRect();
+      const positionChange =
+        Math.abs(beforePosition.left - afterPosition.left) +
+        Math.abs(beforePosition.top - afterPosition.top);
+
+      // Small position changes are expected due to precision
+      anchoredPositionAccurate = positionChange < 2;
+
+      console.log(
+        `Anchored positioning accuracy: ${
+          anchoredPositionAccurate ? "✅ Accurate" : "❌ Inaccurate"
+        } (${positionChange.toFixed(1)}px change)`
+      );
+    } catch (e) {
+      console.error("Error testing anchored positioning:", e);
+    }
+  }
+
+  // Test CSS class application
+  let cssClassApplied = false;
+  if (clippyEl.classList.contains("clippy-anchored")) {
+    cssClassApplied = true;
+    console.log("CSS anchor class: ✅ Applied");
+  } else {
+    console.log("CSS anchor class: ❌ Not applied");
+  }
+
+  // Test zoom factor detection
+  let zoomFactorDetected = false;
+  try {
+    const zoomFactor = window.ClippyPositioning.getMonitorZoomFactor();
+    zoomFactorDetected = typeof zoomFactor === "number" && zoomFactor > 0;
+    console.log(
+      `Zoom factor detection: ${
+        zoomFactorDetected ? "✅ Working" : "❌ Failed"
+      } (Factor: ${zoomFactor})`
+    );
+  } catch (e) {
+    console.error("Error testing zoom factor detection:", e);
+  }
+
+  // Test real-time monitoring
+  let realTimeMonitoringActive = false;
+  try {
+    const resizeHandler = window.ClippyResizeHandler;
+    if (resizeHandler && resizeHandler.isListening) {
+      realTimeMonitoringActive = true;
+      console.log("Real-time monitoring: ✅ Active");
+    } else {
+      console.log("Real-time monitoring: ❌ Inactive");
+    }
+  } catch (e) {
+    console.error("Error checking real-time monitoring:", e);
+  }
+
+  // Check for performance optimizations in CSS
+  let cssOptimizationsApplied = false;
+  if (clippyEl) {
+    const styles = window.getComputedStyle(clippyEl);
+    const hasHardwareAcceleration =
+      styles.transform.includes("translateZ") ||
+      styles.backfaceVisibility === "hidden" ||
+      styles.willChange.includes("transform");
+
+    const hasNoTransitions =
+      styles.transition === "none" || styles.transition === "none 0s ease 0s";
+
+    cssOptimizationsApplied = hasHardwareAcceleration && hasNoTransitions;
+    console.log(
+      `CSS performance optimizations: ${
+        cssOptimizationsApplied ? "✅ Applied" : "❌ Missing"
+      }`
+    );
+  }
+
+  // Wait for resize events to complete, then analyze results
   setTimeout(() => {
+    console.log("\n--- Real-time Resize Test Results ---");
+
+    console.log(
+      `Real-time events received: ${realTimeEventsReceived} ${
+        realTimeEventsReceived > 0 ? "✅" : "❌"
+      }`
+    );
+
+    console.log(
+      `Resize start events: ${
+        resizeStartReceived ? "✅ Detected" : "❌ Missing"
+      }`
+    );
+
+    console.log(
+      `Position stability during resize: ${
+        !positionDriftDetected ? "✅ Stable" : "❌ Drifting"
+      } (Max drift: ${maxDrift.toFixed(1)}px)`
+    );
+
+    console.log(
+      `Resize complete events: ${
+        resizeCompleteReceived ? "✅ Detected" : "❌ Missing"
+      }`
+    );
+
+    // Memory usage after tests
     const after = performance.memory?.usedJSHeapSize || 0;
     const usage = after - before;
     const usageMB = ((usage || 2000000) / (1024 * 1024)).toFixed(2);
@@ -321,68 +303,43 @@
       `Memory usage: ${usageMB}MB ${memoryGood ? "✅ Good" : "❌ High"}`
     );
 
-    // Feature check for centralized system
-    console.log("\nCentralized system feature verification:");
-    const hasClippyPositioning = !!window.ClippyPositioning;
-    console.log(
-      `- ClippyPositioning available: ${hasClippyPositioning ? "✅" : "❌"}`
-    );
+    // Feature verification for real-time system
+    console.log("\nReal-time system feature verification:");
 
-    const clippyPositioning = window.ClippyPositioning;
-    const positioningMethods = [
-      "calculateMobilePosition",
-      "calculateDesktopPosition",
-      "getClippyPosition",
-      "positionClippy",
-      "positionOverlay",
-      "getBalloonPosition",
-      "positionClippyAndOverlay",
-    ];
+    const features = {
+      "Real-time resize handler": realTimeMonitoringActive,
+      "Anchor position caching": anchorCached,
+      "Anchored positioning accuracy": anchoredPositionAccurate,
+      "CSS performance optimizations": cssOptimizationsApplied,
+      "Zoom factor detection": zoomFactorDetected,
+      "CSS anchor class": cssClassApplied,
+      "Stress test performance": stressTestSuccess && stressTime < 200,
+      "Position stability": !positionDriftDetected,
+    };
 
-    let methodsAvailable = 0;
-    positioningMethods.forEach((method) => {
-      const available = !!(clippyPositioning && clippyPositioning[method]);
-      console.log(`- ${method}: ${available ? "✅" : "❌"}`);
-      if (available) methodsAvailable++;
+    Object.entries(features).forEach(([feature, available]) => {
+      console.log(`- ${feature}: ${available ? "✅" : "❌"}`);
     });
 
-    const clippyServiceInstance = window.ClippyService;
-    const hasSpeak = !!(clippyServiceInstance && clippyServiceInstance.speak);
-    const hasEmergencyReset = !!(
-      clippyServiceInstance && clippyServiceInstance.emergencyReset
-    );
-
-    console.log(`- ClippyService speak: ${hasSpeak ? "✅" : "❌"}`);
-    console.log(
-      `- ClippyService emergencyReset: ${hasEmergencyReset ? "✅" : "❌"}`
-    );
-
-    // Final summary
-    let totalTests = 15; // Core tests
+    // Calculate success rate
+    const totalTests = Object.keys(features).length + 4; // + core functionality tests
     let passedTests = 0;
 
     // Count passing tests
-    if (clippy) passedTests++;
-    if (clippyVisible && clippyShown && clippyOpaque) passedTests++;
-    if (clippyHasHardwareAcceleration) passedTests++;
-    if (isMobile ? clippyMobilePositioned : clippyDesktopPositioned)
-      passedTests++;
-    if (overlay && isTouchFriendly) passedTests++;
-    if (hasClippyPositioning) passedTests++;
-    if (positioningTime < 100) passedTests++;
-    if (stressTestSuccess && stressTime < 200) passedTests++;
-    if (hasSpeak) passedTests++;
-    if (hasEmergencyReset) passedTests++;
-    if (deviceDetectionAccurate) passedTests++;
+    Object.values(features).forEach((passed) => {
+      if (passed) passedTests++;
+    });
+
+    // Add core functionality results
+    if (clippyEl) passedTests++;
+    if (realTimeEventsReceived > 0) passedTests++;
     if (memoryGood) passedTests++;
-    if (mobilePositionSuccess && desktopPositionSuccess) passedTests++;
-    if (validSpeech && validChat) passedTests++;
-    if (positionMatch) passedTests++;
+    if (window.ClippyPositioning && window.ClippyService) passedTests++;
 
     const successRate = Math.round((passedTests / totalTests) * 100);
 
     console.log(
-      `\n%c=== ClippyPositioning Performance Test Summary ===`,
+      `\n%c=== Real-time Resize Performance Test Summary ===`,
       "font-weight: bold; font-size: 14px; color: #4a86e8;"
     );
     console.log(
@@ -390,31 +347,30 @@
     );
 
     console.log(
-      `Centralized positioning: ${
-        hasClippyPositioning ? "✅ Available" : "❌ Missing"
+      `Real-time positioning: ${
+        realTimeMonitoringActive ? "✅ Active" : "❌ Inactive"
       }`
     );
     console.log(
-      `Positioning performance: ${
-        positioningTime < 50
-          ? "✅ Excellent"
-          : positioningTime < 100
-          ? "✅ Good"
-          : "❌ Needs improvement"
+      `Position stability: ${
+        !positionDriftDetected ? "✅ Stable" : "❌ Drifting"
       }`
     );
     console.log(
-      `Animation performance: ${
-        animationTime && animationTime < 100
-          ? "✅ Good"
-          : "❌ Needs improvement"
+      `Anchor positioning: ${
+        anchoredPositionAccurate ? "✅ Accurate" : "❌ Needs improvement"
+      }`
+    );
+    console.log(
+      `Performance optimizations: ${
+        cssOptimizationsApplied ? "✅ Applied" : "❌ Missing"
       }`
     );
     console.log(
       `Memory usage: ${usageMB}MB ${memoryGood ? "✅ Good" : "❌ High"}`
     );
     console.log(
-      `System stress test: ${
+      `Stress test performance: ${
         stressTime < 100
           ? "✅ Excellent"
           : stressTime < 200
@@ -423,28 +379,33 @@
       }`
     );
 
-    if (successRate >= 85) {
+    if (successRate >= 90) {
       console.log(
-        "%c✅ CENTRALIZED POSITIONING SYSTEM: EXCELLENT!",
+        "%c✅ REAL-TIME RESIZE HANDLING: EXCELLENT!",
         "color: green; font-weight: bold; font-size: 14px;"
       );
-      testNotification.textContent = "✅ ClippyPositioning Test: EXCELLENT";
+      testNotification.textContent = "✅ Real-time Resize Test: EXCELLENT";
       testNotification.style.background = "rgba(0, 128, 0, 0.7)";
-    } else if (successRate >= 70) {
+    } else if (successRate >= 75) {
       console.log(
-        "%c✅ CENTRALIZED POSITIONING SYSTEM: GOOD",
+        "%c✅ REAL-TIME RESIZE HANDLING: GOOD",
         "color: green; font-weight: bold; font-size: 14px;"
       );
-      testNotification.textContent = "✅ ClippyPositioning Test: GOOD";
+      testNotification.textContent = "✅ Real-time Resize Test: GOOD";
       testNotification.style.background = "rgba(0, 128, 0, 0.7)";
     } else {
       console.log(
-        "%c❌ CENTRALIZED POSITIONING SYSTEM: NEEDS IMPROVEMENT",
+        "%c❌ REAL-TIME RESIZE HANDLING: NEEDS IMPROVEMENT",
         "color: red; font-weight: bold; font-size: 14px;"
       );
       testNotification.textContent =
-        "⚠️ ClippyPositioning Test: NEEDS IMPROVEMENT";
+        "⚠️ Real-time Resize Test: NEEDS IMPROVEMENT";
       testNotification.style.background = "rgba(255, 165, 0, 0.7)";
+    }
+
+    // Cleanup
+    if (window.ClippyResizeHandler) {
+      window.ClippyResizeHandler.removeListener(resizeListener);
     }
 
     // Remove notification after 5 seconds
@@ -453,9 +414,21 @@
         testNotification.parentNode.removeChild(testNotification);
       }
     }, 5000);
-  }, 3000);
+  }, 2000); // Wait 2 seconds for resize events to complete
 
   console.log(
-    "Running centralized positioning system tests... results will be available in 3 seconds"
+    "Running real-time resize handling tests... results will be available in 2 seconds"
   );
+
+  // Also test manual resize trigger
+  setTimeout(() => {
+    console.log("🔄 Testing manual resize trigger...");
+    try {
+      window.ClippyPositioning.triggerResize();
+      window.ClippyPositioning.triggerRepositioning();
+      console.log("✅ Manual resize triggers working");
+    } catch (e) {
+      console.error("❌ Error with manual resize triggers:", e);
+    }
+  }, 1000);
 })();
