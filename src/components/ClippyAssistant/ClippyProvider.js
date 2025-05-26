@@ -18,7 +18,7 @@ import "./_styles.scss";
 
 const ClippyContext = createContext(null);
 
-// Safe device detection with fallbacks
+// Safe device detection with fallbacks  .
 const detectMobile = () => {
   try {
     if (typeof window === "undefined") return false;
