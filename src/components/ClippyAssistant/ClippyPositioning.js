@@ -1349,6 +1349,358 @@ class ClippyPositioning {
   }
 
   /**
+   * HYBRID SOLUTION: Wait for monitor movement/transitions to complete
+   * This is the core method that solves the zoom positioning timing issue
+   * @param {number} maxWaitTime - Maximum time to wait in milliseconds
+   * @returns {Promise} Promise that resolves when monitor movement is complete
+   */
+  static waitForMonitorMovementCompletion(maxWaitTime = 1000) {
+    return new Promise((resolve) => {
+      const startTime = Date.now();
+
+      const checkMovementComplete = () => {
+        try {
+          // Check if we've exceeded max wait time
+          if (Date.now() - startTime > maxWaitTime) {
+            console.log("⏱️ Monitor movement wait timeout reached, proceeding");
+            resolve(true);
+            return;
+          }
+
+          // Check for active CSS transitions on monitor container
+          const monitorContainer = document.querySelector(".monitor-container");
+          if (monitorContainer) {
+            const computedStyle = window.getComputedStyle(monitorContainer);
+            const isTransitioning =
+              computedStyle.transitionDuration !== "0s" ||
+              computedStyle.animationDuration !== "0s";
+
+            if (isTransitioning) {
+              console.log("🔄 Monitor transition in progress, waiting...");
+              setTimeout(checkMovementComplete, 50);
+              return;
+            }
+          }
+
+          // Check for zoom state consistency
+          const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
+          const bodyZoomAttr =
+            parseInt(document.body.getAttribute("data-zoom")) || 0;
+
+          if (bodyZoomAttr !== currentZoomLevel) {
+            console.log("⚙️ Zoom state settling, waiting for consistency...");
+            setTimeout(checkMovementComplete, 25);
+            return;
+          }
+
+          // Check for viewport stability
+          const desktop =
+            document.querySelector(".desktop.screen") ||
+            document.querySelector(".desktop") ||
+            document.querySelector(".w98");
+
+          if (desktop) {
+            const currentRect = desktop.getBoundingClientRect();
+
+            if (!this._lastDesktopRect) {
+              this._lastDesktopRect = currentRect;
+              setTimeout(checkMovementComplete, 25);
+              return;
+            }
+
+            const rectChanged =
+              Math.abs(this._lastDesktopRect.width - currentRect.width) > 1 ||
+              Math.abs(this._lastDesktopRect.height - currentRect.height) > 1 ||
+              Math.abs(this._lastDesktopRect.left - currentRect.left) > 1 ||
+              Math.abs(this._lastDesktopRect.top - currentRect.top) > 1;
+
+            if (rectChanged) {
+              console.log(
+                "📐 Desktop viewport still changing, waiting for stability..."
+              );
+              this._lastDesktopRect = currentRect;
+              setTimeout(checkMovementComplete, 25);
+              return;
+            }
+          }
+
+          // All checks passed - movement is complete
+          console.log("✅ Monitor movement completed, safe to position Clippy");
+          delete this._lastDesktopRect;
+          resolve(true);
+        } catch (error) {
+          console.warn("Error checking monitor movement completion:", error);
+          resolve(true);
+        }
+      };
+
+      checkMovementComplete();
+    });
+  }
+
+  /**
+   * HYBRID PHASE 2: Position validation - checks if Clippy position is reasonable
+   * @param {HTMLElement} clippyElement - The Clippy DOM element
+   * @returns {boolean} True if position is valid, false if correction needed
+   */
+  static validateClippyPosition(clippyElement) {
+    if (!clippyElement) {
+      console.warn("⚠️ Cannot validate position: no Clippy element");
+      return false;
+    }
+
+    try {
+      const rect = clippyElement.getBoundingClientRect();
+
+      if (isMobile) {
+        // Mobile validation: check bottom-right positioning with visibility
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Clippy should be visible and in bottom-right area
+        const isVisible = rect.width > 0 && rect.height > 0;
+        const isInBottomRight =
+          rect.bottom < viewportHeight && rect.right < viewportWidth;
+        const isReasonablyPositioned = rect.left > 0 && rect.top > 0;
+
+        const isValid = isVisible && isInBottomRight && isReasonablyPositioned;
+
+        console.log(
+          `📱 Mobile position validation: ${
+            isValid ? "✅ VALID" : "❌ INVALID"
+          }`,
+          {
+            visible: isVisible,
+            bottomRight: isInBottomRight,
+            reasonable: isReasonablyPositioned,
+            position: `(${rect.left.toFixed(1)}, ${rect.top.toFixed(1)})`,
+            size: `${rect.width.toFixed(1)}x${rect.height.toFixed(1)}`,
+          }
+        );
+
+        return isValid;
+      } else {
+        // Desktop validation: check bounds within desktop area, avoiding corners
+        const desktop =
+          document.querySelector(".desktop.screen") ||
+          document.querySelector(".desktop") ||
+          document.querySelector(".w98");
+
+        if (!desktop) {
+          console.warn(
+            "⚠️ Cannot validate desktop position: desktop not found"
+          );
+          return false;
+        }
+
+        const desktopRect = desktop.getBoundingClientRect();
+
+        // Check if Clippy is within desktop bounds
+        const isWithinBounds =
+          rect.left >= desktopRect.left &&
+          rect.top >= desktopRect.top &&
+          rect.right <= desktopRect.right &&
+          rect.bottom <= desktopRect.bottom;
+
+        // Check if Clippy is visible (not zero-sized)
+        const isVisible = rect.width > 0 && rect.height > 0;
+
+        // Avoid corners - Clippy should not be too close to edges
+        const margin = 50;
+        const isNotInCorners =
+          rect.left > desktopRect.left + margin &&
+          rect.top > desktopRect.top + margin &&
+          rect.right < desktopRect.right - margin &&
+          rect.bottom < desktopRect.bottom - margin;
+
+        // Expected positioning check - should be in lower-right area
+        const expectedX = desktopRect.left + desktopRect.width - 120; // rightOffset
+        const expectedY = desktopRect.top + desktopRect.height - 30 - 100; // taskbar + bottomOffset
+        const positionTolerance = 100; // Allow some tolerance
+
+        const isNearExpected =
+          Math.abs(rect.left - expectedX) < positionTolerance &&
+          Math.abs(rect.top - expectedY) < positionTolerance;
+
+        const isValid = isWithinBounds && isVisible && isNearExpected;
+
+        console.log(
+          `🖥️ Desktop position validation: ${
+            isValid ? "✅ VALID" : "❌ INVALID"
+          }`,
+          {
+            withinBounds: isWithinBounds,
+            visible: isVisible,
+            nearExpected: isNearExpected,
+            notInCorners: isNotInCorners,
+            position: `(${rect.left.toFixed(1)}, ${rect.top.toFixed(1)})`,
+            expected: `(${expectedX.toFixed(1)}, ${expectedY.toFixed(1)})`,
+            desktop: `${desktopRect.width.toFixed(
+              1
+            )}x${desktopRect.height.toFixed(1)}`,
+          }
+        );
+
+        return isValid;
+      }
+    } catch (error) {
+      console.error("Error validating Clippy position:", error);
+      return false;
+    }
+  }
+
+  /**
+   * HYBRID PHASE 3: Position correction - applies corrective positioning when validation fails
+   * @param {HTMLElement} clippyElement - The Clippy DOM element
+   * @returns {Promise<boolean>} Promise resolving to success of correction
+   */
+  static positionCorrection(clippyElement) {
+    return new Promise((resolve) => {
+      if (!clippyElement) {
+        console.warn("⚠️ Cannot apply position correction: no Clippy element");
+        resolve(false);
+        return;
+      }
+
+      console.log("🔧 Applying position correction...");
+
+      // Use requestAnimationFrame for minimal delay
+      requestAnimationFrame(() => {
+        try {
+          const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
+
+          // Clear cached anchors to force fresh calculation
+          resizeHandler.clearZoomAnchor(currentZoomLevel);
+          console.log(
+            `🗑️ Cleared anchors for correction at zoom level ${currentZoomLevel}`
+          );
+
+          // Apply fresh positioning
+          let success = false;
+
+          if (isMobile) {
+            // Mobile: use fresh mobile positioning
+            const position = this.calculateMobilePosition();
+            success = this.applyStyles(clippyElement, position);
+          } else {
+            // Desktop: force immediate fresh positioning
+            success = this.forceImmediateZoomPositioning(
+              clippyElement,
+              currentZoomLevel
+            );
+          }
+
+          if (success) {
+            console.log("✅ Position correction applied successfully");
+
+            // OPTIMIZED: Use requestAnimationFrame for fastest validation
+            requestAnimationFrame(() => {
+              const isNowValid = this.validateClippyPosition(clippyElement);
+              console.log(
+                `🔍 Post-correction validation: ${
+                  isNowValid ? "✅ SUCCESS" : "❌ STILL INVALID"
+                }`
+              );
+              resolve(isNowValid);
+            }); // OPTIMIZED: ~16ms instead of 50ms
+          } else {
+            console.error("❌ Position correction failed to apply");
+            resolve(false);
+          }
+        } catch (error) {
+          console.error("Error during position correction:", error);
+          resolve(false);
+        }
+      });
+    });
+  }
+
+  /**
+   * HYBRID PHASE 4: Main hybrid zoom positioning method - orchestrates all 4 phases
+   * @param {HTMLElement} clippyElement - The Clippy DOM element
+   * @param {number} newZoomLevel - The new zoom level (0, 1, or 2)
+   * @returns {Promise<boolean>} Promise resolving to success of positioning
+   */
+  static hybridZoomPositioning(clippyElement, newZoomLevel) {
+    return new Promise(async (resolve) => {
+      if (!clippyElement) {
+        console.warn("⚠️ Cannot perform hybrid positioning: no Clippy element");
+        resolve(false);
+        return;
+      }
+
+      console.log(
+        `🚀 Starting hybrid zoom positioning for level ${newZoomLevel}`
+      );
+
+      try {
+        // PHASE 1: Wait for monitor movement completion (OPTIMIZED: faster timeout)
+        console.log("📍 Phase 1: Waiting for monitor movement completion...");
+        await this.waitForMonitorMovementCompletion(150); // Reduced from 300ms to 150ms
+
+        // PHASE 2: Apply primary positioning
+        console.log("📍 Phase 2: Applying primary positioning...");
+        let positionSuccess = false;
+
+        if (isMobile) {
+          const position = this.calculateMobilePosition();
+          positionSuccess = this.applyStyles(clippyElement, position);
+        } else {
+          positionSuccess = this.forceImmediateZoomPositioning(
+            clippyElement,
+            newZoomLevel
+          );
+        }
+
+        if (!positionSuccess) {
+          console.error(
+            "❌ Phase 2 failed: Could not apply primary positioning"
+          );
+          resolve(false);
+          return;
+        }
+
+        // OPTIMIZED: Use requestAnimationFrame instead of setTimeout for faster response
+        requestAnimationFrame(async () => {
+          // PHASE 3: Validate positioning accuracy
+          console.log("📍 Phase 3: Validating positioning accuracy...");
+          const isValid = this.validateClippyPosition(clippyElement);
+
+          if (isValid) {
+            console.log(
+              "✅ Hybrid positioning completed successfully - validation passed"
+            );
+            resolve(true);
+          } else {
+            // PHASE 4: Apply correction if validation fails
+            console.log(
+              "📍 Phase 4: Validation failed, applying correction..."
+            );
+            const correctionSuccess = await this.positionCorrection(
+              clippyElement
+            );
+
+            if (correctionSuccess) {
+              console.log(
+                "✅ Hybrid positioning completed successfully - correction applied"
+              );
+              resolve(true);
+            } else {
+              console.error(
+                "❌ Hybrid positioning failed - correction unsuccessful"
+              );
+              resolve(false);
+            }
+          }
+        }); // OPTIMIZED: ~16ms instead of 100ms
+      } catch (error) {
+        console.error("Error during hybrid zoom positioning:", error);
+        resolve(false);
+      }
+    });
+  }
+
+  /**
    * ZOOM-AWARE: Get debug information about zoom and anchoring
    */
   static getZoomDebugInfo() {

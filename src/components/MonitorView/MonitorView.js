@@ -498,15 +498,55 @@ class MonitorView extends Component {
         // Apply the zoom scaling to monitor
         this.applyZoom(level);
 
-        // Give the monitor time to apply zoom, then trigger Clippy repositioning
-        setTimeout(() => {
-          if (window.ClippyPositioning) {
-            console.log("🔄 Triggering Clippy repositioning for zoom change");
-            window.ClippyPositioning.triggerRepositioning();
+        // COMPLETE HYBRID SOLUTION: Use 4-phase hybrid zoom positioning
+        if (
+          window.ClippyPositioning &&
+          window.ClippyPositioning.hybridZoomPositioning
+        ) {
+          console.log("🚀 Using complete 4-phase hybrid zoom positioning");
+
+          // Get Clippy element for hybrid positioning
+          const clippyElement = document.querySelector(".clippy");
+
+          if (clippyElement) {
+            window.ClippyPositioning.hybridZoomPositioning(
+              clippyElement,
+              level
+            ).then((success) => {
+              if (success) {
+                console.log(
+                  "✅ Hybrid zoom positioning completed successfully"
+                );
+              } else {
+                console.warn(
+                  "⚠️ Hybrid zoom positioning failed, trying fallback"
+                );
+                // Fallback to triggering repositioning
+                window.ClippyPositioning.triggerRepositioning();
+              }
+            });
           } else {
-            console.warn("⚠️ ClippyPositioning not available for zoom trigger");
+            console.warn(
+              "⚠️ Clippy element not found, using fallback approach"
+            );
+            // Fallback if no Clippy element
+            window.ClippyPositioning.triggerRepositioning();
           }
-        }, 100);
+        } else {
+          // Fallback to the original timeout approach
+          setTimeout(() => {
+            if (window.ClippyPositioning) {
+              console.log(
+                "🔄 Triggering Clippy repositioning for zoom change (fallback)"
+              );
+              window.ClippyPositioning.triggerRepositioning();
+            } else {
+              console.warn(
+                "⚠️ ClippyPositioning not available for zoom trigger"
+              );
+            }
+          }, 100);
+        }
       }
     );
   };
