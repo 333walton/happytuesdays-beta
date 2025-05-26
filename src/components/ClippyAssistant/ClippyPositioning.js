@@ -1629,8 +1629,16 @@ class ClippyPositioning {
         return;
       }
 
+      // AUTO-FIND OVERLAY: Get the clickable overlay element automatically
+      const overlayElement = document.getElementById(
+        "clippy-clickable-overlay"
+      );
       console.log(
-        `🚀 Starting hybrid zoom positioning for level ${newZoomLevel}`
+        `🎯 Auto-detected overlay: ${overlayElement ? "found" : "not found"}`
+      );
+
+      console.log(
+        `🚀 Starting hybrid zoom positioning with overlay for level ${newZoomLevel}`
       );
 
       try {
@@ -1638,18 +1646,28 @@ class ClippyPositioning {
         console.log("📍 Phase 1: Waiting for monitor movement completion...");
         await this.waitForMonitorMovementCompletion(150); // Reduced from 300ms to 150ms
 
-        // PHASE 2: Apply primary positioning
+        // PHASE 2: Apply primary positioning (CLIPPY + OVERLAY)
         console.log("📍 Phase 2: Applying primary positioning...");
         let positionSuccess = false;
 
         if (isMobile) {
           const position = this.calculateMobilePosition();
           positionSuccess = this.applyStyles(clippyElement, position);
+
+          // Position overlay immediately after Clippy on mobile
+          if (positionSuccess && overlayElement) {
+            this.positionOverlay(overlayElement, clippyElement);
+          }
         } else {
           positionSuccess = this.forceImmediateZoomPositioning(
             clippyElement,
             newZoomLevel
           );
+
+          // Position overlay immediately after Clippy on desktop
+          if (positionSuccess && overlayElement) {
+            this.positionOverlay(overlayElement, clippyElement);
+          }
         }
 
         if (!positionSuccess) {
@@ -1667,12 +1685,17 @@ class ClippyPositioning {
           const isValid = this.validateClippyPosition(clippyElement);
 
           if (isValid) {
+            // OVERLAY SYNC: Ensure overlay follows Clippy after validation
+            if (overlayElement) {
+              this.positionOverlay(overlayElement, clippyElement);
+            }
+
             console.log(
               "✅ Hybrid positioning completed successfully - validation passed"
             );
             resolve(true);
           } else {
-            // PHASE 4: Apply correction if validation fails
+            // PHASE 4: Apply correction if validation fails (CLIPPY + OVERLAY)
             console.log(
               "📍 Phase 4: Validation failed, applying correction..."
             );
@@ -1681,6 +1704,11 @@ class ClippyPositioning {
             );
 
             if (correctionSuccess) {
+              // OVERLAY SYNC: Ensure overlay follows Clippy after correction
+              if (overlayElement) {
+                this.positionOverlay(overlayElement, clippyElement);
+              }
+
               console.log(
                 "✅ Hybrid positioning completed successfully - correction applied"
               );
