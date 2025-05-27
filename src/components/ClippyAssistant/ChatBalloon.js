@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 /**
  * Interactive chat balloon for Clippy assistant
- * Allows for two-way communication with the assistant
+ * Updated to match working console implementation
  */
 const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
   const [visible, setVisible] = useState(false);
@@ -43,7 +43,7 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
     }
   }, [messages]);
 
-  // Handle message submission
+  // Handle message submission - updated to match console logic
   const handleSubmit = (e) => {
     e.preventDefault();
     if (inputValue.trim() === "" || loading) return;
@@ -54,22 +54,46 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
     setInputValue("");
     setLoading(true);
 
-    // Get response from Clippy
-    if (onSendMessage) {
-      onSendMessage(userMessage, (response) => {
-        setMessages((prev) => [...prev, { text: response, sender: "clippy" }]);
-        setLoading(false);
+    // Add thinking indicator
+    setMessages((prev) => [
+      ...prev,
+      { text: "Clippy is thinking...", sender: "thinking" },
+    ]);
+
+    // Generate response after delay - using same logic as console
+    setTimeout(() => {
+      setLoading(false);
+
+      // Remove thinking message and add response
+      setMessages((prev) => {
+        const withoutThinking = prev.filter((msg) => msg.sender !== "thinking");
+
+        // Simple response logic matching console implementation
+        const responses = {
+          hello: "Hello there! How can I assist you today?",
+          help: "I can help with many things! Try asking me about Hydra98 or just chat with me.",
+          hydra:
+            "Hydra98 is an amazing Windows 98 desktop emulator! What do you think of it?",
+          thanks:
+            "You're very welcome! Is there anything else I can help you with?",
+          bye: "Goodbye! Click the X to close this chat anytime.",
+          default:
+            "That's interesting! Tell me more, or ask me something else.",
+        };
+
+        const lowerText = userMessage.toLowerCase();
+        let response = responses.default;
+
+        for (const [key, value] of Object.entries(responses)) {
+          if (lowerText.includes(key)) {
+            response = value;
+            break;
+          }
+        }
+
+        return [...withoutThinking, { text: response, sender: "clippy" }];
       });
-    } else {
-      // Fallback response if no handler provided
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { text: "I'm not sure how to respond to that.", sender: "clippy" },
-        ]);
-        setLoading(false);
-      }, 1000);
-    }
+    }, 1500);
   };
 
   return (
@@ -77,14 +101,27 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
       className="custom-clippy-chat-balloon"
       style={{
         position: "fixed",
-        left: `${position.left}px`,
-        top: `${position.top}px`,
+        left: "50%",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
         opacity: visible ? 1 : 0,
-        transform: `translateY(${visible ? 0 : "10px"})`,
         transition: "opacity 0.3s, transform 0.3s",
-        zIndex: 2100,
+        zIndex: 9999,
         display: "flex",
         flexDirection: "column",
+
+        // Styling to match console implementation
+        background: "#fffcde",
+        border: "3px solid #000",
+        borderRadius: "8px",
+        padding: "20px",
+        fontFamily: "Tahoma, sans-serif",
+        fontSize: "14px",
+        width: "350px",
+        height: "300px",
+        color: "#000",
+        WebkitTextFillColor: "#000", // iOS Safari fix
+        boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
       }}
     >
       {/* Close button */}
@@ -92,35 +129,80 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
         className="custom-clippy-balloon-close"
         onClick={onClose}
         aria-label="Close chat"
+        style={{
+          position: "absolute",
+          top: "8px",
+          right: "12px",
+          background: "none",
+          border: "none",
+          fontSize: "20px",
+          cursor: "pointer",
+          color: "#666",
+          WebkitTextFillColor: "#666", // iOS Safari fix
+          padding: "4px 8px",
+          minWidth: "32px",
+          minHeight: "32px",
+        }}
       >
         ×
       </button>
+
+      {/* Title */}
+      <div
+        style={{
+          marginBottom: "12px",
+          fontWeight: "bold",
+          fontSize: "16px",
+          color: "#000",
+        }}
+      >
+        💬 Chat with Clippy
+      </div>
 
       {/* Messages container */}
       <div
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "4px",
-          marginBottom: "4px",
+          border: "2px inset #ccc",
+          background: "white",
+          padding: "8px",
+          marginBottom: "12px",
+          color: "#000",
+          minHeight: "180px",
         }}
       >
         {messages.map((msg, index) => (
           <div
             key={index}
             style={{
-              marginBottom: "8px",
+              margin: "8px 0",
+              color:
+                msg.sender === "user"
+                  ? "#000080"
+                  : msg.sender === "thinking"
+                  ? "#666"
+                  : "#000",
+              WebkitTextFillColor:
+                msg.sender === "user"
+                  ? "#000080"
+                  : msg.sender === "thinking"
+                  ? "#666"
+                  : "#000", // iOS Safari fix
               textAlign: msg.sender === "user" ? "right" : "left",
-              color: msg.sender === "user" ? "#000080" : "#000000",
+              fontStyle: msg.sender === "thinking" ? "italic" : "normal",
             }}
           >
-            {msg.text}
+            {msg.sender === "thinking" ? (
+              msg.text
+            ) : (
+              <>
+                <strong>{msg.sender === "user" ? "You" : "Clippy"}:</strong>{" "}
+                {msg.text}
+              </>
+            )}
           </div>
         ))}
-
-        {loading && (
-          <div style={{ textAlign: "left", color: "#666" }}>Thinking...</div>
-        )}
 
         {/* Invisible element to scroll to */}
         <div ref={messagesEndRef} />
@@ -131,8 +213,7 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
         onSubmit={handleSubmit}
         style={{
           display: "flex",
-          gap: "4px",
-          marginTop: "auto",
+          gap: "8px",
         }}
       >
         <input
@@ -141,17 +222,30 @@ const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Type a message..."
-          className="clippy-input"
+          disabled={loading}
           style={{
             flex: 1,
-            padding: "4px",
+            padding: "8px",
+            border: "2px inset #ccc",
+            fontSize: "14px",
+            color: "#000",
+            WebkitTextFillColor: "#000", // iOS Safari fix
+            fontFamily: "Tahoma, sans-serif",
           }}
-          disabled={loading}
         />
         <button
           type="submit"
-          className="clippy-option-button"
           disabled={loading}
+          style={{
+            padding: "8px 16px",
+            background: "#c0c0c0",
+            border: "2px outset #c0c0c0",
+            fontSize: "14px",
+            cursor: "pointer",
+            color: "#000",
+            WebkitTextFillColor: "#000", // iOS Safari fix
+            fontFamily: "Tahoma, sans-serif",
+          }}
         >
           Send
         </button>

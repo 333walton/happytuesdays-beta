@@ -720,17 +720,39 @@ class ClippyPositioning {
     }
   }
 
+  // FIXED CODE with bounds checking:
   static getDesktopBalloonPosition(clippyRect, balloonType) {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
     if (balloonType === "chat") {
-      return {
-        left: clippyRect.left + clippyRect.width / 2 - 110,
-        top: clippyRect.top - 200,
-      };
+      // Chat balloon dimensions (from CSS)
+      const balloonWidth = 320; // from min(320px, calc(100vw - 20px))
+      const balloonHeight = 200; // approximate height
+
+      // Calculate desired position
+      let left = clippyRect.left + clippyRect.width / 2 - 110;
+      let top = clippyRect.top - 200;
+
+      // Apply bounds checking to keep balloon on screen
+      left = Math.max(10, Math.min(left, viewportWidth - balloonWidth - 10));
+      top = Math.max(10, Math.min(top, viewportHeight - balloonHeight - 10));
+
+      return { left, top };
     } else {
-      return {
-        left: clippyRect.left + clippyRect.width / 2 - 125,
-        top: clippyRect.top - 120,
-      };
+      // Speech balloon dimensions
+      const balloonWidth = 280; // from max-width
+      const balloonHeight = 120; // approximate height
+
+      // Calculate desired position
+      let left = clippyRect.left + clippyRect.width / 2 - 125;
+      let top = clippyRect.top - 120;
+
+      // Apply bounds checking to keep balloon on screen
+      left = Math.max(10, Math.min(left, viewportWidth - balloonWidth - 10));
+      top = Math.max(10, Math.min(top, viewportHeight - balloonHeight - 10));
+
+      return { left, top };
     }
   }
 

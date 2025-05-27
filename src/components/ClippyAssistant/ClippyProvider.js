@@ -58,7 +58,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   const [currentAgent, setCurrentAgent] = useState(defaultAgent);
   const [isScreenPoweredOn, setIsScreenPoweredOn] = useState(true);
 
-  // Balloon state
+  // Balloon state - KEEP FOR COMPATIBILITY BUT WE'LL USE DIRECT DOM
   const [customBalloonVisible, setCustomBalloonVisible] = useState(false);
   const [customBalloonMessage, setCustomBalloonMessage] = useState("");
   const [chatBalloonVisible, setChatBalloonVisible] = useState(false);
@@ -187,8 +187,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       }
     };
   }, [startupComplete]);
-
-  // Replace the zoom monitoring useEffect in ClippyProvider.js with this enhanced version:
 
   // ENHANCED ZOOM-AWARE: Monitor for zoom level changes with IMMEDIATE response
   useEffect(() => {
@@ -319,11 +317,46 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     return false;
   }, []);
 
-  // Safe global function wrapper
+  // Safe global function wrapper - FIXED STARTUP DETECTION
   const createSafeGlobalFunction = useCallback(
     (fn, functionName) => {
       return (...args) => {
-        if (!mountedRef.current || isErrorRateLimited() || !startupComplete) {
+        if (!mountedRef.current || isErrorRateLimited()) {
+          return false;
+        }
+
+        // FIXED: Check if startup sequence screens are actually hidden instead of relying on state
+        const biosWrapper = document.querySelector(".BIOSWrapper");
+        const windowsLaunchWrapper = document.querySelector(
+          ".WindowsLaunchWrapper"
+        );
+        const desktop = document.querySelector(".desktop");
+        const shutdownScreen = document.querySelector(
+          ".itIsNowSafeToTurnOffYourComputer"
+        );
+
+        // Check if any startup/shutdown screens are currently active
+        let sequenceActive = false;
+
+        if (biosWrapper && windowsLaunchWrapper) {
+          const biosHidden = biosWrapper.classList.contains("hidden");
+          const windowsHidden =
+            windowsLaunchWrapper.classList.contains("hidden");
+          sequenceActive = !biosHidden || !windowsHidden;
+        }
+
+        if (
+          desktop?.classList.contains("windowsShuttingDown") ||
+          shutdownScreen
+        ) {
+          sequenceActive = true;
+        }
+
+        // Only block if screens are actually visible
+        if (sequenceActive) {
+          console.log(
+            `🚫 Blocking ${functionName} - startup/shutdown sequence active`
+          );
           return false;
         }
 
@@ -334,7 +367,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         );
       };
     },
-    [isErrorRateLimited, startupComplete]
+    [isErrorRateLimited] // Removed startupComplete dependency
   );
 
   // Initialize global functions once with crash protection
@@ -372,6 +405,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       window.setAssistantVisible = createSafeGlobalFunction((visible) => {
         setAssistantVisible(visible);
         if (!visible) {
+          // Clean up any DOM balloons
+          document
+            .querySelectorAll(".custom-clippy-balloon")
+            .forEach((el) => el.remove());
+          document
+            .querySelectorAll(".custom-clippy-chat-balloon")
+            .forEach((el) => el.remove());
           setCustomBalloonVisible(false);
           setChatBalloonVisible(false);
         }
@@ -388,53 +428,176 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return true;
       }, "setScreenPowerState");
 
-      // Balloon functions with safe positioning
+      // ===== FIXED BALLOON FUNCTIONS - USING YOUR WORKING CONSOLE IMPLEMENTATIONS =====
+
+      // SPEECH BALLOON - Using your working console implementation
       window.showClippyCustomBalloon = createSafeGlobalFunction((message) => {
-        if (!isScreenPoweredOn || !startupComplete) return false;
+        console.log("💬 Custom balloon called:", message);
 
-        const clippyElement = document.querySelector(".clippy");
-        const position = safeExecute(
-          () => ClippyPositioning?.getBalloonPosition(clippyElement, "speech"),
-          { left: 50, top: 50 },
-          "balloon position calculation"
-        );
+        // Remove existing speech balloons
+        document
+          .querySelectorAll(".custom-clippy-balloon")
+          .forEach((el) => el.remove());
 
-        setBalloonPosition(position);
-        setCustomBalloonMessage(message);
-        setCustomBalloonVisible(true);
-        setChatBalloonVisible(false);
+        // Get Clippy position for better placement
+        const clippyEl = document.querySelector(".clippy");
+        let left = 200,
+          top = 200; // fallback
+
+        if (clippyEl) {
+          const rect = clippyEl.getBoundingClientRect();
+          left = Math.max(20, rect.left - 150);
+          top = Math.max(20, rect.top - 80);
+        }
+
+        const balloon = document.createElement("div");
+        balloon.className = "custom-clippy-balloon";
+        balloon.style.cssText = `
+          position: fixed; left: ${left}px; top: ${top}px;
+          background: #fffcde; border: 2px solid #000; border-radius: 8px;
+          padding: 12px 16px; font-family: Tahoma, sans-serif; font-size: 14px;
+          color: #000; -webkit-text-fill-color: #000; z-index: 9999;
+          max-width: 250px; box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+          line-height: 1.4; word-wrap: break-word;
+        `;
+
+        balloon.textContent = message;
+        document.body.appendChild(balloon);
 
         // Auto-hide after 6 seconds
         setTimeout(() => {
-          if (mountedRef.current) {
-            setCustomBalloonVisible(false);
-          }
+          balloon.style.transition = "opacity 0.3s ease";
+          balloon.style.opacity = "0";
+          setTimeout(() => balloon.remove(), 300);
         }, 6000);
 
         return true;
       }, "showClippyCustomBalloon");
 
       window.hideClippyCustomBalloon = createSafeGlobalFunction(() => {
-        setCustomBalloonVisible(false);
-        setChatBalloonVisible(false);
+        document
+          .querySelectorAll(".custom-clippy-balloon")
+          .forEach((el) => el.remove());
+        document
+          .querySelectorAll(".custom-clippy-chat-balloon")
+          .forEach((el) => el.remove());
         return true;
       }, "hideClippyCustomBalloon");
 
+      // CHAT BALLOON - Using your working console implementation
       window.showClippyChatBalloon = createSafeGlobalFunction(
         (initialMessage) => {
-          if (!isScreenPoweredOn || !startupComplete) return false;
+          console.log("💬 Chat balloon called:", initialMessage);
 
-          const clippyElement = document.querySelector(".clippy");
-          const position = safeExecute(
-            () => ClippyPositioning?.getBalloonPosition(clippyElement, "chat"),
-            { left: 50, top: 50 },
-            "chat balloon position calculation"
-          );
+          // Remove any existing chat balloons
+          document
+            .querySelectorAll(".custom-clippy-chat-balloon")
+            .forEach((el) => el.remove());
 
-          setBalloonPosition(position);
-          setChatInitialMessage(initialMessage);
-          setChatBalloonVisible(true);
-          setCustomBalloonVisible(false);
+          const balloon = document.createElement("div");
+          balloon.className = "custom-clippy-chat-balloon";
+          balloon.style.cssText = `
+          position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+          background: #fffcde; border: 3px solid #000; border-radius: 8px;
+          padding: 20px; font-family: Tahoma, sans-serif; font-size: 14px; z-index: 9999;
+          width: 350px; height: 300px; color: #000; -webkit-text-fill-color: #000;
+          display: flex; flex-direction: column; box-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+        `;
+
+          balloon.innerHTML = `
+          <button onclick="this.parentElement.remove()" style="
+            position: absolute; top: 8px; right: 12px; background: none; border: none;
+            font-size: 20px; cursor: pointer; color: #666; padding: 4px 8px;
+            min-width: 32px; min-height: 32px; -webkit-text-fill-color: #666;
+          ">×</button>
+          
+          <div style="margin-bottom: 12px; font-weight: bold; font-size: 16px; color: #000;">
+            💬 Chat with Clippy
+          </div>
+          
+          <div id="chat-messages" style="
+            flex: 1; overflow-y: auto; border: 2px inset #ccc; background: white;
+            padding: 8px; margin-bottom: 12px; color: #000; min-height: 180px;
+          ">
+            <div style="margin-bottom: 8px; color: #000; -webkit-text-fill-color: #000;">
+              <strong>Clippy:</strong> ${initialMessage}
+            </div>
+          </div>
+          
+          <form onsubmit="
+            event.preventDefault();
+            const input = this.querySelector('input');
+            const messages = document.getElementById('chat-messages');
+            const userText = input.value.trim();
+            if (userText) {
+              // Add user message
+              const userDiv = document.createElement('div');
+              userDiv.style.cssText = 'margin: 8px 0; color: #000080; -webkit-text-fill-color: #000080; text-align: right;';
+              userDiv.innerHTML = '<strong>You:</strong> ' + userText;
+              messages.appendChild(userDiv);
+              
+              // Add thinking indicator
+              const thinkDiv = document.createElement('div');
+              thinkDiv.style.cssText = 'margin: 8px 0; color: #666; -webkit-text-fill-color: #666; font-style: italic;';
+              thinkDiv.textContent = 'Clippy is thinking...';
+              messages.appendChild(thinkDiv);
+              
+              // Clear input and scroll
+              input.value = '';
+              messages.scrollTop = messages.scrollHeight;
+              
+              // Generate response after delay
+              setTimeout(() => {
+                thinkDiv.remove();
+                const respDiv = document.createElement('div');
+                respDiv.style.cssText = 'margin: 8px 0; color: #000; -webkit-text-fill-color: #000;';
+                
+                // Simple response logic
+                const responses = {
+                  'hello': 'Hello there! How can I assist you today?',
+                  'help': 'I can help with many things! Try asking me about Hydra98 or just chat with me.',
+                  'hydra': 'Hydra98 is an amazing Windows 98 desktop emulator! What do you think of it?',
+                  'thanks': 'You\\'re very welcome! Is there anything else I can help you with?',
+                  'bye': 'Goodbye! Click the X to close this chat anytime.',
+                  'default': 'That\\'s interesting! Tell me more, or ask me something else.'
+                };
+                
+                const lowerText = userText.toLowerCase();
+                let response = responses.default;
+                
+                for (const [key, value] of Object.entries(responses)) {
+                  if (lowerText.includes(key)) {
+                    response = value;
+                    break;
+                  }
+                }
+                
+                respDiv.innerHTML = '<strong>Clippy:</strong> ' + response;
+                messages.appendChild(respDiv);
+                messages.scrollTop = messages.scrollHeight;
+              }, 1500);
+            }
+          " style="display: flex; gap: 8px;">
+            <input type="text" placeholder="Type a message..." style="
+              flex: 1; padding: 8px; border: 2px inset #ccc; font-size: 14px;
+              color: #000; -webkit-text-fill-color: #000; font-family: Tahoma, sans-serif;
+            ">
+            <button type="submit" style="
+              padding: 8px 16px; background: #c0c0c0; border: 2px outset #c0c0c0;
+              font-size: 14px; cursor: pointer; color: #000; -webkit-text-fill-color: #000;
+              font-family: Tahoma, sans-serif;
+            ">Send</button>
+          </form>
+        `;
+
+          document.body.appendChild(balloon);
+
+          // Focus the input after a brief delay
+          setTimeout(() => {
+            const input = balloon.querySelector("input");
+            if (input) input.focus();
+          }, 100);
+
           return true;
         },
         "showClippyChatBalloon"
@@ -447,6 +610,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         console.log("🔄 Resetting Clippy...");
         safeExecute(
           () => {
+            // Clean up DOM balloons
+            document
+              .querySelectorAll(".custom-clippy-balloon")
+              .forEach((el) => el.remove());
+            document
+              .querySelectorAll(".custom-clippy-chat-balloon")
+              .forEach((el) => el.remove());
             setCustomBalloonVisible(false);
             setChatBalloonVisible(false);
             setAssistantVisible(true);
@@ -507,7 +677,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     startupComplete,
   ]);
 
-  // Safe chat message handler
+  // Safe chat message handler - KEPT FOR COMPATIBILITY
   const handleChatMessage = useCallback(
     (message, callback) => {
       if (!mountedRef.current || !startupComplete) return;
@@ -569,6 +739,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       safeExecute(
         () => {
           if (typeof window !== "undefined") {
+            // Clean up DOM balloons on unmount
+            document
+              .querySelectorAll(".custom-clippy-balloon")
+              .forEach((el) => el.remove());
+            document
+              .querySelectorAll(".custom-clippy-chat-balloon")
+              .forEach((el) => el.remove());
+
             delete window._clippyGlobalsInitialized;
             delete window.setAssistantVisible;
             delete window.setCurrentAgent;
@@ -624,28 +802,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           />
         )}
 
-        {/* Only render balloons after startup completes */}
-        {mountedRef.current &&
-          isScreenPoweredOn &&
-          customBalloonVisible &&
-          startupComplete && (
-            <CustomBalloon
-              message={customBalloonMessage}
-              position={balloonPosition}
-            />
-          )}
-
-        {mountedRef.current &&
-          isScreenPoweredOn &&
-          chatBalloonVisible &&
-          startupComplete && (
-            <ChatBalloon
-              initialMessage={chatInitialMessage}
-              position={balloonPosition}
-              onClose={() => setChatBalloonVisible(false)}
-              onSendMessage={handleChatMessage}
-            />
-          )}
+        {/* REMOVE REACT BALLOONS - We're using DOM balloons now */}
+        {/* The working balloons are created directly in DOM via the window functions above */}
       </ReactClippyProvider>
     </ClippyContext.Provider>
   );
