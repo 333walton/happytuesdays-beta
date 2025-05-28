@@ -60,7 +60,7 @@ const MobileControlsContent = () => {
         title={assistantVisible ? "Hide Clippy" : "Show Clippy"}
         data-active={!assistantVisible}
       >
-        {assistantVisible ? "👁️" : "👁️‍🗨️"}
+        {assistantVisible ? "👁️" : ""}
       </Button>
 
       <Button
@@ -70,7 +70,7 @@ const MobileControlsContent = () => {
         title={positionLocked ? "Unlock Position" : "Lock Position"}
         data-active={!positionLocked}
       >
-        {positionLocked ? "🔒" : "🔓"}
+        {positionLocked ? "🔒" : ""}
       </Button>
     </div>
   );
