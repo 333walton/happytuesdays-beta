@@ -19,13 +19,13 @@
   /* Center vertically */
 
   /* Size - prioritizing iOS touch standards from JS */
-  left: 157px !important;
+  left: -157px !important; /* 157px is the original position */
   top: 10px !important;
   margin-left: -2px !important;
-  min-width: 35px !important;
-  min-height: 35px !important;
-  width: 35px !important;
-  height: 35px !important;
+  min-width: 33px !important;
+  min-height: 33px !important;
+  width: 33px !important;
+  height: 33px !important;
   padding: 0 !important;
   /* Remove padding to avoid shifting */
   box-sizing: border-box !important;
@@ -123,11 +123,11 @@
 /* Enhanced responsive adjustments with proper pressed states */
 @media (max-width: 480px) {
   .mobile-controls-button {
-    min-width: 37px !important;
-    min-height: 37px !important;
-    width: 37px !important;
-    height: 37px !important;
-    font-size: 16px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 15px !important; //emoji size
     padding: 12px !important;
 
     /* Enhanced pressed state for larger mobile buttons - content shift only */

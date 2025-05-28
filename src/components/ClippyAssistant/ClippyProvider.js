@@ -59,6 +59,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   const [currentAgent, setCurrentAgent] = useState(defaultAgent);
   const [isScreenPoweredOn, setIsScreenPoweredOn] = useState(true);
 
+  // NEW: Mobile control states (no persistence, resets on reload)
+  const [positionLocked, setPositionLocked] = useState(true); // Default locked
+  const [isDragging, setIsDragging] = useState(false);
+
   // Balloon state - KEEP FOR COMPATIBILITY BUT WE'LL USE DIRECT DOM
   const [customBalloonVisible, setCustomBalloonVisible] = useState(false);
   const [customBalloonMessage, setCustomBalloonMessage] = useState("");
@@ -371,7 +375,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     [isErrorRateLimited] // Removed startupComplete dependency
   );
 
-  // Initialize global functions once with crash protection
+  // ENHANCED: Initialize global functions with mobile control support
   useEffect(() => {
     if (initializationRef.current) return;
     initializationRef.current = true;
@@ -401,6 +405,21 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         }
         return false;
       }, "setClippyPosition");
+
+      // NEW: Mobile control support functions
+      window.setClippyPositionLocked = createSafeGlobalFunction((locked) => {
+        setPositionLocked(locked);
+        return true;
+      }, "setClippyPositionLocked");
+
+      window.getClippyPositionLocked = createSafeGlobalFunction(() => {
+        return positionLocked;
+      }, "getClippyPositionLocked");
+
+      window.setClippyDragging = createSafeGlobalFunction((dragging) => {
+        setIsDragging(dragging);
+        return true;
+      }, "setClippyDragging");
 
       // Visibility functions
       window.setAssistantVisible = createSafeGlobalFunction((visible) => {
@@ -676,6 +695,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     isScreenPoweredOn,
     createSafeGlobalFunction,
     startupComplete,
+    positionLocked, // Add to dependency array
   ]);
 
   // Safe chat message handler - KEPT FOR COMPATIBILITY
@@ -758,6 +778,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             delete window.getClippyInstance;
             delete window.setClippyPosition;
             delete window.resetClippy;
+            // NEW: Clean up mobile control functions
+            delete window.setClippyPositionLocked;
+            delete window.getClippyPositionLocked;
+            delete window.setClippyDragging;
           }
         },
         null,
@@ -766,6 +790,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     };
   }, []);
 
+  // ENHANCED: Context value with mobile control states
   const contextValue = {
     assistantVisible,
     setAssistantVisible,
@@ -783,6 +808,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     getClippyInstance: () => clippyInstanceRef.current,
     getCustomPosition, // Expose for resize handling
     isMobile,
+    // NEW: Mobile control states
+    positionLocked,
+    setPositionLocked,
+    isDragging,
+    setIsDragging,
   };
 
   return (
@@ -792,17 +822,25 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
         {/* Only render Clippy components after startup completes */}
         {startupComplete && (
-          <StartupAwareClippyController
-            visible={assistantVisible}
-            isScreenPoweredOn={isScreenPoweredOn}
-            position={position}
-            clippyInstanceRef={clippyInstanceRef}
-            overlayRef={overlayRef}
-            getCustomPosition={getCustomPosition}
-            resizeHandlingActiveRef={resizeHandlingActiveRef}
-          />
+          <>
+            <StartupAwareClippyController
+              visible={assistantVisible}
+              isScreenPoweredOn={isScreenPoweredOn}
+              position={position}
+              clippyInstanceRef={clippyInstanceRef}
+              overlayRef={overlayRef}
+              getCustomPosition={getCustomPosition}
+              resizeHandlingActiveRef={resizeHandlingActiveRef}
+              // NEW: Pass mobile control states
+              positionLocked={positionLocked}
+              isDragging={isDragging}
+            />
+            
+            {/* NEW: Mobile Controls Component */}
+            <MobileControls />
+          </>
         )}
-<MobileControls />
+
         {/* REMOVE REACT BALLOONS - We're using DOM balloons now */}
         {/* The working balloons are created directly in DOM via the window functions above */}
       </ReactClippyProvider>
@@ -810,7 +848,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   );
 };
 
-// ZOOM-AWARE: Startup-aware controller with zoom-aware resize handling integration
+// ENHANCED: StartupAwareClippyController with mobile drag support
 const StartupAwareClippyController = ({
   visible,
   isScreenPoweredOn,
@@ -819,6 +857,8 @@ const StartupAwareClippyController = ({
   overlayRef,
   getCustomPosition,
   resizeHandlingActiveRef,
+  positionLocked, // NEW
+  isDragging,     // NEW
 }) => {
   const { clippy } = useClippy();
   const rafRef = useRef(null);
@@ -828,6 +868,16 @@ const StartupAwareClippyController = ({
   const tapTimeoutRef = useRef(null);
   const errorCountRef = useRef(0);
   const setupAttemptRef = useRef(0);
+
+  // NEW: Mobile drag handling refs
+  const dragStateRef = useRef({
+    startX: 0,
+    startY: 0,
+    origX: 0,
+    origY: 0,
+    longPressTimer: null,
+    dragStarted: false,
+  });
 
   // Mobile-optimized update intervals
   const updateInterval = isMobile ? 2000 : 1000;
@@ -958,91 +1008,203 @@ const StartupAwareClippyController = ({
 
             if (!overlay) return false;
 
-            // Mobile-optimized event handlers (keeping existing code...)
-            const handleInteraction = (e) => {
-              if (!mountedRef.current) return;
-
-              safeExecute(
-                () => {
-                  e.preventDefault();
-                  e.stopPropagation();
-
-                  if (clippy.play) {
-                    clippy.play("Greeting");
-
-                    setTimeout(() => {
-                      if (
-                        window.showClippyCustomBalloon &&
-                        mountedRef.current
-                      ) {
-                        const messages = [
-                          isMobile
-                            ? "Tap me again for more help!"
-                            : "Double-click me again for more help!",
-                          "Need assistance? I'm here to help!",
-                          "What can I help you with today?",
-                        ];
-                        tapCountRef.current =
-                          (tapCountRef.current + 1) % messages.length;
-                        window.showClippyCustomBalloon(
-                          messages[tapCountRef.current]
-                        );
-                      }
-                    }, 800);
-                  }
-                },
-                null,
-                "interaction handling"
-              );
-            };
-
-            // Add event listeners based on device type (keeping existing mobile/desktop logic...)
+            // NEW: Enhanced mobile interaction setup
             if (isMobile) {
-              // Mobile: tap and long press
-              overlay.addEventListener("touchstart", handleInteraction, {
-                passive: false,
-              });
+              // NEW: Enhanced touch handling with drag support
+              const handleEnhancedTouchStart = (e) => {
+                if (!mountedRef.current) return;
 
-              // Long press for chat with safety
-              let longPressTimer;
-              overlay.addEventListener(
-                "touchstart",
-                (e) => {
-                  safeExecute(
-                    () => {
-                      longPressTimer = setTimeout(() => {
-                        if (
-                          window.showClippyChatBalloon &&
-                          mountedRef.current
-                        ) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const touch = e.touches[0];
+                const dragState = dragStateRef.current;
+
+                dragState.startX = touch.clientX;
+                dragState.startY = touch.clientY;
+                dragState.dragStarted = false;
+
+                // Get current position for drag calculations
+                if (!positionLocked) {
+                  safeExecute(() => {
+                    const pos = ClippyPositioning?.calculateMobilePosition?.();
+                    if (pos) {
+                      dragState.origX = parseInt(pos.right, 10) || 0;
+                      dragState.origY = parseInt(pos.bottom, 10) || 0;
+                    }
+                  }, null, "drag position calculation");
+                }
+
+                // Set up long-press timer for chat (if not locked)
+                if (!positionLocked) {
+                  dragState.longPressTimer = setTimeout(() => {
+                    if (!dragState.dragStarted && mountedRef.current) {
+                      safeExecute(() => {
+                        if (window.showClippyChatBalloon) {
                           window.showClippyChatBalloon(
                             "Hi! What would you like to chat about?"
                           );
                         }
+                      }, null, "long press chat");
+                    }
+                  }, 800);
+                } else {
+                  // If locked, show regular interaction
+                  safeExecute(() => {
+                    if (clippy.play) {
+                      clippy.play("Greeting");
+                      setTimeout(() => {
+                        if (window.showClippyCustomBalloon && mountedRef.current) {
+                          window.showClippyCustomBalloon("Position is locked! Unlock to drag me around.");
+                        }
                       }, 800);
-                    },
-                    null,
-                    "long press setup"
-                  );
-                },
-                { passive: false }
-              );
+                    }
+                  }, null, "locked interaction");
+                }
 
-              overlay.addEventListener(
-                "touchend",
-                () => {
-                  safeExecute(
-                    () => {
-                      clearTimeout(longPressTimer);
-                    },
-                    null,
-                    "long press cleanup"
+                // Add move and end listeners
+                document.addEventListener('touchmove', handleEnhancedTouchMove, { passive: false });
+                document.addEventListener('touchend', handleEnhancedTouchEnd, { passive: false });
+                document.addEventListener('touchcancel', handleEnhancedTouchEnd, { passive: false });
+              };
+
+              const handleEnhancedTouchMove = (e) => {
+                if (!mountedRef.current || positionLocked) return;
+
+                const touch = e.touches[0];
+                const dragState = dragStateRef.current;
+
+                // Check if drag threshold is crossed
+                const deltaX = Math.abs(touch.clientX - dragState.startX);
+                const deltaY = Math.abs(touch.clientY - dragState.startY);
+
+                if (!dragState.dragStarted && (deltaX > 10 || deltaY > 10)) {
+                  // Cancel long-press and start drag
+                  clearTimeout(dragState.longPressTimer);
+                  dragState.dragStarted = true;
+                  
+                  if (window.setClippyDragging) {
+                    window.setClippyDragging(true);
+                  }
+                }
+
+                if (dragState.dragStarted) {
+                  e.preventDefault();
+
+                  const totalDeltaX = touch.clientX - dragState.startX;
+                  const totalDeltaY = touch.clientY - dragState.startY;
+
+                  // Calculate new position with boundary enforcement
+                  const viewportWidth = window.innerWidth;
+                  const viewportHeight = window.innerHeight;
+
+                  const newRight = Math.max(
+                    0,
+                    Math.min(
+                      viewportWidth - 60, // Clippy width approximation
+                      dragState.origX - totalDeltaX
+                    )
                   );
-                },
-                { passive: false }
-              );
+
+                  const newBottom = Math.max(
+                    80, // Above taskbar
+                    Math.min(
+                      viewportHeight - 80, // Clippy height approximation
+                      dragState.origY - totalDeltaY
+                    )
+                  );
+
+                  // Apply new position using existing positioning system
+                  const clippyEl = document.querySelector('.clippy');
+                  if (clippyEl && ClippyPositioning) {
+                    const customPosition = {
+                      right: `${newRight}px`,
+                      bottom: `${newBottom}px`
+                    };
+
+                    safeExecute(() => {
+                      ClippyPositioning.positionClippy(clippyEl, customPosition);
+                      
+                      // Update overlay position
+                      if (overlayRef.current) {
+                        ClippyPositioning.positionOverlay(overlayRef.current, clippyEl);
+                      }
+                    }, null, "drag positioning");
+                  }
+                }
+              };
+
+              const handleEnhancedTouchEnd = (e) => {
+                const dragState = dragStateRef.current;
+
+                // Clean up event listeners
+                document.removeEventListener('touchmove', handleEnhancedTouchMove);
+                document.removeEventListener('touchend', handleEnhancedTouchEnd);
+                document.removeEventListener('touchcancel', handleEnhancedTouchEnd);
+
+                // Clear timers
+                clearTimeout(dragState.longPressTimer);
+
+                // Reset drag state
+                if (dragState.dragStarted) {
+                  setTimeout(() => {
+                    if (window.setClippyDragging) {
+                      window.setClippyDragging(false);
+                    }
+                  }, 100);
+                }
+
+                dragState.dragStarted = false;
+              };
+
+              // Set up the enhanced touch handler
+              overlay.addEventListener('touchstart', handleEnhancedTouchStart, { passive: false });
+
+              // Store cleanup function
+              overlay._mobileCleanup = () => {
+                overlay.removeEventListener('touchstart', handleEnhancedTouchStart);
+                document.removeEventListener('touchmove', handleEnhancedTouchMove);
+                document.removeEventListener('touchend', handleEnhancedTouchEnd);
+                document.removeEventListener('touchcancel', handleEnhancedTouchEnd);
+                clearTimeout(dragStateRef.current.longPressTimer);
+              };
             } else {
-              // Desktop: double-click
+              // Desktop: double-click interaction (existing code)
+              const handleInteraction = (e) => {
+                if (!mountedRef.current) return;
+
+                safeExecute(
+                  () => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (clippy.play) {
+                      clippy.play("Greeting");
+
+                      setTimeout(() => {
+                        if (
+                          window.showClippyCustomBalloon &&
+                          mountedRef.current
+                        ) {
+                          const messages = [
+                            "Double-click me again for more help!",
+                            "Need assistance? I'm here to help!",
+                            "What can I help you with today?",
+                          ];
+                          tapCountRef.current =
+                            (tapCountRef.current + 1) % messages.length;
+                          window.showClippyCustomBalloon(
+                            messages[tapCountRef.current]
+                          );
+                        }
+                      }, 800);
+                    }
+                  },
+                  null,
+                  "interaction handling"
+                );
+              };
+
               overlay.addEventListener("dblclick", handleInteraction);
             }
 
@@ -1101,28 +1263,6 @@ const StartupAwareClippyController = ({
       );
     };
 
-    // Rest of the code remains the same...
-    const updateLoop = (timestamp) => {
-      if (!mountedRef.current) return;
-
-      if (timestamp - lastUpdateRef.current > updateInterval) {
-        if (setupClippy()) {
-          errorCountRef.current = 0;
-        } else {
-          errorCountRef.current++;
-          if (errorCountRef.current > 10) {
-            console.warn(
-              "Clippy setup failing repeatedly, reducing update frequency"
-            );
-            return;
-          }
-        }
-        lastUpdateRef.current = timestamp;
-      }
-
-      rafRef.current = requestAnimationFrame(updateLoop);
-    };
-
     // Initial setup with retry logic
     let setupSuccess = false;
     for (let i = 0; i < 3 && !setupSuccess; i++) {
@@ -1133,6 +1273,27 @@ const StartupAwareClippyController = ({
     }
 
     if (setupSuccess) {
+      const updateLoop = (timestamp) => {
+        if (!mountedRef.current) return;
+
+        if (timestamp - lastUpdateRef.current > updateInterval) {
+          if (setupClippy()) {
+            errorCountRef.current = 0;
+          } else {
+            errorCountRef.current++;
+            if (errorCountRef.current > 10) {
+              console.warn(
+                "Clippy setup failing repeatedly, reducing update frequency"
+              );
+              return;
+            }
+          }
+          lastUpdateRef.current = timestamp;
+        }
+
+        rafRef.current = requestAnimationFrame(updateLoop);
+      };
+
       rafRef.current = requestAnimationFrame(updateLoop);
     }
 
@@ -1158,12 +1319,19 @@ const StartupAwareClippyController = ({
             clearTimeout(currentTapTimeout);
           }
           if (overlayRef.current && overlayRef.current.parentNode) {
+            // NEW: Mobile drag cleanup
+            if (overlayRef.current._mobileCleanup) {
+              overlayRef.current._mobileCleanup();
+            }
+            
             overlayRef.current.parentNode.removeChild(overlayRef.current);
             overlayRef.current = null;
           }
+          
+          clearTimeout(dragStateRef.current.longPressTimer);
         },
         null,
-        "controller cleanup"
+        "enhanced controller cleanup"
       );
     };
   }, [
@@ -1174,6 +1342,8 @@ const StartupAwareClippyController = ({
     updateInterval,
     getCustomPosition,
     resizeHandlingActiveRef,
+    positionLocked, // NEW
+    isDragging,     // NEW
   ]);
 
   return null;
