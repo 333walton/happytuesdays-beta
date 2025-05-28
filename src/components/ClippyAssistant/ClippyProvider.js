@@ -1,4 +1,6 @@
-// ClippyProvider.js - Optimized for iOS Safari drag support and reduced latency
+// ClippyProvider.js - Fixed Mobile Drag Implementation
+// Key fixes: Simplified touch handling, better event management, reliable drag detection
+
 import React, {
   createContext,
   useState,
@@ -20,7 +22,7 @@ import "./_styles.scss";
 
 const ClippyContext = createContext(null);
 
-// Optimized device detection
+// Device detection
 const detectMobile = () => {
   try {
     if (typeof window === "undefined") return false;
@@ -35,13 +37,20 @@ const detectMobile = () => {
 const isMobile = detectMobile();
 const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
 
-// Reduced logging wrapper
+// Development logging
+const isDev = process.env.NODE_ENV === 'development';
+const devLog = (message, ...args) => {
+  if (isDev) {
+    console.log(`🎛️ ClippyProvider: ${message}`, ...args);
+  }
+};
+
+// Safe execution wrapper
 const safeExecute = (operation, fallback = null, context = "operation") => {
   try {
     return operation();
   } catch (error) {
-    // Only log errors in development
-    if (process.env.NODE_ENV === 'development') {
+    if (isDev) {
       console.warn(`ClippyProvider error in ${context}:`, error);
     }
     return fallback;
@@ -77,7 +86,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     );
   });
 
-  // Optimized startup sequence monitoring
+  // Startup sequence monitoring (simplified)
   useEffect(() => {
     let isMonitoring = true;
 
@@ -121,7 +130,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     };
   }, [startupComplete]);
 
-  // Optimized zoom monitoring
+  // Zoom monitoring (simplified)
   useEffect(() => {
     if (isMobile || !mountedRef.current) return;
 
@@ -149,7 +158,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       }
     };
 
-    const zoomCheckInterval = setInterval(checkZoomChange, 100); // Reduced frequency
+    const zoomCheckInterval = setInterval(checkZoomChange, 100);
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -170,7 +179,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     };
   }, []);
 
-  // Simplified error rate limiting
+  // Error rate limiting
   const isErrorRateLimited = useCallback(() => {
     const now = Date.now();
     if (now - lastErrorRef.current < 1000) {
@@ -182,7 +191,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     return errorCountRef.current > 5;
   }, []);
 
-  // Optimized global function creation
+  // Global function creation
   const createSafeGlobalFunction = useCallback(
     (fn, functionName) => {
       return (...args) => {
@@ -212,7 +221,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     [isErrorRateLimited]
   );
 
-  // Initialize global functions
+  // Initialize global functions (simplified)
   useEffect(() => {
     if (typeof window !== "undefined" && !window._clippyGlobalsInitialized) {
       window._clippyGlobalsInitialized = true;
@@ -265,7 +274,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return true;
       }, "setScreenPowerState");
 
-      // Optimized balloon functions
+      // Balloon functions (keeping existing working implementation)
       window.showClippyCustomBalloon = createSafeGlobalFunction((message) => {
         document.querySelectorAll(".custom-clippy-balloon").forEach((el) => el.remove());
 
@@ -307,7 +316,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return true;
       }, "hideClippyCustomBalloon");
 
-      // Chat balloon with iOS Safari optimizations
+      // Chat balloon function (keeping working implementation)
       window.showClippyChatBalloon = createSafeGlobalFunction((initialMessage) => {
         document.querySelectorAll(".custom-clippy-chat-balloon").forEach((el) => el.remove());
 
@@ -447,7 +456,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     };
   }, [assistantVisible, isScreenPoweredOn, createSafeGlobalFunction, positionLocked]);
 
-  // Custom position getter for resize handling
+  // Custom position getter
   const getCustomPosition = useCallback(() => {
     if (isMobile) return null;
     return position;
@@ -483,7 +492,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         {children}
         {startupComplete && (
           <>
-            <OptimizedClippyController
+            <FixedClippyController
               visible={assistantVisible}
               isScreenPoweredOn={isScreenPoweredOn}
               position={position}
@@ -502,8 +511,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   );
 };
 
-// OPTIMIZED: Enhanced ClippyController with iOS Safari drag support
-const OptimizedClippyController = ({
+// FIXED: Simplified ClippyController with reliable mobile drag
+const FixedClippyController = ({
   visible,
   isScreenPoweredOn,
   position,
@@ -519,36 +528,30 @@ const OptimizedClippyController = ({
   const mountedRef = useRef(false);
   const setupAttemptRef = useRef(0);
 
-  // iOS Safari optimized drag handling
+  // SIMPLIFIED: Mobile drag state
   const dragStateRef = useRef({
     startX: 0,
     startY: 0,
-    origX: 0,
-    origY: 0,
+    origRightPx: 0,
+    origBottomPx: 0,
     longPressTimer: null,
     dragStarted: false,
-    lastMoveTime: 0,
+    lastInteraction: 0,
   });
 
-  // COOLDOWN SYSTEM - Optimized
-  const cooldownRef = useRef(false);
-  const lastInteractionRef = useRef(0);
-  const COOLDOWN_DURATION = 1500; // Reduced from 2000ms
+  // SIMPLIFIED: Cooldown system
+  const COOLDOWN_DURATION = 1500;
 
   const isInCooldown = useCallback(() => {
     const now = Date.now();
-    return now - lastInteractionRef.current < COOLDOWN_DURATION;
+    return now - dragStateRef.current.lastInteraction < COOLDOWN_DURATION;
   }, []);
 
   const startCooldown = useCallback(() => {
-    lastInteractionRef.current = Date.now();
-    cooldownRef.current = true;
-    setTimeout(() => {
-      cooldownRef.current = false;
-    }, COOLDOWN_DURATION);
+    dragStateRef.current.lastInteraction = Date.now();
   }, []);
 
-  // OPTIMIZED: Enhanced interaction handler
+  // SIMPLIFIED: Interaction handler
   const handleInteractionWithCooldown = useCallback((e, interactionType = "tap") => {
     if (isInCooldown()) {
       e.preventDefault();
@@ -579,106 +582,106 @@ const OptimizedClippyController = ({
     }, false, `${interactionType} interaction`);
   }, [isInCooldown, startCooldown, mountedRef, clippy]);
 
-  // iOS SAFARI OPTIMIZED: Enhanced touch handlers
-  const createIOSOptimizedTouchHandlers = useCallback(() => {
-    let touchMoveHandler;
-    let touchEndHandler;
+  // FIXED: Simplified mobile touch handlers
+  const createSimplifiedTouchHandlers = useCallback(() => {
+    let moveHandler = null;
+    let endHandler = null;
 
-    const handleIOSTouchStart = (e) => {
+    const handleTouchStart = (e) => {
       if (!mountedRef.current) return;
 
-      // CRITICAL: Prevent iOS Safari default behaviors
-      e.preventDefault();
-      e.stopPropagation();
+      devLog('Touch start detected, position locked:', positionLocked);
 
+      // CRITICAL: Don't prevent default on touchstart for iOS Safari
       const touch = e.touches[0];
       const dragState = dragStateRef.current;
 
       dragState.startX = touch.clientX;
       dragState.startY = touch.clientY;
       dragState.dragStarted = false;
-      dragState.lastMoveTime = Date.now();
 
-      // Cancel any running animations immediately for iOS Safari
-      if (window.clippy && window.clippy.stop) {
-        window.clippy.stop();
-      }
-
+      // Get current Clippy position
       if (!positionLocked) {
-        safeExecute(() => {
-          const clippyEl = document.querySelector('.clippy');
-          if (clippyEl) {
-            const rect = clippyEl.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-            
-            dragState.origX = viewportWidth - rect.right;
-            dragState.origY = viewportHeight - rect.bottom;
-          }
-        }, null, "drag position calculation");
+        const clippyEl = document.querySelector('.clippy');
+        if (clippyEl) {
+          const rect = clippyEl.getBoundingClientRect();
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          
+          // Calculate current right/bottom values
+          dragState.origRightPx = viewportWidth - rect.right;
+          dragState.origBottomPx = viewportHeight - rect.bottom;
+          
+          devLog(`Current position - right: ${dragState.origRightPx}px, bottom: ${dragState.origBottomPx}px`);
+        }
       }
 
-      // iOS SAFARI OPTIMIZED: Touch move handler
-      touchMoveHandler = (e) => {
+      // Create move handler
+      moveHandler = (e) => {
         if (!mountedRef.current || positionLocked) return;
 
-        // CRITICAL: Prevent iOS Safari scroll
-        e.preventDefault();
-        e.stopPropagation();
-
         const touch = e.touches[0];
-        const dragState = dragStateRef.current;
-        const now = Date.now();
-
-        // iOS Safari optimization: Throttle move events
-        if (now - dragState.lastMoveTime < 16) return; // ~60fps
-        dragState.lastMoveTime = now;
-
         const deltaX = Math.abs(touch.clientX - dragState.startX);
         const deltaY = Math.abs(touch.clientY - dragState.startY);
 
-        if (!dragState.dragStarted && (deltaX > 8 || deltaY > 8)) { // Reduced threshold for iOS
+        // Start drag when threshold crossed
+        if (!dragState.dragStarted && (deltaX > 10 || deltaY > 10)) {
           clearTimeout(dragState.longPressTimer);
           dragState.dragStarted = true;
+          
+          // Prevent default AFTER drag starts to allow initial tap detection
+          e.preventDefault();
           
           if (window.setClippyDragging) {
             window.setClippyDragging(true);
           }
-
-          // iOS Safari: Cancel all animations immediately
-          const clippyEl = document.querySelector('.clippy');
-          if (clippyEl) {
-            clippyEl.style.transition = 'none';
-            clippyEl.style.animation = 'none';
-          }
+          
+          devLog('Started dragging');
         }
 
         if (dragState.dragStarted) {
+          e.preventDefault(); // Now prevent default during drag
+          
           const totalDeltaX = touch.clientX - dragState.startX;
           const totalDeltaY = touch.clientY - dragState.startY;
 
           const viewportWidth = window.innerWidth;
           const viewportHeight = window.innerHeight;
 
-          const newRight = Math.max(10, Math.min(viewportWidth - 70, dragState.origX - totalDeltaX));
-          const newBottom = Math.max(90, Math.min(viewportHeight - 90, dragState.origY - totalDeltaY));
+          // Calculate new position
+          const newRightPx = Math.max(
+            10,
+            Math.min(
+              viewportWidth - 70,
+              dragState.origRightPx - totalDeltaX
+            )
+          );
 
+          const newBottomPx = Math.max(
+            90,
+            Math.min(
+              viewportHeight - 90,
+              dragState.origBottomPx - totalDeltaY
+            )
+          );
+
+          // Apply position directly for maximum performance
           const clippyEl = document.querySelector('.clippy');
           if (clippyEl) {
-            // iOS Safari: Direct style application for maximum performance
             clippyEl.style.position = 'fixed';
-            clippyEl.style.right = `${newRight}px`;
-            clippyEl.style.bottom = `${newBottom}px`;
+            clippyEl.style.right = `${newRightPx}px`;
+            clippyEl.style.bottom = `${newBottomPx}px`;
             clippyEl.style.left = 'auto';
             clippyEl.style.top = 'auto';
             clippyEl.style.transform = 'translateZ(0) scale(1.05)';
             clippyEl.style.zIndex = '1550';
+            clippyEl.style.transition = 'none';
 
-            // Sync overlay immediately
+            // Sync overlay
             if (overlayRef.current) {
               overlayRef.current.style.position = 'fixed';
-              overlayRef.current.style.right = `${newRight}px`;
-              overlayRef.current.style.bottom = `${newBottom}px`;
+              overlayRef.current.style.right = `${newRightPx}px`;
+              overlayRef.current.style.bottom = `${newBottomPx}px`;
               overlayRef.current.style.left = 'auto';
               overlayRef.current.style.top = 'auto';
             }
@@ -686,14 +689,20 @@ const OptimizedClippyController = ({
         }
       };
 
-      // iOS SAFARI OPTIMIZED: Touch end handler
-      touchEndHandler = (e) => {
+      // Create end handler
+      endHandler = (e) => {
         const dragState = dragStateRef.current;
 
+        devLog('Touch end, was dragging:', dragState.dragStarted);
+
         // Clean up event listeners
-        document.removeEventListener('touchmove', touchMoveHandler, { passive: false });
-        document.removeEventListener('touchend', touchEndHandler, { passive: false });
-        document.removeEventListener('touchcancel', touchEndHandler, { passive: false });
+        if (moveHandler) {
+          document.removeEventListener('touchmove', moveHandler);
+        }
+        if (endHandler) {
+          document.removeEventListener('touchend', endHandler);
+          document.removeEventListener('touchcancel', endHandler);
+        }
 
         clearTimeout(dragState.longPressTimer);
 
@@ -704,11 +713,9 @@ const OptimizedClippyController = ({
           // End drag mode
           const clippyEl = document.querySelector('.clippy');
           if (clippyEl) {
-            // Reset styles
-            clippyEl.style.transition = '';
-            clippyEl.style.animation = '';
             clippyEl.style.transform = 'translateZ(0) scale(0.8)';
             clippyEl.style.zIndex = '1500';
+            clippyEl.style.transition = '';
           }
 
           setTimeout(() => {
@@ -721,18 +728,16 @@ const OptimizedClippyController = ({
         dragState.dragStarted = false;
       };
 
-      // Long-press handling
+      // Set up long-press timer
       if (!positionLocked) {
         dragState.longPressTimer = setTimeout(() => {
           if (!dragState.dragStarted && mountedRef.current) {
             if (isInCooldown()) return;
             startCooldown();
 
-            safeExecute(() => {
-              if (window.showClippyChatBalloon) {
-                window.showClippyChatBalloon("Hi! What would you like to chat about?");
-              }
-            }, null, "long press chat");
+            if (window.showClippyChatBalloon) {
+              window.showClippyChatBalloon("Hi! What would you like to chat about?");
+            }
           }
         }, 800);
       } else {
@@ -741,47 +746,45 @@ const OptimizedClippyController = ({
             if (isInCooldown()) return;
             startCooldown();
 
-            safeExecute(() => {
-              if (clippy.play) {
-                clippy.play("Greeting");
-                setTimeout(() => {
-                  if (window.showClippyCustomBalloon && mountedRef.current) {
-                    window.showClippyCustomBalloon("Position is locked! Unlock to drag me around.");
-                  }
-                }, 800);
-              }
-            }, null, "locked interaction");
+            if (clippy.play) {
+              clippy.play("Greeting");
+              setTimeout(() => {
+                if (window.showClippyCustomBalloon && mountedRef.current) {
+                  window.showClippyCustomBalloon("Position is locked! Unlock to drag me around.");
+                }
+              }, 800);
+            }
           }
         }, 400);
       }
 
-      // Add event listeners with passive: false for iOS Safari
-      document.addEventListener('touchmove', touchMoveHandler, { passive: false });
-      document.addEventListener('touchend', touchEndHandler, { passive: false });
-      document.addEventListener('touchcancel', touchEndHandler, { passive: false });
+      // Add event listeners - using default passive behavior initially
+      document.addEventListener('touchmove', moveHandler, { passive: false });
+      document.addEventListener('touchend', endHandler, { passive: true });
+      document.addEventListener('touchcancel', endHandler, { passive: true });
     };
 
     return {
-      handleIOSTouchStart,
+      handleTouchStart,
       cleanup: () => {
-        if (touchMoveHandler) {
-          document.removeEventListener('touchmove', touchMoveHandler, { passive: false });
+        if (moveHandler) {
+          document.removeEventListener('touchmove', moveHandler);
         }
-        if (touchEndHandler) {
-          document.removeEventListener('touchend', touchEndHandler, { passive: false });
-          document.removeEventListener('touchcancel', touchEndHandler, { passive: false });
+        if (endHandler) {
+          document.removeEventListener('touchend', endHandler);
+          document.removeEventListener('touchcancel', endHandler);
         }
         clearTimeout(dragStateRef.current.longPressTimer);
       }
     };
-  }, [handleInteractionWithCooldown, isInCooldown, startCooldown, positionLocked]);
+  }, [handleInteractionWithCooldown, isInCooldown, startCooldown, positionLocked, clippy]);
 
-  // Desktop interaction handler
+  // Desktop interaction
   const handleDesktopInteraction = useCallback((e) => {
     return handleInteractionWithCooldown(e, "double-click");
   }, [handleInteractionWithCooldown]);
 
-  // Main setup effect - OPTIMIZED
+  // Main setup effect
   useEffect(() => {
     if (!clippy || !visible) return;
 
@@ -798,13 +801,13 @@ const OptimizedClippyController = ({
         const clippyEl = document.querySelector(".clippy");
         if (!clippyEl) return false;
 
-        // OPTIMIZED: Initial positioning
+        // Initial positioning
         const setupInitialPositioning = () => {
           const initialZoomLevel = parseInt(document.body.getAttribute("data-zoom")) || 0;
-
+          
           if (isMobile) {
-            const mobilePosition = ClippyPositioning?.calculateMobilePosition();
-            return ClippyPositioning?.positionClippy(clippyEl, mobilePosition);
+            const mobilePosition = ClippyPositioning?.calculateEnhancedMobilePosition();
+            return ClippyPositioning?.applyMobilePosition(clippyEl, mobilePosition, false);
           } else {
             if (ClippyPositioning?.forceImmediateZoomPositioning) {
               return ClippyPositioning.forceImmediateZoomPositioning(clippyEl, initialZoomLevel);
@@ -822,37 +825,22 @@ const OptimizedClippyController = ({
           opacity: isScreenPoweredOn ? "1" : "0",
           pointerEvents: "none",
         };
-
         ClippyPositioning?.applyStyles(clippyEl, visibilityStyles);
 
-        // Setup overlay - OPTIMIZED
+        // Setup overlay
         if (!overlayRef.current && mountedRef.current) {
           const overlay = document.createElement("div");
           overlay.id = "clippy-clickable-overlay";
 
-          // iOS Safari optimized event handling
+          // FIXED: Mobile interaction setup
           if (isMobile) {
-            if (isIOSSafari) {
-              // iOS Safari specific setup
-              const handlers = createIOSOptimizedTouchHandlers();
-              overlay.addEventListener('touchstart', handlers.handleIOSTouchStart, { passive: false });
-              overlay._handlers = handlers;
-              overlay._mobileCleanup = () => {
-                overlay.removeEventListener('touchstart', handlers.handleIOSTouchStart);
-                handlers.cleanup();
-              };
-            } else {
-              // Other mobile browsers
-              const handlers = createIOSOptimizedTouchHandlers(); // Same optimized handlers work for all mobile
-              overlay.addEventListener('touchstart', handlers.handleIOSTouchStart, { passive: false });
-              overlay._handlers = handlers;
-              overlay._mobileCleanup = () => {
-                overlay.removeEventListener('touchstart', handlers.handleIOSTouchStart);
-                handlers.cleanup();
-              };
-            }
+            const handlers = createSimplifiedTouchHandlers();
+            overlay.addEventListener('touchstart', handlers.handleTouchStart, { passive: true });
+            
+            // Store cleanup function
+            overlay._cleanupHandlers = handlers.cleanup;
           } else {
-            // Desktop: double-click
+            // Desktop: double-click interaction
             overlay.addEventListener("dblclick", handleDesktopInteraction);
           }
 
@@ -861,11 +849,7 @@ const OptimizedClippyController = ({
         }
 
         // Synchronized positioning
-        const syncSuccess = ClippyPositioning?.positionClippyAndOverlay(
-          clippyEl,
-          overlayRef.current,
-          null
-        );
+        ClippyPositioning?.positionClippyAndOverlay(clippyEl, overlayRef.current, null);
 
         if (overlayRef.current) {
           ClippyPositioning?.applyStyles(overlayRef.current, {
@@ -886,24 +870,32 @@ const OptimizedClippyController = ({
           }
         }
 
-        return positionSuccess && syncSuccess;
+        return positionSuccess;
       }, false, "clippy setup");
     };
 
-    // Initial setup
-    let setupSuccess = setupClippy();
+    // Initial setup with retry logic
+    let setupSuccess = false;
+    for (let i = 0; i < 3 && !setupSuccess; i++) {
+      setupSuccess = setupClippy();
+      if (!setupSuccess && isDev) {
+        console.warn(`Clippy setup attempt ${i + 1} failed, retrying...`);
+      }
+    }
 
-    // Reduced update loop frequency for performance
     if (setupSuccess) {
-      const updateLoop = () => {
+      const updateInterval = isMobile ? 3000 : 2000;
+      const updateLoop = (timestamp) => {
         if (!mountedRef.current) return;
 
-        setupClippy();
-        setTimeout(() => {
-          if (mountedRef.current) {
-            rafRef.current = requestAnimationFrame(updateLoop);
+        if (timestamp - (rafRef.current?.lastUpdate || 0) > updateInterval) {
+          setupClippy();
+          if (rafRef.current) {
+            rafRef.current.lastUpdate = timestamp;
           }
-        }, 2000); // Reduced frequency
+        }
+
+        rafRef.current = requestAnimationFrame(updateLoop);
       };
 
       rafRef.current = requestAnimationFrame(updateLoop);
@@ -913,6 +905,7 @@ const OptimizedClippyController = ({
       mountedRef.current = false;
 
       safeExecute(() => {
+        // Stop resize handling
         const clippyEl = document.querySelector(".clippy");
         if (resizeHandlingActiveRef.current && clippyEl) {
           ClippyPositioning?.stopResizeHandling(clippyEl);
@@ -924,13 +917,15 @@ const OptimizedClippyController = ({
         }
 
         if (overlayRef.current && overlayRef.current.parentNode) {
-          if (overlayRef.current._mobileCleanup) {
-            overlayRef.current._mobileCleanup();
+          // Clean up mobile handlers
+          if (overlayRef.current._cleanupHandlers) {
+            overlayRef.current._cleanupHandlers();
           }
+          
           overlayRef.current.parentNode.removeChild(overlayRef.current);
           overlayRef.current = null;
         }
-
+        
         clearTimeout(dragStateRef.current.longPressTimer);
       }, null, "controller cleanup");
     };
@@ -943,7 +938,7 @@ const OptimizedClippyController = ({
     resizeHandlingActiveRef,
     positionLocked,
     isDragging,
-    createIOSOptimizedTouchHandlers,
+    createSimplifiedTouchHandlers,
     handleDesktopInteraction,
   ]);
 
