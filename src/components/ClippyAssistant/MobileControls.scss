@@ -1,0 +1,168 @@
+/* src/components/ClippyAssistant/MobileControls.scss */
+/* Mobile Controls styling - Following PDF specification exactly */
+
+.mobile-controls-container {
+  position: fixed;
+  bottom: calc(var(--taskbar-height, 40px) + 25px);
+  /* Raised from 5px to 25px */
+  right: 5px;
+  display: flex;
+  gap: 4px;
+  z-index: 1000;
+
+  /* Performance optimizations */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+
+  /* Prevent interference with other elements */
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* iOS Safari specific optimizations */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.control-button {
+  width: 28px;
+  height: 28px;
+  padding: 2px;
+
+  /* iOS Safari touch optimizations while maintaining PDF spec */
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+
+  /* Performance optimizations */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  /* Text color fixes for iOS Safari */
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+
+  /* Button interaction feedback */
+  transition: all 0.1s ease;
+
+  &:hover {
+    transform: translateZ(0) scale(1.02);
+  }
+
+  &:active {
+    transform: translateZ(0) scale(0.98);
+  }
+
+  /* Ensure emoji display properly on all platforms */
+  font-family: 'Apple Color Emoji',
+  'Segoe UI Emoji',
+  'Noto Color Emoji',
+  emoji,
+  sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+  /* Appropriate for 28px button */
+
+  /* Active state styling */
+  &[data-active="true"] {
+    background-color: #dfdfdf !important;
+    border-color: #808080 #ffffff #ffffff #808080 !important;
+  }
+}
+
+/* Responsive adjustments for different screen sizes */
+@media (max-width: 480px) {
+  .mobile-controls-container {
+    bottom: calc(var(--taskbar-height, 40px) + 12px);
+    right: 12px;
+    gap: 8px;
+  }
+
+  .control-button {
+    width: 48px !important;
+    /* Slightly larger on very small screens */
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    font-size: 20px !important;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mobile-controls-container {
+    bottom: 8px;
+    /* Reduced spacing in landscape */
+    right: 8px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+  .control-button {
+    /* Enhanced rendering on high DPI displays */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Dark mode compatibility (if implemented) */
+@media (prefers-color-scheme: dark) {
+  .mobile-controls-container {
+    /* Maintain Windows 98 styling regardless of system preference */
+    filter: none;
+  }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .control-button {
+    transition: none !important;
+    transform: translateZ(0) !important;
+
+    &:hover,
+    &:active {
+      transform: translateZ(0) !important;
+    }
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .control-button {
+    border-width: 3px !important;
+    font-weight: bold !important;
+  }
+}
+
+/* Hide during startup/shutdown sequences */
+.BIOSWrapper:not(.hidden)~* .mobile-controls-container,
+.WindowsLaunchWrapper:not(.hidden)~* .mobile-controls-container,
+.desktop.windowsShuttingDown .mobile-controls-container,
+.itIsNowSafeToTurnOffYourComputer .mobile-controls-container,
+body:has(.BIOSWrapper:not(.hidden)) .mobile-controls-container,
+body:has(.WindowsLaunchWrapper:not(.hidden)) .mobile-controls-container,
+body:has(.desktop.windowsShuttingDown) .mobile-controls-container,
+body:has(.itIsNowSafeToTurnOffYourComputer) .mobile-controls-container,
+.startup-sequence-active .mobile-controls-container,
+.shutdown-sequence-active .mobile-controls-container {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Screen power off state */
+body.screen-off .mobile-controls-container {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: visibility 0.3s, opacity 0.3s !important;
+}

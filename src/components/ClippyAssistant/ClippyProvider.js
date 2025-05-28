@@ -14,6 +14,7 @@ import {
 import CustomBalloon from "./CustomBalloon";
 import ChatBalloon from "./ChatBalloon";
 import ClippyPositioning from "./ClippyPositioning";
+import MobileControls from "./MobileControls";
 import "./_styles.scss";
 
 const ClippyContext = createContext(null);
@@ -801,7 +802,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             resizeHandlingActiveRef={resizeHandlingActiveRef}
           />
         )}
-
+<MobileControls />
         {/* REMOVE REACT BALLOONS - We're using DOM balloons now */}
         {/* The working balloons are created directly in DOM via the window functions above */}
       </ReactClippyProvider>
