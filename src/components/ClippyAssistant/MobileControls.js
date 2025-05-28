@@ -28,75 +28,29 @@ const MobileControlsContent = () => {
     // Update the context state
     setAssistantVisible(newVisibility);
 
-    // CRITICAL: Also use the global function like ClippyIntegration does
+    // CRITICAL: Use the global function to ensure coordination with ClippyIntegration
     if (window.setAssistantVisible) {
       console.log(`🎛️ Using global setAssistantVisible: ${newVisibility}`);
       window.setAssistantVisible(newVisibility);
     }
 
-    // Apply immediate DOM changes for visibility (similar to ClippyIntegration)
-    const clippyElement = document.querySelector(".clippy");
-    const overlayElement = document.getElementById("clippy-clickable-overlay");
-    const balloons = document.querySelectorAll(".custom-clippy-balloon, .custom-clippy-chat-balloon");
-
+    // COORDINATE WITH ClippyIntegration: Use body classes instead of direct DOM manipulation
+    // This way ClippyIntegration's CSS rules will still work properly
     if (newVisibility) {
-      // SHOW CLIPPY
-      console.log("📱 Mobile controls: Showing Clippy elements");
-      
-      if (clippyElement) {
-        clippyElement.style.visibility = "visible";
-        clippyElement.style.opacity = "1";
-        clippyElement.style.pointerEvents = "auto";
-        clippyElement.style.transition = "visibility 0.35s, opacity 0.35s";
+      // Remove the mobile hide class - let ClippyIntegration's CSS handle the rest
+      document.body.classList.remove("clippy-manually-hidden");
+      console.log("📱 Mobile controls: Removed manual hide class");
 
-        // Make SVG elements visible
-        const svgElements = clippyElement.querySelectorAll("svg");
-        svgElements.forEach((svg) => {
-          svg.style.visibility = "visible";
-          svg.style.opacity = "1";
-          svg.style.display = "inline";
-        });
-      }
-
-      if (overlayElement) {
-        overlayElement.style.visibility = "visible";
-        overlayElement.style.pointerEvents = "auto";
-        overlayElement.style.transition = "visibility 0.35s, opacity 0.35s";
-      }
-
-      // Update body class
-      document.body.classList.remove("clippy-hidden");
-
-      // Show feedback message after a brief delay
-      if (window.showClippyCustomBalloon) {
+      // Show feedback message after a brief delay (only if screen is also powered on)
+      if (isScreenPoweredOn && window.showClippyCustomBalloon) {
         setTimeout(() => {
           window.showClippyCustomBalloon("I'm back! Tap me for help.");
         }, 300);
       }
     } else {
-      // HIDE CLIPPY - Similar to ClippyIntegration's screen-off behavior
-      console.log("📱 Mobile controls: Hiding Clippy elements");
-      
-      if (clippyElement) {
-        clippyElement.style.visibility = "hidden";
-        clippyElement.style.opacity = "0";
-        clippyElement.style.pointerEvents = "none";
-      }
-
-      if (overlayElement) {
-        overlayElement.style.visibility = "hidden";
-        overlayElement.style.pointerEvents = "none";
-      }
-
-      // Hide all balloons immediately
-      balloons.forEach((balloon) => {
-        balloon.style.visibility = "hidden";
-        balloon.style.opacity = "0";
-        balloon.style.pointerEvents = "none";
-      });
-
-      // Update body class
-      document.body.classList.add("clippy-hidden");
+      // Add manual hide class that works alongside screen-off
+      document.body.classList.add("clippy-manually-hidden");
+      console.log("📱 Mobile controls: Added manual hide class");
 
       // Clean up any existing balloons
       if (window.hideClippyCustomBalloon) {
@@ -104,7 +58,6 @@ const MobileControlsContent = () => {
       }
     }
   };
-  
 
   const handleToggleLock = () => {
     const newLocked = !positionLocked;
@@ -125,15 +78,15 @@ const MobileControlsContent = () => {
     }
   };
 
-  // Monitor assistantVisible changes and apply DOM updates
+  // Monitor assistantVisible changes and apply CSS class coordination
   useEffect(() => {
     console.log(`🎛️ Mobile controls: assistantVisible changed to ${assistantVisible}`);
     
-    // Apply CSS class to body for consistent styling
+    // COORDINATE: Use a different class name that works WITH ClippyIntegration's screen-off
     if (assistantVisible) {
-      document.body.classList.remove("clippy-hidden");
+      document.body.classList.remove("clippy-manually-hidden");
     } else {
-      document.body.classList.add("clippy-hidden");
+      document.body.classList.add("clippy-manually-hidden");
     }
   }, [assistantVisible]);
 
@@ -193,32 +146,58 @@ const MobileControls = () => {
       const styleElement = document.createElement("style");
       styleElement.id = "mobile-clippy-visibility";
       styleElement.textContent = `
-        /* When Clippy is hidden via mobile controls */
-        body.clippy-hidden .clippy,
-        body.clippy-hidden #clippy-clickable-overlay,
-        body.clippy-hidden .custom-clippy-balloon,
-        body.clippy-hidden .custom-clippy-chat-balloon {
+        /* COORDINATE: When Clippy is manually hidden via mobile controls */
+        /* This works ALONGSIDE ClippyIntegration's screen-off class */
+        body.clippy-manually-hidden .clippy,
+        body.clippy-manually-hidden #clippy-clickable-overlay,
+        body.clippy-manually-hidden .custom-clippy-balloon,
+        body.clippy-manually-hidden .custom-clippy-chat-balloon {
           visibility: hidden !important;
           opacity: 0 !important;
           pointer-events: none !important;
-          transition: visibility 0.35s, opacity 0.35s !important;
+          transition: visibility 0.3s, opacity 0.3s !important;
         }
-          /* When Clippy is shown via mobile controls */
-body:not(.clippy-hidden) .clippy,
-body:not(.clippy-hidden) #clippy-clickable-overlay,
-body:not(.clippy-hidden) .custom-clippy-balloon,
-body:not(.clippy-hidden) .custom-clippy-chat-balloon {
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  transition: visibility 0.35s, opacity 0.35s !important; /* Ensure transition is applied */
-}
-
-        /* Ensure mobile controls stay visible when Clippy is hidden */
-        body.clippy-hidden .mobile-controls-container {
+        /* When Clippy is shown via mobile controls */
+        body:not(.clippy-manually-hidden) .clippy,
+        body:not(.clippy-manually-hidden) #clippy-clickable-overlay,
+        body:not(.clippy-manually-hidden) .custom-clippy-balloon,
+        body:not(.clippy-manually-hidden) .custom-clippy-chat-balloon {
           visibility: visible !important;
           opacity: 1 !important;
           pointer-events: auto !important;
+          transition: visibility 0.35s, opacity 0.35s !important;
+        }
+
+        /* PRIORITY: Screen off takes precedence over manual hide */
+        /* ClippyIntegration's screen-off class has higher specificity */
+        body.screen-off .clippy,
+        body.screen-off #clippy-clickable-overlay,
+        body.screen-off .custom-clippy-balloon,
+        body.screen-off .custom-clippy-chat-balloon {
+          visibility: hidden !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+          transition: visibility 0.3s, opacity 0.3s !important;
+        }
+
+        /* ENSURE: Mobile controls stay visible in both states */
+        body.clippy-manually-hidden .mobile-controls-container,
+        body.screen-off .mobile-controls-container {
+          visibility: visible !important;
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
+
+        /* COORDINATE: When both screen is off AND manually hidden */
+        body.screen-off.clippy-manually-hidden .clippy,
+        body.screen-off.clippy-manually-hidden #clippy-clickable-overlay,
+        body.screen-off.clippy-manually-hidden .custom-clippy-balloon,
+        body.screen-off.clippy-manually-hidden .custom-clippy-chat-balloon {
+          visibility: hidden !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+          body:not(.clippy-hidden);
+          transition: visibility 0.35s, opacity 0.35s !important;
         }
       `;
       document.head.appendChild(styleElement);
@@ -239,7 +218,7 @@ body:not(.clippy-hidden) .custom-clippy-chat-balloon {
       }
       
       // Remove body class
-      document.body.classList.remove("clippy-hidden");
+      document.body.classList.remove("clippy-manually-hidden");
     };
   }, []);
 

@@ -17,6 +17,21 @@ const readmeContent = {
       `,
     },
     {
+      title: "Tech",
+      image: "/static/cryptopunk.jpg",
+      content: `
+      <div class="intro-paragraph">
+        <ul>
+          <li>Built with React & Context API for state management</li>
+          <li>Packard Belle & React95 UI libraries for authentic components</li>
+          <li>CSS Modules & Styled Components for Windows 98 aesthetic</li>
+          <li>react-rnd for window resizing and dragging functionality</li>
+          <li>Organized component structure for maximum maintainability</li>
+        </ul>
+        </div>
+      `,
+    },
+    {
       title: "Features",
       image: "/static/computer-01.gif", // Corrected image path
       content: `
@@ -30,21 +45,6 @@ const readmeContent = {
           <li><b>Customization:</b> Wallpapers, themes, display settings</li>
           <li><b>File Saving:</b> LocalStorage persistence for your digital artifacts</li>
           <li>CRT Effect toggle for that authentic retro feel</li>
-        </ul>
-        </div>
-      `,
-    },
-    {
-      title: "Tech",
-      image: "/static/cryptopunk.jpg",
-      content: `
-      <div class="intro-paragraph">
-        <ul>
-          <li>Built with React & Context API for state management</li>
-          <li>Packard Belle & React95 UI libraries for authentic components</li>
-          <li>CSS Modules & Styled Components for Windows 98 aesthetic</li>
-          <li>react-rnd for window resizing and dragging functionality</li>
-          <li>Organized component structure for maximum maintainability</li>
         </ul>
         </div>
       `,
