@@ -848,7 +848,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   );
 };
 
-// ENHANCED: StartupAwareClippyController with mobile drag support
+// ENHANCED: StartupAwareClippyController with mobile drag support and COOLDOWN SYSTEM
 const StartupAwareClippyController = ({
   visible,
   isScreenPoweredOn,
@@ -869,6 +869,11 @@ const StartupAwareClippyController = ({
   const errorCountRef = useRef(0);
   const setupAttemptRef = useRef(0);
 
+  // NEW: Cooldown system refs
+  const cooldownRef = useRef(false);
+  const lastInteractionRef = useRef(0);
+  const COOLDOWN_DURATION = 2000; // 2 seconds
+
   // NEW: Mobile drag handling refs
   const dragStateRef = useRef({
     startX: 0,
@@ -882,6 +887,267 @@ const StartupAwareClippyController = ({
   // Mobile-optimized update intervals
   const updateInterval = isMobile ? 2000 : 1000;
   const maxSetupAttempts = 5;
+
+  // NEW: Cooldown checker function
+  const isInCooldown = useCallback(() => {
+    const now = Date.now();
+    const timeSinceLastInteraction = now - lastInteractionRef.current;
+    
+    if (timeSinceLastInteraction < COOLDOWN_DURATION) {
+      console.log(`🚫 Interaction blocked - cooldown active (${Math.ceil((COOLDOWN_DURATION - timeSinceLastInteraction) / 1000)}s remaining)`);
+      return true;
+    }
+    
+    return false;
+  }, []);
+
+  // NEW: Start cooldown function
+  const startCooldown = useCallback(() => {
+    const now = Date.now();
+    lastInteractionRef.current = now;
+    cooldownRef.current = true;
+    
+    console.log(`⏱️ Starting 2-second interaction cooldown`);
+    
+    // Clear cooldown after duration
+    setTimeout(() => {
+      cooldownRef.current = false;
+      console.log(`✅ Interaction cooldown ended`);
+    }, COOLDOWN_DURATION);
+  }, []);
+
+  // MODIFIED: Enhanced interaction handler with cooldown
+  const handleInteractionWithCooldown = useCallback((e, interactionType = "tap") => {
+    // IMMEDIATE COOLDOWN CHECK - Block if in cooldown
+    if (isInCooldown()) {
+      console.log(`🚫 ${interactionType} interaction ignored - cooldown active`);
+      e.preventDefault();
+      e.stopPropagation();
+      return false; // Explicitly return false to indicate blocked
+    }
+
+    // START COOLDOWN IMMEDIATELY
+    startCooldown();
+
+    if (!mountedRef.current) return false;
+
+    console.log(`✅ Processing ${interactionType} interaction`);
+
+    return safeExecute(
+      () => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (clippy.play) {
+          clippy.play("Greeting");
+
+          setTimeout(() => {
+            if (window.showClippyCustomBalloon && mountedRef.current) {
+              const messages = [
+                isMobile
+                  ? "Tap me again for more help!"
+                  : "Double-click me again for more help!",
+                "Need assistance? I'm here to help!",
+                "What can I help you with today?",
+              ];
+              tapCountRef.current = (tapCountRef.current + 1) % messages.length;
+              window.showClippyCustomBalloon(messages[tapCountRef.current]);
+            }
+          }, 800);
+        }
+        return true;
+      },
+      false,
+      `${interactionType} interaction handling`
+    );
+  }, [isInCooldown, startCooldown, mountedRef, clippy]);
+
+  // FIXED: Enhanced mobile touch handlers with cooldown
+  const createCooldownAwareTouchHandlers = useCallback(() => {
+    // Create handlers that maintain proper references
+    const handlers = {};
+
+    handlers.handleEnhancedTouchMove = (e) => {
+      if (!mountedRef.current || positionLocked) return;
+
+      const touch = e.touches[0];
+      const dragState = dragStateRef.current;
+
+      // Check if drag threshold is crossed
+      const deltaX = Math.abs(touch.clientX - dragState.startX);
+      const deltaY = Math.abs(touch.clientY - dragState.startY);
+
+      if (!dragState.dragStarted && (deltaX > 10 || deltaY > 10)) {
+        // Cancel long-press and start drag
+        clearTimeout(dragState.longPressTimer);
+        dragState.dragStarted = true;
+        
+        if (window.setClippyDragging) {
+          window.setClippyDragging(true);
+        }
+        
+        console.log(`🎯 Started dragging (no cooldown for drag movement)`);
+      }
+
+      if (dragState.dragStarted) {
+        e.preventDefault();
+
+        const totalDeltaX = touch.clientX - dragState.startX;
+        const totalDeltaY = touch.clientY - dragState.startY;
+
+        // Calculate new position with boundary enforcement
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        const newRight = Math.max(
+          0,
+          Math.min(
+            viewportWidth - 60,
+            dragState.origX - totalDeltaX
+          )
+        );
+
+        const newBottom = Math.max(
+          80,
+          Math.min(
+            viewportHeight - 80,
+            dragState.origY - totalDeltaY
+          )
+        );
+
+        // Apply new position using existing positioning system
+        const clippyEl = document.querySelector('.clippy');
+        if (clippyEl && ClippyPositioning) {
+          const customPosition = {
+            right: `${newRight}px`,
+            bottom: `${newBottom}px`
+          };
+
+          safeExecute(() => {
+            ClippyPositioning.positionClippy(clippyEl, customPosition);
+            
+            if (overlayRef.current) {
+              ClippyPositioning.positionOverlay(overlayRef.current, clippyEl);
+            }
+          }, null, "drag positioning");
+        }
+      }
+    };
+
+    handlers.handleEnhancedTouchEnd = (e) => {
+      const dragState = dragStateRef.current;
+
+      // Clean up event listeners
+      document.removeEventListener('touchmove', handlers.handleEnhancedTouchMove);
+      document.removeEventListener('touchend', handlers.handleEnhancedTouchEnd);
+      document.removeEventListener('touchcancel', handlers.handleEnhancedTouchEnd);
+
+      // Clear timers
+      clearTimeout(dragState.longPressTimer);
+
+      // Handle tap (if no drag occurred)
+      if (!dragState.dragStarted) {
+        // SIMPLE TAP INTERACTION WITH COOLDOWN CHECK
+        handleInteractionWithCooldown(e, "tap");
+      }
+
+      // Reset drag state
+      if (dragState.dragStarted) {
+        setTimeout(() => {
+          if (window.setClippyDragging) {
+            window.setClippyDragging(false);
+          }
+        }, 100);
+      }
+
+      dragState.dragStarted = false;
+    };
+
+    handlers.handleEnhancedTouchStart = (e) => {
+      if (!mountedRef.current) return;
+
+      const touch = e.touches[0];
+      const dragState = dragStateRef.current;
+
+      dragState.startX = touch.clientX;
+      dragState.startY = touch.clientY;
+      dragState.dragStarted = false;
+
+      // Get current position for drag calculations
+      if (!positionLocked) {
+        safeExecute(() => {
+          const pos = ClippyPositioning?.calculateMobilePosition?.();
+          if (pos) {
+            dragState.origX = parseInt(pos.right, 10) || 0;
+            dragState.origY = parseInt(pos.bottom, 10) || 0;
+          }
+        }, null, "drag position calculation");
+      }
+
+      // Set up long-press timer for chat (if not locked and not in cooldown)
+      if (!positionLocked) {
+        dragState.longPressTimer = setTimeout(() => {
+          if (!dragState.dragStarted && mountedRef.current) {
+            // CHECK COOLDOWN BEFORE LONG-PRESS CHAT
+            if (isInCooldown()) {
+              console.log(`🚫 Long-press chat ignored - cooldown active`);
+              return;
+            }
+
+            // START COOLDOWN FOR LONG-PRESS
+            startCooldown();
+
+            safeExecute(() => {
+              if (window.showClippyChatBalloon) {
+                console.log(`✅ Processing long-press chat interaction`);
+                window.showClippyChatBalloon(
+                  "Hi! What would you like to chat about?"
+                );
+              }
+            }, null, "long press chat");
+          }
+        }, 800);
+      } else {
+        // If locked, check cooldown before showing lock message
+        dragState.longPressTimer = setTimeout(() => {
+          if (!dragState.dragStarted && mountedRef.current) {
+            // CHECK COOLDOWN BEFORE LOCK MESSAGE
+            if (isInCooldown()) {
+              console.log(`🚫 Lock message ignored - cooldown active`);
+              return;
+            }
+
+            // START COOLDOWN FOR LOCK MESSAGE
+            startCooldown();
+
+            safeExecute(() => {
+              if (clippy.play) {
+                console.log(`✅ Processing locked position interaction`);
+                clippy.play("Greeting");
+                setTimeout(() => {
+                  if (window.showClippyCustomBalloon && mountedRef.current) {
+                    window.showClippyCustomBalloon("Position is locked! Unlock to drag me around.");
+                  }
+                }, 800);
+              }
+            }, null, "locked interaction");
+          }
+        }, 400); // Shorter delay for lock feedback
+      }
+
+      // Add move and end listeners using the handlers object
+      document.addEventListener('touchmove', handlers.handleEnhancedTouchMove, { passive: false });
+      document.addEventListener('touchend', handlers.handleEnhancedTouchEnd, { passive: false });
+      document.addEventListener('touchcancel', handlers.handleEnhancedTouchEnd, { passive: false });
+    };
+
+    return handlers;
+  }, [handleInteractionWithCooldown, isInCooldown, startCooldown, positionLocked, clippy]);
+
+  // MODIFIED: Desktop interaction with cooldown
+  const handleDesktopInteraction = useCallback((e) => {
+    return handleInteractionWithCooldown(e, "double-click");
+  }, [handleInteractionWithCooldown]);
 
   useEffect(() => {
     if (!clippy || !visible) return;
@@ -1008,204 +1274,23 @@ const StartupAwareClippyController = ({
 
             if (!overlay) return false;
 
-            // NEW: Enhanced mobile interaction setup
+            // MODIFIED: Enhanced mobile interaction setup WITH COOLDOWN
             if (isMobile) {
-              // NEW: Enhanced touch handling with drag support
-              const handleEnhancedTouchStart = (e) => {
-                if (!mountedRef.current) return;
-
-                e.preventDefault();
-                e.stopPropagation();
-
-                const touch = e.touches[0];
-                const dragState = dragStateRef.current;
-
-                dragState.startX = touch.clientX;
-                dragState.startY = touch.clientY;
-                dragState.dragStarted = false;
-
-                // Get current position for drag calculations
-                if (!positionLocked) {
-                  safeExecute(() => {
-                    const pos = ClippyPositioning?.calculateMobilePosition?.();
-                    if (pos) {
-                      dragState.origX = parseInt(pos.right, 10) || 0;
-                      dragState.origY = parseInt(pos.bottom, 10) || 0;
-                    }
-                  }, null, "drag position calculation");
-                }
-
-                // Set up long-press timer for chat (if not locked)
-                if (!positionLocked) {
-                  dragState.longPressTimer = setTimeout(() => {
-                    if (!dragState.dragStarted && mountedRef.current) {
-                      safeExecute(() => {
-                        if (window.showClippyChatBalloon) {
-                          window.showClippyChatBalloon(
-                            "Hi! What would you like to chat about?"
-                          );
-                        }
-                      }, null, "long press chat");
-                    }
-                  }, 800);
-                } else {
-                  // If locked, show regular interaction
-                  safeExecute(() => {
-                    if (clippy.play) {
-                      clippy.play("Greeting");
-                      setTimeout(() => {
-                        if (window.showClippyCustomBalloon && mountedRef.current) {
-                          window.showClippyCustomBalloon("Position is locked! Unlock to drag me around.");
-                        }
-                      }, 800);
-                    }
-                  }, null, "locked interaction");
-                }
-
-                // Add move and end listeners
-                document.addEventListener('touchmove', handleEnhancedTouchMove, { passive: false });
-                document.addEventListener('touchend', handleEnhancedTouchEnd, { passive: false });
-                document.addEventListener('touchcancel', handleEnhancedTouchEnd, { passive: false });
-              };
-
-              const handleEnhancedTouchMove = (e) => {
-                if (!mountedRef.current || positionLocked) return;
-
-                const touch = e.touches[0];
-                const dragState = dragStateRef.current;
-
-                // Check if drag threshold is crossed
-                const deltaX = Math.abs(touch.clientX - dragState.startX);
-                const deltaY = Math.abs(touch.clientY - dragState.startY);
-
-                if (!dragState.dragStarted && (deltaX > 10 || deltaY > 10)) {
-                  // Cancel long-press and start drag
-                  clearTimeout(dragState.longPressTimer);
-                  dragState.dragStarted = true;
-                  
-                  if (window.setClippyDragging) {
-                    window.setClippyDragging(true);
-                  }
-                }
-
-                if (dragState.dragStarted) {
-                  e.preventDefault();
-
-                  const totalDeltaX = touch.clientX - dragState.startX;
-                  const totalDeltaY = touch.clientY - dragState.startY;
-
-                  // Calculate new position with boundary enforcement
-                  const viewportWidth = window.innerWidth;
-                  const viewportHeight = window.innerHeight;
-
-                  const newRight = Math.max(
-                    0,
-                    Math.min(
-                      viewportWidth - 60, // Clippy width approximation
-                      dragState.origX - totalDeltaX
-                    )
-                  );
-
-                  const newBottom = Math.max(
-                    80, // Above taskbar
-                    Math.min(
-                      viewportHeight - 80, // Clippy height approximation
-                      dragState.origY - totalDeltaY
-                    )
-                  );
-
-                  // Apply new position using existing positioning system
-                  const clippyEl = document.querySelector('.clippy');
-                  if (clippyEl && ClippyPositioning) {
-                    const customPosition = {
-                      right: `${newRight}px`,
-                      bottom: `${newBottom}px`
-                    };
-
-                    safeExecute(() => {
-                      ClippyPositioning.positionClippy(clippyEl, customPosition);
-                      
-                      // Update overlay position
-                      if (overlayRef.current) {
-                        ClippyPositioning.positionOverlay(overlayRef.current, clippyEl);
-                      }
-                    }, null, "drag positioning");
-                  }
-                }
-              };
-
-              const handleEnhancedTouchEnd = (e) => {
-                const dragState = dragStateRef.current;
-
-                // Clean up event listeners
-                document.removeEventListener('touchmove', handleEnhancedTouchMove);
-                document.removeEventListener('touchend', handleEnhancedTouchEnd);
-                document.removeEventListener('touchcancel', handleEnhancedTouchEnd);
-
-                // Clear timers
-                clearTimeout(dragState.longPressTimer);
-
-                // Reset drag state
-                if (dragState.dragStarted) {
-                  setTimeout(() => {
-                    if (window.setClippyDragging) {
-                      window.setClippyDragging(false);
-                    }
-                  }, 100);
-                }
-
-                dragState.dragStarted = false;
-              };
-
-              // Set up the enhanced touch handler
-              overlay.addEventListener('touchstart', handleEnhancedTouchStart, { passive: false });
-
-              // Store cleanup function
+              const handlers = createCooldownAwareTouchHandlers();
+              overlay.addEventListener('touchstart', handlers.handleEnhancedTouchStart, { passive: false });
+              
+              // Store handlers for cleanup
+              overlay._handlers = handlers;
               overlay._mobileCleanup = () => {
-                overlay.removeEventListener('touchstart', handleEnhancedTouchStart);
-                document.removeEventListener('touchmove', handleEnhancedTouchMove);
-                document.removeEventListener('touchend', handleEnhancedTouchEnd);
-                document.removeEventListener('touchcancel', handleEnhancedTouchEnd);
+                overlay.removeEventListener('touchstart', handlers.handleEnhancedTouchStart);
+                document.removeEventListener('touchmove', handlers.handleEnhancedTouchMove);
+                document.removeEventListener('touchend', handlers.handleEnhancedTouchEnd);
+                document.removeEventListener('touchcancel', handlers.handleEnhancedTouchEnd);
                 clearTimeout(dragStateRef.current.longPressTimer);
               };
             } else {
-              // Desktop: double-click interaction (existing code)
-              const handleInteraction = (e) => {
-                if (!mountedRef.current) return;
-
-                safeExecute(
-                  () => {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    if (clippy.play) {
-                      clippy.play("Greeting");
-
-                      setTimeout(() => {
-                        if (
-                          window.showClippyCustomBalloon &&
-                          mountedRef.current
-                        ) {
-                          const messages = [
-                            "Double-click me again for more help!",
-                            "Need assistance? I'm here to help!",
-                            "What can I help you with today?",
-                          ];
-                          tapCountRef.current =
-                            (tapCountRef.current + 1) % messages.length;
-                          window.showClippyCustomBalloon(
-                            messages[tapCountRef.current]
-                          );
-                        }
-                      }, 800);
-                    }
-                  },
-                  null,
-                  "interaction handling"
-                );
-              };
-
-              overlay.addEventListener("dblclick", handleInteraction);
+              // Desktop: double-click interaction with cooldown
+              overlay.addEventListener("dblclick", handleDesktopInteraction);
             }
 
             overlayRef.current = overlay;
@@ -1319,7 +1404,7 @@ const StartupAwareClippyController = ({
             clearTimeout(currentTapTimeout);
           }
           if (overlayRef.current && overlayRef.current.parentNode) {
-            // NEW: Mobile drag cleanup
+            // NEW: Mobile drag cleanup with cooldown system
             if (overlayRef.current._mobileCleanup) {
               overlayRef.current._mobileCleanup();
             }
@@ -1344,6 +1429,8 @@ const StartupAwareClippyController = ({
     resizeHandlingActiveRef,
     positionLocked, // NEW
     isDragging,     // NEW
+    createCooldownAwareTouchHandlers, // NEW
+    handleDesktopInteraction, // NEW
   ]);
 
   return null;
