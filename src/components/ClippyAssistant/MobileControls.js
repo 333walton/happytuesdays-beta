@@ -131,7 +131,11 @@ const MobileControlsContent = () => {
         data-active={!assistantVisible}
         disabled={isUpdating}
       >
-        {assistantVisible ? "👁️" : "🚫"}
+        {assistantVisible ? (
+          <img src="/static/Textchat_16x16_4.png" alt="Chat Icon" style={{ width: '17px', height: '17px', marginTop: '5px' }} />
+        ) : (
+          <span className="centered-icon" style={{ width: '12px', height: '12px' }}>🚫</span>
+        )}
       </Button>
 
       <Button
@@ -142,7 +146,7 @@ const MobileControlsContent = () => {
         data-active={!localPositionLocked}
         disabled={isUpdating}
       >
-        {localPositionLocked ? "🔒" : "🔓"}
+        {localPositionLocked ? <img src="/static/Lock_16x16_4.png" alt="Lock Icon" style={{ width: '18px', height: '18px' }}/> : " "}
       </Button>
     </div>
   );
