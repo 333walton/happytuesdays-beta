@@ -1118,6 +1118,330 @@ class ClippyPositioning {
     return success;
   }
 
+  /**
+   * Calculate mobile position for drag operations
+   * Returns pixel values instead of CSS strings for easier calculations
+   */
+  static calculateMobilePositionForDrag() {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const values = CLIPPY_POSITIONS.mobileValues;
+
+    // Calculate responsive mobile position with pixel values
+    const bottomPx = Math.min(values.bottom, viewportHeight * 0.2);
+    const rightPx = Math.min(values.right, viewportWidth * 0.1);
+
+    return {
+      rightPx,
+      bottomPx,
+      // Also return CSS strings for compatibility
+      right: `${rightPx}px`,
+      bottom: `${bottomPx}px`
+    };
+  }
+
+  /**
+   * Apply mobile position with drag state handling
+   * Integrates with drag system and performance optimizations
+   */
+  static applyMobilePosition(clippyElement, position, isDragging = false) {
+    if (!clippyElement) return false;
+
+    try {
+      // Add drag state classes for CSS optimizations
+      if (isDragging) {
+        clippyElement.classList.add('clippy-dragging');
+        // Prevent body scroll during drag
+        document.body.classList.add('clippy-drag-active');
+      } else {
+        clippyElement.classList.remove('clippy-dragging');
+        document.body.classList.remove('clippy-drag-active');
+      }
+
+      // Apply position with mobile-specific optimizations
+      const mobileStyles = {
+        position: "fixed",
+        right: position.right || `${position.rightPx}px`,
+        bottom: position.bottom || `${position.bottomPx}px`,
+        left: "auto",
+        top: "auto",
+        transform: isDragging 
+          ? "translateZ(0) scale(1.05)" // Slightly larger during drag
+          : "translateZ(0) scale(0.8)",
+        transformOrigin: "center bottom",
+        zIndex: isDragging ? "1550" : "1500", // Higher z-index during drag
+        // Performance optimizations
+        backfaceVisibility: "hidden",
+        willChange: isDragging ? "transform, opacity, right, bottom" : "transform",
+        // iOS Safari optimizations
+        WebkitTransform: isDragging 
+          ? "translateZ(0) scale(1.05)" 
+          : "translateZ(0) scale(0.8)",
+        WebkitBackfaceVisibility: "hidden",
+        // Touch optimizations
+        touchAction: "none",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        WebkitTouchCallout: "none",
+        // Transitions
+        transition: isDragging ? "none" : "transform 0.2s ease, right 0.2s ease, bottom 0.2s ease",
+      };
+
+      return this.applyStyles(clippyElement, mobileStyles);
+    } catch (error) {
+      console.error("Error applying mobile position:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Enforce mobile boundaries during drag
+   * Prevents Clippy from being dragged off-screen
+   */
+  static enforceMobileBoundaries(position) {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Safe areas with iOS considerations
+    const safeLeft = Math.max(10, window.safeAreaInsets?.left || 0);
+    const safeRight = Math.max(10, window.safeAreaInsets?.right || 0);
+    const safeTop = Math.max(10, window.safeAreaInsets?.top || 0);
+    const safeBottom = Math.max(80, window.safeAreaInsets?.bottom || 0); // Above taskbar
+
+    // Clippy dimensions (approximate)
+    const clippyWidth = 60;
+    const clippyHeight = 80;
+
+    // Enforce boundaries
+    const boundedPosition = {
+      rightPx: Math.max(
+        safeRight,
+        Math.min(
+          viewportWidth - clippyWidth - safeLeft,
+          position.rightPx || parseInt(position.right, 10) || 0
+        )
+      ),
+      bottomPx: Math.max(
+        safeBottom,
+        Math.min(
+          viewportHeight - clippyHeight - safeTop,
+          position.bottomPx || parseInt(position.bottom, 10) || 0
+        )
+      )
+    };
+
+    return {
+      ...boundedPosition,
+      right: `${boundedPosition.rightPx}px`,
+      bottom: `${boundedPosition.bottomPx}px`
+    };
+  }
+
+  /**
+   * Handle mobile drag positioning with performance optimizations
+   * Main method called during drag operations
+   */
+  static handleMobileDrag(clippyElement, overlayElement, newPosition, isDragging = true) {
+    if (!clippyElement || !isMobile) return false;
+
+    try {
+      // Enforce boundaries
+      const boundedPosition = this.enforceMobileBoundaries(newPosition);
+
+      // Apply position to Clippy with drag optimizations
+      const clippySuccess = this.applyMobilePosition(clippyElement, boundedPosition, isDragging);
+
+      // Synchronize overlay position immediately
+      let overlaySuccess = true;
+      if (overlayElement) {
+        // Add drag state to overlay
+        if (isDragging) {
+          overlayElement.classList.add('overlay-dragging');
+        } else {
+          overlayElement.classList.remove('overlay-dragging');
+        }
+
+        overlaySuccess = this.positionOverlay(overlayElement, clippyElement);
+      }
+
+      return clippySuccess && overlaySuccess;
+    } catch (error) {
+      console.error("Error handling mobile drag:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Start mobile drag session
+   * Sets up performance optimizations and initial state
+   */
+  static startMobileDrag(clippyElement, overlayElement) {
+    if (!clippyElement || !isMobile) return false;
+
+    try {
+      // Add performance optimizations
+      clippyElement.classList.add('clippy-dragging');
+      document.body.classList.add('clippy-drag-active');
+      
+      if (overlayElement) {
+        overlayElement.classList.add('overlay-dragging');
+      }
+
+      // Disable transitions for immediate response
+      clippyElement.style.transition = 'none';
+      if (overlayElement) {
+        overlayElement.style.transition = 'none';
+      }
+
+      // Enhance hardware acceleration
+      const enhancedStyles = {
+        willChange: 'transform, opacity, right, bottom',
+        contain: 'layout style paint',
+        isolation: 'isolate',
+      };
+
+      this.applyStyles(clippyElement, enhancedStyles);
+
+      return true;
+    } catch (error) {
+      console.error("Error starting mobile drag:", error);
+      return false;
+    }
+  }
+
+  /**
+   * End mobile drag session
+   * Cleans up performance optimizations and resets state
+   */
+  static endMobileDrag(clippyElement, overlayElement, finalPosition) {
+    if (!clippyElement || !isMobile) return false;
+
+    try {
+      // Apply final position
+      if (finalPosition) {
+        const boundedPosition = this.enforceMobileBoundaries(finalPosition);
+        this.applyMobilePosition(clippyElement, boundedPosition, false);
+      }
+
+      // Clean up drag classes
+      clippyElement.classList.remove('clippy-dragging');
+      document.body.classList.remove('clippy-drag-active');
+      
+      if (overlayElement) {
+        overlayElement.classList.remove('overlay-dragging');
+      }
+
+      // Re-enable transitions
+      setTimeout(() => {
+        if (clippyElement) {
+          clippyElement.style.transition = '';
+        }
+        if (overlayElement) {
+          overlayElement.style.transition = '';
+        }
+      }, 100);
+
+      // Reset performance optimizations
+      const resetStyles = {
+        willChange: 'transform',
+        contain: '',
+        isolation: '',
+      };
+
+      this.applyStyles(clippyElement, resetStyles);
+
+      return true;
+    } catch (error) {
+      console.error("Error ending mobile drag:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Apply lock state styling
+   * Visual indicator for locked/unlocked state
+   */
+  static applyLockState(clippyElement, isLocked) {
+    if (!clippyElement) return false;
+
+    try {
+      if (isLocked) {
+        clippyElement.classList.add('position-locked');
+      } else {
+        clippyElement.classList.remove('position-locked');
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error applying lock state:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Get safe area insets for mobile positioning
+   * Handles iOS safe areas and Android navigation bars
+   */
+  static getMobileSafeAreas() {
+    try {
+      // Try to get CSS environment variables (iOS safe areas)
+      const computedStyle = getComputedStyle(document.documentElement);
+      
+      return {
+        top: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-top)')) || 10,
+        right: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-right)')) || 10,
+        bottom: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-bottom)')) || 80,
+        left: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-left)')) || 10,
+      };
+    } catch (error) {
+      // Fallback safe areas
+      return { top: 10, right: 10, bottom: 80, left: 10 };
+    }
+  }
+
+  /**
+   * Enhanced mobile positioning that replaces calculateMobilePosition for drag support
+   */
+  static calculateEnhancedMobilePosition(customPosition = null) {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const values = CLIPPY_POSITIONS.mobileValues;
+    const safeAreas = this.getMobileSafeAreas();
+
+    if (customPosition) {
+      // Use custom position with boundary enforcement
+      return this.enforceMobileBoundaries(customPosition);
+    }
+
+    // Calculate default position with safe areas
+    const bottomPx = Math.min(
+      values.bottom + safeAreas.bottom,
+      viewportHeight * 0.2
+    );
+    const rightPx = Math.min(
+      values.right + safeAreas.right,
+      viewportWidth * 0.1
+    );
+
+    return {
+      rightPx,
+      bottomPx,
+      right: `${rightPx}px`,
+      bottom: `${bottomPx}px`,
+      position: "fixed",
+      transform: "translateZ(0) scale(0.8)",
+      transformOrigin: "center bottom",
+      zIndex: "1500",
+      left: "auto",
+      top: "auto"
+    };
+  }
+
+  // Expose mobile detection for consistency
+  static get isMobile() {
+    return isMobile;
+  }
+
   // Get current expected Clippy dimensions for calculations
   static getExpectedClippyDimensions() {
     const scale = isMobile

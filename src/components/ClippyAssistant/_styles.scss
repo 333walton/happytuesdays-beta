@@ -710,3 +710,249 @@ body:has(.desktop.windowsShuttingDown) .custom-clippy-chat-balloon {
     transform: translateZ(0) !important;
   }
 }
+
+/* ===== MOBILE DRAG OPTIMIZATIONS ===== */
+
+/* Mobile-specific Clippy optimizations */
+@media (max-width: 768px),
+(pointer: coarse) {
+  .clippy {
+    /* Optimize for touch dragging performance */
+    touch-action: none !important;
+    /* Prevent scroll/zoom during drag */
+
+    /* Enhanced hardware acceleration during drag */
+    transform-style: preserve-3d !important;
+    backface-visibility: hidden !important;
+    perspective: 1000px !important;
+
+    /* Smooth dragging performance */
+    will-change: transform, opacity, left, top, right, bottom !important;
+
+    /* Remove any transitions during drag for immediate response */
+    &.clippy-dragging {
+      transition: none !important;
+      animation: none !important;
+
+      /* Maximum performance during drag */
+      contain: layout style paint !important;
+      isolation: isolate !important;
+    }
+
+    /* Prevent text selection during drag */
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
+
+    /* iOS Safari specific optimizations */
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Mobile overlay optimizations */
+  #clippy-clickable-overlay {
+    /* Enhanced touch handling */
+    touch-action: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+
+    /* Performance optimizations for drag */
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    will-change: transform, left, top !important;
+
+    /* Remove transitions for immediate drag response */
+    &.overlay-dragging {
+      transition: none !important;
+      contain: layout !important;
+    }
+
+    /* Larger invisible touch area on mobile */
+    &::before {
+      content: "" !important;
+      position: absolute !important;
+      top: -15px !important;
+      left: -15px !important;
+      right: -15px !important;
+      bottom: -15px !important;
+      background: transparent !important;
+      pointer-events: auto !important;
+      z-index: 1 !important;
+    }
+  }
+}
+
+/* Position locked state styling */
+.clippy.position-locked {
+
+  /* Visual indicator that position is locked */
+  &::after {
+    content: "🔒";
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 1;
+
+    /* Fade in/out animation */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+/* Drag state visual feedback */
+.clippy.clippy-dragging {
+  /* Slightly scale up during drag for visual feedback */
+  transform: translateZ(0) scale(1.05) !important;
+
+  /* Enhanced shadow during drag */
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) !important;
+
+  /* Slightly transparent during drag */
+  opacity: 0.9 !important;
+}
+
+/* Drag ghost/preview (if needed) */
+.clippy-drag-ghost {
+  position: fixed !important;
+  pointer-events: none !important;
+  z-index: 2500 !important;
+  opacity: 0.7 !important;
+  transform: translateZ(0) scale(0.9) !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)) !important;
+}
+
+/* Prevent body scroll during Clippy drag on mobile */
+body.clippy-drag-active {
+  overflow: hidden !important;
+  touch-action: none !important;
+  -webkit-overflow-scrolling: auto !important;
+
+  /* iOS Safari specific fixes */
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Mobile viewport adjustments during drag */
+@media (max-width: 768px) {
+
+  /* Ensure Clippy stays within safe viewport bounds */
+  .clippy {
+    /* Mobile safe area considerations */
+    --mobile-safe-left: max(env(safe-area-inset-left), 10px);
+    --mobile-safe-right: max(env(safe-area-inset-right), 10px);
+    --mobile-safe-top: max(env(safe-area-inset-top), 10px);
+    --mobile-safe-bottom: max(env(safe-area-inset-bottom), 80px);
+    /* Above taskbar */
+  }
+}
+
+/* iOS Safari specific drag optimizations */
+@supports (-webkit-touch-callout: none) {
+
+  .clippy,
+  #clippy-clickable-overlay {
+    /* Force hardware acceleration on iOS */
+    -webkit-transform: translateZ(0) !important;
+    -webkit-backface-visibility: hidden !important;
+    -webkit-perspective: 1000px !important;
+
+    /* Prevent iOS rubber band effect */
+    overscroll-behavior: none !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
+
+  /* iOS drag performance optimizations */
+  .clippy.clippy-dragging {
+    -webkit-transform: translateZ(0) scale(1.05) !important;
+    -webkit-transition: none !important;
+    -webkit-animation: none !important;
+  }
+
+  /* Prevent iOS text selection during drag */
+  .clippy,
+  #clippy-clickable-overlay {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+}
+
+/* Landscape mode mobile optimizations */
+@media (orientation: landscape) and (max-height: 500px) {
+  .clippy {
+    /* Smaller scale in landscape to fit better */
+    --mobile-landscape-scale: 0.7;
+
+    &:not(.clippy-dragging) {
+      transform: translateZ(0) scale(var(--mobile-landscape-scale)) !important;
+    }
+
+    &.clippy-dragging {
+      transform: translateZ(0) scale(calc(var(--mobile-landscape-scale) * 1.05)) !important;
+    }
+  }
+}
+
+/* High refresh rate display optimizations */
+@media (min-resolution: 120dpi) {
+
+  .clippy.clippy-dragging,
+  #clippy-clickable-overlay.overlay-dragging {
+    /* Enhanced rendering for high refresh rate displays */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    text-rendering: optimizeSpeed;
+  }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .clippy.clippy-dragging {
+    transform: translateZ(0) !important;
+    /* Remove scale animation */
+    filter: none !important;
+    /* Remove shadow animation */
+    transition: none !important;
+  }
+
+  .clippy.position-locked::after {
+    transition: none !important;
+    opacity: 1 !important;
+    /* Always show lock indicator */
+  }
+}
+
+/* Dark mode considerations (maintains Windows 98 styling) */
+@media (prefers-color-scheme: dark) {
+  .clippy.position-locked::after {
+    background: rgba(192, 192, 192, 0.9) !important;
+    /* Windows 98 grey */
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
+}
+
+/* Print mode - hide drag-related styling */
+@media print {
+
+  .clippy.clippy-dragging,
+  .clippy.position-locked::after,
+  .clippy-drag-ghost {
+    display: none !important;
+  }
+}
