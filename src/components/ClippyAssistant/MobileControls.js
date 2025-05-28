@@ -1,28 +1,36 @@
-// Mobile Controls rendered at the highest possible level
+// MobileControls.js - Optimized with reduced logging and better performance
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Button } from "@react95/core";
 import { useClippyContext } from "./ClippyProvider";
 import "./MobileControls.scss";
 
+// Development mode check
+const isDev = process.env.NODE_ENV === 'development';
+
+// Optimized logging - only in development
+const devLog = (message, ...args) => {
+  if (isDev) {
+    console.log(`🎛️ MobileControls: ${message}`, ...args);
+  }
+};
+
 /**
  * Mobile Controls Component for Clippy
- * Rendered via portal to appear above all other elements
- * Uses proper Clippy visibility toggling mechanism
+ * Optimized for performance with reduced logging
  */
 const MobileControlsContent = () => {
-  console.log('MobileControls rendering with portal');
-
   const {
     assistantVisible,
     setAssistantVisible,
     isScreenPoweredOn,
-    positionLocked,    // Get from context
-    setPositionLocked, // Get from context
+    positionLocked,
+    setPositionLocked,
   } = useClippyContext();
 
-  // Local state to track lock button state
+  // Local state for UI responsiveness
   const [localPositionLocked, setLocalPositionLocked] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Sync local state with context state
   useEffect(() => {
@@ -30,55 +38,63 @@ const MobileControlsContent = () => {
   }, [positionLocked]);
 
   const handleToggleVisibility = () => {
-    const newVisibility = !assistantVisible;
-    console.log(`🎛️ Mobile controls: Toggling Clippy visibility to ${newVisibility ? "VISIBLE" : "HIDDEN"}`);
+    if (isUpdating) return; // Prevent rapid clicking
     
-    // Update the context state
+    setIsUpdating(true);
+    const newVisibility = !assistantVisible;
+    
+    if (isDev) {
+      devLog(`Toggling Clippy visibility to ${newVisibility ? "VISIBLE" : "HIDDEN"}`);
+    }
+    
+    // Update context state
     setAssistantVisible(newVisibility);
 
-    // CRITICAL: Use the global function to ensure coordination with ClippyIntegration
+    // Use global function for coordination
     if (window.setAssistantVisible) {
-      console.log(`🎛️ Using global setAssistantVisible: ${newVisibility}`);
       window.setAssistantVisible(newVisibility);
     }
 
-    // COORDINATE WITH ClippyIntegration: Use body classes instead of direct DOM manipulation
-    // This way ClippyIntegration's CSS rules will still work properly
+    // Coordinate with ClippyIntegration using body classes
     if (newVisibility) {
-      // Remove the mobile hide class - let ClippyIntegration's CSS handle the rest
       document.body.classList.remove("clippy-manually-hidden");
-      console.log("📱 Mobile controls: Removed manual hide class");
-
-      // Show feedback message after a brief delay (only if screen is also powered on)
+      
+      // Show feedback message (only if screen is powered on)
       if (isScreenPoweredOn && window.showClippyCustomBalloon) {
         setTimeout(() => {
           window.showClippyCustomBalloon("I'm back! Tap me for help.");
         }, 300);
       }
     } else {
-      // Add manual hide class that works alongside screen-off
       document.body.classList.add("clippy-manually-hidden");
-      console.log("📱 Mobile controls: Added manual hide class");
-
-      // Clean up any existing balloons
+      
+      // Clean up balloons
       if (window.hideClippyCustomBalloon) {
         window.hideClippyCustomBalloon();
       }
     }
+
+    // Reset updating state
+    setTimeout(() => setIsUpdating(false), 300);
   };
 
   const handleToggleLock = () => {
+    if (isUpdating) return; // Prevent rapid clicking
+    
+    setIsUpdating(true);
     const newLocked = !localPositionLocked;
-    console.log(`🔒 Mobile controls: Toggling position lock from ${localPositionLocked} to ${newLocked}`);
+    
+    if (isDev) {
+      devLog(`Toggling position lock from ${localPositionLocked} to ${newLocked}`);
+    }
     
     // Update both local and context state
     setLocalPositionLocked(newLocked);
     setPositionLocked(newLocked);
 
-    // CRITICAL: Update the global function that ClippyProvider uses
+    // Update global function
     if (window.setClippyPositionLocked) {
-      const success = window.setClippyPositionLocked(newLocked);
-      console.log(`🔒 Global setClippyPositionLocked called: ${newLocked}, success: ${success}`);
+      window.setClippyPositionLocked(newLocked);
     }
 
     // Show feedback message
@@ -92,31 +108,18 @@ const MobileControlsContent = () => {
       }, 100);
     }
 
-    // Force log the state after update
-    setTimeout(() => {
-      console.log(`🔒 After toggle - localPositionLocked: ${newLocked}, context positionLocked: ${positionLocked}`);
-      if (window.getClippyPositionLocked) {
-        console.log(`🔒 Global getClippyPositionLocked(): ${window.getClippyPositionLocked()}`);
-      }
-    }, 50);
+    // Reset updating state
+    setTimeout(() => setIsUpdating(false), 300);
   };
 
-  // Monitor assistantVisible changes and apply CSS class coordination
+  // Monitor assistantVisible changes
   useEffect(() => {
-    console.log(`🎛️ Mobile controls: assistantVisible changed to ${assistantVisible}`);
-    
-    // COORDINATE: Use a different class name that works WITH ClippyIntegration's screen-off
     if (assistantVisible) {
       document.body.classList.remove("clippy-manually-hidden");
     } else {
       document.body.classList.add("clippy-manually-hidden");
     }
   }, [assistantVisible]);
-
-  // Debug logging for position lock state
-  useEffect(() => {
-    console.log(`🔒 Mobile controls: positionLocked changed to ${positionLocked}, local: ${localPositionLocked}`);
-  }, [positionLocked, localPositionLocked]);
 
   return (
     <div className="mobile-controls-container">
@@ -126,6 +129,7 @@ const MobileControlsContent = () => {
         onClick={handleToggleVisibility}
         title={assistantVisible ? "Hide Clippy" : "Show Clippy"}
         data-active={!assistantVisible}
+        disabled={isUpdating}
       >
         {assistantVisible ? "👁️" : "🚫"}
       </Button>
@@ -136,6 +140,7 @@ const MobileControlsContent = () => {
         onClick={handleToggleLock}
         title={localPositionLocked ? "Unlock Position (Tap to Enable Drag)" : "Lock Position (Tap to Disable Drag)"}
         data-active={!localPositionLocked}
+        disabled={isUpdating}
       >
         {localPositionLocked ? "🔒" : "🔓"}
       </Button>
@@ -149,23 +154,17 @@ const MobileControls = () => {
   // Direct mobile check
   const isMobile = window.innerWidth <= 768;
   
-  const {
-    isScreenPoweredOn,
-  } = useClippyContext();
+  const { isScreenPoweredOn } = useClippyContext();
 
   useEffect(() => {
-    // Create a portal container at the very top level of the DOM
+    // Create portal container
     const container = document.createElement('div');
     container.id = 'mobile-controls-portal';
-    // Styling moved to SCSS - container will inherit styles from #mobile-controls-portal
-    
-    // Append to body (highest level)
     document.body.appendChild(container);
     setPortalContainer(container);
 
-    // Inject CSS styles for proper Clippy visibility integration
+    // Inject optimized visibility styles
     const injectVisibilityStyles = () => {
-      // Remove existing style if present
       const existingStyle = document.getElementById("mobile-clippy-visibility");
       if (existingStyle) {
         existingStyle.remove();
@@ -174,8 +173,7 @@ const MobileControls = () => {
       const styleElement = document.createElement("style");
       styleElement.id = "mobile-clippy-visibility";
       styleElement.textContent = `
-        /* COORDINATE: When Clippy is manually hidden via mobile controls */
-        /* This works ALONGSIDE ClippyIntegration's screen-off class */
+        /* Coordinate manual hide with ClippyIntegration */
         body.clippy-manually-hidden .clippy,
         body.clippy-manually-hidden #clippy-clickable-overlay,
         body.clippy-manually-hidden .custom-clippy-balloon,
@@ -185,19 +183,17 @@ const MobileControls = () => {
           pointer-events: none !important;
           transition: visibility 0.3s, opacity 0.3s !important;
         }
-        /* When Clippy is shown via mobile controls */
+
+        /* Show when not manually hidden */
         body:not(.clippy-manually-hidden) .clippy,
-        body:not(.clippy-manually-hidden) #clippy-clickable-overlay,
-        body:not(.clippy-manually-hidden) .custom-clippy-balloon,
-        body:not(.clippy-manually-hidden) .custom-clippy-chat-balloon {
+        body:not(.clippy-manually-hidden) #clippy-clickable-overlay {
           visibility: visible !important;
           opacity: 1 !important;
           pointer-events: auto !important;
           transition: visibility 0.35s, opacity 0.35s !important;
         }
 
-        /* PRIORITY: Screen off takes precedence over manual hide */
-        /* ClippyIntegration's screen-off class has higher specificity */
+        /* Screen off takes precedence */
         body.screen-off .clippy,
         body.screen-off #clippy-clickable-overlay,
         body.screen-off .custom-clippy-balloon,
@@ -208,7 +204,7 @@ const MobileControls = () => {
           transition: visibility 0.3s, opacity 0.3s !important;
         }
 
-        /* ENSURE: Mobile controls stay visible in both states */
+        /* Mobile controls always visible */
         body.clippy-manually-hidden .mobile-controls-container,
         body.screen-off .mobile-controls-container {
           visibility: visible !important;
@@ -216,7 +212,7 @@ const MobileControls = () => {
           pointer-events: auto !important;
         }
 
-        /* COORDINATE: When both screen is off AND manually hidden */
+        /* Combined state handling */
         body.screen-off.clippy-manually-hidden .clippy,
         body.screen-off.clippy-manually-hidden #clippy-clickable-overlay,
         body.screen-off.clippy-manually-hidden .custom-clippy-balloon,
@@ -224,7 +220,6 @@ const MobileControls = () => {
           visibility: hidden !important;
           opacity: 0 !important;
           pointer-events: none !important;
-          body:not(.clippy-hidden);
           transition: visibility 0.35s, opacity 0.35s !important;
         }
       `;
@@ -239,13 +234,11 @@ const MobileControls = () => {
         container.parentNode.removeChild(container);
       }
       
-      // Remove injected styles
       const visibilityStyle = document.getElementById("mobile-clippy-visibility");
       if (visibilityStyle) {
         visibilityStyle.remove();
       }
       
-      // Remove body class
       document.body.classList.remove("clippy-manually-hidden");
     };
   }, []);
@@ -255,7 +248,7 @@ const MobileControls = () => {
     return null;
   }
 
-  // Use React Portal to render at the highest DOM level
+  // Use React Portal for highest DOM level rendering
   return ReactDOM.createPortal(
     <MobileControlsContent />,
     portalContainer
