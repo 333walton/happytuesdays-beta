@@ -885,14 +885,14 @@ const FixedClippyController = ({
 
     if (setupSuccess) {
       const updateInterval = isMobile ? 3000 : 2000;
+      let lastUpdateTime = 0;
+      
       const updateLoop = (timestamp) => {
         if (!mountedRef.current) return;
 
-        if (timestamp - (rafRef.current?.lastUpdate || 0) > updateInterval) {
+        if (timestamp - lastUpdateTime > updateInterval) {
           setupClippy();
-          if (rafRef.current) {
-            rafRef.current.lastUpdate = timestamp;
-          }
+          lastUpdateTime = timestamp;
         }
 
         rafRef.current = requestAnimationFrame(updateLoop);
