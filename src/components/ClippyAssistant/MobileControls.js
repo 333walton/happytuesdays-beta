@@ -17,9 +17,17 @@ const MobileControlsContent = () => {
     assistantVisible,
     setAssistantVisible,
     isScreenPoweredOn,
+    positionLocked,    // Get from context
+    setPositionLocked, // Get from context
   } = useClippyContext();
 
-  const [positionLocked, setPositionLocked] = useState(true);
+  // Local state to track lock button state
+  const [localPositionLocked, setLocalPositionLocked] = useState(true);
+
+  // Sync local state with context state
+  useEffect(() => {
+    setLocalPositionLocked(positionLocked);
+  }, [positionLocked]);
 
   const handleToggleVisibility = () => {
     const newVisibility = !assistantVisible;
@@ -60,9 +68,20 @@ const MobileControlsContent = () => {
   };
 
   const handleToggleLock = () => {
-    const newLocked = !positionLocked;
+    const newLocked = !localPositionLocked;
+    console.log(`🔒 Mobile controls: Toggling position lock from ${localPositionLocked} to ${newLocked}`);
+    
+    // Update both local and context state
+    setLocalPositionLocked(newLocked);
     setPositionLocked(newLocked);
 
+    // CRITICAL: Update the global function that ClippyProvider uses
+    if (window.setClippyPositionLocked) {
+      const success = window.setClippyPositionLocked(newLocked);
+      console.log(`🔒 Global setClippyPositionLocked called: ${newLocked}, success: ${success}`);
+    }
+
+    // Show feedback message
     if (window.showClippyCustomBalloon) {
       const message = newLocked
         ? "Position locked! I won't move around anymore."
@@ -73,9 +92,13 @@ const MobileControlsContent = () => {
       }, 100);
     }
 
-    if (window.setClippyPositionLocked) {
-      window.setClippyPositionLocked(newLocked);
-    }
+    // Force log the state after update
+    setTimeout(() => {
+      console.log(`🔒 After toggle - localPositionLocked: ${newLocked}, context positionLocked: ${positionLocked}`);
+      if (window.getClippyPositionLocked) {
+        console.log(`🔒 Global getClippyPositionLocked(): ${window.getClippyPositionLocked()}`);
+      }
+    }, 50);
   };
 
   // Monitor assistantVisible changes and apply CSS class coordination
@@ -90,6 +113,11 @@ const MobileControlsContent = () => {
     }
   }, [assistantVisible]);
 
+  // Debug logging for position lock state
+  useEffect(() => {
+    console.log(`🔒 Mobile controls: positionLocked changed to ${positionLocked}, local: ${localPositionLocked}`);
+  }, [positionLocked, localPositionLocked]);
+
   return (
     <div className="mobile-controls-container">
       <Button
@@ -99,17 +127,17 @@ const MobileControlsContent = () => {
         title={assistantVisible ? "Hide Clippy" : "Show Clippy"}
         data-active={!assistantVisible}
       >
-        {assistantVisible ? "👁️" : ""}
+        {assistantVisible ? "👁️" : "🚫"}
       </Button>
 
       <Button
         className="mobile-controls-button"
-        active={!positionLocked}
+        active={!localPositionLocked}
         onClick={handleToggleLock}
-        title={positionLocked ? "Unlock Position" : "Lock Position"}
-        data-active={!positionLocked}
+        title={localPositionLocked ? "Unlock Position (Tap to Enable Drag)" : "Lock Position (Tap to Disable Drag)"}
+        data-active={!localPositionLocked}
       >
-        {positionLocked ? "🔒" : ""}
+        {localPositionLocked ? "🔒" : "🔓"}
       </Button>
     </div>
   );

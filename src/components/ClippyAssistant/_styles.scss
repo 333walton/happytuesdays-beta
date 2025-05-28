@@ -29,6 +29,13 @@
   /* NO MORE STATIC CSS POSITIONING */
 }
 
+/* Media query for scaling Clippy on smaller screens */
+@media (max-width: 767px) {
+  .clippy {
+    transform: scale(1.2) !important; /* not working? */
+  }
+}
+
 /* Special state for anchored Clippy - maximum performance during resize */
 .clippy.clippy-anchored {
   /* Force GPU acceleration for real-time positioning */
