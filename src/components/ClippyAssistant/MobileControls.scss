@@ -19,13 +19,13 @@
   /* Center vertically */
 
   /* Size - prioritizing iOS touch standards from JS */
-  left: 143px !important;
+  left: 157px !important;
   top: 10px !important;
   margin-left: -2px !important;
-  min-width: 3px !important;
-  min-height: 37px !important;
-  width: 37px !important;
-  height: 37px !important;
+  min-width: 35px !important;
+  min-height: 35px !important;
+  width: 35px !important;
+  height: 35px !important;
   padding: 0 !important;
   /* Remove padding to avoid shifting */
   box-sizing: border-box !important;
@@ -57,20 +57,23 @@
   -webkit-font-smoothing: antialiased;
 
   /* Windows 98 button styling - NORMAL STATE */
-  background-color: #c0c0c0 !important;
+  background-color: #a0a0a0 !important;
+    /* Darkened background color */
   border: 2px solid !important;
-  border-top-color: #ffffff !important;
-  border-left-color: #ffffff !important;
+  border-top-color: #e0e0e0 !important;
+    /* Slightly darker top border */
+  border-left-color: #e0e0e0 !important;
+    /* Slightly darker left border */
   border-right-color: #808080 !important;
   border-bottom-color: #808080 !important;
   box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #707070 !important;
 
   /* Button interaction feedback - smooth transitions */
-  transition: all 0.1s ease;
+  transition: all 0.05s ease;
 
   /* Hover state - slight highlight */
   &:hover:not([data-active="true"]) {
-    background-color: #d0d0d0 !important;
+    background-color: #a0a0a0 !important;
     transform: translateZ(0);
   }
 
@@ -108,10 +111,10 @@
 
   /* Disabled state (if needed in future) */
   &:disabled {
-    background-color: #c0c0c0 !important;
+    background-color: #a0a0a0 !important;
     color: #808080 !important;
     -webkit-text-fill-color: #808080 !important;
-    border-color: #c0c0c0 !important;
+    border-color: #a0a0a0 !important;
     box-shadow: none !important;
     cursor: not-allowed;
   }
@@ -120,10 +123,10 @@
 /* Enhanced responsive adjustments with proper pressed states */
 @media (max-width: 480px) {
   .mobile-controls-button {
-    min-width: 40px !important;
-    min-height: 40px !important;
-    width: 40px !important;
-    height: 40px !important;
+    min-width: 37px !important;
+    min-height: 37px !important;
+    width: 37px !important;
+    height: 37px !important;
     font-size: 16px !important;
     padding: 12px !important;
 
