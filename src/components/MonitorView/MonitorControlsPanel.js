@@ -807,535 +807,537 @@ const MonitorControlsPanel = ({
       </div>
 
       {/* Content Area - Conditionally rendered */}
-      <CollapsibleContent collapsed={isCollapsed}>
-        <style>
-          {`
-          /* This targets the React95 tab components */
-          .react95__tab:focus, 
-          .react95__tab:active, 
-          .react95__tab[aria-selected="true"] {
-            outline: 0.5px dotted #c0c0c0 !important;
-            outline-offset: -1px !important;
-            box-shadow: none !important;
-          }
-        `}
-        </style>
+      {!isCollapsed && (
+        <div>
+          <style>
+            {`
+            /* This targets the React95 tab components */
+            .react95__tab:focus, 
+            .react95__tab:active, 
+            .react95__tab[aria-selected="true"] {
+              outline: 0.5px dotted #c0c0c0 !important;
+              outline-offset: -1px !important;
+              box-shadow: none !important;
+            }
+          `}
+          </style>
 
-        <TabsWrapper>
-          <Tabs
-            value={activeTab}
-            onChange={handleChange}
-            style={{
-              height: 22,
-              top: 0,
-              left: 0,
-              padding: 0,
-              outlineColor: "transparent",
-              overflow: "visible",
-            }}
-          >
-            {/* Tab 0 */}
-            <Tab
-              value={0}
+          <TabsWrapper>
+            <Tabs
+              value={activeTab}
+              onChange={handleChange}
               style={{
                 height: 22,
-                width: 75,
                 top: 0,
+                left: 0,
                 padding: 0,
-                overflow: "visible",
-                fontSize: "11px",
-                fontWeight: activeTab === 0 ? "bold" : "normal",
                 outlineColor: "transparent",
+                overflow: "visible",
               }}
             >
-              Controls
-            </Tab>
-            {/* Tab 1 */}
-            <Tab
-              value={1}
-              style={{
-                height: 22,
-                width: 65,
-                top: 0,
-                left: 0,
-                overflow: "visible",
-                fontSize: "11px",
-                fontWeight: activeTab === 1 ? "bold" : "normal",
-                outlineColor: "transparent",
-              }}
-            >
-              Info
-            </Tab>
-            {/* Tab 2 */}
-            <Tab
-              value={2}
-              style={{
-                height: 22,
-                width: 65,
-                top: 0,
-                left: 0,
-                overflow: "visible",
-                fontSize: "11px",
-                fontWeight: activeTab === 2 ? "bold" : "normal",
-                outlineColor: "transparent",
-              }}
-            >
-              More
-            </Tab>
-          </Tabs>
+              {/* Tab 0 */}
+              <Tab
+                value={0}
+                style={{
+                  height: 22,
+                  width: 75,
+                  top: 0,
+                  padding: 0,
+                  overflow: "visible",
+                  fontSize: "11px",
+                  fontWeight: activeTab === 0 ? "bold" : "normal",
+                  outlineColor: "transparent",
+                }}
+              >
+                Controls
+              </Tab>
+              {/* Tab 1 */}
+              <Tab
+                value={1}
+                style={{
+                  height: 22,
+                  width: 65,
+                  top: 0,
+                  left: 0,
+                  overflow: "visible",
+                  fontSize: "11px",
+                  fontWeight: activeTab === 1 ? "bold" : "normal",
+                  outlineColor: "transparent",
+                }}
+              >
+                Info
+              </Tab>
+              {/* Tab 2 */}
+              <Tab
+                value={2}
+                style={{
+                  height: 22,
+                  width: 65,
+                  top: 0,
+                  left: 0,
+                  overflow: "visible",
+                  fontSize: "11px",
+                  fontWeight: activeTab === 2 ? "bold" : "normal",
+                  outlineColor: "transparent",
+                }}
+              >
+                More
+              </Tab>
+            </Tabs>
 
-          <TabBody>
-            {activeTab === 0 && (
-              <>
-                {/* Monitor Mode */}
-                <StyledGroupBox label="Monitor Mode">
-                  <ButtonRow>
-                    <IconButton
-                      onClick={toggleMonitorView}
-                      active={!showMonitor}
+            <TabBody>
+              {activeTab === 0 && (
+                <>
+                  {/* Monitor Mode */}
+                  <StyledGroupBox label="Monitor Mode">
+                    <ButtonRow>
+                      <IconButton
+                        onClick={toggleMonitorView}
+                        active={!showMonitor}
+                      >
+                        {!showMonitor ? (
+                          <div
+                            style={{
+                              width: "16px",
+                              height: "16px",
+                              backgroundColor: "black",
+                            }}
+                          ></div>
+                        ) : (
+                          <img src={groupbox1} alt="Monitor mode" />
+                        )}
+                      </IconButton>
+                    </ButtonRow>
+                  </StyledGroupBox>
+
+                  {/* Zoom Options - UPDATED TO USE NEW HANDLER */}
+                  <StyledGroupBox label="Zoom Options">
+                    <ButtonRow>
+                      <IconButton
+                        onClick={() => handleZoomLevelChange(0)}
+                        active={zoomLevel === 0}
+                      >
+                        <img src={groupbox2a} alt="Default zoom" />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleZoomLevelChange(1)}
+                        active={zoomLevel === 1}
+                      >
+                        <img src={groupbox2b} alt="110% zoom" />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleZoomLevelChange(2)}
+                        active={zoomLevel === 2}
+                      >
+                        <img src={groupbox2c} alt="125% zoom" />
+                      </IconButton>
+                    </ButtonRow>
+                  </StyledGroupBox>
+
+                  {/* Viewframe Options */}
+                  <StyledGroupBox label="Viewframe Options">
+                    {/* Static Option with custom checkbox */}
+                    <ViewOption>
+                      <CustomCheckboxComponent
+                        label="Static"
+                        checked={activeViewframeCategory === "static"}
+                        onChange={() => toggleCategory("static")}
+                        onClick={handleStaticColorClick}
+                      />
+                    </ViewOption>
+
+                    {/* Slider for Static Option */}
+                    {activeViewframeCategory === "static" && (
+                      <SliderContainer>
+                        <ColorPreview color={viewframeColor} />
+                        <CustomSlider
+                          value={initialColorIndex}
+                          onChange={handleColorChange}
+                          onMouseMove={handleSliderMove}
+                          onMouseLeave={handleSliderLeave}
+                          min={0}
+                          max={colorOptions.length - 1}
+                          step={1}
+                        />
+
+                        {/* Tooltip for slider */}
+                        {sliderTooltip && (
+                          <SliderTooltip style={{ left: sliderTooltip.left }}>
+                            <TooltipColorPreview color={sliderTooltip.color} />
+                            <TooltipText>{sliderTooltip.name}</TooltipText>
+                          </SliderTooltip>
+                        )}
+                      </SliderContainer>
+                    )}
+
+                    {/* Animated Option with custom checkbox */}
+                    <ViewOption style={{ marginTop: "6px" }}>
+                      <CustomCheckboxComponent
+                        label="Animated"
+                        checked={activeViewframeCategory === "animated"}
+                        onChange={() => toggleCategory("animated")}
+                      />
+                    </ViewOption>
+
+                    {/* Animation Controls - Using the animated container */}
+                    <AnimatedControlsContainer
+                      visible={activeViewframeCategory === "animated"}
                     >
-                      {!showMonitor ? (
+                      <AnimatedControlsRow>
+                        {/* Adjusted rocket button to match ColorPreview size and position */}
+                        <IconButton
+                          onClick={toggleRocket}
+                          active={isRocketActive}
+                          style={{
+                            opacity: 1,
+                            cursor: "pointer",
+                            outlineColor: "transparent",
+                            width: "24px",
+                            height: "24px",
+                            minWidth: "24px",
+                            minHeight: "24px",
+                            padding: 0,
+                            marginLeft: "-6px",
+                            marginRight: "9px",
+                            marginBottom: "4px",
+                          }}
+                        >
+                          <span
+                            role="img"
+                            aria-label="Rocket"
+                            style={{ fontSize: "12px" }}
+                          >
+                            🚀
+                          </span>
+                        </IconButton>
+
+                        {/* Transparent select overlay implementation - aligned to match slider */}
                         <div
                           style={{
-                            width: "16px",
-                            height: "16px",
-                            backgroundColor: "black",
+                            position: "relative",
+                            width: "calc(100% - 14px)",
+                            marginBottom: "4px",
+                            marginLeft: 0,
                           }}
-                        ></div>
-                      ) : (
-                        <img src={groupbox1} alt="Monitor mode" />
-                      )}
-                    </IconButton>
-                  </ButtonRow>
-                </StyledGroupBox>
+                          className="win98-select-container"
+                        >
+                          {/* Add styles for button-active state */}
+                          <style>
+                            {`
+                              .win98-button-visual.active {
+                                border-top-color: #808080 !important;
+                                border-left-color: #808080 !important;
+                                border-right-color: #ffffff !important;
+                                border-bottom-color: #ffffff !important;
+                                background-color: #b0b0b0 !important;
+                                transform: translateY(1px);
+                             }
+                           `}
+                          </style>
 
-                {/* Zoom Options - UPDATED TO USE NEW HANDLER */}
-                <StyledGroupBox label="Zoom Options">
-                  <ButtonRow>
-                    <IconButton
-                      onClick={() => handleZoomLevelChange(0)}
-                      active={zoomLevel === 0}
+                          {/* Hidden native select - this gives us native functionality */}
+                          <select
+                            value={activeScreensaver}
+                            onChange={(e) => {
+                              if (!isRocketActive) {
+                                console.log("Selected:", e.target.value);
+                                setActiveScreensaver(e.target.value);
+                              }
+                            }}
+                            onMouseDown={(e) => {
+                              // Find coordinates relative to select element
+                              const rect =
+                                e.currentTarget.getBoundingClientRect();
+                              const x = e.clientX - rect.left;
+
+                              // If click is in the button area (right side)
+                              if (x > rect.width - 20) {
+                                // Find the visual button element and add active class
+                                const buttonVisual =
+                                  e.currentTarget.parentNode.querySelector(
+                                    ".win98-button-visual"
+                                  );
+                                if (buttonVisual) {
+                                  buttonVisual.classList.add("active");
+                                }
+                              }
+                            }}
+                            onMouseUp={() => {
+                              // Remove active class from button visual on mouse up
+                              const buttonVisual = document.querySelector(
+                                ".win98-button-visual"
+                              );
+                              if (buttonVisual) {
+                                buttonVisual.classList.remove("active");
+                              }
+                            }}
+                            onMouseLeave={() => {
+                              // Remove active class from button visual if mouse leaves
+                              const buttonVisual = document.querySelector(
+                                ".win98-button-visual"
+                              );
+                              if (buttonVisual) {
+                                buttonVisual.classList.remove("active");
+                              }
+                            }}
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              width: "100%",
+                              height: "100%",
+                              opacity: 0,
+                              cursor: isRocketActive ? "not-allowed" : "default",
+                              zIndex: 2, // Higher than the visual elements
+                            }}
+                            disabled={isRocketActive}
+                          >
+                            <option value="default">Space</option>
+                            <option value="bouncyballs">Bouncy Balls</option>
+                            <option value="flowerbox">FlowerBox</option>
+                            <option value="pipes">Pipes</option>
+                          </select>
+
+                          {/* Visual display (non-functional, just for appearance) */}
+                          <div
+                            style={{
+                              width: "100%",
+                              height: 24,
+                              backgroundColor: "#ffffff",
+                              border: "1px solid",
+                              borderTopColor: "#999999",
+                              borderLeftColor: "#999999",
+                              borderRightColor: "#ffffff",
+                              borderBottomColor: "#ffffff",
+                              boxShadow: "inset 1px 1px 0px rgba(0, 0, 0, 0.2)",
+                              fontSize: 11,
+                              padding: "2px 20px 2px 3px",
+                              fontFamily:
+                                '"ms_sans_serif", "ms sans serif", "Microsoft Sans Serif", sans-serif',
+                              color:
+                                activeScreensaver === "default" && isRocketActive
+                                  ? "#888888"
+                                  : "#000000",
+                              display: "flex",
+                              alignItems: "center",
+                              pointerEvents: "none", // Don't capture pointer events
+                            }}
+                          >
+                            {/* Display the current value */}
+                            {activeScreensaver === "default"
+                              ? "Space"
+                              : activeScreensaver === "bouncyballs"
+                              ? "Bouncy Balls"
+                              : activeScreensaver === "flowerbox"
+                              ? "FlowerBox"
+                              : "Pipes"}
+                          </div>
+
+                          {/* Button - purely visual, clicks pass through to select */}
+                          <div
+                            className="win98-button-visual"
+                            style={{
+                              position: "absolute",
+                              width: 17,
+                              height: 21.5,
+                              top: 1,
+                              right: 1,
+                              backgroundColor: "#c0c0c0",
+                              border: "1px solid",
+                              borderTopColor: "#ffffff",
+                              borderLeftColor: "#ffffff",
+                              borderRightColor: "#000000",
+                              borderBottomColor: "#000000",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: 0,
+                              pointerEvents: "none", // Don't capture pointer events
+                              transition: "background-color 0.05s ease", // Smooth transition for pressed state
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 0,
+                                height: 0,
+                                borderLeft: "3px solid transparent",
+                                borderRight: "3px solid transparent",
+                                borderTop: "3px solid black",
+                                marginTop: 1,
+                                pointerEvents: "none",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </AnimatedControlsRow>
+                    </AnimatedControlsContainer>
+                  </StyledGroupBox>
+                </>
+              )}
+
+              {activeTab === 1 && (
+                <div
+                  style={{
+                    textAlign: "center", // Center content vertically
+                    padding: "2px 0px", // Reduced top/bottom padding
+                    fontFamily: "monospace",
+                    //minHeight: '80px',  // Ensure consistent height
+                    //display: 'flex',
+                  }}
+                >
+                  {isRocketActive ? (
+                    <p
+                      style={{
+                        fontFamily: "monospace",
+                        fontSize: "13px",
+                        //whiteSpace: 'nowrap',
+                        margin: "7px 0", // Consistent margin
+                      }}
                     >
-                      <img src={groupbox2a} alt="Default zoom" />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleZoomLevelChange(1)}
-                      active={zoomLevel === 1}
+                      {`> turbo mode initialized... `}
+                      <span className="blinker">|</span>
+                    </p>
+                  ) : (
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "3px 0",
+                        fontFamily: "monospace",
+                      }}
                     >
-                      <img src={groupbox2b} alt="110% zoom" />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleZoomLevelChange(2)}
-                      active={zoomLevel === 2}
-                    >
-                      <img src={groupbox2c} alt="125% zoom" />
-                    </IconButton>
-                  </ButtonRow>
-                </StyledGroupBox>
-
-                {/* Viewframe Options */}
-                <StyledGroupBox label="Viewframe Options">
-                  {/* Static Option with custom checkbox */}
-                  <ViewOption>
-                    <CustomCheckboxComponent
-                      label="Static"
-                      checked={activeViewframeCategory === "static"}
-                      onChange={() => toggleCategory("static")}
-                      onClick={handleStaticColorClick}
-                    />
-                  </ViewOption>
-
-                  {/* Slider for Static Option */}
-                  {activeViewframeCategory === "static" && (
-                    <SliderContainer>
-                      <ColorPreview color={viewframeColor} />
-                      <CustomSlider
-                        value={initialColorIndex}
-                        onChange={handleColorChange}
-                        onMouseMove={handleSliderMove}
-                        onMouseLeave={handleSliderLeave}
-                        min={0}
-                        max={colorOptions.length - 1}
-                        step={1}
-                      />
-
-                      {/* Tooltip for slider */}
-                      {sliderTooltip && (
-                        <SliderTooltip style={{ left: sliderTooltip.left }}>
-                          <TooltipColorPreview color={sliderTooltip.color} />
-                          <TooltipText>{sliderTooltip.name}</TooltipText>
-                        </SliderTooltip>
-                      )}
-                    </SliderContainer>
-                  )}
-
-                  {/* Animated Option with custom checkbox */}
-                  <ViewOption style={{ marginTop: "6px" }}>
-                    <CustomCheckboxComponent
-                      label="Animated"
-                      checked={activeViewframeCategory === "animated"}
-                      onChange={() => toggleCategory("animated")}
-                    />
-                  </ViewOption>
-
-                  {/* Animation Controls - Using the animated container */}
-                  <AnimatedControlsContainer
-                    visible={activeViewframeCategory === "animated"}
-                  >
-                    <AnimatedControlsRow>
-                      {/* Adjusted rocket button to match ColorPreview size and position */}
-                      <IconButton
-                        onClick={toggleRocket}
-                        active={isRocketActive}
+                      {/* First line */}
+                      <div
                         style={{
-                          opacity: 1,
-                          cursor: "pointer",
-                          outlineColor: "transparent",
-                          width: "24px",
-                          height: "24px",
-                          minWidth: "24px",
-                          minHeight: "24px",
-                          padding: 0,
-                          marginLeft: "-6px",
-                          marginRight: "9px",
-                          marginBottom: "4px",
+                          fontSize: "11px",
+                          lineHeight: "16px",
+                          height: "16px",
                         }}
                       >
                         <span
-                          role="img"
-                          aria-label="Rocket"
-                          style={{ fontSize: "12px" }}
+                          style={{
+                            color: "black",
+                            fontFamily: "monospace",
+                            fontSize: "11px",
+                          }}
                         >
-                          🚀
+                          <span style={{ fontWeight: "bold" }}>Hydra98</span> is a
+                          Windows 98 desktop
                         </span>
-                      </IconButton>
+                      </div>
 
-                      {/* Transparent select overlay implementation - aligned to match slider */}
+                      {/* Second line */}
                       <div
                         style={{
-                          position: "relative",
-                          width: "calc(100% - 14px)",
-                          marginBottom: "4px",
-                          marginLeft: 0,
+                          fontSize: "11px",
+                          lineHeight: "16px",
+                          height: "15px",
+                          marginBottom: "8px", // Preserve your original bottom margin
                         }}
-                        className="win98-select-container"
                       >
-                        {/* Add styles for button-active state */}
-                        <style>
-                          {`
-                            .win98-button-visual.active {
-                              border-top-color: #808080 !important;
-                              border-left-color: #808080 !important;
-                              border-right-color: #ffffff !important;
-                              border-bottom-color: #ffffff !important;
-                              background-color: #b0b0b0 !important;
-                              transform: translateY(1px);
-                           }
-                         `}
-                        </style>
-
-                        {/* Hidden native select - this gives us native functionality */}
-                        <select
-                          value={activeScreensaver}
-                          onChange={(e) => {
-                            if (!isRocketActive) {
-                              console.log("Selected:", e.target.value);
-                              setActiveScreensaver(e.target.value);
-                            }
-                          }}
-                          onMouseDown={(e) => {
-                            // Find coordinates relative to select element
-                            const rect =
-                              e.currentTarget.getBoundingClientRect();
-                            const x = e.clientX - rect.left;
-
-                            // If click is in the button area (right side)
-                            if (x > rect.width - 20) {
-                              // Find the visual button element and add active class
-                              const buttonVisual =
-                                e.currentTarget.parentNode.querySelector(
-                                  ".win98-button-visual"
-                                );
-                              if (buttonVisual) {
-                                buttonVisual.classList.add("active");
-                              }
-                            }
-                          }}
-                          onMouseUp={() => {
-                            // Remove active class from button visual on mouse up
-                            const buttonVisual = document.querySelector(
-                              ".win98-button-visual"
-                            );
-                            if (buttonVisual) {
-                              buttonVisual.classList.remove("active");
-                            }
-                          }}
-                          onMouseLeave={() => {
-                            // Remove active class from button visual if mouse leaves
-                            const buttonVisual = document.querySelector(
-                              ".win98-button-visual"
-                            );
-                            if (buttonVisual) {
-                              buttonVisual.classList.remove("active");
-                            }
-                          }}
+                        <span
                           style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            opacity: 0,
-                            cursor: isRocketActive ? "not-allowed" : "default",
-                            zIndex: 2, // Higher than the visual elements
-                          }}
-                          disabled={isRocketActive}
-                        >
-                          <option value="default">Space</option>
-                          <option value="bouncyballs">Bouncy Balls</option>
-                          <option value="flowerbox">FlowerBox</option>
-                          <option value="pipes">Pipes</option>
-                        </select>
-
-                        {/* Visual display (non-functional, just for appearance) */}
-                        <div
-                          style={{
-                            width: "100%",
-                            height: 24,
-                            backgroundColor: "#ffffff",
-                            border: "1px solid",
-                            borderTopColor: "#999999",
-                            borderLeftColor: "#999999",
-                            borderRightColor: "#ffffff",
-                            borderBottomColor: "#ffffff",
-                            boxShadow: "inset 1px 1px 0px rgba(0, 0, 0, 0.2)",
-                            fontSize: 11,
-                            padding: "2px 20px 2px 3px",
-                            fontFamily:
-                              '"ms_sans_serif", "ms sans serif", "Microsoft Sans Serif", sans-serif',
-                            color:
-                              activeScreensaver === "default" && isRocketActive
-                                ? "#888888"
-                                : "#000000",
-                            display: "flex",
-                            alignItems: "center",
-                            pointerEvents: "none", // Don't capture pointer events
+                            color: "black",
+                            fontFamily: "monospace",
+                            fontSize: "11px",
                           }}
                         >
-                          {/* Display the current value */}
-                          {activeScreensaver === "default"
-                            ? "Space"
-                            : activeScreensaver === "bouncyballs"
-                            ? "Bouncy Balls"
-                            : activeScreensaver === "flowerbox"
-                            ? "FlowerBox"
-                            : "Pipes"}
-                        </div>
-
-                        {/* Button - purely visual, clicks pass through to select */}
-                        <div
-                          className="win98-button-visual"
-                          style={{
-                            position: "absolute",
-                            width: 17,
-                            height: 21.5,
-                            top: 1,
-                            right: 1,
-                            backgroundColor: "#c0c0c0",
-                            border: "1px solid",
-                            borderTopColor: "#ffffff",
-                            borderLeftColor: "#ffffff",
-                            borderRightColor: "#000000",
-                            borderBottomColor: "#000000",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: 0,
-                            pointerEvents: "none", // Don't capture pointer events
-                            transition: "background-color 0.05s ease", // Smooth transition for pressed state
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: 0,
-                              height: 0,
-                              borderLeft: "3px solid transparent",
-                              borderRight: "3px solid transparent",
-                              borderTop: "3px solid black",
-                              marginTop: 1,
-                              pointerEvents: "none",
-                            }}
-                          />
-                        </div>
+                          emulator for the web.
+                        </span>
                       </div>
-                    </AnimatedControlsRow>
-                  </AnimatedControlsContainer>
-                </StyledGroupBox>
-              </>
-            )}
 
-            {activeTab === 1 && (
-              <div
-                style={{
-                  textAlign: "center", // Center content vertically
-                  padding: "2px 0px", // Reduced top/bottom padding
-                  fontFamily: "monospace",
-                  //minHeight: '80px',  // Ensure consistent height
-                  //display: 'flex',
-                }}
-              >
-                {isRocketActive ? (
-                  <p
-                    style={{
-                      fontFamily: "monospace",
-                      fontSize: "13px",
-                      //whiteSpace: 'nowrap',
-                      margin: "7px 0", // Consistent margin
-                    }}
-                  >
-                    {`> turbo mode initialized... `}
-                    <span className="blinker">|</span>
-                  </p>
-                ) : (
+                      {/* Third line */}
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          lineHeight: "16px",
+                          height: "15px",
+                          //marginBottom: '2px'  // Preserve your original bottom margin
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: "black",
+                            fontFamily: "monospace",
+                            fontSize: "11px",
+                          }}
+                        >
+                          Use the{" "}
+                          <span style={{ fontWeight: "bold" }}>controls</span> to
+                          customize your
+                        </span>
+                      </div>
+                      {/* Fourth line */}
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          lineHeight: "16px",
+                          height: "15px",
+                          //marginBottom: '0px'  // Preserve your original bottom margin
+                        }}
+                      >
+                        <span
+                          style={{
+                            color: "black",
+                            fontFamily: "monospace",
+                            fontSize: "11px",
+                          }}
+                        >
+                          experience.
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 2 && (
+                <div
+                  style={{
+                    textAlign: "center",
+                    padding: "2px 0",
+                    fontFamily: "monospace",
+                  }}
+                >
                   <div
                     style={{
-                      textAlign: "center",
-                      padding: "3px 0",
-                      fontFamily: "monospace",
+                      fontSize: "11px",
+                      lineHeight: "20px",
+                      height: "20px",
                     }}
                   >
-                    {/* First line */}
-                    <div
+                    <span
                       style={{
+                        color: "black",
+                        fontFamily: "monospace",
                         fontSize: "11px",
-                        lineHeight: "16px",
-                        height: "16px",
                       }}
                     >
-                      <span
-                        style={{
-                          color: "black",
-                          fontFamily: "monospace",
-                          fontSize: "11px",
-                        }}
-                      >
-                        <span style={{ fontWeight: "bold" }}>Hydra98</span> is a
-                        Windows 98 desktop
-                      </span>
-                    </div>
-
-                    {/* Second line */}
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        lineHeight: "16px",
-                        height: "15px",
-                        marginBottom: "8px", // Preserve your original bottom margin
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: "black",
-                          fontFamily: "monospace",
-                          fontSize: "11px",
-                        }}
-                      >
-                        emulator for the web.
-                      </span>
-                    </div>
-
-                    {/* Third line */}
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        lineHeight: "16px",
-                        height: "15px",
-                        //marginBottom: '2px'  // Preserve your original bottom margin
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: "black",
-                          fontFamily: "monospace",
-                          fontSize: "11px",
-                        }}
-                      >
-                        Use the{" "}
-                        <span style={{ fontWeight: "bold" }}>controls</span> to
-                        customize your
-                      </span>
-                    </div>
-                    {/* Fourth line */}
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        lineHeight: "16px",
-                        height: "15px",
-                        //marginBottom: '0px'  // Preserve your original bottom margin
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: "black",
-                          fontFamily: "monospace",
-                          fontSize: "11px",
-                        }}
-                      >
-                        experience.
-                      </span>
-                    </div>
+                      Version 0.9.1 beta
+                    </span>
                   </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 2 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "2px 0",
-                  fontFamily: "monospace",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "11px",
-                    lineHeight: "20px",
-                    height: "20px",
-                  }}
-                >
-                  <span
+                  <div
                     style={{
-                      color: "black",
-                      fontFamily: "monospace",
                       fontSize: "11px",
+                      lineHeight: "20px",
+                      height: "20px",
                     }}
                   >
-                    Version 0.9.1 beta
-                  </span>
+                    <span
+                      style={{
+                        color: "black",
+                        fontFamily: "monospace",
+                        fontSize: "11px",
+                      }}
+                    >
+                      Built with ReactJS and ❤️
+                    </span>
+                  </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: "11px",
-                    lineHeight: "20px",
-                    height: "20px",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "black",
-                      fontFamily: "monospace",
-                      fontSize: "11px",
-                    }}
-                  >
-                    Built with ReactJS and ❤️
-                  </span>
-                </div>
-              </div>
-            )}
-          </TabBody>
-        </TabsWrapper>
-      </CollapsibleContent>
+              )}
+            </TabBody>
+          </TabsWrapper>
+        </div>
+      )}
     </div>
   );
 };

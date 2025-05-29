@@ -140,10 +140,10 @@ const MobileControlsContent = () => {
 
       <Button
         className="mobile-controls-button"
-        active={!localPositionLocked}
+        active={!localPositionLocked ? "true" : "false"}
         onClick={handleToggleLock}
         title={localPositionLocked ? "Unlock Position (Tap to Enable Drag)" : "Lock Position (Tap to Disable Drag)"}
-        data-active={!localPositionLocked}
+        data-active={!localPositionLocked ? "true" : "false"}
         disabled={isUpdating}
       >
         {localPositionLocked ? <img src="/static/Lock_16x16_4.png" alt="Lock Icon" style={{ width: '18px', height: '18px' }}/> : " "}

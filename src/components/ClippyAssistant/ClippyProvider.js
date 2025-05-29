@@ -1,6 +1,3 @@
-// ClippyProvider.js - Fixed Mobile Drag Implementation
-// Key fixes: Simplified touch handling, better event management, reliable drag detection
-
 import React, {
   createContext,
   useState,
@@ -16,7 +13,9 @@ import {
 
 import CustomBalloon from "./CustomBalloon";
 import ChatBalloon from "./ChatBalloon";
+import ClippyContextMenu from "./ClippyContextMenu";
 import ClippyPositioning from "./ClippyPositioning";
+import ClippyService from "./ClippyService";
 import MobileControls from "./MobileControls";
 import "./_styles.scss";
 
@@ -35,7 +34,6 @@ const detectMobile = () => {
 };
 
 const isMobile = detectMobile();
-const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
 
 // Development logging
 const isDev = process.env.NODE_ENV === 'development';
@@ -57,6 +55,9 @@ const safeExecute = (operation, fallback = null, context = "operation") => {
   }
 };
 
+// FIXED: Initial greeting animations array
+const GREETING_ANIMATIONS = ["Greeting", "Wave", "GetAttention"];
+
 const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   // Core state
   const [startupComplete, setStartupComplete] = useState(false);
@@ -65,6 +66,18 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   const [isScreenPoweredOn, setIsScreenPoweredOn] = useState(true);
   const [positionLocked, setPositionLocked] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
+
+  // ADDED: Balloon state management
+  const [balloonVisible, setBalloonVisible] = useState(false);
+  const [balloonContent, setBalloonContent] = useState(null);
+  const [balloonType, setBalloonType] = useState('custom'); // 'custom' or 'chat'
+
+  // ADDED: Context menu state
+  const [contextMenuVisible, setContextMenuVisible] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+
+  // ADDED: Animation state
+  const [hasPlayedGreeting, setHasPlayedGreeting] = useState(false);
 
   // Refs
   const clippyInstanceRef = useRef(null);
@@ -75,6 +88,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   const startupTimeoutRef = useRef(null);
   const resizeHandlingActiveRef = useRef(false);
   const currentZoomLevelRef = useRef(0);
+  const balloonTimeoutRef = useRef(null);
 
   // Position state (desktop only)
   const [position, setPosition] = useState(() => {
@@ -85,6 +99,61 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       "initial position"
     );
   });
+
+  // ADDED: Balloon management functions
+  const showCustomBalloon = useCallback((message, duration = 6000) => {
+    setBalloonContent(message);
+    setBalloonType('custom');
+    setBalloonVisible(true);
+    
+    if (balloonTimeoutRef.current) {
+      clearTimeout(balloonTimeoutRef.current);
+    }
+    
+    balloonTimeoutRef.current = setTimeout(() => {
+      setBalloonVisible(false);
+      setBalloonContent(null);
+    }, duration);
+  }, []);
+
+  const showChatBalloon = useCallback((initialMessage) => {
+    setBalloonContent(initialMessage);
+    setBalloonType('chat');
+    setBalloonVisible(true);
+    // Chat balloons don't auto-close, user must close them
+  }, []);
+
+  const hideBalloon = useCallback(() => {
+    setBalloonVisible(false);
+    setBalloonContent(null);
+    if (balloonTimeoutRef.current) {
+      clearTimeout(balloonTimeoutRef.current);
+    }
+  }, []);
+
+  // FIXED: Initial greeting animation
+  const playInitialGreeting = useCallback(() => {
+    if (hasPlayedGreeting || !clippyInstanceRef.current || !startupComplete) return;
+    
+    const randomGreeting = GREETING_ANIMATIONS[Math.floor(Math.random() * GREETING_ANIMATIONS.length)];
+    console.log(`🎯 Playing initial greeting: ${randomGreeting}`);
+    
+    safeExecute(() => {
+      if (clippyInstanceRef.current?.play) {
+        clippyInstanceRef.current.play(randomGreeting);
+        setHasPlayedGreeting(true);
+        
+        setTimeout(() => {
+          if (mountedRef.current) {
+            const welcomeMessage = isMobile 
+              ? "Hi! I'm Clippy. Tap me for help!" 
+              : "Hi! I'm Clippy. Double-click me for help!";
+            showCustomBalloon(welcomeMessage, 4000);
+          }
+        }, 1500);
+      }
+    }, null, "initial greeting");
+  }, [hasPlayedGreeting, showCustomBalloon, startupComplete]);
 
   // Startup sequence monitoring (simplified)
   useEffect(() => {
@@ -114,6 +183,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       if (sequenceActive !== !startupComplete) {
         setStartupComplete(!sequenceActive);
+        // FIXED: Only trigger greeting on transition to complete
+        if (!sequenceActive && !hasPlayedGreeting) {
+          setTimeout(() => {
+            playInitialGreeting();
+          }, 1000);
+        }
       }
 
       const nextCheckDelay = sequenceActive ? 500 : 2000;
@@ -128,7 +203,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         clearTimeout(startupTimeoutRef.current);
       }
     };
-  }, [startupComplete]);
+  }, [playInitialGreeting, hasPlayedGreeting]);
 
   // Zoom monitoring (simplified)
   useEffect(() => {
@@ -138,7 +213,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       const currentZoomLevel = ClippyPositioning.getCurrentZoomLevel();
 
       if (currentZoomLevel !== currentZoomLevelRef.current) {
-        const oldZoomLevel = currentZoomLevelRef.current;
         currentZoomLevelRef.current = currentZoomLevel;
 
         const clippyElement = document.querySelector(".clippy");
@@ -177,7 +251,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       clearInterval(zoomCheckInterval);
       observer.disconnect();
     };
-  }, []);
+  }, [mountedRef]);
 
   // Error rate limiting
   const isErrorRateLimited = useCallback(() => {
@@ -258,8 +332,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       window.setAssistantVisible = createSafeGlobalFunction((visible) => {
         setAssistantVisible(visible);
         if (!visible) {
-          document.querySelectorAll(".custom-clippy-balloon").forEach((el) => el.remove());
-          document.querySelectorAll(".custom-clippy-chat-balloon").forEach((el) => el.remove());
+          hideBalloon();
+          //hideContextMenu();
         }
         return true;
       }, "setAssistantVisible");
@@ -274,150 +348,19 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return true;
       }, "setScreenPowerState");
 
-      // Balloon functions (keeping existing working implementation)
+      // FIXED: Updated balloon functions to use React state
       window.showClippyCustomBalloon = createSafeGlobalFunction((message) => {
-        document.querySelectorAll(".custom-clippy-balloon").forEach((el) => el.remove());
-
-        const clippyEl = document.querySelector(".clippy");
-        let left = 200, top = 200;
-
-        if (clippyEl) {
-          const rect = clippyEl.getBoundingClientRect();
-          left = Math.max(20, rect.left - 150);
-          top = Math.max(20, rect.top - 80);
-        }
-
-        const balloon = document.createElement("div");
-        balloon.className = "custom-clippy-balloon";
-        balloon.style.cssText = `
-          position: fixed; left: ${left}px; top: ${top}px;
-          background: #fffcde; border: 2px solid #000; border-radius: 8px;
-          padding: 12px 16px; font-family: Tahoma, sans-serif; font-size: 14px;
-          color: #000; -webkit-text-fill-color: #000; z-index: 9999;
-          max-width: 250px; box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-          line-height: 1.4; word-wrap: break-word;
-        `;
-
-        balloon.textContent = message;
-        document.body.appendChild(balloon);
-
-        setTimeout(() => {
-          balloon.style.transition = "opacity 0.3s ease";
-          balloon.style.opacity = "0";
-          setTimeout(() => balloon.remove(), 300);
-        }, 6000);
-
+        showCustomBalloon(message);
         return true;
       }, "showClippyCustomBalloon");
 
       window.hideClippyCustomBalloon = createSafeGlobalFunction(() => {
-        document.querySelectorAll(".custom-clippy-balloon").forEach((el) => el.remove());
-        document.querySelectorAll(".custom-clippy-chat-balloon").forEach((el) => el.remove());
+        hideBalloon();
         return true;
       }, "hideClippyCustomBalloon");
 
-      // Chat balloon function (keeping working implementation)
       window.showClippyChatBalloon = createSafeGlobalFunction((initialMessage) => {
-        document.querySelectorAll(".custom-clippy-chat-balloon").forEach((el) => el.remove());
-
-        const balloon = document.createElement("div");
-        balloon.className = "custom-clippy-chat-balloon";
-        balloon.style.cssText = `
-          position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-          background: #fffcde; border: 3px solid #000; border-radius: 8px;
-          padding: 20px; font-family: Tahoma, sans-serif; font-size: 14px; z-index: 9999;
-          width: 350px; height: 300px; color: #000; -webkit-text-fill-color: #000;
-          display: flex; flex-direction: column; box-shadow: 4px 4px 8px rgba(0,0,0,0.3);
-        `;
-
-        balloon.innerHTML = `
-          <button onclick="this.parentElement.remove()" style="
-            position: absolute; top: 8px; right: 12px; background: none; border: none;
-            font-size: 20px; cursor: pointer; color: #666; padding: 4px 8px;
-            min-width: 32px; min-height: 32px; -webkit-text-fill-color: #666;
-          ">×</button>
-          
-          <div style="margin-bottom: 12px; font-weight: bold; font-size: 16px; color: #000;">
-            💬 Chat with Clippy
-          </div>
-          
-          <div id="chat-messages" style="
-            flex: 1; overflow-y: auto; border: 2px inset #ccc; background: white;
-            padding: 8px; margin-bottom: 12px; color: #000; min-height: 180px;
-          ">
-            <div style="margin-bottom: 8px; color: #000; -webkit-text-fill-color: #000;">
-              <strong>Clippy:</strong> ${initialMessage}
-            </div>
-          </div>
-          
-          <form onsubmit="
-            event.preventDefault();
-            const input = this.querySelector('input');
-            const messages = document.getElementById('chat-messages');
-            const userText = input.value.trim();
-            if (userText) {
-              const userDiv = document.createElement('div');
-              userDiv.style.cssText = 'margin: 8px 0; color: #000080; -webkit-text-fill-color: #000080; text-align: right;';
-              userDiv.innerHTML = '<strong>You:</strong> ' + userText;
-              messages.appendChild(userDiv);
-              
-              const thinkDiv = document.createElement('div');
-              thinkDiv.style.cssText = 'margin: 8px 0; color: #666; -webkit-text-fill-color: #666; font-style: italic;';
-              thinkDiv.textContent = 'Clippy is thinking...';
-              messages.appendChild(thinkDiv);
-              
-              input.value = '';
-              messages.scrollTop = messages.scrollHeight;
-              
-              setTimeout(() => {
-                thinkDiv.remove();
-                const respDiv = document.createElement('div');
-                respDiv.style.cssText = 'margin: 8px 0; color: #000; -webkit-text-fill-color: #000;';
-                
-                const responses = {
-                  'hello': 'Hello there! How can I assist you today?',
-                  'help': 'I can help with many things! Try asking me about Hydra98 or just chat with me.',
-                  'hydra': 'Hydra98 is an amazing Windows 98 desktop emulator! What do you think of it?',
-                  'thanks': 'You\\'re very welcome! Is there anything else I can help you with?',
-                  'bye': 'Goodbye! Click the X to close this chat anytime.',
-                  'default': 'That\\'s interesting! Tell me more, or ask me something else.'
-                };
-                
-                const lowerText = userText.toLowerCase();
-                let response = responses.default;
-                
-                for (const [key, value] of Object.entries(responses)) {
-                  if (lowerText.includes(key)) {
-                    response = value;
-                    break;
-                  }
-                }
-                
-                respDiv.innerHTML = '<strong>Clippy:</strong> ' + response;
-                messages.appendChild(respDiv);
-                messages.scrollTop = messages.scrollHeight;
-              }, 1500);
-            }
-          " style="display: flex; gap: 8px;">
-            <input type="text" placeholder="Type a message..." style="
-              flex: 1; padding: 8px; border: 2px inset #ccc; font-size: 14px;
-              color: #000; -webkit-text-fill-color: #000; font-family: Tahoma, sans-serif;
-            ">
-            <button type="submit" style="
-              padding: 8px 16px; background: #c0c0c0; border: 2px outset #c0c0c0;
-              font-size: 14px; cursor: pointer; color: #000; -webkit-text-fill-color: #000;
-              font-family: Tahoma, sans-serif;
-            ">Send</button>
-          </form>
-        `;
-
-        document.body.appendChild(balloon);
-
-        setTimeout(() => {
-          const input = balloon.querySelector("input");
-          if (input) input.focus();
-        }, 100);
-
+        showChatBalloon(initialMessage);
         return true;
       }, "showClippyChatBalloon");
 
@@ -425,20 +368,21 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       window.resetClippy = () => {
         safeExecute(() => {
-          document.querySelectorAll(".custom-clippy-balloon").forEach((el) => el.remove());
-          document.querySelectorAll(".custom-clippy-chat-balloon").forEach((el) => el.remove());
+          hideBalloon();
+          //hideContextMenu();
           setAssistantVisible(true);
           errorCountRef.current = 0;
+          setHasPlayedGreeting(false);
         }, null, "clippy reset");
       };
     }
 
     return () => {
       mountedRef.current = false;
+      if (balloonTimeoutRef.current) {
+        clearTimeout(balloonTimeoutRef.current);
+      }
       if (typeof window !== "undefined") {
-        document.querySelectorAll(".custom-clippy-balloon").forEach((el) => el.remove());
-        document.querySelectorAll(".custom-clippy-chat-balloon").forEach((el) => el.remove());
-        
         delete window._clippyGlobalsInitialized;
         delete window.setAssistantVisible;
         delete window.setCurrentAgent;
@@ -454,7 +398,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         delete window.setClippyDragging;
       }
     };
-  }, [assistantVisible, isScreenPoweredOn, createSafeGlobalFunction, positionLocked]);
+  }, [assistantVisible, isScreenPoweredOn, createSafeGlobalFunction, positionLocked, showCustomBalloon, showChatBalloon, hideBalloon]);
 
   // Custom position getter
   const getCustomPosition = useCallback(() => {
@@ -484,6 +428,18 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     setPositionLocked,
     isDragging,
     setIsDragging,
+    // ADDED: Balloon management in context
+    balloonVisible,
+    setBalloonVisible,
+    balloonContent,
+    balloonType,
+    showCustomBalloon,
+    showChatBalloon,
+    hideBalloon,
+    // ADDED: Context menu management in context
+    contextMenuVisible,
+    setContextMenuVisible,
+    //hideContextMenu,
   };
 
   return (
@@ -502,8 +458,34 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               resizeHandlingActiveRef={resizeHandlingActiveRef}
               positionLocked={positionLocked}
               isDragging={isDragging}
+              playInitialGreeting={playInitialGreeting}
+              hasPlayedGreeting={hasPlayedGreeting}
+              startupComplete={startupComplete}
             />
             <MobileControls />
+            {balloonVisible && balloonType === 'custom' && balloonContent && (
+              <CustomBalloon
+                message={balloonContent}
+                position={{
+                  left: Math.max(20, Math.min(window.innerWidth - 300, window.innerWidth * 0.1)),
+                  top: Math.max(50, Math.min(window.innerHeight - 150, window.innerHeight * 0.2))
+                }}
+                onClose={hideBalloon}
+              />
+            )}
+            {balloonVisible && balloonType === 'chat' && balloonContent && (
+              <ChatBalloon
+                initialMessage={balloonContent}
+                position={{
+                  left: Math.max(50, (window.innerWidth - 350) / 2),
+                  top: Math.max(100, (window.innerHeight - 300) / 2)
+                }}
+                onClose={hideBalloon}
+                onSendMessage={(message) => {
+                  console.log('Chat message sent:', message);
+                }}
+              />
+            )}
           </>
         )}
       </ReactClippyProvider>
@@ -511,7 +493,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   );
 };
 
-// FIXED: Simplified ClippyController with reliable mobile drag
+// FIXED: Simplified ClippyController with reliable mobile drag AND right-click support
 const FixedClippyController = ({
   visible,
   isScreenPoweredOn,
@@ -522,6 +504,11 @@ const FixedClippyController = ({
   resizeHandlingActiveRef,
   positionLocked,
   isDragging,
+  playInitialGreeting,
+  hasPlayedGreeting,
+  startupComplete,
+  setContextMenuVisible,
+  setContextMenuPosition,
 }) => {
   const { clippy } = useClippy();
   const rafRef = useRef(null);
@@ -582,6 +569,22 @@ const FixedClippyController = ({
     }, false, `${interactionType} interaction`);
   }, [isInCooldown, startCooldown, mountedRef, clippy]);
 
+  // FIXED: Right-click context menu handler for desktop
+  const handleRightClick = useCallback((e) => {
+  if (isMobile) return;
+  
+  e.preventDefault();
+  e.stopPropagation();
+  
+  if (window.showClippyCustomBalloon) {
+    window.showClippyCustomBalloon(
+      "Right-click options: Hide Assistant, Change Agent"
+    );
+  }
+  
+  return true;
+}, []);
+
   // FIXED: Simplified mobile touch handlers
   const createSimplifiedTouchHandlers = useCallback(() => {
     let moveHandler = null;
@@ -590,9 +593,6 @@ const FixedClippyController = ({
     const handleTouchStart = (e) => {
       if (!mountedRef.current) return;
 
-      devLog('Touch start detected, position locked:', positionLocked);
-
-      // CRITICAL: Don't prevent default on touchstart for iOS Safari
       const touch = e.touches[0];
       const dragState = dragStateRef.current;
 
@@ -611,8 +611,6 @@ const FixedClippyController = ({
           // Calculate current right/bottom values
           dragState.origRightPx = viewportWidth - rect.right;
           dragState.origBottomPx = viewportHeight - rect.bottom;
-          
-          devLog(`Current position - right: ${dragState.origRightPx}px, bottom: ${dragState.origBottomPx}px`);
         }
       }
 
@@ -635,8 +633,6 @@ const FixedClippyController = ({
           if (window.setClippyDragging) {
             window.setClippyDragging(true);
           }
-          
-          devLog('Started dragging');
         }
 
         if (dragState.dragStarted) {
@@ -692,8 +688,6 @@ const FixedClippyController = ({
       // Create end handler
       endHandler = (e) => {
         const dragState = dragStateRef.current;
-
-        devLog('Touch end, was dragging:', dragState.dragStarted);
 
         // Clean up event listeners
         if (moveHandler) {
@@ -758,10 +752,10 @@ const FixedClippyController = ({
         }, 400);
       }
 
-      // Add event listeners - using default passive behavior initially
+      // Add event listeners with consistent passive settings
       document.addEventListener('touchmove', moveHandler, { passive: false });
-      document.addEventListener('touchend', endHandler, { passive: true });
-      document.addEventListener('touchcancel', endHandler, { passive: true });
+      document.addEventListener('touchend', endHandler, { passive: false });
+      document.addEventListener('touchcancel', endHandler, { passive: false });
     };
 
     return {
@@ -835,13 +829,14 @@ const FixedClippyController = ({
           // FIXED: Mobile interaction setup
           if (isMobile) {
             const handlers = createSimplifiedTouchHandlers();
-            overlay.addEventListener('touchstart', handlers.handleTouchStart, { passive: true });
+            overlay.addEventListener('touchstart', handlers.handleTouchStart, { passive: false });
             
             // Store cleanup function
             overlay._cleanupHandlers = handlers.cleanup;
           } else {
-            // Desktop: double-click interaction
+            // Desktop: double-click interaction AND right-click
             overlay.addEventListener("dblclick", handleDesktopInteraction);
+            overlay.addEventListener("contextmenu", handleRightClick);
           }
 
           overlayRef.current = overlay;
@@ -940,6 +935,12 @@ const FixedClippyController = ({
     isDragging,
     createSimplifiedTouchHandlers,
     handleDesktopInteraction,
+    handleRightClick,
+    playInitialGreeting,
+    hasPlayedGreeting,
+    startupComplete,
+    setContextMenuVisible,  // ADD THIS
+    setContextMenuPosition, // ADD THIS
   ]);
 
   return null;

@@ -1,3 +1,5 @@
+TODO - begin adding 'LAST UPDATED:' at the top
+
 # How the Clippy Component Works
 
 A comprehensive guide to understanding the ClippyAssistant component architecture and functionality.

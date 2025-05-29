@@ -564,3 +564,9 @@ body:has(.itIsNowSafeToTurnOffYourComputer) .custom-clippy-chat-balloon {
     display: none !important;
   }
 }
+
+/* Add this to ensure context menu appears above everything */
+.clippy-context-menu {
+  z-index: 10000 !important;
+  position: fixed !important;
+}
