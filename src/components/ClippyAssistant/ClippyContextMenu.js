@@ -1,4 +1,4 @@
-// ClippyContextMenu.js - Production Portal Version
+// ClippyContextMenu.js - FIXED with desktop viewport constraints and functional actions
 
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
@@ -29,6 +29,35 @@ const ClippyContextMenu = ({
     "RestPose", "IdleEyeBrowRaise", "LookDownLeft",
   ];
 
+  // FIXED: Get desktop viewport boundaries for positioning
+  const getDesktopViewport = () => {
+    const desktop = document.querySelector(".desktop.screen") || 
+                   document.querySelector(".desktop") || 
+                   document.querySelector(".w98");
+    
+    if (desktop) {
+      const rect = desktop.getBoundingClientRect();
+      return {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height
+      };
+    }
+    
+    // Fallback to window viewport
+    return {
+      left: 0,
+      top: 0,
+      right: window.innerWidth,
+      bottom: window.innerHeight,
+      width: window.innerWidth,
+      height: window.innerHeight
+    };
+  };
+
   // Create portal container on mount
   useEffect(() => {
     console.log("🎯 ClippyContextMenu creating portal container");
@@ -58,36 +87,66 @@ const ClippyContextMenu = ({
     };
   }, []);
 
-  // Position calculation - REAL mouse position with viewport constraints
+  // FIXED: Position calculation with strict desktop viewport constraints
   const position = React.useMemo(() => {
     const menuWidth = 180;
-    const menuHeight = 200;
+    const menuHeight = 250; // Increased for more menu items
     const margin = 10;
+    const viewport = getDesktopViewport();
     
-    // Constrain to viewport
-    let adjustedX = Math.max(margin, Math.min(x, window.innerWidth - menuWidth - margin));
-    let adjustedY = Math.max(margin, Math.min(y, window.innerHeight - menuHeight - margin));
+    // Constrain to desktop viewport with margin
+    let adjustedX = Math.max(
+      viewport.left + margin, 
+      Math.min(x, viewport.right - menuWidth - margin)
+    );
+    let adjustedY = Math.max(
+      viewport.top + margin, 
+      Math.min(y, viewport.bottom - menuHeight - margin)
+    );
     
-    console.log(`🎯 Context menu positioning: original(${x}, ${y}) -> adjusted(${adjustedX}, ${adjustedY})`);
+    console.log(`🎯 Context menu positioning within desktop viewport:`, {
+      original: { x, y },
+      adjusted: { x: adjustedX, y: adjustedY },
+      viewport: viewport
+    });
     
     return { x: adjustedX, y: adjustedY };
   }, [x, y]);
 
-  // Submenu positioning
+  // FIXED: Submenu positioning with desktop viewport awareness
   const handleSubmenuOpen = (submenuType, event) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const submenuWidth = 160;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const submenuHeight = submenuType === "animations" ? 300 : 200;
+    const viewport = getDesktopViewport();
 
-    const openLeft = rect.right + submenuWidth > viewportWidth - 10;
-    const newX = openLeft ? rect.left - submenuWidth : rect.right;
-    const newY = Math.min(rect.top, viewportHeight - 300);
+    // Check if submenu would overflow desktop viewport boundaries
+    const wouldOverflowRight = rect.right + submenuWidth > viewport.right - 10;
+    const wouldOverflowBottom = rect.top + submenuHeight > viewport.bottom - 10;
+
+    // Position submenu
+    const newX = wouldOverflowRight 
+      ? Math.max(viewport.left + 5, rect.left - submenuWidth)
+      : rect.right;
+    
+    const newY = wouldOverflowBottom
+      ? Math.max(viewport.top + 5, viewport.bottom - submenuHeight - 10)
+      : rect.top;
+
+    // Final constraint to desktop viewport
+    const constrainedX = Math.max(
+      viewport.left + 5, 
+      Math.min(newX, viewport.right - submenuWidth - 5)
+    );
+    const constrainedY = Math.max(
+      viewport.top + 5, 
+      Math.min(newY, viewport.bottom - submenuHeight - 5)
+    );
 
     setSubmenuPosition({
-      x: Math.max(5, newX),
-      y: Math.max(5, newY),
-      openLeft,
+      x: constrainedX,
+      y: constrainedY,
+      openLeft: wouldOverflowRight,
     });
 
     setSubmenuOpen(submenuType);
@@ -157,7 +216,7 @@ const ClippyContextMenu = ({
     border: "2px outset #c0c0c0",
     boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
     minWidth: "140px",
-    maxHeight: "300px",
+    maxHeight: "280px",
     overflowY: "auto",
     fontFamily: "Tahoma, sans-serif",
     fontSize: "11px",
@@ -167,6 +226,89 @@ const ClippyContextMenu = ({
     display: "block",
     transform: "translateZ(0)",
     zIndex: 2,
+  };
+
+  // FIXED: Functional menu actions
+  const handleMenuAction = (action, data = null) => {
+    console.log(`🎯 Context menu action triggered: ${action}`, data);
+    
+    switch (action) {
+      case 'hide':
+        // Use global function to hide Clippy
+        if (window.setAssistantVisible) {
+          window.setAssistantVisible(false);
+        }
+        onAction('hide');
+        break;
+        
+      case 'selectAgent':
+        // Change agent via global function
+        if (window.setCurrentAgent) {
+          window.setCurrentAgent(data);
+        }
+        // Play welcome animation for new agent
+        if (window.clippy?.play) {
+          setTimeout(() => {
+            window.clippy.play('Wave');
+            // Show welcome message
+            if (window.showClippyCustomBalloon) {
+              setTimeout(() => {
+                window.showClippyCustomBalloon(`Hello! I'm ${data} now. How can I help you?`);
+              }, 800);
+            }
+          }, 100);
+        }
+        onAction('selectAgent', data);
+        break;
+        
+      case 'playAnimation':
+        // Play specific animation
+        if (window.clippy?.play) {
+          window.clippy.play(data);
+        }
+        onAction('playAnimation', data);
+        break;
+        
+      case 'chat':
+        // Open chat balloon
+        if (window.showClippyChatBalloon) {
+          window.showClippyChatBalloon("Hi! What would you like to chat about?");
+        }
+        onAction('chat');
+        break;
+        
+      case 'wave':
+        // Play wave animation with message
+        if (window.clippy?.play) {
+          window.clippy.play('Wave');
+          if (window.showClippyCustomBalloon) {
+            setTimeout(() => {
+              window.showClippyCustomBalloon("👋 Hello there!");
+            }, 500);
+          }
+        }
+        onAction('wave');
+        break;
+        
+      case 'greet':
+        // Play greeting animation with message
+        if (window.clippy?.play) {
+          window.clippy.play('Greeting');
+          if (window.showClippyCustomBalloon) {
+            setTimeout(() => {
+              window.showClippyCustomBalloon("Hello! How can I help you today?");
+            }, 800);
+          }
+        }
+        onAction('greet');
+        break;
+        
+      default:
+        console.warn(`Unknown context menu action: ${action}`);
+        onAction(action, data);
+    }
+    
+    onClose();
   };
 
   // Menu content component
@@ -180,7 +322,7 @@ const ClippyContextMenu = ({
         }
       }, 0);
 
-      // FIXED: Click outside handler with proper exclusions
+      // Click outside handler with proper exclusions
       const handleClickOutside = (event) => {
         // Ignore clicks on Clippy-related elements
         const isClippyElement = event.target.closest('.clippy') || 
@@ -254,7 +396,7 @@ const ClippyContextMenu = ({
           onContextMenu={(e) => e.preventDefault()}
         >
           {/* Hide Clippy */}
-          <MenuItem onClick={() => onAction('hide')}>
+          <MenuItem onClick={() => handleMenuAction('hide')}>
             🚫 Hide Clippy
           </MenuItem>
 
@@ -283,17 +425,17 @@ const ClippyContextMenu = ({
           <div style={separatorStyle} />
 
           {/* Chat */}
-          <MenuItem onClick={() => onAction('chat')}>
+          <MenuItem onClick={() => handleMenuAction('chat')}>
             💬 Chat with Clippy
           </MenuItem>
 
           {/* Wave */}
-          <MenuItem onClick={() => onAction('wave')}>
+          <MenuItem onClick={() => handleMenuAction('wave')}>
             👋 Wave
           </MenuItem>
 
           {/* Greet */}
-          <MenuItem onClick={() => onAction('greet')}>
+          <MenuItem onClick={() => handleMenuAction('greet')}>
             😊 Say Hello
           </MenuItem>
         </div>
@@ -309,10 +451,7 @@ const ClippyContextMenu = ({
             {agents.map((agent) => (
               <MenuItem
                 key={agent}
-                onClick={() => {
-                  onAction('selectAgent', agent);
-                  onClose();
-                }}
+                onClick={() => handleMenuAction('selectAgent', agent)}
               >
                 <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   {agent === currentAgent ? "✓" : " "}
@@ -331,13 +470,10 @@ const ClippyContextMenu = ({
             onMouseEnter={() => setSubmenuOpen("animations")}
             onMouseLeave={handleSubmenuClose}
           >
-            {animations.slice(0, 15).map((animation) => ( // Limit for performance
+            {animations.slice(0, 15).map((animation) => (
               <MenuItem
                 key={animation}
-                onClick={() => {
-                  onAction('playAnimation', animation);
-                  onClose();
-                }}
+                onClick={() => handleMenuAction('playAnimation', animation)}
               >
                 {animation}
               </MenuItem>
