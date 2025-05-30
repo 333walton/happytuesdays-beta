@@ -1,257 +1,566 @@
-import React, { useState, useEffect, useRef } from "react";
+// ChatBalloon.js - FIXED DOM-based interactive chat balloon implementation
+// This file handles interactive chat balloons (not speech balloons)
+import React from "react";
+// ChatBalloon.js - FIXED DOM-based interactive chat balloon implementation
+// This file handles interactive chat balloons (not speech balloons)
+
+import { devLog, errorLog } from './ClippyPositioning';
 
 /**
- * Interactive chat balloon for Clippy assistant
- * Updated to match working console implementation
+ * Creates and manages interactive chat balloons for Clippy
+ * Uses direct DOM manipulation for maximum compatibility
  */
-const ChatBalloon = ({ initialMessage, position, onClose, onSendMessage }) => {
-  const [visible, setVisible] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const [loading, setLoading] = useState(false);
+class ChatBalloonManager {
+  constructor() {
+    this.currentChatBalloon = null;
+    this.chatHistory = [];
+  }
 
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
+  /**
+   * Show an interactive chat balloon
+   * @param {string} initialMessage - The initial message from Clippy
+   * @param {Object} options - Additional options
+   * @returns {boolean} - Success status
+   */
+  show(initialMessage, options = {}) {
+    try {
+      devLog(`Creating chat balloon: "${initialMessage}"`);
+      
+      // FIXED: Remove any existing chat balloons first
+      this.hide();
 
-  // Add initial message and focus input field when mounted
-  useEffect(() => {
-    if (initialMessage) {
-      setMessages([{ text: initialMessage, sender: "clippy" }]);
-    }
+      // Create chat container
+      const chatContainer = document.createElement('div');
+      chatContainer.className = 'custom-clippy-chat-balloon';
+      
+      // Calculate position
+      const position = this.calculatePosition(options.position);
+      
+      // Apply positioning and sizing
+      chatContainer.style.position = 'fixed';
+      chatContainer.style.left = `${position.left}px`;
+      chatContainer.style.top = `${position.top}px`;
+      chatContainer.style.width = `${position.width}px`;
+      chatContainer.style.height = '300px';
+      chatContainer.style.zIndex = '9999';
+      chatContainer.style.visibility = 'visible';
+      chatContainer.style.opacity = '1';
+      chatContainer.style.display = 'flex';
+      chatContainer.style.flexDirection = 'column';
 
-    // Animation timing
-    const showTimer = setTimeout(() => {
-      setVisible(true);
+      // Create chat balloon HTML content
+      this.createChatContent(chatContainer, initialMessage);
 
-      // Focus input after animation completes
-      const focusTimer = setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
+      // Add to DOM
+      document.body.appendChild(chatContainer);
+      this.currentChatBalloon = chatContainer;
+      
+      // Initialize chat history
+      this.chatHistory = [
+        { sender: 'clippy', message: initialMessage, timestamp: Date.now() }
+      ];
+
+      devLog(`Chat balloon positioned at (${position.left}, ${position.top})`);
+
+      // Focus input after a brief delay
+      setTimeout(() => {
+        const input = chatContainer.querySelector('.chat-input');
+        if (input) {
+          input.focus();
         }
-      }, 300);
+      }, 100);
 
-      return () => clearTimeout(focusTimer);
-    }, 50);
-
-    return () => clearTimeout(showTimer);
-  }, [initialMessage]);
-
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      return true;
+    } catch (error) {
+      errorLog("Error creating chat balloon", error);
+      return false;
     }
-  }, [messages]);
+  }
 
-  // Handle message submission - updated to match console logic
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (inputValue.trim() === "" || loading) return;
+  /**
+   * Hide the current chat balloon
+   * @returns {boolean} - Success status
+   */
+  hide() {
+    try {
+      // Remove current chat balloon
+      if (this.currentChatBalloon && this.currentChatBalloon.parentNode) {
+        this.currentChatBalloon.remove();
+        devLog("Chat balloon removed from DOM");
+      }
 
-    // Add user message
-    const userMessage = inputValue.trim();
-    setMessages((prev) => [...prev, { text: userMessage, sender: "user" }]);
-    setInputValue("");
-    setLoading(true);
-
-    // Add thinking indicator
-    setMessages((prev) => [
-      ...prev,
-      { text: "Clippy is thinking...", sender: "thinking" },
-    ]);
-
-    // Generate response after delay - using same logic as console
-    setTimeout(() => {
-      setLoading(false);
-
-      // Remove thinking message and add response
-      setMessages((prev) => {
-        const withoutThinking = prev.filter((msg) => msg.sender !== "thinking");
-
-        // Simple response logic matching console implementation
-        const responses = {
-          hello: "Hello there! How can I assist you today?",
-          help: "I can help with many things! Try asking me about Hydra98 or just chat with me.",
-          hydra:
-            "Hydra98 is an amazing Windows 98 desktop emulator! What do you think of it?",
-          thanks:
-            "You're very welcome! Is there anything else I can help you with?",
-          bye: "Goodbye! Click the X to close this chat anytime.",
-          default:
-            "That's interesting! Tell me more, or ask me something else.",
-        };
-
-        const lowerText = userMessage.toLowerCase();
-        let response = responses.default;
-
-        for (const [key, value] of Object.entries(responses)) {
-          if (lowerText.includes(key)) {
-            response = value;
-            break;
-          }
-        }
-
-        return [...withoutThinking, { text: response, sender: "clippy" }];
+      // Also remove any orphaned chat balloons
+      const orphanedChats = document.querySelectorAll('.custom-clippy-chat-balloon');
+      orphanedChats.forEach(chat => {
+        chat.remove();
+        devLog("Removed orphaned chat balloon");
       });
-    }, 1500);
-  };
 
-  return (
-    <div
-      className="custom-clippy-chat-balloon"
-      style={{
-        position: "fixed",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-        opacity: visible ? 1 : 0,
-        transition: "opacity 0.3s, transform 0.3s",
-        zIndex: 9999,
-        display: "flex",
-        flexDirection: "column",
+      this.currentChatBalloon = null;
+      this.chatHistory = [];
+      return true;
+    } catch (error) {
+      errorLog("Error hiding chat balloon", error);
+      return false;
+    }
+  }
 
-        // Styling to match console implementation
-        background: "#fffcde",
-        border: "3px solid #000",
-        borderRadius: "8px",
-        padding: "20px",
-        fontFamily: "Tahoma, sans-serif",
-        fontSize: "14px",
-        width: "350px",
-        height: "300px",
-        color: "#000",
-        WebkitTextFillColor: "#000", // iOS Safari fix
-        boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
-      }}
-    >
-      {/* Close button */}
-      <button
-        className="custom-clippy-balloon-close"
-        onClick={onClose}
-        aria-label="Close chat"
-        style={{
-          position: "absolute",
-          top: "8px",
-          right: "12px",
-          background: "none",
-          border: "none",
-          fontSize: "20px",
-          cursor: "pointer",
-          color: "#666",
-          WebkitTextFillColor: "#666", // iOS Safari fix
-          padding: "4px 8px",
-          minWidth: "32px",
-          minHeight: "32px",
-        }}
-      >
-        ×
-      </button>
-
-      {/* Title */}
-      <div
-        style={{
-          marginBottom: "12px",
-          fontWeight: "bold",
-          fontSize: "16px",
-          color: "#000",
-        }}
-      >
+  /**
+   * Create the HTML content for the chat balloon
+   * @param {HTMLElement} container - The chat container element
+   * @param {string} initialMessage - Initial message from Clippy
+   */
+  createChatContent(container, initialMessage) {
+    container.innerHTML = `
+      <button class="custom-clippy-balloon-close" aria-label="Close chat" style="
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 20px;
+        padding: 4px 8px;
+        background: none;
+        border: none;
+        line-height: 1;
+        min-width: 32px;
+        min-height: 32px;
+        color: #666666;
+        -webkit-text-fill-color: #666666;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+      ">×</button>
+      
+      <div style="
+        margin-bottom: 12px;
+        font-weight: bold;
+        font-size: 16px;
+        color: #000;
+        -webkit-text-fill-color: #000;
+        padding-right: 40px;
+      ">
         💬 Chat with Clippy
       </div>
-
-      {/* Messages container */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          border: "2px inset #ccc",
-          background: "white",
-          padding: "8px",
-          marginBottom: "12px",
-          color: "#000",
-          minHeight: "180px",
-        }}
-      >
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            style={{
-              margin: "8px 0",
-              color:
-                msg.sender === "user"
-                  ? "#000080"
-                  : msg.sender === "thinking"
-                  ? "#666"
-                  : "#000",
-              WebkitTextFillColor:
-                msg.sender === "user"
-                  ? "#000080"
-                  : msg.sender === "thinking"
-                  ? "#666"
-                  : "#000", // iOS Safari fix
-              textAlign: msg.sender === "user" ? "right" : "left",
-              fontStyle: msg.sender === "thinking" ? "italic" : "normal",
-            }}
-          >
-            {msg.sender === "thinking" ? (
-              msg.text
-            ) : (
-              <>
-                <strong>{msg.sender === "user" ? "You" : "Clippy"}:</strong>{" "}
-                {msg.text}
-              </>
-            )}
-          </div>
-        ))}
-
-        {/* Invisible element to scroll to */}
-        <div ref={messagesEndRef} />
+      
+      <div class="chat-messages" style="
+        flex: 1;
+        overflow-y: auto;
+        border: 2px inset #ccc;
+        background: white;
+        padding: 8px;
+        margin-bottom: 12px;
+        color: #000;
+        -webkit-text-fill-color: #000;
+        min-height: 180px;
+        font-family: 'Tahoma', sans-serif;
+        font-size: 14px;
+      ">
+        <div style="
+          margin: 8px 0;
+          color: #000;
+          -webkit-text-fill-color: #000;
+          text-align: left;
+        ">
+          <strong>Clippy:</strong> ${initialMessage}
+        </div>
       </div>
+      
+      <div style="display: flex; gap: 8px;">
+        <input type="text" placeholder="Type a message..." class="chat-input" style="
+          flex: 1;
+          padding: 8px;
+          border: 2px inset #ccc;
+          font-size: ${this.isMobile() ? '16px' : '14px'};
+          color: #000;
+          -webkit-text-fill-color: #000;
+          font-family: 'Tahoma', sans-serif;
+          background-color: #fff;
+          outline: none;
+          -webkit-appearance: none;
+          appearance: none;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
+          min-height: ${this.isMobile() ? '48px' : 'auto'};
+        " />
+        <button class="chat-send" style="
+          padding: ${this.isMobile() ? '12px 20px' : '8px 16px'};
+          background: #c0c0c0;
+          border: 2px outset #c0c0c0;
+          font-size: ${this.isMobile() ? '16px' : '14px'};
+          cursor: pointer;
+          color: #000;
+          -webkit-text-fill-color: #000;
+          font-family: 'Tahoma', sans-serif;
+          touch-action: manipulation;
+          -webkit-appearance: none;
+          appearance: none;
+          min-height: ${this.isMobile() ? '48px' : 'auto'};
+          min-width: ${this.isMobile() ? '80px' : 'auto'};
+        ">Send</button>
+      </div>
+    `;
 
-      {/* Input form */}
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          gap: "8px",
-        }}
-      >
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Type a message..."
-          disabled={loading}
-          style={{
-            flex: 1,
-            padding: "8px",
-            border: "2px inset #ccc",
-            fontSize: "14px",
-            color: "#000",
-            WebkitTextFillColor: "#000", // iOS Safari fix
-            fontFamily: "Tahoma, sans-serif",
-          }}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            padding: "8px 16px",
-            background: "#c0c0c0",
-            border: "2px outset #c0c0c0",
-            fontSize: "14px",
-            cursor: "pointer",
-            color: "#000",
-            WebkitTextFillColor: "#000", // iOS Safari fix
-            fontFamily: "Tahoma, sans-serif",
-          }}
-        >
-          Send
-        </button>
-      </form>
-    </div>
-  );
+    // Attach event listeners
+    this.attachEventListeners(container);
+  }
+
+  /**
+   * Attach event listeners to chat elements
+   * @param {HTMLElement} container - The chat container
+   */
+  attachEventListeners(container) {
+    const closeBtn = container.querySelector('.custom-clippy-balloon-close');
+    const chatInput = container.querySelector('.chat-input');
+    const sendBtn = container.querySelector('.chat-send');
+    const chatMessages = container.querySelector('.chat-messages');
+
+    // Close button
+    closeBtn.onclick = () => {
+      this.hide();
+    };
+
+    // Close button hover effect
+    closeBtn.onmouseenter = () => {
+      closeBtn.style.color = '#000000';
+      closeBtn.style.webkitTextFillColor = '#000000';
+      closeBtn.style.backgroundColor = '#f0f0f0';
+      closeBtn.style.borderRadius = '4px';
+    };
+
+    closeBtn.onmouseleave = () => {
+      closeBtn.style.color = '#666666';
+      closeBtn.style.webkitTextFillColor = '#666666';
+      closeBtn.style.backgroundColor = 'transparent';
+      closeBtn.style.borderRadius = '';
+    };
+
+    // Send message function
+    const sendMessage = () => {
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      // Add user message to chat
+      this.addMessageToChat(chatMessages, 'user', message);
+      chatInput.value = '';
+
+      // Add to history
+      this.chatHistory.push({
+        sender: 'user',
+        message: message,
+        timestamp: Date.now()
+      });
+
+      // Generate and add Clippy response
+      setTimeout(() => {
+        const response = this.generateClippyResponse(message);
+        this.addMessageToChat(chatMessages, 'clippy', response);
+        
+        // Add to history
+        this.chatHistory.push({
+          sender: 'clippy',
+          message: response,
+          timestamp: Date.now()
+        });
+      }, 1000 + Math.random() * 1000); // 1-2 second delay for realism
+    };
+
+    // Send button
+    sendBtn.onclick = sendMessage;
+
+    // Send button hover effect
+    sendBtn.onmouseenter = () => {
+      sendBtn.style.backgroundColor = '#d0d0d0';
+    };
+
+    sendBtn.onmouseleave = () => {
+      sendBtn.style.backgroundColor = '#c0c0c0';
+    };
+
+    // Send button active effect
+    sendBtn.onmousedown = () => {
+      sendBtn.style.border = '2px inset #c0c0c0';
+      sendBtn.style.paddingTop = '9px';
+      sendBtn.style.paddingLeft = '17px';
+    };
+
+    sendBtn.onmouseup = () => {
+      sendBtn.style.border = '2px outset #c0c0c0';
+      sendBtn.style.paddingTop = this.isMobile() ? '12px' : '8px';
+      sendBtn.style.paddingLeft = this.isMobile() ? '20px' : '16px';
+    };
+
+    // Input field
+    chatInput.onkeypress = (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    };
+
+    // Input focus styling
+    chatInput.onfocus = () => {
+      chatInput.style.borderColor = '#0078d4';
+      chatInput.style.boxShadow = '0 0 0 1px #0078d4';
+    };
+
+    chatInput.onblur = () => {
+      chatInput.style.borderColor = '';
+      chatInput.style.boxShadow = '';
+    };
+  }
+
+  /**
+   * Add a message to the chat display
+   * @param {HTMLElement} chatMessages - The chat messages container
+   * @param {string} sender - 'user' or 'clippy'
+   * @param {string} message - The message text
+   */
+  addMessageToChat(chatMessages, sender, message) {
+    const messageEl = document.createElement('div');
+    messageEl.style.cssText = `
+      margin: 8px 0;
+      color: ${sender === 'user' ? '#000080' : '#000'};
+      -webkit-text-fill-color: ${sender === 'user' ? '#000080' : '#000'};
+      text-align: ${sender === 'user' ? 'right' : 'left'};
+    `;
+
+    if (sender === 'clippy') {
+      messageEl.innerHTML = `<strong>Clippy:</strong> ${message}`;
+    } else {
+      messageEl.innerHTML = `<strong>You:</strong> ${message}`;
+    }
+
+    chatMessages.appendChild(messageEl);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  /**
+   * Generate a response from Clippy based on user input
+   * @param {string} userMessage - The user's message
+   * @returns {string} - Clippy's response
+   */
+  generateClippyResponse(userMessage) {
+    const lowerMessage = userMessage.toLowerCase();
+
+    // Response patterns
+    const responses = {
+      hello: [
+        "Hello there! How can I assist you today?",
+        "Hi! Great to chat with you!",
+        "Hello! What can I help you with?"
+      ],
+      help: [
+        "I can help with many things! Try asking me about Hydra98 or just chat with me.",
+        "I'm here to help! What do you need assistance with?",
+        "Happy to help! What would you like to know?"
+      ],
+      hydra: [
+        "Hydra98 is an amazing Windows 98 desktop emulator! What do you think of it?",
+        "Hydra98 brings back the nostalgic Windows 98 experience! Are you enjoying it?",
+        "I love helping people navigate Hydra98! It's just like the good old days."
+      ],
+      thanks: [
+        "You're very welcome! Is there anything else I can help you with?",
+        "My pleasure! Feel free to ask me anything else.",
+        "Happy to help! What else can I do for you?"
+      ],
+      bye: [
+        "Goodbye! Click the X to close this chat anytime.",
+        "See you later! I'll be here if you need me.",
+        "Farewell! Thanks for chatting with me."
+      ],
+      how: [
+        "That's a great question! Let me think about that...",
+        "Hmm, let me help you figure that out!",
+        "Good question! Here's what I think..."
+      ],
+      what: [
+        "That's an interesting question!",
+        "Let me explain that for you...",
+        "Good question! Here's what I know..."
+      ],
+      why: [
+        "That's a thoughtful question!",
+        "Let me think about the reasoning behind that...",
+        "Interesting! Here's my perspective..."
+      ]
+    };
+
+    // Find matching response category
+    for (const [key, responseArray] of Object.entries(responses)) {
+      if (lowerMessage.includes(key)) {
+        const randomResponse = responseArray[Math.floor(Math.random() * responseArray.length)];
+        return randomResponse;
+      }
+    }
+
+    // Default responses for unmatched input
+    const defaultResponses = [
+      "That's interesting! Tell me more, or ask me something else.",
+      "I see! What else would you like to chat about?",
+      "Fascinating! Is there anything specific I can help you with?",
+      "Thanks for sharing! What else is on your mind?",
+      "Interesting perspective! What would you like to know?",
+      "I appreciate you sharing that! How else can I assist you?",
+      "That's a good point! What other questions do you have?",
+      "Thanks for telling me that! What else can I help with?"
+    ];
+
+    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+  }
+
+  /**
+   * Calculate chat balloon position
+   * @param {Object} customPosition - Optional custom position override
+   * @returns {Object} - Position with left, top, and width properties
+   */
+  calculatePosition(customPosition = null) {
+    const minWidth = 320;
+    const maxWidth = 400;
+    const chatHeight = 300;
+    const clippyOffset = 30;
+
+    // Responsive width based on viewport
+    const viewportWidth = window.innerWidth;
+    const chatWidth = Math.min(maxWidth, Math.max(minWidth, viewportWidth - 40));
+
+    // If custom position provided, use it
+    if (customPosition && customPosition.left !== undefined && customPosition.top !== undefined) {
+      return {
+        left: Math.max(20, Math.min(customPosition.left, viewportWidth - chatWidth - 20)),
+        top: Math.max(50, Math.min(customPosition.top, window.innerHeight - chatHeight - 50)),
+        width: chatWidth
+      };
+    }
+
+    // Find Clippy element for relative positioning
+    const clippyEl = document.querySelector('.clippy');
+    
+    if (clippyEl) {
+      const clippyRect = clippyEl.getBoundingClientRect();
+      
+      // Position chat above Clippy, centered horizontally
+      let left = clippyRect.left + (clippyRect.width / 2) - (chatWidth / 2);
+      let top = clippyRect.top - chatHeight - clippyOffset;
+      
+      // Keep chat within viewport with padding
+      left = Math.max(20, Math.min(left, viewportWidth - chatWidth - 20));
+      top = Math.max(50, Math.min(top, window.innerHeight - chatHeight - 50));
+      
+      // If chat would be too high, show it below Clippy instead
+      if (top < 50) {
+        top = clippyRect.bottom + clippyOffset;
+        top = Math.min(top, window.innerHeight - chatHeight - 50);
+      }
+      
+      return { left, top, width: chatWidth };
+    } else {
+      // Fallback: center of screen
+      devLog("Clippy element not found, using center positioning");
+      return {
+        left: (viewportWidth - chatWidth) / 2,
+        top: (window.innerHeight - chatHeight) / 2,
+        width: chatWidth
+      };
+    }
+  }
+
+  /**
+   * Check if mobile device
+   * @returns {boolean}
+   */
+  isMobile() {
+    return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
+  /**
+   * Check if a chat balloon is currently visible
+   * @returns {boolean}
+   */
+  isVisible() {
+    return this.currentChatBalloon && this.currentChatBalloon.parentNode;
+  }
+
+  /**
+   * Get chat history
+   * @returns {Array} - Array of chat messages
+   */
+  getChatHistory() {
+    return [...this.chatHistory];
+  }
+
+  /**
+   * Cleanup method for component unmount
+   */
+  cleanup() {
+    this.hide();
+    devLog("ChatBalloonManager cleaned up");
+  }
+}
+
+// Create singleton instance
+const chatBalloonManager = new ChatBalloonManager();
+
+/**
+ * Show an interactive chat balloon (main public API)
+ * @param {string} initialMessage - Initial message from Clippy
+ * @param {Object} options - Additional options
+ * @returns {boolean} - Success status
+ */
+export const showChatBalloon = (initialMessage, options = {}) => {
+  return chatBalloonManager.show(initialMessage, options);
+};
+
+/**
+ * Hide the current chat balloon
+ * @returns {boolean} - Success status
+ */
+export const hideChatBalloon = () => {
+  return chatBalloonManager.hide();
+};
+
+/**
+ * Check if chat balloon is currently visible
+ * @returns {boolean}
+ */
+export const isChatBalloonVisible = () => {
+  return chatBalloonManager.isVisible();
+};
+
+/**
+ * Get chat history
+ * @returns {Array} - Array of chat messages
+ */
+export const getChatHistory = () => {
+  return chatBalloonManager.getChatHistory();
+};
+
+/**
+ * Cleanup function for unmount
+ */
+export const cleanupChatBalloon = () => {
+  chatBalloonManager.cleanup();
+};
+
+// React component for backwards compatibility (if needed)
+const ChatBalloon = ({ initialMessage, position, onClose }) => {
+  // This is just a wrapper - actual implementation is DOM-based above
+  React.useEffect(() => {
+    if (initialMessage) {
+      showChatBalloon(initialMessage, { position });
+    }
+
+    return () => {
+      if (onClose) {
+        onClose();
+      }
+    };
+  }, [initialMessage, position, onClose]);
+
+  // Return null since we're using DOM manipulation
+  return null;
 };
 
 export default ChatBalloon;
