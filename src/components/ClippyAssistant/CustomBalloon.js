@@ -22,6 +22,13 @@ class CustomBalloonManager {
    */
   show(message, duration = 6000, options = {}) {
     try {
+      // FIXED: Check if any balloon (speech or chat) is already open
+      const existingBalloons = document.querySelectorAll('.custom-clippy-balloon, .custom-clippy-chat-balloon');
+      if (existingBalloons.length > 0) {
+        devLog("Balloon creation blocked - another balloon is already open");
+        return false;
+      }
+
       devLog(`Creating custom balloon: "${message}"`);
       
       // FIXED: Remove any existing balloons first
@@ -32,7 +39,7 @@ class CustomBalloonManager {
       balloonEl.className = 'custom-clippy-balloon';
       balloonEl.textContent = message;
       
-      // Calculate position relative to Clippy
+      // Calculate position relative to Clippy with desktop viewport boundaries
       const position = this.calculatePosition(options.position);
       
       // Apply positioning
@@ -44,11 +51,15 @@ class CustomBalloonManager {
       balloonEl.style.opacity = '1';
       balloonEl.style.display = 'block';
 
+      // FIXED: Dynamic sizing to fit within desktop viewport
+      balloonEl.style.maxWidth = `${position.maxWidth}px`;
+      balloonEl.style.width = `${Math.min(280, position.maxWidth)}px`;
+
       // Add to DOM
       document.body.appendChild(balloonEl);
       this.currentBalloon = balloonEl;
       
-      devLog(`Balloon positioned at (${position.left}, ${position.top})`);
+      devLog(`Balloon positioned at (${position.left}, ${position.top}) with max width ${position.maxWidth}px`);
 
       // Set auto-hide timer
       this.balloonTimeout = setTimeout(() => {
@@ -96,20 +107,58 @@ class CustomBalloonManager {
   }
 
   /**
-   * Calculate balloon position relative to Clippy
+   * Calculate balloon position relative to Clippy - FIXED with desktop viewport boundaries
    * @param {Object} customPosition - Optional custom position override
-   * @returns {Object} - Position with left and top properties
+   * @returns {Object} - Position with left, top, and maxWidth properties
    */
   calculatePosition(customPosition = null) {
     const balloonWidth = 280;
     const balloonHeight = 120;
-    const clippyOffset = 30; // Space between Clippy and balloon
+    const safeMargin = 15; // Minimum distance from desktop edges
+    const clippyMargin = 10; // FIXED: Reduced distance from Clippy (was 15px)
 
-    // If custom position provided, use it
+    // FIXED: Always use desktop viewport instead of window viewport
+    const desktop = document.querySelector(".desktop.screen") || 
+                   document.querySelector(".desktop") || 
+                   document.querySelector(".w98");
+    
+    let viewportWidth, viewportHeight, viewportLeft = 0, viewportTop = 0;
+    
+    if (desktop) {
+      const desktopRect = desktop.getBoundingClientRect();
+      viewportWidth = desktopRect.width;
+      viewportHeight = desktopRect.height;
+      viewportLeft = desktopRect.left;
+      viewportTop = desktopRect.top;
+      devLog(`Using desktop viewport: ${viewportWidth}x${viewportHeight} at (${viewportLeft}, ${viewportTop})`);
+    } else {
+      // Emergency fallback
+      viewportWidth = 640;
+      viewportHeight = 480;
+      viewportLeft = (window.innerWidth - 640) / 2;
+      viewportTop = (window.innerHeight - 480) / 2;
+      devLog("Desktop viewport not found, using fallback 640x480");
+    }
+
+    // Calculate dynamic sizing
+    const maxAvailableWidth = viewportWidth - (safeMargin * 2);
+    const dynamicWidth = Math.min(balloonWidth, maxAvailableWidth);
+
+    // If custom position provided, validate and constrain to desktop
     if (customPosition && customPosition.left !== undefined && customPosition.top !== undefined) {
+      const constrainedLeft = Math.max(
+        viewportLeft + safeMargin, 
+        Math.min(customPosition.left, viewportLeft + viewportWidth - dynamicWidth - safeMargin)
+      );
+      const constrainedTop = Math.max(
+        viewportTop + safeMargin, 
+        Math.min(customPosition.top, viewportTop + viewportHeight - balloonHeight - safeMargin)
+      );
+      
       return {
-        left: Math.max(20, Math.min(customPosition.left, window.innerWidth - balloonWidth - 20)),
-        top: Math.max(20, Math.min(customPosition.top, window.innerHeight - balloonHeight - 20))
+        left: constrainedLeft,
+        top: constrainedTop,
+        maxWidth: maxAvailableWidth
       };
     }
 
@@ -119,28 +168,66 @@ class CustomBalloonManager {
     if (clippyEl) {
       const clippyRect = clippyEl.getBoundingClientRect();
       
-      // Position balloon above Clippy, centered horizontally
-      let left = clippyRect.left + (clippyRect.width / 2) - (balloonWidth / 2);
-      let top = clippyRect.top - balloonHeight - clippyOffset;
+      // FIXED: Position closer to Clippy's head (reduced margin from 15px to 10px)
+      let left = clippyRect.left + (clippyRect.width / 2) - (dynamicWidth / 2);
+      let top = clippyRect.top - balloonHeight - clippyMargin;
       
-      // Keep balloon within viewport with padding
-      left = Math.max(20, Math.min(left, window.innerWidth - balloonWidth - 20));
-      top = Math.max(20, Math.min(top, window.innerHeight - balloonHeight - 20));
+      // FIXED: Strict containment within desktop viewport
+      left = Math.max(
+        viewportLeft + safeMargin, 
+        Math.min(left, viewportLeft + viewportWidth - dynamicWidth - safeMargin)
+      );
+      top = Math.max(
+        viewportTop + safeMargin, 
+        Math.min(top, viewportTop + viewportHeight - balloonHeight - safeMargin)
+      );
       
-      // If balloon would be too high, show it below Clippy instead
-      if (top < 20) {
-        top = clippyRect.bottom + clippyOffset;
-        // Make sure it doesn't go below viewport
-        top = Math.min(top, window.innerHeight - balloonHeight - 20);
+      // FIXED: If balloon overlaps with Clippy, try positioning below
+      if (top + balloonHeight + clippyMargin > clippyRect.top && top < clippyRect.bottom + clippyMargin) {
+        const belowPosition = clippyRect.bottom + clippyMargin;
+        
+        // Only use below position if it fits within desktop viewport
+        if (belowPosition + balloonHeight + safeMargin <= viewportTop + viewportHeight) {
+          top = belowPosition;
+        } else {
+          // Try side positioning within desktop bounds
+          const rightPosition = clippyRect.right + clippyMargin;
+          const leftPosition = clippyRect.left - dynamicWidth - clippyMargin;
+          
+          if (rightPosition + dynamicWidth + safeMargin <= viewportLeft + viewportWidth) {
+            // Position to the right
+            left = rightPosition;
+            top = Math.max(
+              viewportTop + safeMargin, 
+              Math.min(clippyRect.top, viewportTop + viewportHeight - balloonHeight - safeMargin)
+            );
+          } else if (leftPosition >= viewportLeft + safeMargin) {
+            // Position to the left
+            left = leftPosition;
+            top = Math.max(
+              viewportTop + safeMargin, 
+              Math.min(clippyRect.top, viewportTop + viewportHeight - balloonHeight - safeMargin)
+            );
+          } else {
+            // Last resort: center in desktop viewport
+            left = viewportLeft + (viewportWidth - dynamicWidth) / 2;
+            top = viewportTop + (viewportHeight - balloonHeight) / 2;
+          }
+        }
       }
       
-      return { left, top };
+      return { 
+        left, 
+        top,
+        maxWidth: maxAvailableWidth
+      };
     } else {
-      // Fallback: center of screen
-      devLog("Clippy element not found, using center positioning");
+      // Fallback: center of desktop viewport
+      devLog("Clippy element not found, centering in desktop viewport");
       return {
-        left: (window.innerWidth - balloonWidth) / 2,
-        top: window.innerHeight * 0.3 // 30% from top
+        left: viewportLeft + (viewportWidth - dynamicWidth) / 2,
+        top: viewportTop + (viewportHeight - balloonHeight) / 2,
+        maxWidth: maxAvailableWidth
       };
     }
   }

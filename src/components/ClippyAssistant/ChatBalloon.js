@@ -1,9 +1,6 @@
 // ChatBalloon.js - FIXED DOM-based interactive chat balloon implementation
 // This file handles interactive chat balloons (not speech balloons)
 import React from "react";
-// ChatBalloon.js - FIXED DOM-based interactive chat balloon implementation
-// This file handles interactive chat balloons (not speech balloons)
-
 import { devLog, errorLog } from './ClippyPositioning';
 
 /**
@@ -14,6 +11,7 @@ class ChatBalloonManager {
   constructor() {
     this.currentChatBalloon = null;
     this.chatHistory = [];
+    this.isUserInteracting = false; // Track if user has interacted with chat
   }
 
   /**
@@ -24,6 +22,13 @@ class ChatBalloonManager {
    */
   show(initialMessage, options = {}) {
     try {
+      // FIXED: Check if any balloon (speech or chat) is already open
+      const existingBalloons = document.querySelectorAll('.custom-clippy-balloon, .custom-clippy-chat-balloon');
+      if (existingBalloons.length > 0) {
+        devLog("Balloon creation blocked - another balloon is already open");
+        return false;
+      }
+
       devLog(`Creating chat balloon: "${initialMessage}"`);
       
       // FIXED: Remove any existing chat balloons first
@@ -33,7 +38,7 @@ class ChatBalloonManager {
       const chatContainer = document.createElement('div');
       chatContainer.className = 'custom-clippy-chat-balloon';
       
-      // Calculate position
+      // Calculate position with desktop viewport boundaries
       const position = this.calculatePosition(options.position);
       
       // Apply positioning and sizing
@@ -41,7 +46,7 @@ class ChatBalloonManager {
       chatContainer.style.left = `${position.left}px`;
       chatContainer.style.top = `${position.top}px`;
       chatContainer.style.width = `${position.width}px`;
-      chatContainer.style.height = '300px';
+      chatContainer.style.height = `${position.height}px`;
       chatContainer.style.zIndex = '9999';
       chatContainer.style.visibility = 'visible';
       chatContainer.style.opacity = '1';
@@ -60,7 +65,10 @@ class ChatBalloonManager {
         { sender: 'clippy', message: initialMessage, timestamp: Date.now() }
       ];
 
-      devLog(`Chat balloon positioned at (${position.left}, ${position.top})`);
+      // Reset interaction state
+      this.isUserInteracting = false;
+
+      devLog(`Chat balloon positioned at (${position.left}, ${position.top}) size ${position.width}x${position.height}`);
 
       // Focus input after a brief delay
       setTimeout(() => {
@@ -98,6 +106,7 @@ class ChatBalloonManager {
 
       this.currentChatBalloon = null;
       this.chatHistory = [];
+      this.isUserInteracting = false;
       return true;
     } catch (error) {
       errorLog("Error hiding chat balloon", error);
@@ -154,7 +163,7 @@ class ChatBalloonManager {
         margin-bottom: 12px;
         color: #000;
         -webkit-text-fill-color: #000;
-        min-height: 180px;
+        min-height: 140px;
         font-family: 'Tahoma', sans-serif;
         font-size: 14px;
       ">
@@ -237,10 +246,21 @@ class ChatBalloonManager {
       closeBtn.style.borderRadius = '';
     };
 
+    // FIXED: Track user interaction for persistent chat
+    const markUserInteraction = () => {
+      if (!this.isUserInteracting) {
+        this.isUserInteracting = true;
+        devLog("User started interacting with chat - now persistent");
+      }
+    };
+
     // Send message function
     const sendMessage = () => {
       const message = chatInput.value.trim();
       if (!message) return;
+
+      // Mark user interaction
+      markUserInteraction();
 
       // Add user message to chat
       this.addMessageToChat(chatMessages, 'user', message);
@@ -292,15 +312,23 @@ class ChatBalloonManager {
       sendBtn.style.paddingLeft = this.isMobile() ? '20px' : '16px';
     };
 
-    // Input field
+    // Input field - track interaction
     chatInput.onkeypress = (e) => {
       if (e.key === 'Enter') {
         sendMessage();
       }
     };
 
-    // Input focus styling
+    chatInput.oninput = () => {
+      markUserInteraction();
+    };
+
+    chatInput.onclick = () => {
+      markUserInteraction();
+    };
+
     chatInput.onfocus = () => {
+      markUserInteraction();
       chatInput.style.borderColor = '#0078d4';
       chatInput.style.boxShadow = '0 0 0 1px #0078d4';
     };
@@ -412,26 +440,64 @@ class ChatBalloonManager {
   }
 
   /**
-   * Calculate chat balloon position
+   * Calculate chat balloon position - FIXED with strict desktop viewport boundaries
    * @param {Object} customPosition - Optional custom position override
-   * @returns {Object} - Position with left, top, and width properties
+   * @returns {Object} - Position with left, top, width, and height properties
    */
   calculatePosition(customPosition = null) {
-    const minWidth = 320;
-    const maxWidth = 400;
-    const chatHeight = 300;
-    const clippyOffset = 30;
+    const minWidth = 300;
+    const maxWidth = 380;
+    const minHeight = 250;
+    const maxHeight = 300;
+    const safeMargin = 15; // Minimum distance from desktop edges
+    const clippyMargin = 20; // Minimum distance from Clippy
 
-    // Responsive width based on viewport
-    const viewportWidth = window.innerWidth;
-    const chatWidth = Math.min(maxWidth, Math.max(minWidth, viewportWidth - 40));
+    // FIXED: Always use desktop viewport instead of window viewport
+    const desktop = document.querySelector(".desktop.screen") || 
+                   document.querySelector(".desktop") || 
+                   document.querySelector(".w98");
+    
+    let viewportWidth, viewportHeight, viewportLeft = 0, viewportTop = 0;
+    
+    if (desktop) {
+      const desktopRect = desktop.getBoundingClientRect();
+      viewportWidth = desktopRect.width;
+      viewportHeight = desktopRect.height;
+      viewportLeft = desktopRect.left;
+      viewportTop = desktopRect.top;
+      devLog(`Using desktop viewport: ${viewportWidth}x${viewportHeight} at (${viewportLeft}, ${viewportTop})`);
+    } else {
+      // Emergency fallback
+      viewportWidth = 640;
+      viewportHeight = 480;
+      viewportLeft = (window.innerWidth - 640) / 2;
+      viewportTop = (window.innerHeight - 480) / 2;
+      devLog("Desktop viewport not found, using fallback 640x480");
+    }
 
-    // If custom position provided, use it
+    // Calculate dynamic sizing to fit within desktop viewport
+    const maxAvailableWidth = viewportWidth - (safeMargin * 2);
+    const maxAvailableHeight = viewportHeight - (safeMargin * 2);
+    
+    const chatWidth = Math.min(maxWidth, Math.max(minWidth, maxAvailableWidth));
+    const chatHeight = Math.min(maxHeight, Math.max(minHeight, maxAvailableHeight));
+
+    // If custom position provided, validate and constrain to desktop
     if (customPosition && customPosition.left !== undefined && customPosition.top !== undefined) {
+      const constrainedLeft = Math.max(
+        viewportLeft + safeMargin, 
+        Math.min(customPosition.left, viewportLeft + viewportWidth - chatWidth - safeMargin)
+      );
+      const constrainedTop = Math.max(
+        viewportTop + safeMargin, 
+        Math.min(customPosition.top, viewportTop + viewportHeight - chatHeight - safeMargin)
+      );
+      
       return {
-        left: Math.max(20, Math.min(customPosition.left, viewportWidth - chatWidth - 20)),
-        top: Math.max(50, Math.min(customPosition.top, window.innerHeight - chatHeight - 50)),
-        width: chatWidth
+        left: constrainedLeft,
+        top: constrainedTop,
+        width: chatWidth,
+        height: chatHeight
       };
     }
 
@@ -441,28 +507,68 @@ class ChatBalloonManager {
     if (clippyEl) {
       const clippyRect = clippyEl.getBoundingClientRect();
       
-      // Position chat above Clippy, centered horizontally
+      // FIXED: Calculate position ensuring no overlap with Clippy and within desktop bounds
       let left = clippyRect.left + (clippyRect.width / 2) - (chatWidth / 2);
-      let top = clippyRect.top - chatHeight - clippyOffset;
+      let top = clippyRect.top - chatHeight - clippyMargin;
       
-      // Keep chat within viewport with padding
-      left = Math.max(20, Math.min(left, viewportWidth - chatWidth - 20));
-      top = Math.max(50, Math.min(top, window.innerHeight - chatHeight - 50));
+      // FIXED: Strict containment within desktop viewport
+      left = Math.max(
+        viewportLeft + safeMargin, 
+        Math.min(left, viewportLeft + viewportWidth - chatWidth - safeMargin)
+      );
+      top = Math.max(
+        viewportTop + safeMargin, 
+        Math.min(top, viewportTop + viewportHeight - chatHeight - safeMargin)
+      );
       
-      // If chat would be too high, show it below Clippy instead
-      if (top < 50) {
-        top = clippyRect.bottom + clippyOffset;
-        top = Math.min(top, window.innerHeight - chatHeight - 50);
+      // FIXED: If chat overlaps with Clippy, try positioning below
+      if (top + chatHeight + clippyMargin > clippyRect.top && top < clippyRect.bottom + clippyMargin) {
+        const belowPosition = clippyRect.bottom + clippyMargin;
+        
+        // Only use below position if it fits within desktop viewport
+        if (belowPosition + chatHeight + safeMargin <= viewportTop + viewportHeight) {
+          top = belowPosition;
+        } else {
+          // Try side positioning within desktop bounds
+          const rightPosition = clippyRect.right + clippyMargin;
+          const leftPosition = clippyRect.left - chatWidth - clippyMargin;
+          
+          if (rightPosition + chatWidth + safeMargin <= viewportLeft + viewportWidth) {
+            // Position to the right
+            left = rightPosition;
+            top = Math.max(
+              viewportTop + safeMargin, 
+              Math.min(clippyRect.top, viewportTop + viewportHeight - chatHeight - safeMargin)
+            );
+          } else if (leftPosition >= viewportLeft + safeMargin) {
+            // Position to the left
+            left = leftPosition;
+            top = Math.max(
+              viewportTop + safeMargin, 
+              Math.min(clippyRect.top, viewportTop + viewportHeight - chatHeight - safeMargin)
+            );
+          } else {
+            // Last resort: center in desktop viewport
+            left = viewportLeft + (viewportWidth - chatWidth) / 2;
+            top = viewportTop + (viewportHeight - chatHeight) / 2;
+          }
+        }
       }
       
-      return { left, top, width: chatWidth };
+      return { 
+        left, 
+        top, 
+        width: chatWidth, 
+        height: chatHeight 
+      };
     } else {
-      // Fallback: center of screen
-      devLog("Clippy element not found, using center positioning");
+      // Fallback: center of desktop viewport
+      devLog("Clippy element not found, centering in desktop viewport");
       return {
-        left: (viewportWidth - chatWidth) / 2,
-        top: (window.innerHeight - chatHeight) / 2,
-        width: chatWidth
+        left: viewportLeft + (viewportWidth - chatWidth) / 2,
+        top: viewportTop + (viewportHeight - chatHeight) / 2,
+        width: chatWidth,
+        height: chatHeight
       };
     }
   }
@@ -481,6 +587,14 @@ class ChatBalloonManager {
    */
   isVisible() {
     return this.currentChatBalloon && this.currentChatBalloon.parentNode;
+  }
+
+  /**
+   * Check if user has interacted with the chat (making it persistent)
+   * @returns {boolean}
+   */
+  isUserInteractingWithChat() {
+    return this.isUserInteracting;
   }
 
   /**
@@ -527,6 +641,14 @@ export const hideChatBalloon = () => {
  */
 export const isChatBalloonVisible = () => {
   return chatBalloonManager.isVisible();
+};
+
+/**
+ * Check if user is actively interacting with chat (making it persistent)
+ * @returns {boolean}
+ */
+export const isUserInteractingWithChat = () => {
+  return chatBalloonManager.isUserInteractingWithChat();
 };
 
 /**
