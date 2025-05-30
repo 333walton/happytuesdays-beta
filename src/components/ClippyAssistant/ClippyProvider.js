@@ -319,19 +319,22 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }, false, "long press interaction");
   }, [lastInteractionTime, isInCooldown, isAnimationPlaying, startCooldown, isAnyBalloonOpen]);
 
-  // FIXED: Right-click handler with proper enforcement
+  // FIXED: Enhanced right-click handler with better event handling
   const handleRightClick = useCallback((e) => {
-    if (isMobile) return false;
-    
+    // Don't block on mobile - allow context menu on all devices
     e.preventDefault();
     e.stopPropagation();
     
-    // FIXED: Right-click should work even during cooldown for context menu
-    devLog("Right-click context menu triggered");
+    devLog("Right-click context menu triggered", { 
+      target: e.target.className,
+      clientX: e.clientX, 
+      clientY: e.clientY 
+    });
+    
+    // Ensure menu shows even if other balloons are open
     showContextMenu(e.clientX, e.clientY);
     return true;
   }, [showContextMenu]);
-
   // FIXED: Initial message function with flag check
   const showInitialMessage = useCallback(() => {
     if (initialMessageShownRef.current) {
@@ -703,6 +706,39 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     };
   }, [contextMenuVisible, hideContextMenu]);
 
+  // FIXED: Enhanced context menu visibility styles
+  useEffect(() => {
+    if (contextMenuVisible) {
+      const contextMenuVisibilityFix = `
+        .clippy-context-menu,
+        .clippy-context-menu-debug {
+          position: fixed !important;
+          z-index: 2147483647 !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          display: block !important;
+          pointer-events: auto !important;
+          isolation: isolate !important;
+          contain: layout style paint !important;
+          transform: translateZ(0) !important;
+          backface-visibility: hidden !important;
+        }
+      `;
+
+      const styleElement = document.createElement("style");
+      styleElement.id = "context-menu-visibility-fix";
+      styleElement.textContent = contextMenuVisibilityFix;
+      document.head.appendChild(styleElement);
+
+      return () => {
+        const existingStyle = document.getElementById("context-menu-visibility-fix");
+        if (existingStyle) {
+          existingStyle.remove();
+        }
+      };
+    }
+  }, [contextMenuVisible]);
+
   // Zoom monitoring (keeping existing logic)
   useEffect(() => {
     if (isMobile || !mountedRef.current) return;
@@ -968,7 +1004,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     hideContextMenu,
   ]);
 
-  // ClippyController - simplified version focused on setup
+  // ClippyController - FIXED with direct Clippy element binding
   const ClippyController = () => {
     const { clippy } = useClippy();
     const setupAttemptRef = useRef(0);
@@ -999,6 +1035,26 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           const clippyEl = document.querySelector(".clippy");
           if (!clippyEl) return false;
 
+          // FIXED: Bind right-click directly to Clippy element
+          const addRightClickToElement = (element, elementName) => {
+            if (element && !element._hasContextMenu) {
+              element.addEventListener("contextmenu", (e) => {
+                devLog(`Right-click on ${elementName}`);
+                handleRightClick(e);
+              }, { passive: false });
+              element._hasContextMenu = true;
+            }
+          };
+
+          // Add right-click to main Clippy element
+          addRightClickToElement(clippyEl, "main Clippy element");
+
+          // Add right-click to all SVG elements within Clippy
+          const svgElements = clippyEl.querySelectorAll("svg, .map");
+          svgElements.forEach((svg, index) => {
+            addRightClickToElement(svg, `SVG element ${index}`);
+          });
+
           // Initial positioning
           const initialZoomLevel = parseInt(document.body.getAttribute("data-zoom")) || 0;
           
@@ -1023,11 +1079,16 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           if (!overlayRef.current) {
             const overlay = document.createElement("div");
             overlay.id = "clippy-clickable-overlay";
-            overlay.style.pointerEvents = "auto";
-            overlay.style.cursor = "pointer";
-            overlay.style.background = "transparent";
-            overlay.style.position = "fixed";
-            overlay.style.zIndex = "1500";
+            
+            // Enhanced overlay styles for better event capture
+            overlay.style.cssText = `
+              position: fixed !important;
+              background: transparent !important;
+              cursor: pointer !important;
+              pointer-events: auto !important;
+              z-index: 1500 !important;
+              touch-action: none !important;
+            `;
 
             if (isMobile) {
               const handlers = createMobileTouchHandlers();
@@ -1037,7 +1098,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               }
             } else {
               overlay.addEventListener("dblclick", handleDesktopInteraction);
-              overlay.addEventListener("contextmenu", handleRightClick);
+              // FIXED: Enhanced context menu binding
+              overlay.addEventListener("contextmenu", (e) => {
+                devLog("Right-click on overlay");
+                handleRightClick(e);
+              }, { passive: false });
             }
 
             overlayRef.current = overlay;
@@ -1066,10 +1131,25 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       setupClippy();
 
       return () => {
+        // FIXED: Enhanced cleanup
         mountedRef.current = false;
         
         safeExecute(() => {
+          // Remove context menu handlers
           const clippyEl = document.querySelector(".clippy");
+          if (clippyEl && clippyEl._hasContextMenu) {
+            clippyEl.removeEventListener("contextmenu", handleRightClick);
+            clippyEl._hasContextMenu = false;
+          }
+
+          const svgElements = clippyEl?.querySelectorAll("svg, .map") || [];
+          svgElements.forEach((svg) => {
+            if (svg._hasContextMenu) {
+              svg.removeEventListener("contextmenu", handleRightClick);
+              svg._hasContextMenu = false;
+            }
+          });
+
           if (resizeHandlingActiveRef.current && clippyEl) {
             ClippyPositioning?.stopResizeHandling(clippyEl);
             resizeHandlingActiveRef.current = false;
@@ -1091,7 +1171,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       isScreenPoweredOn,
       createMobileTouchHandlers,
       handleDesktopInteraction,
-      handleRightClick,
+      handleRightClick, // ✅ Added to dependencies
     ]);
 
     return null;
