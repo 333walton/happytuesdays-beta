@@ -1,27 +1,23 @@
-// ClippyContextMenu.js - Enhanced with React95 styling and full functionality
+// ClippyContextMenu.js - Custom Windows 98 style context menu
 
 import React, { useState, useEffect, useRef } from "react";
-import { MenuList, MenuListItem, Separator } from "react95";
 
 const ClippyContextMenu = ({
   x,
   y,
   onClose,
+  onAction,
   agents = ["Clippy", "Links", "Bonzi", "Genie", "Merlin", "Rover"],
   currentAgent = "Clippy",
-  onHideAssistant,
-  onSelectAgent,
-  onPlayAnimation,
-  onAbout,
 }) => {
   const menuRef = useRef(null);
   const [submenuOpen, setSubmenuOpen] = useState(null);
   const [submenuPosition, setSubmenuPosition] = useState({ x: 0, y: 0 });
 
-  // All available Clippy animations from the GitHub repo
+  // All available Clippy animations
   const animations = [
     "Congratulate",
-    "LookRight",
+    "LookRight", 
     "SendMail",
     "Thinking",
     "Explain",
@@ -68,20 +64,12 @@ const ClippyContextMenu = ({
   // Adjust position to stay within viewport
   const adjustedPosition = React.useMemo(() => {
     const menuWidth = 180;
-    const menuHeight = 120;
+    const menuHeight = 160;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    let adjustedX = x;
-    let adjustedY = y;
-
-    if (adjustedX + menuWidth > viewportWidth) {
-      adjustedX = viewportWidth - menuWidth - 10;
-    }
-
-    if (adjustedY + menuHeight > viewportHeight) {
-      adjustedY = viewportHeight - menuHeight - 10;
-    }
+    let adjustedX = Math.max(5, Math.min(x, viewportWidth - menuWidth - 5));
+    let adjustedY = Math.max(5, Math.min(y, viewportHeight - menuHeight - 5));
 
     return { x: adjustedX, y: adjustedY };
   }, [x, y]);
@@ -94,9 +82,22 @@ const ClippyContextMenu = ({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    // Small delay to prevent immediate closure from the same click that opened the menu
+    const timer = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEscKey);
+    }, 100);
+
     return () => {
+      clearTimeout(timer);
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscKey);
     };
   }, [onClose]);
 
@@ -105,13 +106,18 @@ const ClippyContextMenu = ({
     const rect = event.currentTarget.getBoundingClientRect();
     const submenuWidth = 160;
     const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
 
     // Determine if submenu should open to the left or right
-    const openLeft = rect.right + submenuWidth > viewportWidth;
+    const openLeft = rect.right + submenuWidth > viewportWidth - 10;
+    
+    // Calculate position
+    const newX = openLeft ? rect.left - submenuWidth : rect.right;
+    const newY = Math.min(rect.top, viewportHeight - 300); // Keep submenu in viewport
 
     setSubmenuPosition({
-      x: openLeft ? rect.left - submenuWidth : rect.right,
-      y: rect.top,
+      x: Math.max(5, newX),
+      y: Math.max(5, newY),
       openLeft,
     });
 
@@ -122,28 +128,86 @@ const ClippyContextMenu = ({
     setSubmenuOpen(null);
   };
 
-  // Handle agent selection
-  const handleAgentSelect = (agent) => {
-    onSelectAgent(agent);
-    onClose();
+  // Menu item styles
+  const menuItemStyle = {
+    padding: "6px 16px",
+    cursor: "pointer",
+    fontSize: "11px",
+    fontFamily: "Tahoma, sans-serif",
+    color: "#000",
+    borderBottom: "1px solid #e0e0e0",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "transparent",
+    transition: "background-color 0.1s",
   };
 
-  // Handle animation play
-  const handleAnimationPlay = (animation) => {
-    onPlayAnimation(animation);
-    onClose();
+  const menuItemHoverStyle = {
+    ...menuItemStyle,
+    backgroundColor: "#0066cc",
+    color: "#fff",
   };
 
-  // Handle hide assistant
-  const handleHideAssistant = () => {
-    onHideAssistant();
-    onClose();
+  const separatorStyle = {
+    height: "1px",
+    backgroundColor: "#c0c0c0",
+    margin: "2px 0",
+    borderTop: "1px solid #808080",
   };
 
-  // Handle about
-  const handleAbout = () => {
-    onAbout();
-    onClose();
+  // Custom MenuItem component
+  const MenuItem = ({ children, onClick, onMouseEnter, onMouseLeave, disabled, hasSubmenu }) => {
+    const [isHovered, setIsHovered] = useState(false);
+
+    return (
+      <div
+        style={isHovered && !disabled ? menuItemHoverStyle : { ...menuItemStyle, color: disabled ? "#808080" : "#000" }}
+        onClick={disabled ? undefined : onClick}
+        onMouseEnter={(e) => {
+          if (!disabled) {
+            setIsHovered(true);
+            onMouseEnter?.(e);
+          }
+        }}
+        onMouseLeave={(e) => {
+          setIsHovered(false);
+          onMouseLeave?.(e);
+        }}
+      >
+        <span>{children}</span>
+        {hasSubmenu && <span>▶</span>}
+      </div>
+    );
+  };
+
+  // Menu container style
+  const menuStyle = {
+    position: "fixed",
+    left: `${adjustedPosition.x}px`,
+    top: `${adjustedPosition.y}px`,
+    zIndex: 999999,
+    backgroundColor: "#c0c0c0",
+    border: "2px outset #c0c0c0",
+    boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
+    minWidth: "160px",
+    fontFamily: "Tahoma, sans-serif",
+    fontSize: "11px",
+  };
+
+  const submenuStyle = {
+    position: "fixed",
+    left: `${submenuPosition.x}px`,
+    top: `${submenuPosition.y}px`,
+    zIndex: 1000000,
+    backgroundColor: "#c0c0c0",
+    border: "2px outset #c0c0c0",
+    boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
+    minWidth: "140px",
+    maxHeight: "300px",
+    overflowY: "auto",
+    fontFamily: "Tahoma, sans-serif",
+    fontSize: "11px",
   };
 
   return (
@@ -151,97 +215,96 @@ const ClippyContextMenu = ({
       {/* Main Menu */}
       <div
         ref={menuRef}
-        style={{
-          position: "fixed",
-          left: `${adjustedPosition.x}px`,
-          top: `${adjustedPosition.y}px`,
-          zIndex: 10000,
-        }}
+        style={menuStyle}
+        className="clippy-context-menu-debug"
       >
-        <MenuList>
-          {/* Hide Assistant */}
-          <MenuListItem onClick={handleHideAssistant}>
-            Hide Assistant
-          </MenuListItem>
+        {/* Hide Clippy */}
+        <MenuItem onClick={() => onAction('hide')}>
+          🚫 Hide Clippy
+        </MenuItem>
 
-          {/* Select Assistant */}
-          <MenuListItem
-            onMouseEnter={(e) => handleSubmenuOpen("agents", e)}
-            onMouseLeave={handleSubmenuClose}
-            style={{ position: "relative" }}
-          >
-            Select Assistant ▶
-          </MenuListItem>
+        {/* Separator */}
+        <div style={separatorStyle} />
 
-          {/* Play Animation */}
-          <MenuListItem
-            onMouseEnter={(e) => handleSubmenuOpen("animations", e)}
-            onMouseLeave={handleSubmenuClose}
-            style={{ position: "relative" }}
-          >
-            Play Animation ▶
-          </MenuListItem>
+        {/* Select Agent */}
+        <MenuItem
+          hasSubmenu
+          onMouseEnter={(e) => handleSubmenuOpen("agents", e)}
+          onMouseLeave={handleSubmenuClose}
+        >
+          👤 Select Agent
+        </MenuItem>
 
-          <Separator />
+        {/* Play Animation */}
+        <MenuItem
+          hasSubmenu
+          onMouseEnter={(e) => handleSubmenuOpen("animations", e)}
+          onMouseLeave={handleSubmenuClose}
+        >
+          🎭 Play Animation
+        </MenuItem>
 
-          {/* About */}
-          <MenuListItem onClick={handleAbout}>About</MenuListItem>
-        </MenuList>
+        {/* Separator */}
+        <div style={separatorStyle} />
+
+        {/* Chat */}
+        <MenuItem onClick={() => onAction('chat')}>
+          💬 Chat with Clippy
+        </MenuItem>
+
+        {/* Wave */}
+        <MenuItem onClick={() => onAction('wave')}>
+          👋 Wave
+        </MenuItem>
+
+        {/* Greet */}
+        <MenuItem onClick={() => onAction('greet')}>
+          😊 Say Hello
+        </MenuItem>
       </div>
 
       {/* Agents Submenu */}
       {submenuOpen === "agents" && (
         <div
-          style={{
-            position: "fixed",
-            left: `${submenuPosition.x}px`,
-            top: `${submenuPosition.y}px`,
-            zIndex: 10001,
-          }}
+          style={submenuStyle}
           onMouseEnter={() => setSubmenuOpen("agents")}
           onMouseLeave={handleSubmenuClose}
         >
-          <MenuList>
-            {agents.map((agent) => (
-              <MenuListItem
-                key={agent}
-                onClick={() => handleAgentSelect(agent)}
-                style={{
-                  fontWeight: agent === currentAgent ? "bold" : "normal",
-                }}
-              >
-                {agent === currentAgent ? "✓ " : "  "}
-                {agent}
-              </MenuListItem>
-            ))}
-          </MenuList>
+          {agents.map((agent) => (
+            <MenuItem
+              key={agent}
+              onClick={() => {
+                onAction('selectAgent', agent);
+                onClose();
+              }}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                {agent === currentAgent ? "✓" : " "}
+                <span>{agent}</span>
+              </span>
+            </MenuItem>
+          ))}
         </div>
       )}
 
       {/* Animations Submenu */}
       {submenuOpen === "animations" && (
         <div
-          style={{
-            position: "fixed",
-            left: `${submenuPosition.x}px`,
-            top: `${submenuPosition.y}px`,
-            zIndex: 10001,
-            maxHeight: "300px",
-            overflowY: "auto",
-          }}
+          style={submenuStyle}
           onMouseEnter={() => setSubmenuOpen("animations")}
           onMouseLeave={handleSubmenuClose}
         >
-          <MenuList>
-            {animations.map((animation) => (
-              <MenuListItem
-                key={animation}
-                onClick={() => handleAnimationPlay(animation)}
-              >
-                {animation}
-              </MenuListItem>
-            ))}
-          </MenuList>
+          {animations.map((animation) => (
+            <MenuItem
+              key={animation}
+              onClick={() => {
+                onAction('playAnimation', animation);
+                onClose();
+              }}
+            >
+              {animation}
+            </MenuItem>
+          ))}
         </div>
       )}
     </>

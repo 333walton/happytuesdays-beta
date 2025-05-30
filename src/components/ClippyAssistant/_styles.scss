@@ -1,10 +1,10 @@
-/* ===== OPTIMIZED CLIPPY STYLES - PERFORMANCE FOCUSED ===== */
-/* Removed redundant styles, optimized for iOS Safari drag performance */
+/* ===== OPTIMIZED CLIPPY STYLES - DOM-BASED BALLOON SYSTEM ===== */
 
 /* ===== CORE CLIPPY ELEMENT ===== */
 .clippy {
   /* Essential display properties */
-  pointer-events: none !important;
+  pointer-events: auto !important;
+  /* FIXED: Enable interactions */
   visibility: visible !important;
   opacity: 1 !important;
   display: block !important;
@@ -78,7 +78,6 @@
   /* iOS Safari touch optimizations */
   -webkit-tap-highlight-color: transparent !important;
   touch-action: none !important;
-  /* CRITICAL for iOS Safari drag */
   -webkit-touch-callout: none !important;
   -webkit-user-select: none !important;
   user-select: none !important;
@@ -148,27 +147,27 @@
   transform: translateX(-9999px) !important;
 }
 
-/* ===== CUSTOM SPEECH BALLOON - OPTIMIZED ===== */
+/* ===== DOM-BASED CUSTOM SPEECH BALLOON ===== */
 .custom-clippy-balloon {
   position: fixed !important;
   background-color: #fffcde !important;
-  border: 1px solid #000 !important;
-  border-radius: 5px !important;
+  border: 3px solid #000 !important;
+  border-radius: 8px !important;
   padding: 12px 16px !important;
   font-family: "Tahoma", "MS Sans Serif", sans-serif !important;
   font-size: 14px !important;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3) !important;
   visibility: visible !important;
   opacity: 1 !important;
   display: block !important;
   z-index: 9999 !important;
 
-  /* Performance */
+  /* Performance optimizations */
   transform: translateZ(0) !important;
   backface-visibility: hidden !important;
   will-change: transform, opacity !important;
 
-  /* iOS Safari text fix */
+  /* iOS Safari text fix - CRITICAL */
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
   line-height: 1.4 !important;
@@ -177,16 +176,19 @@
   /* Responsive sizing */
   max-width: min(280px, calc(100vw - 40px)) !important;
   min-width: 150px !important;
+
+  /* Animation entrance */
+  animation: balloonFadeIn 0.3s ease-out !important;
 }
 
-/* Balloon tail */
+/* Balloon tail pointing down to Clippy */
 .custom-clippy-balloon:after {
   content: "" !important;
   position: absolute !important;
-  bottom: -10px !important;
+  bottom: -12px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  border-width: 10px 10px 0 !important;
+  border-width: 12px 12px 0 !important;
   border-style: solid !important;
   border-color: #fffcde transparent !important;
   width: 0 !important;
@@ -196,24 +198,24 @@
 .custom-clippy-balloon:before {
   content: "" !important;
   position: absolute !important;
-  bottom: -11px !important;
+  bottom: -15px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  border-width: 10px 10px 0 !important;
+  border-width: 12px 12px 0 !important;
   border-style: solid !important;
   border-color: #000 transparent !important;
   width: 0 !important;
   height: 0 !important;
 }
 
-/* ===== INTERACTIVE CHAT BALLOON - OPTIMIZED ===== */
+/* ===== DOM-BASED INTERACTIVE CHAT BALLOON ===== */
 .custom-clippy-chat-balloon {
   position: fixed !important;
   background-color: #fffcde !important;
-  border: 1px solid #000 !important;
-  border-radius: 5px !important;
-  padding: 16px !important;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2) !important;
+  border: 3px solid #000 !important;
+  border-radius: 8px !important;
+  padding: 20px !important;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3) !important;
   font-family: "Tahoma", "MS Sans Serif", sans-serif !important;
   font-size: 14px !important;
   display: flex !important;
@@ -222,32 +224,34 @@
   opacity: 1 !important;
   z-index: 9999 !important;
 
-  /* Performance */
+  /* Performance optimizations */
   transform: translateZ(0) !important;
   backface-visibility: hidden !important;
   will-change: transform, opacity !important;
 
   /* Responsive sizing */
-  width: min(320px, calc(100vw - 20px)) !important;
-  height: auto !important;
-  min-height: 200px !important;
+  width: min(350px, calc(100vw - 40px)) !important;
+  height: 300px !important;
   max-height: calc(100vh - 100px) !important;
 
-  /* iOS Safari text fix */
+  /* iOS Safari text fix - CRITICAL */
   user-select: text !important;
   -webkit-user-select: text !important;
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
+
+  /* Animation entrance */
+  animation: balloonFadeIn 0.3s ease-out !important;
 }
 
-/* ===== BALLOON CLOSE BUTTON - OPTIMIZED ===== */
+/* Chat balloon close button */
 .custom-clippy-balloon-close {
   position: absolute !important;
-  top: 4px !important;
-  right: 8px !important;
+  top: 8px !important;
+  right: 12px !important;
   cursor: pointer !important;
   font-weight: bold !important;
-  font-size: 18px !important;
+  font-size: 20px !important;
   padding: 4px 8px !important;
   background: none !important;
   border: none !important;
@@ -271,6 +275,7 @@
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
   background-color: #f0f0f0 !important;
+  border-radius: 4px !important;
 }
 
 /* Larger close button on mobile */
@@ -284,20 +289,35 @@
   }
 }
 
-/* ===== FORM INPUTS - OPTIMIZED ===== */
-.clippy-input {
+/* ===== CHAT ELEMENTS STYLING ===== */
+.chat-messages {
   flex: 1 !important;
-  border: 2px solid #888 !important;
-  padding: 8px 12px !important;
+  overflow-y: auto !important;
+  border: 2px inset #ccc !important;
+  background: white !important;
+  padding: 8px !important;
+  margin-bottom: 12px !important;
+  min-height: 180px !important;
+  font-family: 'Tahoma', sans-serif !important;
+  font-size: 14px !important;
+
+  /* iOS Safari text fix */
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+.chat-input {
+  flex: 1 !important;
+  border: 2px inset #ccc !important;
+  padding: 8px !important;
   font-family: "Tahoma", "MS Sans Serif", sans-serif !important;
   font-size: 14px !important;
   background-color: #fff !important;
-  border-radius: 2px !important;
   outline: none !important;
   -webkit-appearance: none !important;
   appearance: none !important;
 
-  /* iOS Safari text fix */
+  /* iOS Safari text fix - CRITICAL */
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
 
@@ -306,38 +326,20 @@
   -webkit-tap-highlight-color: transparent !important;
 }
 
-.clippy-input:focus {
+.chat-input:focus {
   border-color: #0078d4 !important;
   box-shadow: 0 0 0 1px #0078d4 !important;
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
 }
 
-/* Mobile input optimization - CRITICAL for iOS Safari */
-@media (max-width: 768px),
-(pointer: coarse) {
-  .clippy-input {
-    font-size: 16px !important;
-    /* Prevents iOS zoom */
-    padding: 12px !important;
-    min-height: 48px !important;
-    border-radius: 4px !important;
-  }
-}
-
-/* ===== BUTTONS - OPTIMIZED ===== */
-.clippy-option-button {
-  background: #d4d0c8 !important;
-  border: 2px solid !important;
-  border-color: #fff #888 #888 #fff !important;
+.chat-send {
+  background: #c0c0c0 !important;
+  border: 2px outset #c0c0c0 !important;
   padding: 8px 16px !important;
-  margin: 0 !important;
   font-family: "Tahoma", "MS Sans Serif", sans-serif !important;
   font-size: 14px !important;
   cursor: pointer !important;
-  display: inline-block !important;
-  min-width: 80px !important;
-  box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #808080 !important;
 
   /* iOS Safari text fix */
   color: #000000 !important;
@@ -345,228 +347,256 @@
 
   /* Touch optimizations */
   touch-action: manipulation !important;
-  -webkit-tap-highlight-color: transparent !important;
   -webkit-appearance: none !important;
   appearance: none !important;
 }
 
-.clippy-option-button:hover {
-  background: #e2e0da !important;
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
+.chat-send:hover {
+  background: #d0d0d0 !important;
 }
 
-.clippy-option-button:active {
-  border-color: #888 #fff #fff #888 !important;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #dfdfdf !important;
+.chat-send:active {
+  border: 2px inset #c0c0c0 !important;
   padding-top: 9px !important;
   padding-left: 17px !important;
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
 }
 
-/* Mobile button optimization */
+/* Mobile input optimization - CRITICAL for iOS Safari */
 @media (max-width: 768px),
 (pointer: coarse) {
-  .clippy-option-button {
+  .chat-input {
+    font-size: 16px !important;
+    /* Prevents iOS zoom */
+    padding: 12px !important;
+    min-height: 48px !important;
+    border-radius: 4px !important;
+  }
+
+  .chat-send {
     padding: 12px 20px !important;
     font-size: 16px !important;
     min-height: 48px !important;
-    min-width: 100px !important;
+    min-width: 80px !important;
   }
 }
 
-/* ===== SCREEN POWER STATE ===== */
-body.screen-off .clippy,
-body.screen-off #clippy-clickable-overlay,
-body.screen-off .custom-clippy-balloon,
-body.screen-off .custom-clippy-chat-balloon {
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* ===== iOS SAFARI UNIVERSAL TEXT FIXES ===== */
-@supports (-webkit-touch-callout: none) {
-
-  .custom-clippy-balloon,
-  .custom-clippy-chat-balloon,
-  .clippy-input,
-  .clippy-option-button,
-  .custom-clippy-balloon-close {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
+/* ===== BALLOON ANIMATIONS ===== */
+@keyframes balloonFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateZ(0) translateY(10px) scale(0.95);
   }
 
-  .clippy-input::placeholder,
-  .clippy-input::-webkit-input-placeholder {
-    color: #666666 !important;
-    -webkit-text-fill-color: #666666 !important;
-  }
-
-  .custom-clippy-chat-balloon div,
-  .custom-clippy-chat-balloon p,
-  .custom-clippy-chat-balloon span {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
+  100% {
+    opacity: 1;
+    transform: translateZ(0) translateY(0) scale(1);
   }
 }
 
-/* ===== MOBILE DRAG PERFORMANCE OPTIMIZATIONS ===== */
-@media (max-width: 768px),
-(pointer: coarse) {
-  .clippy {
-    /* iOS Safari specific drag optimizations */
-    touch-action: none !important;
-    -webkit-touch-callout: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-    user-select: none !important;
-    -webkit-user-select: none !important;
-
-    /* Enhanced hardware acceleration */
-    transform-style: preserve-3d !important;
-    backface-visibility: hidden !important;
-    perspective: 1000px !important;
-    will-change: transform, right, bottom !important;
-  }
-
-  #clippy-clickable-overlay {
-    /* Enhanced touch handling for iOS Safari */
-    touch-action: none !important;
-    -webkit-touch-callout: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-    user-select: none !important;
-    -webkit-user-select: none !important;
-
-    /* Performance optimizations */
-    transform: translateZ(0) !important;
-    backface-visibility: hidden !important;
-    will-change: transform, left, top !important;
-  }
-}
-
-/* Prevent body scroll during drag on mobile */
-body.clippy-drag-active {
-  overflow: hidden !important;
-  touch-action: none !important;
-  -webkit-overflow-scrolling: auto !important;
-
-  /* iOS Safari specific fixes */
+/* ===== NUCLEAR CONTEXT MENU STYLING - MAXIMUM VISIBILITY ===== */
+#simple-context-menu {
+  /* NUCLEAR VISIBILITY - HIGHEST Z-INDEX POSSIBLE */
   position: fixed !important;
-  width: 100% !important;
-  height: 100% !important;
+  z-index: 2147483647 !important;
+  /* Maximum possible z-index */
+
+  /* Force visibility */
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  pointer-events: auto !important;
+
+  /* Performance optimizations */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  will-change: transform, opacity !important;
+
+  /* Ensure it's isolated */
+  isolation: isolate !important;
+  contain: layout style paint !important;
+
+  /* Nuclear styling for maximum visibility */
+  background: #c0c0c0 !important;
+  border: 2px solid #808080 !important;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8) !important;
+  padding: 4px !important;
+  min-width: 160px !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+
+  /* Animation entrance */
+  animation: contextMenuSlideIn 0.15s ease-out !important;
 }
 
-/* Position locked visual indicator */
-.clippy.position-locked::after {
-  content: "🔒";
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  font-size: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+/* Context menu items */
+#simple-context-menu div {
+  padding: 4px 8px !important;
+  cursor: pointer !important;
+  background-color: transparent !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  border-radius: 2px !important;
+  margin: 1px 0 !important;
 }
 
-.clippy.position-locked:hover::after {
-  opacity: 1;
+#simple-context-menu div:hover {
+  background-color: #0078d4 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
-/* ===== STARTUP/SHUTDOWN SEQUENCE HIDING - SIMPLIFIED ===== */
-.BIOSWrapper:not(.hidden)~* .clippy,
-.BIOSWrapper:not(.hidden)~* #clippy-clickable-overlay,
-.BIOSWrapper:not(.hidden)~* .custom-clippy-balloon,
-.BIOSWrapper:not(.hidden)~* .custom-clippy-chat-balloon,
-.WindowsLaunchWrapper:not(.hidden)~* .clippy,
-.WindowsLaunchWrapper:not(.hidden)~* #clippy-clickable-overlay,
-.WindowsLaunchWrapper:not(.hidden)~* .custom-clippy-balloon,
-.WindowsLaunchWrapper:not(.hidden)~* .custom-clippy-chat-balloon,
-.desktop.windowsShuttingDown .clippy,
-.desktop.windowsShuttingDown #clippy-clickable-overlay,
-.desktop.windowsShuttingDown .custom-clippy-balloon,
-.desktop.windowsShuttingDown .custom-clippy-chat-balloon,
-body:has(.BIOSWrapper:not(.hidden)) .clippy,
-body:has(.BIOSWrapper:not(.hidden)) #clippy-clickable-overlay,
-body:has(.BIOSWrapper:not(.hidden)) .custom-clippy-balloon,
-body:has(.BIOSWrapper:not(.hidden)) .custom-clippy-chat-balloon,
-body:has(.WindowsLaunchWrapper:not(.hidden)) .clippy,
-body:has(.WindowsLaunchWrapper:not(.hidden)) #clippy-clickable-overlay,
-body:has(.WindowsLaunchWrapper:not(.hidden)) .custom-clippy-balloon,
-body:has(.WindowsLaunchWrapper:not(.hidden)) .custom-clippy-chat-balloon,
-body:has(.desktop.windowsShuttingDown) .clippy,
-body:has(.desktop.windowsShuttingDown) #clippy-clickable-overlay,
-body:has(.desktop.windowsShuttingDown) .custom-clippy-balloon,
-body:has(.desktop.windowsShuttingDown) .custom-clippy-chat-balloon,
-body:has(.itIsNowSafeToTurnOffYourComputer) .clippy,
-body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay,
-body:has(.itIsNowSafeToTurnOffYourComputer) .custom-clippy-balloon,
-body:has(.itIsNowSafeToTurnOffYourComputer) .custom-clippy-chat-balloon {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translateX(-9999px) translateY(-9999px) !important;
+/* Nuclear context menu from DOM test */
+#nuclear-context-menu {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  /* Maximum possible z-index */
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  pointer-events: auto !important;
+  isolation: isolate !important;
+  contain: layout style paint !important;
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  animation: nuclearPulse 1s infinite !important;
 }
 
-/* Fallback for browsers without :has() support */
-.startup-sequence-active .clippy,
-.startup-sequence-active #clippy-clickable-overlay,
-.startup-sequence-active .custom-clippy-balloon,
-.startup-sequence-active .custom-clippy-chat-balloon,
-.shutdown-sequence-active .clippy,
-.shutdown-sequence-active #clippy-clickable-overlay,
-.shutdown-sequence-active .custom-clippy-balloon,
-.shutdown-sequence-active .custom-clippy-chat-balloon {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translateX(-9999px) translateY(-9999px) !important;
-}
-
-/* ===== ACCESSIBILITY & PERFORMANCE ===== */
-@media (prefers-reduced-motion: reduce) {
-
-  .clippy,
-  .custom-clippy-balloon,
-  .custom-clippy-chat-balloon {
-    transition: none !important;
-    animation: none !important;
-  }
-
-  .clippy.clippy-dragging {
-    transform: translateZ(0) !important;
-    filter: none !important;
-  }
-
-  .clippy.position-locked::after {
-    transition: none !important;
-    opacity: 1 !important;
-  }
-}
-
-/* Print mode */
-@media print {
-
-  .clippy,
-  #clippy-clickable-overlay,
-  .custom-clippy-balloon,
-  .custom-clippy-chat-balloon {
-    display: none !important;
-  }
-}
-
-/* Add this to ensure context menu appears above everything */
+/* Context menu styling for nuclear visibility */
 .clippy-context-menu {
-  z-index: 10000 !important;
   position: fixed !important;
+  z-index: 2147483647 !important;
+  /* Maximum possible z-index */
+
+  /* Performance optimizations */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  will-change: transform, opacity !important;
+
+  /* Ensure visibility */
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  pointer-events: auto !important;
+
+  /* Isolation */
+  isolation: isolate !important;
+  contain: layout style paint !important;
+
+  /* Animation entrance */
+  animation: contextMenuFadeIn 0.2s ease-out !important;
+}
+
+/* Debug context menu styling - NUCLEAR VISIBLE */
+.clippy-context-menu-debug {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  /* Maximum possible z-index */
+
+  /* Force maximum visibility */
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  pointer-events: auto !important;
+
+  /* Performance optimizations */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+
+  /* Isolation and containment */
+  isolation: isolate !important;
+  contain: layout style paint !important;
+
+  /* Nuclear styling for maximum visibility */
+  background: linear-gradient(45deg, #ff0000, #00ff00) !important;
+  border: 5px solid #000000 !important;
+  box-shadow: 0 0 50px rgba(255, 0, 0, 1) !important;
+  padding: 20px !important;
+  border-radius: 10px !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  color: #ffffff !important;
+  text-shadow: 2px 2px 4px #000000 !important;
+  min-width: 200px !important;
+  text-align: center !important;
+
+  /* Pulsing animation */
+  animation: contextMenuPulse 1s infinite !important;
+}
+
+.clippy-context-menu-debug div {
+  padding: 8px 12px !important;
+  cursor: pointer !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  margin: 5px 0 !important;
+  border-radius: 5px !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.clippy-context-menu-debug div:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  transform: scale(1.05) !important;
+}
+
+/* React95 MenuList styling overrides for context menu */
+.clippy-context-menu .react95-menu-list {
+  background: #c0c0c0 !important;
+  border: 2px solid !important;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf !important;
+  box-shadow: 1px 1px 0 #000000 !important;
+  padding: 2px !important;
+  min-width: 160px !important;
+  z-index: 2147483647 !important;
+  position: relative !important;
+}
+
+.clippy-context-menu .react95-menu-list-item {
+  padding: 4px 8px !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  cursor: pointer !important;
+}
+
+.clippy-context-menu .react95-menu-list-item:hover {
+  background: #0078d4 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Nuclear animations */
+@keyframes contextMenuPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+  }
+
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 80px rgba(255, 0, 0, 1);
+  }
+}
+
+@keyframes nuclearPulse {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow: 0 0 80px rgba(255, 0, 0, 1);
+  }
 }
