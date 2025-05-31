@@ -947,6 +947,39 @@ class ClippyPositioning {
     return this.applyStyles(overlayElement, position);
   }
 
+static preserveClippyScale(clippyElement) {
+  if (!clippyElement) return false;
+
+  try {
+    const currentStyle = window.getComputedStyle(clippyElement);
+    const currentTransform = currentStyle.transform;
+    
+    // Extract current scale from transform
+    let currentScale = 0.9; // Default desktop scale
+    if (isMobile) {
+      currentScale = 0.8; // Mobile scale
+    } else {
+      // For desktop, calculate proper scale based on zoom
+      const zoomFactor = this.getMonitorZoomFactor();
+      currentScale = 0.9 * zoomFactor;
+    }
+    
+    // Ensure the correct scale is applied
+    const correctTransform = `translateZ(0) scale(${currentScale})`;
+    
+    if (currentTransform !== correctTransform) {
+      clippyElement.style.transform = correctTransform;
+      devLog(`Scale corrected: ${currentTransform} → ${correctTransform}`);
+      return true;
+    }
+    
+    return true;
+  } catch (error) {
+    errorLog("Error preserving Clippy scale", error);
+    return false;
+  }
+}
+
   static positionClippyAndOverlay(clippyElement, overlayElement, customPosition = null) {
     if (!clippyElement) return false;
 

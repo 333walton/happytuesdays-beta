@@ -11,9 +11,13 @@ import {
   ClippyProvider as ReactClippyProvider,
 } from "@react95/clippy";
 
-// FIXED: Import dedicated balloon managers
+// FIXED: Import enhanced balloon managers
 import { 
   showCustomBalloon, 
+  showWelcomeBalloon,
+  showHelpBalloon,
+  showErrorBalloon,
+  showTipsBalloon,
   hideCustomBalloon, 
   cleanupCustomBalloon,
   isCustomBalloonVisible
@@ -79,7 +83,7 @@ const safeExecute = (operation, fallback = null, context = "operation") => {
   }
 };
 
-// FIXED: Enforced greeting animations array - will only select from these 3
+// FIXED: Enforced greeting animations array - will only select from these
 const GREETING_ANIMATIONS = ["Greeting", "Wave"];
 
 // FIXED: Initial message content from StartMessage component
@@ -161,226 +165,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     setContextMenuVisible(false);
   }, []);
 
-  // FIXED: Enhanced interaction handler with randomized animations
-  const handleInteraction = useCallback((e, interactionType = "tap") => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const now = Date.now();
-    
-    // FIXED: Enforce 1.5s cooldown for ALL interactions
-    if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-      devLog(`Interaction blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
-      return false;
-    }
-
-    // FIXED: Block if animation is currently playing
-    if (isAnimationPlaying) {
-      devLog("Interaction blocked - animation currently playing");
-      return false;
-    }
-
-    // FIXED: Check if persistent chat is open - don't allow new interactions
-    if (isChatBalloonVisible() && isUserInteractingWithChat()) {
-      devLog("Interaction blocked - user is actively using chat balloon (persistent)");
-      return false;
-    }
-
-    // FIXED: Block if any balloon is already open
-    if (isAnyBalloonOpen()) {
-      devLog("Interaction blocked - another balloon is already open");
-      return false;
-    }
-
-    setLastInteractionTime(now);
-    startCooldown();
-    
-    const newCount = interactionCount + 1;
-    setInteractionCount(newCount);
-
-    devLog(`${interactionType} interaction #${newCount} triggered`);
-
-    if (!mountedRef.current || !clippyInstanceRef.current) {
-      if (window.clippy) {
-        clippyInstanceRef.current = window.clippy;
-      } else {
-        devLog("No clippy instance available");
-        return false;
-      }
-    }
-
-    // FIXED: Implement balloon interaction rules
-    const shouldShowChatBalloon = (newCount % 2 === 0) && interactionType !== "long-press";
-    
-    devLog(`Will show ${shouldShowChatBalloon ? 'chat' : 'speech'} balloon (interaction #${newCount})`);
-
-    return safeExecute(() => {
-      if (clippyInstanceRef.current.play) {
-        setIsAnimationPlaying(true);
-        
-        // FIXED: Use random greeting animation instead of hardcoded "Greeting"
-        const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
-        const animationName = GREETING_ANIMATIONS[randomIndex];
-        logAnimation(animationName, `${interactionType} interaction #${newCount} (random greeting ${randomIndex})`);
-        
-        clippyInstanceRef.current.play(animationName);
-        devLog("Animation triggered successfully");
-        
-        // Clear animation state after reasonable time
-        setTimeout(() => {
-          setIsAnimationPlaying(false);
-        }, 2000);
-        
-        setTimeout(() => {
-          if (mountedRef.current && !isAnyBalloonOpen()) {
-            if (shouldShowChatBalloon) {
-              const chatMessage = isMobile 
-                ? "Hi! What would you like to chat about?" 
-                : "Hello! How can I help you today?";
-              devLog("Showing chat balloon");
-              showChatBalloon(chatMessage);
-            } else {
-              const speechMessage = isMobile
-                ? "Tap me again for more help!"
-                : "Double-click me again for more help!";
-              devLog("Showing speech balloon");
-              showCustomBalloon(speechMessage);
-            }
-          }
-        }, 800);
-      }
-      return true;
-    }, false, `${interactionType} interaction`);
-  }, [interactionCount, lastInteractionTime, isInCooldown, isAnimationPlaying, startCooldown, isAnyBalloonOpen]);
-
-  // FIXED: Long press handler with randomized animation (mobile only)
-  const handleLongPress = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!mountedRef.current || !isMobile) return false;
-
-    const now = Date.now();
-    
-    // FIXED: Enforce 1.5s cooldown
-    if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-      devLog("Long press blocked - in cooldown");
-      return false;
-    }
-
-    // FIXED: Block if animation is playing
-    if (isAnimationPlaying) {
-      devLog("Long press blocked - animation playing");
-      return false;
-    }
-
-    // FIXED: Check if persistent chat is open
-    if (isChatBalloonVisible() && isUserInteractingWithChat()) {
-      devLog("Long press blocked - user is actively using chat balloon");
-      return false;
-    }
-
-    // FIXED: Block if any balloon is open
-    if (isAnyBalloonOpen()) {
-      devLog("Long press blocked - another balloon is open");
-      return false;
-    }
-
-    devLog("Long press interaction - always shows chat balloon");
-
-    setLastInteractionTime(now);
-    startCooldown();
-
-    return safeExecute(() => {
-      if (clippyInstanceRef.current?.play) {
-        setIsAnimationPlaying(true);
-        
-        // FIXED: Use random animation for long press
-        const longPressAnimations = ["Wave" , "Greeting"];
-        const randomIndex = Math.floor(Math.random() * longPressAnimations.length);
-        const animationName = longPressAnimations[randomIndex];
-        logAnimation(animationName, `long press interaction (${randomIndex})`);
-        
-        clippyInstanceRef.current.play(animationName);
-        
-        // Clear animation state
-        setTimeout(() => {
-          setIsAnimationPlaying(false);
-        }, 2000);
-        
-        setTimeout(() => {
-          if (mountedRef.current && !isAnyBalloonOpen()) {
-            // FIXED: Long press always shows chat balloon as required
-            showChatBalloon("Hi! What would you like to chat about?");
-          }
-        }, 500);
-      }
-      return true;
-    }, false, "long press interaction");
-  }, [lastInteractionTime, isInCooldown, isAnimationPlaying, startCooldown, isAnyBalloonOpen]);
-
-  // FIXED: Enhanced right-click handler with better event handling
-  const handleRightClick = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    devLog("Right-click context menu triggered", { 
-      target: e.target.className,
-      clientX: e.clientX, 
-      clientY: e.clientY 
-    });
-    
-    // Ensure menu shows even if other balloons are open
-    showContextMenu(e.clientX, e.clientY);
-    return true;
-  }, [showContextMenu]);
-
-  // FIXED: Initial message function with animation conflict removed
-  const showInitialMessage = useCallback(() => {
-    if (initialMessageShownRef.current) {
-      devLog("Initial message already shown, skipping");
-      return;
-    }
-    
-    initialMessageShownRef.current = true;
-    devLog("Showing initial welcome message (without conflicting animation)");
-    
-    // FIXED: Don't play any animation here to avoid conflicts with greeting
-    setTimeout(() => {
-      if (mountedRef.current && !isAnyBalloonOpen()) {
-        devLog("Showing welcome message balloon");
-        showCustomBalloon(INITIAL_MESSAGE_CONTENT, 8000);
-      }
-    }, 800);
-  }, [isAnyBalloonOpen]);
-
-  // FIXED: Proper greeting animation selection with animation logging - ENFORCED to only use the 3 specified animations
-  const playInitialGreeting = useCallback(() => {
-    if (greetingPlayedRef.current || !clippyInstanceRef.current || !startupComplete) {
-      return;
-    }
-    
-    greetingPlayedRef.current = true;
-    
-    devLog("Playing initial greeting animation");
-    
-    safeExecute(() => {
-      // FIXED: ENFORCED - Only select from the specified greeting animations
-      const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
-      const selectedGreeting = GREETING_ANIMATIONS[randomIndex];
-      
-      // FIXED: Log animation with forced console output
-      logAnimation(selectedGreeting, `initial greeting (index ${randomIndex})`);
-      
-      devLog(`Selected greeting animation: ${selectedGreeting} (index ${randomIndex} from [${GREETING_ANIMATIONS.join(', ')}])`);
-      
-      if (clippyInstanceRef.current?.play) {
-        clippyInstanceRef.current.play(selectedGreeting);
-        devLog("Initial greeting animation started");
-      }
-    }, null, "initial greeting");
-  }, [startupComplete]);
-
   // FIXED: Enhanced shutdown detection and handling with GoodBye animation and logging
   const handleShutdownSequence = useCallback((isShuttingDown) => {
     if (isShuttingDown) {
@@ -456,163 +240,395 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }
   }, [hideContextMenu]);
 
-  // FIXED: Mobile touch handlers with enhanced drag/interaction separation
-  const createMobileTouchHandlers = useCallback(() => {
-    let moveHandler = null;
-    let endHandler = null;
+  // FIXED: Enhanced agent change function with actual character switching
+  const handleAgentChange = useCallback((newAgent) => {
+    if (!mountedRef.current || newAgent === currentAgent) {
+      devLog(`Agent change blocked - same agent (${newAgent}) or not mounted`);
+      return false;
+    }
 
-    const handleTouchStart = (e) => {
-      if (!mountedRef.current) return;
-
-      const touch = e.touches[0];
-      const dragState = {
-        startX: touch.clientX,
-        startY: touch.clientY,
-        dragStarted: false,
-        longPressTimer: null,
-        origRightPx: 0,
-        origBottomPx: 0
-      };
-
-      // Only set up drag if position is unlocked
-      if (!positionLocked) {
-        const clippyEl = document.querySelector('.clippy');
-        if (clippyEl) {
-          const rect = clippyEl.getBoundingClientRect();
-          dragState.origRightPx = window.innerWidth - rect.right;
-          dragState.origBottomPx = window.innerHeight - rect.bottom;
-        }
+    devLog(`Changing agent from ${currentAgent} to ${newAgent}`);
+    
+    return safeExecute(() => {
+      // Hide any open balloons during transition
+      hideCustomBalloon();
+      hideChatBalloon();
+      hideContextMenu();
+      
+      // Update agent state
+      setCurrentAgent(newAgent);
+      
+      // FIXED: Force reload Clippy with new agent
+      const clippyEl = document.querySelector('.clippy');
+      if (clippyEl) {
+        // Add transitioning class for smooth change
+        clippyEl.classList.add('agent-transitioning');
+        
+        // Brief fade out
+        clippyEl.style.opacity = '0.3';
+        clippyEl.style.transform = 'translateZ(0) scale(0.7)';
+        
+        setTimeout(() => {
+          // Trigger agent change in React95 Clippy
+          if (window.clippy && window.clippy.load) {
+            window.clippy.load(newAgent, () => {
+              devLog(`Agent ${newAgent} loaded successfully`);
+              
+              // Update clippy instance reference
+              clippyInstanceRef.current = window.clippy;
+              
+              // Restore appearance with new agent
+              clippyEl.style.opacity = '1';
+              
+              // Apply correct scale for device
+              const correctScale = isMobile ? '0.8' : `${0.9 * ClippyPositioning.getMonitorZoomFactor()}`;
+              clippyEl.style.transform = `translateZ(0) scale(${correctScale})`;
+              
+              clippyEl.classList.remove('agent-transitioning');
+              
+              // Reposition for new agent
+              setTimeout(() => {
+                if (ClippyPositioning?.positionClippyAndOverlay) {
+                  const overlayEl = document.getElementById("clippy-clickable-overlay");
+                  ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
+                }
+                
+                // Play welcome animation for new agent
+                if (window.clippy?.play) {
+                  logAnimation('Wave', `agent change welcome (${newAgent})`);
+                  window.clippy.play('Wave');
+                  
+                  // Show welcome message
+                  setTimeout(() => {
+                    if (mountedRef.current && !isAnyBalloonOpen()) {
+                      showCustomBalloon(`Hello! I'm ${newAgent} now. How can I help you?`, 6000);
+                    }
+                  }, 800);
+                }
+              }, 100);
+            });
+          } else {
+            // Fallback: Update agent through context if direct load not available
+            devLog(`Fallback agent change to ${newAgent}`);
+            
+            // Restore appearance
+            clippyEl.style.opacity = '1';
+            const correctScale = isMobile ? '0.8' : `${0.9 * ClippyPositioning.getMonitorZoomFactor()}`;
+            clippyEl.style.transform = `translateZ(0) scale(${correctScale})`;
+            clippyEl.classList.remove('agent-transitioning');
+            
+            // Show change message
+            setTimeout(() => {
+              if (mountedRef.current && !isAnyBalloonOpen()) {
+                showCustomBalloon(`I'm now ${newAgent}! How can I help you?`, 6000);
+              }
+            }, 300);
+          }
+        }, 300);
       }
+      
+      return true;
+    }, false, "agent change");
+  }, [currentAgent, hideCustomBalloon, hideChatBalloon, hideContextMenu, isAnyBalloonOpen]);
 
-      // Move handler
-      moveHandler = (e) => {
-        if (!mountedRef.current) return;
-
-        const touch = e.touches[0];
-        const deltaX = Math.abs(touch.clientX - dragState.startX);
-        const deltaY = Math.abs(touch.clientY - dragState.startY);
-
-        // Start drag only if unlocked AND movement threshold crossed
-        if (!dragState.dragStarted && !positionLocked && (deltaX > 10 || deltaY > 10)) {
-          clearTimeout(dragState.longPressTimer);
-          dragState.dragStarted = true;
-          e.preventDefault();
-          
-          if (window.setClippyDragging) {
-            window.setClippyDragging(true);
-          }
-        }
-
-        // Handle drag movement
-        if (dragState.dragStarted && !positionLocked) {
-          e.preventDefault();
-          
-          const totalDeltaX = touch.clientX - dragState.startX;
-          const totalDeltaY = touch.clientY - dragState.startY;
-          
-          const newRightPx = Math.max(10, Math.min(window.innerWidth - 70, dragState.origRightPx - totalDeltaX));
-          const newBottomPx = Math.max(90, Math.min(window.innerHeight - 90, dragState.origBottomPx - totalDeltaY));
-
-          const clippyEl = document.querySelector('.clippy');
-          if (clippyEl && ClippyPositioning?.handleMobileDrag) {
-            ClippyPositioning.handleMobileDrag(clippyEl, overlayRef.current, { rightPx: newRightPx, bottomPx: newBottomPx }, true);
-          }
-        }
-      };
-
-      // End handler
-      endHandler = (e) => {
-        // Clean up event listeners
-        if (moveHandler) document.removeEventListener('touchmove', moveHandler);
-        if (endHandler) {
-          document.removeEventListener('touchend', endHandler);
-          document.removeEventListener('touchcancel', endHandler);
-        }
-
-        clearTimeout(dragState.longPressTimer);
-
-        // FIXED: Only trigger interaction if no drag occurred
-        if (!dragState.dragStarted) {
-          handleInteraction(e, "tap");
-        } else {
-          // End drag mode
-          const clippyEl = document.querySelector('.clippy');
-          if (clippyEl && ClippyPositioning?.endMobileDrag) {
-            ClippyPositioning.endMobileDrag(clippyEl, overlayRef.current, null);
-          }
-
-          setTimeout(() => {
-            if (window.setClippyDragging) {
-              window.setClippyDragging(false);
-            }
-          }, 100);
-        }
-      };
-
-      // Set up long-press timer with cooldown check
-      const now = Date.now();
-      if (now - lastInteractionTime >= INTERACTION_COOLDOWN_MS && !isInCooldown) {
-        dragState.longPressTimer = setTimeout(() => {
-          if (!dragState.dragStarted && mountedRef.current) {
-            clearTimeout(dragState.longPressTimer);
-            handleLongPress(e);
-          }
-        }, 800);
-      }
-
-      // Add event listeners
-      document.addEventListener('touchmove', moveHandler, { passive: false });
-      document.addEventListener('touchend', endHandler, { passive: false });
-      document.addEventListener('touchcancel', endHandler, { passive: false });
-    };
-
-    return {
-      handleTouchStart,
-      cleanup: () => {
-        if (moveHandler) document.removeEventListener('touchmove', moveHandler);
-        if (endHandler) {
-          document.removeEventListener('touchend', endHandler);
-          document.removeEventListener('touchcancel', endHandler);
-        }
-      }
-    };
-  }, [handleInteraction, handleLongPress, lastInteractionTime, positionLocked, isInCooldown]);
-
-  // FIXED: Desktop interaction with 1.5s cooldown
-  const handleDesktopInteraction = useCallback((e) => {
-    const now = Date.now();
-    if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-      devLog("Desktop interaction blocked - in cooldown");
+  // FIXED: Enhanced initial message with welcome balloon
+  const showInitialMessage = useCallback(() => {
+    if (initialMessageShownRef.current) {
+      devLog("Initial message already shown, skipping");
       return;
     }
-    return handleInteraction(e, "double-click");
-  }, [handleInteraction, lastInteractionTime, isInCooldown]);
+    
+    initialMessageShownRef.current = true;
+    devLog("Showing enhanced initial welcome message with buttons");
+    
+    setTimeout(() => {
+      if (mountedRef.current && !isAnyBalloonOpen()) {
+        devLog("Showing enhanced welcome balloon with options");
+        showWelcomeBalloon(); // Use the enhanced welcome balloon
+      }
+    }, 800);
+  }, [isAnyBalloonOpen]);
 
-  // FIXED: Enhanced unmount with GoodBye animation and logging
-  useEffect(() => {
-    return () => {
-      if (clippyInstanceRef.current?.play) {
-        devLog("Playing GoodBye animation before unmount");
-        const animationName = "GoodBye";
-        logAnimation(animationName, "component unmount");
-        clippyInstanceRef.current.play(animationName);
+  // FIXED: Enhanced interaction handler with guaranteed responses and scale preservation
+  const handleInteraction = useCallback((e, interactionType = "tap") => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const now = Date.now();
+    
+    // FIXED: Enforce 1.5s cooldown for ALL interactions
+    if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
+      devLog(`Interaction blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
+      return false;
+    }
+
+    // FIXED: Block if animation is currently playing
+    if (isAnimationPlaying) {
+      devLog("Interaction blocked - animation currently playing");
+      return false;
+    }
+
+    // FIXED: Check if persistent chat is open - don't allow new interactions
+    if (isChatBalloonVisible() && isUserInteractingWithChat()) {
+      devLog("Interaction blocked - user is actively using chat balloon (persistent)");
+      return false;
+    }
+
+    // FIXED: Block if any balloon is already open
+    if (isAnyBalloonOpen()) {
+      devLog("Interaction blocked - another balloon is already open");
+      return false;
+    }
+
+    setLastInteractionTime(now);
+    startCooldown();
+    
+    const newCount = interactionCount + 1;
+    setInteractionCount(newCount);
+
+    devLog(`${interactionType} interaction #${newCount} triggered`);
+
+    if (!mountedRef.current || !clippyInstanceRef.current) {
+      if (window.clippy) {
+        clippyInstanceRef.current = window.clippy;
+      } else {
+        devLog("No clippy instance available");
+        return false;
+      }
+    }
+
+    // FIXED: Preserve Clippy's positioning and scale during interaction
+    const clippyEl = document.querySelector('.clippy');
+    if (clippyEl && ClippyPositioning?.preserveClippyScale) {
+      // Store and preserve current scale before interaction
+      const preserved = ClippyPositioning.preserveClippyScale(clippyEl);
+      devLog(`Clippy scale preservation: ${preserved ? 'success' : 'failed'}`);
+      
+      // After interaction completes, ensure positioning is maintained
+      setTimeout(() => {
+        if (ClippyPositioning?.positionClippyAndOverlay) {
+          const overlayEl = document.getElementById("clippy-clickable-overlay");
+          ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
+          devLog("Clippy positioning restored after interaction");
+        }
+      }, 100);
+    }
+
+    // FIXED: GUARANTEED RESPONSE - Every interaction gets either animation OR balloon (never both except initial)
+    const isInitialInteraction = !greetingPlayedRef.current && !initialMessageShownRef.current;
+    
+    if (isInitialInteraction) {
+      // SPECIAL CASE: Initial interaction gets BOTH animation AND enhanced welcome balloon
+      devLog("Initial interaction - will show BOTH animation and enhanced welcome balloon");
+      
+      return safeExecute(() => {
+        if (clippyInstanceRef.current.play) {
+          setIsAnimationPlaying(true);
+          
+          const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
+          const animationName = GREETING_ANIMATIONS[randomIndex];
+          logAnimation(animationName, `initial interaction (both animation + enhanced welcome)`);
+          
+          clippyInstanceRef.current.play(animationName);
+          greetingPlayedRef.current = true;
+          
+          setTimeout(() => {
+            setIsAnimationPlaying(false);
+          }, 2000);
+          
+          // Show enhanced welcome balloon after animation
+          setTimeout(() => {
+            if (mountedRef.current && !initialMessageShownRef.current) {
+              initialMessageShownRef.current = true;
+              showWelcomeBalloon(); // Enhanced welcome with buttons
+              devLog("Enhanced welcome balloon shown");
+            }
+          }, 1200);
+        }
+        return true;
+      }, false, "initial interaction");
+    }
+
+    // FIXED: STANDARD INTERACTIONS - Guaranteed animation OR balloon (never both, never neither)
+    const shouldShowChatBalloon = (newCount % 2 === 0) && interactionType !== "long-press";
+    const shouldShowSpeechBalloon = !shouldShowChatBalloon;
+    
+    // RULE: Even interactions (2, 4, 6...) = Chat balloon only (no animation)
+    // RULE: Odd interactions (1, 3, 5...) = Animation + Enhanced Speech balloon
+    
+    devLog(`Enhanced interaction pattern for #${newCount}:`, {
+      isEven: newCount % 2 === 0,
+      willShowChat: shouldShowChatBalloon,
+      willShowSpeech: shouldShowSpeechBalloon,
+      willPlayAnimation: shouldShowSpeechBalloon // Animation only with speech
+    });
+
+    return safeExecute(() => {
+      if (shouldShowChatBalloon) {
+        // EVEN INTERACTIONS: Chat balloon only (no animation)
+        devLog("Even interaction - showing chat balloon (no animation)");
         
-        // Small delay to let animation start
         setTimeout(() => {
-          devLog("GoodBye animation completed");
-        }, 500);
+          if (mountedRef.current && !isAnyBalloonOpen()) {
+            const chatMessage = isMobile 
+              ? "Hi! What would you like to chat about?" 
+              : "Hello! How can I help you today?";
+            showChatBalloon(chatMessage);
+            devLog("Chat balloon shown for even interaction");
+          }
+        }, 200);
+        
+      } else {
+        // ODD INTERACTIONS: Animation + Enhanced Speech balloon with buttons
+        devLog("Odd interaction - playing animation + showing enhanced speech balloon");
+        
+        if (clippyInstanceRef.current.play) {
+          setIsAnimationPlaying(true);
+          
+          const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
+          const animationName = GREETING_ANIMATIONS[randomIndex];
+          logAnimation(animationName, `${interactionType} interaction #${newCount} (odd - with enhanced speech)`);
+          
+          clippyInstanceRef.current.play(animationName);
+          
+          setTimeout(() => {
+            setIsAnimationPlaying(false);
+          }, 2000);
+          
+          // Show enhanced speech balloon with contextual buttons
+          setTimeout(() => {
+            if (mountedRef.current && !isAnyBalloonOpen()) {
+              const enhancedMessage = {
+                message: isMobile 
+                  ? "Hi there! What can I help you with?" 
+                  : "Hello! How can I assist you today?",
+                buttons: [
+                  {
+                    text: "💬 Let's chat",
+                    chat: "Great! What would you like to talk about?"
+                  },
+                  {
+                    text: "🎭 Show me tricks",
+                    action: () => {
+                      if (window.clippy?.play) {
+                        const tricks = ["GetAttention", "Congratulate", "Wave", "GestureRight"];
+                        const randomTrick = tricks[Math.floor(Math.random() * tricks.length)];
+                        logAnimation(randomTrick, "enhanced balloon trick button");
+                        window.clippy.play(randomTrick);
+                      }
+                    }
+                  },
+                  {
+                    text: "❓ I need help",
+                    action: () => showHelpBalloon()
+                  },
+                  {
+                    text: "👋 Just saying hi",
+                    message: "Well hello there! It's great to see you. Feel free to explore Hydra98!"
+                  }
+                ]
+              };
+              
+              showCustomBalloon(enhancedMessage, 12000);
+              devLog("Enhanced speech balloon with buttons shown");
+            }
+          }, 800);
+        }
       }
       
-      // Cleanup balloon managers
-      cleanupCustomBalloon();
-      cleanupChatBalloon();
+      return true;
+    }, false, `${interactionType} interaction`);
+  }, [interactionCount, lastInteractionTime, isInCooldown, isAnimationPlaying, startCooldown, isAnyBalloonOpen]);
+
+  // FIXED: Long press guaranteed response
+  const handleLongPress = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!mountedRef.current || !isMobile) return false;
+
+    const now = Date.now();
+    
+    if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
+      devLog("Long press blocked - in cooldown");
+      return false;
+    }
+
+    if (isAnimationPlaying) {
+      devLog("Long press blocked - animation playing");
+      return false;
+    }
+
+    if (isChatBalloonVisible() && isUserInteractingWithChat()) {
+      devLog("Long press blocked - user is actively using chat balloon");
+      return false;
+    }
+
+    if (isAnyBalloonOpen()) {
+      devLog("Long press blocked - another balloon is open");
+      return false;
+    }
+
+    devLog("Long press interaction - GUARANTEED chat balloon");
+
+    setLastInteractionTime(now);
+    startCooldown();
+
+    return safeExecute(() => {
+      // GUARANTEED: Long press always shows chat balloon (no animation)
+      setTimeout(() => {
+        if (mountedRef.current && !isAnyBalloonOpen()) {
+          showChatBalloon("Hi! What would you like to chat about?");
+          devLog("Long press chat balloon guaranteed");
+        }
+      }, 100);
       
-      // Clear shutdown timeout
-      if (shutdownTimeoutRef.current) {
-        clearTimeout(shutdownTimeoutRef.current);
+      return true;
+    }, false, "long press interaction");
+  }, [lastInteractionTime, isInCooldown, isAnimationPlaying, startCooldown, isAnyBalloonOpen]);
+
+  // FIXED: Enhanced right-click handler with better event handling
+  const handleRightClick = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    devLog("Right-click context menu triggered", { 
+      target: e.target.className,
+      clientX: e.clientX, 
+      clientY: e.clientY 
+    });
+    
+    // Ensure menu shows even if other balloons are open
+    showContextMenu(e.clientX, e.clientY);
+    return true;
+  }, [showContextMenu]);
+
+  // FIXED: Proper greeting animation selection with animation logging - ENFORCED to only use the specified animations
+  const playInitialGreeting = useCallback(() => {
+    if (greetingPlayedRef.current || !clippyInstanceRef.current || !startupComplete) {
+      return;
+    }
+    
+    greetingPlayedRef.current = true;
+    
+    devLog("Playing initial greeting animation");
+    
+    safeExecute(() => {
+      // FIXED: ENFORCED - Only select from the specified greeting animations
+      const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
+      const selectedGreeting = GREETING_ANIMATIONS[randomIndex];
+      
+      // FIXED: Log animation with forced console output
+      logAnimation(selectedGreeting, `initial greeting (index ${randomIndex})`);
+      
+      devLog(`Selected greeting animation: ${selectedGreeting} (index ${randomIndex} from [${GREETING_ANIMATIONS.join(', ')}])`);
+      
+      if (clippyInstanceRef.current?.play) {
+        clippyInstanceRef.current.play(selectedGreeting);
+        devLog("Initial greeting animation started");
       }
-    };
-  }, []);
+    }, null, "initial greeting");
+  }, [startupComplete]);
 
   // FIXED: Initial message trigger when startup completes
   useEffect(() => {
@@ -849,7 +865,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     [isErrorRateLimited]
   );
 
-  // Initialize global functions (FIXED: use dedicated balloon functions)
+  // FIXED: Initialize enhanced global functions with button support and agent switching
   useEffect(() => {
     if (typeof window !== "undefined" && !window._clippyGlobalsInitialized) {
       window._clippyGlobalsInitialized = true;
@@ -893,9 +909,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return true;
       }, "setAssistantVisible");
 
+      // FIXED: Enhanced agent change function
       window.setCurrentAgent = createSafeGlobalFunction((agent) => {
-        setCurrentAgent(agent);
-        return true;
+        devLog(`Global setCurrentAgent called: ${agent}`);
+        return handleAgentChange(agent);
       }, "setCurrentAgent");
 
       window.setScreenPowerState = createSafeGlobalFunction((powered) => {
@@ -903,14 +920,15 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return true;
       }, "setScreenPowerState");
 
-      // FIXED: Balloon functions now use dedicated managers with single balloon enforcement
-      window.showClippyCustomBalloon = createSafeGlobalFunction((message) => {
-        // FIXED: Check if any balloon is already open
+      // FIXED: Enhanced balloon functions with button support
+      window.showClippyCustomBalloon = createSafeGlobalFunction((content) => {
         if (isCustomBalloonVisible() || isChatBalloonVisible()) {
           devLog("Cannot show custom balloon - another balloon is already open");
           return false;
         }
-        return showCustomBalloon(message);
+        
+        // Support both string and object content
+        return showCustomBalloon(content);
       }, "showClippyCustomBalloon");
 
       window.hideClippyCustomBalloon = createSafeGlobalFunction(() => {
@@ -918,7 +936,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       }, "hideClippyCustomBalloon");
 
       window.showClippyChatBalloon = createSafeGlobalFunction((initialMessage) => {
-        // FIXED: Check if any balloon is already open
         if (isCustomBalloonVisible() || isChatBalloonVisible()) {
           devLog("Cannot show chat balloon - another balloon is already open");
           return false;
@@ -930,6 +947,39 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return hideChatBalloon();
       }, "hideChatBalloon");
 
+      // FIXED: New enhanced balloon functions
+      window.showClippyWelcomeBalloon = createSafeGlobalFunction(() => {
+        if (isCustomBalloonVisible() || isChatBalloonVisible()) {
+          devLog("Cannot show welcome balloon - another balloon is already open");
+          return false;
+        }
+        return showWelcomeBalloon();
+      }, "showClippyWelcomeBalloon");
+
+      window.showClippyHelpBalloon = createSafeGlobalFunction(() => {
+        if (isCustomBalloonVisible() || isChatBalloonVisible()) {
+          devLog("Cannot show help balloon - another balloon is already open");
+          return false;
+        }
+        return showHelpBalloon();
+      }, "showClippyHelpBalloon");
+
+      window.showClippyErrorBalloon = createSafeGlobalFunction((errorMessage) => {
+        if (isCustomBalloonVisible() || isChatBalloonVisible()) {
+          devLog("Cannot show error balloon - another balloon is already open");
+          return false;
+        }
+        return showErrorBalloon(errorMessage);
+      }, "showClippyErrorBalloon");
+
+      window.showClippyTipsBalloon = createSafeGlobalFunction(() => {
+        if (isCustomBalloonVisible() || isChatBalloonVisible()) {
+          devLog("Cannot show tips balloon - another balloon is already open");
+          return false;
+        }
+        return showTipsBalloon();
+      }, "showClippyTipsBalloon");
+
       // FIXED: Initial message function with flag checking
       window.showClippyInitialMessage = createSafeGlobalFunction(() => {
         return showInitialMessage();
@@ -937,15 +987,40 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       window.getClippyInstance = () => clippyInstanceRef.current;
 
-      // FIXED: Test functions now use dedicated managers with balloon checking
+      // FIXED: Enhanced test functions with buttons
       window.testClippyBalloon = () => {
-        devLog("Manual balloon test triggered");
+        devLog("Manual enhanced balloon test triggered");
         if (isCustomBalloonVisible() || isChatBalloonVisible()) {
           devLog("Cannot test balloon - another balloon is already open");
           return false;
         }
-        const success = showCustomBalloon("🎉 Test balloon - if you see this, balloons are working!");
-        devLog(`Balloon creation success: ${success}`);
+        
+        const testBalloon = {
+          message: "🎉 Enhanced balloon test! This balloon has interactive buttons.",
+          buttons: [
+            {
+              text: "✨ Play animation",
+              animation: "Congratulate"
+            },
+            {
+              text: "💬 Open chat",
+              chat: "Hello! This chat was opened from a balloon button."
+            },
+            {
+              text: "📢 Show message",
+              message: "This is a follow-up message triggered by a button!"
+            },
+            {
+              text: "👍 Got it",
+              action: () => {
+                devLog("Test balloon button clicked - test complete!");
+              }
+            }
+          ]
+        };
+        
+        const success = showCustomBalloon(testBalloon, 15000);
+        devLog(`Enhanced balloon creation success: ${success}`);
         return success;
       };
 
@@ -976,7 +1051,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return true;
       };
 
-      devLog("All global functions initialized successfully");
+      devLog("All enhanced global functions initialized successfully");
     }
 
     return () => {
@@ -993,6 +1068,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         delete window.hideClippyCustomBalloon;
         delete window.showClippyChatBalloon;
         delete window.hideChatBalloon;
+        delete window.showClippyWelcomeBalloon;
+        delete window.showClippyHelpBalloon;
+        delete window.showClippyErrorBalloon;
+        delete window.showClippyTipsBalloon;
         delete window.showClippyInitialMessage;
         delete window.getClippyInstance;
         delete window.testClippyBalloon;
@@ -1013,19 +1092,176 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     setIsScreenPoweredOn,
     showInitialMessage,
     hideContextMenu,
+    handleAgentChange,
   ]);
 
-  // ClippyController - FIXED with direct Clippy element binding
+  // FIXED: Mobile touch handlers with enhanced drag/interaction separation and scale preservation
+  const createMobileTouchHandlers = useCallback(() => {
+    let moveHandler = null;
+    let endHandler = null;
+
+    const handleTouchStart = (e) => {
+      if (!mountedRef.current) return;
+
+      const touch = e.touches[0];
+      const dragState = {
+        startX: touch.clientX,
+        startY: touch.clientY,
+        dragStarted: false,
+        longPressTimer: null,
+        origRightPx: 0,
+        origBottomPx: 0
+      };
+
+      // Only set up drag if position is unlocked
+      if (!positionLocked) {
+        const clippyEl = document.querySelector('.clippy');
+        if (clippyEl) {
+          const rect = clippyEl.getBoundingClientRect();
+          dragState.origRightPx = window.innerWidth - rect.right;
+          dragState.origBottomPx = window.innerHeight - rect.bottom;
+        }
+      }
+
+      // Move handler
+      moveHandler = (e) => {
+        if (!mountedRef.current) return;
+
+        const touch = e.touches[0];
+        const deltaX = Math.abs(touch.clientX - dragState.startX);
+        const deltaY = Math.abs(touch.clientY - dragState.startY);
+
+        // Start drag only if unlocked AND movement threshold crossed
+        if (!dragState.dragStarted && !positionLocked && (deltaX > 10 || deltaY > 10)) {
+          clearTimeout(dragState.longPressTimer);
+          dragState.dragStarted = true;
+          e.preventDefault();
+          
+          if (window.setClippyDragging) {
+            window.setClippyDragging(true);
+          }
+        }
+
+        // Handle drag movement
+        if (dragState.dragStarted && !positionLocked) {
+          e.preventDefault();
+          
+          const totalDeltaX = touch.clientX - dragState.startX;
+          const totalDeltaY = touch.clientY - dragState.startY;
+          
+          const newRightPx = Math.max(10, Math.min(window.innerWidth - 70, dragState.origRightPx - totalDeltaX));
+          const newBottomPx = Math.max(90, Math.min(window.innerHeight - 90, dragState.origBottomPx - totalDeltaY));
+
+          const clippyEl = document.querySelector('.clippy');
+          if (clippyEl && ClippyPositioning?.handleMobileDrag) {
+            ClippyPositioning.handleMobileDrag(clippyEl, overlayRef.current, { rightPx: newRightPx, bottomPx: newBottomPx }, true);
+          }
+        }
+      };
+
+      // End handler
+      endHandler = (e) => {
+        // Clean up event listeners
+        if (moveHandler) document.removeEventListener('touchmove', moveHandler);
+        if (endHandler) {
+          document.removeEventListener('touchend', endHandler);
+          document.removeEventListener('touchcancel', endHandler);
+        }
+
+        clearTimeout(dragState.longPressTimer);
+
+        // FIXED: Only trigger interaction if no drag occurred
+        if (!dragState.dragStarted) {
+          handleInteraction(e, "tap");
+        } else {
+          // End drag mode and preserve scale
+          const clippyEl = document.querySelector('.clippy');
+          if (clippyEl && ClippyPositioning?.endMobileDrag) {
+            ClippyPositioning.endMobileDrag(clippyEl, overlayRef.current, null);
+            
+            // FIXED: Preserve scale after drag
+            if (ClippyPositioning?.preserveClippyScale) {
+              ClippyPositioning.preserveClippyScale(clippyEl);
+            }
+          }
+
+          setTimeout(() => {
+            if (window.setClippyDragging) {
+              window.setClippyDragging(false);
+            }
+          }, 100);
+        }
+      };
+
+      // Set up long-press timer with cooldown check
+      const now = Date.now();
+      if (now - lastInteractionTime >= INTERACTION_COOLDOWN_MS && !isInCooldown) {
+        dragState.longPressTimer = setTimeout(() => {
+          if (!dragState.dragStarted && mountedRef.current) {
+            clearTimeout(dragState.longPressTimer);
+            handleLongPress(e);
+          }
+        }, 800);
+      }
+
+      // Add event listeners
+      document.addEventListener('touchmove', moveHandler, { passive: false });
+      document.addEventListener('touchend', endHandler, { passive: false });
+      document.addEventListener('touchcancel', endHandler, { passive: false });
+    };
+
+    return {
+      handleTouchStart,
+      cleanup: () => {
+        if (moveHandler) document.removeEventListener('touchmove', moveHandler);
+        if (endHandler) {
+          document.removeEventListener('touchend', endHandler);
+          document.removeEventListener('touchcancel', endHandler);
+        }
+      }
+    };
+  }, [handleInteraction, handleLongPress, lastInteractionTime, positionLocked, isInCooldown]);
+
+  // FIXED: Desktop interaction with 1.5s cooldown
+  const handleDesktopInteraction = useCallback((e) => {
+    const now = Date.now();
+    if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
+      devLog("Desktop interaction blocked - in cooldown");
+      return;
+    }
+    return handleInteraction(e, "double-click");
+  }, [handleInteraction, lastInteractionTime, isInCooldown]);
+
+  // FIXED: Enhanced ClippyController with agent monitoring and scale preservation
   const ClippyController = () => {
     const { clippy } = useClippy();
     const setupAttemptRef = useRef(0);
+    const lastAgentRef = useRef(currentAgent);
+
+    // Monitor agent changes
+    useEffect(() => {
+      if (lastAgentRef.current !== currentAgent) {
+        devLog(`Agent change detected in ClippyController: ${lastAgentRef.current} → ${currentAgent}`);
+        lastAgentRef.current = currentAgent;
+        
+        // Trigger agent reload if available
+        if (clippy && clippy.load) {
+          clippy.load(currentAgent, () => {
+            clippyInstanceRef.current = clippy;
+            window.clippy = clippy;
+            devLog(`ClippyController reloaded with agent: ${currentAgent}`);
+          });
+        }
+      }
+    }, [currentAgent, clippy]);
 
     useEffect(() => {
       if (!clippy || !assistantVisible || !shouldRenderClippy) {
         devLog("ClippyController: Conditions not met for rendering", {
           hasClippy: !!clippy,
           assistantVisible,
-          shouldRenderClippy
+          shouldRenderClippy,
+          currentAgent
         });
         return;
       }
@@ -1034,17 +1270,20 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       clippyInstanceRef.current = clippy;
       window.clippy = clippy;
       
-      devLog("ClippyController mounted with clippy instance");
+      devLog(`ClippyController mounted with agent: ${currentAgent}`);
 
       const setupClippy = () => {
         if (!mountedRef.current || setupAttemptRef.current >= 3) return false;
 
         setupAttemptRef.current++;
-        devLog(`Clippy setup attempt ${setupAttemptRef.current}`);
+        devLog(`Clippy setup attempt ${setupAttemptRef.current} for agent: ${currentAgent}`);
 
         return safeExecute(() => {
           const clippyEl = document.querySelector(".clippy");
           if (!clippyEl) return false;
+
+          // Agent-specific styling if needed
+          clippyEl.setAttribute('data-agent', currentAgent);
 
           // FIXED: Bind right-click directly to Clippy element
           const addRightClickToElement = (element, elementName) => {
@@ -1066,7 +1305,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             addRightClickToElement(svg, `SVG element ${index}`);
           });
 
-          // Initial positioning
+          // Initial positioning with scale preservation
           const initialZoomLevel = parseInt(document.body.getAttribute("data-zoom")) || 0;
           
           if (isMobile) {
@@ -1180,6 +1419,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       assistantVisible,
       shouldRenderClippy,
       isScreenPoweredOn,
+      currentAgent, // ADDED: React to agent changes
       createMobileTouchHandlers,
       handleDesktopInteraction,
       handleRightClick,
@@ -1196,6 +1436,73 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     return () => {
       mountedRef.current = false;
       devLog("ClippyProvider unmounted");
+    };
+  }, []);
+
+  // FIXED: CSS for agent transitions
+  useEffect(() => {
+    const agentTransitionStyles = `
+      .agent-transitioning {
+        transition: opacity 0.3s ease, transform 0.3s ease !important;
+      }
+
+      .clippy[data-agent="Bonzi"] {
+        /* Bonzi-specific styling if needed */
+      }
+
+      .clippy[data-agent="Genie"] {
+        /* Genie-specific styling if needed */
+      }
+
+      .clippy[data-agent="Merlin"] {
+        /* Merlin-specific styling if needed */
+      }
+
+      .clippy[data-agent="Rover"] {
+        /* Rover-specific styling if needed */
+      }
+
+      .clippy[data-agent="Links"] {
+        /* Links-specific styling if needed */
+      }
+    `;
+
+    const styleEl = document.createElement('style');
+    styleEl.id = 'clippy-agent-transitions';
+    styleEl.textContent = agentTransitionStyles;
+    document.head.appendChild(styleEl);
+
+    return () => {
+      const existingStyle = document.getElementById('clippy-agent-transitions');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    };
+  }, []);
+
+  // FIXED: Enhanced unmount with GoodBye animation and logging
+  useEffect(() => {
+    return () => {
+      if (clippyInstanceRef.current?.play) {
+        devLog("Playing GoodBye animation before unmount");
+        const animationName = "GoodBye";
+        logAnimation(animationName, "component unmount");
+        clippyInstanceRef.current.play(animationName);
+        
+        // Small delay to let animation start
+        setTimeout(() => {
+          devLog("GoodBye animation completed");
+        }, 500);
+      }
+      
+      // Cleanup balloon managers
+      cleanupCustomBalloon();
+      cleanupChatBalloon();
+      
+      // Clear shutdown timeout
+      if (shutdownTimeoutRef.current) {
+        clearTimeout(shutdownTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -1224,8 +1531,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     setPositionLocked,
     setIsDragging,
 
-    // FIXED: Balloon functions now use dedicated managers
+    // FIXED: Enhanced balloon functions
     showCustomBalloon,
+    showWelcomeBalloon,
+    showHelpBalloon,
+    showErrorBalloon,
+    showTipsBalloon,
     showChatBalloon,
     hideCustomBalloon,
     hideChatBalloon,
@@ -1240,6 +1551,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     handleInteraction,
     handleLongPress,
     handleRightClick,
+
+    // Agent change function
+    handleAgentChange,
 
     // Greeting function
     playInitialGreeting,
@@ -1259,7 +1573,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         {/* FIXED: Only render ClippyController when shouldRenderClippy is true */}
         {assistantVisible && shouldRenderClippy && <ClippyController />}
 
-        {/* FIXED: Context Menu - REMOVED redundant action handling, now uses functional ClippyContextMenu */}
+        {/* FIXED: Context Menu with enhanced functionality */}
         {contextMenuVisible && (
           <ClippyContextMenu
             x={contextMenuPosition.x}

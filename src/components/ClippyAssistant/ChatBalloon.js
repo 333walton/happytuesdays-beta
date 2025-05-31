@@ -1,4 +1,4 @@
-// ChatBalloon.js - FIXED positioning and styling issues
+// ChatBalloon.js - COMPLETE FIXED VERSION with enhanced viewport positioning
 import React from "react";
 import { devLog, errorLog } from './ClippyPositioning';
 
@@ -38,7 +38,7 @@ class ChatBalloonManager {
       const chatContainer = document.createElement('div');
       chatContainer.className = 'custom-clippy-chat-balloon';
       
-      // FIXED: Calculate position with improved constraints
+      // FIXED: Calculate position with enhanced viewport constraints
       const position = this.calculatePosition(options.position);
       
       // Apply positioning and sizing with bounds checking
@@ -392,17 +392,17 @@ class ChatBalloonManager {
   }
 
   /**
-   * Calculate chat balloon position - FIXED with strict bounds and higher positioning
+   * Calculate chat balloon position - FIXED with enhanced viewport constraints
    * @param {Object} customPosition - Optional custom position override
    * @returns {Object} - Position with left, top, width, and height properties
    */
   calculatePosition(customPosition = null) {
-    const minWidth = 260;
-    const maxWidth = 320;
-    const minHeight = 200;
-    const maxHeight = 240;
-    const safeMargin = 20; // INCREASED from 15px to 20px for better bounds
-    const clippyMargin = 35; // INCREASED from 20px to 35px (15px higher as requested)
+    const minWidth = 240; // Slightly reduced for better fit
+    const maxWidth = 280; // Reduced from 320
+    const minHeight = 180;
+    const maxHeight = 200; // Reduced from 240
+    const safeMargin = 30; // INCREASED for better clearance
+    const clippyMargin = 40; // Clearance from Clippy
 
     // Always use desktop viewport instead of window viewport
     const desktop = document.querySelector(".desktop.screen") || 
@@ -427,7 +427,7 @@ class ChatBalloonManager {
       devLog("Desktop viewport not found, using fallback 640x480");
     }
 
-    // FIXED: Calculate dynamic sizing with stricter constraints
+    // ENHANCED: Calculate sizing with strict viewport constraints
     const maxAvailableWidth = viewportWidth - (safeMargin * 2);
     const maxAvailableHeight = viewportHeight - (safeMargin * 2);
     
@@ -460,94 +460,100 @@ class ChatBalloonManager {
     if (clippyEl) {
       const clippyRect = clippyEl.getBoundingClientRect();
       
-      // FIXED: Calculate position ensuring no overlap with Clippy and within desktop bounds
+      // FIXED: Initial positioning above Clippy, centered
       let left = clippyRect.left + (clippyRect.width / 2) - (chatWidth / 2);
-      let top = clippyRect.top - chatHeight - clippyMargin; // Now 35px higher
+      let top = clippyRect.top - chatHeight - clippyMargin;
       
-      // FIXED: Strict containment within desktop viewport with better margin handling
-      const constrainedLeft = Math.max(
-        viewportLeft + safeMargin, 
-        Math.min(left, viewportLeft + viewportWidth - chatWidth - safeMargin)
-      );
-      const constrainedTop = Math.max(
-        viewportTop + safeMargin, 
-        Math.min(top, viewportTop + viewportHeight - chatHeight - safeMargin)
-      );
+      // CRITICAL: Enhanced viewport boundary enforcement
+      const rightBoundary = viewportLeft + viewportWidth - safeMargin;
+      const leftBoundary = viewportLeft + safeMargin;
+      const topBoundary = viewportTop + safeMargin;
+      const bottomBoundary = viewportTop + viewportHeight - safeMargin;
       
-      // Check if we had to constrain the position
-      const wasConstrained = (constrainedLeft !== left) || (constrainedTop !== top);
-      
-      if (wasConstrained) {
-        devLog(`Position constrained: original (${left.toFixed(1)}, ${top.toFixed(1)}) -> constrained (${constrainedLeft.toFixed(1)}, ${constrainedTop.toFixed(1)})`);
+      // Constrain horizontally
+      if (left + chatWidth > rightBoundary) {
+        left = rightBoundary - chatWidth;
+        devLog(`Chat constrained from right: moved to x=${left.toFixed(1)}`);
+      }
+      if (left < leftBoundary) {
+        left = leftBoundary;
+        devLog(`Chat constrained from left: moved to x=${left.toFixed(1)}`);
       }
       
-      // FIXED: If chat still overlaps with Clippy after constraining, try alternative positions
-      if (constrainedTop + chatHeight + 10 > clippyRect.top && constrainedTop < clippyRect.bottom + 10) {
-        devLog("Chat would overlap Clippy, trying alternative positions");
+      // Constrain vertically
+      if (top < topBoundary) {
+        top = topBoundary;
+        devLog(`Chat constrained from top: moved to y=${top.toFixed(1)}`);
+      }
+      if (top + chatHeight > bottomBoundary) {
+        top = bottomBoundary - chatHeight;
+        devLog(`Chat constrained from bottom: moved to y=${top.toFixed(1)}`);
+      }
+      
+      // ENHANCED: Smart repositioning if overlapping with Clippy
+      const chatBottom = top + chatHeight;
+      const clippyTop = clippyRect.top;
+      const clearanceGap = 20;
+      
+      if (chatBottom + clearanceGap > clippyTop && top < clippyRect.bottom + clearanceGap) {
+        devLog("Chat would overlap Clippy, trying smart repositioning");
         
-        // Try positioning below Clippy
-        const belowPosition = clippyRect.bottom + clippyMargin;
-        
-        if (belowPosition + chatHeight + safeMargin <= viewportTop + viewportHeight) {
+        // Strategy 1: Try left side of Clippy
+        const leftSideX = clippyRect.left - chatWidth - clippyMargin;
+        if (leftSideX >= leftBoundary) {
+          left = leftSideX;
+          top = Math.max(topBoundary, Math.min(clippyRect.top - 20, bottomBoundary - chatHeight));
+          devLog("Repositioned chat to left of Clippy");
+          
           return { 
-            left: constrainedLeft, 
-            top: belowPosition, 
-            width: chatWidth, 
-            height: chatHeight,
-            withinBounds: true 
+            left, top, width: chatWidth, height: chatHeight,
+            withinBounds: true, position: "left-of-clippy"
           };
         }
         
-        // Try side positioning within desktop bounds
-        const rightPosition = clippyRect.right + clippyMargin;
-        const leftPosition = clippyRect.left - chatWidth - clippyMargin;
-        
-        if (rightPosition + chatWidth + safeMargin <= viewportLeft + viewportWidth) {
-          // Position to the right
-          const sideTop = Math.max(
-            viewportTop + safeMargin, 
-            Math.min(clippyRect.top, viewportTop + viewportHeight - chatHeight - safeMargin)
-          );
+        // Strategy 2: Try right side of Clippy
+        const rightSideX = clippyRect.right + clippyMargin;
+        if (rightSideX + chatWidth <= rightBoundary) {
+          left = rightSideX;
+          top = Math.max(topBoundary, Math.min(clippyRect.top - 20, bottomBoundary - chatHeight));
+          devLog("Repositioned chat to right of Clippy");
+          
           return { 
-            left: rightPosition, 
-            top: sideTop, 
-            width: chatWidth, 
-            height: chatHeight,
-            withinBounds: true 
-          };
-        } else if (leftPosition >= viewportLeft + safeMargin) {
-          // Position to the left
-          const sideTop = Math.max(
-            viewportTop + safeMargin, 
-            Math.min(clippyRect.top, viewportTop + viewportHeight - chatHeight - safeMargin)
-          );
-          return { 
-            left: leftPosition, 
-            top: sideTop, 
-            width: chatWidth, 
-            height: chatHeight,
-            withinBounds: true 
-          };
-        } else {
-          // Last resort: center in desktop viewport
-          devLog("Using fallback center position");
-          return {
-            left: viewportLeft + (viewportWidth - chatWidth) / 2,
-            top: viewportTop + (viewportHeight - chatHeight) / 2,
-            width: chatWidth,
-            height: chatHeight,
-            withinBounds: true
+            left, top, width: chatWidth, height: chatHeight,
+            withinBounds: true, position: "right-of-clippy"
           };
         }
+        
+        // Strategy 3: Position in upper portion of viewport (away from Clippy)
+        const upperPortionTop = topBoundary + ((bottomBoundary - topBoundary - chatHeight) * 0.2);
+        if (upperPortionTop + chatHeight < clippyRect.top - clearanceGap) {
+          left = Math.max(leftBoundary, Math.min(left, rightBoundary - chatWidth));
+          top = upperPortionTop;
+          devLog("Repositioned chat to upper viewport portion");
+          
+          return { 
+            left, top, width: chatWidth, height: chatHeight,
+            withinBounds: true, position: "upper-viewport"
+          };
+        }
+        
+        // Strategy 4: Center in available space
+        left = viewportLeft + (viewportWidth - chatWidth) / 2;
+        top = topBoundary + ((bottomBoundary - topBoundary - chatHeight) / 3);
+        devLog("Using centered fallback position");
+        
+        return { 
+          left, top, width: chatWidth, height: chatHeight,
+          withinBounds: true, position: "center-fallback"
+        };
       }
       
+      devLog(`Chat positioned above Clippy at (${left.toFixed(1)}, ${top.toFixed(1)})`);
       return { 
-        left: constrainedLeft, 
-        top: constrainedTop, 
-        width: chatWidth, 
-        height: chatHeight,
-        withinBounds: !wasConstrained
+        left, top, width: chatWidth, height: chatHeight,
+        withinBounds: true, position: "above-clippy"
       };
+      
     } else {
       // Fallback: center of desktop viewport
       devLog("Clippy element not found, centering in desktop viewport");
@@ -556,7 +562,8 @@ class ChatBalloonManager {
         top: viewportTop + (viewportHeight - chatHeight) / 2,
         width: chatWidth,
         height: chatHeight,
-        withinBounds: true
+        withinBounds: true,
+        position: "center-no-clippy"
       };
     }
   }

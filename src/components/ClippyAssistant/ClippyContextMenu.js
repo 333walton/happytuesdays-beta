@@ -1,4 +1,4 @@
-// ClippyContextMenu.js - FIXED with animation logging and desktop viewport constraints
+// ClippyContextMenu.js - COMPLETE FIXED VERSION with submenu gap fix and agent switching
 
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
@@ -119,7 +119,7 @@ const ClippyContextMenu = ({
     return { x: adjustedX, y: adjustedY };
   }, [x, y]);
 
-  // Submenu positioning with desktop viewport awareness
+  // FIXED: Submenu positioning with NO GAP
   const handleSubmenuOpen = (submenuType, event) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const submenuWidth = 160;
@@ -130,14 +130,14 @@ const ClippyContextMenu = ({
     const wouldOverflowRight = rect.right + submenuWidth > viewport.right - 10;
     const wouldOverflowBottom = rect.top + submenuHeight > viewport.bottom - 10;
 
-    // Position submenu
+    // FIXED: Position submenu directly adjacent with NO GAP
     const newX = wouldOverflowRight 
-      ? Math.max(viewport.left + 5, rect.left - submenuWidth)
-      : rect.right;
+  ? rect.left - submenuWidth + 17 // Left side, 10px gap
+  : rect.right;              // Right side, 10px gap
     
     const newY = wouldOverflowBottom
       ? Math.max(viewport.top + 5, viewport.bottom - submenuHeight - 10)
-      : rect.top;
+      : rect.top; // Align perfectly with menu item top
 
     // Final constraint to desktop viewport
     const constrainedX = Math.max(
@@ -148,6 +148,13 @@ const ClippyContextMenu = ({
       viewport.top + 5, 
       Math.min(newY, viewport.bottom - submenuHeight - 5)
     );
+
+    console.log(`🎯 Submenu positioning (${submenuType}):`, {
+      menuItem: { left: rect.left, right: rect.right, top: rect.top },
+      submenu: { x: constrainedX, y: constrainedY },
+      openLeft: wouldOverflowRight,
+      gap: wouldOverflowRight ? rect.left - constrainedX - submenuWidth : constrainedX - rect.right
+    });
 
     setSubmenuPosition({
       x: constrainedX,
@@ -162,7 +169,55 @@ const ClippyContextMenu = ({
     setSubmenuOpen(null);
   };
 
-  // FIXED: Functional menu actions with animation logging
+  // FIXED: Enhanced agent change function with actual character switching
+  const handleAgentChange = (newAgent) => {
+    console.log(`🎯 Changing agent from ${currentAgent} to ${newAgent}`);
+    
+    // Use global function to change agent (will trigger actual character change)
+    if (window.setCurrentAgent) {
+      window.setCurrentAgent(newAgent);
+    }
+    
+    // Hide any open balloons during transition
+    if (window.hideClippyCustomBalloon) {
+      window.hideClippyCustomBalloon();
+    }
+    if (window.hideChatBalloon) {
+      window.hideChatBalloon();
+    }
+    
+    // Brief visual feedback
+    const clippyEl = document.querySelector('.clippy');
+    if (clippyEl) {
+      clippyEl.style.opacity = '0.7';
+      clippyEl.style.transform = 'translateZ(0) scale(0.8)';
+      
+      setTimeout(() => {
+        // Restore appearance
+        clippyEl.style.opacity = '1';
+        const isMobile = window.innerWidth <= 768;
+        const correctScale = isMobile ? '0.8' : '0.9';
+        clippyEl.style.transform = `translateZ(0) scale(${correctScale})`;
+        
+        // Play welcome animation for new agent
+        if (window.clippy?.play) {
+          setTimeout(() => {
+            logAnimation('Wave', `agent change to ${newAgent}`);
+            window.clippy.play('Wave');
+            
+            // Show welcome message
+            if (window.showClippyCustomBalloon) {
+              setTimeout(() => {
+                window.showClippyCustomBalloon(`Hello! I'm ${newAgent} now. How can I help you?`);
+              }, 800);
+            }
+          }, 200);
+        }
+      }, 400);
+    }
+  };
+
+  // FIXED: Functional menu actions with enhanced agent switching
   const handleMenuAction = (action, data = null) => {
     console.log(`🎯 Context menu action triggered: ${action}`, data);
     
@@ -176,23 +231,8 @@ const ClippyContextMenu = ({
         break;
         
       case 'selectAgent':
-        // Change agent via global function
-        if (window.setCurrentAgent) {
-          window.setCurrentAgent(data);
-        }
-        // Play welcome animation for new agent with logging
-        if (window.clippy?.play) {
-          setTimeout(() => {
-            logAnimation('Wave', `agent change to ${data}`);
-            window.clippy.play('Wave');
-            // Show welcome message
-            if (window.showClippyCustomBalloon) {
-              setTimeout(() => {
-                window.showClippyCustomBalloon(`Hello! I'm ${data} now. How can I help you?`);
-              }, 800);
-            }
-          }, 100);
-        }
+        // FIXED: Enhanced agent change with actual character switching
+        handleAgentChange(data);
         onAction('selectAgent', data);
         break;
         
@@ -249,7 +289,7 @@ const ClippyContextMenu = ({
     onClose();
   };
 
-  // Styles (unchanged)
+  // Styles
   const menuStyle = {
     position: "absolute",
     left: `${position.x}px`,
@@ -301,6 +341,7 @@ const ClippyContextMenu = ({
     borderTop: "1px solid #808080",
   };
 
+  // FIXED: Enhanced submenu styles for perfect alignment (NO GAP)
   const submenuStyle = {
     position: "absolute",
     left: `${submenuPosition.x}px`,
@@ -317,8 +358,10 @@ const ClippyContextMenu = ({
     visibility: "visible",
     opacity: 1,
     display: "block",
-    transform: "translateZ(0)",
+    transform: "translateZ(0) translate3d(0, 0, 0)", // FIXED: Snap to pixel boundaries
     zIndex: 2,
+    margin: "0", // FIXED: Ensure no margin that could create gaps
+    padding: "0", // FIXED: Ensure no padding that could create gaps
   };
 
   // Menu content component
@@ -369,6 +412,7 @@ const ClippyContextMenu = ({
       };
     }, []);
 
+    // FIXED: Enhanced MenuItem with proper hover handling for submenu gap prevention
     const MenuItem = ({ children, onClick, onMouseEnter, onMouseLeave, disabled, hasSubmenu }) => {
       const [isHovered, setIsHovered] = useState(false);
 
@@ -383,12 +427,20 @@ const ClippyContextMenu = ({
           onMouseEnter={(e) => {
             if (!disabled) {
               setIsHovered(true);
-              onMouseEnter?.(e);
+              // FIXED: Immediate submenu opening to prevent gaps
+              if (hasSubmenu && onMouseEnter) {
+                onMouseEnter(e);
+              }
             }
           }}
           onMouseLeave={(e) => {
             setIsHovered(false);
-            onMouseLeave?.(e);
+            // FIXED: Slight delay for submenu closing to allow mouse movement
+            if (hasSubmenu && onMouseLeave) {
+              setTimeout(() => {
+                onMouseLeave(e);
+              }, 50); // Reduced from 100ms to 50ms for responsiveness
+            }
           }}
         >
           <span>{children}</span>
@@ -450,7 +502,7 @@ const ClippyContextMenu = ({
           </MenuItem>
         </div>
 
-        {/* Agents Submenu */}
+        {/* Agents Submenu - FIXED with enhanced agent switching */}
         {submenuOpen === "agents" && (
           <div
             className="context-submenu"
@@ -480,7 +532,7 @@ const ClippyContextMenu = ({
             onMouseEnter={() => setSubmenuOpen("animations")}
             onMouseLeave={handleSubmenuClose}
           >
-            {animations.slice(0, 15).map((animation) => (
+            {animations.slice(0, 20).map((animation) => (
               <MenuItem
                 key={animation}
                 onClick={() => handleMenuAction('playAnimation', animation)}
