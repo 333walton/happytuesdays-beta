@@ -1,7 +1,13 @@
-// ClippyContextMenu.js - FIXED with desktop viewport constraints and functional actions
+// ClippyContextMenu.js - FIXED with animation logging and desktop viewport constraints
 
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
+
+// FIXED: Animation logging function
+const logAnimation = (animationName, context = "context menu") => {
+  // Force log animation regardless of dev mode
+  console.log(`🎭 Animation Triggered: "${animationName}" from ${context}`);
+};
 
 const ClippyContextMenu = ({
   x,
@@ -29,7 +35,7 @@ const ClippyContextMenu = ({
     "RestPose", "IdleEyeBrowRaise", "LookDownLeft",
   ];
 
-  // FIXED: Get desktop viewport boundaries for positioning
+  // Get desktop viewport boundaries for positioning
   const getDesktopViewport = () => {
     const desktop = document.querySelector(".desktop.screen") || 
                    document.querySelector(".desktop") || 
@@ -87,10 +93,10 @@ const ClippyContextMenu = ({
     };
   }, []);
 
-  // FIXED: Position calculation with strict desktop viewport constraints
+  // Position calculation with strict desktop viewport constraints
   const position = React.useMemo(() => {
     const menuWidth = 180;
-    const menuHeight = 250; // Increased for more menu items
+    const menuHeight = 250;
     const margin = 10;
     const viewport = getDesktopViewport();
     
@@ -113,7 +119,7 @@ const ClippyContextMenu = ({
     return { x: adjustedX, y: adjustedY };
   }, [x, y]);
 
-  // FIXED: Submenu positioning with desktop viewport awareness
+  // Submenu positioning with desktop viewport awareness
   const handleSubmenuOpen = (submenuType, event) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const submenuWidth = 160;
@@ -156,7 +162,94 @@ const ClippyContextMenu = ({
     setSubmenuOpen(null);
   };
 
-  // Styles
+  // FIXED: Functional menu actions with animation logging
+  const handleMenuAction = (action, data = null) => {
+    console.log(`🎯 Context menu action triggered: ${action}`, data);
+    
+    switch (action) {
+      case 'hide':
+        // Use global function to hide Clippy
+        if (window.setAssistantVisible) {
+          window.setAssistantVisible(false);
+        }
+        onAction('hide');
+        break;
+        
+      case 'selectAgent':
+        // Change agent via global function
+        if (window.setCurrentAgent) {
+          window.setCurrentAgent(data);
+        }
+        // Play welcome animation for new agent with logging
+        if (window.clippy?.play) {
+          setTimeout(() => {
+            logAnimation('Wave', `agent change to ${data}`);
+            window.clippy.play('Wave');
+            // Show welcome message
+            if (window.showClippyCustomBalloon) {
+              setTimeout(() => {
+                window.showClippyCustomBalloon(`Hello! I'm ${data} now. How can I help you?`);
+              }, 800);
+            }
+          }, 100);
+        }
+        onAction('selectAgent', data);
+        break;
+        
+      case 'playAnimation':
+        // FIXED: Play specific animation with logging
+        if (window.clippy?.play) {
+          logAnimation(data, 'context menu selection');
+          window.clippy.play(data);
+        }
+        onAction('playAnimation', data);
+        break;
+        
+      case 'chat':
+        // Open chat balloon
+        if (window.showClippyChatBalloon) {
+          window.showClippyChatBalloon("Hi! What would you like to chat about?");
+        }
+        onAction('chat');
+        break;
+        
+      case 'wave':
+        // FIXED: Play wave animation with message and logging
+        if (window.clippy?.play) {
+          logAnimation('Wave', 'context menu wave action');
+          window.clippy.play('Wave');
+          if (window.showClippyCustomBalloon) {
+            setTimeout(() => {
+              window.showClippyCustomBalloon("👋 Hello there!");
+            }, 500);
+          }
+        }
+        onAction('wave');
+        break;
+        
+      case 'greet':
+        // FIXED: Play greeting animation with message and logging
+        if (window.clippy?.play) {
+          logAnimation('Greeting', 'context menu greet action');
+          window.clippy.play('Greeting');
+          if (window.showClippyCustomBalloon) {
+            setTimeout(() => {
+              window.showClippyCustomBalloon("Hello! How can I help you today?");
+            }, 800);
+          }
+        }
+        onAction('greet');
+        break;
+        
+      default:
+        console.warn(`Unknown context menu action: ${action}`);
+        onAction(action, data);
+    }
+    
+    onClose();
+  };
+
+  // Styles (unchanged)
   const menuStyle = {
     position: "absolute",
     left: `${position.x}px`,
@@ -226,89 +319,6 @@ const ClippyContextMenu = ({
     display: "block",
     transform: "translateZ(0)",
     zIndex: 2,
-  };
-
-  // FIXED: Functional menu actions
-  const handleMenuAction = (action, data = null) => {
-    console.log(`🎯 Context menu action triggered: ${action}`, data);
-    
-    switch (action) {
-      case 'hide':
-        // Use global function to hide Clippy
-        if (window.setAssistantVisible) {
-          window.setAssistantVisible(false);
-        }
-        onAction('hide');
-        break;
-        
-      case 'selectAgent':
-        // Change agent via global function
-        if (window.setCurrentAgent) {
-          window.setCurrentAgent(data);
-        }
-        // Play welcome animation for new agent
-        if (window.clippy?.play) {
-          setTimeout(() => {
-            window.clippy.play('Wave');
-            // Show welcome message
-            if (window.showClippyCustomBalloon) {
-              setTimeout(() => {
-                window.showClippyCustomBalloon(`Hello! I'm ${data} now. How can I help you?`);
-              }, 800);
-            }
-          }, 100);
-        }
-        onAction('selectAgent', data);
-        break;
-        
-      case 'playAnimation':
-        // Play specific animation
-        if (window.clippy?.play) {
-          window.clippy.play(data);
-        }
-        onAction('playAnimation', data);
-        break;
-        
-      case 'chat':
-        // Open chat balloon
-        if (window.showClippyChatBalloon) {
-          window.showClippyChatBalloon("Hi! What would you like to chat about?");
-        }
-        onAction('chat');
-        break;
-        
-      case 'wave':
-        // Play wave animation with message
-        if (window.clippy?.play) {
-          window.clippy.play('Wave');
-          if (window.showClippyCustomBalloon) {
-            setTimeout(() => {
-              window.showClippyCustomBalloon("👋 Hello there!");
-            }, 500);
-          }
-        }
-        onAction('wave');
-        break;
-        
-      case 'greet':
-        // Play greeting animation with message
-        if (window.clippy?.play) {
-          window.clippy.play('Greeting');
-          if (window.showClippyCustomBalloon) {
-            setTimeout(() => {
-              window.showClippyCustomBalloon("Hello! How can I help you today?");
-            }, 800);
-          }
-        }
-        onAction('greet');
-        break;
-        
-      default:
-        console.warn(`Unknown context menu action: ${action}`);
-        onAction(action, data);
-    }
-    
-    onClose();
   };
 
   // Menu content component
@@ -462,7 +472,7 @@ const ClippyContextMenu = ({
           </div>
         )}
 
-        {/* Animations Submenu */}
+        {/* Animations Submenu - FIXED with logging */}
         {submenuOpen === "animations" && (
           <div
             className="context-submenu"

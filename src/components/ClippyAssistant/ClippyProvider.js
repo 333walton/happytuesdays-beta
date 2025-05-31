@@ -56,6 +56,17 @@ const devLog = (message, ...args) => {
   }
 };
 
+// FIXED: Enhanced animation logging with forced console output
+const logAnimation = (animationName, context = "unknown") => {
+  // Force log animation regardless of dev mode
+  console.log(`🎭 Animation Triggered: "${animationName}" from ${context}`);
+  
+  // Also log to dev console if in dev mode
+  if (isDev) {
+    devLog(`Animation: ${animationName} (${context})`);
+  }
+};
+
 // Safe execution wrapper
 const safeExecute = (operation, fallback = null, context = "operation") => {
   try {
@@ -69,7 +80,7 @@ const safeExecute = (operation, fallback = null, context = "operation") => {
 };
 
 // FIXED: Enforced greeting animations array - will only select from these 3
-const GREETING_ANIMATIONS = ["Greeting", "Wave", "GetAttention"];
+const GREETING_ANIMATIONS = ["Greeting", "Wave"];
 
 // FIXED: Initial message content from StartMessage component
 const INITIAL_MESSAGE_CONTENT = "Welcome to Hydra98! Please enjoy and don't break anything";
@@ -150,7 +161,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     setContextMenuVisible(false);
   }, []);
 
-  // FIXED: Enhanced interaction handler with 1.5s cooldown and balloon rules
+  // FIXED: Enhanced interaction handler with randomized animations
   const handleInteraction = useCallback((e, interactionType = "tap") => {
     e.preventDefault();
     e.stopPropagation();
@@ -207,7 +218,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       if (clippyInstanceRef.current.play) {
         setIsAnimationPlaying(true);
         
-        clippyInstanceRef.current.play("Greeting");
+        // FIXED: Use random greeting animation instead of hardcoded "Greeting"
+        const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
+        const animationName = GREETING_ANIMATIONS[randomIndex];
+        logAnimation(animationName, `${interactionType} interaction #${newCount} (random greeting ${randomIndex})`);
+        
+        clippyInstanceRef.current.play(animationName);
         devLog("Animation triggered successfully");
         
         // Clear animation state after reasonable time
@@ -237,7 +253,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }, false, `${interactionType} interaction`);
   }, [interactionCount, lastInteractionTime, isInCooldown, isAnimationPlaying, startCooldown, isAnyBalloonOpen]);
 
-  // FIXED: Long press handler (mobile only) - always shows speech balloon
+  // FIXED: Long press handler with randomized animation (mobile only)
   const handleLongPress = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -279,7 +295,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       if (clippyInstanceRef.current?.play) {
         setIsAnimationPlaying(true);
         
-        clippyInstanceRef.current.play("GetAttention");
+        // FIXED: Use random animation for long press
+        const longPressAnimations = ["Wave" , "Greeting"];
+        const randomIndex = Math.floor(Math.random() * longPressAnimations.length);
+        const animationName = longPressAnimations[randomIndex];
+        logAnimation(animationName, `long press interaction (${randomIndex})`);
+        
+        clippyInstanceRef.current.play(animationName);
         
         // Clear animation state
         setTimeout(() => {
@@ -313,7 +335,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     return true;
   }, [showContextMenu]);
 
-  // FIXED: Initial message function with flag check
+  // FIXED: Initial message function with animation conflict removed
   const showInitialMessage = useCallback(() => {
     if (initialMessageShownRef.current) {
       devLog("Initial message already shown, skipping");
@@ -321,20 +343,18 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }
     
     initialMessageShownRef.current = true;
-    devLog("Showing initial welcome message");
+    devLog("Showing initial welcome message (without conflicting animation)");
     
-    if (clippyInstanceRef.current?.play) {
-      clippyInstanceRef.current.play("GetAttention");
-      
-      setTimeout(() => {
-        if (mountedRef.current && !isAnyBalloonOpen()) {
-          showCustomBalloon(INITIAL_MESSAGE_CONTENT, 8000);
-        }
-      }, 800);
-    }
+    // FIXED: Don't play any animation here to avoid conflicts with greeting
+    setTimeout(() => {
+      if (mountedRef.current && !isAnyBalloonOpen()) {
+        devLog("Showing welcome message balloon");
+        showCustomBalloon(INITIAL_MESSAGE_CONTENT, 8000);
+      }
+    }, 800);
   }, [isAnyBalloonOpen]);
 
-  // FIXED: Proper greeting animation selection - ENFORCED to only use the 3 specified animations
+  // FIXED: Proper greeting animation selection with animation logging - ENFORCED to only use the 3 specified animations
   const playInitialGreeting = useCallback(() => {
     if (greetingPlayedRef.current || !clippyInstanceRef.current || !startupComplete) {
       return;
@@ -349,7 +369,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
       const selectedGreeting = GREETING_ANIMATIONS[randomIndex];
       
-      devLog(`Selected greeting animation: ${selectedGreeting} (index ${randomIndex} from ${GREETING_ANIMATIONS.join(', ')})`);
+      // FIXED: Log animation with forced console output
+      logAnimation(selectedGreeting, `initial greeting (index ${randomIndex})`);
+      
+      devLog(`Selected greeting animation: ${selectedGreeting} (index ${randomIndex} from [${GREETING_ANIMATIONS.join(', ')}])`);
       
       if (clippyInstanceRef.current?.play) {
         clippyInstanceRef.current.play(selectedGreeting);
@@ -358,14 +381,16 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }, null, "initial greeting");
   }, [startupComplete]);
 
-  // FIXED: Enhanced shutdown detection and handling with GoodBye animation
+  // FIXED: Enhanced shutdown detection and handling with GoodBye animation and logging
   const handleShutdownSequence = useCallback((isShuttingDown) => {
     if (isShuttingDown) {
       devLog("Shutdown sequence detected - playing GoodBye and hiding Clippy completely");
       
-      // Play GoodBye animation immediately
+      // FIXED: Play GoodBye animation with logging
       if (clippyInstanceRef.current?.play) {
-        clippyInstanceRef.current.play("GoodBye");
+        const animationName = "GoodBye";
+        logAnimation(animationName, "shutdown sequence");
+        clippyInstanceRef.current.play(animationName);
       }
       
       // Hide all balloons immediately
@@ -563,12 +588,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     return handleInteraction(e, "double-click");
   }, [handleInteraction, lastInteractionTime, isInCooldown]);
 
-  // FIXED: Enhanced unmount with GoodBye animation
+  // FIXED: Enhanced unmount with GoodBye animation and logging
   useEffect(() => {
     return () => {
       if (clippyInstanceRef.current?.play) {
         devLog("Playing GoodBye animation before unmount");
-        clippyInstanceRef.current.play("GoodBye");
+        const animationName = "GoodBye";
+        logAnimation(animationName, "component unmount");
+        clippyInstanceRef.current.play(animationName);
         
         // Small delay to let animation start
         setTimeout(() => {
