@@ -68,24 +68,11 @@ const safeExecute = (operation, fallback = null, context = "operation") => {
   }
 };
 
-// FIXED: Proper greeting animations array
+// FIXED: Enforced greeting animations array - will only select from these 3
 const GREETING_ANIMATIONS = ["Greeting", "Wave", "GetAttention"];
 
 // FIXED: Initial message content from StartMessage component
 const INITIAL_MESSAGE_CONTENT = "Welcome to Hydra98! Please enjoy and don't break anything";
-
-// FIXED: All 41 available Clippy animations for context menu
-const ALL_CLIPPY_ANIMATIONS = [
-  "Congratulate", "LookRight", "SendMail", "Thinking", "Explain",
-  "IdleRopePile", "IdleAtom", "Print", "Hide", "GetAttention",
-  "Save", "GetTechy", "GestureUp", "Idle1_1", "Processing",
-  "Alert", "LookUpRight", "IdleSideToSide", "GoodBye", "LookLeft",
-  "IdleHeadScratch", "LookUpLeft", "CheckingSomething", "Hearing_1", "GetWizardy",
-  "IdleFingerTap", "GestureLeft", "Wave", "GestureRight", "Writing",
-  "IdleSnooze", "LookDownRight", "GetArtsy", "Show", "LookDown",
-  "Searching", "EmptyTrash", "Greeting", "LookUp", "GestureDown",
-  "RestPose", "IdleEyeBrowRaise", "LookDownLeft"
-];
 
 // FIXED: Increased cooldown to 1.5 seconds as required
 const INTERACTION_COOLDOWN_MS = 1500;
@@ -153,13 +140,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
   // FIXED: Context menu management
   const showContextMenu = useCallback((x, y) => {
-    const menuWidth = 180;
-    const menuHeight = 200;
-    const adjustedX = Math.min(x, window.innerWidth - menuWidth - 10);
-    const adjustedY = Math.min(y, window.innerHeight - menuHeight - 10);
-    
-    devLog(`Showing context menu at (${adjustedX}, ${adjustedY})`);
-    setContextMenuPosition({ x: adjustedX, y: adjustedY });
+    devLog(`Showing context menu at (${x}, ${y})`);
+    setContextMenuPosition({ x, y });
     setContextMenuVisible(true);
   }, []);
 
@@ -217,10 +199,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }
 
     // FIXED: Implement balloon interaction rules
-    // Single tap (mobile): Every other tap should show a chat balloon
-    // Double-click (desktop): Every other click shows a chat balloon
-    // Long press (mobile, 800ms hold): Always shows a speech balloon
-    
     const shouldShowChatBalloon = (newCount % 2 === 0) && interactionType !== "long-press";
     
     devLog(`Will show ${shouldShowChatBalloon ? 'chat' : 'speech'} balloon (interaction #${newCount})`);
@@ -238,7 +216,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         }, 2000);
         
         setTimeout(() => {
-          if (mountedRef.current && !isAnyBalloonOpen()) { // Double-check balloon state
+          if (mountedRef.current && !isAnyBalloonOpen()) {
             if (shouldShowChatBalloon) {
               const chatMessage = isMobile 
                 ? "Hi! What would you like to chat about?" 
@@ -321,7 +299,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
   // FIXED: Enhanced right-click handler with better event handling
   const handleRightClick = useCallback((e) => {
-    // Don't block on mobile - allow context menu on all devices
     e.preventDefault();
     e.stopPropagation();
     
@@ -335,6 +312,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     showContextMenu(e.clientX, e.clientY);
     return true;
   }, [showContextMenu]);
+
   // FIXED: Initial message function with flag check
   const showInitialMessage = useCallback(() => {
     if (initialMessageShownRef.current) {
@@ -350,13 +328,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       
       setTimeout(() => {
         if (mountedRef.current && !isAnyBalloonOpen()) {
-          showCustomBalloon(INITIAL_MESSAGE_CONTENT, 8000); // Show longer for initial message
+          showCustomBalloon(INITIAL_MESSAGE_CONTENT, 8000);
         }
       }, 800);
     }
   }, [isAnyBalloonOpen]);
 
-  // FIXED: Proper greeting animation selection from correct array
+  // FIXED: Proper greeting animation selection - ENFORCED to only use the 3 specified animations
   const playInitialGreeting = useCallback(() => {
     if (greetingPlayedRef.current || !clippyInstanceRef.current || !startupComplete) {
       return;
@@ -367,22 +345,23 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     devLog("Playing initial greeting animation");
     
     safeExecute(() => {
-      // FIXED: Select from the correct greeting animations
-      const randomGreeting = GREETING_ANIMATIONS[Math.floor(Math.random() * GREETING_ANIMATIONS.length)];
+      // FIXED: ENFORCED - Only select from the specified greeting animations
+      const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
+      const selectedGreeting = GREETING_ANIMATIONS[randomIndex];
       
-      devLog(`Selected greeting animation: ${randomGreeting}`);
+      devLog(`Selected greeting animation: ${selectedGreeting} (index ${randomIndex} from ${GREETING_ANIMATIONS.join(', ')})`);
       
       if (clippyInstanceRef.current?.play) {
-        clippyInstanceRef.current.play(randomGreeting);
+        clippyInstanceRef.current.play(selectedGreeting);
         devLog("Initial greeting animation started");
       }
     }, null, "initial greeting");
   }, [startupComplete]);
 
-  // FIXED: Enhanced shutdown detection and handling
+  // FIXED: Enhanced shutdown detection and handling with GoodBye animation
   const handleShutdownSequence = useCallback((isShuttingDown) => {
     if (isShuttingDown) {
-      devLog("Shutdown sequence detected - playing GoodBye and removing Clippy");
+      devLog("Shutdown sequence detected - playing GoodBye and hiding Clippy completely");
       
       // Play GoodBye animation immediately
       if (clippyInstanceRef.current?.play) {
@@ -394,10 +373,29 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       hideChatBalloon();
       hideContextMenu();
       
+      // Hide Clippy from ALL viewports (including surrounding frame)
+      const clippyEl = document.querySelector(".clippy");
+      const overlayEl = document.getElementById("clippy-clickable-overlay");
+      
+      if (clippyEl) {
+        clippyEl.style.display = "none";
+        clippyEl.style.visibility = "hidden";
+        clippyEl.style.opacity = "0";
+        clippyEl.style.transform = "translateX(-9999px) translateY(-9999px)";
+        clippyEl.style.pointerEvents = "none";
+      }
+      
+      if (overlayEl) {
+        overlayEl.style.display = "none";
+        overlayEl.style.visibility = "hidden";
+        overlayEl.style.opacity = "0";
+        overlayEl.style.pointerEvents = "none";
+      }
+      
       // Remove Clippy from viewport after animation
       shutdownTimeoutRef.current = setTimeout(() => {
         setShouldRenderClippy(false);
-        devLog("Clippy removed from viewport due to shutdown");
+        devLog("Clippy completely removed from all viewports due to shutdown");
       }, 1000); // Give time for GoodBye animation
       
     } else {
@@ -411,6 +409,25 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       
       // Re-render Clippy
       setShouldRenderClippy(true);
+      
+      // Restore Clippy visibility
+      const clippyEl = document.querySelector(".clippy");
+      const overlayEl = document.getElementById("clippy-clickable-overlay");
+      
+      if (clippyEl) {
+        clippyEl.style.display = "block";
+        clippyEl.style.visibility = "visible";
+        clippyEl.style.opacity = "1";
+        clippyEl.style.transform = "";
+        clippyEl.style.pointerEvents = "auto";
+      }
+      
+      if (overlayEl) {
+        overlayEl.style.display = "block";
+        overlayEl.style.visibility = "visible";
+        overlayEl.style.opacity = "1";
+        overlayEl.style.pointerEvents = "auto";
+      }
     }
   }, [hideContextMenu]);
 
@@ -584,7 +601,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }
   }, [startupComplete, shouldRenderClippy, showInitialMessage]);
 
-  // FIXED: Enhanced startup and shutdown sequence monitoring
+  // FIXED: Enhanced startup and shutdown sequence monitoring with complete hiding
   useEffect(() => {
     let isMonitoring = true;
 
@@ -608,7 +625,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         sequenceActive = biosVisible || windowsVisible;
       }
 
-      // FIXED: Check shutdown sequences
+      // FIXED: Check shutdown sequences - both windowsShuttingDown class and shutdown screen
       if (desktop?.classList.contains("windowsShuttingDown")) {
         isShuttingDown = true;
         sequenceActive = true;
@@ -637,7 +654,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         }
       }
 
-      // FIXED: Handle rendering state
+      // FIXED: Handle rendering state with shutdown detection
       if (wasRendering !== shouldRender) {
         setShouldRenderClippy(shouldRender);
         
@@ -646,10 +663,16 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           handleShutdownSequence(true);
         } else if (shouldRender && !wasRendering) {
           // Clippy being shown (shutdown cancelled or startup complete)
-          if (wasRendering === false) { // Only if we were previously rendering
+          if (wasRendering === false) {
             handleShutdownSequence(false);
           }
         }
+      }
+
+      // FIXED: If shutdown is detected but shouldRender is still true, force shutdown handling
+      if (isShuttingDown && shouldRender) {
+        setShouldRenderClippy(false);
+        handleShutdownSequence(true);
       }
 
       const nextCheckDelay = sequenceActive ? 500 : 2000;
@@ -677,7 +700,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       const handleClickOutside = (e) => {
         if (e.target.closest('.clippy') || 
             e.target.closest('#clippy-clickable-overlay') ||
-            e.target.closest('.clippy-context-menu-debug')) {
+            e.target.closest('.clippy-context-menu') ||
+            e.target.closest('.context-menu-content') ||
+            e.target.closest('.context-submenu')) {
           return;
         }
         devLog("Click outside context menu - hiding");
@@ -705,39 +730,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       if (cleanup) cleanup();
     };
   }, [contextMenuVisible, hideContextMenu]);
-
-  // FIXED: Enhanced context menu visibility styles
-  useEffect(() => {
-    if (contextMenuVisible) {
-      const contextMenuVisibilityFix = `
-        .clippy-context-menu,
-        .clippy-context-menu-debug {
-          position: fixed !important;
-          z-index: 2147483647 !important;
-          visibility: visible !important;
-          opacity: 1 !important;
-          display: block !important;
-          pointer-events: auto !important;
-          isolation: isolate !important;
-          contain: layout style paint !important;
-          transform: translateZ(0) !important;
-          backface-visibility: hidden !important;
-        }
-      `;
-
-      const styleElement = document.createElement("style");
-      styleElement.id = "context-menu-visibility-fix";
-      styleElement.textContent = contextMenuVisibilityFix;
-      document.head.appendChild(styleElement);
-
-      return () => {
-        const existingStyle = document.getElementById("context-menu-visibility-fix");
-        if (existingStyle) {
-          existingStyle.remove();
-        }
-      };
-    }
-  }, [contextMenuVisible]);
 
   // Zoom monitoring (keeping existing logic)
   useEffect(() => {
@@ -941,13 +933,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return success;
       };
 
-      window.testClippyInitialMessage = () => {
-        devLog("Manual initial message test triggered");
-        const success = showInitialMessage();
-        devLog(`Initial message success: ${success}`);
-        return success;
-      };
-
       // Context menu test functions
       window.forceShowContextMenu = () => {
         devLog("Force showing context menu");
@@ -985,7 +970,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         delete window.getClippyInstance;
         delete window.testClippyBalloon;
         delete window.testClippyChat;
-        delete window.testClippyInitialMessage;
         delete window.forceShowContextMenu;
         delete window.resetClippyCooldown;
         delete window._clippyGlobalsInitialized;
@@ -1171,17 +1155,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       isScreenPoweredOn,
       createMobileTouchHandlers,
       handleDesktopInteraction,
-      handleRightClick, // ✅ Added to dependencies
+      handleRightClick,
     ]);
 
     return null;
   };
-
-  // Get custom position function for controller
-  const getCustomPosition = useCallback(() => {
-    if (isMobile) return null;
-    return position;
-  }, [position]);
 
   // Mount effect
   useEffect(() => {
@@ -1254,7 +1232,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         {/* FIXED: Only render ClippyController when shouldRenderClippy is true */}
         {assistantVisible && shouldRenderClippy && <ClippyController />}
 
-        {/* FIXED: Context Menu with all animations */}
+        {/* FIXED: Context Menu - REMOVED redundant action handling, now uses functional ClippyContextMenu */}
         {contextMenuVisible && (
           <ClippyContextMenu
             x={contextMenuPosition.x}
@@ -1262,66 +1240,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             onClose={hideContextMenu}
             currentAgent={currentAgent}
             agents={["Clippy", "Links", "Bonzi", "Genie", "Merlin", "Rover"]}
-            animations={ALL_CLIPPY_ANIMATIONS}
             onAction={(action, data) => {
               devLog(`Context menu action: ${action}`, data);
-              hideContextMenu();
-              
-              switch (action) {
-                case 'hide':
-                  setAssistantVisible(false);
-                  break;
-                case 'selectAgent':
-                  setCurrentAgent(data);
-                  if (clippyInstanceRef.current?.play && !isAnimationPlaying) {
-                    setIsAnimationPlaying(true);
-                    clippyInstanceRef.current.play('Wave');
-                    setTimeout(() => {
-                      setIsAnimationPlaying(false);
-                      if (!isAnyBalloonOpen()) {
-                        showCustomBalloon(`Hello! I'm ${data} now. How can I help you?`);
-                      }
-                    }, 800);
-                  }
-                  break;
-                case 'playAnimation':
-                  if (clippyInstanceRef.current?.play && !isAnimationPlaying) {
-                    setIsAnimationPlaying(true);
-                    clippyInstanceRef.current.play(data);
-                    setTimeout(() => {
-                      setIsAnimationPlaying(false);
-                    }, 2000);
-                  }
-                  break;
-                case 'wave':
-                  if (clippyInstanceRef.current?.play && !isAnimationPlaying) {
-                    setIsAnimationPlaying(true);
-                    clippyInstanceRef.current.play('Wave');
-                    setTimeout(() => {
-                      setIsAnimationPlaying(false);
-                    }, 2000);
-                  }
-                  break;
-                case 'greet':
-                  if (clippyInstanceRef.current?.play && !isAnimationPlaying) {
-                    setIsAnimationPlaying(true);
-                    clippyInstanceRef.current.play('Greeting');
-                    setTimeout(() => {
-                      setIsAnimationPlaying(false);
-                      if (!isAnyBalloonOpen()) {
-                        showCustomBalloon("Hello there! 👋");
-                      }
-                    }, 800);
-                  }
-                  break;
-                case 'chat':
-                  if (!isAnyBalloonOpen()) {
-                    showChatBalloon("Hi! What would you like to chat about?");
-                  }
-                  break;
-                default:
-                  devLog(`Unknown context menu action: ${action}`);
-              }
+              // Menu actions are now handled within ClippyContextMenu component
+              // This just logs for debugging
             }}
           />
         )}

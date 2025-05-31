@@ -1,10 +1,9 @@
-/* ===== OPTIMIZED CLIPPY STYLES - DOM-BASED BALLOON SYSTEM ===== */
+/* ===== OPTIMIZED CLIPPY STYLES - TEST 1: ONLY :has() SELECTORS ===== */
 
 /* ===== CORE CLIPPY ELEMENT ===== */
 .clippy {
   /* Essential display properties */
   pointer-events: auto !important;
-  /* FIXED: Enable interactions */
   visibility: visible !important;
   opacity: 1 !important;
   display: block !important;
@@ -56,6 +55,31 @@
   perspective: 1000px !important;
   transition: none !important;
   animation: none !important;
+}
+
+/* ===== TEST 1: ONLY :has() SELECTORS ===== */
+/* Primary approach with :has() selector - TESTING */
+body:has(.BIOSWrapper:not(.hidden)) .clippy,
+body:has(.BIOSWrapper:not(.hidden)) #clippy-clickable-overlay,
+body:has(.WindowsLaunchWrapper:not(.hidden)) .clippy,
+body:has(.WindowsLaunchWrapper:not(.hidden)) #clippy-clickable-overlay {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
+}
+
+/* Shutdown sequences with :has() selector - TESTING */
+body:has(.desktop.windowsShuttingDown) .clippy,
+body:has(.desktop.windowsShuttingDown) #clippy-clickable-overlay,
+body:has(.itIsNowSafeToTurnOffYourComputer) .clippy,
+body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
 }
 
 /* ===== CLICKABLE OVERLAY ===== */
@@ -393,12 +417,13 @@
   }
 }
 
-/* ===== NUCLEAR CONTEXT MENU STYLING - MAXIMUM VISIBILITY ===== */
-#simple-context-menu {
+/* ===== CONTEXT MENU STYLING ===== */
+.clippy-context-menu,
+.context-menu-content,
+.context-submenu {
   /* NUCLEAR VISIBILITY - HIGHEST Z-INDEX POSSIBLE */
   position: fixed !important;
   z-index: 2147483647 !important;
-  /* Maximum possible z-index */
 
   /* Force visibility */
   visibility: visible !important;
@@ -415,188 +440,18 @@
   isolation: isolate !important;
   contain: layout style paint !important;
 
-  /* Nuclear styling for maximum visibility */
-  background: #c0c0c0 !important;
-  border: 2px solid #808080 !important;
-  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8) !important;
-  padding: 4px !important;
-  min-width: 160px !important;
-  font-family: "MS Sans Serif", sans-serif !important;
-  font-size: 11px !important;
+  /* iOS Safari text fix */
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
-
-  /* Animation entrance */
-  animation: contextMenuSlideIn 0.15s ease-out !important;
 }
 
-/* Context menu items */
-#simple-context-menu div {
-  padding: 4px 8px !important;
-  cursor: pointer !important;
-  background-color: transparent !important;
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  border-radius: 2px !important;
-  margin: 1px 0 !important;
-}
-
-#simple-context-menu div:hover {
-  background-color: #0078d4 !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-}
-
-/* Nuclear context menu from DOM test */
-#nuclear-context-menu {
-  position: fixed !important;
-  z-index: 2147483647 !important;
-  /* Maximum possible z-index */
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: block !important;
-  pointer-events: auto !important;
-  isolation: isolate !important;
-  contain: layout style paint !important;
-  transform: translateZ(0) !important;
-  backface-visibility: hidden !important;
-  animation: nuclearPulse 1s infinite !important;
-}
-
-/* Context menu styling for nuclear visibility */
-.clippy-context-menu {
-  position: fixed !important;
-  z-index: 2147483647 !important;
-  /* Maximum possible z-index */
-
-  /* Performance optimizations */
-  transform: translateZ(0) !important;
-  backface-visibility: hidden !important;
-  will-change: transform, opacity !important;
-
-  /* Ensure visibility */
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: block !important;
-  pointer-events: auto !important;
-
-  /* Isolation */
-  isolation: isolate !important;
-  contain: layout style paint !important;
-
-  /* Animation entrance */
-  animation: contextMenuFadeIn 0.2s ease-out !important;
-}
-
-/* Debug context menu styling - NUCLEAR VISIBLE */
-.clippy-context-menu-debug {
-  position: fixed !important;
-  z-index: 2147483647 !important;
-  /* Maximum possible z-index */
-
-  /* Force maximum visibility */
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: block !important;
-  pointer-events: auto !important;
-
-  /* Performance optimizations */
-  transform: translateZ(0) !important;
-  backface-visibility: hidden !important;
-
-  /* Isolation and containment */
-  isolation: isolate !important;
-  contain: layout style paint !important;
-
-  /* Nuclear styling for maximum visibility */
-  background: linear-gradient(45deg, #ff0000, #00ff00) !important;
-  border: 5px solid #000000 !important;
-  box-shadow: 0 0 50px rgba(255, 0, 0, 1) !important;
-  padding: 20px !important;
-  border-radius: 10px !important;
-  font-family: Arial, sans-serif !important;
-  font-size: 16px !important;
-  font-weight: bold !important;
-  color: #ffffff !important;
-  text-shadow: 2px 2px 4px #000000 !important;
-  min-width: 200px !important;
-  text-align: center !important;
-
-  /* Pulsing animation */
-  animation: contextMenuPulse 1s infinite !important;
-}
-
-.clippy-context-menu-debug div {
-  padding: 8px 12px !important;
-  cursor: pointer !important;
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  margin: 5px 0 !important;
-  border-radius: 5px !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  user-select: none !important;
-  -webkit-user-select: none !important;
-}
-
-.clippy-context-menu-debug div:hover {
-  background-color: rgba(255, 255, 255, 0.3) !important;
-  transform: scale(1.05) !important;
-}
-
-/* React95 MenuList styling overrides for context menu */
-.clippy-context-menu .react95-menu-list {
-  background: #c0c0c0 !important;
-  border: 2px solid !important;
-  border-color: #dfdfdf #808080 #808080 #dfdfdf !important;
-  box-shadow: 1px 1px 0 #000000 !important;
-  padding: 2px !important;
-  min-width: 160px !important;
-  z-index: 2147483647 !important;
-  position: relative !important;
-}
-
-.clippy-context-menu .react95-menu-list-item {
-  padding: 4px 8px !important;
-  font-family: "MS Sans Serif", sans-serif !important;
-  font-size: 11px !important;
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
-  cursor: pointer !important;
-}
-
-.clippy-context-menu .react95-menu-list-item:hover {
-  background: #0078d4 !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-}
-
-/* Nuclear animations */
-@keyframes contextMenuPulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
-  }
-
-  50% {
-    transform: scale(1.02);
-    box-shadow: 0 0 80px rgba(255, 0, 0, 1);
-  }
-}
-
-@keyframes nuclearPulse {
-
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
-  }
-
-  50% {
-    transform: translate(-50%, -50%) scale(1.05);
-    box-shadow: 0 0 80px rgba(255, 0, 0, 1);
-  }
+/* Screen power off state - SAFE */
+body.screen-off .clippy,
+body.screen-off #clippy-clickable-overlay,
+body.screen-off .custom-clippy-balloon,
+body.screen-off .custom-clippy-chat-balloon {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: visibility 0.3s, opacity 0.3s !important;
 }
