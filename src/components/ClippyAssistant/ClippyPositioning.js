@@ -577,44 +577,52 @@ class ClippyPositioning {
   }
 
   static getMobileBalloonPosition(clippyRect, balloonType) {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const safeMargin = 10;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const safeMargin = 15;
+  
+  // Account for clickable overlay height
+  const overlayEl = document.getElementById('clippy-clickable-overlay');
+  const overlayRect = overlayEl ? overlayEl.getBoundingClientRect() : clippyRect;
+  const effectiveClippyTop = Math.min(clippyRect.top, overlayRect.top);
 
-    if (balloonType === "chat") {
-      const balloonWidth = Math.min(320, viewportWidth - 20);
-      const balloonHeight = Math.min(280, viewportHeight - 100);
-
-      // Center chat balloon in viewport
-      return {
-        left: Math.max(safeMargin, (viewportWidth - balloonWidth) / 2),
-        top: Math.max(50, (viewportHeight - balloonHeight) / 2),
-      };
-    } else {
-      // Speech balloon
-      const balloonWidth = Math.min(280, viewportWidth - 40);
-      const balloonHeight = 120;
-
-      // Position above Clippy with proper bounds checking
-      let left = clippyRect.left + (clippyRect.width / 2) - (balloonWidth / 2);
-      let top = clippyRect.top - balloonHeight - 20; // 20px gap above Clippy
-
-      // Constrain to viewport
-      left = Math.max(safeMargin, Math.min(left, viewportWidth - balloonWidth - safeMargin));
-      
-      // If balloon would go above viewport, position below Clippy instead
-      if (top < safeMargin) {
-        top = clippyRect.bottom + 20;
-        
-        // If still doesn't fit, position at top of viewport
-        if (top + balloonHeight > viewportHeight - safeMargin) {
-          top = safeMargin;
-        }
+  if (balloonType === "chat") {
+    const balloonWidth = Math.min(300, viewportWidth - 40);
+    const balloonHeight = Math.min(220, viewportHeight - 120); // Reduced height
+    
+    // Position higher and more to the left
+    let left = Math.max(safeMargin, (viewportWidth - balloonWidth) / 2 - 20);
+    let top = effectiveClippyTop - balloonHeight - 25; // 25px gap above Clippy/overlay
+    
+    // If doesn't fit above, position at top of viewport
+    if (top < safeMargin) {
+      top = safeMargin;
+      // Shift left to avoid Clippy
+      if (clippyRect.right > viewportWidth / 2) {
+        left = safeMargin;
       }
-
-      return { left, top };
     }
+    
+    return { left, top };
+  } else {
+    // Speech balloon
+    const balloonWidth = Math.min(260, viewportWidth - 40);
+    const balloonHeight = 100;
+    
+    // Center above Clippy/overlay
+    let left = clippyRect.left + (clippyRect.width / 2) - (balloonWidth / 2);
+    let top = effectiveClippyTop - balloonHeight - 20;
+    
+    // Constrain to viewport
+    left = Math.max(safeMargin, Math.min(left, viewportWidth - balloonWidth - safeMargin));
+    
+    if (top < safeMargin) {
+      top = safeMargin;
+    }
+    
+    return { left, top };
   }
+}
 
   static getDesktopBalloonPosition(clippyRect, balloonType) {
     const viewportWidth = window.innerWidth;

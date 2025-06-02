@@ -138,109 +138,98 @@ class ChatBalloonManager {
    * @param {string} initialMessage - Initial message from Clippy
    */
   createChatContent(container, initialMessage) {
-    container.innerHTML = `
-      <button class="custom-clippy-balloon-close" aria-label="Close chat" style="
-        position: absolute;
-        top: 4px;
-        right: 8px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 16px;
-        padding: 2px 6px;
-        background: none;
-        border: none;
-        line-height: 1;
-        min-width: 28px;
-        min-height: 28px;
-        color: #666666;
-        -webkit-text-fill-color: #666666;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        user-select: none;
-      ">×</button>
-      
+  container.innerHTML = `
+    <button class="custom-clippy-balloon-close" aria-label="Close chat" style="
+      position: absolute;
+      top: 4px;
+      right: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 2px 6px;
+      background: none;
+      border: none;
+      line-height: 1;
+      min-width: 28px;
+      min-height: 28px;
+      color: #666666;
+      -webkit-text-fill-color: #666666;
+    ">×</button>
+    
+    <div style="
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 12px;
+      color: #000;
+      -webkit-text-fill-color: #000;
+      padding-right: 35px;
+    ">
+      💬 Chat with Clippy
+    </div>
+    
+    <div class="chat-messages" style="
+      flex: 1;
+      overflow-y: auto;
+      border: 1px inset #999;
+      background: white;
+      padding: 6px;
+      margin-bottom: 6px;
+      color: #000;
+      -webkit-text-fill-color: #000;
+      min-height: 60px;
+      max-height: 70px;
+      font-family: 'Tahoma', sans-serif;
+      font-size: 11px;
+      line-height: 1.3;
+    ">
       <div style="
-        margin-bottom: 8px;
-        font-weight: bold;
-        font-size: 12px;
+        margin: 2px 0;
         color: #000;
         -webkit-text-fill-color: #000;
-        padding-right: 35px;
+        text-align: left;
       ">
-        💬 Chat with Clippy
+        <strong>Clippy:</strong> ${initialMessage}
       </div>
-      
-      <div class="chat-messages" style="
+    </div>
+    
+    <div style="display: flex; gap: 6px; align-items: stretch;">
+      <input type="text" placeholder="Type a message..." class="chat-input" style="
         flex: 1;
-        overflow-y: auto;
+        padding: 4px 6px;
         border: 1px inset #999;
-        background: white;
-        padding: 6px;
-        margin-bottom: 8px;
+        font-size: ${this.isMobile() ? '16px' : '11px'};
         color: #000;
         -webkit-text-fill-color: #000;
-        min-height: 120px;
-        max-height: 140px;
         font-family: 'Tahoma', sans-serif;
-        font-size: 11px;
-        line-height: 1.3;
-      ">
-        <div style="
-          margin: 4px 0;
-          color: #000;
-          -webkit-text-fill-color: #000;
-          text-align: left;
-        ">
-          <strong>Clippy:</strong> ${initialMessage}
-        </div>
-      </div>
-      
-      <div style="display: flex; gap: 6px; align-items: stretch;">
-        <input type="text" placeholder="Type a message..." class="chat-input" style="
-          flex: 1;
-          padding: 4px 6px;
-          border: 1px inset #999;
-          font-size: ${this.isMobile() ? '16px' : '11px'};
-          color: #000;
-          -webkit-text-fill-color: #000;
-          font-family: 'Tahoma', sans-serif;
-          background-color: #fff;
-          outline: none;
-          -webkit-appearance: none;
-          appearance: none;
-          touch-action: manipulation;
-          -webkit-tap-highlight-color: transparent;
-          min-height: ${this.isMobile() ? '36px' : '24px'};
-          height: ${this.isMobile() ? '36px' : '24px'};
-        " />
-        <button class="chat-send" style="
-          padding: ${this.isMobile() ? '8px 12px' : '4px 12px'};
-          background: #c0c0c0;
-          border: 1px outset #c0c0c0;
-          font-size: ${this.isMobile() ? '14px' : '11px'};
-          cursor: pointer;
-          color: #000;
-          -webkit-text-fill-color: #000;
-          font-family: 'Tahoma', sans-serif;
-          touch-action: manipulation;
-          -webkit-appearance: none;
-          appearance: none;
-          min-height: ${this.isMobile() ? '36px' : '24px'};
-          height: ${this.isMobile() ? '36px' : '24px'};
-          min-width: ${this.isMobile() ? '60px' : '50px'};
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-        ">Send</button>
-      </div>
-    `;
+        background-color: #fff;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        min-height: ${this.isMobile() ? '36px' : '24px'};
+        height: ${this.isMobile() ? '36px' : '24px'};
+      " />
+      <button class="chat-send" style="
+        padding: ${this.isMobile() ? '8px 12px' : '4px 12px'};
+        background: #c0c0c0;
+        border: 1px outset #c0c0c0;
+        font-size: ${this.isMobile() ? '14px' : '11px'};
+        cursor: pointer;
+        color: #000;
+        -webkit-text-fill-color: #000;
+        font-family: 'Tahoma', sans-serif;
+        min-height: ${this.isMobile() ? '36px' : '24px'};
+        height: ${this.isMobile() ? '36px' : '24px'};
+        min-width: ${this.isMobile() ? '60px' : '50px'};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">Send</button>
+    </div>
+  `;
 
-    // Attach event listeners
-    this.attachEventListeners(container);
-  }
+  // Attach event listeners
+  this.attachEventListeners(container);
+}
 
   /**
    * Attach event listeners to chat elements - with interaction tracking
@@ -398,13 +387,13 @@ class ChatBalloonManager {
    */
   calculatePosition(customPosition = null) {
   const minWidth = 260;
-  const maxWidth = 320;
-  const minHeight = 200;
-  const maxHeight = 240;
-  const safeMargin = 20;
-  const clippyMargin = 30; // Increased gap for chat balloons
+  const maxWidth = 300;
+  const minHeight = 140; // Reduced from 200
+  const maxHeight = 160; // Reduced from 240
+  const safeMargin = 25;
+  const clippyMargin = 30;
 
-  // Always use desktop viewport
+  // Get desktop viewport
   const desktop = document.querySelector(".desktop.screen") || 
                  document.querySelector(".desktop") || 
                  document.querySelector(".w98");
@@ -418,50 +407,37 @@ class ChatBalloonManager {
     viewportLeft = desktopRect.left;
     viewportTop = desktopRect.top;
   } else {
-    // Emergency fallback
-    viewportWidth = 640;
-    viewportHeight = 480;
-    viewportLeft = (window.innerWidth - 640) / 2;
-    viewportTop = (window.innerHeight - 480) / 2;
+    viewportWidth = window.innerWidth;
+    viewportHeight = window.innerHeight;
   }
 
-  // Calculate dynamic sizing
-  const maxAvailableWidth = viewportWidth - (safeMargin * 2);
-  const maxAvailableHeight = viewportHeight - (safeMargin * 2) - 100; // Leave space for Clippy
-  
-  const chatWidth = Math.min(maxWidth, Math.max(minWidth, maxAvailableWidth));
-  const chatHeight = Math.min(maxHeight, Math.max(minHeight, maxAvailableHeight));
+  // Calculate sizing
+  const chatWidth = Math.min(maxWidth, Math.max(minWidth, viewportWidth - (safeMargin * 2)));
+  const chatHeight = Math.min(maxHeight, Math.max(minHeight, viewportHeight - 200));
 
-  // Find Clippy for positioning
+  // Find Clippy and overlay
   const clippyEl = document.querySelector('.clippy');
+  const overlayEl = document.getElementById('clippy-clickable-overlay');
   
   if (clippyEl) {
     const clippyRect = clippyEl.getBoundingClientRect();
+    const overlayRect = overlayEl ? overlayEl.getBoundingClientRect() : clippyRect;
     
-    // Default: center horizontally, position above Clippy
-    let left = Math.max(
+    // Account for overlay when positioning
+    const effectiveTop = Math.min(clippyRect.top, overlayRect.top);
+    
+    // Position higher and more to the left
+    let left = clippyRect.left + (clippyRect.width / 2) - (chatWidth / 2) - 30; // Shift left
+    let top = effectiveTop - chatHeight - clippyMargin;
+    
+    // Constrain to viewport
+    left = Math.max(
       viewportLeft + safeMargin,
-      Math.min(
-        clippyRect.left + (clippyRect.width / 2) - (chatWidth / 2),
-        viewportLeft + viewportWidth - chatWidth - safeMargin
-      )
+      Math.min(left, viewportLeft + viewportWidth - chatWidth - safeMargin)
     );
     
-    let top = clippyRect.top - chatHeight - clippyMargin;
-    
-    // If doesn't fit above, position at top of viewport
-    if (top < viewportTop + safeMargin) {
-      top = viewportTop + safeMargin;
-      
-      // Adjust horizontal position to avoid overlapping Clippy
-      if (clippyRect.left > viewportLeft + viewportWidth / 2) {
-        // Clippy is on right, position chat on left
-        left = viewportLeft + safeMargin;
-      } else {
-        // Clippy is on left, position chat on right
-        left = viewportLeft + viewportWidth - chatWidth - safeMargin;
-      }
-    }
+    // Ensure adequate top margin
+    top = Math.max(viewportTop + safeMargin, top);
     
     return { 
       left, 
@@ -471,9 +447,9 @@ class ChatBalloonManager {
       withinBounds: true
     };
   } else {
-    // Fallback: center in viewport
+    // Fallback
     return {
-      left: viewportLeft + (viewportWidth - chatWidth) / 2,
+      left: viewportLeft + safeMargin,
       top: viewportTop + safeMargin,
       width: chatWidth,
       height: chatHeight,
