@@ -303,146 +303,105 @@ class CustomBalloonManager {
    * @returns {Object} - Position with left, top, and maxWidth properties
    */
   calculatePosition(customPosition = null) {
-    const balloonWidth = 200; // REDUCED from 280 to fit better
-    const balloonHeight = 120;
-    const safeMargin = 25; // INCREASED margin for better clearance
-    const clippyMargin = 25;
+  const balloonWidth = 280;
+  const balloonHeight = 120;
+  const safeMargin = 15;
+  const clippyMargin = 20; // Gap between Clippy and balloon
 
-    // Always use desktop viewport instead of window viewport
-    const desktop = document.querySelector(".desktop.screen") || 
-                   document.querySelector(".desktop") || 
-                   document.querySelector(".w98");
+  // Always use desktop viewport
+  const desktop = document.querySelector(".desktop.screen") || 
+                 document.querySelector(".desktop") || 
+                 document.querySelector(".w98");
+  
+  let viewportWidth, viewportHeight, viewportLeft = 0, viewportTop = 0;
+  
+  if (desktop) {
+    const desktopRect = desktop.getBoundingClientRect();
+    viewportWidth = desktopRect.width;
+    viewportHeight = desktopRect.height;
+    viewportLeft = desktopRect.left;
+    viewportTop = desktopRect.top;
+  } else {
+    // Emergency fallback
+    viewportWidth = 640;
+    viewportHeight = 480;
+    viewportLeft = (window.innerWidth - 640) / 2;
+    viewportTop = (window.innerHeight - 480) / 2;
+  }
+
+  // Calculate max width to fit within viewport
+  const maxAvailableWidth = viewportWidth - (safeMargin * 2);
+  const dynamicWidth = Math.min(balloonWidth, maxAvailableWidth);
+
+  // Find Clippy for positioning
+  const clippyEl = document.querySelector('.clippy');
+  
+  if (clippyEl) {
+    const clippyRect = clippyEl.getBoundingClientRect();
     
-    let viewportWidth, viewportHeight, viewportLeft = 0, viewportTop = 0;
+    // Default: position above Clippy
+    let left = clippyRect.left + (clippyRect.width / 2) - (dynamicWidth / 2);
+    let top = clippyRect.top - balloonHeight - clippyMargin;
     
-    if (desktop) {
-      const desktopRect = desktop.getBoundingClientRect();
-      viewportWidth = desktopRect.width;
-      viewportHeight = desktopRect.height;
-      viewportLeft = desktopRect.left;
-      viewportTop = desktopRect.top;
-      devLog(`Using desktop viewport: ${viewportWidth}x${viewportHeight} at (${viewportLeft}, ${viewportTop})`);
-    } else {
-      // Emergency fallback
-      viewportWidth = 640;
-      viewportHeight = 480;
-      viewportLeft = (window.innerWidth - 640) / 2;
-      viewportTop = (window.innerHeight - 480) / 2;
-      devLog("Desktop viewport not found, using fallback 640x480");
-    }
-
-    // FIXED: Calculate dynamic sizing with stricter constraints
-    const maxAvailableWidth = viewportWidth - (safeMargin * 2);
-    const dynamicWidth = Math.min(balloonWidth, maxAvailableWidth);
-
-    // If custom position provided, validate and constrain to desktop
-    if (customPosition && customPosition.left !== undefined && customPosition.top !== undefined) {
-      const constrainedLeft = Math.max(
-        viewportLeft + safeMargin, 
-        Math.min(customPosition.left, viewportLeft + viewportWidth - dynamicWidth - safeMargin)
-      );
-      const constrainedTop = Math.max(
-        viewportTop + safeMargin, 
-        Math.min(customPosition.top, viewportTop + viewportHeight - balloonHeight - safeMargin)
-      );
-      
-      return {
-        left: constrainedLeft,
-        top: constrainedTop,
-        maxWidth: maxAvailableWidth
-      };
-    }
-
-    // Find Clippy element for relative positioning
-    const clippyEl = document.querySelector('.clippy');
+    // Constrain to desktop viewport
+    left = Math.max(
+      viewportLeft + safeMargin, 
+      Math.min(left, viewportLeft + viewportWidth - dynamicWidth - safeMargin)
+    );
     
-    if (clippyEl) {
-      const clippyRect = clippyEl.getBoundingClientRect();
+    // If balloon would go above viewport, try below
+    if (top < viewportTop + safeMargin) {
+      const belowPosition = clippyRect.bottom + clippyMargin;
       
-      // FIXED: Center balloon above Clippy, but constrain to viewport bounds
-      let left = clippyRect.left + (clippyRect.width / 2) - (dynamicWidth / 2);
-      let top = clippyRect.top - balloonHeight - clippyMargin;
-      
-      // CRITICAL FIX: Strict containment within desktop viewport with enhanced logic
-      const rightEdge = left + dynamicWidth;
-      const bottomEdge = top + balloonHeight;
-      
-      // Check if balloon would overflow right edge
-      if (rightEdge > viewportLeft + viewportWidth - safeMargin) {
-        left = viewportLeft + viewportWidth - dynamicWidth - safeMargin;
-        devLog(`Balloon constrained from right edge: moved ${rightEdge - (viewportLeft + viewportWidth - safeMargin)}px left`);
-      }
-      
-      // Check if balloon would overflow left edge
-      if (left < viewportLeft + safeMargin) {
-        left = viewportLeft + safeMargin;
-        devLog(`Balloon constrained from left edge`);
-      }
-      
-      // Check if balloon would overflow top edge
-      if (top < viewportTop + safeMargin) {
-        top = viewportTop + safeMargin;
-        devLog(`Balloon constrained from top edge`);
-      }
-      
-      // Check if balloon would overflow bottom edge
-      if (bottomEdge > viewportTop + viewportHeight - safeMargin) {
-        top = viewportTop + viewportHeight - balloonHeight - safeMargin;
-        devLog(`Balloon constrained from bottom edge`);
-      }
-      
-      // ENHANCED: If balloon still overlaps with Clippy after constraining, try alternative positions
-      if (top + balloonHeight + 10 > clippyRect.top && top < clippyRect.bottom + 10) {
-        devLog("Balloon would overlap Clippy, trying alternative positions");
-        
-        // Try positioning to the left of Clippy first (better for left-side positioning)
+      // Check if below position fits
+      if (belowPosition + balloonHeight <= viewportTop + viewportHeight - safeMargin) {
+        top = belowPosition;
+      } else {
+        // Try left or right positioning
+        const rightPosition = clippyRect.right + clippyMargin;
         const leftPosition = clippyRect.left - dynamicWidth - clippyMargin;
         
-        if (leftPosition >= viewportLeft + safeMargin) {
+        if (rightPosition + dynamicWidth <= viewportLeft + viewportWidth - safeMargin) {
+          // Position to the right
+          left = rightPosition;
+          top = Math.max(
+            viewportTop + safeMargin, 
+            Math.min(clippyRect.top, viewportTop + viewportHeight - balloonHeight - safeMargin)
+          );
+        } else if (leftPosition >= viewportLeft + safeMargin) {
           // Position to the left
           left = leftPosition;
           top = Math.max(
             viewportTop + safeMargin, 
-            Math.min(clippyRect.top - 15, viewportTop + viewportHeight - balloonHeight - safeMargin)
+            Math.min(clippyRect.top, viewportTop + viewportHeight - balloonHeight - safeMargin)
           );
-          devLog("Positioned balloon to the left of Clippy");
         } else {
-          // Try positioning to the right
-          const rightPosition = clippyRect.right + clippyMargin;
-          
-          if (rightPosition + dynamicWidth + safeMargin <= viewportLeft + viewportWidth) {
-            left = rightPosition;
-            top = Math.max(
-              viewportTop + safeMargin, 
-              Math.min(clippyRect.top - 15, viewportTop + viewportHeight - balloonHeight - safeMargin)
-            );
-            devLog("Positioned balloon to the right of Clippy");
-          } else {
-            // Last resort: center in viewport
-            left = viewportLeft + (viewportWidth - dynamicWidth) / 2;
-            top = viewportTop + (viewportHeight - balloonHeight) / 3;
-            devLog("Using fallback center position");
-          }
+          // Last resort: position at top of viewport
+          top = viewportTop + safeMargin;
         }
       }
-      
-      devLog(`Final balloon position: (${left.toFixed(1)}, ${top.toFixed(1)}) within viewport bounds`);
-      
-      return { 
-        left, 
-        top,
-        maxWidth: maxAvailableWidth
-      };
     } else {
-      // Fallback: center of desktop viewport
-      devLog("Clippy element not found, centering in desktop viewport");
-      return {
-        left: viewportLeft + (viewportWidth - dynamicWidth) / 2,
-        top: viewportTop + (viewportHeight - balloonHeight) / 2,
-        maxWidth: maxAvailableWidth
-      };
+      // Ensure top is within bounds
+      top = Math.max(
+        viewportTop + safeMargin,
+        Math.min(top, viewportTop + viewportHeight - balloonHeight - safeMargin)
+      );
     }
+    
+    return { 
+      left, 
+      top,
+      maxWidth: maxAvailableWidth
+    };
+  } else {
+    // Fallback: center in desktop viewport
+    return {
+      left: viewportLeft + (viewportWidth - dynamicWidth) / 2,
+      top: viewportTop + safeMargin, // Position at top if no Clippy
+      maxWidth: maxAvailableWidth
+    };
   }
+}
 
   /**
    * Check if mobile device

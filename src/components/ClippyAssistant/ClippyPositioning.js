@@ -579,31 +579,37 @@ class ClippyPositioning {
   static getMobileBalloonPosition(clippyRect, balloonType) {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
+    const safeMargin = 10;
 
     if (balloonType === "chat") {
       const balloonWidth = Math.min(320, viewportWidth - 20);
       const balloonHeight = Math.min(280, viewportHeight - 100);
 
+      // Center chat balloon in viewport
       return {
-        left: Math.max(10, (viewportWidth - balloonWidth) / 2),
+        left: Math.max(safeMargin, (viewportWidth - balloonWidth) / 2),
         top: Math.max(50, (viewportHeight - balloonHeight) / 2),
       };
     } else {
+      // Speech balloon
       const balloonWidth = Math.min(280, viewportWidth - 40);
       const balloonHeight = 120;
 
-      const mobileValues = CLIPPY_POSITIONS.mobileValues;
-      const clippyBottom = Math.min(mobileValues.bottom, viewportHeight * 0.2);
-      const clippyRight = Math.min(mobileValues.right, viewportWidth * 0.1);
+      // Position above Clippy with proper bounds checking
+      let left = clippyRect.left + (clippyRect.width / 2) - (balloonWidth / 2);
+      let top = clippyRect.top - balloonHeight - 20; // 20px gap above Clippy
 
-      const clippyLeft = viewportWidth - clippyRight - 60;
-      const clippyTop = viewportHeight - clippyBottom - 80;
-
-      let left = Math.max(10, Math.min(clippyLeft - 100, viewportWidth - balloonWidth - 10));
-      let top = Math.max(10, clippyTop - balloonHeight - 20);
-
-      if (top < 10) {
-        top = clippyTop + 80 + 10;
+      // Constrain to viewport
+      left = Math.max(safeMargin, Math.min(left, viewportWidth - balloonWidth - safeMargin));
+      
+      // If balloon would go above viewport, position below Clippy instead
+      if (top < safeMargin) {
+        top = clippyRect.bottom + 20;
+        
+        // If still doesn't fit, position at top of viewport
+        if (top + balloonHeight > viewportHeight - safeMargin) {
+          top = safeMargin;
+        }
       }
 
       return { left, top };
