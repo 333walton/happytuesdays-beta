@@ -622,27 +622,7 @@ export const showWelcomeBalloon = () => {
       ? `<span style="font-weight: 600;">Welcome to Hydra98!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Double-tap me to view menu.</span></i>`
       : `<span style="font-weight: 600;">Welcome to Hydra98!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Right-click me to view menu.</span></i>`,
     animation: "Wave",
-    buttons: isMobile ? [
-      {
-        text: "",
-        action: () => {
-          if (window.showClippyContextMenu) {
-            const clippyEl = document.querySelector('.clippy');
-            if (clippyEl) {
-              const rect = clippyEl.getBoundingClientRect();
-              // Show menu directly above Clippy's head
-              window.showClippyContextMenu(
-                rect.left + rect.width / 2,
-                rect.top - 20 // 20px above Clippy
-              );
-            } else {
-              // Fallback: show in center of screen
-              window.showClippyContextMenu(window.innerWidth / 2, window.innerHeight / 2);
-            }
-          }
-        }
-      }
-    ] : []
+    buttons: isMobile ? [] : []
   }, 6000, isMobile ? { position: mobilePosition } : {});
 };
 

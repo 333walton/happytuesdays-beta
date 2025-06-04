@@ -1105,18 +1105,26 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   const createMobileTouchHandlers = useCallback(() => {
     let moveHandler = null;
     let endHandler = null;
+    let lastTapTime = 0; // Track time of last tap
+    let tapCount = 0; // Track consecutive taps
+    const DOUBLE_TAP_THRESHOLD = 300; // Max time between taps for double tap (ms)
+    const TAP_DISTANCE_THRESHOLD = 20; // Max distance between taps for double tap (px)
 
     const handleTouchStart = (e) => {
       if (!mountedRef.current) return;
 
       const touch = e.touches[0];
+
       const dragState = {
         startX: touch.clientX,
         startY: touch.clientY,
         dragStarted: false,
         longPressTimer: null,
         origRightPx: 0,
-        origBottomPx: 0
+        origBottomPx: 0,
+        // Store initial position for distance check
+        initialClientX: touch.clientX,
+        initialClientY: touch.clientY,
       };
 
       // Only set up drag if position is unlocked
@@ -1176,16 +1184,69 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
         clearTimeout(dragState.longPressTimer);
 
-        // FIXED: Only trigger interaction if no drag occurred
+        // If no drag occurred (it was a tap)
         if (!dragState.dragStarted) {
-          handleInteraction(e, "tap");
+          const tapEndTime = Date.now();
+          const timeSinceLastTap = tapEndTime - lastTapTime;
+          
+          // Check distance moved since start of touch to confirm it's a tap
+          const deltaX = Math.abs(e.changedTouches[0].clientX - dragState.initialClientX);
+          const deltaY = Math.abs(e.changedTouches[0].clientY - dragState.initialClientY);
+          const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+          if (distance < TAP_DISTANCE_THRESHOLD) {
+            // It's a valid tap
+            if (timeSinceLastTap < DOUBLE_TAP_THRESHOLD && tapCount === 1) {
+              // Double tap detected
+              tapCount = 0; // Reset tap count
+              lastTapTime = 0; // Reset timer
+              devLog("Mobile double-tap detected - opening context menu");
+
+              // Open context menu with specified positioning
+              const clippyEl = document.querySelector('.clippy');
+              if (clippyEl) {
+                const rect = clippyEl.getBoundingClientRect();
+                // Show menu directly above Clippy's head
+                showContextMenu(
+                  rect.left + rect.width / 2,
+                  rect.top - 20 // 20px above Clippy
+                );
+              } else {
+                // Fallback: show in center of screen
+                showContextMenu(window.innerWidth / 2, window.innerHeight / 2);
+              }
+            } else {
+              // Single tap detected (or start of double tap sequence)
+              tapCount = 1;
+              lastTapTime = tapEndTime;
+              devLog("Mobile single tap detected");
+              
+              // Only handle single tap if we're not in a potential double-tap sequence
+              if (timeSinceLastTap >= DOUBLE_TAP_THRESHOLD) {
+                handleInteraction(e, "tap");
+              }
+              
+              // Reset tap count after double tap threshold if no second tap occurs
+              setTimeout(() => {
+                if (tapCount === 1 && Date.now() - lastTapTime >= DOUBLE_TAP_THRESHOLD) {
+                  tapCount = 0;
+                  lastTapTime = 0;
+                  devLog("Mobile tap count reset");
+                }
+              }, DOUBLE_TAP_THRESHOLD);
+            }
+          } else {
+            // Movement was too large for a tap, reset tap count
+            tapCount = 0;
+            lastTapTime = 0;
+          }
         } else {
           // End drag mode and preserve scale
           const clippyEl = document.querySelector('.clippy');
           if (clippyEl && ClippyPositioning?.endMobileDrag) {
             ClippyPositioning.endMobileDrag(clippyEl, overlayRef.current, null);
             
-            // FIXED: Preserve scale after drag
+            // Preserve scale after drag
             if (ClippyPositioning?.preserveClippyScale) {
               ClippyPositioning.preserveClippyScale(clippyEl);
             }
@@ -1200,12 +1261,15 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       };
 
       // Set up long-press timer with cooldown check
-      const now = Date.now();
-      if (now - lastInteractionTime >= INTERACTION_COOLDOWN_MS && !isInCooldown) {
+      const touchStartTimeForLongPress = Date.now();
+      if (!dragState.dragStarted && touchStartTimeForLongPress - lastInteractionTime >= INTERACTION_COOLDOWN_MS && !isInCooldown) {
         dragState.longPressTimer = setTimeout(() => {
           if (!dragState.dragStarted && mountedRef.current) {
             clearTimeout(dragState.longPressTimer);
             handleLongPress(e);
+            // Reset tap count after long press
+            tapCount = 0;
+            lastTapTime = 0;
           }
         }, 800);
       }
@@ -1226,7 +1290,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         }
       }
     };
-  }, [handleInteraction, handleLongPress, lastInteractionTime, positionLocked, isInCooldown]);
+  }, [handleInteraction, handleLongPress, lastInteractionTime, positionLocked, isInCooldown, showContextMenu]);
 
   // FIXED: Desktop interaction with 1.5s cooldown
   const handleDesktopInteraction = useCallback((e) => {
