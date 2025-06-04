@@ -25,6 +25,7 @@ const ClippyContextMenu = ({
   const [submenuOpen, setSubmenuOpen] = useState(null);
   const [submenuPosition, setSubmenuPosition] = useState({ x: 0, y: 0 });
   const menuRef = useRef(null);
+  const [dynamicPosition, setDynamicPosition] = useState({ x, y });
 
   // All available Clippy animations
   const animations = [
@@ -97,30 +98,30 @@ const ClippyContextMenu = ({
     };
   }, []);
 
-  // Position calculation with strict desktop viewport constraints
-  const position = React.useMemo(() => {
-    const menuWidth = 180;
-    const menuHeight = 250;
-    const margin = 10;
-    const viewport = getDesktopViewport();
-    
-    // Constrain to desktop viewport with margin
-    let adjustedX = Math.max(
-      viewport.left + margin, 
-      Math.min(x, viewport.right - menuWidth - margin)
-    );
-    let adjustedY = Math.max(
-      viewport.top + margin, 
-      Math.min(y, viewport.bottom - menuHeight - margin)
-    );
-    
-    console.log(`🎯 Context menu positioning within desktop viewport:`, {
-      original: { x, y },
-      adjusted: { x: adjustedX, y: adjustedY },
-      viewport: viewport
-    });
-    
-    return { x: adjustedX, y: adjustedY };
+  // Dynamic repositioning handler
+  useEffect(() => {
+    const reposition = () => {
+      // Recalculate position
+      const menuWidth = 180;
+      const menuHeight = 250;
+      const margin = 10;
+      const viewport = getDesktopViewport();
+      let adjustedX = Math.max(
+        viewport.left + margin, 
+        Math.min(x, viewport.right - menuWidth - margin)
+      );
+      let adjustedY = Math.max(
+        viewport.top + margin, 
+        Math.min(y, viewport.bottom - menuHeight - margin)
+      );
+      setDynamicPosition({ x: adjustedX, y: adjustedY });
+    };
+    window.addEventListener('resize', reposition);
+    window.addEventListener('clippyRepositioned', reposition);
+    return () => {
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('clippyRepositioned', reposition);
+    };
   }, [x, y]);
 
   // FIXED: Submenu positioning with NO GAP
@@ -305,8 +306,8 @@ const ClippyContextMenu = ({
   // Styles
   const menuStyle = {
     position: "absolute",
-    left: `${position.x}px`,
-    top: `${position.y}px`,
+    left: `${dynamicPosition.x}px`,
+    top: `${dynamicPosition.y}px`,
     backgroundColor: "#c0c0c0",
     border: "2px outset #c0c0c0",
     boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",

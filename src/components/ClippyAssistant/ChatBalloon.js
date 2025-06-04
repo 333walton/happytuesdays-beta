@@ -12,6 +12,7 @@ class ChatBalloonManager {
     this.chatHistory = [];
     this.isUserInteracting = false; // Track if user has interacted with chat
     this.hasUserEverInteracted = false; // Track if user has EVER interacted
+    this._resizeHandler = null;
   }
 
   /**
@@ -80,6 +81,9 @@ class ChatBalloonManager {
         }
       }, 100);
 
+      // Add dynamic repositioning
+      this._addDynamicRepositioning(options);
+
       return true;
     } catch (error) {
       errorLog("Error creating chat balloon", error);
@@ -116,6 +120,10 @@ class ChatBalloonManager {
       this.chatHistory = [];
       this.isUserInteracting = false;
       this.hasUserEverInteracted = false;
+
+      // Remove dynamic repositioning
+      this._removeDynamicRepositioning();
+
       return true;
     } catch (error) {
       errorLog("Error hiding chat balloon", error);
@@ -599,6 +607,32 @@ class ChatBalloonManager {
   cleanup() {
     this.forceClose();
     devLog("ChatBalloonManager cleaned up");
+  }
+
+  /**
+   * Add dynamic repositioning for the current chat balloon
+   */
+  _addDynamicRepositioning(options) {
+    this._removeDynamicRepositioning();
+    this._resizeHandler = () => {
+      if (!this.currentChatBalloon) return;
+      const position = this.calculatePosition(options?.position);
+      this.currentChatBalloon.style.setProperty('left', `${position.left}px`, 'important');
+      this.currentChatBalloon.style.setProperty('top', `${position.top}px`, 'important');
+    };
+    window.addEventListener('resize', this._resizeHandler);
+    window.addEventListener('clippyRepositioned', this._resizeHandler);
+  }
+
+  /**
+   * Remove dynamic repositioning event listeners
+   */
+  _removeDynamicRepositioning() {
+    if (this._resizeHandler) {
+      window.removeEventListener('resize', this._resizeHandler);
+      window.removeEventListener('clippyRepositioned', this._resizeHandler);
+      this._resizeHandler = null;
+    }
   }
 }
 

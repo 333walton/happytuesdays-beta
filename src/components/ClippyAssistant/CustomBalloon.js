@@ -50,6 +50,7 @@ class CustomBalloonManager {
   constructor() {
     this.currentBalloon = null;
     this.balloonTimeout = null;
+    this._resizeHandler = null;
   }
 
   /**
@@ -126,6 +127,9 @@ class CustomBalloonManager {
       document.body.appendChild(balloonEl);
       this.currentBalloon = balloonEl;
       
+      // Add dynamic repositioning
+      this._addDynamicRepositioning(message, options);
+      
       devLog(`Balloon positioned at (${position.left}, ${position.top}) with max width ${position.maxWidth}px`);
 
       // Set auto-hide timer (longer for balloons with buttons)
@@ -138,6 +142,36 @@ class CustomBalloonManager {
     } catch (error) {
       errorLog("Error creating custom balloon", error);
       return false;
+    }
+  }
+
+  /**
+   * Add dynamic repositioning for the current balloon
+   */
+  _addDynamicRepositioning(message, options) {
+    this._removeDynamicRepositioning();
+    this._resizeHandler = () => {
+      if (!this.currentBalloon) return;
+      const isEnhancedMessage = message === "How may I help you?";
+      const position = this.calculatePosition({
+        ...options.position,
+        isEnhancedMessage
+      });
+      this.currentBalloon.style.setProperty('left', `${position.left}px`, 'important');
+      this.currentBalloon.style.setProperty('top', `${position.top}px`, 'important');
+    };
+    window.addEventListener('resize', this._resizeHandler);
+    window.addEventListener('clippyRepositioned', this._resizeHandler);
+  }
+
+  /**
+   * Remove dynamic repositioning event listeners
+   */
+  _removeDynamicRepositioning() {
+    if (this._resizeHandler) {
+      window.removeEventListener('resize', this._resizeHandler);
+      window.removeEventListener('clippyRepositioned', this._resizeHandler);
+      this._resizeHandler = null;
     }
   }
 
@@ -160,7 +194,7 @@ class CustomBalloonManager {
     // Create message content
     const messageEl = document.createElement('div');
     messageEl.className = 'balloon-message';
-    messageEl.textContent = message;
+    messageEl.innerHTML = message;
     messageEl.style.cssText = `
       color: #000000 !important;
       -webkit-text-fill-color: #000000 !important;
@@ -342,6 +376,10 @@ class CustomBalloonManager {
       });
 
       this.currentBalloon = null;
+
+      // Remove dynamic repositioning
+      this._removeDynamicRepositioning();
+
       return true;
     } catch (error) {
       errorLog("Error hiding balloon", error);
@@ -520,7 +558,7 @@ class CustomBalloonManager {
     try {
       const messageEl = this.currentBalloon.querySelector('.balloon-message');
       if (messageEl) {
-        messageEl.textContent = newMessage;
+        messageEl.innerHTML = newMessage;
         devLog(`Balloon message updated to: "${newMessage}"`);
         return true;
       }
@@ -567,19 +605,31 @@ export const showWelcomeBalloon = () => {
   return showCustomBalloon({
     message: isMobile 
       ? "Welcome to Hydra98! Please enjoy and don't break anything"
-      : "Welcome to Hydra98! Please enjoy and don't break anything. Right-click me to view my menu.",
+      : "Welcome to Hydra98! Please enjoy and don't break anything. <i>Right-click me to view menu.</i>",
     animation: "Wave",
     buttons: isMobile ? [
       {
         text: "ℹ️ View Menu",
         action: () => {
           if (window.showClippyContextMenu) {
-            window.showClippyContextMenu();
+            // Find Clippy's position
+            const clippyEl = document.querySelector('.clippy');
+            if (clippyEl) {
+              const rect = clippyEl.getBoundingClientRect();
+              // Show menu near Clippy (centered above)
+              window.showClippyContextMenu(
+                rect.left + rect.width / 2,
+                rect.top - 10 // 10px above Clippy
+              );
+            } else {
+              // Fallback: show in center of screen
+              window.showClippyContextMenu(window.innerWidth / 2, window.innerHeight / 2);
+            }
           }
         }
       }
     ] : []
-  }, 5000);
+  }, 6000);
 };
 
 export const showHelpBalloon = () => {
