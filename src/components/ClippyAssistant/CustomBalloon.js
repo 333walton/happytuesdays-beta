@@ -204,6 +204,7 @@ class CustomBalloonManager {
       margin-bottom: ${buttons.length > 0 ? '12px' : '0'} !important;
       word-wrap: break-word !important;
       padding: 0 !important;
+      text-align: center !important;
     `;
     balloonEl.appendChild(messageEl);
 
@@ -618,12 +619,12 @@ export const showWelcomeBalloon = () => {
   
   return showCustomBalloon({
     message: isMobile 
-      ? "Welcome to Hydra98! Please enjoy and don't break anything"
-      : "Welcome to Hydra98! Please enjoy and don't break anything. <i>Right-click me to view menu.</i>",
+      ? `<span style="font-weight: 600;">Welcome to Hydra98!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Double-tap me to view menu.</span></i>`
+      : `<span style="font-weight: 600;">Welcome to Hydra98!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Right-click me to view menu.</span></i>`,
     animation: "Wave",
     buttons: isMobile ? [
       {
-        text: "ℹ️ View Menu",
+        text: "",
         action: () => {
           if (window.showClippyContextMenu) {
             const clippyEl = document.querySelector('.clippy');
