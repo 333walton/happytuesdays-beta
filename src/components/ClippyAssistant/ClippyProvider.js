@@ -1043,6 +1043,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return true;
       };
 
+      // Expose showContextMenu globally for mobile View Menu button
+      window.showClippyContextMenu = (x, y) => {
+        showContextMenu(x, y);
+      };
+
       // FIXED: Reset cooldown function for testing
       window.resetClippyCooldown = () => {
         setIsInCooldown(false);
@@ -1077,6 +1082,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         delete window.testClippyBalloon;
         delete window.testClippyChat;
         delete window.forceShowContextMenu;
+        delete window.showClippyContextMenu;
         delete window.resetClippyCooldown;
         delete window._clippyGlobalsInitialized;
       }

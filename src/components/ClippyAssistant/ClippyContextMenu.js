@@ -69,6 +69,22 @@ const ClippyContextMenu = ({
     };
   };
 
+  // Helper to get viewport for both mobile and desktop
+  const getViewport = () => {
+    // Use window for mobile, desktop container for desktop
+    if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      return {
+        left: 0,
+        top: 0,
+        right: window.innerWidth,
+        bottom: window.innerHeight,
+        width: window.innerWidth,
+        height: window.innerHeight
+      };
+    }
+    return getDesktopViewport();
+  };
+
   // Create portal container on mount
   useEffect(() => {
     console.log("🎯 ClippyContextMenu creating portal container");
@@ -98,31 +114,22 @@ const ClippyContextMenu = ({
     };
   }, []);
 
-  // Dynamic repositioning handler
+  // Always constrain menu to viewport on mount and when x/y change
   useEffect(() => {
-    const reposition = () => {
-      // Recalculate position
-      const menuWidth = 180;
-      const menuHeight = 250;
-      const margin = 10;
-      const viewport = getDesktopViewport();
-      let adjustedX = Math.max(
-        viewport.left + margin, 
-        Math.min(x, viewport.right - menuWidth - margin)
-      );
-      let adjustedY = Math.max(
-        viewport.top + margin, 
-        Math.min(y, viewport.bottom - menuHeight - margin)
-      );
-      setDynamicPosition({ x: adjustedX, y: adjustedY });
-    };
-    window.addEventListener('resize', reposition);
-    window.addEventListener('clippyRepositioned', reposition);
-    return () => {
-      window.removeEventListener('resize', reposition);
-      window.removeEventListener('clippyRepositioned', reposition);
-    };
-  }, [x, y]);
+    const menuWidth = 180;
+    const menuHeight = 250;
+    const margin = 10;
+    const viewport = getViewport();
+    let adjustedX = Math.max(
+      viewport.left + margin, 
+      Math.min(x, viewport.right - menuWidth - margin)
+    );
+    let adjustedY = Math.max(
+      viewport.top + margin, 
+      Math.min(y, viewport.bottom - menuHeight - margin)
+    );
+    setDynamicPosition({ x: adjustedX, y: adjustedY });
+  }, [x, y, portalContainer]);
 
   // FIXED: Submenu positioning with NO GAP
   const handleSubmenuOpen = (submenuType, event) => {

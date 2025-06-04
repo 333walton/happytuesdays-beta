@@ -601,6 +601,20 @@ export const showWelcomeBalloon = () => {
   }
   
   const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  // Custom position for mobile: shift right over Clippy's head
+  let mobilePosition = undefined;
+  if (isMobile) {
+    const clippyEl = document.querySelector('.clippy');
+    if (clippyEl) {
+      const rect = clippyEl.getBoundingClientRect();
+      // Place balloon above and to the right of Clippy's head
+      mobilePosition = {
+        left: rect.left + rect.width * 0.7, // 70% to the right of Clippy
+        top: rect.top - 90 // 90px above Clippy
+      };
+    }
+  }
   
   return showCustomBalloon({
     message: isMobile 
@@ -612,14 +626,13 @@ export const showWelcomeBalloon = () => {
         text: "ℹ️ View Menu",
         action: () => {
           if (window.showClippyContextMenu) {
-            // Find Clippy's position
             const clippyEl = document.querySelector('.clippy');
             if (clippyEl) {
               const rect = clippyEl.getBoundingClientRect();
-              // Show menu near Clippy (centered above)
+              // Show menu directly above Clippy's head
               window.showClippyContextMenu(
                 rect.left + rect.width / 2,
-                rect.top - 10 // 10px above Clippy
+                rect.top - 20 // 20px above Clippy
               );
             } else {
               // Fallback: show in center of screen
@@ -629,7 +642,7 @@ export const showWelcomeBalloon = () => {
         }
       }
     ] : []
-  }, 6000);
+  }, 6000, isMobile ? { position: mobilePosition } : {});
 };
 
 export const showHelpBalloon = () => {
