@@ -119,15 +119,25 @@ const ClippyContextMenu = ({
     const menuWidth = 180;
     const menuHeight = 250;
     const margin = 10;
+    const mobileBottomMargin = 100; // Minimum distance from bottom on mobile
     const viewport = getViewport();
     let adjustedX = Math.max(
       viewport.left + margin, 
       Math.min(x, viewport.right - menuWidth - margin)
     );
-    let adjustedY = Math.max(
-      viewport.top + margin, 
-      Math.min(y, viewport.bottom - menuHeight - margin)
-    );
+    let adjustedY;
+    if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      // On mobile, keep at least 20px above the bottom
+      adjustedY = Math.max(
+        viewport.top + margin,
+        Math.min(y, viewport.bottom - menuHeight - mobileBottomMargin)
+      );
+    } else {
+      adjustedY = Math.max(
+        viewport.top + margin, 
+        Math.min(y, viewport.bottom - menuHeight - margin)
+      );
+    }
     setDynamicPosition({ x: adjustedX, y: adjustedY });
   }, [x, y, portalContainer]);
 

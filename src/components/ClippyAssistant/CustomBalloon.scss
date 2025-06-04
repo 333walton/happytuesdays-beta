@@ -87,9 +87,10 @@
     box-shadow: 2px 2px 0 #888 !important;
     color: #000 !important;
     padding: 0 !important;
-    width: 98vw !important;
+    min-height: 52vw !important;
+    width: 72vw !important;
     min-width: 0 !important;
-    max-width: 99vw !important;
+    max-width: 72vw !important;
     z-index: 9999 !important;
 
     .chat-header {
@@ -103,7 +104,7 @@
     .chat-messages {
       padding: 10px 8px !important;
       font-size: 14px !important;
-      min-height: 60px !important;
+      min-height: 110px !important;
       background: #fff !important;
       border-bottom: 1px solid #aaa !important;
     }
@@ -128,6 +129,7 @@
       border-radius: 0 !important;
       outline: none !important;
       min-width: 0 !important;
+      min-height: 36px !important;
     }
 
     button {
@@ -136,7 +138,7 @@
       background: #c0c0c0 !important;
       border: 2px outset #c0c0c0 !important;
       color: #000 !important;
-      padding: 6px 18px !important;
+      padding: 4px 4px !important;
       cursor: pointer !important;
       border-radius: 0 !important;
       outline: none !important;
@@ -149,5 +151,22 @@
       border: 2px inset #c0c0c0 !important;
       background: #d0d0d0 !important;
     }
+        .custom-clippy-balloon-close {
+            min-width: 22px !important;
+            min-height: 22px !important;
+            font-family: inherit !important;
+            font-size: 15px !important;
+            background: #c0c0c0 !important;
+            border: 2px outset #c0c0c0 !important;
+            color: #000 !important;
+            padding: 4px 4px !important;
+            margin-right: 8px !important;
+            margin-top: 2px !important;
+            cursor: pointer !important;
+            border-radius: 0 !important;
+            outline: none !important;
+            box-sizing: border-box !important;
+            transition: background 0.1s;
+        }
   }
 } 
