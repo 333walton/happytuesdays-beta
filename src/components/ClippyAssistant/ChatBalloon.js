@@ -179,7 +179,7 @@ class ChatBalloonManager {
       min-height: 60px;
       max-height: 70px;
       font-family: 'Tahoma', sans-serif;
-      font-size: 11px;
+      font-size: 12px;
       line-height: 1.3;
     ">
       <div style="
@@ -212,7 +212,7 @@ class ChatBalloonManager {
         padding: ${this.isMobile() ? '8px 12px' : '4px 12px'};
         background: #c0c0c0;
         border: 1px outset #c0c0c0;
-        font-size: ${this.isMobile() ? '14px' : '11px'};
+        font-size: ${this.isMobile() ? '12px' : '11px'};
         cursor: pointer;
         color: #000;
         -webkit-text-fill-color: #000;
@@ -366,7 +366,7 @@ class ChatBalloonManager {
       color: ${sender === 'user' ? '#000080' : '#000'};
       -webkit-text-fill-color: ${sender === 'user' ? '#000080' : '#000'};
       text-align: ${sender === 'user' ? 'right' : 'left'};
-      font-size: 11px;
+      font-size: 12px;
       line-height: 1.3;
     `;
 
@@ -391,7 +391,7 @@ class ChatBalloonManager {
   const minHeight = 140; // Reduced from 200
   const maxHeight = 160; // Reduced from 240
   const safeMargin = 25;
-  const clippyMargin = 30;
+  const clippyMargin = 40; // Increased gap
 
   // Get desktop viewport
   const desktop = document.querySelector(".desktop.screen") || 
@@ -411,7 +411,7 @@ class ChatBalloonManager {
     viewportHeight = window.innerHeight;
   }
 
-  // Calculate sizing
+  // Calculate sizing within viewport constraints
   const chatWidth = Math.min(maxWidth, Math.max(minWidth, viewportWidth - (safeMargin * 2)));
   const chatHeight = Math.min(maxHeight, Math.max(minHeight, viewportHeight - 200));
 
@@ -423,21 +423,49 @@ class ChatBalloonManager {
     const clippyRect = clippyEl.getBoundingClientRect();
     const overlayRect = overlayEl ? overlayEl.getBoundingClientRect() : clippyRect;
     
-    // Account for overlay when positioning
+    // Calculate Clippy's full height including overlay
+    const clippyHeight = clippyRect.height;
+    const overlayHeight = overlayRect.height;
+    const effectiveClippyHeight = Math.max(clippyHeight, overlayHeight);
+    
+    // Get the topmost position between Clippy and overlay
     const effectiveTop = Math.min(clippyRect.top, overlayRect.top);
     
-    // Position higher and more to the left
+    // Try to position above Clippy first
     let left = clippyRect.left + (clippyRect.width / 2) - (chatWidth / 2) - 30; // Shift left
     let top = effectiveTop - chatHeight - clippyMargin;
     
-    // Constrain to viewport
+    // Constrain horizontally to viewport
     left = Math.max(
       viewportLeft + safeMargin,
       Math.min(left, viewportLeft + viewportWidth - chatWidth - safeMargin)
     );
     
-    // Ensure adequate top margin
-    top = Math.max(viewportTop + safeMargin, top);
+    // Check if chat fits above Clippy within viewport
+    if (top < viewportTop + safeMargin) {
+      // Not enough space above - position to the left of Clippy
+      top = effectiveTop - 20; // Slightly above Clippy's top
+      left = clippyRect.left - chatWidth - 40; // 40px gap to the left
+      
+      // If doesn't fit on left, try right side
+      if (left < viewportLeft + safeMargin) {
+        left = clippyRect.right + 40; // 40px gap to the right
+        
+        // If still doesn't fit, position at top center of viewport
+        if (left + chatWidth > viewportLeft + viewportWidth - safeMargin) {
+          left = viewportLeft + (viewportWidth - chatWidth) / 2;
+          top = viewportTop + safeMargin;
+        }
+      }
+    }
+    
+    // Final constraint checks
+    left = Math.max(viewportLeft + safeMargin, 
+                    Math.min(left, viewportLeft + viewportWidth - chatWidth - safeMargin));
+    top = Math.max(viewportTop + safeMargin,
+                   Math.min(top, viewportTop + viewportHeight - chatHeight - safeMargin));
+    
+    devLog(`Chat balloon position: left=${left}, top=${top}, size=${chatWidth}x${chatHeight}`);
     
     return { 
       left, 

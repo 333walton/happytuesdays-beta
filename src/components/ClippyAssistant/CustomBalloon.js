@@ -2,12 +2,45 @@
 // This file handles speech balloons (not chat balloons)
 import React from "react";
 import { devLog, errorLog } from './ClippyPositioning';
+import './CustomBalloon.scss';  // Import SCSS styles
 
 // FIXED: Animation logging function
 const logAnimation = (animationName, context = "custom balloon") => {
   // Force log animation regardless of dev mode
-  console.log(`🎭 Animation Triggered: "${animationName}" from ${context}`);
+  console.log(
+    `%c🎭 Clippy Animation: "${animationName}"%c (from ${context})`,
+    'color: #0066cc; font-weight: bold; font-size: 14px;',
+    'color: #666; font-size: 12px;'
+  );
+  // Log stack trace to see where the animation was called from
+  console.trace('Animation call stack:');
 };
+
+// Wrap clippy.play to ensure all animations are logged
+const wrapClippyPlay = () => {
+  if (window.clippy && window.clippy.play) {
+    const originalPlay = window.clippy.play;
+    window.clippy.play = function(animationName) {
+      // Log the animation before playing it
+      console.group(`%c🎭 Clippy Animation Debug%c "${animationName}"`, 
+        'color: #0066cc; font-weight: bold; font-size: 14px;',
+        'color: #666; font-size: 12px;'
+      );
+      console.log('Animation name:', animationName);
+      console.log('Animation type:', typeof animationName);
+      console.log('Call stack:');
+      console.trace();
+      console.groupEnd();
+      
+      // Call the original function
+      return originalPlay.call(this, animationName);
+    };
+    console.log("%c🎭 Clippy animation logging enabled", "color: #0066cc; font-weight: bold;");
+  }
+};
+
+// Initialize the wrapper
+wrapClippyPlay();
 
 /**
  * Creates and manages custom speech balloons for Clippy with enhanced button support
@@ -56,12 +89,22 @@ class CustomBalloonManager {
       balloonEl.className = 'custom-clippy-balloon';
       
       // Calculate position relative to Clippy with desktop viewport boundaries
-      const position = this.calculatePosition(options.position);
+      const isEnhancedMessage = message === "How may I help you?";
+      const position = this.calculatePosition({
+        ...options.position,
+        isEnhancedMessage
+      });
       
       // Apply positioning
       balloonEl.style.position = 'fixed';
       balloonEl.style.left = `${position.left}px`;
       balloonEl.style.top = `${position.top}px`;
+      // Force with !important for enhanced message balloon
+      if (isEnhancedMessage) {
+        balloonEl.style.setProperty('left', `${position.left}px`, 'important');
+        balloonEl.style.setProperty('top', `${position.top}px`, 'important');
+        console.log('Enhanced balloon position:', position.left, position.top);
+      }
       balloonEl.style.zIndex = '9999';
       balloonEl.style.visibility = 'visible';
       balloonEl.style.opacity = '1';
@@ -108,6 +151,12 @@ class CustomBalloonManager {
     // Clear any existing content
     balloonEl.innerHTML = '';
 
+    // Add enhanced message class if this is the enhanced message
+    const isEnhancedMessage = message === "How may I help you?";
+    if (isEnhancedMessage) {
+      balloonEl.classList.add('enhanced-message-balloon');
+    }
+
     // Create message content
     const messageEl = document.createElement('div');
     messageEl.className = 'balloon-message';
@@ -139,6 +188,9 @@ class CustomBalloonManager {
       buttons.forEach((button, index) => {
         const buttonEl = document.createElement('button');
         buttonEl.className = 'balloon-button';
+        if (isEnhancedMessage) {
+          buttonEl.classList.add('enhanced-button');
+        }
         buttonEl.textContent = button.text || button.label || `Option ${index + 1}`;
         
         // Classic Windows 98 button styling with iOS Safari compatibility
@@ -302,71 +354,142 @@ class CustomBalloonManager {
    * @param {Object} customPosition - Optional custom position override
    * @returns {Object} - Position with left, top, and maxWidth properties
    */
-  calculatePosition(customPosition = null) {
-  const balloonWidth = 280;
-  const balloonHeight = 120;
-  const safeMargin = 20;
-  const clippyMargin = 25; // Gap between Clippy/overlay and balloon
+  
+  calculatePosition(customPosition = {}) {
+    const balloonWidth = 280;
+    const balloonHeight = 120;
+    const safeMargin = 20;
+    const clippyMargin = 50; // Increased gap between Clippy/overlay and balloon
 
-  // Get desktop viewport
-  const desktop = document.querySelector(".desktop.screen") || 
-                 document.querySelector(".desktop") || 
-                 document.querySelector(".w98");
-  
-  let viewportWidth, viewportHeight, viewportLeft = 0, viewportTop = 0;
-  
-  if (desktop) {
-    const desktopRect = desktop.getBoundingClientRect();
-    viewportWidth = desktopRect.width;
-    viewportHeight = desktopRect.height;
-    viewportLeft = desktopRect.left;
-    viewportTop = desktopRect.top;
-  } else {
-    viewportWidth = window.innerWidth;
-    viewportHeight = window.innerHeight;
+    // Get desktop viewport
+    const desktop = document.querySelector(".desktop.screen") || 
+                   document.querySelector(".desktop") || 
+                   document.querySelector(".w98");
+    
+    let viewportWidth, viewportHeight, viewportLeft = 0, viewportTop = 0;
+    
+    if (desktop) {
+      const desktopRect = desktop.getBoundingClientRect();
+      viewportWidth = desktopRect.width;
+      viewportHeight = desktopRect.height;
+      viewportLeft = desktopRect.left;
+      viewportTop = desktopRect.top;
+    } else {
+      viewportWidth = window.innerWidth;
+      viewportHeight = window.innerHeight;
+    }
+
+    const maxAvailableWidth = viewportWidth - (safeMargin * 2);
+    const dynamicWidth = Math.min(balloonWidth, maxAvailableWidth);
+
+    // Find Clippy and overlay
+    const clippyEl = document.querySelector('.clippy');
+    const overlayEl = document.getElementById('clippy-clickable-overlay');
+    
+    if (clippyEl) {
+      const clippyRect = clippyEl.getBoundingClientRect();
+      const overlayRect = overlayEl ? overlayEl.getBoundingClientRect() : clippyRect;
+      
+      // Calculate Clippy's full height including overlay
+      const clippyHeight = clippyRect.height;
+      const overlayHeight = overlayRect.height;
+      const effectiveClippyHeight = Math.max(clippyHeight, overlayHeight);
+      
+      // Get the topmost position between Clippy and overlay
+      const effectiveTop = Math.min(clippyRect.top, overlayRect.top);
+      
+      // Check if this is an enhanced message balloon
+      const isEnhancedMessage = customPosition.isEnhancedMessage;
+      
+      // For enhanced message balloon, use chat balloon's positioning logic
+      if (isEnhancedMessage) {
+        // Use chat balloon's width and height
+        const chatWidth = 300;
+        const chatHeight = 160;
+        const chatMargin = 40;
+
+        let left = clippyRect.left + (clippyRect.width / 2) - (chatWidth / 2) + 140; // Shift 140px to the right
+        let top = effectiveTop - chatHeight - (chatMargin + 80); // Move even higher above Clippy
+
+        // Constrain horizontally to viewport
+        left = Math.max(
+          viewportLeft + safeMargin,
+          Math.min(left, viewportLeft + viewportWidth - chatWidth - safeMargin)
+        );
+
+        // If not enough space above, fallback to side or top center
+        if (top < viewportTop + safeMargin) {
+          top = effectiveTop - 20;
+          left = clippyRect.left - chatWidth - 40;
+          if (left < viewportLeft + safeMargin) {
+            left = clippyRect.right + 40;
+            if (left + chatWidth > viewportLeft + viewportWidth - safeMargin) {
+              left = viewportLeft + (viewportWidth - chatWidth) / 2;
+              top = viewportTop + safeMargin;
+            }
+          }
+        }
+
+        // Final constraint checks
+        left = Math.min(left, viewportLeft + viewportWidth - chatWidth - 20);
+        left = Math.max(viewportLeft + 20, left);
+        top = Math.max(viewportTop + safeMargin, Math.min(top, viewportTop + viewportHeight - chatHeight - safeMargin));
+
+        return {
+          left,
+          top,
+          maxWidth: chatWidth
+        };
+      }
+      
+      // Position balloon above Clippy's full height
+      let left = clippyRect.left + (clippyRect.width / 2) - (dynamicWidth / 2);
+      let top = effectiveTop - balloonHeight - clippyMargin;
+      
+      // Constrain to desktop viewport horizontally
+      left = Math.max(
+        viewportLeft + safeMargin, 
+        Math.min(left, viewportLeft + viewportWidth - dynamicWidth - safeMargin)
+      );
+      
+      // Check if balloon fits above Clippy within viewport
+      if (top < viewportTop + safeMargin) {
+        // If not enough space above, try positioning to the left of Clippy
+        top = effectiveTop + 10; // Align roughly with Clippy's top
+        left = clippyRect.left - dynamicWidth - 30; // 30px gap to the left
+        
+        // If still doesn't fit on left, try right side
+        if (left < viewportLeft + safeMargin) {
+          left = clippyRect.right + 30; // 30px gap to the right
+          
+          // Ensure it fits on the right
+          if (left + dynamicWidth > viewportLeft + viewportWidth - safeMargin) {
+            // Last resort: position at top of viewport
+            left = viewportLeft + (viewportWidth - dynamicWidth) / 2;
+            top = viewportTop + safeMargin;
+          }
+        }
+      }
+      
+      // Final vertical constraint check
+      top = Math.max(viewportTop + safeMargin, top);
+      
+      devLog(`Balloon position calculated: left=${left}, top=${top}, clippyHeight=${effectiveClippyHeight}`);
+      
+      return { 
+        left, 
+        top,
+        maxWidth: maxAvailableWidth
+      };
+    } else {
+      // Fallback
+      return {
+        left: viewportLeft + (viewportWidth - dynamicWidth) / 2,
+        top: viewportTop + safeMargin,
+        maxWidth: maxAvailableWidth
+      };
+    }
   }
-
-  const maxAvailableWidth = viewportWidth - (safeMargin * 2);
-  const dynamicWidth = Math.min(balloonWidth, maxAvailableWidth);
-
-  // Find Clippy and overlay
-  const clippyEl = document.querySelector('.clippy');
-  const overlayEl = document.getElementById('clippy-clickable-overlay');
-  
-  if (clippyEl) {
-    const clippyRect = clippyEl.getBoundingClientRect();
-    const overlayRect = overlayEl ? overlayEl.getBoundingClientRect() : clippyRect;
-    
-    // Use the higher top position (accounts for overlay)
-    const effectiveTop = Math.min(clippyRect.top, overlayRect.top);
-    
-    // Position above Clippy/overlay
-    let left = clippyRect.left + (clippyRect.width / 2) - (dynamicWidth / 2);
-    let top = effectiveTop - balloonHeight - clippyMargin;
-    
-    // Constrain to desktop viewport
-    left = Math.max(
-      viewportLeft + safeMargin, 
-      Math.min(left, viewportLeft + viewportWidth - dynamicWidth - safeMargin)
-    );
-    
-    // Ensure balloon is within top boundary
-    top = Math.max(viewportTop + safeMargin, top);
-    
-    return { 
-      left, 
-      top,
-      maxWidth: maxAvailableWidth
-    };
-  } else {
-    // Fallback
-    return {
-      left: viewportLeft + (viewportWidth - dynamicWidth) / 2,
-      top: viewportTop + safeMargin,
-      maxWidth: maxAvailableWidth
-    };
-  }
-}
 
   /**
    * Check if mobile device
@@ -427,40 +550,36 @@ const customBalloonManager = new CustomBalloonManager();
  * @param {Object} options - Additional options
  * @returns {boolean} - Success status
  */
-export const showCustomBalloon = (content, duration = 8000, options = {}) => {
+export const showCustomBalloon = (content, duration = 5000, options = {}) => {
   return customBalloonManager.show(content, duration, options);
 };
 
 // FIXED: Predefined classic Clippy balloon types
 export const showWelcomeBalloon = () => {
+  // Play the wave animation first
+  if (window.clippy?.play) {
+    logAnimation("Wave", "welcome balloon");
+    window.clippy.play("Wave");
+  }
+  
+  const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
   return showCustomBalloon({
-    message: "Welcome to Hydra98! How can I help you today?",
-    buttons: [
+    message: isMobile 
+      ? "Welcome to Hydra98! Please enjoy and don't break anything"
+      : "Welcome to Hydra98! Please enjoy and don't break anything. Right-click me to view my menu.",
+    animation: "Wave",
+    buttons: isMobile ? [
       {
-        text: "💬 Start a conversation",
-        chat: "Hi! What would you like to chat about?"
-      },
-      {
-        text: "🎭 Show me some animations",
+        text: "ℹ️ View Menu",
         action: () => {
-          if (window.clippy?.play) {
-            const animations = ["Wave", "Congratulate", "GetAttention", "GestureRight"];
-            const randomAnim = animations[Math.floor(Math.random() * animations.length)];
-            logAnimation(randomAnim, "welcome balloon animation button");
-            window.clippy.play(randomAnim);
+          if (window.showClippyContextMenu) {
+            window.showClippyContextMenu();
           }
         }
-      },
-      {
-        text: "ℹ️ Tell me about Hydra98",
-        message: "Hydra98 is a Windows 98 desktop emulator that brings back the nostalgic computing experience! You can run programs, play games, and explore just like the good old days. Try right-clicking me for more options!"
-      },
-      {
-        text: "👋 Just say hello",
-        animation: "Greeting"
       }
-    ]
-  }, 20000);
+    ] : []
+  }, 5000);
 };
 
 export const showHelpBalloon = () => {

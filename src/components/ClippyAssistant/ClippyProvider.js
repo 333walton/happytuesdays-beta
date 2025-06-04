@@ -84,7 +84,7 @@ const safeExecute = (operation, fallback = null, context = "operation") => {
 };
 
 // FIXED: Enforced greeting animations array - will only select from these
-const GREETING_ANIMATIONS = ["Greeting", "Wave"];
+const GREETING_ANIMATIONS = ["Wave"];
 
 // FIXED: Initial message content from StartMessage component
 const INITIAL_MESSAGE_CONTENT = "Welcome to Hydra98! Please enjoy and don't break anything";
@@ -500,8 +500,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             if (mountedRef.current && !isAnyBalloonOpen()) {
               const enhancedMessage = {
                 message: isMobile 
-                  ? "Hi there! What can I help you with?" 
-                  : "Hello! How can I assist you today?",
+                  ? "How may I help you?" 
+                  : "How may I help you?",
                 buttons: [
                   {
                     text: "💬 Let's chat",

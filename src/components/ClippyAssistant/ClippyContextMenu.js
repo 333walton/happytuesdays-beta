@@ -6,7 +6,11 @@ import ReactDOM from "react-dom";
 // FIXED: Animation logging function
 const logAnimation = (animationName, context = "context menu") => {
   // Force log animation regardless of dev mode
-  console.log(`🎭 Animation Triggered: "${animationName}" from ${context}`);
+  console.log(
+    `%c🎭 Clippy Animation: "${animationName}"%c (from ${context})`,
+    'color: #0066cc; font-weight: bold; font-size: 14px;',
+    'color: #666; font-size: 12px;'
+  );
 };
 
 const ClippyContextMenu = ({
@@ -132,8 +136,8 @@ const ClippyContextMenu = ({
 
     // FIXED: Position submenu directly adjacent with NO GAP
     const newX = wouldOverflowRight 
-  ? rect.left - submenuWidth + 17 // Left side, 10px gap
-  : rect.right;              // Right side, 10px gap
+      ? rect.left - submenuWidth + 17 // Left side, 10px gap
+      : rect.right;              // Right side, 10px gap
     
     const newY = wouldOverflowBottom
       ? Math.max(viewport.top + 5, viewport.bottom - submenuHeight - 10)
@@ -166,7 +170,10 @@ const ClippyContextMenu = ({
   };
 
   const handleSubmenuClose = () => {
-    setSubmenuOpen(null);
+    // Add a small delay before closing the submenu
+    setTimeout(() => {
+      setSubmenuOpen(null);
+    }, 300); // Increased from 50ms to 300ms to give more time to move mouse
   };
 
   // FIXED: Enhanced agent change function with actual character switching
@@ -190,7 +197,7 @@ const ClippyContextMenu = ({
     const clippyEl = document.querySelector('.clippy');
     if (clippyEl) {
       clippyEl.style.opacity = '0.7';
-      clippyEl.style.transform = 'translateZ(0) scale(0.8)';
+      clippyEl.style.transform = 'translateZ(0) scale(0.9)';
       
       setTimeout(() => {
         // Restore appearance
@@ -238,9 +245,15 @@ const ClippyContextMenu = ({
         
       case 'playAnimation':
         // FIXED: Play specific animation with logging
-        if (window.clippy?.play) {
-          logAnimation(data, 'context menu selection');
-          window.clippy.play(data);
+        if (window.clippy?.play && data) {
+          // Ensure we're using the exact animation name
+          const animationName = String(data).trim();
+          if (animations.includes(animationName)) {
+            logAnimation(animationName, 'context menu selection');
+            window.clippy.play(animationName);
+          } else {
+            console.warn(`Invalid animation name: ${animationName}`);
+          }
         }
         onAction('playAnimation', data);
         break;
@@ -274,7 +287,7 @@ const ClippyContextMenu = ({
           window.clippy.play('Greeting');
           if (window.showClippyCustomBalloon) {
             setTimeout(() => {
-              window.showClippyCustomBalloon("Hello! How can I help you today?");
+              window.showClippyCustomBalloon("Hello! Right click on me to see my menu.");
             }, 800);
           }
         }
@@ -366,6 +379,8 @@ const ClippyContextMenu = ({
 
   // Menu content component
   const MenuContent = () => {
+    const [closeTimeout, setCloseTimeout] = useState(null);
+
     useEffect(() => {
       // Set ref after portal mount
       setTimeout(() => {
@@ -415,10 +430,11 @@ const ClippyContextMenu = ({
     // FIXED: Enhanced MenuItem with proper hover handling for submenu gap prevention
     const MenuItem = ({ children, onClick, onMouseEnter, onMouseLeave, disabled, hasSubmenu }) => {
       const [isHovered, setIsHovered] = useState(false);
+      const isSubmenuOpen = hasSubmenu && submenuOpen === (children === "👤 Select Agent" ? "agents" : "animations");
 
       return (
         <div
-          style={isHovered && !disabled ? menuItemHoverStyle : { 
+          style={(isHovered || isSubmenuOpen) && !disabled ? menuItemHoverStyle : { 
             ...menuItemStyle, 
             color: disabled ? "#808080" : "#000000",
             WebkitTextFillColor: disabled ? "#808080" : "#000000"
@@ -427,6 +443,11 @@ const ClippyContextMenu = ({
           onMouseEnter={(e) => {
             if (!disabled) {
               setIsHovered(true);
+              // Clear any pending close timeout
+              if (closeTimeout) {
+                clearTimeout(closeTimeout);
+                setCloseTimeout(null);
+              }
               // FIXED: Immediate submenu opening to prevent gaps
               if (hasSubmenu && onMouseEnter) {
                 onMouseEnter(e);
@@ -435,11 +456,12 @@ const ClippyContextMenu = ({
           }}
           onMouseLeave={(e) => {
             setIsHovered(false);
-            // FIXED: Slight delay for submenu closing to allow mouse movement
+            // FIXED: Add delay for submenu closing to allow mouse movement
             if (hasSubmenu && onMouseLeave) {
-              setTimeout(() => {
+              const timeout = setTimeout(() => {
                 onMouseLeave(e);
-              }, 50); // Reduced from 100ms to 50ms for responsiveness
+              }, 300); // Increased from 50ms to 300ms
+              setCloseTimeout(timeout);
             }
           }}
         >
@@ -506,8 +528,21 @@ const ClippyContextMenu = ({
         {submenuOpen === "agents" && (
           <div
             className="context-submenu"
-            style={submenuStyle}
-            onMouseEnter={() => setSubmenuOpen("agents")}
+            style={{
+              ...submenuStyle,
+              // Add padding to create a buffer zone
+              padding: "5px",
+              // Add a small gap between main menu and submenu
+              marginLeft: submenuPosition.openLeft ? "-5px" : "5px"
+            }}
+            onMouseEnter={() => {
+              // Clear any pending close timeout when entering submenu
+              if (closeTimeout) {
+                clearTimeout(closeTimeout);
+                setCloseTimeout(null);
+              }
+              setSubmenuOpen("agents");
+            }}
             onMouseLeave={handleSubmenuClose}
           >
             {agents.map((agent) => (

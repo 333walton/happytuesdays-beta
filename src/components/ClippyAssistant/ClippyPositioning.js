@@ -51,7 +51,7 @@ const CLIPPY_POSITIONS = {
   // Mobile positioning (dynamic-ready)
   mobile: {
     position: "fixed",
-    transform: "translateZ(0) scale(0.8)",
+    transform: "translateZ(0) scale(0.9)",
     transformOrigin: "center bottom",
     zIndex: "1500",
   },
@@ -584,22 +584,29 @@ class ClippyPositioning {
   // Account for clickable overlay height
   const overlayEl = document.getElementById('clippy-clickable-overlay');
   const overlayRect = overlayEl ? overlayEl.getBoundingClientRect() : clippyRect;
+  
+  // Calculate Clippy's full height including overlay
+  const clippyHeight = clippyRect.height;
+  const overlayHeight = overlayRect.height;
+  const effectiveClippyHeight = Math.max(clippyHeight, overlayHeight);
   const effectiveClippyTop = Math.min(clippyRect.top, overlayRect.top);
 
   if (balloonType === "chat") {
     const balloonWidth = Math.min(300, viewportWidth - 40);
-    const balloonHeight = Math.min(220, viewportHeight - 120); // Reduced height
+    const balloonHeight = Math.min(220, viewportHeight - 150); // Reduced to ensure fit
     
-    // Position higher and more to the left
+    // Position above Clippy with more margin
     let left = Math.max(safeMargin, (viewportWidth - balloonWidth) / 2 - 20);
-    let top = effectiveClippyTop - balloonHeight - 25; // 25px gap above Clippy/overlay
+    let top = effectiveClippyTop - balloonHeight - 40; // Increased gap
     
     // If doesn't fit above, position at top of viewport
     if (top < safeMargin) {
       top = safeMargin;
-      // Shift left to avoid Clippy
+      // Shift to left side to avoid Clippy if it's on the right
       if (clippyRect.right > viewportWidth / 2) {
         left = safeMargin;
+      } else {
+        left = viewportWidth - balloonWidth - safeMargin;
       }
     }
     
@@ -609,15 +616,29 @@ class ClippyPositioning {
     const balloonWidth = Math.min(260, viewportWidth - 40);
     const balloonHeight = 100;
     
-    // Center above Clippy/overlay
+    // Center above Clippy
     let left = clippyRect.left + (clippyRect.width / 2) - (balloonWidth / 2);
-    let top = effectiveClippyTop - balloonHeight - 20;
+    let top = effectiveClippyTop - balloonHeight - 30; // Increased gap
     
     // Constrain to viewport
     left = Math.max(safeMargin, Math.min(left, viewportWidth - balloonWidth - safeMargin));
     
+    // If doesn't fit above, position to the side
     if (top < safeMargin) {
-      top = safeMargin;
+      top = effectiveClippyTop - 20; // Align near Clippy's top
+      
+      // Try left side first
+      if (clippyRect.left > balloonWidth + 30) {
+        left = clippyRect.left - balloonWidth - 20;
+      } else {
+        // Otherwise right side
+        left = clippyRect.right + 20;
+        if (left + balloonWidth > viewportWidth - safeMargin) {
+          // Last resort: top of viewport
+          left = (viewportWidth - balloonWidth) / 2;
+          top = safeMargin;
+        }
+      }
     }
     
     return { left, top };
@@ -715,7 +736,7 @@ class ClippyPositioning {
         bottom: ${boundedPosition.bottomPx}px !important;
         left: auto !important;
         top: auto !important;
-        transform: translateZ(0) scale(${isDragging ? '1.05' : '0.8'}) !important;
+        transform: translateZ(0) scale(${isDragging ? '1.05' : '0.9'}) !important;
         transform-origin: center bottom !important;
         z-index: ${isDragging ? '1550' : '1500'} !important;
         transition: none !important;
@@ -1053,14 +1074,14 @@ static preserveClippyScale(clippyElement) {
         top: "auto",
         transform: isDragging 
           ? "translateZ(0) scale(1.05)"
-          : "translateZ(0) scale(0.8)",
+          : "translateZ(0) scale(0.9)",
         transformOrigin: "center bottom",
         zIndex: isDragging ? "1550" : "1500",
         backfaceVisibility: "hidden",
         willChange: isDragging ? "transform, opacity, right, bottom" : "transform",
         WebkitTransform: isDragging 
           ? "translateZ(0) scale(1.05)" 
-          : "translateZ(0) scale(0.8)",
+          : "translateZ(0) scale(0.9)",
         WebkitBackfaceVisibility: "hidden",
         touchAction: "none",
         userSelect: "none",
@@ -1270,7 +1291,7 @@ static preserveClippyScale(clippyElement) {
       right: `${rightPx}px`,
       bottom: `${bottomPx}px`,
       position: "fixed",
-      transform: "translateZ(0) scale(0.8)",
+      transform: "translateZ(0) scale(0.9)",
       transformOrigin: "center bottom",
       zIndex: "1500",
       left: "auto",
