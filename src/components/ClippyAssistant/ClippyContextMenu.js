@@ -141,8 +141,8 @@ const ClippyContextMenu = ({
     }
 
     // Adjust main menu vertical position for mobile based on height reduction (6 items * 3px)
-    if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|Ipod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      adjustedY -= 27; // Total reduction for 6 main menu items (6 * 4.5px)
+    if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      adjustedY -= 18; // Total reduction for 6 main menu items
     }
 
     setDynamicPosition({ x: adjustedX, y: adjustedY });
@@ -248,13 +248,8 @@ const ClippyContextMenu = ({
 
       if (parentItemIndex !== -1) {
         // Subtract the cumulative height reduction of items above the parent
-        newY -= (parentItemIndex * 4.5); // Adjusted for new per-item reduction (4.5px)
+        newY -= (parentItemIndex * 3);
       }
-    }
-
-    // Adjust vertical position for desktop agents submenu
-    if (!isMobile && submenuType === 'agents') {
-      constrainedY -= 20; // Raise by 20px
     }
 
     let constrainedX = Math.max(
@@ -265,6 +260,11 @@ const ClippyContextMenu = ({
       viewport.top + 5,
       Math.min(newY, viewport.bottom - submenuHeight - currentMobileBottomMargin)
     );
+
+    // Adjust vertical position for desktop agents submenu - Apply here after declaration
+    if (!isMobile && submenuType === 'agents') {
+      constrainedY -= 20; // Raise by 20px
+    }
 
     // Apply horizontal adjustment ONLY for mobile
     if (isMobile) {
@@ -523,8 +523,6 @@ const ClippyContextMenu = ({
       .context-menu-item.mobile {
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
-        padding-top: 3.75px;
-        padding-bottom: 3.75px;
       }
 
       .context-menu-item.mobile:active {
@@ -553,7 +551,7 @@ const ClippyContextMenu = ({
       }
 
       .context-submenu.mobile .context-menu-item {
-        padding: 3.75px 12px; /* Reduced vertical padding by 1.5px top/bottom */
+        padding: 6px 12px;
         min-height: auto;
       }
 
