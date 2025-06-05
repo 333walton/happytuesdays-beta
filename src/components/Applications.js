@@ -36,5 +36,5 @@ export { default as StartMessage } from "./StartMessage";
 export { default as UTMTool } from "./UTMTool";
 export { default as Minesweeper } from "./Minesweeper";
 export { default as MinesweeperWithHelp } from "./MinesweeperWithHelp";
-export { default as Clippy } from "./ClippyAssistant";
+export { default as ClippyAssistant } from "./ClippyAssistant";
 export { default as HamsterCreator } from "./HamsterCreator/HamsterCreator";

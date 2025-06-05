@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
+import faq from "../../data/textFiles/faq";
 
 // FIXED: Animation logging function
 const logAnimation = (animationName, context = "context menu") => {
@@ -141,12 +142,71 @@ const ClippyContextMenu = ({
     setDynamicPosition({ x: adjustedX, y: adjustedY });
   }, [x, y, portalContainer]);
 
+  // FIXED: Enhanced MenuItem with proper hover handling and flexible icon/arrow placement
+  const MenuItem = ({ children, onClick, onMouseEnter, onMouseLeave, disabled, hasSubmenu, isSubmenuItem, leftIcon, rightIcon, currentSubmenuOpen, submenuType }) => {
+    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|Icod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const [isHovered, setIsHovered] = useState(false);
+
+    // Combine external onMouseEnter/onMouseLeave with internal hover state management
+    const handleMouseEnter = (e) => {
+      if (!disabled) {
+        setIsHovered(true);
+        if (onMouseEnter) onMouseEnter(e);
+        // Only open submenu on hover for desktop
+        if (hasSubmenu && !isMobile && !disabled) {
+          handleSubmenuOpen(submenuType, e);
+        } else if (!hasSubmenu && !isSubmenuItem && currentSubmenuOpen) {
+          // If hovering over a different main menu item, close any open submenu
+          setSubmenuOpen(null);
+        }
+      }
+    };
+
+    const handleMouseLeave = (e) => {
+      if (!disabled) {
+        setIsHovered(false);
+        if (onMouseLeave) onMouseLeave(e);
+      }
+    };
+
+    // Determine if the menu item should be highlighted
+    // Highlight if hovered OR if it's a parent with an open submenu (desktop only)
+    const isHighlighted = isHovered || (hasSubmenu && currentSubmenuOpen === submenuType && !isMobile);
+
+    // Apply hover style on desktop
+    const finalStyle = {
+      ...menuItemStyle,
+      // Only apply hover style on desktop if highlighted and not disabled
+      ...(isHighlighted && !isMobile && !disabled ? menuItemHoverStyle : {}),
+      transition: 'background-color 0.1s ease-in-out'
+    };
+
+    return (
+      <div
+        className={`context-menu-item ${disabled ? 'disabled' : ''} ${isSubmenuItem ? 'submenu-item' : ''} ${isMobile ? 'mobile' : ''}`}
+        onClick={disabled ? null : onClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={finalStyle}
+        data-submenu={hasSubmenu ? submenuType : undefined}
+      >
+        {leftIcon && (
+          <span style={{ marginRight: '8px', fontSize: '12px' }}>{leftIcon}</span>
+        )}
+        <span>{children}</span>
+        {rightIcon && (
+          <span style={{ marginLeft: '8px', fontSize: '12px' }}>{rightIcon}</span>
+        )}
+      </div>
+    );
+  };
+
   // FIXED: Submenu positioning with NO GAP
   const handleSubmenuOpen = (submenuType, event) => {
     const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|Icod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const rect = event.currentTarget.getBoundingClientRect();
     const submenuWidth = isMobile ? 180 : 160;
-    const submenuHeight = submenuType === "animations" ? 300 : 200;
+    const submenuHeight = (submenuType === "animations" && isMobile) ? 150 : (submenuType === "animations" ? 300 : 200);
     const viewport = getViewport();
 
     // Check if submenu would overflow desktop or mobile viewport boundaries
@@ -155,11 +215,13 @@ const ClippyContextMenu = ({
 
     // FIXED: Position submenu directly bordering main menu (no gap)
     const newX = wouldOverflowRight 
-      ? rect.left - submenuWidth // Align submenu's right edge with main menu's left edge
-      : rect.right;              // Align submenu's left edge with main menu's right edge
+      ? rect.left - submenuWidth
+      : rect.right;
     
+    // FIXED: Refined vertical positioning for mobile to stay above taskbar
     const newY = wouldOverflowBottom
-      ? Math.max(viewport.top + 5, viewport.bottom - submenuHeight - 10)
+      ? (isMobile ? Math.max(viewport.top + 5, viewport.bottom - submenuHeight - 100)
+                : Math.max(viewport.top + 5, viewport.bottom - submenuHeight - 10))
       : rect.top;
 
     let constrainedX = Math.max(
@@ -167,17 +229,22 @@ const ClippyContextMenu = ({
       Math.min(newX, viewport.right - submenuWidth - 5)
     );
     const constrainedY = Math.max(
-      viewport.top + 5, 
-      Math.min(newY, viewport.bottom - submenuHeight - 5)
+      viewport.top + 5,
+      Math.min(newY, viewport.bottom - submenuHeight - (isMobile ? 100 : 10))
     );
 
-    // Manually adjust submenu position to the right by 10px
-    constrainedX += 36; // Add the desired pixel amount here
+    // Manually adjust submenu position to the right by 36px
+    constrainedX += 36;
 
     console.log(`🎯 Submenu positioning (${submenuType}):`, {
       menuItem: { left: rect.left, right: rect.right, top: rect.top },
       submenu: { x: constrainedX, y: constrainedY },
       openLeft: wouldOverflowRight,
+      isMobile: isMobile,
+      submenuHeight: submenuHeight,
+      wouldOverflowBottom: wouldOverflowBottom,
+      calculatedNewY: newY,
+      constrainedY: constrainedY
     });
 
     setSubmenuPosition({
@@ -194,7 +261,7 @@ const ClippyContextMenu = ({
     const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     setTimeout(() => {
       setSubmenuOpen(null);
-    }, isMobile ? 500 : 300); // Longer delay on mobile
+    }, isMobile ? 500 : 300);
   };
 
   // FIXED: Enhanced agent change function with actual character switching
@@ -288,17 +355,25 @@ const ClippyContextMenu = ({
         break;
         
       case 'wave':
-        // FIXED: Play wave animation with message and logging
-        if (window.clippy?.play) {
-          logAnimation('Wave', 'context menu wave action');
-          window.clippy.play('Wave');
+        // FIXED: Change Wave action to open Notepad with FAQ content
+        console.log("🎯 Context menu action: Open About Clippy (Notepad)");
+        if (window.ProgramContext?.onOpen) {
+          window.ProgramContext.onOpen({
+            component: "Notepad",
+            multiInstance: true,
+            title: "About Clippy",
+            icon: "textchat32",
+            data: {
+              content: faq,
+            },
+          });
+        } else {
+          console.warn("window.ProgramContext.onOpen is not available.");
           if (window.showClippyCustomBalloon) {
-            setTimeout(() => {
-              window.showClippyCustomBalloon("👋 Hello there!");
-            }, 500);
+            window.showClippyCustomBalloon("Sorry, I couldn't open the About Clippy information.");
           }
         }
-        onAction('wave');
+        onAction('aboutClippy');
         break;
         
       case 'greet':
@@ -401,66 +476,6 @@ const ClippyContextMenu = ({
     padding: "0", // FIXED: Ensure no padding that could create gaps
   };
 
-  // FIXED: Enhanced MenuItem with proper hover handling and flexible icon/arrow placement
-  const MenuItem = ({ children, onClick, onMouseEnter, onMouseLeave, disabled, hasSubmenu, isSubmenuItem, leftIcon, rightIcon, currentSubmenuOpen, submenuType }) => {
-    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|Icod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const [isHovered, setIsHovered] = useState(false); // Add hover state
-
-    // Combine external onMouseEnter/onMouseLeave with internal hover state management
-    const handleMouseEnter = (e) => {
-      if (!disabled) {
-        setIsHovered(true);
-        if (onMouseEnter) onMouseEnter(e);
-      }
-    };
-
-    const handleMouseLeave = (e) => {
-      if (!disabled) {
-        setIsHovered(false);
-        if (onMouseLeave) onMouseLeave(e);
-      }
-    };
-
-    // Determine if the menu item should be highlighted
-    const isHighlighted = isHovered || (hasSubmenu && currentSubmenuOpen === submenuType);
-
-    return (
-      <div
-        className={`context-menu-item ${disabled ? 'disabled' : ''} ${isSubmenuItem ? 'submenu-item' : ''} ${isMobile ? 'mobile' : ''}`}
-        onClick={disabled ? null : onClick}
-        onMouseEnter={handleMouseEnter} // Use combined handler
-        onMouseLeave={handleMouseLeave} // Use combined handler
-        style={{
-          padding: '6px 16px',
-          minHeight: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          // Rely on CSS for justify-content, remove inline logic
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          userSelect: 'none',
-          WebkitTapHighlightColor: 'transparent',
-          touchAction: 'manipulation',
-          // Apply hover style on desktop or if associated submenu is open
-          ...((isHighlighted && !isMobile && !disabled) ? menuItemHoverStyle : menuItemStyle)
-        }}
-      >
-        {/* Render left icon/arrow if provided */}
-        {leftIcon && (
-          <span style={{ marginRight: '8px', fontSize: '12px' }}>{leftIcon}</span> // Standard margin for spacing
-        )}
-
-        {/* Render text content */}
-        {/* Remove flexGrow and textAlign inherit, rely on CSS for submenu items */}
-        <span>{children}</span>
-
-        {/* Render right icon/arrow if provided */}
-        {rightIcon && (
-           <span style={{ marginLeft: '8px', fontSize: '12px' }}>{rightIcon}</span> // Standard margin for spacing
-        )}
-      </div>
-    );
-  };
-
   // Add mobile-specific styles and standard submenu alignment
   useEffect(() => {
     const style = document.createElement('style');
@@ -475,45 +490,61 @@ const ClippyContextMenu = ({
       }
 
       .context-submenu {
-        padding: 0; /* Keep original padding */
-        text-align: left; /* Keep explicitly left-aligning submenu content */
-        min-width: 120px !important; /* Reduced minimum width for compactness */
+        padding: 0;
+        text-align: left;
+        min-width: 120px !important;
       }
 
       .context-submenu .context-menu-item {
-        padding: 6px 8px 6px 12px; /* Reduced right padding */
-        min-height: auto; /* Removed min-height */
-        /* Force left alignment for all submenu item content */
+        padding: 6px 8px 6px 12px;
+        min-height: auto;
         justify-content: flex-start !important;
-        flex-direction: row; /* Ensure left-to-right flow */
+        flex-direction: row;
       }
 
-      .context-submenu .context-menu-item span:first-child { /* Target text span */
-        /* Remove flex-grow and text-align */
-        margin-left: 0; /* Ensure no extra margin */
+      .context-submenu .context-menu-item span:first-child {
+        margin-left: 0;
       }
 
-      /* Revert specific padding adjustments for submenu items with a left icon */
       .context-submenu .context-menu-item.submenu-item {
-        padding: 6px 8px 6px 8px; /* Adjusted padding for items with left icons */
+        padding: 6px 8px 6px 8px;
       }
 
       .context-submenu.mobile .context-menu-item {
-        padding: 6px 12px; /* Reverted to original padding */
-        min-height: auto; /* Removed min-height */
+        padding: 6px 12px;
+        min-height: auto;
+      }
+
+      /* Apply hover style using pseudo-class */
+      .context-menu-item:not(.mobile):not(.disabled):hover {
+        background-color: #0066cc !important;
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+      }
+
+      /* Left scrollbar for animations submenu */
+      .context-submenu.animations-submenu {
+        direction: rtl;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .context-submenu.animations-submenu .context-menu-item {
+        direction: ltr;
+        margin-left: 0px;
       }
 
       /* Remove mobile-specific sizing and font-size adjustments */
       @media (max-width: 768px) {
         .clippy-context-menu {
-          min-width: 160px !important; /* Reverted to original */
-          max-width: none !important; /* Removed max-width */
-          font-size: 11px !important; /* Reverted to original */
+          min-width: 160px !important;
+          max-width: none !important;
+          font-size: 11px !important;
         }
 
         .context-submenu {
-          min-width: 140px !important; /* Reverted to original */
-          max-width: none !important; /* Removed max-width */
+          min-width: 80px !important;
+          max-width: 80px !important;
         }
       }
     `;
@@ -587,7 +618,14 @@ const ClippyContextMenu = ({
           >
             Hide Clippy
           </MenuItem>
-
+          {/* Wave - Emoji on Right */}
+          <MenuItem
+            onClick={() => handleMenuAction('wave')}
+            rightIcon="👋"
+            currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
+          >
+            About Clippy {/* Changed text from Wave */}
+          </MenuItem>
           {/* Separator */}
           <div style={separatorStyle} />
 
@@ -627,15 +665,6 @@ const ClippyContextMenu = ({
             Chat with Clippy
           </MenuItem>
 
-          {/* Wave - Emoji on Right */}
-          <MenuItem
-            onClick={() => handleMenuAction('wave')}
-            rightIcon="👋"
-            currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
-          >
-            Wave
-          </MenuItem>
-
           {/* Greet - Emoji on Right */}
           <MenuItem
             onClick={() => handleMenuAction('greet')}
@@ -652,52 +681,66 @@ const ClippyContextMenu = ({
             className="context-submenu"
             style={{
               ...submenuStyle,
-              padding: "5px",
-              textAlign: "left", // Explicitly left-align submenu
+              padding: "0px",
+              textAlign: "left",
             }}
             onMouseEnter={() => {
-              // Clear any pending close timeout when entering submenu
-              if (closeTimeout) {
-                clearTimeout(closeTimeout);
-                setCloseTimeout(null);
-              }
+              // Keep submenu open when hovering over it
               setSubmenuOpen("agents");
             }}
-            // Removed onMouseLeave to prevent unexpected closing
+            onMouseLeave={() => {
+              // Only close if we're not hovering over the parent menu item
+              const menuItem = document.querySelector(`.context-menu-item[data-submenu="agents"]`);
+              if (!menuItem?.matches(':hover')) {
+                handleSubmenuClose();
+              }
+            }}
           >
             {/* Agents list */}
             {agents.map((agent) => (
-                <MenuItem
-                  key={agent}
-                  onClick={() => handleMenuAction('selectAgent', agent)}
-                  isSubmenuItem // Mark as submenu item
-                  leftIcon={agent === currentAgent ? "✓" : null} // Pass checkmark or null
-                  rightIcon={null} // Ensure no right icon for agent items
-                  currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
-                >
-                  {/* Agent name text only */}
-                  {agent}
-                </MenuItem>
-              ))
-            }
+              <MenuItem
+                key={agent}
+                onClick={() => handleMenuAction('selectAgent', agent)}
+                isSubmenuItem
+                leftIcon={agent === currentAgent ? "✓" : null}
+                rightIcon={null}
+                currentSubmenuOpen={submenuOpen}
+              >
+                {agent}
+              </MenuItem>
+            ))}
           </div>
         )}
 
-        {/* Animations Submenu - Left Aligned */}
+        {/* Animations Submenu - Left Aligned with Left Scrollbar */}
         {submenuOpen === "animations" && (
           <div
-            className="context-submenu"
-            style={submenuStyle}
-            onMouseEnter={() => setSubmenuOpen("animations")}
+            className="context-submenu animations-submenu"
+            style={{
+              ...submenuStyle,
+              padding: "0px",
+              textAlign: "left",
+            }}
+            onMouseEnter={() => {
+              // Keep submenu open when hovering over it
+              setSubmenuOpen("animations");
+            }}
+            onMouseLeave={() => {
+              // Only close if we're not hovering over the parent menu item
+              const menuItem = document.querySelector(`.context-menu-item[data-submenu="animations"]`);
+              if (!menuItem?.matches(':hover')) {
+                handleSubmenuClose();
+              }
+            }}
           >
             {animations.slice(0, 20).map((animation) => (
               <MenuItem
                 key={animation}
                 onClick={() => handleMenuAction('playAnimation', animation)}
-                isSubmenuItem // Mark as submenu item
-                leftIcon={null} // Ensure no left icon for animation items
-                rightIcon={null} // Ensure no right icon for animation items
-                currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
+                isSubmenuItem
+                leftIcon={null}
+                rightIcon={null}
+                currentSubmenuOpen={submenuOpen}
               >
                 {animation}
               </MenuItem>
