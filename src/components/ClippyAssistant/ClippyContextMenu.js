@@ -141,8 +141,8 @@ const ClippyContextMenu = ({
     }
 
     // Adjust main menu vertical position for mobile based on height reduction (6 items * 3px)
-    if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      adjustedY -= 18; // Total reduction for 6 main menu items
+    if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|Ipod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      adjustedY -= 27; // Total reduction for 6 main menu items (6 * 4.5px)
     }
 
     setDynamicPosition({ x: adjustedX, y: adjustedY });
@@ -248,7 +248,7 @@ const ClippyContextMenu = ({
 
       if (parentItemIndex !== -1) {
         // Subtract the cumulative height reduction of items above the parent
-        newY -= (parentItemIndex * 3);
+        newY -= (parentItemIndex * 4.5); // Adjusted for new per-item reduction (4.5px)
       }
     }
 
@@ -523,6 +523,8 @@ const ClippyContextMenu = ({
       .context-menu-item.mobile {
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
+        padding-top: 3.75px;
+        padding-bottom: 3.75px;
       }
 
       .context-menu-item.mobile:active {
@@ -551,7 +553,7 @@ const ClippyContextMenu = ({
       }
 
       .context-submenu.mobile .context-menu-item {
-        padding: 6px 12px;
+        padding: 3.75px 12px; /* Reduced vertical padding by 1.5px top/bottom */
         min-height: auto;
       }
 
@@ -690,7 +692,7 @@ const ClippyContextMenu = ({
             hasSubmenu
             onMouseEnter={(e) => handleSubmenuOpen("agents", e)}
             leftIcon="◀"
-            rightIcon="👤"
+            rightIcon="🤖"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
             submenuType="agents" // Indicate submenu type
           >
