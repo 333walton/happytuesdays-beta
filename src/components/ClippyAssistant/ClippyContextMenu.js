@@ -223,7 +223,7 @@ const ClippyContextMenu = ({
     let currentMobileBottomMargin = 10; // Default for desktop
     if (isMobile) {
       if (submenuType === 'animations') {
-        currentMobileBottomMargin = 250; // Specific margin for animations submenu on mobile
+        currentMobileBottomMargin = 226; // Specific margin for animations submenu on mobile
       } else if (submenuType === 'agents') {
         currentMobileBottomMargin = 150; // Specific margin for agents submenu on mobile
       } else {
@@ -233,16 +233,21 @@ const ClippyContextMenu = ({
 
     const newY = wouldOverflowBottom
       ? Math.max(viewport.top + 5, viewport.bottom - submenuHeight - currentMobileBottomMargin)
-      : rect.top;
+      : (isMobile || submenuType !== 'agents' ? rect.top : rect.top - 0); // Raise desktop agents submenu by 20px when opening downwards
 
     let constrainedX = Math.max(
       viewport.left + 5,
       Math.min(newX, viewport.right - submenuWidth - 5)
     );
-    const constrainedY = Math.max(
+    let constrainedY = Math.max(
       viewport.top + 5,
       Math.min(newY, viewport.bottom - submenuHeight - currentMobileBottomMargin)
     );
+
+    // Adjust constrainedY for desktop agents submenu
+    if (!isMobile && submenuType === 'agents') {
+      constrainedY -= 20; // Raise by 20px
+    }
 
     // Apply horizontal adjustment ONLY for mobile
     if (isMobile) {
