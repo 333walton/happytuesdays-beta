@@ -247,7 +247,18 @@ class ChatBalloonManager {
     const closeBtn = container.querySelector('.custom-clippy-balloon-close');
     const chatInput = container.querySelector('.chat-input');
     const sendBtn = container.querySelector('.chat-send');
-    const chatMessages = container.querySelector('.chat-messages');
+    const messagesContainer = container.querySelector('.chat-messages');
+
+    // Add visual viewport resize handler for mobile keyboard
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        if (this.currentChatBalloon) {
+          const position = this.calculatePosition();
+          this.currentChatBalloon.style.left = `${position.left}px`;
+          this.currentChatBalloon.style.top = `${position.top}px`;
+        }
+      });
+    }
 
     // Close button - use forceClose
     closeBtn.onclick = () => {
@@ -287,7 +298,7 @@ class ChatBalloonManager {
       markUserInteraction();
 
       // Add user message to chat
-      this.addMessageToChat(chatMessages, 'user', message);
+      this.addMessageToChat(messagesContainer, 'user', message);
       chatInput.value = '';
 
       // Add to history
@@ -300,7 +311,7 @@ class ChatBalloonManager {
       // Generate and add Clippy response
       setTimeout(() => {
         const response = this.generateClippyResponse(message);
-        this.addMessageToChat(chatMessages, 'clippy', response);
+        this.addMessageToChat(messagesContainer, 'clippy', response);
         
         // Add to history
         this.chatHistory.push({
@@ -406,10 +417,11 @@ class ChatBalloonManager {
     let viewportWidth, viewportHeight, viewportLeft = 0, viewportTop = 0;
 
     if (isMobile) {
-      viewportWidth = window.innerWidth;
-      viewportHeight = window.innerHeight;
-      viewportLeft = 0;
-      viewportTop = 0;
+      // On mobile, use visual viewport to account for keyboard
+      viewportWidth = window.visualViewport?.width || window.innerWidth;
+      viewportHeight = window.visualViewport?.height || window.innerHeight;
+      viewportLeft = window.visualViewport?.offsetLeft || 0;
+      viewportTop = window.visualViewport?.offsetTop || 0;
     } else {
       // Desktop container logic
       const desktop = document.querySelector(".desktop.screen") || 
@@ -447,39 +459,48 @@ class ChatBalloonManager {
       // Get the topmost position between Clippy and overlay
       const effectiveTop = Math.min(clippyRect.top, overlayRect.top);
       
-      // Try to position above Clippy first
+      // For mobile, position at bottom of viewport when keyboard is open
+      if (isMobile && window.visualViewport?.height < window.innerHeight) {
+        return {
+          left: viewportLeft + (viewportWidth - chatWidth) / 2,
+          top: viewportTop + viewportHeight - chatHeight - safeMargin,
+          width: chatWidth,
+          height: chatHeight,
+          withinBounds: true
+        };
+      }
+      
+      // Position balloon above Clippy's full height
       let left = clippyRect.left + (clippyRect.width / 2) - (chatWidth / 2);
       let top = effectiveTop - chatHeight - clippyMargin;
       
-      // Constrain horizontally to viewport
+      // Constrain to viewport horizontally
       left = Math.max(
-        viewportLeft + safeMargin,
+        viewportLeft + safeMargin, 
         Math.min(left, viewportLeft + viewportWidth - chatWidth - safeMargin)
       );
       
-      // Check if chat fits above Clippy within viewport
+      // Check if balloon fits above Clippy within viewport
       if (top < viewportTop + safeMargin) {
-        // Not enough space above - position to the left of Clippy
-        top = effectiveTop - 20; // Slightly above Clippy's top
-        left = clippyRect.left - chatWidth - 20; // 20px gap to the left
+        // If not enough space above, try positioning to the left of Clippy
+        top = effectiveTop + 10; // Align roughly with Clippy's top
+        left = clippyRect.left - chatWidth - 30; // 30px gap to the left
         
-        // If doesn't fit on left, try right side
+        // If still doesn't fit on left, try right side
         if (left < viewportLeft + safeMargin) {
-          left = clippyRect.right + 20; // 20px gap to the right
+          left = clippyRect.right + 30; // 30px gap to the right
           
-          // If still doesn't fit, position at top center of viewport
+          // Ensure it fits on the right
           if (left + chatWidth > viewportLeft + viewportWidth - safeMargin) {
+            // Last resort: position at top of viewport
             left = viewportLeft + (viewportWidth - chatWidth) / 2;
             top = viewportTop + safeMargin;
           }
         }
       }
       
-      // Final constraint checks
-      left = Math.max(viewportLeft + safeMargin, 
-                      Math.min(left, viewportLeft + viewportWidth - chatWidth - safeMargin));
-      top = Math.max(viewportTop + safeMargin,
-                     Math.min(top, viewportTop + viewportHeight - chatHeight - safeMargin));
+      // Final vertical constraint check
+      top = Math.max(viewportTop + safeMargin, top);
       
       devLog(`Chat balloon position: left=${left}, top=${top}, size=${chatWidth}x${chatHeight}`);
       
