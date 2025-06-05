@@ -139,6 +139,12 @@ const ClippyContextMenu = ({
         Math.min(y, viewport.bottom - menuHeight - margin)
       );
     }
+
+    // Adjust main menu vertical position for mobile based on height reduction (6 items * 3px)
+    if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      adjustedY -= 18; // Total reduction for 6 main menu items
+    }
+
     setDynamicPosition({ x: adjustedX, y: adjustedY });
   }, [x, y, portalContainer]);
 
@@ -218,12 +224,10 @@ const ClippyContextMenu = ({
       ? rect.left - submenuWidth
       : rect.right;
 
-    // Refined vertical positioning for mobile to stay above taskbar
-    // Determine mobile bottom margin based on submenu type
     let currentMobileBottomMargin = 10; // Default for desktop
     if (isMobile) {
       if (submenuType === 'animations') {
-        currentMobileBottomMargin = 225; // Specific margin for animations submenu on mobile
+        currentMobileBottomMargin = 223; // Specific margin for animations submenu on mobile
       } else if (submenuType === 'agents') {
         currentMobileBottomMargin = 125; // Specific margin for agents submenu on mobile
       } else {
@@ -231,9 +235,27 @@ const ClippyContextMenu = ({
       }
     }
 
-    const newY = wouldOverflowBottom
+    let newY = wouldOverflowBottom
       ? Math.max(viewport.top + 5, viewport.bottom - submenuHeight - currentMobileBottomMargin)
-      : (isMobile || submenuType !== 'agents' ? rect.top : rect.top - 0); // Raise desktop agents submenu by 20px when opening downwards
+      : rect.top; // Revert to original calculation
+
+    // Adjust vertical position based on parent item index for mobile submenus
+    if (isMobile) {
+      let parentItemIndex = -1; // 0-indexed
+      // Find the index of the parent item in the main menu
+      const mainMenuActions = ['hide', 'wave', 'selectAgent', 'playAnimation', 'chat', 'greet'];
+      parentItemIndex = mainMenuActions.indexOf(submenuType === 'agents' ? 'selectAgent' : 'playAnimation');
+
+      if (parentItemIndex !== -1) {
+        // Subtract the cumulative height reduction of items above the parent
+        newY -= (parentItemIndex * 3);
+      }
+    }
+
+    // Adjust vertical position for desktop agents submenu
+    if (!isMobile && submenuType === 'agents') {
+      constrainedY -= 20; // Raise by 20px
+    }
 
     let constrainedX = Math.max(
       viewport.left + 5,
@@ -244,16 +266,11 @@ const ClippyContextMenu = ({
       Math.min(newY, viewport.bottom - submenuHeight - currentMobileBottomMargin)
     );
 
-    // Adjust constrainedY for desktop agents submenu
-    if (!isMobile && submenuType === 'agents') {
-      constrainedY -= 20; // Raise by 20px
-    }
-
     // Apply horizontal adjustment ONLY for mobile
     if (isMobile) {
       constrainedX += 57;
     }
-    // Apply horizontal adjustment ONLY for mobile
+    // Apply horizontal adjustment ONLY for desktop
     if (!isMobile) {
       constrainedX += 36; // Apply offset ONLY for desktop
     }
@@ -568,6 +585,22 @@ const ClippyContextMenu = ({
         .context-submenu {
           min-width: auto;
           max-width: none;
+        }
+
+        .context-menu-item.mobile {
+          -webkit-tap-highlight-color: transparent;
+          touch-action: manipulation;
+          padding-top: 4.5px;
+          padding-bottom: 4.5px;
+        }
+
+        .context-menu-item.mobile:active {
+          background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .context-submenu.mobile .context-menu-item {
+          padding: 4.5px 12px; /* Reduced vertical padding by 1.5px top/bottom */
+          min-height: auto;
         }
       }
     `;
