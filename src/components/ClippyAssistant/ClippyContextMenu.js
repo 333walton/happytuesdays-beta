@@ -223,9 +223,9 @@ const ClippyContextMenu = ({
     let currentMobileBottomMargin = 10; // Default for desktop
     if (isMobile) {
       if (submenuType === 'animations') {
-        currentMobileBottomMargin = 226; // Specific margin for animations submenu on mobile
+        currentMobileBottomMargin = 225; // Specific margin for animations submenu on mobile
       } else if (submenuType === 'agents') {
-        currentMobileBottomMargin = 150; // Specific margin for agents submenu on mobile
+        currentMobileBottomMargin = 125; // Specific margin for agents submenu on mobile
       } else {
         currentMobileBottomMargin = 100; // Default mobile margin for other submenus (if any)
       }
@@ -661,7 +661,7 @@ const ClippyContextMenu = ({
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
             submenuType="agents" // Indicate submenu type
           >
-            Select Agent
+            Select AI Agent
           </MenuItem>
 
           {/* Play Animation - Emoji on Left, Arrow on Right pointing Left */}
