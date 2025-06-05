@@ -1107,13 +1107,29 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     let endHandler = null;
     let lastTapTime = 0; // Track time of last tap
     let tapCount = 0; // Track consecutive taps
-    const DOUBLE_TAP_THRESHOLD = 300; // Max time between taps for double tap (ms)
-    const TAP_DISTANCE_THRESHOLD = 20; // Max distance between taps for double tap (px)
+    const DOUBLE_TAP_THRESHOLD = 500; // Increased from 300ms to 500ms for more forgiving timing
+    const TAP_DISTANCE_THRESHOLD = 30; // Increased from 20px to 30px for more forgiving distance
+    let lastTapX = 0;
+    let lastTapY = 0;
 
     const handleTouchStart = (e) => {
       if (!mountedRef.current) return;
 
       const touch = e.touches[0];
+      const currentTime = Date.now();
+      const timeSinceLastTap = currentTime - lastTapTime;
+      const currentX = touch.clientX;
+      const currentY = touch.clientY;
+
+      // Calculate distance from last tap
+      const distance = Math.sqrt(
+        Math.pow(currentX - lastTapX, 2) + 
+        Math.pow(currentY - lastTapY, 2)
+      );
+
+      // Store current tap coordinates
+      lastTapX = currentX;
+      lastTapY = currentY;
 
       const dragState = {
         startX: touch.clientX,
@@ -1122,7 +1138,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         longPressTimer: null,
         origRightPx: 0,
         origBottomPx: 0,
-        // Store initial position for distance check
         initialClientX: touch.clientX,
         initialClientY: touch.clientY,
       };
@@ -1135,6 +1150,47 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           dragState.origRightPx = window.innerWidth - rect.right;
           dragState.origBottomPx = window.innerHeight - rect.bottom;
         }
+      }
+
+      // Handle double tap detection
+      if (timeSinceLastTap < DOUBLE_TAP_THRESHOLD && distance < TAP_DISTANCE_THRESHOLD) {
+        // Double tap detected
+        tapCount = 0;
+        lastTapTime = 0;
+        devLog("Mobile double-tap detected - opening context menu");
+
+        // Open context menu with specified positioning
+        const clippyEl = document.querySelector('.clippy');
+        if (clippyEl) {
+          const rect = clippyEl.getBoundingClientRect();
+          // Show menu directly above Clippy's head
+          showContextMenu(
+            rect.left + rect.width / 2,
+            rect.top - 20 // 20px above Clippy
+          );
+        } else {
+          // Fallback: show in center of screen
+          showContextMenu(window.innerWidth / 2, window.innerHeight / 2);
+        }
+      } else {
+        // Single tap or start of potential double tap
+        tapCount = 1;
+        lastTapTime = currentTime;
+        devLog("Mobile single tap detected");
+        
+        // Only handle single tap if we're not in a potential double-tap sequence
+        if (timeSinceLastTap >= DOUBLE_TAP_THRESHOLD) {
+          handleInteraction(e, "tap");
+        }
+        
+        // Reset tap count after double tap threshold if no second tap occurs
+        setTimeout(() => {
+          if (tapCount === 1 && Date.now() - lastTapTime >= DOUBLE_TAP_THRESHOLD) {
+            tapCount = 0;
+            lastTapTime = 0;
+            devLog("Mobile tap count reset");
+          }
+        }, DOUBLE_TAP_THRESHOLD);
       }
 
       // Move handler
