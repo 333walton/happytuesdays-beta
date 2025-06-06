@@ -1409,8 +1409,9 @@ static preserveClippyScale(clippyElement) {
       return this.enforceMobileBoundaries(customPosition);
     }
 
+    // Use our desired higher position (300px) instead of values.bottom
     const bottomPx = Math.min(
-      values.bottom + safeAreas.bottom,
+      300, // Fixed higher position
       viewportHeight * 0.2
     );
     const rightPx = Math.min(
