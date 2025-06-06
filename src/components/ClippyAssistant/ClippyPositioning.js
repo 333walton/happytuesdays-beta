@@ -488,8 +488,21 @@ class ClippyPositioning {
     const viewportHeight = window.innerHeight;
     const values = CLIPPY_POSITIONS.mobileValues;
 
-    const bottom = Math.min(values.bottom, viewportHeight * 0.2);
-    const right = Math.min(values.right, viewportWidth * 0.1);
+    let tempBottom = values.bottom;
+    let tempRight = values.right;
+
+    // Apply offset based on device
+    if (isIOSSafari) {
+      tempRight += 15; // Shift 15px right for iOS Safari
+      tempBottom += 5; // Shift 5px down for iOS Safari
+    } else {
+      // Apply 40px upward shift for all other mobile users
+      tempBottom -= 40;
+    }
+
+    // Apply viewport constraints
+    const bottom = Math.min(tempBottom, viewportHeight * 0.2);
+    const right = Math.min(tempRight, viewportWidth * 0.1);
 
     return {
       ...CLIPPY_POSITIONS.mobile,
