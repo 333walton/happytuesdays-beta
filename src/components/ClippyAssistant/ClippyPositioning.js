@@ -505,7 +505,7 @@ class ClippyPositioning {
       desiredRightFromViewport = previousNonIosRight + 20; // 26 + 20 = 46px from right
     }
 
-    // Apply viewport constraintss
+    // Apply viewport constraints
     const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2);
     const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1);
 
