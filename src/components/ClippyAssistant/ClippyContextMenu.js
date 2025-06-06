@@ -603,6 +603,14 @@ const ClippyContextMenu = ({
           min-height: auto;
         }
       }
+
+      /* Add styles for disabled menu items */
+      .context-menu-item.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        color: #666666;
+        -webkit-text-fill-color: #666666;
+      }
     `;
     document.head.appendChild(style);
     return () => style.remove();
@@ -669,10 +677,11 @@ const ClippyContextMenu = ({
           {/* Hide Clippy - Emoji on Right */}
           <MenuItem
             onClick={() => handleMenuAction('hide')}
-            rightIcon="🚫"
-            currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
+            rightIcon="↔️"
+            currentSubmenuOpen={submenuOpen}
+            disabled={true}
           >
-            Hide Clippy
+            Drag Clippy
           </MenuItem>
           {/* Wave - Emoji on Right */}
           <MenuItem
