@@ -531,8 +531,8 @@ class ClippyPositioning {
       desiredRightFromViewport = 4; // Keep right position consistent with Safari
     } else {
       // Positioning for all other mobile browsers (Android, Chrome/Firefox on iOS, etc.)
-      // Aiming for the same vertical position as Safari (115px) but with Chrome's working horizontal (-1px).
-      desiredBottomFromViewport = 115; // Matching Safari's vertical aim
+      // Adjusting based on feedback for Chrome, aiming for 120px bottom, -1px right.
+      desiredBottomFromViewport = 120; // Adjusted to lower Chrome position
       desiredRightFromViewport = -1; // Using Chrome's working horizontal
     }
 
