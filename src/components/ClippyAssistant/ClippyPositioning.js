@@ -496,7 +496,7 @@ class ClippyPositioning {
       desiredRightFromViewport = values.right - 7;
     } else {
       // For testing, use a large fixed value
-      desiredBottomFromViewport = 150; // Fixed large value to test
+      desiredBottomFromViewport = 300; // Increased from 150 to 300 to raise position
       desiredRightFromViewport = 40;
     }
 
