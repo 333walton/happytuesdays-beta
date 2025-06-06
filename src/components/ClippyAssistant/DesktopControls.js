@@ -146,12 +146,15 @@ const DesktopControls = () => {
           transition: visibility 0.3s, opacity 0.3s !important;
         }
 
-        /* Desktop controls always visible */
-        body.clippy-manually-hidden .desktop-controls-container,
-        body.screen-off .desktop-controls-container {
+        /* Desktop controls always hidden but functional */
+        .desktop-controls-container {
+          position: absolute !important;
+          left: -9999px !important;
+          top: -9999px !important;
           visibility: visible !important;
           opacity: 1 !important;
           pointer-events: auto !important;
+          z-index: 0 !important;
         }
 
         /* Combined state handling */

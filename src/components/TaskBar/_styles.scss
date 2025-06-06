@@ -1,0 +1,42 @@
+/* Quicklaunch button styles */
+.quick-launch-button-clippy,
+.TaskBar .quick-launch-button-clippy {
+  /* Windows 98 button styling */
+  background-color: #c0c0c0 !important;
+  border: 2px solid !important;
+  border-color: #ffffff #808080 #808080 #ffffff !important;
+  box-shadow: inset -1px -1px #000000 !important;
+  transition: all 0.1s ease !important;
+
+  /* Normal state */
+  &.btn.ButtonIconSmall {
+    border-color: #ffffff #808080 #808080 #ffffff !important;
+    box-shadow: inset -1px -1px #000000 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  /* Icon styling */
+  img {
+    display: block;
+    margin: 0 auto;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+  .quick-launch-button-clippy,
+  .TaskBar .quick-launch-button-clippy {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .quick-launch-button-clippy,
+  .TaskBar .quick-launch-button-clippy {
+    transition: none !important;
+  }
+} 

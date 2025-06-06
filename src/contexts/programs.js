@@ -141,7 +141,7 @@ class ProgramProvider extends Component {
       }),
       {}
     ),
-    recycleEmpty: true, // ✅ Added
+    recycleEmpty: true,
     startMenu: initialize(
       (p) => this.open(p),
       addIdsToData(
@@ -184,6 +184,29 @@ class ProgramProvider extends Component {
         icon: icons.twitter16,
         title: "",
       },
+      {
+        onClick: () => {
+          const desktopControlsButton = document.querySelector('.desktop-controls-button');
+          if (desktopControlsButton) {
+            desktopControlsButton.click();
+            // Toggle the state
+            this.setState(prevState => ({
+              quickLaunch: prevState.quickLaunch.map(item => 
+                item.title === "Show Clippy" || item.title === "Hide Clippy"
+                  ? { 
+                      ...item, 
+                      title: item.title === "Hide Clippy" ? "Show Clippy" : "Hide Clippy",
+                      className: "quick-launch-button-clippy btn ButtonIconSmall"
+                    }
+                  : item
+              )
+            }));
+          }
+        },
+        icon: icons.textchat32,
+        title: "Hide Clippy",
+        className: "quick-launch-button-clippy btn ButtonIconSmall",
+      },
     ],
     activePrograms: {},
     openOrder: [],
@@ -203,7 +226,7 @@ class ProgramProvider extends Component {
     window.ProgramContext = {
       onOpen: this.open,
       onClose: this.close,
-      setRecycleBinFull: this.setRecycleBinFull, // ✅ add this line
+      setRecycleBinFull: this.setRecycleBinFull,
     };
   }
 
@@ -414,7 +437,6 @@ class ProgramProvider extends Component {
   saveLocally = (loc) =>
     window.localStorage.setItem(loc, JSON.stringify(this.state[loc]));
 
-  // ✅ ADDED: Controls the recycle icon state globally
   setRecycleBinFull = (isFull) => {
     this.setState({ recycleEmpty: !isFull });
   };
@@ -433,7 +455,7 @@ class ProgramProvider extends Component {
           shutDown: this.shutDown,
           onMinimize: this.minimize,
           save: this.save,
-          setRecycleBinFull: this.setRecycleBinFull, // ✅ exposed here
+          setRecycleBinFull: this.setRecycleBinFull,
         }}
       >
         {this.props.children}
