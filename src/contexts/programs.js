@@ -186,22 +186,39 @@ class ProgramProvider extends Component {
       },
       {
         onClick: () => {
-          const desktopControlsButton = document.querySelector('.desktop-controls-button');
-          if (desktopControlsButton) {
-            desktopControlsButton.click();
-            // Toggle the state
-            this.setState(prevState => ({
+          // Check if device is mobile
+          const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          
+          if (isMobile) {
+            // Click mobile controls button on mobile devices
+            const mobileControlsButton = document.querySelector('.mobile-controls-button');
+            if (mobileControlsButton) {
+              mobileControlsButton.click();
+            }
+          } else {
+            // Click desktop controls button on desktop
+            const desktopControlsButton = document.querySelector('.desktop-controls-button');
+            if (desktopControlsButton) {
+              desktopControlsButton.click();
+            }
+          }
+          
+          // Toggle the state and border style
+          this.setState(prevState => {
+            const isWhiteBorder = !prevState.isWhiteBorder;
+            return {
+              isWhiteBorder,
               quickLaunch: prevState.quickLaunch.map(item => 
                 item.title === "Show Clippy" || item.title === "Hide Clippy"
                   ? { 
                       ...item, 
                       title: item.title === "Hide Clippy" ? "Show Clippy" : "Hide Clippy",
-                      className: "quick-launch-button-clippy btn ButtonIconSmall"
+                      className: `quick-launch-button-clippy btn ButtonIconSmall ${isWhiteBorder ? 'white-border' : ''}`
                     }
                   : item
               )
-            }));
-          }
+            };
+          });
         },
         icon: icons.textchat32,
         title: "Hide Clippy",
@@ -213,6 +230,7 @@ class ProgramProvider extends Component {
     zIndexes: [],
     settingsDisplay: false,
     shutDownMenu: false,
+    isWhiteBorder: false,
   };
 
   componentDidMount() {

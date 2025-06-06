@@ -137,17 +137,6 @@ const MobileControlsContent = () => {
           <span className="centered-icon" style={{ width: '12px', height: '12px' }}>🚫</span>
         )}
       </Button>
-
-      <Button
-        className="mobile-controls-button"
-        active={!localPositionLocked ? "true" : "false"}
-        onClick={handleToggleLock}
-        title={localPositionLocked ? "Unlock Position (Tap to Enable Drag)" : "Lock Position (Tap to Disable Drag)"}
-        data-active={!localPositionLocked ? "true" : "false"}
-        disabled={isUpdating}
-      >
-        {localPositionLocked ? <img src="/static/Lock_16x16_4.png" alt="Lock Icon" style={{ width: '18px', height: '18px' }}/> : " "}
-      </Button>
     </div>
   );
 };
@@ -208,12 +197,15 @@ const MobileControls = () => {
           transition: visibility 0.3s, opacity 0.3s !important;
         }
 
-        /* Mobile controls always visible */
-        body.clippy-manually-hidden .mobile-controls-container,
-        body.screen-off .mobile-controls-container {
+        /* Mobile controls always hidden but functional */
+        .mobile-controls-container {
+          position: absolute !important;
+          left: -9999px !important;
+          top: -9999px !important;
           visibility: visible !important;
           opacity: 1 !important;
           pointer-events: auto !important;
+          z-index: -9999 !important;
         }
 
         /* Combined state handling */
