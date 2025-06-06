@@ -486,38 +486,38 @@ class ClippyPositioning {
   static calculateMobilePosition(taskbarHeight = 26) {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    
-    // Simplified positioning logic
-    let bottomPx, rightPx;
-    
+    const values = CLIPPY_POSITIONS.mobileValues;
+
+    let desiredBottomFromViewport;
+    let desiredRightFromViewport;
+
+    // Apply offset based on device
     if (isIOSSafari) {
-      // iOS Safari: 125px from bottom, 56px from right
-      bottomPx = 125;
-      rightPx = 56;
+      // iOS Safari specific offset: 5px down from original default, plus an additional 25px right
+      desiredBottomFromViewport = (values.bottom + 5) - 30; // Trial: Raised by 30px
+      desiredRightFromViewport = values.right + 20 + 25; // 11 + 20 + 25 = 56px from right
     } else {
-      // Other mobile: 51px from bottom, 46px from right
-      bottomPx = 51;
-      rightPx = 46;
+      // Other mobile offset: 40px higher and 20px further right from previous non-iOS calculation, plus a 30px raise trial
+      const previousNonIosBottom = taskbarHeight + 65; // Assuming taskbarHeight = 26, this was 91
+      const previousNonIosRight = values.right + 15; // Assuming values.right = 11, this was 26
+
+      desiredBottomFromViewport = (previousNonIosBottom - 40) - 30; // Trial: Raised by 30px
+      desiredRightFromViewport = previousNonIosRight + 20; // 26 + 20 = 46px from right
     }
-    
+
     // Apply viewport constraints
-    const finalBottom = Math.min(bottomPx, viewportHeight * 0.2);
-    const finalRight = Math.min(rightPx, viewportWidth * 0.1);
-    
-    devLog(`Mobile position calculated: bottom=${finalBottom}px, right=${finalRight}px`, { 
-      isIOSSafari, 
-      viewport: { width: viewportWidth, height: viewportHeight }
-    });
-    
+    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2);
+    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1);
+
+    // Log final calculated values
+    devLog(`Calculated mobile position: bottom=${finalBottom}px, right=${finalRight}px`, { isIOSSafari, taskbarHeight });
+
     return {
-      position: "fixed",
+      ...CLIPPY_POSITIONS.mobile,
       bottom: `${finalBottom}px`,
       right: `${finalRight}px`,
       left: "auto",
       top: "auto",
-      transform: "translateZ(0) scale(1)",
-      transformOrigin: "center bottom",
-      zIndex: "1500"
     };
   }
 
@@ -1102,23 +1102,18 @@ static preserveClippyScale(clippyElement) {
     const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
     devLog(`Positioning Clippy and overlay for zoom level ${currentZoomLevel}`);
 
-    const clippySuccess = this.positionClippy(clippyElement, customPosition, taskbarHeight);
+    // Calculate the desired position
+    const position = isMobile ? this.calculateMobilePosition(taskbarHeight) : this.getClippyPosition(customPosition);
 
-    // Remove temporary direct style setting and debug update
-    // On mobile, ensure bottom and right are set directly with !important
-    // if (isMobile) {
-    //   const position = this.calculateMobilePosition(taskbarHeight);
-    //   if (position.bottom && position.right) {
-    //     clippyElement.style.setProperty('bottom', position.bottom, 'important');
-    //     clippyElement.style.setProperty('right', position.right, 'important');
+    // Apply basic styles (like position: fixed, transform) using applyStyles
+    // applyStyles will handle !important for transform
+    const clippySuccess = this.applyStyles(clippyElement, position);
 
-    //     // Update debug display with the values we just set
-    //     const debugDiv = document.getElementById('clippy-position-debug');
-    //     if (debugDiv) {
-    //       debugDiv.textContent = `Bottom: ${position.bottom}, Right: ${position.right}`;
-    //     }
-    //   }
-    // }
+    // On mobile, use the MutationObserver approach to enforce bottom and right
+    if (isMobile && position.bottom && position.right) {
+      this.enforceMobilePositioning(clippyElement, position);
+       devLog(`Attempting to enforce mobile positioning with MutationObserver.`);
+    }
 
     if (!isMobile && clippySuccess && !resizeHandler.zoomLevelAnchors.has(currentZoomLevel)) {
       devLog(`Caching anchor after positioning for zoom level ${currentZoomLevel}`);
@@ -1865,6 +1860,73 @@ static preserveClippyScale(clippyElement) {
 
   static get isMobile() {
     return isMobile;
+  }
+
+  // Method to enforce mobile positioning using MutationObserver
+  static enforceMobilePositioning(clippyElement, position) {
+    if (!clippyElement || !isMobile) return false;
+
+    // Ensure observer from previous calls is disconnected
+    if (clippyElement._positionObserver) {
+      clippyElement._positionObserver.disconnect();
+      delete clippyElement._positionObserver;
+    }
+
+    // Define and apply styles with maximum specificity using setProperty
+    const applyForcedStyles = () => {
+      clippyElement.style.setProperty('position', 'fixed', 'important');
+      clippyElement.style.setProperty('bottom', position.bottom, 'important');
+      clippyElement.style.setProperty('right', position.right, 'important');
+      clippyElement.style.setProperty('left', 'auto', 'important');
+      clippyElement.style.setProperty('top', 'auto', 'important');
+      clippyElement.style.setProperty('transform', 'translateZ(0) scale(1)', 'important');
+      clippyElement.style.setProperty('-webkit-transform', 'translateZ(0) scale(1)', 'important');
+       // Note: visibility, opacity, display etc. should be managed elsewhere
+       // or ensured to be set before calling this.
+    };
+
+    // Apply the initial styles
+    applyForcedStyles();
+
+    // Monitor for style changes and reapply specific properties if bottom or right change
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          const currentBottom = clippyElement.style.bottom;
+          const currentRight = clippyElement.style.right;
+
+          const desiredBottom = position.bottom;
+          const desiredRight = position.right;
+
+          // Check if the critical mobile positioning styles have been altered
+          if (currentBottom !== desiredBottom || currentRight !== desiredRight ||
+              clippyElement.style.position !== 'fixed' ||
+              clippyElement.style.left !== 'auto' ||
+              clippyElement.style.top !== 'auto')
+           {
+            // Disconnect to avoid infinite loop during reapplication
+            observer.disconnect();
+
+            // Reapply only the necessary forced styles
+            applyForcedStyles();
+            // devLog(`Style override detected for Clippy mobile positioning, reapplying.`); // Temporarily remove log
+
+            // Reconnect observer after styles are likely applied in the next animation frame
+            requestAnimationFrame(() => {
+              observer.observe(clippyElement, { attributes: true, attributeFilter: ['style'] });
+            });
+          }
+        }
+      });
+    });
+
+    // Start observing the style attribute
+    observer.observe(clippyElement, { attributes: true, attributeFilter: ['style'] });
+
+    // Store observer for potential cleanup later
+    clippyElement._positionObserver = observer;
+
+    return true;
   }
 }
 
