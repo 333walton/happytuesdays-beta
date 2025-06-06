@@ -1090,15 +1090,41 @@ class ClippyPositioning {
   }
 
   static positionOverlay(overlayElement, clippyElement) {
-    if (!overlayElement || !clippyElement) return false;
+    if (!overlayElement || !clippyElement) {
+      // devLog('positionOverlay: Missing elements.'); // Optional log
+      return false;
+    }
+
+    // Temporary debug logging
+    console.log('ClippyPositioning: positionOverlay called.');
 
     const position = this.getOverlayPosition(clippyElement);
 
+    // Temporary debug logging
+    console.log('ClippyPositioning: positionOverlay calculated position:', position);
+
     if (position) {
-      delete position.transform;
+      delete position.transform; // Overlay doesn't need the transform property
     }
 
-    return this.applyStyles(overlayElement, position);
+    const success = this.applyStyles(overlayElement, position);
+
+    // Temporary debug logging
+    console.log(`ClippyPositioning: positionOverlay applyStyles success: ${success}`);
+    if (success) {
+        // Log computed styles after applying
+        requestAnimationFrame(() => {
+            console.log('ClippyPositioning: positionOverlay computed bottom/right:', {
+                bottom: window.getComputedStyle(overlayElement).bottom,
+                right: window.getComputedStyle(overlayElement).right,
+                left: window.getComputedStyle(overlayElement).left,
+                top: window.getComputedStyle(overlayElement).top,
+                position: window.getComputedStyle(overlayElement).position,
+            });
+        });
+    }
+
+    return success;
   }
 
 static preserveClippyScale(clippyElement) {
