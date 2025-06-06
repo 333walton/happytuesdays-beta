@@ -491,31 +491,31 @@ class ClippyPositioning {
     let desiredBottomFromViewport;
     let desiredRightFromViewport;
 
-    // Apply offset based on devicee
     if (isIOSSafari) {
-  // iOS Safari specific offset: 5px down from original default, plus an additional 25px right
-  desiredBottomFromViewport = values.bottom - 5; // Keep iOS as is
-  desiredRightFromViewport = values.right - 7; // 11px from right
-} else {
-  // Other mobile offset: To raise Clippy higher, DECREASE the bottom value
-  const previousNonIosRight = values.right; // Assuming values.right = 11
+      desiredBottomFromViewport = values.bottom - 5;
+      desiredRightFromViewport = values.right - 7;
+    } else {
+      // For testing, use a large fixed value
+      desiredBottomFromViewport = 150; // Fixed large value to test
+      desiredRightFromViewport = 40;
+    }
 
-  // Current: taskbarHeight - 100 = 26 - 100 = -74 (which becomes 0 due to Math.min)
-  // To raise by 30px more, subtract 30 from the bottom value
-  desiredBottomFromViewport = taskbarHeight + 100; // This will be 26 + 50 = 76px from bottom
-  // Or if you want it even higher:
-  // desiredBottomFromViewport = taskbarHeight + 80; // 106px from bottom (higher position)
-  // desiredBottomFromViewport = taskbarHeight + 100; // 126px from bottom (even higher)
-  
-  desiredRightFromViewport = previousNonIosRight + 20; // 31px from right
-}
+    // Log before and after viewport constraints
+    console.log('Before constraints:', {
+      bottom: desiredBottomFromViewport,
+      right: desiredRightFromViewport,
+      viewportHeight: viewportHeight,
+      twentyPercentHeight: viewportHeight * 0.2
+    });
 
     // Apply viewport constraints
     const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2);
     const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1);
 
-    // Log final calculated values
-    devLog(`Calculated mobile position: bottom=${finalBottom}px, right=${finalRight}px`, { isIOSSafari, taskbarHeight });
+    console.log('After constraints:', {
+      bottom: finalBottom,
+      right: finalRight
+    });
 
     return {
       ...CLIPPY_POSITIONS.mobile,
