@@ -213,7 +213,8 @@ class ProgramProvider extends Component {
                   ? { 
                       ...item, 
                       title: item.title === "Hide Clippy" ? "Show Clippy" : "Hide Clippy",
-                      className: `quick-launch-button-clippy btn ButtonIconSmall ${isWhiteBorder ? 'white-border' : ''}`
+                      className: `quick-launch-button-clippy btn ButtonIconSmall ${isWhiteBorder ? 'white-border' : ''}`,
+                      tooltip: item.title === "Hide Clippy" ? "Show Clippy" : "Hide Clippy"
                     }
                   : item
               )
@@ -222,6 +223,7 @@ class ProgramProvider extends Component {
         },
         icon: icons.textchat32,
         title: "Hide Clippy",
+        tooltip: "Hide Clippy",
         className: "quick-launch-button-clippy btn ButtonIconSmall",
       },
     ],

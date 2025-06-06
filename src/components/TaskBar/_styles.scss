@@ -7,6 +7,8 @@
   border-color: #ffffff #808080 #808080 #ffffff !important;
   box-shadow: inset -1px -1px #000000 !important;
   transition: all 0.1s ease !important;
+  position: relative !important;
+  cursor: pointer;
 
   /* Normal state */
   &.btn.ButtonIconSmall {
@@ -20,6 +22,11 @@
   img {
     display: block;
     margin: 0 auto;
+  }
+
+  /* Debug styles */
+  &:hover {
+    outline: 2px solid red !important;
   }
 }
 
