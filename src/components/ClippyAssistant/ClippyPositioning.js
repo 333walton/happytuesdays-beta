@@ -491,7 +491,7 @@ class ClippyPositioning {
     let desiredBottomFromViewport;
     let desiredRightFromViewport;
 
-    // Apply offset based on device
+    // Apply offset based on devicee
     if (isIOSSafari) {
       // iOS Safari specific offset: 5px down from original default, plus an additional 25px right
       desiredBottomFromViewport = values.bottom - 5; // 
