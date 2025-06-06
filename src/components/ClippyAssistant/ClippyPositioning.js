@@ -483,31 +483,34 @@ class ClippyPositioning {
     return desktop;
   }
 
-  static calculateMobilePosition() {
+  static calculateMobilePosition(taskbarHeight = 26) {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const values = CLIPPY_POSITIONS.mobileValues;
 
-    let tempBottom = values.bottom;
-    let tempRight = values.right;
+    let desiredBottomFromViewport;
+    let desiredRightFromViewport;
 
     // Apply offset based on device
     if (isIOSSafari) {
-      tempRight += 15; // Shift 15px right for iOS Safari
-      tempBottom += 5; // Shift 5px down for iOS Safari
+      // iOS Safari specific offset relative to original default
+      desiredRightFromViewport = values.right + 15; // 11 + 15 = 26px from right
+      desiredBottomFromViewport = values.bottom + 5; // 120 + 5 = 125px from bottom
     } else {
-      // Apply 40px upward shift for all other mobile users
-      tempBottom -= 40;
+      // 15px above the taskbar for all other mobile
+      const gapAboveTaskbar = 15;
+      desiredBottomFromViewport = taskbarHeight + gapAboveTaskbar;
+      desiredRightFromViewport = values.right; // Use original default right (11px)
     }
 
     // Apply viewport constraints
-    const bottom = Math.min(tempBottom, viewportHeight * 0.2);
-    const right = Math.min(tempRight, viewportWidth * 0.1);
+    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2);
+    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1);
 
     return {
       ...CLIPPY_POSITIONS.mobile,
-      bottom: `${bottom}px`,
-      right: `${right}px`,
+      bottom: `${finalBottom}px`,
+      right: `${finalRight}px`,
       left: "auto",
       top: "auto",
     };
@@ -963,7 +966,7 @@ class ClippyPositioning {
     }
   }
 
-  static positionClippy(clippyElement, customPosition = null) {
+  static positionClippy(clippyElement, customPosition = null, taskbarHeight = 26) {
     if (!clippyElement) return false;
 
     const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
@@ -985,7 +988,7 @@ class ClippyPositioning {
       }
     }
 
-    const position = this.getClippyPosition(customPosition);
+    const position = isMobile ? this.calculateMobilePosition(taskbarHeight) : this.getClippyPosition(customPosition);
     return this.applyStyles(clippyElement, position);
   }
 
@@ -1034,13 +1037,13 @@ static preserveClippyScale(clippyElement) {
   }
 }
 
-  static positionClippyAndOverlay(clippyElement, overlayElement, customPosition = null) {
+  static positionClippyAndOverlay(clippyElement, overlayElement, customPosition = null, taskbarHeight = 26) {
     if (!clippyElement) return false;
 
     const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
     devLog(`Positioning Clippy and overlay for zoom level ${currentZoomLevel}`);
 
-    const clippySuccess = this.positionClippy(clippyElement, customPosition);
+    const clippySuccess = this.positionClippy(clippyElement, customPosition, taskbarHeight);
 
     if (!isMobile && clippySuccess && !resizeHandler.zoomLevelAnchors.has(currentZoomLevel)) {
       devLog(`Caching anchor after positioning for zoom level ${currentZoomLevel}`);
