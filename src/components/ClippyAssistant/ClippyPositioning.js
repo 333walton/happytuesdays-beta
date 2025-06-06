@@ -698,6 +698,11 @@ class ClippyPositioning {
     if (!element) return false;
 
     try {
+      // Log incoming styles on mobile
+      if (isMobile) {
+        devLog('Applying styles on mobile:', styles);
+      }
+
       // Add temporary debug display for mobile
       if (isMobile) {
         const debugDiv = document.createElement('div');
@@ -723,14 +728,22 @@ class ClippyPositioning {
         
         // Add new debug div
         document.body.appendChild(debugDiv);
-        
-        // Update debug text with current styles
-        debugDiv.textContent = `Bottom: ${styles.bottom}, Right: ${styles.right}`;
       }
 
       Object.entries(styles).forEach(([key, value]) => {
         element.style[key] = value;
       });
+
+      // Update debug text with current styles AFTER applying them
+      if (isMobile) {
+        const debugDiv = document.getElementById('clippy-position-debug');
+        if (debugDiv) {
+           // Read the actual applied styles from the element
+          const appliedBottom = element.style.bottom;
+          const appliedRight = element.style.right;
+          debugDiv.textContent = `Bottom: ${appliedBottom}, Right: ${appliedRight}`;
+        }
+      }
 
       if (styles.transform) {
         const actualTransform = element.style.transform;
