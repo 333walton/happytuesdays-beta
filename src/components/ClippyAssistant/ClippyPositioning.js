@@ -495,8 +495,8 @@ class ClippyPositioning {
       desiredBottomFromViewport = values.bottom - 5;
       desiredRightFromViewport = values.right - 7;
     } else {
-      // For testing, use a large fixed value
-      desiredBottomFromViewport = 150; // Fixed large value to test
+      // Non-iOS: Increase this value to move Clippy higher
+      desiredBottomFromViewport = 150; // Try 150, 200, 250 to move higher
       desiredRightFromViewport = 40;
     }
 
@@ -505,7 +505,8 @@ class ClippyPositioning {
       bottom: desiredBottomFromViewport,
       right: desiredRightFromViewport,
       viewportHeight: viewportHeight,
-      twentyPercentHeight: viewportHeight * 0.2
+      twentyPercentHeight: viewportHeight * 0.2,
+      isIOSSafari: isIOSSafari
     });
 
     // Apply viewport constraints
@@ -516,6 +517,20 @@ class ClippyPositioning {
       bottom: finalBottom,
       right: finalRight
     });
+
+    // Add verification after applying
+    setTimeout(() => {
+      const clippyEl = document.querySelector('.clippy');
+      if (clippyEl) {
+        const computedStyle = window.getComputedStyle(clippyEl);
+        console.log('Actual applied styles:', {
+          bottom: computedStyle.bottom,
+          right: computedStyle.right,
+          position: computedStyle.position,
+          inlineStyle: clippyEl.style.bottom + ' / ' + clippyEl.style.right
+        });
+      }
+    }, 100);
 
     return {
       ...CLIPPY_POSITIONS.mobile,
@@ -1870,67 +1885,65 @@ static preserveClippyScale(clippyElement) {
   // Method to enforce mobile positioning using MutationObserver
   static enforceMobilePositioning(clippyElement, position) {
     if (!clippyElement || !isMobile) return false;
-
-    // Ensure observer from previous calls is disconnected
-    if (clippyElement._positionObserver) {
-      clippyElement._positionObserver.disconnect();
-      delete clippyElement._positionObserver;
-    }
-
-    // Define and apply styles with maximum specificity using setProperty
-    const applyForcedStyles = () => {
-      clippyElement.style.setProperty('position', 'fixed', 'important');
-      clippyElement.style.setProperty('bottom', position.bottom, 'important');
-      clippyElement.style.setProperty('right', position.right, 'important');
-      clippyElement.style.setProperty('left', 'auto', 'important');
-      clippyElement.style.setProperty('top', 'auto', 'important');
-      clippyElement.style.setProperty('transform', 'translateZ(0) scale(1)', 'important');
-      clippyElement.style.setProperty('-webkit-transform', 'translateZ(0) scale(1)', 'important');
-       // Note: visibility, opacity, display etc. should be managed elsewhere
-       // or ensured to be set before calling this.
+    
+    console.log('Enforcing position with MutationObserver:', position);
+    
+    // Apply styles with maximum specificity
+    const applyPosition = () => {
+      const styles = `
+        position: fixed !important;
+        bottom: ${position.bottom || position.bottomPx + 'px'} !important;
+        right: ${position.right || position.rightPx + 'px'} !important;
+        left: auto !important;
+        top: auto !important;
+        transform: translateZ(0) scale(1) !important;
+        -webkit-transform: translateZ(0) scale(1) !important;
+      `;
+      
+      clippyElement.setAttribute('style', styles);
+      console.log('Styles applied via setAttribute');
     };
-
-    // Apply the initial styles
-    applyForcedStyles();
-
-    // Monitor for style changes and reapply specific properties if bottom or right change
+    
+    // Apply immediately
+    applyPosition();
+    
+    // Monitor for style changes and reapply
     const observer = new MutationObserver((mutations) => {
+      let styleChanged = false;
+      
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-          const currentBottom = clippyElement.style.bottom;
-          const currentRight = clippyElement.style.right;
-
-          const desiredBottom = position.bottom;
-          const desiredRight = position.right;
-
-          // Check if the critical mobile positioning styles have been altered
-          if (currentBottom !== desiredBottom || currentRight !== desiredRight ||
-              clippyElement.style.position !== 'fixed' ||
-              clippyElement.style.left !== 'auto' ||
-              clippyElement.style.top !== 'auto')
-           {
-            // Disconnect to avoid infinite loop during reapplication
-            observer.disconnect();
-
-            // Reapply only the necessary forced styles
-            applyForcedStyles();
-            // devLog(`Style override detected for Clippy mobile positioning, reapplying.`); // Temporarily remove log
-
-            // Reconnect observer after styles are likely applied in the next animation frame
-            requestAnimationFrame(() => {
-              observer.observe(clippyElement, { attributes: true, attributeFilter: ['style'] });
-            });
-          }
+          styleChanged = true;
         }
       });
+      
+      if (styleChanged) {
+        const currentBottom = clippyElement.style.bottom;
+        const currentRight = clippyElement.style.right;
+        const expectedBottom = position.bottom || position.bottomPx + 'px';
+        const expectedRight = position.right || position.rightPx + 'px';
+        
+        console.log('Style mutation detected:', {
+          current: { bottom: currentBottom, right: currentRight },
+          expected: { bottom: expectedBottom, right: expectedRight }
+        });
+        
+        if (currentBottom !== expectedBottom || currentRight !== expectedRight) {
+          console.log('Reapplying position due to override');
+          observer.disconnect();
+          applyPosition();
+          requestAnimationFrame(() => {
+            observer.observe(clippyElement, { attributes: true, attributeFilter: ['style'] });
+          });
+        }
+      }
     });
-
-    // Start observing the style attribute
+    
     observer.observe(clippyElement, { attributes: true, attributeFilter: ['style'] });
-
-    // Store observer for potential cleanup later
+    
+    // Store observer for cleanup
     clippyElement._positionObserver = observer;
-
+    
     return true;
   }
 }
