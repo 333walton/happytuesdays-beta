@@ -498,10 +498,10 @@ class ClippyPositioning {
       desiredRightFromViewport = values.right - 7; // 11px from right
     } else {
       // Other mobile offset: 40px higher and 20px further right from previous non-iOS calculation, plus a 30px raise trial
-      const previousNonIosBottom = taskbarHeight + 150; // Assuming taskbarHeight = 26, this is 121
+      //const previousNonIosBottom = taskbarHeight + 150; // Assuming taskbarHeight = 26, this is 121
       const previousNonIosRight = values.right; // Assuming values.right = 11
 
-      desiredBottomFromViewport = taskbarHeight - 100; // 70px higher than before
+      desiredBottomFromViewport = taskbarHeight - 200; // 70px higher than before
       desiredRightFromViewport = previousNonIosRight + 20; // 26 + 20 = 46px from right
     }
 
