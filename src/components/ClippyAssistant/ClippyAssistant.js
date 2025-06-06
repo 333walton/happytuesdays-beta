@@ -163,13 +163,12 @@ const ClippyAssistant = memo((props) => {
       const newPosition = { x: Number(xPosition), y: Number(yPosition) };
       setPosition(newPosition);
 
-      // Update DOM directly for immediate feedback
       const clippyElement = document.querySelector(".clippy");
+      const overlayEl = document.getElementById("clippy-clickable-overlay");
+
       if (clippyElement) {
-        // Apply hardware-accelerated positioning
-        
-        // Only apply these direct styles on desktop
         if (!ClippyPositioning.isMobile) {
+          // Desktop: Apply hardware-accelerated positioning
           clippyElement.style.position = "absolute";
           clippyElement.style.left = `${xPosition}px`;
           clippyElement.style.top = `${yPosition}px`;
@@ -183,16 +182,23 @@ const ClippyAssistant = memo((props) => {
               clippyElement.style.willChange = "auto";
             }
           }, 500);
+
+          // Position overlay on desktop
+          if (overlayEl) {
+             ClippyPositioning.positionOverlay(overlayEl, clippyElement);
+          }
+
         } else {
-          // On mobile, ensure positioning is handled by ClippyPositioning
+          // Mobile: Ensure positioning is handled by ClippyPositioning method
           if (ClippyPositioning.positionClippyAndOverlay) {
-            const overlayEl = document.getElementById("clippy-clickable-overlay");
-            ClippyPositioning.positionClippyAndOverlay(clippyElement, overlayEl);
+            // Pass the calculated mobile position or null to let the method recalculate
+            ClippyPositioning.positionClippyAndOverlay(clippyElement, overlayEl, null);
           }
         }
       }
 
-      // Give feedback
+      // Give feedback (only if positions were successfully applied?)
+      // For now, keep the feedback logic simple
       const clippy = getClippy();
       if (clippy) {
         if (clippy.speak) {

@@ -1905,6 +1905,12 @@ static preserveClippyScale(clippyElement) {
   static enforceMobilePositioning(clippyElement, position) {
     if (!clippyElement || !isMobile) return false;
 
+    // Apply this enforcement only to non-iOS mobile devices
+    if (isIOSSafari) {
+      // devLog('Skipping mobile positioning enforcement for iOS Safari.'); // Optional log
+      return false; // Or return true if doing nothing is considered success for iOS
+    }
+
     // Ensure observer from previous calls is disconnected
     if (clippyElement._positionObserver) {
       clippyElement._positionObserver.disconnect();
@@ -1921,6 +1927,9 @@ static preserveClippyScale(clippyElement) {
       clippyElement.style.setProperty('top', 'auto', '!important');
       clippyElement.style.setProperty('transform', 'translateZ(0) scale(1)', '!important');
       clippyElement.style.setProperty('-webkit-transform', 'translateZ(0) scale(1)', '!important');
+
+      // Temporary debug logging after applying styles
+      console.log('ClippyPositioning: applyForcedStyles applied. Immediate computed bottom:', window.getComputedStyle(clippyElement).bottom);
     };
 
     // Apply the initial styles
@@ -1934,6 +1943,7 @@ static preserveClippyScale(clippyElement) {
           const currentRight = clippyElement.style.right;
 
           // Check if the critical mobile positioning styles have been altered
+          // Note: This check still uses '300px' as it's for non-iOS mobile only
           if (currentBottom !== '300px' || currentRight !== position.right ||
               clippyElement.style.position !== 'fixed' ||
               clippyElement.style.left !== 'auto' ||
@@ -1945,9 +1955,14 @@ static preserveClippyScale(clippyElement) {
             // Reapply only the necessary forced styles
             applyForcedStyles();
 
+            // Log after reapplying
+            console.log('ClippyPositioning: Override detected, styles reapplied. Computed bottom:', window.getComputedStyle(clippyElement).bottom);
+
             // Reconnect observer after styles are likely applied in the next animation frame
             requestAnimationFrame(() => {
               observer.observe(clippyElement, { attributes: true, attributeFilter: ['style'] });
+               // Log after re-observing
+               console.log('ClippyPositioning: Observer reconnected. Computed bottom:', window.getComputedStyle(clippyElement).bottom);
             });
           }
         }
@@ -1956,6 +1971,14 @@ static preserveClippyScale(clippyElement) {
 
     // Start observing the style attribute
     observer.observe(clippyElement, { attributes: true, attributeFilter: ['style'] });
+
+    // Temporary debug logging after starting observer
+    console.log('ClippyPositioning: Observer started. Computed bottom:', window.getComputedStyle(clippyElement).bottom);
+
+    // Add a check after a short delay to see if the style persists
+    setTimeout(() => {
+        console.log('ClippyPositioning: 100ms check. Computed bottom:', window.getComputedStyle(clippyElement).bottom);
+    }, 100);
 
     // Store observer for potential cleanup later
     clippyElement._positionObserver = observer;
