@@ -502,18 +502,26 @@ class ClippyPositioning {
   static calculateMobilePosition(taskbarHeight = 26) {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    // Removed: const values = CLIPPY_POSITIONS.mobileValues;
+    const values = CLIPPY_POSITIONS.mobileValues; // Keep values for potential future use or context
 
-    // Aim for the observed desired position (Safari's approximate position)
-    const desiredBottomFromViewport = 115;
-    const desiredRightFromViewport = 4;
+    let desiredBottomFromViewport;
+    let desiredRightFromViewport;
+
+    if (isIOSSafari) {
+      // Positioning specific to iOS Safari (which was already correct)
+      desiredBottomFromViewport = values.bottom - 5; // 115px
+      desiredRightFromViewport = values.right - 7; // 4px
+    } else {
+      // Positioning for all other mobile browsers (Android, Chrome/Firefox on iOS, etc.)
+      // Aim to match Safari's vertical position (115px) and right position (4px)
+      desiredBottomFromViewport = 115;
+      desiredRightFromViewport = 4;
+    }
 
     // Apply viewport constraints
     // These constraints prevent Clippy from going off-screen near the top/left edges.
-    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2); // Constraint from top edge
-    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1); // Constraint from left edge
-
-    // Removed previous conditional logic and debug logs
+    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2); // Constraint from top edge (20% of viewport)
+    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1); // Constraint from left edge (10% of viewport)
 
     return {
       ...CLIPPY_POSITIONS.mobile,
