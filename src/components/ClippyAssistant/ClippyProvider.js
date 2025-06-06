@@ -34,6 +34,7 @@ import ClippyContextMenu from "./ClippyContextMenu";
 import ClippyPositioning from "./ClippyPositioning";
 import ClippyService from "./ClippyService";
 import MobileControls from "./MobileControls";
+import DesktopControls from "./DesktopControls";
 import "./_styles.scss";
 
 const ClippyContext = createContext(null);
@@ -1723,6 +1724,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             onHide={() => setAssistantVisible(false)}
           />
         )}
+
+        {/* Desktop Controls - only show when Clippy should be rendered */}
+        {!isMobile && shouldRenderClippy && <DesktopControls />}
 
         {children}
       </ReactClippyProvider>
