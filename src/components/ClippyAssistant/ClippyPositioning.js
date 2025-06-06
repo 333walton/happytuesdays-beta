@@ -43,16 +43,20 @@ const isMobile = (() => {
   }
 })();
 
-// iOS Safari detection (refined)
+// iOS Safari detection (more refined)
 const isIOSSafari = (() => {
   try {
     const userAgent = navigator.userAgent || '';
     const isIOS = /iPad|iPhone|iPod/.test(userAgent);
     const isSafari = /Safari/.test(userAgent);
-    const isOtherBrowserOnIOS = /CriOS|FxiOS|EdgiOS|OPiOS/.test(userAgent); // Check for Chrome, Firefox, Edge, Opera on iOS
 
-    // It's iOS Safari if it's iOS, contains 'Safari', and does NOT contain strings for other known browsers
-    return isIOS && isSafari && !isOtherBrowserOnIOS;
+    // More comprehensive check for common non-Safari browser indicators on iOS
+    // We look for specific strings that typically appear *instead* of or *in addition* to the base Safari string
+    const isLikelyNotSafari = /CriOS\/|FxiOS\/|EdgiOS\/|OPiOS\/|Coast\/|AlohaBrowser\/|Vivaldi\/|DuckDuckGo\//.test(userAgent);
+
+    // It's iOS Safari if it's iOS, contains 'Safari', and does NOT contain stronger indicators of other browsers
+    // This is still heuristic and may not be perfect for all edge cases.
+    return isIOS && isSafari && !isLikelyNotSafari;
   } catch {
     return false;
   }
