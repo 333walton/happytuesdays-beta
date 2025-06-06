@@ -513,8 +513,8 @@ class ClippyPositioning {
       desiredRightFromViewport = values.right - 7; // Should be 4px
     } else {
       // Positioning for all other mobile browsers (Android, Chrome/Firefox on iOS, etc.)
-      // Aim for a bottom position around 150px and a right position of 4px.
-      desiredBottomFromViewport = 150; // Starting point to adjust non-Safari mobile height
+      // Aim for a bottom position around 120px and a right position of 4px.
+      desiredBottomFromViewport = 120; // Adjusted starting point to fine-tune non-Safari mobile height
       desiredRightFromViewport = 4; // Match Safari's right position
     }
 
