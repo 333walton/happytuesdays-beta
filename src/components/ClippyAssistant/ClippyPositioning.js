@@ -1913,15 +1913,14 @@ static preserveClippyScale(clippyElement) {
 
     // Define and apply styles with maximum specificity using setProperty
     const applyForcedStyles = () => {
-      clippyElement.style.setProperty('position', 'fixed', 'important');
-      clippyElement.style.setProperty('bottom', position.bottom, 'important');
-      clippyElement.style.setProperty('right', position.right, 'important');
-      clippyElement.style.setProperty('left', 'auto', 'important');
-      clippyElement.style.setProperty('top', 'auto', 'important');
-      clippyElement.style.setProperty('transform', 'translateZ(0) scale(1)', 'important');
-      clippyElement.style.setProperty('-webkit-transform', 'translateZ(0) scale(1)', 'important');
-       // Note: visibility, opacity, display etc. should be managed elsewhere
-       // or ensured to be set before calling this.
+      clippyElement.style.setProperty('position', 'fixed', '!important');
+      // Force a much higher position
+      clippyElement.style.setProperty('bottom', '300px', '!important');
+      clippyElement.style.setProperty('right', position.right, '!important');
+      clippyElement.style.setProperty('left', 'auto', '!important');
+      clippyElement.style.setProperty('top', 'auto', '!important');
+      clippyElement.style.setProperty('transform', 'translateZ(0) scale(1)', '!important');
+      clippyElement.style.setProperty('-webkit-transform', 'translateZ(0) scale(1)', '!important');
     };
 
     // Apply the initial styles
@@ -1934,11 +1933,8 @@ static preserveClippyScale(clippyElement) {
           const currentBottom = clippyElement.style.bottom;
           const currentRight = clippyElement.style.right;
 
-          const desiredBottom = position.bottom;
-          const desiredRight = position.right;
-
           // Check if the critical mobile positioning styles have been altered
-          if (currentBottom !== desiredBottom || currentRight !== desiredRight ||
+          if (currentBottom !== '300px' || currentRight !== position.right ||
               clippyElement.style.position !== 'fixed' ||
               clippyElement.style.left !== 'auto' ||
               clippyElement.style.top !== 'auto')
@@ -1948,7 +1944,6 @@ static preserveClippyScale(clippyElement) {
 
             // Reapply only the necessary forced styles
             applyForcedStyles();
-            // devLog(`Style override detected for Clippy mobile positioning, reapplying.`); // Temporarily remove log
 
             // Reconnect observer after styles are likely applied in the next animation frame
             requestAnimationFrame(() => {
