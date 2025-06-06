@@ -528,14 +528,14 @@ class ClippyPositioning {
       desiredRightFromViewport = values.right - 7; // Should be 4px
     } else if (isGoogleAppOnIOS) {
       // Positioning specific to Google App on iOS using top positioning
-      // Aiming for the same distance from the bottom as Safari (~115px)
-      desiredTopFromViewport = viewportHeight - 115; // Calculate top based on desired distance from bottom
+      // Aiming for ~145px from bottom (115 + 30) to raise it by 30px visually.
+      desiredTopFromViewport = viewportHeight - 145; // Calculate top based on desired distance from bottom
       desiredRightFromViewport = 4; // Keep right position consistent with Safari
       useTopPositioning = true;
     } else {
       // Positioning for all other mobile browsers (Android, Chrome/Firefox on iOS, etc.)
-      // Adjusting based on feedback for Chrome, aiming for 120px bottom, 4px right.
-      desiredBottomFromViewport = 120; // Adjusted to lower Chrome position based on reverse behavior
+      // Adjusting based on feedback for Chrome, aiming for 130px bottom, 4px right.
+      desiredBottomFromViewport = 130; // Adjusted to lower Chrome position further
       desiredRightFromViewport = 4; // Setting right to 4px for consistency
     }
 
