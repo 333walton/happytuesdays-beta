@@ -486,40 +486,38 @@ class ClippyPositioning {
   static calculateMobilePosition(taskbarHeight = 26) {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    // const values = CLIPPY_POSITIONS.mobileValues; // Original default values (120 bottom, 11 right)
+    const values = CLIPPY_POSITIONS.mobileValues;
 
-    // Simplified positioning logic based on tested pixel values
-    let bottomPx, rightPx;
+    let desiredBottomFromViewport;
+    let desiredRightFromViewport;
 
+    // Apply offset based on device
     if (isIOSSafari) {
-      // iOS Safari: 125px from bottom, 56px from right
-      bottomPx = 125;
-      rightPx = 41;
+      // iOS Safari specific offset: 5px down from original default, plus an additional 25px right
+      desiredBottomFromViewport = (values.bottom + 5) - 30; // Trial: Raised by 30px
+      desiredRightFromViewport = values.right + 20 + 25; // 11 + 20 + 25 = 56px from right
     } else {
-      // Other mobile: 51px from bottom, 46px from right
-      bottomPx = 75;
-      rightPx = 38;
+      // Other mobile offset: 40px higher and 20px further right from previous non-iOS calculation, plus a 30px raise trial
+      const previousNonIosBottom = taskbarHeight + 65; // Assuming taskbarHeight = 26, this was 91
+      const previousNonIosRight = values.right + 15; // Assuming values.right = 11, this was 26
+
+      desiredBottomFromViewport = (previousNonIosBottom - 40) - 30; // Trial: Raised by 30px
+      desiredRightFromViewport = previousNonIosRight + 20; // 26 + 20 = 46px from right
     }
 
     // Apply viewport constraints
-    const finalBottom = Math.min(bottomPx, viewportHeight * 0.2);
-    const finalRight = Math.min(rightPx, viewportWidth * 0.1);
+    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2);
+    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1);
 
     // Log final calculated values
-    devLog(`Mobile position calculated: bottom=${finalBottom}px, right=${finalRight}px`, {
-      isIOSSafari,
-      viewport: { width: viewportWidth, height: viewportHeight }
-    });
+    devLog(`Calculated mobile position: bottom=${finalBottom}px, right=${finalRight}px`, { isIOSSafari, taskbarHeight });
 
     return {
-      position: "fixed",
+      ...CLIPPY_POSITIONS.mobile,
       bottom: `${finalBottom}px`,
       right: `${finalRight}px`,
       left: "auto",
       top: "auto",
-      transform: "translateZ(0) scale(1)",
-      transformOrigin: "center bottom",
-      zIndex: "1500"
     };
   }
 
