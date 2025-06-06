@@ -519,34 +519,47 @@ class ClippyPositioning {
 
     let desiredBottomFromViewport;
     let desiredRightFromViewport;
+    let desiredTopFromViewport;
+    let useTopPositioning = false; // Flag to indicate if we should use top instead of bottom
 
     if (isIOSSafari) {
       // Positioning specific to iOS Safari (which was already correct)
       desiredBottomFromViewport = values.bottom - 5; // Should be 115px
       desiredRightFromViewport = values.right - 7; // Should be 4px
     } else if (isGoogleAppOnIOS) {
-      // Positioning specific to Google App on iOS (+40px higher as per notes)
-      // Adding 40px to the base desired bottom (e.g., Safari's 115px) to move it visually higher.
-      desiredBottomFromViewport = 115 + 40; // Aiming for 155px bottom
+      // Positioning specific to Google App on iOS using top positioning
+      // Aiming for the same distance from the bottom as Safari (~115px)
+      desiredTopFromViewport = viewportHeight - 115; // Calculate top based on desired distance from bottom
       desiredRightFromViewport = 4; // Keep right position consistent with Safari
+      useTopPositioning = true;
     } else {
       // Positioning for all other mobile browsers (Android, Chrome/Firefox on iOS, etc.)
-      // Adjusting based on feedback for Chrome, aiming for 120px bottom, -1px right.
-      desiredBottomFromViewport = 120; // Adjusted to lower Chrome position
-      desiredRightFromViewport = -1; // Using Chrome's working horizontal
+      // Adjusting based on feedback for Chrome, aiming for 120px bottom, 4px right.
+      desiredBottomFromViewport = 120; // Adjusted to lower Chrome position based on reverse behavior
+      desiredRightFromViewport = 4; // Setting right to 4px for consistency
     }
 
     // Apply viewport constraints
     // These constraints prevent Clippy from going off-screen near the top/left edges.
-    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2); // Constraint from top edge (20% of viewport)
+    // Constraints need to be applied differently if using top positioning.
+    let finalBottom = 'auto';
+    let finalTop = 'auto';
     const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1); // Constraint from left edge (10% of viewport)
+
+    if (useTopPositioning) {
+        // Apply top constraint
+        finalTop = Math.max(desiredTopFromViewport, viewportHeight * 0.1); // Ensure it's not too close to the top
+    } else {
+        // Apply bottom constraint
+        finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2); // Constraint from top edge (20% of viewport)
+    }
 
     return {
       ...CLIPPY_POSITIONS.mobile,
-      bottom: `${finalBottom}px`,
+      bottom: useTopPositioning ? 'auto' : `${finalBottom}px`,
+      top: useTopPositioning ? `${finalTop}px` : 'auto',
       right: `${finalRight}px`,
-      left: "auto", // Ensure left and top are auto when using bottom/right
-      top: "auto",
+      left: "auto", // Ensure left is auto when using right
     };
   }
 
