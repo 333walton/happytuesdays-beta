@@ -502,7 +502,7 @@ class ClippyPositioning {
 
   // Current: taskbarHeight - 100 = 26 - 100 = -74 (which becomes 0 due to Math.min)
   // To raise by 30px more, subtract 30 from the bottom value
-  desiredBottomFromViewport = taskbarHeight + 50; // This will be 26 + 50 = 76px from bottom
+  desiredBottomFromViewport = taskbarHeight + 100; // This will be 26 + 50 = 76px from bottom
   // Or if you want it even higher:
   // desiredBottomFromViewport = taskbarHeight + 80; // 106px from bottom (higher position)
   // desiredBottomFromViewport = taskbarHeight + 100; // 126px from bottom (even higher)
