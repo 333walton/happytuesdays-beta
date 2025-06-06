@@ -26,8 +26,15 @@
   -webkit-backface-visibility: hidden !important;
   -webkit-font-smoothing: antialiased !important;
 
-  transform: scale(0.9) !important;
+  /* Mobile scale */
+  @media screen and (max-width: 768px) {
+  transform: scale(1) !important;
   transform-origin: center bottom !important;
+  }
+  /* Desktop scale */
+  @media screen and (min-width: 768px) {
+    transform: scale(0.95) !important;
+  }
 }
 
 /* Special drag state for maximum performance */
