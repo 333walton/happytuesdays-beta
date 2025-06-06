@@ -80,7 +80,7 @@ const CLIPPY_POSITIONS = {
     zIndex: "2000",
   },
 
-  // MOBILE positioning values (centralized)
+  // MOBILE positioning values (centralized) - Keep for reference but calculations will use fixed values
   mobileValues: {
     bottom: 120,
     right: 11,
@@ -502,42 +502,24 @@ class ClippyPositioning {
   static calculateMobilePosition(taskbarHeight = 26) {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const values = CLIPPY_POSITIONS.mobileValues;
+    // Removed: const values = CLIPPY_POSITIONS.mobileValues;
 
-    let desiredBottomFromViewport;
-    let desiredRightFromViewport;
-
-    if (isIOSSafari) {
-      desiredBottomFromViewport = values.bottom - 5;
-      desiredRightFromViewport = values.right - 7;
-    } else {
-      // For testing, use a large fixed value
-      desiredBottomFromViewport = 300; // Increased from 150 to 300 to raise position
-      desiredRightFromViewport = 40;
-    }
-
-    // Log before and after viewport constraints
-    console.log('Before constraints:', {
-      bottom: desiredBottomFromViewport,
-      right: desiredRightFromViewport,
-      viewportHeight: viewportHeight,
-      twentyPercentHeight: viewportHeight * 0.2
-    });
+    // Aim for the observed desired position (Safari's approximate position)
+    const desiredBottomFromViewport = 115;
+    const desiredRightFromViewport = 4;
 
     // Apply viewport constraints
-    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2);
-    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1);
+    // These constraints prevent Clippy from going off-screen near the top/left edges.
+    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2); // Constraint from top edge
+    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1); // Constraint from left edge
 
-    console.log('After constraints:', {
-      bottom: finalBottom,
-      right: finalRight
-    });
+    // Removed previous conditional logic and debug logs
 
     return {
       ...CLIPPY_POSITIONS.mobile,
       bottom: `${finalBottom}px`,
       right: `${finalRight}px`,
-      left: "auto",
+      left: "auto", // Ensure left and top are auto when using bottom/right
       top: "auto",
     };
   }
@@ -721,52 +703,9 @@ class ClippyPositioning {
     if (!element) return false;
 
     try {
-      // Remove temporary debug display for mobile
-      // if (isMobile) {
-      //   const debugDiv = document.createElement('div');
-      //   debugDiv.id = 'clippy-position-debug';
-      //   debugDiv.style.cssText = `
-      //     position: fixed;
-      //     top: 10px;
-      //     left: 10px;
-      //     background: rgba(0, 0, 0, 0.8);
-      //     color: white;
-      //     padding: 5px;
-      //     border-radius: 4px;
-      //     font-size: 12px;
-      //     z-index: 9999;
-      //     pointer-events: none;
-      //   `;
-      
-      //   // Remove existing debug div if it exists
-      //   const existingDebug = document.getElementById('clippy-position-debug');
-      //   if (existingDebug) {
-      //     existingDebug.remove();
-      //   }
-      
-      //   // Add new debug div
-      //   document.body.appendChild(debugDiv);
-      // }
-
       Object.entries(styles).forEach(([key, value]) => {
-        // Remove temporary !important for bottom and right on mobile
-        // if (isMobile && (key === 'bottom' || key === 'right')) {
-        //   element.style.setProperty(key, value, 'important');
-        // } else {
-          element.style[key] = value;
-        // }
+        element.style[key] = value;
       });
-
-      // Remove temporary debug text update
-      // if (isMobile) {
-      //   const debugDiv = document.getElementById('clippy-position-debug');
-      //   if (debugDiv) {
-      //      // Read the actual applied styles from the element
-      //     const appliedBottom = element.style.bottom;
-      //     const appliedRight = element.style.right;
-      //     debugDiv.textContent = `Bottom: ${appliedBottom}, Right: ${appliedRight}`;
-      //   }
-      // }
 
       if (styles.transform) {
         const actualTransform = element.style.transform;
@@ -1941,121 +1880,6 @@ static preserveClippyScale(clippyElement) {
 
   static get isMobile() {
     return isMobile;
-  }
-
-  // Method to enforce mobile positioning using MutationObserver
-  static enforceMobilePositioning(clippyElement, position) {
-    // Add a log at the very beginning to confirm entry
-    console.log('DEBUG ClippyPositioning (ENTRY): Entering enforceMobilePositioning.', { isMobile, isIOSSafari, userAgent: navigator.userAgent });
-
-    if (!clippyElement || !isMobile) {
-       console.log('DEBUG ClippyPositioning (ENTRY): Exiting early due to missing element or not mobile.');
-       return false;
-    }
-
-    // Apply this enforcement only to non-Safari mobile browsers (includes Android, and non-Safari on iOS)
-    // Skip if it is specifically iOS Safari
-    if (isIOSSafari) {
-      console.log('DEBUG ClippyPositioning (CONDITION): Skipping enforcement for iOS Safari.');
-      return false; // Or return true if doing nothing is considered success for iOS
-    }
-
-    // Ensure we are definitely on a mobile device but NOT iOS Safari
-    if (!isMobile || isIOSSafari) {
-         console.log('DEBUG ClippyPositioning (CONDITION): Unexpected condition met, skipping enforcement.', { isMobile, isIOSSafari });
-         return false;
-    }
-
-    console.log('DEBUG ClippyPositioning (CONDITION): Applying enforcement for non-Safari mobile.');
-
-    try {
-      // Ensure observer from previous calls is disconnected
-      if (clippyElement._positionObserver) {
-        clippyElement._positionObserver.disconnect();
-        delete clippyElement._positionObserver;
-        console.log('DEBUG ClippyPositioning: Old observer disconnected.');
-      }
-
-      // Define and apply styles with maximum specificity using setProperty
-      const applyForcedStyles = () => {
-        try {
-          clippyElement.style.setProperty('position', 'fixed', '!important');
-          // Force a much higher position
-          clippyElement.style.setProperty('bottom', '300px', '!important');
-          clippyElement.style.setProperty('right', position.right, '!important');
-          clippyElement.style.setProperty('left', 'auto', '!important');
-          clippyElement.style.setProperty('top', 'auto', '!important');
-          clippyElement.style.setProperty('transform', 'translateZ(0) scale(1)', '!important');
-          clippyElement.style.setProperty('-webkit-transform', 'translateZ(0) scale(1)', '!important');
-
-          // --- DEBUG LOGGING: After applyForcedStyles ---
-          console.log('DEBUG ClippyPositioning (1): applyForcedStyles applied. Computed bottom:', window.getComputedStyle(clippyElement).bottom);
-        } catch (styleErr) {
-          console.error('DEBUG ClippyPositioning (ERROR in applyForcedStyles): ', styleErr);
-        }
-      };
-
-      // Apply the initial styles
-      console.log('DEBUG ClippyPositioning (2): Calling applyForcedStyles...'); // Log before applying initially
-      applyForcedStyles();
-
-      // Monitor for style changes and reapply specific properties if bottom or right change
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-            const currentBottom = clippyElement.style.bottom;
-            const currentRight = clippyElement.style.right;
-
-            // Check if the critical mobile positioning styles have been altered
-            if (currentBottom !== '300px' || currentRight !== position.right ||
-                clippyElement.style.position !== 'fixed' ||
-                clippyElement.style.left !== 'auto' ||
-                clippyElement.style.top !== 'auto')
-             {
-              console.log('DEBUG ClippyPositioning (3): Override detected. Current bottom:', currentBottom); // Log override detection
-              // Disconnect to avoid infinite loop during reapplication
-              observer.disconnect();
-
-              // Reapply only the necessary forced styles
-              applyForcedStyles();
-
-              // --- DEBUG LOGGING: After reapplying styles ---
-              console.log('DEBUG ClippyPositioning (4): Styles reapplied by observer. Computed bottom:', window.getComputedStyle(clippyElement).bottom);
-
-              // Reconnect observer after styles are likely applied in the next animation frame
-              requestAnimationFrame(() => {
-                try {
-                  observer.observe(clippyElement, { attributes: true, attributeFilter: ['style'] });
-                   // --- DEBUG LOGGING: After re-observing ---
-                   console.log('DEBUG ClippyPositioning (5): Observer reconnected. Computed bottom:', window.getComputedStyle(clippyElement).bottom);
-                } catch (reobserveErr) {
-                   console.error('DEBUG ClippyPositioning (ERROR re-observing): ', reobserveErr);
-                }
-              });
-            }
-          }
-        });
-      });
-
-      // Start observing the style attribute
-      observer.observe(clippyElement, { attributes: true, attributeFilter: ['style'] });
-      console.log('DEBUG ClippyPositioning (6): Observer started. Computed bottom:', window.getComputedStyle(clippyElement).bottom); // Log after starting observer
-
-      // Add a check after a short delay to see if the style persists
-      setTimeout(() => {
-          console.log('DEBUG ClippyPositioning (7): 100ms check. Computed bottom:', window.getComputedStyle(clippyElement).bottom);
-      }, 100);
-
-      // Store observer for potential cleanup later
-      clippyElement._positionObserver = observer;
-
-      console.log('DEBUG ClippyPositioning (END): enforceMobilePositioning finished.'); // Final log before return
-
-      return true;
-    } catch (mainErr) {
-       console.error('DEBUG ClippyPositioning (MAIN ERROR): ', mainErr);
-       return false; // Indicate failure
-    }
   }
 }
 
