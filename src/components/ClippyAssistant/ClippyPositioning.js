@@ -493,17 +493,22 @@ class ClippyPositioning {
 
     // Apply offset based on devicee
     if (isIOSSafari) {
-      // iOS Safari specific offset: 5px down from original default, plus an additional 25px right
-      desiredBottomFromViewport = values.bottom - 5; // 
-      desiredRightFromViewport = values.right - 7; // 11px from right
-    } else {
-      // Other mobile offset: 40px higher and 20px further right from previous non-iOS calculation, plus a 30px raise trial
-      //const previousNonIosBottom = taskbarHeight + 150; // Assuming taskbarHeight = 26, this is 121
-      const previousNonIosRight = values.right; // Assuming values.right = 11
+  // iOS Safari specific offset: 5px down from original default, plus an additional 25px right
+  desiredBottomFromViewport = values.bottom - 5; // Keep iOS as is
+  desiredRightFromViewport = values.right - 7; // 11px from right
+} else {
+  // Other mobile offset: To raise Clippy higher, DECREASE the bottom value
+  const previousNonIosRight = values.right; // Assuming values.right = 11
 
-      desiredBottomFromViewport = taskbarHeight - 100; // 70px higher than before
-      desiredRightFromViewport = previousNonIosRight + 20; // 26 + 20 = 46px from right
-    }
+  // Current: taskbarHeight - 100 = 26 - 100 = -74 (which becomes 0 due to Math.min)
+  // To raise by 30px more, subtract 30 from the bottom value
+  desiredBottomFromViewport = taskbarHeight + 50; // This will be 26 + 50 = 76px from bottom
+  // Or if you want it even higher:
+  // desiredBottomFromViewport = taskbarHeight + 80; // 106px from bottom (higher position)
+  // desiredBottomFromViewport = taskbarHeight + 100; // 126px from bottom (even higher)
+  
+  desiredRightFromViewport = previousNonIosRight + 20; // 31px from right
+}
 
     // Apply viewport constraints
     const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2);
