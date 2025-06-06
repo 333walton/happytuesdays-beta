@@ -62,6 +62,19 @@ const isIOSSafari = (() => {
   }
 })();
 
+// Google App on iOS detection
+const isGoogleAppOnIOS = (() => {
+    try {
+        const userAgent = navigator.userAgent || '';
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+        // Look for patterns typical in Google App (GSA) user agents
+        const isGoogleApp = /GSA\//.test(userAgent);
+        return isIOS && isGoogleApp;
+    } catch {
+        return false;
+    }
+})();
+
 // ===== SINGLE SOURCE OF TRUTH FOR POSITIONING =====
 const CLIPPY_POSITIONS = {
   // Mobile positioning (dynamic-ready)
@@ -511,11 +524,16 @@ class ClippyPositioning {
       // Positioning specific to iOS Safari (which was already correct)
       desiredBottomFromViewport = values.bottom - 5; // Should be 115px
       desiredRightFromViewport = values.right - 7; // Should be 4px
+    } else if (isGoogleAppOnIOS) {
+      // Positioning specific to Google App on iOS (+40px higher as per notes)
+      // Adding 40px to the base desired bottom (e.g., Safari's 115px) to move it visually higher.
+      desiredBottomFromViewport = 115 + 40; // Aiming for 155px bottom
+      desiredRightFromViewport = 4; // Keep right position consistent with Safari
     } else {
       // Positioning for all other mobile browsers (Android, Chrome/Firefox on iOS, etc.)
-      // Adjusting based on feedback for Chrome, aiming for ~145px bottom, -1px right.
-      desiredBottomFromViewport = 145; // Adjusted starting point to fine-tune non-Safari mobile height
-      desiredRightFromViewport = -1; // Adjusted to move right for non-Safari mobile
+      // Aiming for the same vertical position as Safari (115px) but with Chrome's working horizontal (-1px).
+      desiredBottomFromViewport = 115; // Matching Safari's vertical aim
+      desiredRightFromViewport = -1; // Using Chrome's working horizontal
     }
 
     // Apply viewport constraints
