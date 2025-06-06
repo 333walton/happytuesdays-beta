@@ -731,7 +731,12 @@ class ClippyPositioning {
       }
 
       Object.entries(styles).forEach(([key, value]) => {
-        element.style[key] = value;
+        // Apply bottom and right with !important on mobile
+        if (isMobile && (key === 'bottom' || key === 'right')) {
+          element.style.setProperty(key, value, 'important');
+        } else {
+          element.style[key] = value;
+        }
       });
 
       // Update debug text with current styles AFTER applying them
