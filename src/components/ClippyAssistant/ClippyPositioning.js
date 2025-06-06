@@ -501,7 +501,7 @@ class ClippyPositioning {
       const previousNonIosBottom = taskbarHeight + 150; // Assuming taskbarHeight = 26, this is 121
       const previousNonIosRight = values.right; // Assuming values.right = 11
 
-      desiredBottomFromViewport = (previousNonIosBottom - 40) - 60; // Trial: Raised by 30px
+      desiredBottomFromViewport = taskbarHeight + 10; // Direct calculation
       desiredRightFromViewport = previousNonIosRight + 20; // 26 + 20 = 46px from right
     }
 
