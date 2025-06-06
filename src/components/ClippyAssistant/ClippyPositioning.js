@@ -509,13 +509,13 @@ class ClippyPositioning {
 
     if (isIOSSafari) {
       // Positioning specific to iOS Safari (which was already correct)
-      desiredBottomFromViewport = values.bottom - 5; // 115px
-      desiredRightFromViewport = values.right - 7; // 4px
+      desiredBottomFromViewport = values.bottom - 5; // Should be 115px
+      desiredRightFromViewport = values.right - 7; // Should be 4px
     } else {
       // Positioning for all other mobile browsers (Android, Chrome/Firefox on iOS, etc.)
-      // Aim to match Safari's vertical position (115px) and right position (4px)
-      desiredBottomFromViewport = 115;
-      desiredRightFromViewport = 4;
+      // Aim for a bottom position around 150px and a right position of 4px.
+      desiredBottomFromViewport = 150; // Starting point to adjust non-Safari mobile height
+      desiredRightFromViewport = 4; // Match Safari's right position
     }
 
     // Apply viewport constraints
@@ -1135,12 +1135,6 @@ static preserveClippyScale(clippyElement) {
     // Apply basic styles (like position: fixed, transform) using applyStyles
     // applyStyles will handle !important for transform
     const clippySuccess = this.applyStyles(clippyElement, position);
-
-    // On mobile, use the MutationObserver approach to enforce bottom and right
-    if (isMobile && position.bottom && position.right) {
-      this.enforceMobilePositioning(clippyElement, position);
-       devLog(`Attempting to enforce mobile positioning with MutationObserver.`);
-    }
 
     if (!isMobile && clippySuccess && !resizeHandler.zoomLevelAnchors.has(currentZoomLevel)) {
       devLog(`Caching anchor after positioning for zoom level ${currentZoomLevel}`);
