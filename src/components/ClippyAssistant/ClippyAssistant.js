@@ -4,6 +4,7 @@ import { useClippy } from "@react95/clippy";
 import { useClippyContext } from "./ClippyProvider";
 import CustomWindow from "../CustomWindow";
 import * as icons from "../../icons";
+import ClippyPositioning from "./ClippyPositioning";
 
 /**
  * Office Assistant (Clippy) settings and control panel
@@ -166,19 +167,29 @@ const ClippyAssistant = memo((props) => {
       const clippyElement = document.querySelector(".clippy");
       if (clippyElement) {
         // Apply hardware-accelerated positioning
-        clippyElement.style.position = "absolute";
-        clippyElement.style.left = `${xPosition}px`;
-        clippyElement.style.top = `${yPosition}px`;
-        clippyElement.style.right = "auto";
-        clippyElement.style.bottom = "auto";
-        clippyElement.style.willChange = "transform"; // Optimize for animations
+        
+        // Only apply these direct styles on desktop
+        if (!ClippyPositioning.isMobile) {
+          clippyElement.style.position = "absolute";
+          clippyElement.style.left = `${xPosition}px`;
+          clippyElement.style.top = `${yPosition}px`;
+          clippyElement.style.right = "auto";
+          clippyElement.style.bottom = "auto";
+          clippyElement.style.willChange = "transform"; // Optimize for animations
 
-        // Reset willChange after animation would be complete
-        setTimeout(() => {
-          if (clippyElement) {
-            clippyElement.style.willChange = "auto";
+          // Reset willChange after animation would be complete
+          setTimeout(() => {
+            if (clippyElement) {
+              clippyElement.style.willChange = "auto";
+            }
+          }, 500);
+        } else {
+          // On mobile, ensure positioning is handled by ClippyPositioning
+          if (ClippyPositioning.positionClippyAndOverlay) {
+            const overlayEl = document.getElementById("clippy-clickable-overlay");
+            ClippyPositioning.positionClippyAndOverlay(clippyElement, overlayEl);
           }
-        }, 500);
+        }
       }
 
       // Give feedback
