@@ -494,13 +494,13 @@ class ClippyPositioning {
     // Apply offset based on device
     if (isIOSSafari) {
       // iOS Safari specific offset relative to original default
-      desiredRightFromViewport = values.right + 15; // 11 + 15 = 26px from right
-      desiredBottomFromViewport = values.bottom + 5; // 120 + 5 = 125px from bottom
+      desiredRightFromViewport = values.right + 20; // Shift 20px right for iOS Safari
+      desiredBottomFromViewport = values.bottom + 5; // Shift 5px down for iOS Safari (maintain)
     } else {
-      // 15px above the taskbar for all other mobile
-      const gapAboveTaskbar = 15;
+      // 65px above the taskbar for all other mobile, and 15px further right
+      const gapAboveTaskbar = 65;
       desiredBottomFromViewport = taskbarHeight + gapAboveTaskbar;
-      desiredRightFromViewport = values.right; // Use original default right (11px)
+      desiredRightFromViewport = values.right + 15; // Shift 15px right
     }
 
     // Apply viewport constraints
