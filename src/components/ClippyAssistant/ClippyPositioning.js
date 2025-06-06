@@ -497,11 +497,11 @@ class ClippyPositioning {
       desiredBottomFromViewport = values.bottom - 5; // 
       desiredRightFromViewport = values.right - 7; // 11px from right
     } else {
-      // Other mobile offset: 40px higher and 20px further right from previous non-iOS calculation, plus a 30px raise trial
-      //const previousNonIosBottom = taskbarHeight + 150; // Assuming taskbarHeight = 26, this is 121
+      // Other mobile offset: 40px higher and 20px further right from previous non-iOS calculation
       const previousNonIosRight = values.right; // Assuming values.right = 11
 
-      desiredBottomFromViewport = taskbarHeight - 200; // 70px higher than before
+      // Set a much higher position (200px above taskbar)
+      desiredBottomFromViewport = Math.max(0, taskbarHeight - 200);
       desiredRightFromViewport = previousNonIosRight + 20; // 26 + 20 = 46px from right
     }
 
@@ -1875,14 +1875,15 @@ static preserveClippyScale(clippyElement) {
     // Define and apply styles with maximum specificity using setProperty
     const applyForcedStyles = () => {
       clippyElement.style.setProperty('position', 'fixed', 'important');
-      clippyElement.style.setProperty('bottom', position.bottom, 'important');
+      // Force the bottom position to be 200px higher than taskbarHeight
+      const taskbarHeight = 26;
+      const bottomPosition = `${taskbarHeight - 200}px`;
+      clippyElement.style.setProperty('bottom', bottomPosition, 'important');
       clippyElement.style.setProperty('right', position.right, 'important');
       clippyElement.style.setProperty('left', 'auto', 'important');
       clippyElement.style.setProperty('top', 'auto', 'important');
       clippyElement.style.setProperty('transform', 'translateZ(0) scale(1)', 'important');
       clippyElement.style.setProperty('-webkit-transform', 'translateZ(0) scale(1)', 'important');
-       // Note: visibility, opacity, display etc. should be managed elsewhere
-       // or ensured to be set before calling this.
     };
 
     // Apply the initial styles
