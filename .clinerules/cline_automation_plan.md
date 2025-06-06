@@ -339,14 +339,14 @@ const ClippyController = ({
         clippyEl.style.position = "fixed";
         clippyEl.style.bottom = "100px";
         clippyEl.style.right = "20px";
-        clippyEl.style.transform = "scale(0.8)";
+        clippyEl.style.transform = "scale(1)";
         clippyEl.style.transformOrigin = "center bottom";
         clippyEl.style.zIndex = "1500";
       } else {
         clippyEl.style.position = "fixed";
         clippyEl.style.left = `${position.x}px`;
         clippyEl.style.top = `${position.y}px`;
-        clippyEl.style.transform = "scale(0.9)";
+        clippyEl.style.transform = "scale(0.95)";
         clippyEl.style.transformOrigin = "center bottom";
         clippyEl.style.zIndex = "2000";
       }
@@ -1319,7 +1319,7 @@ export default ClippyService;
   transition: opacity 0.3s ease !important;
 
   /* Hardware acceleration */
-  transform: translateZ(0) scale(0.9) !important;
+  transform: translateZ(0) scale(0.95) !important;
   transform-origin: center bottom !important;
   backface-visibility: hidden !important;
   will-change: transform, opacity !important;

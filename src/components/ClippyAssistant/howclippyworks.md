@@ -427,7 +427,7 @@ const CLIPPY_POSITIONS = {
   // Desktop positioning (calculated)
   desktop: {
     position: "fixed",
-    transform: "translateZ(0) scale(0.9)", // Adjusted by zoom factor
+    transform: "translateZ(0) scale(0.95)", // Adjusted by zoom factor
     transformOrigin: "center bottom",
     zIndex: "2000",
   },

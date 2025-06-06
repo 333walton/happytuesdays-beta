@@ -26,12 +26,12 @@
   -webkit-backface-visibility: hidden !important;
   -webkit-font-smoothing: antialiased !important;
 
-  /* Mobile scale */
+  /* Default Mobile scale */
   @media screen and (max-width: 768px) {
   transform: scale(1) !important;
   transform-origin: center bottom !important;
   }
-  /* Desktop scale */
+  /* Default Desktop scale */
   @media screen and (min-width: 768px) {
     transform: scale(0.95) !important;
   }
@@ -140,8 +140,8 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
   }
 
   #clippy-clickable-overlay {
-    min-width: 100px !important;
-    min-height: 100px !important;
+    min-width: 124px !important;
+    min-height: 93px !important;
     touch-action: none !important;
     -webkit-tap-highlight-color: transparent !important;
     -webkit-touch-callout: none !important;

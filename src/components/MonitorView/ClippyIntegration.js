@@ -175,7 +175,7 @@ class ClippyIntegration extends Component {
       
       /* Ensure transform doesn't block animations */
       .clippy {
-        transform: scale(0.9) !important;
+        /* transform: scale(0.95) !important; */ /* Removed to prevent override */
         transform-origin: center bottom !important;
         z-index: 1001 !important;
       }

@@ -51,7 +51,7 @@ const CLIPPY_POSITIONS = {
   // Mobile positioning (dynamic-ready)
   mobile: {
     position: "fixed",
-    transform: "translateZ(0) scale(0.9)",
+    transform: "translateZ(0) scale(1)",
     transformOrigin: "center bottom",
     zIndex: "1500",
   },
@@ -59,7 +59,7 @@ const CLIPPY_POSITIONS = {
   // Desktop positioning (calculated)
   desktop: {
     position: "fixed",
-    transform: "translateZ(0) scale(0.9)",
+    transform: "translateZ(0) scale(0.95)",
     transformOrigin: "center bottom",
     zIndex: "2000",
   },
@@ -68,7 +68,7 @@ const CLIPPY_POSITIONS = {
   mobileValues: {
     bottom: 120,
     right: 11,
-    scale: 0.8,
+    scale: 1,
   },
 
   // DESKTOP positioning values (centralized)
@@ -76,7 +76,7 @@ const CLIPPY_POSITIONS = {
     rightOffset: 120,
     bottomOffset: 100,
     taskbarHeight: 30,
-    scale: 0.9,
+    scale: 0.95,
   },
 
   // Overlay positioning (matches Clippy exactly)
@@ -150,8 +150,9 @@ class ZoomAwareResizeHandler {
     const baseClippyWidth = 124;
     const baseClippyHeight = 93;
     const zoomFactor = this.getZoomFactorForLevel(currentZoom);
-    const scaledClippyWidth = baseClippyWidth * 0.9 * zoomFactor; // Make sure this line exists
-    const scaledClippyHeight = baseClippyHeight * 0.9 * zoomFactor; // Make sure this line exists
+    const baseScale = isMobile ? 1 : 0.95;
+    const scaledClippyWidth = baseClippyWidth * baseScale * zoomFactor;
+    const scaledClippyHeight = baseClippyHeight * baseScale * zoomFactor;
 
     const rightOffset = 120;
     const bottomOffset = 100;
@@ -467,7 +468,7 @@ class ClippyPositioning {
 
     const desktop = { ...CLIPPY_POSITIONS.desktop };
     const zoomFactor = this.getMonitorZoomFactor();
-    const adjustedScale = 0.9 * zoomFactor;
+    const adjustedScale = 0.95 * zoomFactor;
     desktop.transform = `translateZ(0) scale(${adjustedScale})`;
 
     if (customPosition) {
@@ -678,6 +679,11 @@ class ClippyPositioning {
     if (!element) return false;
 
     try {
+      // Log the transform style being applied
+      // if (styles.transform) {
+      //   devLog(`Applying transform style: ${styles.transform}`, { elementId: element.id, elementClass: element.className });
+      // }
+
       Object.entries(styles).forEach(([key, value]) => {
         element.style[key] = value;
       });
@@ -736,7 +742,7 @@ class ClippyPositioning {
         bottom: ${boundedPosition.bottomPx}px !important;
         left: auto !important;
         top: auto !important;
-        transform: translateZ(0) scale(${isDragging ? '1.05' : '0.9'}) !important;
+        transform: translateZ(0) scale(${isDragging ? '1.05' : '1'}) !important;
         transform-origin: center bottom !important;
         z-index: ${isDragging ? '1550' : '1500'} !important;
         transition: none !important;
@@ -756,8 +762,8 @@ class ClippyPositioning {
           bottom: ${boundedPosition.bottomPx}px !important;
           left: auto !important;
           top: auto !important;
-          width: 60px !important;
-          height: 80px !important;
+          width: 124px !important;
+          height: 93px !important;
           background: transparent !important;
           pointer-events: auto !important;
           cursor: pointer !important;
@@ -798,7 +804,7 @@ class ClippyPositioning {
 
   static applyCalculatedPosition(clippyElement, positionData, zoomLevel) {
     const zoomFactor = this.getMonitorZoomFactor();
-    const adjustedScale = 0.9 * zoomFactor;
+    const adjustedScale = CLIPPY_POSITIONS.desktopValues.scale * zoomFactor;
 
     const anchoredStyles = {
       position: "fixed",
@@ -896,7 +902,7 @@ class ClippyPositioning {
         default: zoomFactor = 1.0; break;
       }
 
-      const adjustedScale = 0.9 * zoomFactor;
+      const adjustedScale = CLIPPY_POSITIONS.desktopValues.scale * zoomFactor;
       const rightOffset = 120;
       const bottomOffset = 100;
       const taskbarHeight = 30;
@@ -990,13 +996,13 @@ static preserveClippyScale(clippyElement) {
     const currentTransform = currentStyle.transform;
     
     // Extract current scale from transform
-    let currentScale = 0.9; // Default desktop scale
+    let currentScale = 0.95; // Default desktop scale
     if (isMobile) {
-      currentScale = 0.8; // Mobile scale
+      currentScale = 1; // Mobile scale
     } else {
       // For desktop, calculate proper scale based on zoom
       const zoomFactor = this.getMonitorZoomFactor();
-      currentScale = 0.9 * zoomFactor;
+      currentScale = 0.95 * zoomFactor;
     }
     
     // Ensure the correct scale is applied
@@ -1074,14 +1080,14 @@ static preserveClippyScale(clippyElement) {
         top: "auto",
         transform: isDragging 
           ? "translateZ(0) scale(1.05)"
-          : "translateZ(0) scale(0.9)",
+          : "translateZ(0) scale(1)",
         transformOrigin: "center bottom",
         zIndex: isDragging ? "1550" : "1500",
         backfaceVisibility: "hidden",
         willChange: isDragging ? "transform, opacity, right, bottom" : "transform",
         WebkitTransform: isDragging 
           ? "translateZ(0) scale(1.05)" 
-          : "translateZ(0) scale(0.9)",
+          : "translateZ(0) scale(1)",
         WebkitBackfaceVisibility: "hidden",
         touchAction: "none",
         userSelect: "none",
@@ -1106,8 +1112,11 @@ static preserveClippyScale(clippyElement) {
     const safeTop = Math.max(10, window.safeAreaInsets?.top || 0);
     const safeBottom = Math.max(80, window.safeAreaInsets?.bottom || 0);
 
-    const clippyWidth = 60;
-    const clippyHeight = 80;
+    // Updated dimensions based on new scaling
+    const baseWidth = 124;
+    const baseHeight = 93;
+    const clippyWidth = baseWidth * 1; // Mobile scale is 1
+    const clippyHeight = baseHeight * 1; // Mobile scale is 1
 
     const boundedPosition = {
       rightPx: Math.max(
@@ -1291,7 +1300,7 @@ static preserveClippyScale(clippyElement) {
       right: `${rightPx}px`,
       bottom: `${bottomPx}px`,
       position: "fixed",
-      transform: "translateZ(0) scale(0.9)",
+      transform: "translateZ(0) scale(1)",
       transformOrigin: "center bottom",
       zIndex: "1500",
       left: "auto",
@@ -1300,12 +1309,12 @@ static preserveClippyScale(clippyElement) {
   }
 
   static getExpectedClippyDimensions() {
-    const scale = isMobile
-      ? CLIPPY_POSITIONS.mobileValues.scale
-      : CLIPPY_POSITIONS.desktopValues.scale;
+    const baseWidth = 124;
+    const baseHeight = 93;
+    const scale = isMobile ? 1 : 0.95;
     return {
-      width: 124 * scale,
-      height: 93 * scale,
+      width: baseWidth * scale,
+      height: baseHeight * scale,
     };
   }
 

@@ -325,15 +325,12 @@ const ClippyContextMenu = ({
     const clippyEl = document.querySelector('.clippy');
     if (clippyEl) {
       clippyEl.style.opacity = '0.7';
-      clippyEl.style.transform = 'translateZ(0) scale(0.9)';
       
       setTimeout(() => {
         // Restore appearance
         clippyEl.style.opacity = '1';
-        const isMobile = window.innerWidth <= 768;
-        const correctScale = isMobile ? '0.8' : '0.9';
-        clippyEl.style.transform = `translateZ(0) scale(${correctScale})`;
-        
+        // The correct scale will be applied by positionClippyAndOverlay
+
         // Play welcome animation for new agent
         if (window.clippy?.play) {
           setTimeout(() => {
@@ -345,6 +342,12 @@ const ClippyContextMenu = ({
               setTimeout(() => {
                 window.showClippyCustomBalloon(`Hello! I'm ${newAgent} now. How can I help you?`);
               }, 800);
+            }
+
+            // Reposition for new agent - this will also set the correct scale
+            if (window.ClippyPositioning?.positionClippyAndOverlay) {
+              const overlayEl = document.getElementById("clippy-clickable-overlay");
+              window.ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
             }
           }, 200);
         }

@@ -230,6 +230,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         clippyEl.style.opacity = "1";
         clippyEl.style.transform = "";
         clippyEl.style.pointerEvents = "auto";
+
+        // Explicitly restore position and scale
+        if (ClippyPositioning?.positionClippyAndOverlay) {
+          const overlayEl = document.getElementById("clippy-clickable-overlay");
+          ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
+        }
       }
       
       if (overlayEl) {
@@ -267,7 +273,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         
         // Brief fade out
         clippyEl.style.opacity = '0.3';
-        clippyEl.style.transform = 'translateZ(0) scale(0.7)';
         
         setTimeout(() => {
           // Trigger agent change in React95 Clippy
@@ -278,12 +283,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               // Update clippy instance reference
               clippyInstanceRef.current = window.clippy;
               
-              // Restore appearance with new agent
+              // Restore appearance
               clippyEl.style.opacity = '1';
               
-              // Apply correct scale for device
-              const correctScale = isMobile ? '0.8' : `${0.9 * ClippyPositioning.getMonitorZoomFactor()}`;
-              clippyEl.style.transform = `translateZ(0) scale(${correctScale})`;
+              // Restore correct scale based on device and monitor zoom
+              const isMobile = window.innerWidth <= 768;
+              const baseScale = isMobile ? '1' : '0.95';
+              const zoomFactor = ClippyPositioning.getMonitorZoomFactor();
+              const correctScale = isMobile ? baseScale : `${baseScale * zoomFactor}`;
               
               clippyEl.classList.remove('agent-transitioning');
               
@@ -314,8 +321,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             
             // Restore appearance
             clippyEl.style.opacity = '1';
-            const correctScale = isMobile ? '0.8' : `${0.9 * ClippyPositioning.getMonitorZoomFactor()}`;
-            clippyEl.style.transform = `translateZ(0) scale(${correctScale})`;
+            const isMobile = window.innerWidth <= 768;
+            const baseScale = isMobile ? '1' : '0.95';
+            const zoomFactor = ClippyPositioning.getMonitorZoomFactor();
+            const correctScale = isMobile ? baseScale : `${baseScale * zoomFactor}`;
+            
             clippyEl.classList.remove('agent-transitioning');
             
             // Show change message

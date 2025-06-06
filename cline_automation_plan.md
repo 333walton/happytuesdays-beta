@@ -1,11 +1,13 @@
 # ClippyAssistant Migration - Cline Automation Plan
 
 ## Overview
+
 This plan will automatically migrate your ClippyAssistant component from a complex, crash-prone implementation to a simplified, performant version while preserving all custom features.
 
 ## Automated Tasks for Cline
 
 ### Phase 1: Backup and Analysis
+
 ```bash
 # Create backup branch
 git checkout -b clippy-migration-backup
@@ -21,6 +23,7 @@ find src/components/ClippyAssistant -name "*.js" -o -name "*.scss" | xargs wc -l
 ### Phase 2: Create Enhanced Simplified Files
 
 #### 2.1 Replace ClippyProvider.js
+
 ```javascript
 // src/components/ClippyAssistant/ClippyProvider.js
 // REPLACE ENTIRE FILE WITH:
@@ -44,19 +47,17 @@ import "./_styles.scss";
 const ClippyContext = createContext(null);
 
 // Device detection - run once
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-  navigator.userAgent
-);
+const isMobile =
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
 
-const ClippyProvider = ({
-  children,
-  defaultAgent = "Clippy",
-}) => {
+const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   // Core state
   const [assistantVisible, setAssistantVisible] = useState(true);
   const [currentAgent, setCurrentAgent] = useState(defaultAgent);
   const [isScreenPoweredOn, setIsScreenPoweredOn] = useState(true);
-  
+
   // Custom features state
   const [positionLocked, setPositionLocked] = useState(() => {
     try {
@@ -65,7 +66,7 @@ const ClippyProvider = ({
       return true;
     }
   });
-  
+
   // Balloon state
   const [customBalloonVisible, setCustomBalloonVisible] = useState(false);
   const [customBalloonMessage, setCustomBalloonMessage] = useState("");
@@ -103,11 +104,11 @@ const ClippyProvider = ({
 
     // Position lock functions
     window._clippyPositionLocked = positionLocked;
-    
+
     // Balloon functions
     window.showClippyCustomBalloon = (message) => {
       if (!isScreenPoweredOn) return false;
-      
+
       const clippyElement = document.querySelector(".clippy");
       if (clippyElement) {
         const rect = clippyElement.getBoundingClientRect();
@@ -116,11 +117,11 @@ const ClippyProvider = ({
           top: rect.top - 120,
         });
       }
-      
+
       setCustomBalloonMessage(message);
       setCustomBalloonVisible(true);
       setChatBalloonVisible(false);
-      
+
       setTimeout(() => setCustomBalloonVisible(false), 6000);
       return true;
     };
@@ -133,7 +134,7 @@ const ClippyProvider = ({
 
     window.showClippyChatBalloon = (initialMessage) => {
       if (!isScreenPoweredOn) return false;
-      
+
       const clippyElement = document.querySelector(".clippy");
       if (clippyElement) {
         const rect = clippyElement.getBoundingClientRect();
@@ -142,7 +143,7 @@ const ClippyProvider = ({
           top: rect.top - 200,
         });
       }
-      
+
       setChatInitialMessage(initialMessage);
       setChatBalloonVisible(true);
       setCustomBalloonVisible(false);
@@ -159,7 +160,9 @@ const ClippyProvider = ({
             window.clippy.play("Greeting");
             setTimeout(() => {
               if (window.showClippyCustomBalloon) {
-                window.showClippyCustomBalloon("Welcome to Hydra98! Double-click me for help.");
+                window.showClippyCustomBalloon(
+                  "Welcome to Hydra98! Double-click me for help."
+                );
               }
             }, 1000);
             welcomeShownRef.current = true;
@@ -168,7 +171,7 @@ const ClippyProvider = ({
       }
     };
 
-    window.addEventListener('biosSequenceCompleted', handleBiosComplete);
+    window.addEventListener("biosSequenceCompleted", handleBiosComplete);
 
     return () => {
       delete window._clippyProviderInitialized;
@@ -179,7 +182,7 @@ const ClippyProvider = ({
       delete window.hideClippyCustomBalloon;
       delete window.showClippyChatBalloon;
       delete window.getClippyInstance;
-      window.removeEventListener('biosSequenceCompleted', handleBiosComplete);
+      window.removeEventListener("biosSequenceCompleted", handleBiosComplete);
     };
   }, [isScreenPoweredOn, assistantVisible, positionLocked]);
 
@@ -202,15 +205,27 @@ const ClippyProvider = ({
       if (lowercaseMsg.includes("hello") || lowercaseMsg.includes("hi")) {
         response = "Hello there! How can I assist you?";
       } else if (lowercaseMsg.includes("help")) {
-        response = "I can help with many tasks. What specifically do you need assistance with?";
-      } else if (lowercaseMsg.includes("file") || lowercaseMsg.includes("explorer")) {
+        response =
+          "I can help with many tasks. What specifically do you need assistance with?";
+      } else if (
+        lowercaseMsg.includes("file") ||
+        lowercaseMsg.includes("explorer")
+      ) {
         response = "To manage your files, you can access the file explorer.";
-      } else if (lowercaseMsg.includes("internet") || lowercaseMsg.includes("web")) {
+      } else if (
+        lowercaseMsg.includes("internet") ||
+        lowercaseMsg.includes("web")
+      ) {
         response = "You can browse the web using a web browser.";
-      } else if (lowercaseMsg.includes("hydra") || lowercaseMsg.includes("98")) {
-        response = "Hydra98 is a Windows 98-themed web application that recreates the classic desktop experience!";
+      } else if (
+        lowercaseMsg.includes("hydra") ||
+        lowercaseMsg.includes("98")
+      ) {
+        response =
+          "Hydra98 is a Windows 98-themed web application that recreates the classic desktop experience!";
       } else {
-        response = "I'm not sure about that. Is there something specific you'd like to know?";
+        response =
+          "I'm not sure about that. Is there something specific you'd like to know?";
       }
 
       callback(response);
@@ -241,7 +256,7 @@ const ClippyProvider = ({
     <ClippyContext.Provider value={contextValue}>
       <ReactClippyProvider agentName={currentAgent}>
         {children}
-        
+
         <ClippyController
           visible={assistantVisible}
           isScreenPoweredOn={isScreenPoweredOn}
@@ -324,14 +339,14 @@ const ClippyController = ({
         clippyEl.style.position = "fixed";
         clippyEl.style.bottom = "100px";
         clippyEl.style.right = "20px";
-        clippyEl.style.transform = "scale(0.8)";
+        clippyEl.style.transform = "scale(1)";
         clippyEl.style.transformOrigin = "center bottom";
         clippyEl.style.zIndex = "1500";
       } else {
         clippyEl.style.position = "fixed";
         clippyEl.style.left = `${position.x}px`;
         clippyEl.style.top = `${position.y}px`;
-        clippyEl.style.transform = "scale(0.9)";
+        clippyEl.style.transform = "scale(0.95)";
         clippyEl.style.transformOrigin = "center bottom";
         clippyEl.style.zIndex = "2000";
       }
@@ -353,13 +368,13 @@ const ClippyController = ({
         // Double-click handler
         overlay.addEventListener("dblclick", (e) => {
           e.preventDefault();
-          
+
           if (clippy.play) {
             clippy.play("Greeting");
-            
+
             // Only show balloon every 3rd double-click
             doubleClickCountRef.current = (doubleClickCountRef.current + 1) % 3;
-            
+
             if (doubleClickCountRef.current === 0) {
               setTimeout(() => {
                 if (window.showClippyCustomBalloon) {
@@ -399,7 +414,7 @@ const ClippyController = ({
       if (!mounted) return;
 
       const interval = isMobile ? 1000 : 500;
-      
+
       if (timestamp - lastUpdateRef.current > interval) {
         setupClippy();
         lastUpdateRef.current = timestamp;
@@ -439,6 +454,7 @@ export default ClippyProvider;
 ```
 
 #### 2.2 Replace ClippyService.js
+
 ```javascript
 // src/components/ClippyAssistant/ClippyService.js
 // REPLACE ENTIRE FILE WITH:
@@ -584,7 +600,7 @@ const setPosition = (x, y) => {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent
   );
-  
+
   if (isMobile) {
     console.log("Position changes not supported on mobile devices");
     return false;
@@ -603,7 +619,7 @@ const setInitialPosition = (options) => {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent
   );
-  
+
   if (isMobile) {
     return true;
   }
@@ -614,7 +630,7 @@ const setInitialPosition = (options) => {
       if (percentMatch) {
         const xPercent = parseInt(percentMatch[1], 10) / 100;
         const yPercent = parseInt(percentMatch[2], 10) / 100;
-        
+
         const viewport = document.querySelector(".w98") || document.querySelector(".desktop");
         if (viewport) {
           const rect = viewport.getBoundingClientRect();
@@ -640,7 +656,7 @@ const setInitialPosition = (options) => {
     } else if (options.x !== undefined && options.y !== undefined) {
       return setPosition(options.x, options.y);
     }
-    
+
     return false;
   });
 };
@@ -908,7 +924,7 @@ body.screen-off .custom-clippy-chat-balloon {
     transition: none !important;
     animation: none !important;
   }
-  
+
   .clippy .map {
     animation-duration: 0.1s !important;
   }
@@ -921,7 +937,7 @@ body.screen-off .custom-clippy-chat-balloon {
     border-width: 2px !important;
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5) !important;
   }
-  
+
   .clippy-option-button {
     border-width: 3px !important;
   }
@@ -929,6 +945,7 @@ body.screen-off .custom-clippy-chat-balloon {
 ```
 
 #### 2.4 Update index.js
+
 ```javascript
 // src/components/ClippyAssistant/index.js
 // REPLACE ENTIRE FILE WITH:
@@ -941,6 +958,7 @@ export default ClippyAssistant;
 ```
 
 #### 2.5 Update ClippyAssistant.js
+
 ```javascript
 // src/components/ClippyAssistant/ClippyAssistant.js
 // REMOVE these import lines (search and delete):
@@ -966,6 +984,7 @@ useEffect(() => {
 ```
 
 #### 2.6 Update App.js
+
 ```javascript
 // src/App.js
 // REPLACE the entire Desktop class with:
@@ -1003,10 +1022,10 @@ class Desktop extends Component {
 
   initializeClippy = () => {
     const isMobile = this.context.isMobile;
-    
+
     setTimeout(() => {
       console.log("Initializing Clippy...");
-      
+
       if (!isMobile) {
         setTimeout(() => {
           ClippyService.setInitialPosition({ position: "higher-right" });
@@ -1024,7 +1043,7 @@ class Desktop extends Component {
   render() {
     const { context } = this;
     const isMobile = context.isMobile;
-    
+
     return (
       <ProgramProvider>
         <MonitorView>
@@ -1043,9 +1062,9 @@ class Desktop extends Component {
             <TaskManager />
             <Settings />
             <ShutDown />
-            
+
             <ClippyProvider defaultAgent="Clippy" />
-            
+
             {context.crt && <CRTOverlay />}
           </Theme>
         </MonitorView>
@@ -1064,6 +1083,7 @@ export default App;
 ```
 
 ### Phase 3: Remove Problematic Files
+
 ```bash
 # Remove the problematic files
 rm src/components/ClippyAssistant/ClippyManager.js
@@ -1076,6 +1096,7 @@ rm src/components/ClippyAssistant/ClippyMobileOptimizer.js
 ```
 
 ### Phase 4: Test and Verify
+
 ```bash
 # Test the application
 npm start
@@ -1091,54 +1112,61 @@ npm start
 ```
 
 ### Phase 5: Performance Verification
+
 ```javascript
 // Add this to browser console for performance testing:
 
 const testClippyPerformance = () => {
   console.log("=== Clippy Performance Test ===");
-  
+
   // Memory test
   const before = performance.memory?.usedJSHeapSize || 0;
-  
+
   // Animation test
   const start = performance.now();
-  ClippyService.play('Wave');
-  
+  ClippyService.play("Wave");
+
   requestAnimationFrame(() => {
     const animTime = performance.now() - start;
-    console.log(`Animation start time: ${animTime}ms ${animTime < 100 ? '✅' : '❌'}`);
+    console.log(
+      `Animation start time: ${animTime}ms ${animTime < 100 ? "✅" : "❌"}`
+    );
   });
-  
+
   // Memory after test
   setTimeout(() => {
     const after = performance.memory?.usedJSHeapSize || 0;
     const usage = after - before;
-    console.log(`Memory usage: ${usage} bytes ${usage < 5000000 ? '✅' : '❌'}`);
+    console.log(
+      `Memory usage: ${usage} bytes ${usage < 5000000 ? "✅" : "❌"}`
+    );
   }, 3000);
-  
+
   // Mobile positioning test
-  const clippy = document.querySelector('.clippy');
+  const clippy = document.querySelector(".clippy");
   if (clippy) {
     const style = window.getComputedStyle(clippy);
     const isMobile = window.innerWidth < 768;
-    
+
     if (isMobile) {
-      const mobile = style.bottom && style.right && style.transform.includes('scale');
-      console.log(`Mobile positioning: ${mobile ? '✅' : '❌'}`);
+      const mobile =
+        style.bottom && style.right && style.transform.includes("scale");
+      console.log(`Mobile positioning: ${mobile ? "✅" : "❌"}`);
     } else {
-      const desktop = style.left && style.top && style.transform.includes('scale');
-      console.log(`Desktop positioning: ${desktop ? '✅' : '❌'}`);
+      const desktop =
+        style.left && style.top && style.transform.includes("scale");
+      console.log(`Desktop positioning: ${desktop ? "✅" : "❌"}`);
     }
   }
-  
+
   // Touch target test
-  const overlay = document.getElementById('clippy-clickable-overlay');
+  const overlay = document.getElementById("clippy-clickable-overlay");
   if (overlay) {
     const rect = overlay.getBoundingClientRect();
     const touchFriendly = rect.width >= 44 && rect.height >= 44;
-    console.log(`Touch targets: ${touchFriendly ? '✅' : '❌'}`);
+    console.log(`Touch targets: ${touchFriendly ? "✅" : "❌"}`);
   }
-  
+
   console.log("=== Test Complete ===");
 };
 
@@ -1149,6 +1177,7 @@ testClippyPerformance();
 ## Expected Results After Migration
 
 ### ✅ Fixed Issues:
+
 - No more mobile crashes (0% crash rate target)
 - Smooth 45-60 FPS on mobile (vs previous 15-25 FPS)
 - Memory usage reduced to <25MB (vs previous 50-80MB)
@@ -1156,6 +1185,7 @@ testClippyPerformance();
 - Clean console (no Clippy-related errors)
 
 ### ✅ Preserved Features:
+
 - Position lock/unlock system
 - MonitorView screen power integration
 - BIOS sequence welcome message
@@ -1165,6 +1195,7 @@ testClippyPerformance();
 - All animations and speech balloons
 
 ### ✅ Performance Improvements:
+
 - Hardware acceleration enabled
 - Touch-friendly mobile UI
 - Reduced DOM manipulation
@@ -1172,6 +1203,7 @@ testClippyPerformance();
 - Proper cleanup and memory management
 
 ## Rollback Plan
+
 ```bash
 # If anything goes wrong:
 git checkout clippy-migration-backup
@@ -1182,31 +1214,32 @@ git checkout HEAD~1 -- src/components/ClippyAssistant/
 ```
 
 ## Success Verification Commands
+
 ```javascript
 // Run these in browser console after migration:
 
 // 1. Basic functionality
-ClippyService.debug()
+ClippyService.debug();
 
 // 2. Animation test
-ClippyService.play("Greeting")
+ClippyService.play("Greeting");
 
-// 3. Speech test  
-ClippyService.speak("Migration successful!")
+// 3. Speech test
+ClippyService.speak("Migration successful!");
 
 // 4. Chat test
-ClippyService.showChat("Test chat")
+ClippyService.showChat("Test chat");
 
 // 5. Emergency test
-ClippyService.emergencyReset()
+ClippyService.emergencyReset();
 
 // 6. Performance test
-testClippyPerformance()
+testClippyPerformance();
 ```
 
 This automated approach preserves all your custom features while fixing the performance issues. The migration should complete in under 30 minutes with minimal manual intervention required.",
-      ".custom-clippy-chat-balloon"
-    ];
+".custom-clippy-chat-balloon"
+];
 
     elementsToHide.forEach(selector => {
       const elements = document.querySelectorAll(selector);
@@ -1220,8 +1253,8 @@ This automated approach preserves all your custom features while fixing the perf
     const hideStyle = document.createElement("style");
     hideStyle.id = "clippy-emergency-hide";
     hideStyle.textContent = `
-      .clippy, #clippy-clickable-overlay, 
-      .clippy-balloon, .custom-clippy-balloon, 
+      .clippy, #clippy-clickable-overlay,
+      .clippy-balloon, .custom-clippy-balloon,
       .custom-clippy-chat-balloon {
         display: none !important;
         visibility: hidden !important;
@@ -1229,44 +1262,46 @@ This automated approach preserves all your custom features while fixing the perf
         pointer-events: none !important;
       }
     `;
-    
+
     const existing = document.getElementById("clippy-emergency-hide");
     if (existing) existing.remove();
-    
+
     document.head.appendChild(hideStyle);
 
     return "Emergency reset complete. Refresh the page to restore Clippy.";
-  } catch (e) {
-    console.error("Error during emergency reset:", e);
-    return "Error during reset. Try refreshing the page.";
-  }
+
+} catch (e) {
+console.error("Error during emergency reset:", e);
+return "Error during reset. Try refreshing the page.";
+}
 };
 
 const ClippyService = {
-  isAvailable,
-  show,
-  hide,
-  speak,
-  showChat,
-  hideBalloon,
-  play,
-  changeAgent,
-  setPosition,
-  setInitialPosition,
-  getHelpForWindow,
-  showHelpForWindow,
-  handleWindowHelp: showHelpForWindow,
-  debug,
-  emergencyReset,
+isAvailable,
+show,
+hide,
+speak,
+showChat,
+hideBalloon,
+play,
+changeAgent,
+setPosition,
+setInitialPosition,
+getHelpForWindow,
+showHelpForWindow,
+handleWindowHelp: showHelpForWindow,
+debug,
+emergencyReset,
 };
 
 if (typeof window !== "undefined") {
-  window.ClippyService = ClippyService;
-  window.resetClippy = emergencyReset;
+window.ClippyService = ClippyService;
+window.resetClippy = emergencyReset;
 }
 
 export default ClippyService;
-```
+
+````
 
 #### 2.3 Replace _styles.scss
 ```scss
@@ -1282,13 +1317,13 @@ export default ClippyService;
   opacity: 1 !important;
   display: block !important;
   transition: opacity 0.3s ease !important;
-  
+
   /* Hardware acceleration */
-  transform: translateZ(0) scale(0.9) !important;
+  transform: translateZ(0) scale(0.95) !important;
   transform-origin: center bottom !important;
   backface-visibility: hidden !important;
   will-change: transform, opacity !important;
-  
+
   /* Desktop z-index */
   z-index: 2000 !important;
 }
@@ -1389,3 +1424,4 @@ export default ClippyService;
 }
 
 .custom-clippy-balloon
+````
