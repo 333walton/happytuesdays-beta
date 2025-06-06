@@ -507,6 +507,9 @@ class ClippyPositioning {
     const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2);
     const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1);
 
+    // Log final calculated values
+    devLog(`Calculated mobile position: bottom=${finalBottom}px, right=${finalRight}px`, { isIOSSafari, taskbarHeight });
+
     return {
       ...CLIPPY_POSITIONS.mobile,
       bottom: `${finalBottom}px`,
@@ -695,10 +698,35 @@ class ClippyPositioning {
     if (!element) return false;
 
     try {
-      // Log the transform style being applied
-      // if (styles.transform) {
-      //   devLog(`Applying transform style: ${styles.transform}`, { elementId: element.id, elementClass: element.className });
-      // }
+      // Add temporary debug display for mobile
+      if (isMobile) {
+        const debugDiv = document.createElement('div');
+        debugDiv.id = 'clippy-position-debug';
+        debugDiv.style.cssText = `
+          position: fixed;
+          top: 10px;
+          left: 10px;
+          background: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 5px;
+          border-radius: 4px;
+          font-size: 12px;
+          z-index: 9999;
+          pointer-events: none;
+        `;
+        
+        // Remove existing debug div if it exists
+        const existingDebug = document.getElementById('clippy-position-debug');
+        if (existingDebug) {
+          existingDebug.remove();
+        }
+        
+        // Add new debug div
+        document.body.appendChild(debugDiv);
+        
+        // Update debug text with current styles
+        debugDiv.textContent = `Bottom: ${styles.bottom}, Right: ${styles.right}`;
+      }
 
       Object.entries(styles).forEach(([key, value]) => {
         element.style[key] = value;
