@@ -493,14 +493,16 @@ class ClippyPositioning {
 
     // Apply offset based on device
     if (isIOSSafari) {
-      // iOS Safari specific offset relative to original default
-      desiredRightFromViewport = values.right + 20; // Shift 20px right for iOS Safari
-      desiredBottomFromViewport = values.bottom + 5; // Shift 5px down for iOS Safari (maintain)
+      // iOS Safari specific offset: 5px down from original default, plus an additional 25px right
+      desiredBottomFromViewport = values.bottom + 5; // 120 + 5 = 125px from bottom
+      desiredRightFromViewport = values.right + 20 + 25; // 11 + 20 + 25 = 56px from right
     } else {
-      // 65px above the taskbar for all other mobile, and 15px further right
-      const gapAboveTaskbar = 65;
-      desiredBottomFromViewport = taskbarHeight + gapAboveTaskbar;
-      desiredRightFromViewport = values.right + 15; // Shift 15px right
+      // Other mobile offset: 40px higher and 20px further right from previous non-iOS calculation
+      const previousNonIosBottom = taskbarHeight + 65; // Assuming taskbarHeight = 26, this was 91
+      const previousNonIosRight = values.right + 15; // Assuming values.right = 11, this was 26
+
+      desiredBottomFromViewport = previousNonIosBottom - 40; // 91 - 40 = 51px from bottom
+      desiredRightFromViewport = previousNonIosRight + 20; // 26 + 20 = 46px from right
     }
 
     // Apply viewport constraints
@@ -698,57 +700,52 @@ class ClippyPositioning {
     if (!element) return false;
 
     try {
-      // Log incoming styles on mobile
-      if (isMobile) {
-        devLog('Applying styles on mobile:', styles);
-      }
-
-      // Add temporary debug display for mobile
-      if (isMobile) {
-        const debugDiv = document.createElement('div');
-        debugDiv.id = 'clippy-position-debug';
-        debugDiv.style.cssText = `
-          position: fixed;
-          top: 10px;
-          left: 10px;
-          background: rgba(0, 0, 0, 0.8);
-          color: white;
-          padding: 5px;
-          border-radius: 4px;
-          font-size: 12px;
-          z-index: 9999;
-          pointer-events: none;
-        `;
-        
-        // Remove existing debug div if it exists
-        const existingDebug = document.getElementById('clippy-position-debug');
-        if (existingDebug) {
-          existingDebug.remove();
-        }
-        
-        // Add new debug div
-        document.body.appendChild(debugDiv);
-      }
+      // Remove temporary debug display for mobile
+      // if (isMobile) {
+      //   const debugDiv = document.createElement('div');
+      //   debugDiv.id = 'clippy-position-debug';
+      //   debugDiv.style.cssText = `
+      //     position: fixed;
+      //     top: 10px;
+      //     left: 10px;
+      //     background: rgba(0, 0, 0, 0.8);
+      //     color: white;
+      //     padding: 5px;
+      //     border-radius: 4px;
+      //     font-size: 12px;
+      //     z-index: 9999;
+      //     pointer-events: none;
+      //   `;
+      
+      //   // Remove existing debug div if it exists
+      //   const existingDebug = document.getElementById('clippy-position-debug');
+      //   if (existingDebug) {
+      //     existingDebug.remove();
+      //   }
+      
+      //   // Add new debug div
+      //   document.body.appendChild(debugDiv);
+      // }
 
       Object.entries(styles).forEach(([key, value]) => {
-        // Apply bottom and right with !important on mobile
-        if (isMobile && (key === 'bottom' || key === 'right')) {
-          element.style.setProperty(key, value, 'important');
-        } else {
+        // Remove temporary !important for bottom and right on mobile
+        // if (isMobile && (key === 'bottom' || key === 'right')) {
+        //   element.style.setProperty(key, value, 'important');
+        // } else {
           element.style[key] = value;
-        }
+        // }
       });
 
-      // Update debug text with current styles AFTER applying them
-      if (isMobile) {
-        const debugDiv = document.getElementById('clippy-position-debug');
-        if (debugDiv) {
-           // Read the actual applied styles from the element
-          const appliedBottom = element.style.bottom;
-          const appliedRight = element.style.right;
-          debugDiv.textContent = `Bottom: ${appliedBottom}, Right: ${appliedRight}`;
-        }
-      }
+      // Remove temporary debug text update
+      // if (isMobile) {
+      //   const debugDiv = document.getElementById('clippy-position-debug');
+      //   if (debugDiv) {
+      //      // Read the actual applied styles from the element
+      //     const appliedBottom = element.style.bottom;
+      //     const appliedRight = element.style.right;
+      //     debugDiv.textContent = `Bottom: ${appliedBottom}, Right: ${appliedRight}`;
+      //   }
+      // }
 
       if (styles.transform) {
         const actualTransform = element.style.transform;
@@ -1107,20 +1104,21 @@ static preserveClippyScale(clippyElement) {
 
     const clippySuccess = this.positionClippy(clippyElement, customPosition, taskbarHeight);
 
+    // Remove temporary direct style setting and debug update
     // On mobile, ensure bottom and right are set directly with !important
-    if (isMobile) {
-      const position = this.calculateMobilePosition(taskbarHeight);
-      if (position.bottom && position.right) {
-        clippyElement.style.setProperty('bottom', position.bottom, 'important');
-        clippyElement.style.setProperty('right', position.right, 'important');
+    // if (isMobile) {
+    //   const position = this.calculateMobilePosition(taskbarHeight);
+    //   if (position.bottom && position.right) {
+    //     clippyElement.style.setProperty('bottom', position.bottom, 'important');
+    //     clippyElement.style.setProperty('right', position.right, 'important');
 
-        // Update debug display with the values we just set
-        const debugDiv = document.getElementById('clippy-position-debug');
-        if (debugDiv) {
-          debugDiv.textContent = `Bottom: ${position.bottom}, Right: ${position.right}`;
-        }
-      }
-    }
+    //     // Update debug display with the values we just set
+    //     const debugDiv = document.getElementById('clippy-position-debug');
+    //     if (debugDiv) {
+    //       debugDiv.textContent = `Bottom: ${position.bottom}, Right: ${position.right}`;
+    //     }
+    //   }
+    // }
 
     if (!isMobile && clippySuccess && !resizeHandler.zoomLevelAnchors.has(currentZoomLevel)) {
       devLog(`Caching anchor after positioning for zoom level ${currentZoomLevel}`);

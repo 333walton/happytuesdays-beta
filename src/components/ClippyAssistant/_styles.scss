@@ -127,7 +127,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
 /* Mobile touch area expansion */
 @media (max-width: 768px),
 (pointer: coarse) {
-  /*
+  
   #clippy-clickable-overlay::before {
     content: "" !important;
     position: absolute !important;
@@ -139,8 +139,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
     pointer-events: auto !important;
     z-index: 1 !important;
   }
-  */
-
+  
   #clippy-clickable-overlay {
     min-width: 124px !important;
     min-height: 93px !important;
