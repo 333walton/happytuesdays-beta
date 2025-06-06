@@ -1037,10 +1037,18 @@ class ClippyPositioning {
     const position = isMobile ? this.calculateMobilePosition(taskbarHeight) : this.getClippyPosition(customPosition);
     const success = this.applyStyles(clippyElement, position);
 
-    // On mobile, explicitly ensure bottom and right are set with !important
-    if (isMobile && position.bottom && position.right) {
-      clippyElement.style.setProperty('bottom', position.bottom, 'important');
-      clippyElement.style.setProperty('right', position.right, 'important');
+    // On mobile, ensure bottom and right are set directly with !important
+    if (isMobile) {
+      if (position.bottom && position.right) {
+        clippyElement.style.setProperty('bottom', position.bottom, 'important');
+        clippyElement.style.setProperty('right', position.right, 'important');
+
+        // Update debug display with the values we just set
+        const debugDiv = document.getElementById('clippy-position-debug');
+        if (debugDiv) {
+          debugDiv.textContent = `Bottom: ${position.bottom}, Right: ${position.right}`;
+        }
+      }
     }
 
     return success;
@@ -1098,6 +1106,21 @@ static preserveClippyScale(clippyElement) {
     devLog(`Positioning Clippy and overlay for zoom level ${currentZoomLevel}`);
 
     const clippySuccess = this.positionClippy(clippyElement, customPosition, taskbarHeight);
+
+    // On mobile, ensure bottom and right are set directly with !important
+    if (isMobile) {
+      const position = this.calculateMobilePosition(taskbarHeight);
+      if (position.bottom && position.right) {
+        clippyElement.style.setProperty('bottom', position.bottom, 'important');
+        clippyElement.style.setProperty('right', position.right, 'important');
+
+        // Update debug display with the values we just set
+        const debugDiv = document.getElementById('clippy-position-debug');
+        if (debugDiv) {
+          debugDiv.textContent = `Bottom: ${position.bottom}, Right: ${position.right}`;
+        }
+      }
+    }
 
     if (!isMobile && clippySuccess && !resizeHandler.zoomLevelAnchors.has(currentZoomLevel)) {
       devLog(`Caching anchor after positioning for zoom level ${currentZoomLevel}`);
