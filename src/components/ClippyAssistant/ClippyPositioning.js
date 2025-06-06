@@ -494,11 +494,11 @@ class ClippyPositioning {
     if (isIOSSafari) {
       // iOS Safari: 125px from bottom, 56px from right
       bottomPx = 125;
-      rightPx = 56;
+      rightPx = 41;
     } else {
       // Other mobile: 51px from bottom, 46px from right
-      bottomPx = 51;
-      rightPx = 46;
+      bottomPx = 75;
+      rightPx = 38;
     }
 
     // Apply viewport constraints
