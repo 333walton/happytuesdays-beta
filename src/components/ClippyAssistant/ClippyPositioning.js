@@ -1035,7 +1035,15 @@ class ClippyPositioning {
     }
 
     const position = isMobile ? this.calculateMobilePosition(taskbarHeight) : this.getClippyPosition(customPosition);
-    return this.applyStyles(clippyElement, position);
+    const success = this.applyStyles(clippyElement, position);
+
+    // On mobile, explicitly ensure bottom and right are set with !important
+    if (isMobile && position.bottom && position.right) {
+      clippyElement.style.setProperty('bottom', position.bottom, 'important');
+      clippyElement.style.setProperty('right', position.right, 'important');
+    }
+
+    return success;
   }
 
   static positionOverlay(overlayElement, clippyElement) {
