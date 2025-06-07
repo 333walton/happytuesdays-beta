@@ -515,51 +515,55 @@ class ClippyPositioning {
   static calculateMobilePosition(taskbarHeight = 26) {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const values = CLIPPY_POSITIONS.mobileValues; // Keep values for potential future use or context
+    const values = CLIPPY_POSITIONS.mobileValues;
 
+    // First determine the exact visual position that iOS Safari achieves
+    const targetBottom = values.bottom - 5; // 115px from bottom
+    const targetRight = values.right - 7; // 4px from right
+
+    // Find the taskbar notification area
+    const taskbarNotifications = document.querySelector('.TaskBar__notifications');
     let desiredBottomFromViewport;
     let desiredRightFromViewport;
-    let desiredTopFromViewport;
-    let useTopPositioning = false; // Flag to indicate if we should use top instead of bottom
 
-    if (isIOSSafari) {
-      // Positioning specific to iOS Safari (which was already correct)
-      desiredBottomFromViewport = values.bottom - 5; // Should be 115px
-      desiredRightFromViewport = values.right - 7; // Should be 4px
-    } else if (isGoogleAppOnIOS) {
-      // Positioning specific to Google App on iOS using bottom positioning
-      // Aiming for 100px from bottom to clear the taskbar.
-      desiredBottomFromViewport = 100; // Adjusted for Google App to clear taskbar
-      desiredRightFromViewport = 4; // Keep right position consistent with Safari
-      useTopPositioning = false; // Use bottom positioning
+    if (taskbarNotifications) {
+      const taskbarRect = taskbarNotifications.getBoundingClientRect();
+      
+      // Calculate how far the taskbar is from the bottom of the viewport
+      const taskbarFromBottom = viewportHeight - taskbarRect.top;
+      
+      // Adjust our target position based on where the taskbar actually is
+      // If taskbar is higher than expected, we need to move Clippy up by the same amount
+      const bottomAdjustment = taskbarFromBottom - 30; // 30px is the expected taskbar height
+      desiredBottomFromViewport = targetBottom + bottomAdjustment;
+      
+      // Keep the same right offset from the edge
+      desiredRightFromViewport = targetRight;
+      
+      devLog('Positioning to match iOS Safari visual position', {
+        taskbarFromBottom,
+        bottomAdjustment,
+        targetBottom,
+        desiredBottom: desiredBottomFromViewport,
+        desiredRight: desiredRightFromViewport
+      });
     } else {
-      // Positioning for all other mobile browsers (Android, Chrome/Firefox on iOS, etc.)
-      // Adjusting based on feedback for Chrome, aiming for 150px bottom, 4px right.
-      desiredBottomFromViewport = 250; // Adjusted to lower Chrome position further (changed from 150 as test)
-      desiredRightFromViewport = 4; // Setting right to 4px for consistency
+      // If we can't find the taskbar, use the exact iOS Safari position
+      desiredBottomFromViewport = targetBottom;
+      desiredRightFromViewport = targetRight;
+      devLog('Using exact iOS Safari position - taskbar not found');
     }
 
     // Apply viewport constraints
-    // These constraints prevent Clippy from going off-screen near the top/left edges.
-    // Constraints need to be applied differently if using top positioning.
-    let finalBottom = 'auto';
-    let finalTop = 'auto';
-    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1); // Constraint from left edge (10% of viewport)
-
-    if (useTopPositioning) {
-        // Apply top constraint
-        finalTop = Math.max(desiredTopFromViewport, viewportHeight * 0.1); // Ensure it's not too close to the top
-    } else {
-        // Apply bottom constraint
-        finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2); // Constraint from top edge (20% of viewport)
-    }
+    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2);
+    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1);
 
     return {
       ...CLIPPY_POSITIONS.mobile,
-      bottom: useTopPositioning ? 'auto' : `${finalBottom}px`,
-      top: useTopPositioning ? `${finalTop}px` : 'auto',
+      bottom: `${finalBottom}px`,
+      top: 'auto',
       right: `${finalRight}px`,
-      left: "auto", // Ensure left is auto when using right
+      left: "auto",
     };
   }
 
