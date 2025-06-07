@@ -80,6 +80,16 @@ class CustomBalloonManager {
         message = String(content);
       }
 
+      // BLOCK: Do not show the enhanced message balloon ("How may I help you?" with 4 buttons)
+      if (
+        message === "How may I help you?" &&
+        Array.isArray(buttons) &&
+        buttons.length === 4
+      ) {
+        devLog('Blocked display of "How may I help you?" enhanced message balloon.');
+        return false;
+      }
+
       devLog(`Creating custom balloon: "${message}" with ${buttons.length} buttons`);
       
       // FIXED: Remove any existing balloons first
@@ -90,22 +100,14 @@ class CustomBalloonManager {
       balloonEl.className = 'custom-clippy-balloon';
       
       // Calculate position relative to Clippy with desktop viewport boundaries
-      const isEnhancedMessage = message === "How may I help you?";
       const position = this.calculatePosition({
-        ...options.position,
-        isEnhancedMessage
+        ...options.position
       });
       
       // Apply positioning
       balloonEl.style.position = 'fixed';
       balloonEl.style.left = `${position.left}px`;
       balloonEl.style.top = `${position.top}px`;
-      // Force with !important for enhanced message balloon
-      if (isEnhancedMessage) {
-        balloonEl.style.setProperty('left', `${position.left}px`, 'important');
-        balloonEl.style.setProperty('top', `${position.top}px`, 'important');
-        console.log('Enhanced balloon position:', position.left, position.top);
-      }
       balloonEl.style.zIndex = '9999';
       balloonEl.style.visibility = 'visible';
       balloonEl.style.opacity = '1';
@@ -152,10 +154,8 @@ class CustomBalloonManager {
     this._removeDynamicRepositioning();
     this._resizeHandler = () => {
       if (!this.currentBalloon) return;
-      const isEnhancedMessage = message === "How may I help you?";
       const position = this.calculatePosition({
-        ...options.position,
-        isEnhancedMessage
+        ...options.position
       });
       this.currentBalloon.style.setProperty('left', `${position.left}px`, 'important');
       this.currentBalloon.style.setProperty('top', `${position.top}px`, 'important');
@@ -185,10 +185,10 @@ class CustomBalloonManager {
     // Clear any existing content
     balloonEl.innerHTML = '';
 
-    // Add enhanced message class if this is the enhanced message
-    const isEnhancedMessage = message === "How may I help you?";
-    if (isEnhancedMessage) {
-      balloonEl.classList.add('enhanced-message-balloon');
+    // BLOCK: Do not render the enhanced message balloon content
+    if (message === "How may I help you?" && Array.isArray(buttons) && buttons.length === 4) {
+      devLog('Blocked rendering of "How may I help you?" enhanced message balloon content.');
+      return;
     }
 
     // Create message content
@@ -223,9 +223,6 @@ class CustomBalloonManager {
       buttons.forEach((button, index) => {
         const buttonEl = document.createElement('button');
         buttonEl.className = 'balloon-button';
-        if (isEnhancedMessage) {
-          buttonEl.classList.add('enhanced-button');
-        }
         buttonEl.textContent = button.text || button.label || `Option ${index + 1}`;
         
         // Classic Windows 98 button styling with iOS Safari compatibility
@@ -695,6 +692,23 @@ export const showTipsBalloon = () => {
       }
     ]
   }, 18000);
+ };
+
+// Add more close-ended speech balloons (statements only, no buttons)
+export const showStatementBalloon1 = () => {
+  return showCustomBalloon("Welcome to Hydra98! Enjoy your stay.", 5000);
+};
+
+export const showStatementBalloon2 = () => {
+  return showCustomBalloon("Clippy is here to help if you need anything.", 5000);
+};
+
+export const showStatementBalloon3 = () => {
+  return showCustomBalloon("Remember to save your work often!", 5000);
+};
+
+export const showStatementBalloon4 = () => {
+  return showCustomBalloon("Tip: You can right-click on the desktop for more options.", 5000);
 };
 
 /**

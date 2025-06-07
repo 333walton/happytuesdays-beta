@@ -696,101 +696,77 @@ class ClippyPositioning {
     const viewportHeight = window.innerHeight;
     const safeMargin = 15;
 
-    // Account for clickable overlay height
+    // Overlay height logic (used for mobile, ignored for desktop)
     const overlayEl = document.getElementById("clippy-clickable-overlay");
     const overlayRect = overlayEl
       ? overlayEl.getBoundingClientRect()
       : clippyRect;
-
-    // Calculate Clippy's full height including overlay
     const clippyHeight = clippyRect.height;
     const overlayHeight = overlayRect.height;
     const effectiveClippyHeight = Math.max(clippyHeight, overlayHeight);
     const effectiveClippyTop = Math.min(clippyRect.top, overlayRect.top);
 
-    if (balloonType === "chat") {
-      const balloonWidth = Math.min(300, viewportWidth - 40);
-      const balloonHeight = Math.min(220, viewportHeight - 150); // Reduced to ensure fit
-
-      // Position above Clippy with more margin
-      let left = Math.max(safeMargin, (viewportWidth - balloonWidth) / 2 - 20);
-      let top = effectiveClippyTop - balloonHeight - 40; // Increased gap
-
-      // If doesn't fit above, position at top of viewport
-      if (top < safeMargin) {
-        top = safeMargin;
-        // Shift to left side to avoid Clippy if it's on the right
-        if (clippyRect.right > viewportWidth / 2) {
-          left = safeMargin;
-        } else {
-          left = viewportWidth - balloonWidth - safeMargin;
+    if (isMobile) {
+      // Mobile logic
+      if (balloonType === "chat") {
+        const balloonWidth = Math.min(300, viewportWidth - 40);
+        const balloonHeight = Math.min(220, viewportHeight - 150);
+        let left = Math.max(
+          safeMargin,
+          (viewportWidth - balloonWidth) / 2 - 20
+        );
+        let top = effectiveClippyTop - balloonHeight - 40;
+        if (top < safeMargin) {
+          top = safeMargin;
+          left =
+            clippyRect.right > viewportWidth / 2
+              ? safeMargin
+              : viewportWidth - balloonWidth - safeMargin;
         }
-      }
-
-      return { left, top };
-    } else {
-      // Speech balloon
-      const balloonWidth = Math.min(260, viewportWidth - 40);
-      const balloonHeight = 100;
-
-      // Center above Clippy
-      let left = clippyRect.left + clippyRect.width / 2 - balloonWidth / 2;
-      let top = effectiveClippyTop - balloonHeight - 30; // Increased gap
-
-      // Constrain to viewport
-      left = Math.max(
-        safeMargin,
-        Math.min(left, viewportWidth - balloonWidth - safeMargin)
-      );
-
-      // If doesn't fit above, position to the side
-      if (top < safeMargin) {
-        top = effectiveClippyTop - 20; // Align near Clippy's top
-
-        // Try left side first
-        if (clippyRect.left > balloonWidth + 30) {
-          left = clippyRect.left - balloonWidth - 20;
-        } else {
-          // Otherwise right side
-          left = clippyRect.right + 20;
-          if (left + balloonWidth > viewportWidth - safeMargin) {
-            // Last resort: top of viewport
-            left = (viewportWidth - balloonWidth) / 2;
-            top = safeMargin;
+        return { left, top };
+      } else {
+        // Speech balloon
+        const balloonWidth = Math.min(260, viewportWidth - 40);
+        const balloonHeight = 100;
+        let left = clippyRect.left + clippyRect.width / 2 - balloonWidth / 2;
+        let top = effectiveClippyTop - balloonHeight - 30;
+        left = Math.max(
+          safeMargin,
+          Math.min(left, viewportWidth - balloonWidth - safeMargin)
+        );
+        if (top < safeMargin) {
+          top = effectiveClippyTop - 20;
+          if (clippyRect.left > balloonWidth + 30) {
+            left = clippyRect.left - balloonWidth - 20;
+          } else {
+            left = clippyRect.right + 20;
+            if (left + balloonWidth > viewportWidth - safeMargin) {
+              left = (viewportWidth - balloonWidth) / 2;
+              top = safeMargin;
+            }
           }
         }
+        return { left, top };
       }
-
-      return { left, top };
-    }
-  }
-
-  static getDesktopBalloonPosition(clippyRect, balloonType) {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    if (balloonType === "chat") {
-      const balloonWidth = 320;
-      const balloonHeight = 200;
-
-      let left = clippyRect.left + clippyRect.width / 2 - 110;
-      let top = clippyRect.top - 200;
-
-      left = Math.max(10, Math.min(left, viewportWidth - balloonWidth - 10));
-      top = Math.max(10, Math.min(top, viewportHeight - balloonHeight - 10));
-
-      return { left, top };
     } else {
-      const balloonWidth = 280;
-      const balloonHeight = 120;
-
-      let left = clippyRect.left + clippyRect.width / 2 - 125;
-      let top = clippyRect.top - 120;
-
-      left = Math.max(10, Math.min(left, viewportWidth - balloonWidth - 10));
-      top = Math.max(10, Math.min(top, viewportHeight - balloonHeight - 10));
-
-      return { left, top };
+      // Desktop logic
+      if (balloonType === "chat") {
+        const balloonWidth = 320;
+        const balloonHeight = 200;
+        let left = clippyRect.left + clippyRect.width / 2 - 110;
+        let top = clippyRect.top - 200;
+        left = Math.max(10, Math.min(left, viewportWidth - balloonWidth - 10));
+        top = Math.max(10, Math.min(top, viewportHeight - balloonHeight - 10));
+        return { left, top };
+      } else {
+        const balloonWidth = 280;
+        const balloonHeight = 120;
+        let left = clippyRect.left + clippyRect.width / 2 - 125;
+        let top = clippyRect.top - 120;
+        left = Math.max(10, Math.min(left, viewportWidth - balloonWidth - 10));
+        top = Math.max(10, Math.min(top, viewportHeight - balloonHeight - 10));
+        return { left, top };
+      }
     }
   }
 
@@ -1197,49 +1173,10 @@ class ClippyPositioning {
   }
 
   static positionOverlay(overlayElement, clippyElement) {
-    if (!overlayElement || !clippyElement) {
-      // devLog('positionOverlay: Missing elements.'); // Optional log
-      return false;
-    }
-
-    // Temporary debug logging
-    console.log("ClippyPositioning: positionOverlay called.");
-
+    if (!overlayElement || !clippyElement) return false;
     const position = this.getOverlayPosition(clippyElement);
-
-    // Temporary debug logging
-    console.log(
-      "ClippyPositioning: positionOverlay calculated position:",
-      position
-    );
-
-    if (position) {
-      delete position.transform; // Overlay doesn't need the transform property
-    }
-
-    const success = this.applyStyles(overlayElement, position);
-
-    // Temporary debug logging
-    console.log(
-      `ClippyPositioning: positionOverlay applyStyles success: ${success}`
-    );
-    if (success) {
-      // Log computed styles after applying
-      requestAnimationFrame(() => {
-        console.log(
-          "ClippyPositioning: positionOverlay computed bottom/right:",
-          {
-            bottom: window.getComputedStyle(overlayElement).bottom,
-            right: window.getComputedStyle(overlayElement).right,
-            left: window.getComputedStyle(overlayElement).left,
-            top: window.getComputedStyle(overlayElement).top,
-            position: window.getComputedStyle(overlayElement).position,
-          }
-        );
-      });
-    }
-
-    return success;
+    if (position) delete position.transform;
+    return this.applyStyles(overlayElement, position);
   }
 
   static preserveClippyScale(clippyElement) {
@@ -1316,21 +1253,7 @@ class ClippyPositioning {
     return success;
   }
 
-  static calculateMobilePositionForDrag() {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const values = CLIPPY_POSITIONS.mobileValues;
-
-    const bottomPx = Math.min(values.bottom, viewportHeight * 0.2);
-    const rightPx = Math.min(values.right, viewportWidth * 0.1);
-
-    return {
-      rightPx,
-      bottomPx,
-      right: `${rightPx}px`,
-      bottom: `${bottomPx}px`,
-    };
-  }
+  // Removed unused: calculateMobilePositionForDrag (not referenced anywhere)
 
   static applyMobilePosition(clippyElement, position, isDragging = false) {
     if (!clippyElement) return false;
