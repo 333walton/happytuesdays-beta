@@ -535,10 +535,15 @@ class ClippyPositioning {
 
     // Browser-specific adjustments
     if (isIOSSafari) {
-      bottom -= 20; // Lower for iOS Safari/Chrome
+      bottom += 30; // Move up by 30px for iOS Safari
+    }
+    // iOS Chrome detection: userAgent contains "CriOS"
+    if (window.navigator.userAgent.includes("CriOS")) {
+      bottom += 15; // Move up by 15px for iOS Chrome
+      right += 3;   // Shift right by 3px for iOS Chrome
     }
     if (isGoogleAppOnIOS) {
-      bottom += 30; // Raise for Google App
+      bottom += 30; // Raise for Google App (already correct)
     }
 
     // Constrain to viewport (never off-screen)
