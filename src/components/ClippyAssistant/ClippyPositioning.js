@@ -587,7 +587,7 @@ class ClippyPositioning {
       right += 3; // Shift right by 3px for iOS Chrome
     }
     if (isGoogleAppOnIOS) {
-      bottom += 30; // Raise for Google App (already correct)
+      bottom -= 30; // Lower for Google App on iOS
     }
 
     // Constrain to viewport (never off-screen)
