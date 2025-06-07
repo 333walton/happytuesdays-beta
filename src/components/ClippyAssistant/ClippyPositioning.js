@@ -535,7 +535,7 @@ class ClippyPositioning {
     } else {
       // Positioning for all other mobile browsers (Android, Chrome/Firefox on iOS, etc.)
       // Adjusting based on feedback for Chrome, aiming for 150px bottom, 4px right.
-      desiredBottomFromViewport = 150; // Adjusted to lower Chrome position further
+      desiredBottomFromViewport = 250; // Adjusted to lower Chrome position further (changed from 150 as test)
       desiredRightFromViewport = 4; // Setting right to 4px for consistency
     }
 
