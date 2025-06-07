@@ -559,35 +559,33 @@ class ClippyPositioning {
     const viewportHeight = window.innerHeight;
     const clippyWidth = 124;
     const clippyHeight = 93;
-    const baseBottom = 115; // iOS Safari reference
-    const baseRight = 4;
+    const gapAboveTaskbar = 5;
+    const gapFromRight = 4;
 
     // Try to detect the taskbar notification area
-    const taskbarNotifications = document.querySelector(
-      ".TaskBar__notifications"
-    );
-    let bottom = baseBottom;
-    let right = baseRight;
+    const taskbarNotifications = document.querySelector('.TaskBar__notifications');
+    let bottom, right;
 
     if (taskbarNotifications) {
       const taskbarRect = taskbarNotifications.getBoundingClientRect();
       // Distance from bottom of viewport to top of taskbar
       const taskbarFromBottom = viewportHeight - taskbarRect.top;
-      // Position Clippy just above the taskbar, with a small gap
-      bottom = taskbarFromBottom + 5;
-    }
+      bottom = taskbarFromBottom + gapAboveTaskbar;
+      right = gapFromRight;
+    } else {
+      // Fallback defaults (your tuned values)
+      bottom = 115;
+      right = gapFromRight;
 
-    // Browser-specific adjustments
-    if (isIOSSafari) {
-      bottom += 15; // Move up by 15px for iOS Safari
-    }
-    // iOS Chrome detection: userAgent contains "CriOS"
-    if (window.navigator.userAgent.includes("CriOS")) {
-      bottom += 15; // Move up by 15px for iOS Chrome
-      right += 3; // Shift right by 3px for iOS Chrome
-    }
-    if (isGoogleAppOnIOS) {
-      bottom -= 3; // Lower for Google App on iOS
+      // Browser-specific adjustments
+      if (isIOSSafari) {
+        bottom += 30;
+      } else if (window.navigator.userAgent.includes("CriOS")) {
+        bottom += 15;
+        right += 3;
+      } else if (isGoogleAppOnIOS) {
+        bottom -= 30;
+      }
     }
 
     // Constrain to viewport (never off-screen)
