@@ -517,44 +517,52 @@ class ClippyPositioning {
     const viewportHeight = window.innerHeight;
     const values = CLIPPY_POSITIONS.mobileValues;
 
-    let desiredBottomFromViewport;
-    let desiredRightFromViewport;
+    // Determine the desired bottom and right positions based on iOS Safari's ideal visual position.
+    // Adjusted to lower Clippy by 20px from previous 115px (115 - 20 = 95).
+    let desiredBottomFromViewport = 95; // New target for bottom position from viewport
+    let desiredRightFromViewport = values.right - 7; // Still 4px from right (matches iOS Safari's ideal)
 
     // Find the taskbar notification area
     const taskbarNotifications = document.querySelector('.TaskBar__notifications');
 
     if (taskbarNotifications) {
       const taskbarRect = taskbarNotifications.getBoundingClientRect();
-      const taskbarFromBottom = viewportHeight - taskbarRect.top; // Distance from viewport bottom to taskbar top
 
-      if (isGoogleAppOnIOS) {
-        // Google App: Needs to be raised by 30px from its current position (base of taskbar)
-        // To raise Clippy by 30px, we set its bottom edge to be 30px above the taskbar's top edge.
-        desiredBottomFromViewport = taskbarFromBottom + 30; // Position 30px above taskbar base
-        desiredRightFromViewport = 4; // Keep consistent right
-        devLog('Google App: Positioning relative to taskbar (raised)', { taskbarFromBottom, desiredBottom: desiredBottomFromViewport });
-      } else {
-        // iOS Safari and Chrome: Both need to be lowered by 20px from their current identical position.
-        // Current is effectively `115 + (taskbarFromBottom - 30)`. We want to add 20 to that.
-        // So, `(115 + 20) + (taskbarFromBottom - 30)` which simplifies to `135 + taskbarFromBottom - 30`
-        desiredBottomFromViewport = (values.bottom - 5 + 20) + (taskbarFromBottom - 30);
-        desiredRightFromViewport = 4; // Keep consistent right
-        devLog('Safari/Chrome: Positioning relative to taskbar (lowered)', { taskbarFromBottom, desiredBottom: desiredBottomFromViewport });
-      }
+      // Calculate the visual gap from the bottom of the taskbar's top edge to Clippy's bottom edge
+      // In iOS Safari, Clippy is 95px from the viewport bottom. If taskbar is e.g., 30px tall (top at viewportHeight-30)
+      // The gap from taskbar top to Clippy bottom = (viewportHeight - 30) - (viewportHeight - 95) = 65px.
+      const idealGapAboveTaskbarTop = 65;
+
+      // Position Clippy relative to the taskbar notifications using this ideal gap
+      desiredBottomFromViewport = viewportHeight - taskbarRect.top + idealGapAboveTaskbarTop;
+      // The right position is relative to the viewport, which should remain consistent
+      desiredRightFromViewport = values.right - 7; // Keep this consistent with the base target right
+
+      devLog('Positioning relative to taskbar with fixed offset from taskbar top', {
+        taskbarTop: taskbarRect.top,
+        taskbarRight: taskbarRect.right,
+        idealGap: idealGapAboveTaskbarTop,
+        desiredBottom: desiredBottomFromViewport,
+        desiredRight: desiredRightFromViewport
+      });
+
     } else {
-      // Fallback if taskbar not found (use fixed values)
-      if (isGoogleAppOnIOS) {
-        desiredBottomFromViewport = values.bottom - 5 - 30; // Approx 85px to raise Clippy for Google App
-      } else {
-        desiredBottomFromViewport = values.bottom - 5 + 20; // Approx 135px to lower Clippy for Safari/Chrome
-      }
-      desiredRightFromViewport = 4; // Always 4px for fallback
-      devLog('Using fixed fallback positioning - taskbar not found');
+      // Fallback to the target position if taskbar not found
+      // This means Clippy's bottom is 95px from the viewport bottom, 4px from right
+      devLog('Using fallback position - taskbar not found');
+    }
+
+    // Apply specific adjustment for Google App on iOS after the general calculation.
+    if (isGoogleAppOnIOS) {
+      // Google App needs to be raised by 30px.
+      // Reducing the bottom value makes Clippy appear higher.
+      desiredBottomFromViewport -= 30; // Reduce the bottom value to raise Clippy
+      devLog(`Google App adjustment: new desiredBottom: ${desiredBottomFromViewport}`);
     }
 
     // Apply viewport constraints
-    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2);
-    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1);
+    const finalBottom = Math.min(desiredBottomFromViewport, viewportHeight * 0.2); // Ensure it's not too high
+    const finalRight = Math.min(desiredRightFromViewport, viewportWidth * 0.1); // Ensure it's not too far left
 
     return {
       ...CLIPPY_POSITIONS.mobile,
