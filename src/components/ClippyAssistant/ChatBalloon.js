@@ -13,6 +13,8 @@ class ChatBalloonManager {
     this.isUserInteracting = false; // Track if user has interacted with chat
     this.hasUserEverInteracted = false; // Track if user has EVER interacted
     this._resizeHandler = null;
+    this._titleObserver = null;
+    this._agentChangeHandler = null;
   }
 
   /**
@@ -157,11 +159,32 @@ class ChatBalloonManager {
    * @param {Object} options - Additional options (may include agentName)
    */
   createChatContent(container, initialMessage, options = {}) {
-    // Determine agent title using selected agent or default to Clippy
-    const selectedAgent =
-      window.selectedAIAgent || options.agentName || "Clippy";
+    // Get the current agent name from window.selectedAIAgent or fall back to options
+    const getCurrentAgent = () => {
+      // Try getting from window.selectedAIAgent first
+      if (window.selectedAIAgent) {
+        return window.selectedAIAgent;
+      }
+      // Then try clippy element's data-agent attribute
+      const clippyEl = document.querySelector('.clippy');
+      const dataAgent = clippyEl?.getAttribute('data-agent');
+      if (dataAgent) {
+        window.selectedAIAgent = dataAgent; // Sync the global state
+        return dataAgent;
+      }
+      // Then try options
+      if (options.agentName) {
+        window.selectedAIAgent = options.agentName; // Sync the global state
+        return options.agentName;
+      }
+      // Default to Clippy
+      return "Clippy";
+    };
+
+    const selectedAgent = getCurrentAgent();
     const agentTitle = `Chat with ${selectedAgent}`;
 
+    // Create chat balloon HTML
     container.innerHTML = `
     <button class="custom-clippy-balloon-close" aria-label="Close chat" style="
       position: absolute;
@@ -212,7 +235,7 @@ class ChatBalloonManager {
         -webkit-text-fill-color: #000;
         text-align: left;
       ">
-        <strong>Clippy:</strong> ${initialMessage}
+        <strong>${selectedAgent}:</strong> ${initialMessage}
       </div>
     </div>
     
@@ -250,6 +273,51 @@ class ChatBalloonManager {
       ">Send</button>
     </div>
   `;
+
+    // Also update window.selectedAIAgent for consistency
+    window.selectedAIAgent = selectedAgent;
+
+    // Enhanced updateTitle function that also updates the initial message
+    const updateTitle = () => {
+      const titleEl = container.querySelector('.custom-clippy-balloon-title');
+      const messageEl = container.querySelector('.chat-messages div:first-child strong');
+      if (titleEl || messageEl) {
+        const currentAgent = window.selectedAIAgent || "Clippy";
+        if (titleEl) {
+          titleEl.innerHTML = `💬 Chat with ${currentAgent}`;
+        }
+        if (messageEl) {
+          messageEl.textContent = `${currentAgent}:`;
+        }
+      }
+    };
+
+    // Set up agent change event listener
+    this._agentChangeHandler = (event) => {
+      if (event.detail?.agent) {
+        window.selectedAIAgent = event.detail.agent;
+        updateTitle();
+      }
+    };
+    window.addEventListener('agentChanged', this._agentChangeHandler);
+
+    // Set up mutation observer with enhanced event handling
+    const clippyEl = document.querySelector('.clippy');
+    if (clippyEl) {
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.attributeName === 'data-agent') {
+            const newAgent = clippyEl.getAttribute('data-agent');
+            if (newAgent) {
+              window.selectedAIAgent = newAgent;
+              updateTitle();
+            }
+          }
+        }
+      });
+      observer.observe(clippyEl, { attributes: true, attributeFilter: ['data-agent'] });
+      this._titleObserver = observer;
+    }
 
     // Attach event listeners
     this.attachEventListeners(container);
@@ -405,8 +473,11 @@ class ChatBalloonManager {
       line-height: 1.3;
     `;
 
+    // Get current agent name for the message
+    const currentAgent = window.selectedAIAgent || "Clippy";
+
     if (sender === "clippy") {
-      messageEl.innerHTML = `<strong>Clippy:</strong> ${message}`;
+      messageEl.innerHTML = `<strong>${currentAgent}:</strong> ${message}`;
     } else {
       messageEl.innerHTML = `<strong>You:</strong> ${message}`;
     }
@@ -676,6 +747,14 @@ class ChatBalloonManager {
    * Cleanup method for component unmount
    */
   cleanup() {
+    if (this._titleObserver) {
+      this._titleObserver.disconnect();
+      this._titleObserver = null;
+    }
+    if (this._agentChangeHandler) {
+      window.removeEventListener('agentChanged', this._agentChangeHandler);
+      this._agentChangeHandler = null;
+    }
     this.forceClose();
     devLog("ChatBalloonManager cleaned up");
   }

@@ -19,8 +19,8 @@ const ClippyContextMenu = ({
   y,
   onClose,
   onAction,
-  agents = ["Clippy GPT", "Links", "Bonzi", "Genie", "Merlin", "Rover"],
-  currentAgent = "Clippy GPT",
+  agents, // Remove default value, rely on prop from parent
+  currentAgent,
 }) => {
   const [portalContainer, setPortalContainer] = useState(null);
   const [submenuOpen, setSubmenuOpen] = useState(null);

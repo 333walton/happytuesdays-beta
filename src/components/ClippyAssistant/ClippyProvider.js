@@ -2013,11 +2013,16 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             y={contextMenuPosition.y}
             onClose={hideContextMenu}
             currentAgent={currentAgent}
-            agents={["ClippyGPT", "Links", "Bonzi", "Genie", "Merlin", "Rover"]}
+            agents={[
+              "Clippy GPT",
+              "Links",
+              "Bonzi",
+              "Genie",
+              "Merlin",
+              "Rover",
+            ]}
             onAction={(action, data) => {
               devLog(`Context menu action: ${action}`, data);
-              // Menu actions are now handled within ClippyContextMenu component
-              // This just logs for debugging
             }}
           />
         )}
