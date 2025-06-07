@@ -517,41 +517,39 @@ class ClippyPositioning {
     const viewportHeight = window.innerHeight;
     const values = CLIPPY_POSITIONS.mobileValues;
 
-    // First determine the exact visual position that iOS Safari achieves
-    const targetBottom = values.bottom - 5; // 115px from bottom
-    const targetRight = values.right - 7; // 4px from right
-
-    // Find the taskbar notification area
-    const taskbarNotifications = document.querySelector('.TaskBar__notifications');
     let desiredBottomFromViewport;
     let desiredRightFromViewport;
 
+    // Find the taskbar notification area
+    const taskbarNotifications = document.querySelector('.TaskBar__notifications');
+
     if (taskbarNotifications) {
       const taskbarRect = taskbarNotifications.getBoundingClientRect();
-      
-      // Calculate how far the taskbar is from the bottom of the viewport
-      const taskbarFromBottom = viewportHeight - taskbarRect.top;
-      
-      // Adjust our target position based on where the taskbar actually is
-      // If taskbar is higher than expected, we need to move Clippy up by the same amount
-      const bottomAdjustment = taskbarFromBottom - 30; // 30px is the expected taskbar height
-      desiredBottomFromViewport = targetBottom + bottomAdjustment;
-      
-      // Keep the same right offset from the edge
-      desiredRightFromViewport = targetRight;
-      
-      devLog('Positioning to match iOS Safari visual position', {
-        taskbarFromBottom,
-        bottomAdjustment,
-        targetBottom,
-        desiredBottom: desiredBottomFromViewport,
-        desiredRight: desiredRightFromViewport
-      });
+      const taskbarFromBottom = viewportHeight - taskbarRect.top; // Distance from viewport bottom to taskbar top
+
+      if (isGoogleAppOnIOS) {
+        // Google App: Needs to be raised by 30px from its current position (base of taskbar)
+        // To raise Clippy by 30px, we set its bottom edge to be 30px above the taskbar's top edge.
+        desiredBottomFromViewport = taskbarFromBottom + 30; // Position 30px above taskbar base
+        desiredRightFromViewport = 4; // Keep consistent right
+        devLog('Google App: Positioning relative to taskbar (raised)', { taskbarFromBottom, desiredBottom: desiredBottomFromViewport });
+      } else {
+        // iOS Safari and Chrome: Both need to be lowered by 20px from their current identical position.
+        // Current is effectively `115 + (taskbarFromBottom - 30)`. We want to add 20 to that.
+        // So, `(115 + 20) + (taskbarFromBottom - 30)` which simplifies to `135 + taskbarFromBottom - 30`
+        desiredBottomFromViewport = (values.bottom - 5 + 20) + (taskbarFromBottom - 30);
+        desiredRightFromViewport = 4; // Keep consistent right
+        devLog('Safari/Chrome: Positioning relative to taskbar (lowered)', { taskbarFromBottom, desiredBottom: desiredBottomFromViewport });
+      }
     } else {
-      // If we can't find the taskbar, use the exact iOS Safari position
-      desiredBottomFromViewport = targetBottom;
-      desiredRightFromViewport = targetRight;
-      devLog('Using exact iOS Safari position - taskbar not found');
+      // Fallback if taskbar not found (use fixed values)
+      if (isGoogleAppOnIOS) {
+        desiredBottomFromViewport = values.bottom - 5 - 30; // Approx 85px to raise Clippy for Google App
+      } else {
+        desiredBottomFromViewport = values.bottom - 5 + 20; // Approx 135px to lower Clippy for Safari/Chrome
+      }
+      desiredRightFromViewport = 4; // Always 4px for fallback
+      devLog('Using fixed fallback positioning - taskbar not found');
     }
 
     // Apply viewport constraints
