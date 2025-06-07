@@ -559,7 +559,7 @@ class ClippyPositioning {
     const viewportHeight = window.innerHeight;
     const clippyWidth = 124;
     const clippyHeight = 93;
-    const gapAboveTaskbar = 10; // Adjusted gap above taskbar
+    const gapAboveTaskbar = 13; // Adjusted gap above taskbar
     const gapFromRight = 4;
 
     // Try to detect the taskbar notification area
