@@ -2,7 +2,7 @@
 // This is the SINGLE source of truth for all Clippy positioning
 
 // Optimized logging system
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === "development";
 
 const devLog = (message, data = null) => {
   if (isDev) {
@@ -46,13 +46,16 @@ const isMobile = (() => {
 // iOS Safari detection (more refined)
 const isIOSSafari = (() => {
   try {
-    const userAgent = navigator.userAgent || '';
+    const userAgent = navigator.userAgent || "";
     const isIOS = /iPad|iPhone|iPod/.test(userAgent);
     const isSafari = /Safari/.test(userAgent);
 
     // More comprehensive check for common non-Safari browser indicators on iOS
     // We look for specific strings that typically appear *instead* of or *in addition* to the base Safari string
-    const isLikelyNotSafari = /CriOS\/|FxiOS\/|EdgiOS\/|OPiOS\/|Coast\/|AlohaBrowser\/|Vivaldi\/|DuckDuckGo\//.test(userAgent);
+    const isLikelyNotSafari =
+      /CriOS\/|FxiOS\/|EdgiOS\/|OPiOS\/|Coast\/|AlohaBrowser\/|Vivaldi\/|DuckDuckGo\//.test(
+        userAgent
+      );
 
     // It's iOS Safari if it's iOS, contains 'Safari', and does NOT contain stronger indicators of other browsers
     // This is still heuristic and may not be perfect for all edge cases.
@@ -64,15 +67,15 @@ const isIOSSafari = (() => {
 
 // Google App on iOS detection
 const isGoogleAppOnIOS = (() => {
-    try {
-        const userAgent = navigator.userAgent || '';
-        const isIOS = /iPad|iPhone|iPod/.test(userAgent);
-        // Look for patterns typical in Google App (GSA) user agents
-        const isGoogleApp = /GSA\//.test(userAgent);
-        return isIOS && isGoogleApp;
-    } catch {
-        return false;
-    }
+  try {
+    const userAgent = navigator.userAgent || "";
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    // Look for patterns typical in Google App (GSA) user agents
+    const isGoogleApp = /GSA\//.test(userAgent);
+    return isIOS && isGoogleApp;
+  } catch {
+    return false;
+  }
 })();
 
 // ===== SINGLE SOURCE OF TRUTH FOR POSITIONING =====
@@ -161,8 +164,9 @@ class ZoomAwareResizeHandler {
   cacheClippyAnchorPosition(clippyElement, zoomLevel = null) {
     if (!clippyElement) return false;
 
-    const currentZoom = zoomLevel !== null ? zoomLevel : this.getCurrentZoomLevel();
-    
+    const currentZoom =
+      zoomLevel !== null ? zoomLevel : this.getCurrentZoomLevel();
+
     devLog(`Caching anchor for zoom ${currentZoom}`);
 
     const desktop =
@@ -188,16 +192,21 @@ class ZoomAwareResizeHandler {
     const taskbarHeight = 30;
 
     const safeLeft = desktopRect.left + desktopRect.width - rightOffset;
-    const safeTop = desktopRect.top + desktopRect.height - taskbarHeight - bottomOffset;
+    const safeTop =
+      desktopRect.top + desktopRect.height - taskbarHeight - bottomOffset;
 
     const zoomAnchorData = {
       zoomLevel: currentZoom,
       timestamp: Date.now(),
       zoomFactor: zoomFactor,
       fromDesktopRightPercent: rightOffset / desktopRect.width,
-      fromDesktopBottomPercent: (taskbarHeight + bottomOffset) / desktopRect.height,
-      fromDesktopLeftPercent: (desktopRect.width - rightOffset) / desktopRect.width,
-      fromDesktopTopPercent: (desktopRect.height - taskbarHeight - bottomOffset) / desktopRect.height,
+      fromDesktopBottomPercent:
+        (taskbarHeight + bottomOffset) / desktopRect.height,
+      fromDesktopLeftPercent:
+        (desktopRect.width - rightOffset) / desktopRect.width,
+      fromDesktopTopPercent:
+        (desktopRect.height - taskbarHeight - bottomOffset) /
+        desktopRect.height,
       safeLeft: safeLeft,
       safeTop: safeTop,
       rightOffset: rightOffset,
@@ -213,7 +222,9 @@ class ZoomAwareResizeHandler {
 
     devLog(`Cached anchor for zoom ${currentZoom}`, {
       zoomFactor,
-      expectedSize: `${scaledClippyWidth.toFixed(1)}x${scaledClippyHeight.toFixed(1)}`,
+      expectedSize: `${scaledClippyWidth.toFixed(
+        1
+      )}x${scaledClippyHeight.toFixed(1)}`,
       position: `(${safeLeft.toFixed(1)}, ${safeTop.toFixed(1)})`,
     });
     return true;
@@ -221,14 +232,18 @@ class ZoomAwareResizeHandler {
 
   getZoomFactorForLevel(zoomLevel) {
     switch (zoomLevel) {
-      case 1: return 1.1;
-      case 2: return 1.25;
-      default: return 1.0;
+      case 1:
+        return 1.1;
+      case 2:
+        return 1.25;
+      default:
+        return 1.0;
     }
   }
 
   getAnchoredPosition(zoomLevel = null) {
-    const currentZoom = zoomLevel !== null ? zoomLevel : this.getCurrentZoomLevel();
+    const currentZoom =
+      zoomLevel !== null ? zoomLevel : this.getCurrentZoomLevel();
     const anchorData = this.zoomLevelAnchors.get(currentZoom);
 
     if (!anchorData) {
@@ -253,14 +268,20 @@ class ZoomAwareResizeHandler {
 
     const anchoredPosition = {
       left: currentDesktopRect.left + currentDesktopRect.width - rightOffset,
-      top: currentDesktopRect.top + currentDesktopRect.height - taskbarHeight - bottomOffset,
+      top:
+        currentDesktopRect.top +
+        currentDesktopRect.height -
+        taskbarHeight -
+        bottomOffset,
       zoomLevel: currentZoom,
       appliedWidth: anchorData.expectedWidth,
       appliedHeight: anchorData.expectedHeight,
     };
 
     devLog(`Calculated anchored position for zoom ${currentZoom}`, {
-      position: `(${anchoredPosition.left.toFixed(1)}, ${anchoredPosition.top.toFixed(1)})`,
+      position: `(${anchoredPosition.left.toFixed(
+        1
+      )}, ${anchoredPosition.top.toFixed(1)})`,
       desktop: `${currentDesktopRect.width}x${currentDesktopRect.height}`,
     });
 
@@ -287,7 +308,10 @@ class ZoomAwareResizeHandler {
       this.clearZoomAnchor(newZoomLevel);
 
       if (clippyElement) {
-        const newAnchorSuccess = this.cacheClippyAnchorPosition(clippyElement, newZoomLevel);
+        const newAnchorSuccess = this.cacheClippyAnchorPosition(
+          clippyElement,
+          newZoomLevel
+        );
 
         if (newAnchorSuccess) {
           this.notifyListeners("zoom-change-immediate", {
@@ -342,16 +366,28 @@ class ZoomAwareResizeHandler {
 
     this.isListening = true;
 
-    window.addEventListener("resize", this.handleResizeImmediate, { passive: true });
+    window.addEventListener("resize", this.handleResizeImmediate, {
+      passive: true,
+    });
     this.startRealTimeMonitoring();
 
     if (isMobile) {
-      window.addEventListener("orientationchange", this.handleOrientationChange, { passive: true });
+      window.addEventListener(
+        "orientationchange",
+        this.handleOrientationChange,
+        { passive: true }
+      );
 
       if (isIOSSafari) {
-        window.addEventListener("scroll", this.handleIOSViewportChange, { passive: true });
+        window.addEventListener("scroll", this.handleIOSViewportChange, {
+          passive: true,
+        });
         if (window.visualViewport) {
-          window.visualViewport.addEventListener("resize", this.handleIOSViewportChange, { passive: true });
+          window.visualViewport.addEventListener(
+            "resize",
+            this.handleIOSViewportChange,
+            { passive: true }
+          );
         }
       }
     }
@@ -363,12 +399,18 @@ class ZoomAwareResizeHandler {
     this.isListening = false;
 
     window.removeEventListener("resize", this.handleResizeImmediate);
-    window.removeEventListener("orientationchange", this.handleOrientationChange);
+    window.removeEventListener(
+      "orientationchange",
+      this.handleOrientationChange
+    );
 
     if (isIOSSafari) {
       window.removeEventListener("scroll", this.handleIOSViewportChange);
       if (window.visualViewport) {
-        window.visualViewport.removeEventListener("resize", this.handleIOSViewportChange);
+        window.visualViewport.removeEventListener(
+          "resize",
+          this.handleIOSViewportChange
+        );
       }
     }
 
@@ -521,7 +563,9 @@ class ClippyPositioning {
     const baseRight = 4;
 
     // Try to detect the taskbar notification area
-    const taskbarNotifications = document.querySelector('.TaskBar__notifications');
+    const taskbarNotifications = document.querySelector(
+      ".TaskBar__notifications"
+    );
     let bottom = baseBottom;
     let right = baseRight;
 
@@ -535,12 +579,12 @@ class ClippyPositioning {
 
     // Browser-specific adjustments
     if (isIOSSafari) {
-      bottom += 30; // Move up by 30px for iOS Safari
+      bottom += 15; // Move up by 15px for iOS Safari
     }
     // iOS Chrome detection: userAgent contains "CriOS"
     if (window.navigator.userAgent.includes("CriOS")) {
       bottom += 15; // Move up by 15px for iOS Chrome
-      right += 3;   // Shift right by 3px for iOS Chrome
+      right += 3; // Shift right by 3px for iOS Chrome
     }
     if (isGoogleAppOnIOS) {
       bottom += 30; // Raise for Google App (already correct)
@@ -587,18 +631,26 @@ class ClippyPositioning {
           }
 
           if (monitorContainer.classList.contains("zoomed")) {
-            const zoomLevel = parseInt(document.body.getAttribute("data-zoom")) || 0;
+            const zoomLevel =
+              parseInt(document.body.getAttribute("data-zoom")) || 0;
             switch (zoomLevel) {
-              case 1: zoomFactor = 1.1; break;
-              case 2: zoomFactor = 1.25; break;
-              default: zoomFactor = 1.0; break;
+              case 1:
+                zoomFactor = 1.1;
+                break;
+              case 2:
+                zoomFactor = 1.25;
+                break;
+              default:
+                zoomFactor = 1.0;
+                break;
             }
           }
         }
 
         const basePosition = {
           x: rect.left + rect.width - values.rightOffset,
-          y: rect.top + rect.height - values.taskbarHeight - values.bottomOffset,
+          y:
+            rect.top + rect.height - values.taskbarHeight - values.bottomOffset,
         };
 
         return basePosition;
@@ -640,73 +692,78 @@ class ClippyPositioning {
   }
 
   static getMobileBalloonPosition(clippyRect, balloonType) {
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const safeMargin = 15;
-  
-  // Account for clickable overlay height
-  const overlayEl = document.getElementById('clippy-clickable-overlay');
-  const overlayRect = overlayEl ? overlayEl.getBoundingClientRect() : clippyRect;
-  
-  // Calculate Clippy's full height including overlay
-  const clippyHeight = clippyRect.height;
-  const overlayHeight = overlayRect.height;
-  const effectiveClippyHeight = Math.max(clippyHeight, overlayHeight);
-  const effectiveClippyTop = Math.min(clippyRect.top, overlayRect.top);
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const safeMargin = 15;
 
-  if (balloonType === "chat") {
-    const balloonWidth = Math.min(300, viewportWidth - 40);
-    const balloonHeight = Math.min(220, viewportHeight - 150); // Reduced to ensure fit
-    
-    // Position above Clippy with more margin
-    let left = Math.max(safeMargin, (viewportWidth - balloonWidth) / 2 - 20);
-    let top = effectiveClippyTop - balloonHeight - 40; // Increased gap
-    
-    // If doesn't fit above, position at top of viewport
-    if (top < safeMargin) {
-      top = safeMargin;
-      // Shift to left side to avoid Clippy if it's on the right
-      if (clippyRect.right > viewportWidth / 2) {
-        left = safeMargin;
-      } else {
-        left = viewportWidth - balloonWidth - safeMargin;
-      }
-    }
-    
-    return { left, top };
-  } else {
-    // Speech balloon
-    const balloonWidth = Math.min(260, viewportWidth - 40);
-    const balloonHeight = 100;
-    
-    // Center above Clippy
-    let left = clippyRect.left + (clippyRect.width / 2) - (balloonWidth / 2);
-    let top = effectiveClippyTop - balloonHeight - 30; // Increased gap
-    
-    // Constrain to viewport
-    left = Math.max(safeMargin, Math.min(left, viewportWidth - balloonWidth - safeMargin));
-    
-    // If doesn't fit above, position to the side
-    if (top < safeMargin) {
-      top = effectiveClippyTop - 20; // Align near Clippy's top
-      
-      // Try left side first
-      if (clippyRect.left > balloonWidth + 30) {
-        left = clippyRect.left - balloonWidth - 20;
-      } else {
-        // Otherwise right side
-        left = clippyRect.right + 20;
-        if (left + balloonWidth > viewportWidth - safeMargin) {
-          // Last resort: top of viewport
-          left = (viewportWidth - balloonWidth) / 2;
-          top = safeMargin;
+    // Account for clickable overlay height
+    const overlayEl = document.getElementById("clippy-clickable-overlay");
+    const overlayRect = overlayEl
+      ? overlayEl.getBoundingClientRect()
+      : clippyRect;
+
+    // Calculate Clippy's full height including overlay
+    const clippyHeight = clippyRect.height;
+    const overlayHeight = overlayRect.height;
+    const effectiveClippyHeight = Math.max(clippyHeight, overlayHeight);
+    const effectiveClippyTop = Math.min(clippyRect.top, overlayRect.top);
+
+    if (balloonType === "chat") {
+      const balloonWidth = Math.min(300, viewportWidth - 40);
+      const balloonHeight = Math.min(220, viewportHeight - 150); // Reduced to ensure fit
+
+      // Position above Clippy with more margin
+      let left = Math.max(safeMargin, (viewportWidth - balloonWidth) / 2 - 20);
+      let top = effectiveClippyTop - balloonHeight - 40; // Increased gap
+
+      // If doesn't fit above, position at top of viewport
+      if (top < safeMargin) {
+        top = safeMargin;
+        // Shift to left side to avoid Clippy if it's on the right
+        if (clippyRect.right > viewportWidth / 2) {
+          left = safeMargin;
+        } else {
+          left = viewportWidth - balloonWidth - safeMargin;
         }
       }
+
+      return { left, top };
+    } else {
+      // Speech balloon
+      const balloonWidth = Math.min(260, viewportWidth - 40);
+      const balloonHeight = 100;
+
+      // Center above Clippy
+      let left = clippyRect.left + clippyRect.width / 2 - balloonWidth / 2;
+      let top = effectiveClippyTop - balloonHeight - 30; // Increased gap
+
+      // Constrain to viewport
+      left = Math.max(
+        safeMargin,
+        Math.min(left, viewportWidth - balloonWidth - safeMargin)
+      );
+
+      // If doesn't fit above, position to the side
+      if (top < safeMargin) {
+        top = effectiveClippyTop - 20; // Align near Clippy's top
+
+        // Try left side first
+        if (clippyRect.left > balloonWidth + 30) {
+          left = clippyRect.left - balloonWidth - 20;
+        } else {
+          // Otherwise right side
+          left = clippyRect.right + 20;
+          if (left + balloonWidth > viewportWidth - safeMargin) {
+            // Last resort: top of viewport
+            left = (viewportWidth - balloonWidth) / 2;
+            top = safeMargin;
+          }
+        }
+      }
+
+      return { left, top };
     }
-    
-    return { left, top };
   }
-}
 
   static getDesktopBalloonPosition(clippyRect, balloonType) {
     const viewportWidth = window.innerWidth;
@@ -762,36 +819,41 @@ class ClippyPositioning {
   // iOS Safari Performance Optimization: Cancel all animations immediately
   static cancelAllAnimations(clippyElement) {
     if (!clippyElement) return;
-    
+
     // Stop Clippy animations immediately
     if (window.clippy && window.clippy.stop) {
       window.clippy.stop();
     }
-    
+
     // Cancel CSS animations and transitions
-    clippyElement.style.transition = 'none';
-    clippyElement.style.animation = 'none';
-    clippyElement.style.animationPlayState = 'paused';
-    
+    clippyElement.style.transition = "none";
+    clippyElement.style.animation = "none";
+    clippyElement.style.animationPlayState = "paused";
+
     // Force immediate style application for iOS Safari
     void clippyElement.offsetHeight; // Trigger reflow
-    
+
     if (isIOSSafari && isDev) {
       devLog("iOS Safari animations cancelled for drag performance");
     }
   }
 
   // Enhanced mobile drag handling optimized for iOS Safari
-  static optimizedIOSMobileDrag(clippyElement, overlayElement, newPosition, isDragging = true) {
+  static optimizedIOSMobileDrag(
+    clippyElement,
+    overlayElement,
+    newPosition,
+    isDragging = true
+  ) {
     if (!clippyElement || !isMobile) return false;
 
     try {
       // CRITICAL: Cancel all animations immediately for iOS Safari
       this.cancelAllAnimations(clippyElement);
-      
+
       // Apply position with maximum iOS Safari performance
       const boundedPosition = this.enforceMobileBoundaries(newPosition);
-      
+
       // Direct style application - fastest method for iOS Safari
       clippyElement.style.cssText = `
         position: fixed !important;
@@ -799,9 +861,9 @@ class ClippyPositioning {
         bottom: ${boundedPosition.bottomPx}px !important;
         left: auto !important;
         top: auto !important;
-        transform: translateZ(0) scale(${isDragging ? '1.05' : '1'}) !important;
+        transform: translateZ(0) scale(${isDragging ? "1.05" : "1"}) !important;
         transform-origin: center bottom !important;
-        z-index: ${isDragging ? '1550' : '1500'} !important;
+        z-index: ${isDragging ? "1550" : "1500"} !important;
         transition: none !important;
         animation: none !important;
         will-change: transform, right, bottom !important;
@@ -824,7 +886,7 @@ class ClippyPositioning {
           background: transparent !important;
           pointer-events: auto !important;
           cursor: pointer !important;
-          z-index: ${isDragging ? '1560' : '1510'} !important;
+          z-index: ${isDragging ? "1560" : "1510"} !important;
           transition: none !important;
           touch-action: none !important;
           -webkit-touch-callout: none !important;
@@ -845,18 +907,32 @@ class ClippyPositioning {
     const anchoredPos = resizeHandler.getAnchoredPosition(currentZoomLevel);
 
     if (!anchoredPos) {
-      errorLog(`Cannot apply anchored position - no anchor cached for zoom ${currentZoomLevel}`);
-      const anchorCreated = resizeHandler.cacheClippyAnchorPosition(clippyElement, currentZoomLevel);
+      errorLog(
+        `Cannot apply anchored position - no anchor cached for zoom ${currentZoomLevel}`
+      );
+      const anchorCreated = resizeHandler.cacheClippyAnchorPosition(
+        clippyElement,
+        currentZoomLevel
+      );
       if (anchorCreated) {
-        const newAnchoredPos = resizeHandler.getAnchoredPosition(currentZoomLevel);
+        const newAnchoredPos =
+          resizeHandler.getAnchoredPosition(currentZoomLevel);
         if (newAnchoredPos) {
-          return this.applyCalculatedPosition(clippyElement, newAnchoredPos, currentZoomLevel);
+          return this.applyCalculatedPosition(
+            clippyElement,
+            newAnchoredPos,
+            currentZoomLevel
+          );
         }
       }
       return false;
     }
 
-    return this.applyCalculatedPosition(clippyElement, anchoredPos, currentZoomLevel);
+    return this.applyCalculatedPosition(
+      clippyElement,
+      anchoredPos,
+      currentZoomLevel
+    );
   }
 
   static applyCalculatedPosition(clippyElement, positionData, zoomLevel) {
@@ -879,9 +955,11 @@ class ClippyPositioning {
     if (success) {
       clippyElement.classList.add("clippy-anchored");
       clippyElement.setAttribute("data-zoom-anchored", zoomLevel.toString());
-      
+
       devLog(`Applied anchored position for zoom ${zoomLevel}`, {
-        position: `(${positionData.left.toFixed(1)}, ${positionData.top.toFixed(1)})`,
+        position: `(${positionData.left.toFixed(1)}, ${positionData.top.toFixed(
+          1
+        )})`,
         scale: adjustedScale,
       });
     }
@@ -896,9 +974,15 @@ class ClippyPositioning {
       if (dataZoom >= 0) {
         let factor;
         switch (dataZoom) {
-          case 1: factor = 1.1; break;
-          case 2: factor = 1.25; break;
-          default: factor = 1.0; break;
+          case 1:
+            factor = 1.1;
+            break;
+          case 2:
+            factor = 1.25;
+            break;
+          default:
+            factor = 1.0;
+            break;
         }
         return factor;
       }
@@ -954,9 +1038,15 @@ class ClippyPositioning {
 
       let zoomFactor = 1.0;
       switch (newZoomLevel) {
-        case 1: zoomFactor = 1.1; break;
-        case 2: zoomFactor = 1.25; break;
-        default: zoomFactor = 1.0; break;
+        case 1:
+          zoomFactor = 1.1;
+          break;
+        case 2:
+          zoomFactor = 1.25;
+          break;
+        default:
+          zoomFactor = 1.0;
+          break;
       }
 
       const adjustedScale = CLIPPY_POSITIONS.desktopValues.scale * zoomFactor;
@@ -965,7 +1055,8 @@ class ClippyPositioning {
       const taskbarHeight = 30;
 
       const correctLeft = desktopRect.left + desktopRect.width - rightOffset;
-      const correctTop = desktopRect.top + desktopRect.height - taskbarHeight - bottomOffset;
+      const correctTop =
+        desktopRect.top + desktopRect.height - taskbarHeight - bottomOffset;
 
       const correctStyles = {
         position: "fixed",
@@ -984,15 +1075,23 @@ class ClippyPositioning {
       const success = this.applyStyles(clippyElement, correctStyles);
 
       if (success) {
-        const anchorCached = resizeHandler.cacheClippyAnchorPosition(clippyElement, newZoomLevel);
+        const anchorCached = resizeHandler.cacheClippyAnchorPosition(
+          clippyElement,
+          newZoomLevel
+        );
 
         clippyElement.classList.add("clippy-anchored");
-        clippyElement.setAttribute("data-zoom-anchored", newZoomLevel.toString());
+        clippyElement.setAttribute(
+          "data-zoom-anchored",
+          newZoomLevel.toString()
+        );
 
         devLog(`Applied positioning for zoom ${newZoomLevel}`, {
           position: `(${correctLeft.toFixed(1)}, ${correctTop.toFixed(1)})`,
           scale: adjustedScale,
-          desktop: `${desktopRect.width.toFixed(1)}x${desktopRect.height.toFixed(1)}`,
+          desktop: `${desktopRect.width.toFixed(
+            1
+          )}x${desktopRect.height.toFixed(1)}`,
           anchorCached: anchorCached ? "yes" : "no",
         });
 
@@ -1007,7 +1106,11 @@ class ClippyPositioning {
     }
   }
 
-  static positionClippy(clippyElement, customPosition = null, taskbarHeight = 26) {
+  static positionClippy(
+    clippyElement,
+    customPosition = null,
+    taskbarHeight = 26
+  ) {
     if (!clippyElement) return false;
 
     const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
@@ -1018,13 +1121,20 @@ class ClippyPositioning {
         devLog(`Using cached anchor for zoom level ${currentZoomLevel}`);
         return this.applyAnchoredPosition(clippyElement);
       } else {
-        devLog(`No anchor cached for zoom level ${currentZoomLevel}, creating fresh anchor`);
-        const anchorCached = resizeHandler.cacheClippyAnchorPosition(clippyElement, currentZoomLevel);
+        devLog(
+          `No anchor cached for zoom level ${currentZoomLevel}, creating fresh anchor`
+        );
+        const anchorCached = resizeHandler.cacheClippyAnchorPosition(
+          clippyElement,
+          currentZoomLevel
+        );
 
         if (anchorCached) {
           return this.applyAnchoredPosition(clippyElement);
         } else {
-          errorLog("Failed to cache anchor, falling back to normal positioning");
+          errorLog(
+            "Failed to cache anchor, falling back to normal positioning"
+          );
         }
       }
     }
@@ -1032,7 +1142,7 @@ class ClippyPositioning {
     // For mobile, use a more forceful approach
     if (isMobile) {
       const position = this.calculateMobilePosition(taskbarHeight);
-      
+
       // Method 1: Direct style attribute override
       const forceStyles = `
         position: fixed !important;
@@ -1044,23 +1154,23 @@ class ClippyPositioning {
         transform-origin: center bottom !important;
         z-index: 1500 !important;
       `;
-      
-      clippyElement.setAttribute('style', forceStyles);
-      
+
+      clippyElement.setAttribute("style", forceStyles);
+
       // Method 2: Use setProperty with important flag
       requestAnimationFrame(() => {
-        clippyElement.style.setProperty('bottom', position.bottom, 'important');
-        clippyElement.style.setProperty('right', position.right, 'important');
-        clippyElement.style.setProperty('position', 'fixed', 'important');
-        clippyElement.style.setProperty('left', 'auto', 'important');
-        clippyElement.style.setProperty('top', 'auto', 'important');
+        clippyElement.style.setProperty("bottom", position.bottom, "important");
+        clippyElement.style.setProperty("right", position.right, "important");
+        clippyElement.style.setProperty("position", "fixed", "important");
+        clippyElement.style.setProperty("left", "auto", "important");
+        clippyElement.style.setProperty("top", "auto", "important");
       });
-      
+
       // Method 3: Create a style sheet rule specifically for this Clippy instance
-      const styleId = 'clippy-mobile-position-override';
+      const styleId = "clippy-mobile-position-override";
       let styleElement = document.getElementById(styleId);
       if (!styleElement) {
-        styleElement = document.createElement('style');
+        styleElement = document.createElement("style");
         styleElement.id = styleId;
         document.head.appendChild(styleElement);
       }
@@ -1073,12 +1183,16 @@ class ClippyPositioning {
           top: auto !important;
         }
       `;
-      
-      devLog(`Mobile position forced: bottom=${position.bottom}, right=${position.right}`);
+
+      devLog(
+        `Mobile position forced: bottom=${position.bottom}, right=${position.right}`
+      );
       return true;
     }
 
-    const position = isMobile ? this.calculateMobilePosition(taskbarHeight) : this.getClippyPosition(customPosition);
+    const position = isMobile
+      ? this.calculateMobilePosition(taskbarHeight)
+      : this.getClippyPosition(customPosition);
     return this.applyStyles(clippyElement, position);
   }
 
@@ -1089,12 +1203,15 @@ class ClippyPositioning {
     }
 
     // Temporary debug logging
-    console.log('ClippyPositioning: positionOverlay called.');
+    console.log("ClippyPositioning: positionOverlay called.");
 
     const position = this.getOverlayPosition(clippyElement);
 
     // Temporary debug logging
-    console.log('ClippyPositioning: positionOverlay calculated position:', position);
+    console.log(
+      "ClippyPositioning: positionOverlay calculated position:",
+      position
+    );
 
     if (position) {
       delete position.transform; // Overlay doesn't need the transform property
@@ -1103,71 +1220,89 @@ class ClippyPositioning {
     const success = this.applyStyles(overlayElement, position);
 
     // Temporary debug logging
-    console.log(`ClippyPositioning: positionOverlay applyStyles success: ${success}`);
+    console.log(
+      `ClippyPositioning: positionOverlay applyStyles success: ${success}`
+    );
     if (success) {
-        // Log computed styles after applying
-        requestAnimationFrame(() => {
-            console.log('ClippyPositioning: positionOverlay computed bottom/right:', {
-                bottom: window.getComputedStyle(overlayElement).bottom,
-                right: window.getComputedStyle(overlayElement).right,
-                left: window.getComputedStyle(overlayElement).left,
-                top: window.getComputedStyle(overlayElement).top,
-                position: window.getComputedStyle(overlayElement).position,
-            });
-        });
+      // Log computed styles after applying
+      requestAnimationFrame(() => {
+        console.log(
+          "ClippyPositioning: positionOverlay computed bottom/right:",
+          {
+            bottom: window.getComputedStyle(overlayElement).bottom,
+            right: window.getComputedStyle(overlayElement).right,
+            left: window.getComputedStyle(overlayElement).left,
+            top: window.getComputedStyle(overlayElement).top,
+            position: window.getComputedStyle(overlayElement).position,
+          }
+        );
+      });
     }
 
     return success;
   }
 
-static preserveClippyScale(clippyElement) {
-  if (!clippyElement) return false;
+  static preserveClippyScale(clippyElement) {
+    if (!clippyElement) return false;
 
-  try {
-    const currentStyle = window.getComputedStyle(clippyElement);
-    const currentTransform = currentStyle.transform;
-    
-    // Extract current scale from transform
-    let currentScale = 0.95; // Default desktop scale
-    if (isMobile) {
-      currentScale = 1; // Mobile scale
-    } else {
-      // For desktop, calculate proper scale based on zoom
-      const zoomFactor = this.getMonitorZoomFactor();
-      currentScale = 0.95 * zoomFactor;
-    }
-    
-    // Ensure the correct scale is applied
-    const correctTransform = `translateZ(0) scale(${currentScale})`;
-    
-    if (currentTransform !== correctTransform) {
-      clippyElement.style.transform = correctTransform;
-      devLog(`Scale corrected: ${currentTransform} → ${correctTransform}`);
+    try {
+      const currentStyle = window.getComputedStyle(clippyElement);
+      const currentTransform = currentStyle.transform;
+
+      // Extract current scale from transform
+      let currentScale = 0.95; // Default desktop scale
+      if (isMobile) {
+        currentScale = 1; // Mobile scale
+      } else {
+        // For desktop, calculate proper scale based on zoom
+        const zoomFactor = this.getMonitorZoomFactor();
+        currentScale = 0.95 * zoomFactor;
+      }
+
+      // Ensure the correct scale is applied
+      const correctTransform = `translateZ(0) scale(${currentScale})`;
+
+      if (currentTransform !== correctTransform) {
+        clippyElement.style.transform = correctTransform;
+        devLog(`Scale corrected: ${currentTransform} → ${correctTransform}`);
+        return true;
+      }
+
       return true;
+    } catch (error) {
+      errorLog("Error preserving Clippy scale", error);
+      return false;
     }
-    
-    return true;
-  } catch (error) {
-    errorLog("Error preserving Clippy scale", error);
-    return false;
   }
-}
 
-  static positionClippyAndOverlay(clippyElement, overlayElement, customPosition = null, taskbarHeight = 26) {
+  static positionClippyAndOverlay(
+    clippyElement,
+    overlayElement,
+    customPosition = null,
+    taskbarHeight = 26
+  ) {
     if (!clippyElement) return false;
 
     const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
     devLog(`Positioning Clippy and overlay for zoom level ${currentZoomLevel}`);
 
     // Calculate the desired position
-    const position = isMobile ? this.calculateMobilePosition(taskbarHeight) : this.getClippyPosition(customPosition);
+    const position = isMobile
+      ? this.calculateMobilePosition(taskbarHeight)
+      : this.getClippyPosition(customPosition);
 
     // Apply basic styles (like position: fixed, transform) using applyStyles
     // applyStyles will handle !important for transform
     const clippySuccess = this.applyStyles(clippyElement, position);
 
-    if (!isMobile && clippySuccess && !resizeHandler.zoomLevelAnchors.has(currentZoomLevel)) {
-      devLog(`Caching anchor after positioning for zoom level ${currentZoomLevel}`);
+    if (
+      !isMobile &&
+      clippySuccess &&
+      !resizeHandler.zoomLevelAnchors.has(currentZoomLevel)
+    ) {
+      devLog(
+        `Caching anchor after positioning for zoom level ${currentZoomLevel}`
+      );
       resizeHandler.cacheClippyAnchorPosition(clippyElement, currentZoomLevel);
     }
 
@@ -1193,7 +1328,7 @@ static preserveClippyScale(clippyElement) {
       rightPx,
       bottomPx,
       right: `${rightPx}px`,
-      bottom: `${bottomPx}px`
+      bottom: `${bottomPx}px`,
     };
   }
 
@@ -1202,11 +1337,11 @@ static preserveClippyScale(clippyElement) {
 
     try {
       if (isDragging) {
-        clippyElement.classList.add('clippy-dragging');
-        document.body.classList.add('clippy-drag-active');
+        clippyElement.classList.add("clippy-dragging");
+        document.body.classList.add("clippy-drag-active");
       } else {
-        clippyElement.classList.remove('clippy-dragging');
-        document.body.classList.remove('clippy-drag-active');
+        clippyElement.classList.remove("clippy-dragging");
+        document.body.classList.remove("clippy-drag-active");
       }
 
       const mobileStyles = {
@@ -1215,22 +1350,26 @@ static preserveClippyScale(clippyElement) {
         bottom: position.bottom || `${position.bottomPx}px`,
         left: "auto",
         top: "auto",
-        transform: isDragging 
+        transform: isDragging
           ? "translateZ(0) scale(1.05)"
           : "translateZ(0) scale(1)",
         transformOrigin: "center bottom",
         zIndex: isDragging ? "1550" : "1500",
         backfaceVisibility: "hidden",
-        willChange: isDragging ? "transform, opacity, right, bottom" : "transform",
-        WebkitTransform: isDragging 
-          ? "translateZ(0) scale(1.05)" 
+        willChange: isDragging
+          ? "transform, opacity, right, bottom"
+          : "transform",
+        WebkitTransform: isDragging
+          ? "translateZ(0) scale(1.05)"
           : "translateZ(0) scale(1)",
         WebkitBackfaceVisibility: "hidden",
         touchAction: "none",
         userSelect: "none",
         WebkitUserSelect: "none",
         WebkitTouchCallout: "none",
-        transition: isDragging ? "none" : "transform 0.2s ease, right 0.2s ease, bottom 0.2s ease",
+        transition: isDragging
+          ? "none"
+          : "transform 0.2s ease, right 0.2s ease, bottom 0.2s ease",
       };
 
       return this.applyStyles(clippyElement, mobileStyles);
@@ -1243,7 +1382,7 @@ static preserveClippyScale(clippyElement) {
   static enforceMobileBoundaries(position) {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    
+
     const safeLeft = Math.max(10, window.safeAreaInsets?.left || 0);
     const safeRight = Math.max(10, window.safeAreaInsets?.right || 0);
     const safeTop = Math.max(10, window.safeAreaInsets?.top || 0);
@@ -1269,34 +1408,48 @@ static preserveClippyScale(clippyElement) {
           viewportHeight - clippyHeight - safeTop,
           position.bottomPx || parseInt(position.bottom, 10) || 0
         )
-      )
+      ),
     };
 
     return {
       ...boundedPosition,
       right: `${boundedPosition.rightPx}px`,
-      bottom: `${boundedPosition.bottomPx}px`
+      bottom: `${boundedPosition.bottomPx}px`,
     };
   }
 
-  static handleMobileDrag(clippyElement, overlayElement, newPosition, isDragging = true) {
+  static handleMobileDrag(
+    clippyElement,
+    overlayElement,
+    newPosition,
+    isDragging = true
+  ) {
     if (!clippyElement || !isMobile) return false;
 
     try {
       // For iOS Safari, use the optimized method
       if (isIOSSafari && isDragging) {
-        return this.optimizedIOSMobileDrag(clippyElement, overlayElement, newPosition, isDragging);
+        return this.optimizedIOSMobileDrag(
+          clippyElement,
+          overlayElement,
+          newPosition,
+          isDragging
+        );
       }
 
       const boundedPosition = this.enforceMobileBoundaries(newPosition);
-      const clippySuccess = this.applyMobilePosition(clippyElement, boundedPosition, isDragging);
+      const clippySuccess = this.applyMobilePosition(
+        clippyElement,
+        boundedPosition,
+        isDragging
+      );
 
       let overlaySuccess = true;
       if (overlayElement) {
         if (isDragging) {
-          overlayElement.classList.add('overlay-dragging');
+          overlayElement.classList.add("overlay-dragging");
         } else {
-          overlayElement.classList.remove('overlay-dragging');
+          overlayElement.classList.remove("overlay-dragging");
         }
 
         overlaySuccess = this.positionOverlay(overlayElement, clippyElement);
@@ -1313,22 +1466,22 @@ static preserveClippyScale(clippyElement) {
     if (!clippyElement || !isMobile) return false;
 
     try {
-      clippyElement.classList.add('clippy-dragging');
-      document.body.classList.add('clippy-drag-active');
-      
+      clippyElement.classList.add("clippy-dragging");
+      document.body.classList.add("clippy-drag-active");
+
       if (overlayElement) {
-        overlayElement.classList.add('overlay-dragging');
+        overlayElement.classList.add("overlay-dragging");
       }
 
-      clippyElement.style.transition = 'none';
+      clippyElement.style.transition = "none";
       if (overlayElement) {
-        overlayElement.style.transition = 'none';
+        overlayElement.style.transition = "none";
       }
 
       const enhancedStyles = {
-        willChange: 'transform, opacity, right, bottom',
-        contain: 'layout style paint',
-        isolation: 'isolate',
+        willChange: "transform, opacity, right, bottom",
+        contain: "layout style paint",
+        isolation: "isolate",
       };
 
       this.applyStyles(clippyElement, enhancedStyles);
@@ -1349,26 +1502,26 @@ static preserveClippyScale(clippyElement) {
         this.applyMobilePosition(clippyElement, boundedPosition, false);
       }
 
-      clippyElement.classList.remove('clippy-dragging');
-      document.body.classList.remove('clippy-drag-active');
-      
+      clippyElement.classList.remove("clippy-dragging");
+      document.body.classList.remove("clippy-drag-active");
+
       if (overlayElement) {
-        overlayElement.classList.remove('overlay-dragging');
+        overlayElement.classList.remove("overlay-dragging");
       }
 
       setTimeout(() => {
         if (clippyElement) {
-          clippyElement.style.transition = '';
+          clippyElement.style.transition = "";
         }
         if (overlayElement) {
-          overlayElement.style.transition = '';
+          overlayElement.style.transition = "";
         }
       }, 100);
 
       const resetStyles = {
-        willChange: 'transform',
-        contain: '',
-        isolation: '',
+        willChange: "transform",
+        contain: "",
+        isolation: "",
       };
 
       this.applyStyles(clippyElement, resetStyles);
@@ -1385,9 +1538,9 @@ static preserveClippyScale(clippyElement) {
 
     try {
       if (isLocked) {
-        clippyElement.classList.add('position-locked');
+        clippyElement.classList.add("position-locked");
       } else {
-        clippyElement.classList.remove('position-locked');
+        clippyElement.classList.remove("position-locked");
       }
 
       return true;
@@ -1400,12 +1553,24 @@ static preserveClippyScale(clippyElement) {
   static getMobileSafeAreas() {
     try {
       const computedStyle = getComputedStyle(document.documentElement);
-      
+
       return {
-        top: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-top)')) || 10,
-        right: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-right)')) || 10,
-        bottom: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-bottom)')) || 80,
-        left: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-left)')) || 10,
+        top:
+          parseInt(
+            computedStyle.getPropertyValue("env(safe-area-inset-top)")
+          ) || 10,
+        right:
+          parseInt(
+            computedStyle.getPropertyValue("env(safe-area-inset-right)")
+          ) || 10,
+        bottom:
+          parseInt(
+            computedStyle.getPropertyValue("env(safe-area-inset-bottom)")
+          ) || 80,
+        left:
+          parseInt(
+            computedStyle.getPropertyValue("env(safe-area-inset-left)")
+          ) || 10,
       };
     } catch (error) {
       return { top: 10, right: 10, bottom: 80, left: 10 };
@@ -1442,7 +1607,7 @@ static preserveClippyScale(clippyElement) {
       transformOrigin: "center bottom",
       zIndex: "1500",
       left: "auto",
-      top: "auto"
+      top: "auto",
     };
   }
 
@@ -1458,7 +1623,11 @@ static preserveClippyScale(clippyElement) {
 
   // ===== ZOOM-AWARE RESIZE HANDLING METHODS =====
 
-  static startResizeHandling(clippyElement, overlayElement, customPositionGetter = null) {
+  static startResizeHandling(
+    clippyElement,
+    overlayElement,
+    customPositionGetter = null
+  ) {
     if (!clippyElement) {
       errorLog("Cannot start resize handling: Clippy element not provided");
       return false;
@@ -1467,11 +1636,19 @@ static preserveClippyScale(clippyElement) {
     const resizeCallback = (eventType, data) => {
       try {
         if (eventType === "zoom-change-immediate") {
-          devLog(`Handling immediate zoom change: ${data.oldZoomLevel} → ${data.newZoomLevel}`);
+          devLog(
+            `Handling immediate zoom change: ${data.oldZoomLevel} → ${data.newZoomLevel}`
+          );
 
           if (isMobile) {
-            const customPosition = customPositionGetter ? customPositionGetter() : null;
-            this.positionClippyAndOverlay(clippyElement, overlayElement, customPosition);
+            const customPosition = customPositionGetter
+              ? customPositionGetter()
+              : null;
+            this.positionClippyAndOverlay(
+              clippyElement,
+              overlayElement,
+              customPosition
+            );
           } else {
             const positioned = this.applyAnchoredPosition(clippyElement);
             if (positioned && overlayElement) {
@@ -1482,14 +1659,26 @@ static preserveClippyScale(clippyElement) {
         }
 
         if (eventType === "zoom-change") {
-          devLog(`Handling zoom change: ${data.oldZoomLevel} → ${data.newZoomLevel}`);
+          devLog(
+            `Handling zoom change: ${data.oldZoomLevel} → ${data.newZoomLevel}`
+          );
 
           setTimeout(() => {
             if (isMobile) {
-              const customPosition = customPositionGetter ? customPositionGetter() : null;
-              this.positionClippyAndOverlay(clippyElement, overlayElement, customPosition);
+              const customPosition = customPositionGetter
+                ? customPositionGetter()
+                : null;
+              this.positionClippyAndOverlay(
+                clippyElement,
+                overlayElement,
+                customPosition
+              );
             } else {
-              this.positionClippyAndOverlay(clippyElement, overlayElement, null);
+              this.positionClippyAndOverlay(
+                clippyElement,
+                overlayElement,
+                null
+              );
             }
           }, 50);
           return;
@@ -1497,8 +1686,14 @@ static preserveClippyScale(clippyElement) {
 
         if (eventType === "realtime-resize" || eventType === "resize-start") {
           if (isMobile) {
-            const customPosition = customPositionGetter ? customPositionGetter() : null;
-            this.positionClippyAndOverlay(clippyElement, overlayElement, customPosition);
+            const customPosition = customPositionGetter
+              ? customPositionGetter()
+              : null;
+            this.positionClippyAndOverlay(
+              clippyElement,
+              overlayElement,
+              customPosition
+            );
           } else {
             const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
             if (resizeHandler.zoomLevelAnchors.has(currentZoomLevel)) {
@@ -1525,7 +1720,11 @@ static preserveClippyScale(clippyElement) {
             detail: {
               eventType,
               data,
-              anchored: !isMobile && resizeHandler.zoomLevelAnchors.has(resizeHandler.getCurrentZoomLevel()),
+              anchored:
+                !isMobile &&
+                resizeHandler.zoomLevelAnchors.has(
+                  resizeHandler.getCurrentZoomLevel()
+                ),
               zoomLevel: resizeHandler.getCurrentZoomLevel(),
               zoomFactor: this.getMonitorZoomFactor(),
             },
@@ -1562,7 +1761,10 @@ static preserveClippyScale(clippyElement) {
       return false;
     }
 
-    const success = this.forceImmediateZoomPositioning(clippyElement, newZoomLevel);
+    const success = this.forceImmediateZoomPositioning(
+      clippyElement,
+      newZoomLevel
+    );
     resizeHandler.handleZoomChange(newZoomLevel, clippyElement);
 
     return success;
@@ -1582,7 +1784,10 @@ static preserveClippyScale(clippyElement) {
     const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
     resizeHandler.clearZoomAnchor(currentZoomLevel);
 
-    return resizeHandler.cacheClippyAnchorPosition(clippyElement, currentZoomLevel);
+    return resizeHandler.cacheClippyAnchorPosition(
+      clippyElement,
+      currentZoomLevel
+    );
   }
 
   static triggerResize() {
@@ -1628,7 +1833,8 @@ static preserveClippyScale(clippyElement) {
           }
 
           const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
-          const bodyZoomAttr = parseInt(document.body.getAttribute("data-zoom")) || 0;
+          const bodyZoomAttr =
+            parseInt(document.body.getAttribute("data-zoom")) || 0;
 
           if (bodyZoomAttr !== currentZoomLevel) {
             devLog("Zoom state settling, waiting for consistency...");
@@ -1657,7 +1863,9 @@ static preserveClippyScale(clippyElement) {
               Math.abs(this._lastDesktopRect.top - currentRect.top) > 1;
 
             if (rectChanged) {
-              devLog("Desktop viewport still changing, waiting for stability...");
+              devLog(
+                "Desktop viewport still changing, waiting for stability..."
+              );
               this._lastDesktopRect = currentRect;
               setTimeout(checkMovementComplete, 25);
               return;
@@ -1691,7 +1899,8 @@ static preserveClippyScale(clippyElement) {
         const viewportHeight = window.innerHeight;
 
         const isVisible = rect.width > 0 && rect.height > 0;
-        const isInBottomRight = rect.bottom < viewportHeight && rect.right < viewportWidth;
+        const isInBottomRight =
+          rect.bottom < viewportHeight && rect.right < viewportWidth;
         const isReasonablyPositioned = rect.left > 0 && rect.top > 0;
 
         const isValid = isVisible && isInBottomRight && isReasonablyPositioned;
@@ -1735,13 +1944,16 @@ static preserveClippyScale(clippyElement) {
 
         const isValid = isWithinBounds && isVisible && isNearExpected;
 
-        devLog(`Desktop position validation: ${isValid ? "VALID" : "INVALID"}`, {
-          withinBounds: isWithinBounds,
-          visible: isVisible,
-          nearExpected: isNearExpected,
-          position: `(${rect.left.toFixed(1)}, ${rect.top.toFixed(1)})`,
-          expected: `(${expectedX.toFixed(1)}, ${expectedY.toFixed(1)})`,
-        });
+        devLog(
+          `Desktop position validation: ${isValid ? "VALID" : "INVALID"}`,
+          {
+            withinBounds: isWithinBounds,
+            visible: isVisible,
+            nearExpected: isNearExpected,
+            position: `(${rect.left.toFixed(1)}, ${rect.top.toFixed(1)})`,
+            expected: `(${expectedX.toFixed(1)}, ${expectedY.toFixed(1)})`,
+          }
+        );
 
         return isValid;
       }
@@ -1765,7 +1977,9 @@ static preserveClippyScale(clippyElement) {
         try {
           const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
           resizeHandler.clearZoomAnchor(currentZoomLevel);
-          devLog(`Cleared anchors for correction at zoom level ${currentZoomLevel}`);
+          devLog(
+            `Cleared anchors for correction at zoom level ${currentZoomLevel}`
+          );
 
           let success = false;
 
@@ -1773,7 +1987,10 @@ static preserveClippyScale(clippyElement) {
             const position = this.calculateMobilePosition();
             success = this.applyStyles(clippyElement, position);
           } else {
-            success = this.forceImmediateZoomPositioning(clippyElement, currentZoomLevel);
+            success = this.forceImmediateZoomPositioning(
+              clippyElement,
+              currentZoomLevel
+            );
           }
 
           if (success) {
@@ -1781,7 +1998,11 @@ static preserveClippyScale(clippyElement) {
 
             requestAnimationFrame(() => {
               const isNowValid = this.validateClippyPosition(clippyElement);
-              devLog(`Post-correction validation: ${isNowValid ? "SUCCESS" : "STILL INVALID"}`);
+              devLog(
+                `Post-correction validation: ${
+                  isNowValid ? "SUCCESS" : "STILL INVALID"
+                }`
+              );
               resolve(isNowValid);
             });
           } else {
@@ -1804,8 +2025,12 @@ static preserveClippyScale(clippyElement) {
         return;
       }
 
-      const overlayElement = document.getElementById("clippy-clickable-overlay");
-      devLog(`Auto-detected overlay: ${overlayElement ? "found" : "not found"}`);
+      const overlayElement = document.getElementById(
+        "clippy-clickable-overlay"
+      );
+      devLog(
+        `Auto-detected overlay: ${overlayElement ? "found" : "not found"}`
+      );
       devLog(`Starting hybrid zoom positioning for level ${newZoomLevel}`);
 
       try {
@@ -1823,7 +2048,10 @@ static preserveClippyScale(clippyElement) {
             this.positionOverlay(overlayElement, clippyElement);
           }
         } else {
-          positionSuccess = this.forceImmediateZoomPositioning(clippyElement, newZoomLevel);
+          positionSuccess = this.forceImmediateZoomPositioning(
+            clippyElement,
+            newZoomLevel
+          );
 
           if (positionSuccess && overlayElement) {
             this.positionOverlay(overlayElement, clippyElement);
@@ -1845,18 +2073,24 @@ static preserveClippyScale(clippyElement) {
               this.positionOverlay(overlayElement, clippyElement);
             }
 
-            devLog("Hybrid positioning completed successfully - validation passed");
+            devLog(
+              "Hybrid positioning completed successfully - validation passed"
+            );
             resolve(true);
           } else {
             devLog("Phase 4: Validation failed, applying correction");
-            const correctionSuccess = await this.positionCorrection(clippyElement);
+            const correctionSuccess = await this.positionCorrection(
+              clippyElement
+            );
 
             if (correctionSuccess) {
               if (overlayElement) {
                 this.positionOverlay(overlayElement, clippyElement);
               }
 
-              devLog("Hybrid positioning completed successfully - correction applied");
+              devLog(
+                "Hybrid positioning completed successfully - correction applied"
+              );
               resolve(true);
             } else {
               errorLog("Hybrid positioning failed - correction unsuccessful");
