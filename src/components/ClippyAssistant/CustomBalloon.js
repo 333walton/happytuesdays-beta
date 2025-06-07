@@ -113,14 +113,14 @@ class CustomBalloonManager {
       balloonEl.style.opacity = '1';
       balloonEl.style.display = 'block';
 
-      // FIXED: Dynamic sizing to fit within desktop viewport with button consideration
+      // SCALE DOWN: Reduce width and minHeight by 10%
       const hasButtons = buttons.length > 0;
-      const baseWidth = Math.min(200, position.maxWidth); // REDUCED from 280
-      const buttonHeight = hasButtons ? (buttons.length * 32) + 20 : 0;
-      
-      balloonEl.style.maxWidth = `${position.maxWidth}px`;
+      const baseWidth = Math.min(180, position.maxWidth * 0.9); // 200 -> 180, 10% smaller
+      const buttonHeight = hasButtons ? (buttons.length * 29) + 18 : 0; // 32 -> 29, 20 -> 18
+
+      balloonEl.style.maxWidth = `${position.maxWidth * 0.9}px`;
       balloonEl.style.width = `${baseWidth}px`;
-      balloonEl.style.minHeight = hasButtons ? `${Math.max(120, 80 + buttonHeight)}px` : 'auto';
+      balloonEl.style.minHeight = hasButtons ? `${Math.max(108, 72 + buttonHeight)}px` : 'auto'; // 120 -> 108, 80 -> 72
 
       // FIXED: Create balloon content with enhanced button support
       this.createBalloonContent(balloonEl, message, buttons);
@@ -199,9 +199,9 @@ class CustomBalloonManager {
       color: #000000 !important;
       -webkit-text-fill-color: #000000 !important;
       font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important;
-      font-size: 14px !important;
-      line-height: 1.4 !important;
-      margin-bottom: ${buttons.length > 0 ? '12px' : '0'} !important;
+      font-size: 12.6px !important; /* 14px -> 12.6px */
+      line-height: 1.3 !important;   /* 1.4 -> 1.3 */
+      margin-bottom: ${buttons.length > 0 ? '10px' : '0'} !important; /* 12px -> 10px */
       word-wrap: break-word !important;
       padding: 0 !important;
       text-align: center !important;
@@ -215,8 +215,8 @@ class CustomBalloonManager {
       buttonsContainer.style.cssText = `
         display: flex !important;
         flex-direction: column !important;
-        gap: 4px !important;
-        margin-top: 8px !important;
+        gap: 3.5px !important; /* 4px -> 3.5px */
+        margin-top: 7px !important; /* 8px -> 7px */
         padding: 0 !important;
       `;
 
@@ -225,19 +225,19 @@ class CustomBalloonManager {
         buttonEl.className = 'balloon-button';
         buttonEl.textContent = button.text || button.label || `Option ${index + 1}`;
         
-        // Classic Windows 98 button styling with iOS Safari compatibility
+        // SCALE DOWN: Reduce button font size, padding, min-height
         buttonEl.style.cssText = `
           background: #c0c0c0 !important;
           border: 2px outset #c0c0c0 !important;
           color: #000000 !important;
           -webkit-text-fill-color: #000000 !important;
           font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important;
-          font-size: 11px !important;
-          padding: 4px 12px !important;
+          font-size: 9.9px !important; /* 11px -> 9.9px */
+          padding: 3.5px 10.8px !important; /* 4px 12px -> 3.5px 10.8px */
           cursor: pointer !important;
           text-align: left !important;
           width: 100% !important;
-          min-height: ${this.isMobile() ? '36px' : '28px'} !important;
+          min-height: ${this.isMobile() ? '32px' : '25px'} !important; /* 36/28 -> 32/25 */
           touch-action: manipulation !important;
           -webkit-tap-highlight-color: transparent !important;
           -webkit-touch-callout: none !important;
@@ -392,10 +392,11 @@ class CustomBalloonManager {
    */
   
   calculatePosition(customPosition = {}) {
-    const balloonWidth = 280;
-    const balloonHeight = 120;
-    const safeMargin = 20;
-    const clippyMargin = 50; // Increased gap between Clippy/overlay and balloon
+    // SCALE DOWN: Reduce balloonWidth and balloonHeight by 10%
+    const balloonWidth = 252; // 280 * 0.9
+    const balloonHeight = 108; // 120 * 0.9
+    const safeMargin = 18; // 20 * 0.9
+    const clippyMargin = 45; // 50 * 0.9
 
     // Get desktop viewport
     const desktop = document.querySelector(".desktop.screen") || 
@@ -693,6 +694,81 @@ export const showTipsBalloon = () => {
     ]
   }, 18000);
  };
+
+// Add more close-ended speech balloons (statements only, no buttons) based on user observations/tips
+export const showObservationBalloon = (observationType) => {
+  let message = "";
+  switch (observationType) {
+    case "idle":
+      message = "Taking a break? Let me know if you need anything!";
+      break;
+    case "openedNotepad":
+      message = "Notepad is great for jotting down quick notes!";
+      break;
+    case "openedPaint":
+      message = "Feeling creative? Paint is ready for your masterpiece.";
+      break;
+    case "openedMinesweeper":
+      message = "Good luck! Remember, sometimes it's just a guess.";
+      break;
+    case "openedBrowser":
+      message = "Browsing the web? Stay safe out there!";
+      break;
+    case "changedWallpaper":
+      message = "Nice choice! A fresh wallpaper brightens the desktop.";
+      break;
+    case "rightClickDesktop":
+      message = "Right-clicking gives you more options—try it anywhere!";
+      break;
+    case "openedStartMenu":
+      message = "The Start menu is your gateway to all programs.";
+      break;
+    case "openedSettings":
+      message = "Tweak your settings to make Hydra98 your own.";
+      break;
+    case "openedChat":
+      message = "I'm always here if you want to chat!";
+      break;
+    default:
+      message = "Exploring Hydra98 is fun! Let me know if you need a tip.";
+      break;
+  }
+  return showCustomBalloon(message, 6000);
+};
+
+export const showTipBalloon = (tipType) => {
+  let message = "";
+  switch (tipType) {
+    case "dragClippy":
+      message = "Tip: You can drag me to a new spot if I'm in your way!";
+      break;
+    case "lockClippy":
+      message = "Tip: Lock my position to keep me from moving accidentally.";
+      break;
+    case "doubleClickClippy":
+      message = "Tip: Double-click me for a quick greeting or a surprise!";
+      break;
+    case "rightClickClippy":
+      message = "Tip: Right-click me for more options and settings.";
+      break;
+    case "useShortcuts":
+      message = "Tip: Try keyboard shortcuts like Alt+Tab to switch programs.";
+      break;
+    case "saveOften":
+      message = "Tip: Save your work often to avoid losing progress.";
+      break;
+    case "exploreGames":
+      message = "Tip: Check out classic games like Minesweeper and Solitaire!";
+      break;
+    case "changeTheme":
+      message = "Tip: You can change the desktop theme in settings.";
+      break;
+    default:
+      message = "Tip: Right-click the desktop for even more options!";
+      break;
+  }
+  return showCustomBalloon(message, 6000);
+};
 
 // Add more close-ended speech balloons (statements only, no buttons)
 export const showStatementBalloon1 = () => {

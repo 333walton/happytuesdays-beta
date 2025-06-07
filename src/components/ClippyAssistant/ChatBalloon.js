@@ -55,7 +55,7 @@ class ChatBalloonManager {
       chatContainer.style.flexDirection = 'column';
 
       // Create chat balloon HTML content with improved styling
-      this.createChatContent(chatContainer, initialMessage);
+      this.createChatContent(chatContainer, initialMessage, options);
 
       // Add to DOM
       document.body.appendChild(chatContainer);
@@ -144,9 +144,22 @@ class ChatBalloonManager {
    * Create the HTML content for the chat balloon - FIXED with centered send button
    * @param {HTMLElement} container - The chat container element
    * @param {string} initialMessage - Initial message from Clippy
+   * @param {Object} options - Additional options (may include agentName)
    */
-  createChatContent(container, initialMessage) {
-  container.innerHTML = `
+  createChatContent(container, initialMessage, options = {}) {
+    // Determine agent title
+    let agentTitle = "Chat";
+    // If agent is Clippy GPT, show "Chat with Clippy"
+    if (
+      (window.selectedAIAgent && window.selectedAIAgent === "Clippy GPT") ||
+      (options.agentName && options.agentName === "Clippy GPT")
+    ) {
+      agentTitle = "Chat with Clippy";
+    } else if (options.agentName) {
+      agentTitle = `Chat with ${options.agentName}`;
+    }
+
+    container.innerHTML = `
     <button class="custom-clippy-balloon-close" aria-label="Close chat" style="
       position: absolute;
       top: 4px;
@@ -172,7 +185,7 @@ class ChatBalloonManager {
       -webkit-text-fill-color: #000;
       padding-right: 35px;
     ">
-      💬 Chat with Clippy
+      💬 ${agentTitle}
     </div>
     
     <div class="chat-messages" style="
@@ -235,9 +248,9 @@ class ChatBalloonManager {
     </div>
   `;
 
-  // Attach event listeners
-  this.attachEventListeners(container);
-}
+    // Attach event listeners
+    this.attachEventListeners(container);
+  }
 
   /**
    * Attach event listeners to chat elements - with interaction tracking

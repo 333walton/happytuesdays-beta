@@ -9,8 +9,8 @@ const logAnimation = (animationName, context = "context menu") => {
   // Force log animation regardless of dev mode
   console.log(
     `%c🎭 Clippy Animation: "${animationName}"%c (from ${context})`,
-    'color: #0066cc; font-weight: bold; font-size: 14px;',
-    'color: #666; font-size: 12px;'
+    "color: #0066cc; font-weight: bold; font-size: 14px;",
+    "color: #666; font-size: 12px;"
   );
 };
 
@@ -19,8 +19,8 @@ const ClippyContextMenu = ({
   y,
   onClose,
   onAction,
-  agents = ["Clippy", "Links", "Bonzi", "Genie", "Merlin", "Rover"],
-  currentAgent = "Clippy",
+  agents = ["Clippy GPT", "Links", "Bonzi", "Genie", "Merlin", "Rover"],
+  currentAgent = "Clippy GPT",
 }) => {
   const [portalContainer, setPortalContainer] = useState(null);
   const [submenuOpen, setSubmenuOpen] = useState(null);
@@ -30,23 +30,58 @@ const ClippyContextMenu = ({
 
   // All available Clippy animations
   const animations = [
-    "Congratulate", "LookRight", "SendMail", "Thinking", "Explain",
-    "IdleRopePile", "IdleAtom", "Print", "Hide", "GetAttention",
-    "Save", "GetTechy", "GestureUp", "Idle1_1", "Processing",
-    "Alert", "LookUpRight", "IdleSideToSide", "GoodBye", "LookLeft",
-    "IdleHeadScratch", "LookUpLeft", "CheckingSomething", "Hearing_1", "GetWizardy",
-    "IdleFingerTap", "GestureLeft", "Wave", "GestureRight", "Writing",
-    "IdleSnooze", "LookDownRight", "GetArtsy", "Show", "LookDown",
-    "Searching", "EmptyTrash", "Greeting", "LookUp", "GestureDown",
-    "RestPose", "IdleEyeBrowRaise", "LookDownLeft",
+    "Congratulate",
+    "LookRight",
+    "SendMail",
+    "Thinking",
+    "Explain",
+    "IdleRopePile",
+    "IdleAtom",
+    "Print",
+    "Hide",
+    "GetAttention",
+    "Save",
+    "GetTechy",
+    "GestureUp",
+    "Idle1_1",
+    "Processing",
+    "Alert",
+    "LookUpRight",
+    "IdleSideToSide",
+    "GoodBye",
+    "LookLeft",
+    "IdleHeadScratch",
+    "LookUpLeft",
+    "CheckingSomething",
+    "Hearing_1",
+    "GetWizardy",
+    "IdleFingerTap",
+    "GestureLeft",
+    "Wave",
+    "GestureRight",
+    "Writing",
+    "IdleSnooze",
+    "LookDownRight",
+    "GetArtsy",
+    "Show",
+    "LookDown",
+    "Searching",
+    "EmptyTrash",
+    "Greeting",
+    "LookUp",
+    "GestureDown",
+    "RestPose",
+    "IdleEyeBrowRaise",
+    "LookDownLeft",
   ];
 
   // Get desktop viewport boundaries for positioning
   const getDesktopViewport = () => {
-    const desktop = document.querySelector(".desktop.screen") || 
-                   document.querySelector(".desktop") || 
-                   document.querySelector(".w98");
-    
+    const desktop =
+      document.querySelector(".desktop.screen") ||
+      document.querySelector(".desktop") ||
+      document.querySelector(".w98");
+
     if (desktop) {
       const rect = desktop.getBoundingClientRect();
       return {
@@ -55,10 +90,10 @@ const ClippyContextMenu = ({
         right: rect.right,
         bottom: rect.bottom,
         width: rect.width,
-        height: rect.height
+        height: rect.height,
       };
     }
-    
+
     // Fallback to window viewport
     return {
       left: 0,
@@ -66,21 +101,26 @@ const ClippyContextMenu = ({
       right: window.innerWidth,
       bottom: window.innerHeight,
       width: window.innerWidth,
-      height: window.innerHeight
+      height: window.innerHeight,
     };
   };
 
   // Helper to get viewport for both mobile and desktop
   const getViewport = () => {
     // Use window for mobile, desktop container for desktop
-    if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    if (
+      window.innerWidth <= 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    ) {
       return {
         left: 0,
         top: 0,
         right: window.innerWidth,
         bottom: window.innerHeight,
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       };
     }
     return getDesktopViewport();
@@ -89,9 +129,9 @@ const ClippyContextMenu = ({
   // Create portal container on mount
   useEffect(() => {
     console.log("🎯 ClippyContextMenu creating portal container");
-    
-    const container = document.createElement('div');
-    container.id = 'clippy-context-menu-portal';
+
+    const container = document.createElement("div");
+    container.id = "clippy-context-menu-portal";
     container.style.cssText = `
       position: fixed !important;
       top: 0 !important;
@@ -104,10 +144,10 @@ const ClippyContextMenu = ({
       opacity: 1 !important;
       display: block !important;
     `;
-    
+
     document.body.appendChild(container);
     setPortalContainer(container);
-    
+
     return () => {
       if (container.parentElement) {
         container.remove();
@@ -123,11 +163,16 @@ const ClippyContextMenu = ({
     const mobileBottomMargin = 100; // Minimum distance from bottom on mobile
     const viewport = getViewport();
     let adjustedX = Math.max(
-      viewport.left + margin, 
+      viewport.left + margin,
       Math.min(x, viewport.right - menuWidth - margin)
     );
     let adjustedY;
-    if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    if (
+      window.innerWidth <= 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    ) {
       // On mobile, keep at least 20px above the bottom
       adjustedY = Math.max(
         viewport.top + margin,
@@ -135,13 +180,18 @@ const ClippyContextMenu = ({
       );
     } else {
       adjustedY = Math.max(
-        viewport.top + margin, 
+        viewport.top + margin,
         Math.min(y, viewport.bottom - menuHeight - margin)
       );
     }
 
     // Adjust main menu vertical position for mobile based on height reduction (6 items * 3px)
-    if (window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    if (
+      window.innerWidth <= 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    ) {
       adjustedY -= 18; // Total reduction for 6 main menu items
     }
 
@@ -149,8 +199,24 @@ const ClippyContextMenu = ({
   }, [x, y, portalContainer]);
 
   // FIXED: Enhanced MenuItem with proper hover handling and flexible icon/arrow placement
-  const MenuItem = ({ children, onClick, onMouseEnter, onMouseLeave, disabled, hasSubmenu, isSubmenuItem, leftIcon, rightIcon, currentSubmenuOpen, submenuType }) => {
-    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|Icod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const MenuItem = ({
+    children,
+    onClick,
+    onMouseEnter,
+    onMouseLeave,
+    disabled,
+    hasSubmenu,
+    isSubmenuItem,
+    leftIcon,
+    rightIcon,
+    currentSubmenuOpen,
+    submenuType,
+  }) => {
+    const isMobile =
+      window.innerWidth <= 768 ||
+      /Android|webOS|iPhone|iPad|Icod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
     const [isHovered, setIsHovered] = useState(false);
 
     // Combine external onMouseEnter/onMouseLeave with internal hover state management
@@ -177,19 +243,23 @@ const ClippyContextMenu = ({
 
     // Determine if the menu item should be highlighted
     // Highlight if hovered OR if it's a parent with an open submenu (desktop only)
-    const isHighlighted = isHovered || (hasSubmenu && currentSubmenuOpen === submenuType && !isMobile);
+    const isHighlighted =
+      isHovered ||
+      (hasSubmenu && currentSubmenuOpen === submenuType && !isMobile);
 
     // Apply hover style on desktop
     const finalStyle = {
       ...menuItemStyle,
       // Only apply hover style on desktop if highlighted and not disabled
       ...(isHighlighted && !isMobile && !disabled ? menuItemHoverStyle : {}),
-      transition: 'background-color 0.1s ease-in-out'
+      transition: "background-color 0.1s ease-in-out",
     };
 
     return (
       <div
-        className={`context-menu-item ${disabled ? 'disabled' : ''} ${isSubmenuItem ? 'submenu-item' : ''} ${isMobile ? 'mobile' : ''}`}
+        className={`context-menu-item ${disabled ? "disabled" : ""} ${
+          isSubmenuItem ? "submenu-item" : ""
+        } ${isMobile ? "mobile" : ""}`}
         onClick={disabled ? null : onClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -197,11 +267,15 @@ const ClippyContextMenu = ({
         data-submenu={hasSubmenu ? submenuType : undefined}
       >
         {leftIcon && (
-          <span style={{ marginRight: '8px', fontSize: '12px' }}>{leftIcon}</span>
+          <span style={{ marginRight: "8px", fontSize: "12px" }}>
+            {leftIcon}
+          </span>
         )}
         <span>{children}</span>
         {rightIcon && (
-          <span style={{ marginLeft: '8px', fontSize: '12px' }}>{rightIcon}</span>
+          <span style={{ marginLeft: "8px", fontSize: "12px" }}>
+            {rightIcon}
+          </span>
         )}
       </div>
     );
@@ -209,10 +283,19 @@ const ClippyContextMenu = ({
 
   // FIXED: Submenu positioning with NO GAP
   const handleSubmenuOpen = (submenuType, event) => {
-    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|Icod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile =
+      window.innerWidth <= 768 ||
+      /Android|webOS|iPhone|iPad|Icod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
     const rect = event.currentTarget.getBoundingClientRect();
     const submenuWidth = isMobile ? 180 : 160; // Increased width for mobile
-    const submenuHeight = (submenuType === "animations" && isMobile) ? 150 : (submenuType === "animations" ? 300 : 200);
+    const submenuHeight =
+      submenuType === "animations" && isMobile
+        ? 150
+        : submenuType === "animations"
+        ? 300
+        : 200;
     const viewport = getViewport();
 
     // Check if submenu would overflow desktop or mobile viewport boundaries
@@ -220,15 +303,13 @@ const ClippyContextMenu = ({
     const wouldOverflowBottom = rect.top + submenuHeight > viewport.bottom - 10;
 
     // Position submenu directly bordering main menu (no gap)
-    const newX = wouldOverflowRight
-      ? rect.left - submenuWidth
-      : rect.right;
+    const newX = wouldOverflowRight ? rect.left - submenuWidth : rect.right;
 
     let currentMobileBottomMargin = 10; // Default for desktop
     if (isMobile) {
-      if (submenuType === 'animations') {
+      if (submenuType === "animations") {
         currentMobileBottomMargin = 223; // Specific margin for animations submenu on mobile
-      } else if (submenuType === 'agents') {
+      } else if (submenuType === "agents") {
         currentMobileBottomMargin = 125; // Specific margin for agents submenu on mobile
       } else {
         currentMobileBottomMargin = 100; // Default mobile margin for other submenus (if any)
@@ -236,19 +317,31 @@ const ClippyContextMenu = ({
     }
 
     let newY = wouldOverflowBottom
-      ? Math.max(viewport.top + 5, viewport.bottom - submenuHeight - currentMobileBottomMargin)
+      ? Math.max(
+          viewport.top + 5,
+          viewport.bottom - submenuHeight - currentMobileBottomMargin
+        )
       : rect.top; // Revert to original calculation
 
     // Adjust vertical position based on parent item index for mobile submenus
     if (isMobile) {
       let parentItemIndex = -1; // 0-indexed
       // Find the index of the parent item in the main menu
-      const mainMenuActions = ['hide', 'wave', 'selectAgent', 'playAnimation', 'chat', 'greet'];
-      parentItemIndex = mainMenuActions.indexOf(submenuType === 'agents' ? 'selectAgent' : 'playAnimation');
+      const mainMenuActions = [
+        "hide",
+        "wave",
+        "selectAgent",
+        "playAnimation",
+        "chat",
+        "greet",
+      ];
+      parentItemIndex = mainMenuActions.indexOf(
+        submenuType === "agents" ? "selectAgent" : "playAnimation"
+      );
 
       if (parentItemIndex !== -1) {
         // Subtract the cumulative height reduction of items above the parent
-        newY -= (parentItemIndex * 3);
+        newY -= parentItemIndex * 3;
       }
     }
 
@@ -258,11 +351,14 @@ const ClippyContextMenu = ({
     );
     let constrainedY = Math.max(
       viewport.top + 5,
-      Math.min(newY, viewport.bottom - submenuHeight - currentMobileBottomMargin)
+      Math.min(
+        newY,
+        viewport.bottom - submenuHeight - currentMobileBottomMargin
+      )
     );
 
     // Adjust vertical position for desktop agents submenu - Apply here after declaration
-    if (!isMobile && submenuType === 'agents') {
+    if (!isMobile && submenuType === "agents") {
       constrainedY -= 20; // Raise by 20px
     }
 
@@ -284,7 +380,7 @@ const ClippyContextMenu = ({
       wouldOverflowBottom: wouldOverflowBottom,
       calculatedNewY: newY,
       constrainedY: constrainedY,
-      mobileBottomMargin: currentMobileBottomMargin // Use the dynamic value in log
+      mobileBottomMargin: currentMobileBottomMargin, // Use the dynamic value in log
     });
 
     setSubmenuPosition({
@@ -298,21 +394,28 @@ const ClippyContextMenu = ({
 
   const handleSubmenuClose = () => {
     // Increased delay for mobile to make it easier to select options
-    const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    setTimeout(() => {
-      setSubmenuOpen(null);
-    }, isMobile ? 500 : 300);
+    const isMobile =
+      window.innerWidth <= 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+    setTimeout(
+      () => {
+        setSubmenuOpen(null);
+      },
+      isMobile ? 500 : 300
+    );
   };
 
   // FIXED: Enhanced agent change function with actual character switching
   const handleAgentChange = (newAgent) => {
     console.log(`🎯 Changing agent from ${currentAgent} to ${newAgent}`);
-    
+
     // Use global function to change agent (will trigger actual character change)
     if (window.setCurrentAgent) {
       window.setCurrentAgent(newAgent);
     }
-    
+
     // Hide any open balloons during transition
     if (window.hideClippyCustomBalloon) {
       window.hideClippyCustomBalloon();
@@ -320,34 +423,42 @@ const ClippyContextMenu = ({
     if (window.hideChatBalloon) {
       window.hideChatBalloon();
     }
-    
+
     // Brief visual feedback
-    const clippyEl = document.querySelector('.clippy');
+    const clippyEl = document.querySelector(".clippy");
     if (clippyEl) {
-      clippyEl.style.opacity = '0.7';
-      
+      clippyEl.style.opacity = "0.7";
+
       setTimeout(() => {
         // Restore appearance
-        clippyEl.style.opacity = '1';
+        clippyEl.style.opacity = "1";
         // The correct scale will be applied by positionClippyAndOverlay
 
         // Play welcome animation for new agent
         if (window.clippy?.play) {
           setTimeout(() => {
-            logAnimation('Wave', `agent change to ${newAgent}`);
-            window.clippy.play('Wave');
-            
+            logAnimation("Wave", `agent change to ${newAgent}`);
+            window.clippy.play("Wave");
+
             // Show welcome message
             if (window.showClippyCustomBalloon) {
               setTimeout(() => {
-                window.showClippyCustomBalloon(`Hello! I'm ${newAgent} now. How can I help you?`);
+                window.showClippyCustomBalloon(
+                  `Hello! I'm ${newAgent} now. How can I help you?`
+                );
               }, 800);
             }
 
             // Reposition for new agent - this will also set the correct scale
             if (window.ClippyPositioning?.positionClippyAndOverlay) {
-              const overlayEl = document.getElementById("clippy-clickable-overlay");
-              window.ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
+              const overlayEl = document.getElementById(
+                "clippy-clickable-overlay"
+              );
+              window.ClippyPositioning.positionClippyAndOverlay(
+                clippyEl,
+                overlayEl,
+                null
+              );
             }
           }, 200);
         }
@@ -358,46 +469,48 @@ const ClippyContextMenu = ({
   // FIXED: Functional menu actions with enhanced agent switching
   const handleMenuAction = (action, data = null) => {
     console.log(`🎯 Context menu action triggered: ${action}`, data);
-    
+
     switch (action) {
-      case 'hide':
+      case "hide":
         // Use global function to hide Clippy
         if (window.setAssistantVisible) {
           window.setAssistantVisible(false);
         }
-        onAction('hide');
+        onAction("hide");
         break;
-        
-      case 'selectAgent':
+
+      case "selectAgent":
         // FIXED: Enhanced agent change with actual character switching
         handleAgentChange(data);
-        onAction('selectAgent', data);
+        onAction("selectAgent", data);
         break;
-        
-      case 'playAnimation':
+
+      case "playAnimation":
         // FIXED: Play specific animation with logging
         if (window.clippy?.play && data) {
           // Ensure we're using the exact animation name
           const animationName = String(data).trim();
           if (animations.includes(animationName)) {
-            logAnimation(animationName, 'context menu selection');
+            logAnimation(animationName, "context menu selection");
             window.clippy.play(animationName);
           } else {
             console.warn(`Invalid animation name: ${animationName}`);
           }
         }
-        onAction('playAnimation', data);
+        onAction("playAnimation", data);
         break;
-        
-      case 'chat':
+
+      case "chat":
         // Open chat balloon
         if (window.showClippyChatBalloon) {
-          window.showClippyChatBalloon("Hi! What would you like to chat about?");
+          window.showClippyChatBalloon(
+            "Hi! What would you like to chat about?"
+          );
         }
-        onAction('chat');
+        onAction("chat");
         break;
-        
-      case 'wave':
+
+      case "wave":
         // FIXED: Change Wave action to open Notepad with FAQ content
         console.log("🎯 Context menu action: Open About Clippy (Notepad)");
         if (window.ProgramContext?.onOpen) {
@@ -413,31 +526,35 @@ const ClippyContextMenu = ({
         } else {
           console.warn("window.ProgramContext.onOpen is not available.");
           if (window.showClippyCustomBalloon) {
-            window.showClippyCustomBalloon("Sorry, I couldn't open the About Clippy information.");
+            window.showClippyCustomBalloon(
+              "Sorry, I couldn't open the About Clippy information."
+            );
           }
         }
-        onAction('aboutClippy');
+        onAction("aboutClippy");
         break;
-        
-      case 'greet':
+
+      case "greet":
         // FIXED: Play greeting animation with message and logging
         if (window.clippy?.play) {
-          logAnimation('Greeting', 'context menu greet action');
-          window.clippy.play('Greeting');
+          logAnimation("Greeting", "context menu greet action");
+          window.clippy.play("Greeting");
           if (window.showClippyCustomBalloon) {
             setTimeout(() => {
-              window.showClippyCustomBalloon("Well hello there! It's great to see you. Feel free to explore Hydra98!");
+              window.showClippyCustomBalloon(
+                "Well hello there! It's great to see you. Feel free to explore Hydra98!"
+              );
             }, 800);
           }
         }
-        onAction('greet');
+        onAction("greet");
         break;
-        
+
       default:
         console.warn(`Unknown context menu action: ${action}`);
         onAction(action, data);
     }
-    
+
     onClose();
   };
 
@@ -521,7 +638,7 @@ const ClippyContextMenu = ({
 
   // Add mobile-specific styles and standard submenu alignment
   useEffect(() => {
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
       .context-menu-item.mobile {
         -webkit-tap-highlight-color: transparent;
@@ -626,7 +743,9 @@ const ClippyContextMenu = ({
     useEffect(() => {
       // Set ref after portal mount
       setTimeout(() => {
-        const menuElement = document.querySelector('#clippy-context-menu-portal .context-menu-content');
+        const menuElement = document.querySelector(
+          "#clippy-context-menu-portal .context-menu-content"
+        );
         if (menuElement) {
           menuRef.current = menuElement;
         }
@@ -635,36 +754,41 @@ const ClippyContextMenu = ({
       // Click outside handler with proper exclusions
       const handleClickOutside = (event) => {
         // Ignore clicks on Clippy-related elements
-        const isClippyElement = event.target.closest('.clippy') || 
-                               event.target.closest('#clippy-clickable-overlay') ||
-                               event.target.closest('.context-menu-content') ||
-                               event.target.closest('.context-submenu') ||
-                               event.target.id === 'clippy-clickable-overlay';
-        
+        const isClippyElement =
+          event.target.closest(".clippy") ||
+          event.target.closest("#clippy-clickable-overlay") ||
+          event.target.closest(".context-menu-content") ||
+          event.target.closest(".context-submenu") ||
+          event.target.id === "clippy-clickable-overlay";
+
         if (isClippyElement) {
           return;
         }
-        
+
         if (menuRef.current && !menuRef.current.contains(event.target)) {
           onClose();
         }
       };
 
       const handleEscKey = (event) => {
-        if (event.key === 'Escape') {
+        if (event.key === "Escape") {
           onClose();
         }
       };
 
       // Add delay to prevent immediate closure from the right-click that opened menu
       const timeoutId = setTimeout(() => {
-        document.addEventListener("mousedown", handleClickOutside, { capture: true });
+        document.addEventListener("mousedown", handleClickOutside, {
+          capture: true,
+        });
         document.addEventListener("keydown", handleEscKey);
       }, 100);
 
       return () => {
         clearTimeout(timeoutId);
-        document.removeEventListener("mousedown", handleClickOutside, { capture: true });
+        document.removeEventListener("mousedown", handleClickOutside, {
+          capture: true,
+        });
         document.removeEventListener("keydown", handleEscKey);
       };
     }, []);
@@ -679,7 +803,7 @@ const ClippyContextMenu = ({
         >
           {/* Hide Clippy - Emoji on Right */}
           <MenuItem
-            onClick={() => handleMenuAction('hide')}
+            onClick={() => handleMenuAction("hide")}
             rightIcon="↔️"
             currentSubmenuOpen={submenuOpen}
             disabled={true}
@@ -688,7 +812,7 @@ const ClippyContextMenu = ({
           </MenuItem>
           {/* Wave - Emoji on Right */}
           <MenuItem
-            onClick={() => handleMenuAction('wave')}
+            onClick={() => handleMenuAction("wave")}
             rightIcon="👋"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
           >
@@ -726,7 +850,7 @@ const ClippyContextMenu = ({
 
           {/* Chat - Emoji on Right */}
           <MenuItem
-            onClick={() => handleMenuAction('chat')}
+            onClick={() => handleMenuAction("chat")}
             rightIcon="💬"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
           >
@@ -735,7 +859,7 @@ const ClippyContextMenu = ({
 
           {/* Greet - Emoji on Right */}
           <MenuItem
-            onClick={() => handleMenuAction('greet')}
+            onClick={() => handleMenuAction("greet")}
             rightIcon="😊"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
           >
@@ -758,8 +882,10 @@ const ClippyContextMenu = ({
             }}
             onMouseLeave={() => {
               // Only close if we're not hovering over the parent menu item
-              const menuItem = document.querySelector(`.context-menu-item[data-submenu="agents"]`);
-              if (!menuItem?.matches(':hover')) {
+              const menuItem = document.querySelector(
+                `.context-menu-item[data-submenu="agents"]`
+              );
+              if (!menuItem?.matches(":hover")) {
                 handleSubmenuClose();
               }
             }}
@@ -768,7 +894,7 @@ const ClippyContextMenu = ({
             {agents.map((agent) => (
               <MenuItem
                 key={agent}
-                onClick={() => handleMenuAction('selectAgent', agent)}
+                onClick={() => handleMenuAction("selectAgent", agent)}
                 isSubmenuItem
                 leftIcon={agent === currentAgent ? "✓" : null}
                 rightIcon={null}
@@ -795,8 +921,10 @@ const ClippyContextMenu = ({
             }}
             onMouseLeave={() => {
               // Only close if we're not hovering over the parent menu item
-              const menuItem = document.querySelector(`.context-menu-item[data-submenu="animations"]`);
-              if (!menuItem?.matches(':hover')) {
+              const menuItem = document.querySelector(
+                `.context-menu-item[data-submenu="animations"]`
+              );
+              if (!menuItem?.matches(":hover")) {
                 handleSubmenuClose();
               }
             }}
@@ -804,7 +932,7 @@ const ClippyContextMenu = ({
             {animations.slice(0, 20).map((animation) => (
               <MenuItem
                 key={animation}
-                onClick={() => handleMenuAction('playAnimation', animation)}
+                onClick={() => handleMenuAction("playAnimation", animation)}
                 isSubmenuItem
                 leftIcon={null}
                 rightIcon={null}
@@ -825,10 +953,7 @@ const ClippyContextMenu = ({
   }
 
   // Use ReactDOM.createPortal to render outside component tree
-  return ReactDOM.createPortal(
-    <MenuContent />,
-    portalContainer
-  );
+  return ReactDOM.createPortal(<MenuContent />, portalContainer);
 };
 
 export default ClippyContextMenu;
