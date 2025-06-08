@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
-import faq from "../../data/textFiles/faq";
+import clippyFaq from "../../data/textFiles/clippyFaq";
 
 // FIXED: Animation logging function
 const logAnimation = (animationName, context = "context menu") => {
@@ -520,7 +520,7 @@ const ClippyContextMenu = ({
             title: "About Clippy",
             icon: "textchat32",
             data: {
-              content: faq,
+              content: clippyFaq,
             },
           });
         } else {
