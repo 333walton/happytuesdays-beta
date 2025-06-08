@@ -407,9 +407,13 @@ const ClippyContextMenu = ({
       )
     );
 
-    // Adjust vertical position for desktop agents submenu
-    if (!isMobile && submenuType === "agents") {
-      constrainedY -= 20; // Raise by 20px
+    // Adjust vertical position for desktop submenus
+    if (!isMobile) {
+      if (submenuType === "agents") {
+        constrainedY -= 30; // Raise by 30px (original 20px + additional 10px)
+      } else if (submenuType === "animations") {
+        constrainedY -= 16; // Raise by 16px
+      }
     }
 
     // DEBUGGING: Show detailed positioning calculations
@@ -749,7 +753,7 @@ const ClippyContextMenu = ({
     borderTop: "1px solid #808080",
   };
 
-  // FIXED: Enhanced submenu styles with fixed width to prevent expansion
+  // FIXED: Enhanced submenu styles with fixed dimensions and bottom alignment preservation
   const submenuStyle = {
     position: "absolute",
     left: `${submenuPosition.x}px`,
@@ -757,22 +761,26 @@ const ClippyContextMenu = ({
     backgroundColor: "#c0c0c0",
     border: "2px outset #c0c0c0",
     boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
-    width: "140px", // Fixed width instead of minWidth to prevent expansion
-    maxHeight: "240px",
+    width: "140px", // Fixed width to prevent expansion
+    height: "auto", // Allow height to adjust to content
+    maxHeight: "240px", // Prevent excessive height
+    minHeight: "25px", // Ensure minimum height matches menu item height
     overflowY: "auto",
-    overflowX: "hidden", // Hide horizontal overflow
+    overflowX: "hidden",
     fontFamily: "Tahoma, sans-serif",
     fontSize: "11px",
     pointerEvents: "auto",
     visibility: "visible",
     opacity: 1,
-    display: "block",
+    display: "flex",
+    flexDirection: "column", // Stack items vertically
     transform: "translateZ(0) translate3d(0, 0, 0)",
     zIndex: 2,
     textAlign: "left",
     margin: "0",
     padding: "0",
-    whiteSpace: "nowrap", // Prevent text wrapping that could change width
+    whiteSpace: "nowrap",
+    boxSizing: "border-box", // Include borders in size calculations
   };
 
   // Add mobile-specific styles and standard submenu alignment
@@ -877,6 +885,22 @@ const ClippyContextMenu = ({
           height: 25px !important;
           padding: 4px 16px !important; /* Adjust padding to achieve 25px total height */
           min-height: 25px !important;
+        }
+
+        /* Ensure submenu items have consistent height for bottom alignment */
+        .context-submenu .context-menu-item {
+          height: 25px !important;
+          min-height: 25px !important;
+          max-height: 25px !important;
+          padding: 4px 8px !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+
+        /* Ensure submenu container maintains bottom alignment */
+        .context-submenu {
+          box-sizing: border-box !important;
         }
       }
     `;
