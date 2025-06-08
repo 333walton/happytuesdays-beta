@@ -43,7 +43,7 @@ const ClippyContextMenu = ({
     "Save",
     "GetTechy",
     "GestureUp",
-    "Idle1_1",
+    "Writing",
     "Processing",
     "Alert",
     "LookUpRight",
@@ -371,17 +371,15 @@ const ClippyContextMenu = ({
       constrainedX += 36; // Apply offset ONLY for desktop
     }
 
-    console.log(`🎯 Submenu positioning (${submenuType}):`, {
-      menuItem: { left: rect.left, right: rect.right, top: rect.top },
-      submenu: { x: constrainedX, y: constrainedY },
-      openLeft: wouldOverflowRight,
-      isMobile: isMobile,
-      submenuHeight: submenuHeight,
-      wouldOverflowBottom: wouldOverflowBottom,
-      calculatedNewY: newY,
-      constrainedY: constrainedY,
-      mobileBottomMargin: currentMobileBottomMargin, // Use the dynamic value in log
-    });
+    // Throttled logging to reduce console congestion
+    if (Math.random() < 0.1) { // Only log 10% of the time
+      console.log(`🎯 Submenu positioning (${submenuType}):`, {
+        menuItem: { left: rect.left, right: rect.right, top: rect.top },
+        submenu: { x: constrainedX, y: constrainedY },
+        openLeft: wouldOverflowRight,
+        isMobile: isMobile,
+      });
+    }
 
     setSubmenuPosition({
       x: constrainedX,
@@ -854,7 +852,7 @@ const ClippyContextMenu = ({
             rightIcon="💬"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
           >
-            Chat with Clippy
+            Chat with {currentAgent}
           </MenuItem>
 
           {/* Greet - Emoji on Right */}

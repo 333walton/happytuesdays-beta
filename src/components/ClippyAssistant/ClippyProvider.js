@@ -179,11 +179,16 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           "Shutdown sequence detected - playing GoodBye and hiding Clippy completely"
         );
 
-        // FIXED: Play GoodBye animation with logging
+        // FIXED: Play GoodBye animation with logging and 1 second delay
         if (clippyInstanceRef.current?.play) {
           const animationName = "GoodBye";
           logAnimation(animationName, "shutdown sequence");
           clippyInstanceRef.current.play(animationName);
+          
+          // Add 1 second delay after GoodBye animation
+          setTimeout(() => {
+            devLog("GoodBye animation delay completed");
+          }, 1000);
         }
 
         // Hide all balloons immediately
@@ -499,9 +504,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               logAnimation(animationName, `desktop single click (75% animation)`);
               clippyInstanceRef.current.play(animationName);
 
+              // Add extra delay for GoodBye animation
+              const animationDelay = animationName === "GoodBye" ? 3000 : 2000; // 1 second extra for GoodBye
               setTimeout(() => {
                 setIsAnimationPlaying(false);
-              }, 2000);
+                if (animationName === "GoodBye") {
+                  devLog("GoodBye animation delay completed");
+                }
+              }, animationDelay);
             }
           } else {
             // 25% case: Show custom balloon message
@@ -552,19 +562,48 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     ]
   );
 
-  // NEW: Desktop double click handler for context menu
+  // NEW: Desktop double click handler for chat balloon
   const handleDesktopDoubleClick = useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      devLog("Desktop double click - opening context menu");
+      const now = Date.now();
 
-      // Show context menu at click position
-      showContextMenu(e.clientX, e.clientY);
+      // Check cooldown
+      if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
+        devLog(`Desktop double click blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
+        return false;
+      }
+
+      // Block if animation is currently playing
+      if (isAnimationPlaying) {
+        devLog("Desktop double click blocked - animation currently playing");
+        return false;
+      }
+
+      // Block if any balloon is already open
+      if (isAnyBalloonOpen()) {
+        devLog("Desktop double click blocked - balloon is already open");
+        return false;
+      }
+
+      setLastInteractionTime(now);
+      startCooldown();
+
+      devLog("Desktop double click - opening chat balloon");
+
+      // Show chat balloon
+      setTimeout(() => {
+        if (mountedRef.current && !isAnyBalloonOpen()) {
+          showChatBalloon("Hi! What would you like to chat about?");
+          devLog("Desktop double click chat balloon shown");
+        }
+      }, 200);
+
       return true;
     },
-    [showContextMenu]
+    [isInCooldown, lastInteractionTime, isAnimationPlaying, isAnyBalloonOpen, startCooldown, showChatBalloon]
   );
 
   // UPDATED: Mobile interaction handler (existing mobile logic)
@@ -668,87 +707,76 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         );
       }
 
-      // Mobile standard interactions - Keep existing mobile logic
-      const shouldShowChatBalloon = newCount % 2 === 0 && interactionType !== "long-press";
-      const shouldShowSpeechBalloon = !shouldShowChatBalloon;
+      // NEW: Mobile single tap - 75% animation, 25% speech balloon
+      const shouldShowAnimation = Math.random() < 0.75;
 
-      devLog(`Mobile interaction pattern for #${newCount}:`, {
-        isEven: newCount % 2 === 0,
-        willShowChat: shouldShowChatBalloon,
-        willShowSpeech: shouldShowSpeechBalloon,
-        willPlayAnimation: shouldShowSpeechBalloon
+      devLog(`Mobile single tap pattern:`, {
+        shouldShowAnimation,
+        percentage: shouldShowAnimation ? "75% - Animation" : "25% - Speech Balloon"
       });
 
       return safeExecute(
         () => {
-          if (shouldShowChatBalloon) {
-            devLog("Mobile even interaction - showing chat balloon (no animation)");
-
-            setTimeout(() => {
-              if (mountedRef.current && !isAnyBalloonOpen()) {
-                const chatMessage = "Hi! What would you like to chat about?";
-                showChatBalloon(chatMessage);
-                devLog("Chat balloon shown for mobile even interaction");
-              }
-            }, 200);
-          } else {
-            devLog("Mobile odd interaction - playing animation + showing enhanced speech balloon");
+          if (shouldShowAnimation) {
+            // 75% case: Play random animation only
+            devLog("Mobile single tap - playing random animation (75%)");
 
             if (clippyInstanceRef.current.play) {
               setIsAnimationPlaying(true);
 
-              const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
-              const animationName = GREETING_ANIMATIONS[randomIndex];
-              logAnimation(animationName, `mobile ${interactionType} interaction #${newCount} (odd - with enhanced speech)`);
-
+              // Available animations for random selection
+              const animations = [
+                "Wave", "Congratulate", "GetAttention", "Thinking", "Writing", 
+                "GoodBye", "Processing", "Alert", "GetArtsy", "Searching", 
+                "Explain", "Greeting", "GestureRight", "GestureLeft", "GestureUp"
+              ];
+              
+              const randomIndex = Math.floor(Math.random() * animations.length);
+              const animationName = animations[randomIndex];
+              
+              logAnimation(animationName, `mobile single tap (75% animation)`);
               clippyInstanceRef.current.play(animationName);
 
+              // Add extra delay for GoodBye animation
+              const animationDelay = animationName === "GoodBye" ? 3000 : 2000; // 1 second extra for GoodBye
               setTimeout(() => {
                 setIsAnimationPlaying(false);
-              }, 2000);
-
-              setTimeout(() => {
-                if (mountedRef.current && !isAnyBalloonOpen()) {
-                  const enhancedMessage = {
-                    message: "How may I help you?",
-                    buttons: [
-                      {
-                        text: "💬 Let's chat",
-                        chat: "Great! What would you like to talk about?",
-                      },
-                      {
-                        text: "🎭 Show me tricks",
-                        action: () => {
-                          if (window.clippy?.play) {
-                            const tricks = ["GetAttention", "Congratulate", "Wave", "GestureRight"];
-                            const randomTrick = tricks[Math.floor(Math.random() * tricks.length)];
-                            logAnimation(randomTrick, "enhanced balloon trick button");
-                            window.clippy.play(randomTrick);
-                          }
-                        },
-                      },
-                      {
-                        text: "❓ I need help",
-                        action: () => showHelpBalloon(),
-                      },
-                      {
-                        text: "👋 Just saying hi",
-                        message: "Well hello there! It's great to see you. Feel free to explore Hydra98!",
-                      },
-                    ],
-                  };
-
-                  showCustomBalloon(enhancedMessage, 12000);
-                  devLog("Enhanced speech balloon with buttons shown");
+                if (animationName === "GoodBye") {
+                  devLog("GoodBye animation delay completed");
                 }
-              }, 800);
+              }, animationDelay);
             }
+          } else {
+            // 25% case: Show custom speech balloon message
+            devLog("Mobile single tap - showing speech balloon (25%)");
+
+            setTimeout(() => {
+              if (mountedRef.current && !isAnyBalloonOpen()) {
+                // Random balloon messages
+                const balloonMessages = [
+                  "Hi there! Having a good day?",
+                  "Tap me again for another surprise!",
+                  "I'm here if you need any help!",
+                  "Enjoying Hydra98 so far?",
+                  "Try double-tapping me for my menu!",
+                  "Long-press me to start a chat!",
+                  "Need help? Just let me know!",
+                  "Welcome to the nostalgic world of Windows 98!",
+                  "Feeling productive today?",
+                  "Don't forget to save your work!"
+                ];
+                
+                const randomMessage = balloonMessages[Math.floor(Math.random() * balloonMessages.length)];
+                showCustomBalloon(randomMessage, 4000);
+                devLog(`Speech balloon shown: "${randomMessage}"`);
+              }
+            }, 200);
           }
 
           return true;
         },
         false,
-        `mobile ${interactionType} interaction`
+        "mobile single tap"
       );
     },
     [
@@ -821,11 +849,23 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     ]
   );
 
-  // FIXED: Enhanced right-click handler with better event handling
+  // FIXED: Enhanced right-click handler with interaction blocking
   const handleRightClick = useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
+
+      // Block if any balloon is already open
+      if (isAnyBalloonOpen()) {
+        devLog("Right-click blocked - balloon is already open");
+        return false;
+      }
+
+      // Block if context menu is already visible
+      if (contextMenuVisible) {
+        devLog("Right-click blocked - context menu already visible");
+        return false;
+      }
 
       devLog("Right-click context menu triggered", {
         target: e.target.className,
@@ -833,11 +873,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         clientY: e.clientY,
       });
 
-      // Ensure menu shows even if other balloons are open
       showContextMenu(e.clientX, e.clientY);
       return true;
     },
-    [showContextMenu]
+    [showContextMenu, isAnyBalloonOpen, contextMenuVisible]
   );
 
   // FIXED: Proper greeting animation selection with animation logging - ENFORCED to only use the specified animations
@@ -1476,7 +1515,21 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         // Double tap detected
         tapCount = 0;
         lastTapTime = 0;
-        devLog("Mobile double-tap detected - opening context menu");
+        devLog("Mobile double-tap detected - checking blocking conditions");
+
+        // Block if any balloon is already open
+        if (isAnyBalloonOpen()) {
+          devLog("Mobile double-tap blocked - balloon is already open");
+          return;
+        }
+
+        // Block if context menu is already visible
+        if (contextMenuVisible) {
+          devLog("Mobile double-tap blocked - context menu already visible");
+          return;
+        }
+
+        devLog("Mobile double-tap proceeding - opening context menu");
 
         // Open context menu with specified positioning
         const clippyEl = document.querySelector(".clippy");
@@ -1603,7 +1656,21 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               // Double tap detected
               tapCount = 0; // Reset tap count
               lastTapTime = 0; // Reset timer
-              devLog("Mobile double-tap detected - opening context menu");
+              devLog("Mobile double-tap detected (endHandler) - checking blocking conditions");
+
+              // Block if any balloon is already open
+              if (isAnyBalloonOpen()) {
+                devLog("Mobile double-tap blocked (endHandler) - balloon is already open");
+                return;
+              }
+
+              // Block if context menu is already visible
+              if (contextMenuVisible) {
+                devLog("Mobile double-tap blocked (endHandler) - context menu already visible");
+                return;
+              }
+
+              devLog("Mobile double-tap proceeding (endHandler) - opening context menu");
 
               // Open context menu with specified positioning
               const clippyEl = document.querySelector(".clippy");
@@ -1709,6 +1776,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     isInCooldown,
     showContextMenu,
     isAnyBalloonOpen,
+    contextMenuVisible,
   ]);
 
   // NEW: Desktop click handler with proper single/double click separation
@@ -2039,10 +2107,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         logAnimation(animationName, "component unmount");
         clippyInstanceRef.current.play(animationName);
 
-        // Small delay to let animation start
+        // 1 second delay after GoodBye animation
         setTimeout(() => {
-          devLog("GoodBye animation completed");
-        }, 500);
+          devLog("GoodBye animation delay completed");
+        }, 1000);
       }
 
       // Cleanup balloon managers
