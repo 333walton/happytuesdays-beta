@@ -334,6 +334,30 @@ class ProgramProvider extends Component {
       zIndexes: [...this.state.zIndexes, newProgram.id],
       activeId: newProgram.id,
     });
+
+    // App-specific speech balloons with 25% chance
+    const targetApps = ["Read Me", "FAQ", "Change Log"];
+    if (targetApps.includes(program.title) && Math.random() < 0.25) {
+      setTimeout(() => {
+        if (window.showClippyCustomBalloon) {
+          let message;
+          switch (program.title) {
+            case "Read Me":
+              message = "I see you're checking out the Read Me! Let me know if you need any help understanding Hydra98!";
+              break;
+            case "FAQ":
+              message = "Reading the FAQ is smart! I'm here if you have any other questions not covered there.";
+              break;
+            case "Change Log":
+              message = "Checking out the latest changes? That's what I call staying informed! 📋";
+              break;
+            default:
+              message = "Good choice reading the documentation! Knowledge is power! 📚";
+          }
+          window.showClippyCustomBalloon(message, 6000);
+        }
+      }, 1500); // 1.5 second delay after opening
+    }
   };
 
   close = (program, exit) => {

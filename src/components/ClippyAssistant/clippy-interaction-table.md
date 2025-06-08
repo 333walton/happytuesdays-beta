@@ -4,16 +4,17 @@
 
 | Action         | Trigger             | Animation         | Balloon Type         | Notes                                      |
 |----------------|--------------------|-------------------|----------------------|--------------------------------------------|
-| **Single Tap** | One touch          | Yes (2/3 times)   | Speech (1/3 times)   | Animation OR balloon, never both           |
-| **Double Tap** | Two quick taps     | No                | Chat                 | Always opens chat balloon                  |
-| **Long Press** | 800ms hold         | Scale +10%        | None                 | Unlocks position for dragging              |
-| **Drag**       | Long press + move  | Scale +10%        | None                 | Only when unlocked, auto-locks on drop     |
+| **Single Tap** | One touch          | Yes (75% chance)   | Speech (25% chance)  | Animation OR speech balloon, never chat    |
+| **Double Tap** | Two quick taps     | No                | Context Menu         | Opens context menu ONLY                    |
+| **Long Press** | 800ms hold         | No                | Chat                 | Opens chat balloon ONLY                    |
+| **Drag**       | Long press + move  | Scale +5%         | None                 | Only when position unlocked                |
 
 ## Desktop Interactions
 
 | Action           | Trigger            | Animation         | Balloon Type         | Notes                                      |
 |------------------|-------------------|-------------------|----------------------|--------------------------------------------|
-| **Double Click** | Mouse double-click | Yes (2/3 times)   | Speech (1/3 times)   | Animation OR balloon, never both           |
+| **Single Click** | Mouse click        | Yes (75% chance)   | Speech (25% chance)  | Animation OR speech balloon, never both    |
+| **Double Click** | Mouse double-click | No                | Chat                 | Opens chat balloon ONLY                    |
 | **Right Click**  | Context menu      | No                | Context Menu         | Shows agent/animation options              |
 
 ## Balloon Persistence Rules
@@ -27,10 +28,12 @@
 
 ## Interaction Frequency Rules
 
-| Interaction Count | Animation Probability | Speech Balloon | Chat Balloon                |
-|-------------------|----------------------|----------------|-----------------------------|
-| **1, 3, 5, ...**  | 66% (2/3)            | 33% (1/3)      | Desktop/Mobile: Double-tap only |
-| **2, 4, 6, ...**  | 0%                   | 0%             | 100% (even interactions)    |
+| Interaction Type | Animation Probability | Speech Balloon | Chat Balloon                |
+|------------------|----------------------|----------------|-----------------------------|
+| **Single Tap/Click** | 75%                | 25%            | Never                       |
+| **Double Tap**    | 0%                   | 0%             | Context Menu Only           |
+| **Double Click**  | 0%                   | 0%             | Chat Balloon Only           |
+| **Long Press**    | 0%                   | 0%             | Chat Balloon Only           |
 
 ## Cooldown & Blocking Rules
 
@@ -58,6 +61,22 @@
 | **Google iOS App**  | +40px higher       | 1.0                  | Matches Safari visually     |
 | **Other Mobile**    | Standard mobile    | 1.0                  | Responsive                  |
 | **Desktop**         | Zoom-aware anchoring | 0.95 * zoomFactor   | Real-time resize handling   |
+
+## Context Menu Features
+
+| Feature               | Mobile Behavior    | Desktop Behavior     | Notes                       |
+|-----------------------|-------------------|----------------------|-----------------------------|
+| **Dynamic Text**      | "Drag [Agent]"    | "Drag [Agent]"       | Shows current agent name    |
+| **Touch Highlighting** | Blue bg/white text | Hover highlight     | Mobile touch feedback       |
+| **Animation Delay**   | 2s for Hide       | 2s for Hide          | Hide animation has delay    |
+
+## App-Specific Features
+
+| Application     | Trigger         | Balloon Chance | Message Type           |
+|-----------------|----------------|----------------|------------------------|
+| **Read Me**     | App open       | 25%            | Documentation help     |
+| **FAQ**         | App open       | 25%            | FAQ guidance           |
+| **Change Log**  | App open       | 25%            | Update information     |
 
 ## State Management
 

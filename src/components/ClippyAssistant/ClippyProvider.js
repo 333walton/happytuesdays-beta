@@ -606,9 +606,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     [isInCooldown, lastInteractionTime, isAnimationPlaying, isAnyBalloonOpen, startCooldown, showChatBalloon]
   );
 
-  // UPDATED: Mobile interaction handler (existing mobile logic)
-  const handleMobileInteraction = useCallback(
-    (e, interactionType = "tap") => {
+  // NEW: Mobile single tap handler - 75% animation, 25% speech balloon ONLY
+  const handleMobileSingleTap = useCallback(
+    (e) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -616,25 +616,25 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       // Check cooldown
       if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-        devLog(`Mobile interaction blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
+        devLog(`Mobile single tap blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
         return false;
       }
 
       // Block if animation is currently playing
       if (isAnimationPlaying) {
-        devLog("Mobile interaction blocked - animation currently playing");
-        return false;
-      }
-
-      // Check if persistent chat is open
-      if (isChatBalloonVisible() && isUserInteractingWithChat()) {
-        devLog("Mobile interaction blocked - user is actively using chat balloon (persistent)");
+        devLog("Mobile single tap blocked - animation currently playing");
         return false;
       }
 
       // Block if any balloon is already open
       if (isAnyBalloonOpen()) {
-        devLog("Mobile interaction blocked - another balloon is already open");
+        devLog("Mobile single tap blocked - balloon is already open");
+        return false;
+      }
+
+      // Block if context menu is visible
+      if (contextMenuVisible) {
+        devLog("Mobile single tap blocked - context menu is visible");
         return false;
       }
 
@@ -644,7 +644,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       const newCount = interactionCount + 1;
       setInteractionCount(newCount);
 
-      devLog(`Mobile ${interactionType} interaction #${newCount} triggered`);
+      devLog(`Mobile single tap #${newCount} triggered`);
 
       if (!mountedRef.current || !clippyInstanceRef.current) {
         if (window.clippy) {
@@ -655,26 +655,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         }
       }
 
-      // Preserve Clippy's positioning and scale during interaction
-      const clippyEl = document.querySelector(".clippy");
-      if (clippyEl && ClippyPositioning?.preserveClippyScale) {
-        const preserved = ClippyPositioning.preserveClippyScale(clippyEl);
-        devLog(`Clippy scale preservation: ${preserved ? "success" : "failed"}`);
-
-        setTimeout(() => {
-          if (ClippyPositioning?.positionClippyAndOverlay) {
-            const overlayEl = document.getElementById("clippy-clickable-overlay");
-            ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
-            devLog("Clippy positioning restored after interaction");
-          }
-        }, 100);
-      }
-
       // Handle initial interaction
       const isInitialInteraction = !greetingPlayedRef.current && !initialMessageShownRef.current;
 
       if (isInitialInteraction) {
-        devLog("Initial mobile interaction - will show BOTH animation and enhanced welcome balloon");
+        devLog("Initial mobile single tap - will show greeting animation and welcome balloon");
 
         return safeExecute(
           () => {
@@ -683,7 +668,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
               const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
               const animationName = GREETING_ANIMATIONS[randomIndex];
-              logAnimation(animationName, `initial mobile interaction (both animation + enhanced welcome)`);
+              logAnimation(animationName, `initial mobile single tap`);
 
               clippyInstanceRef.current.play(animationName);
               greetingPlayedRef.current = true;
@@ -696,18 +681,18 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 if (mountedRef.current && !initialMessageShownRef.current) {
                   initialMessageShownRef.current = true;
                   showWelcomeBalloon();
-                  devLog("Enhanced welcome balloon shown");
+                  devLog("Welcome balloon shown");
                 }
               }, 1200);
             }
             return true;
           },
           false,
-          "initial mobile interaction"
+          "initial mobile single tap"
         );
       }
 
-      // NEW: Mobile single tap - 75% animation, 25% speech balloon
+      // Standard mobile single tap - 75% animation, 25% speech balloon
       const shouldShowAnimation = Math.random() < 0.75;
 
       devLog(`Mobile single tap pattern:`, {
@@ -724,7 +709,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             if (clippyInstanceRef.current.play) {
               setIsAnimationPlaying(true);
 
-              // Available animations for random selection
               const animations = [
                 "Wave", "Congratulate", "GetAttention", "Thinking", "Writing", 
                 "GoodBye", "Processing", "Alert", "GetArtsy", "Searching", 
@@ -737,8 +721,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               logAnimation(animationName, `mobile single tap (75% animation)`);
               clippyInstanceRef.current.play(animationName);
 
-              // Add extra delay for GoodBye animation
-              const animationDelay = animationName === "GoodBye" ? 3000 : 2000; // 1 second extra for GoodBye
+              const animationDelay = animationName === "GoodBye" ? 3000 : 2000;
               setTimeout(() => {
                 setIsAnimationPlaying(false);
                 if (animationName === "GoodBye") {
@@ -752,7 +735,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
             setTimeout(() => {
               if (mountedRef.current && !isAnyBalloonOpen()) {
-                // Random balloon messages
                 const balloonMessages = [
                   "Hi there! Having a good day?",
                   "Tap me again for another surprise!",
@@ -786,10 +768,51 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       isAnimationPlaying,
       startCooldown,
       isAnyBalloonOpen,
+      contextMenuVisible,
+      showCustomBalloon
     ]
   );
 
-  // NEW: Mobile long press handler
+  // NEW: Mobile double-tap handler - context menu ONLY
+  const handleMobileDoubleTap = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!mountedRef.current || !isMobile) return false;
+
+      // Block if any balloon is already open
+      if (isAnyBalloonOpen()) {
+        devLog("Mobile double-tap blocked - balloon is already open");
+        return false;
+      }
+
+      // Block if context menu is already visible
+      if (contextMenuVisible) {
+        devLog("Mobile double-tap blocked - context menu already visible");
+        return false;
+      }
+
+      devLog("Mobile double-tap - opening context menu ONLY");
+
+      // Show context menu positioned above Clippy
+      const clippyEl = document.querySelector(".clippy");
+      if (clippyEl) {
+        const rect = clippyEl.getBoundingClientRect();
+        showContextMenu(
+          rect.left + rect.width / 2,
+          rect.top - 20
+        );
+      } else {
+        showContextMenu(window.innerWidth / 2, window.innerHeight / 2);
+      }
+
+      return true;
+    },
+    [isAnyBalloonOpen, contextMenuVisible, showContextMenu]
+  );
+
+  // NEW: Mobile long press handler - chat balloon ONLY
   const handleMobileLongPress = useCallback(
     (e) => {
       e.preventDefault();
@@ -809,35 +832,35 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return false;
       }
 
-      if (isChatBalloonVisible() && isUserInteractingWithChat()) {
-        devLog("Mobile long press blocked - user is actively using chat balloon");
-        return false;
-      }
-
       if (isAnyBalloonOpen()) {
         devLog("Mobile long press blocked - another balloon is open");
         return false;
       }
 
-      devLog("Mobile long press interaction - GUARANTEED chat balloon");
+      if (contextMenuVisible) {
+        devLog("Mobile long press blocked - context menu is visible");
+        return false;
+      }
+
+      devLog("Mobile long press - showing chat balloon ONLY");
 
       setLastInteractionTime(now);
       startCooldown();
 
       return safeExecute(
         () => {
-          // GUARANTEED: Long press always shows chat balloon (no animation)
+          // ONLY: Long press shows chat balloon (no animation)
           setTimeout(() => {
             if (mountedRef.current && !isAnyBalloonOpen()) {
               showChatBalloon("Hi! What would you like to chat about?");
-              devLog("Mobile long press chat balloon guaranteed");
+              devLog("Mobile long press chat balloon shown");
             }
           }, 100);
 
           return true;
         },
         false,
-        "mobile long press interaction"
+        "mobile long press"
       );
     },
     [
@@ -846,6 +869,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       isAnimationPlaying,
       startCooldown,
       isAnyBalloonOpen,
+      contextMenuVisible,
+      showChatBalloon
     ]
   );
 
@@ -1529,21 +1554,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           return;
         }
 
-        devLog("Mobile double-tap proceeding - opening context menu");
-
-        // Open context menu with specified positioning
-        const clippyEl = document.querySelector(".clippy");
-        if (clippyEl) {
-          const rect = clippyEl.getBoundingClientRect();
-          // Show menu directly above Clippy's head
-          showContextMenu(
-            rect.left + rect.width / 2,
-            rect.top - 20 // 20px above Clippy
-          );
-        } else {
-          // Fallback: show in center of screen
-          showContextMenu(window.innerWidth / 2, window.innerHeight / 2);
-        }
+        devLog("Mobile double-tap proceeding - calling handleMobileDoubleTap");
+        handleMobileDoubleTap(e);
       } else {
         // Single tap or start of potential double tap
         tapCount = 1;
@@ -1552,7 +1564,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
         // Only handle single tap if we're not in a potential double-tap sequence
         if (timeSinceLastTap >= DOUBLE_TAP_THRESHOLD) {
-          handleMobileInteraction(e, "tap");
+          handleMobileSingleTap(e);
         }
 
         // Reset tap count after double tap threshold if no second tap occurs
@@ -1670,21 +1682,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 return;
               }
 
-              devLog("Mobile double-tap proceeding (endHandler) - opening context menu");
-
-              // Open context menu with specified positioning
-              const clippyEl = document.querySelector(".clippy");
-              if (clippyEl) {
-                const rect = clippyEl.getBoundingClientRect();
-                // Show menu directly above Clippy's head
-                showContextMenu(
-                  rect.left + rect.width / 2,
-                  rect.top - 20 // 20px above Clippy
-                );
-              } else {
-                // Fallback: show in center of screen
-                showContextMenu(window.innerWidth / 2, window.innerHeight / 2);
-              }
+              devLog("Mobile double-tap proceeding (endHandler) - calling handleMobileDoubleTap");
+              handleMobileDoubleTap(e);
             } else {
               // Single tap detected (or start of double tap sequence)
               tapCount = 1;
@@ -1693,7 +1692,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
               // Only handle single tap if we're not in a potential double-tap sequence
               if (timeSinceLastTap >= DOUBLE_TAP_THRESHOLD) {
-                handleMobileInteraction(e, "tap");
+                handleMobileSingleTap(e);
               }
 
               // Reset tap count after double tap threshold if no second tap occurs
@@ -1769,12 +1768,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       },
     };
   }, [
-    handleMobileInteraction,
+    handleMobileSingleTap,
+    handleMobileDoubleTap,
     handleMobileLongPress,
     lastInteractionTime,
     positionLocked,
     isInCooldown,
-    showContextMenu,
     isAnyBalloonOpen,
     contextMenuVisible,
   ]);
@@ -2166,7 +2165,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     hideContextMenu,
 
     // Interaction handlers
-    handleMobileInteraction,
+    handleMobileSingleTap,
+    handleMobileDoubleTap,
     handleMobileLongPress,
     handleRightClick,
 

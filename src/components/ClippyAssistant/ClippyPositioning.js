@@ -1,11 +1,12 @@
 // ClippyPositioning.js - Optimized with reduced logging and iOS Safari performance improvements
 // This is the SINGLE source of truth for all Clippy positioning
 
-// Optimized logging system
+// Optimized logging system with reduced frequency
 const isDev = process.env.NODE_ENV === "development";
+const VERBOSE_LOGGING = false; // Set to true for detailed debugging
 
-const devLog = (message, data = null) => {
-  if (isDev) {
+const devLog = (message, data = null, forceLog = false) => {
+  if (isDev && (VERBOSE_LOGGING || forceLog)) {
     if (data) {
       console.log(`🎯 ClippyPositioning: ${message}`, data);
     } else {
@@ -167,7 +168,7 @@ class ZoomAwareResizeHandler {
     const currentZoom =
       zoomLevel !== null ? zoomLevel : this.getCurrentZoomLevel();
 
-    devLog(`Caching anchor for zoom ${currentZoom}`);
+    devLog(`Caching anchor for zoom ${currentZoom}`, null, true);
 
     const desktop =
       document.querySelector(".desktop.screen") ||
@@ -220,6 +221,7 @@ class ZoomAwareResizeHandler {
     this.zoomLevelAnchors.set(currentZoom, zoomAnchorData);
     this.currentZoomLevel = currentZoom;
 
+    // Only log anchor caching in verbose mode
     devLog(`Cached anchor for zoom ${currentZoom}`, {
       zoomFactor,
       expectedSize: `${scaledClippyWidth.toFixed(
@@ -278,6 +280,7 @@ class ZoomAwareResizeHandler {
       appliedHeight: anchorData.expectedHeight,
     };
 
+    // Only log position calculations in verbose mode
     devLog(`Calculated anchored position for zoom ${currentZoom}`, {
       position: `(${anchoredPosition.left.toFixed(
         1
@@ -302,7 +305,7 @@ class ZoomAwareResizeHandler {
     const oldZoomLevel = this.currentZoomLevel;
 
     if (oldZoomLevel !== newZoomLevel) {
-      devLog(`Zoom change: ${oldZoomLevel} → ${newZoomLevel}`);
+      devLog(`Zoom change: ${oldZoomLevel} → ${newZoomLevel}`, null, true);
 
       this.currentZoomLevel = newZoomLevel;
       this.clearZoomAnchor(newZoomLevel);
@@ -809,7 +812,7 @@ class ClippyPositioning {
     // Force immediate style application for iOS Safari
     void clippyElement.offsetHeight; // Trigger reflow
 
-    if (isIOSSafari && isDev) {
+    if (isIOSSafari && VERBOSE_LOGGING && isDev) {
       devLog("iOS Safari animations cancelled for drag performance");
     }
   }
@@ -1090,6 +1093,7 @@ class ClippyPositioning {
     if (!clippyElement) return false;
 
     const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
+    // Only log positioning in verbose mode
     devLog(`Positioning Clippy for zoom level ${currentZoomLevel}`);
 
     if (!isMobile) {
@@ -1160,6 +1164,7 @@ class ClippyPositioning {
         }
       `;
 
+      // Only log mobile position in verbose mode
       devLog(
         `Mobile position forced: bottom=${position.bottom}, right=${position.right}`
       );
@@ -1828,6 +1833,7 @@ class ClippyPositioning {
 
         const isValid = isVisible && isInBottomRight && isReasonablyPositioned;
 
+        // Only log validation details in verbose mode
         devLog(`Mobile position validation: ${isValid ? "VALID" : "INVALID"}`, {
           visible: isVisible,
           bottomRight: isInBottomRight,
@@ -1867,6 +1873,7 @@ class ClippyPositioning {
 
         const isValid = isWithinBounds && isVisible && isNearExpected;
 
+        // Only log desktop validation details in verbose mode
         devLog(
           `Desktop position validation: ${isValid ? "VALID" : "INVALID"}`,
           {

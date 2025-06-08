@@ -1,4 +1,4 @@
-LAST UPDATED: 2024-06
+LAST UPDATED: 2025-01
 
 # How the Clippy Component Works
 
@@ -107,14 +107,24 @@ The Clippy implementation consists of several interconnected modules:
 ## User Interactions
 
 - **Mobile**
-  - Single tap: Animation (2/3) or speech balloon (1/3).
-  - Double tap: Opens chat balloon.
-  - Long press: Unlocks for dragging.
-  - Drag: Only when unlocked, auto-locks on drop.
+  - Single tap: Animation (75%) or speech balloon (25%). Never opens chat.
+  - Double tap: Opens context menu ONLY.
+  - Long press: Opens chat balloon ONLY.
+  - Drag: Only when position unlocked via controls.
 
 - **Desktop**
-  - Double click: Animation (2/3) or speech balloon (1/3).
+  - Single click: Animation (75%) or speech balloon (25%). Never opens chat.
+  - Double click: Opens chat balloon ONLY.
   - Right click: Shows context menu for agent/animation options.
+
+- **Context Menu Features**
+  - Dynamic text: "Drag [CurrentAgent]" shows current agent name.
+  - Mobile touch highlighting: Blue background with white text.
+  - Hide animation: 2-second delay before execution.
+
+- **App-Specific Features**
+  - Read Me, FAQ, Change Log apps trigger speech balloons (25% chance).
+  - Contextual messages based on the specific application opened.
 
 - **Balloon Persistence**
   - Speech balloons auto-close after 6 seconds.
@@ -153,6 +163,20 @@ The Clippy implementation consists of several interconnected modules:
   - Zero drift during resize.
   - Overlay always synchronized.
   - All updates are immediate (no CSS transitions during resize).
+
+---
+
+## Performance Optimizations
+
+- **Reduced Logging**
+  - ClippyPositioning uses VERBOSE_LOGGING flag to reduce console noise.
+  - Only critical events and errors are logged by default.
+  - Detailed positioning logs only available in verbose mode.
+
+- **Efficient Interaction Handling**
+  - Separate handlers for mobile tap, double-tap, and long-press.
+  - Dedicated desktop click and double-click handlers.
+  - Prevents interaction conflicts and improves responsiveness.
 
 ---
 

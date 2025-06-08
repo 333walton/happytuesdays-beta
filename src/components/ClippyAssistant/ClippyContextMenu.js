@@ -218,6 +218,26 @@ const ClippyContextMenu = ({
         navigator.userAgent
       );
     const [isHovered, setIsHovered] = useState(false);
+    const [isMobileTouched, setIsMobileTouched] = useState(false);
+
+    // Mobile touch handlers for blue highlighting
+    const handleTouchStart = (e) => {
+      if (isMobile && !disabled) {
+        setIsMobileTouched(true);
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      if (isMobile && !disabled) {
+        setIsMobileTouched(false);
+      }
+    };
+
+    const handleTouchCancel = (e) => {
+      if (isMobile && !disabled) {
+        setIsMobileTouched(false);
+      }
+    };
 
     // Combine external onMouseEnter/onMouseLeave with internal hover state management
     const handleMouseEnter = (e) => {
@@ -242,17 +262,18 @@ const ClippyContextMenu = ({
     };
 
     // Determine if the menu item should be highlighted
-    // Highlight if hovered OR if it's a parent with an open submenu (desktop only)
+    // Desktop: Highlight if hovered OR if it's a parent with an open submenu
+    // Mobile: Highlight if touched OR if it's a parent with an open submenu
     const isHighlighted =
-      isHovered ||
-      (hasSubmenu && currentSubmenuOpen === submenuType && !isMobile);
+      (isMobile ? isMobileTouched : isHovered) ||
+      (hasSubmenu && currentSubmenuOpen === submenuType);
 
-    // Apply hover style on desktop
+    // Apply hover/touch style
     const finalStyle = {
       ...menuItemStyle,
-      // Only apply hover style on desktop if highlighted and not disabled
-      ...(isHighlighted && !isMobile && !disabled ? menuItemHoverStyle : {}),
-      transition: "background-color 0.1s ease-in-out",
+      // Apply blue highlight style if highlighted and not disabled
+      ...(isHighlighted && !disabled ? menuItemHoverStyle : {}),
+      transition: "background-color 0.1s ease-in-out, color 0.1s ease-in-out",
     };
 
     return (
@@ -263,6 +284,9 @@ const ClippyContextMenu = ({
         onClick={disabled ? null : onClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
         style={finalStyle}
         data-submenu={hasSubmenu ? submenuType : undefined}
       >
@@ -490,7 +514,15 @@ const ClippyContextMenu = ({
           const animationName = String(data).trim();
           if (animations.includes(animationName)) {
             logAnimation(animationName, "context menu selection");
-            window.clippy.play(animationName);
+            
+            // Add 2 second delay specifically for "Hide" animation
+            if (animationName === "Hide") {
+              setTimeout(() => {
+                window.clippy.play(animationName);
+              }, 2000);
+            } else {
+              window.clippy.play(animationName);
+            }
           } else {
             console.warn(`Invalid animation name: ${animationName}`);
           }
@@ -806,7 +838,7 @@ const ClippyContextMenu = ({
             currentSubmenuOpen={submenuOpen}
             disabled={true}
           >
-            Drag Clippy
+            Drag {currentAgent}
           </MenuItem>
           {/* Wave - Emoji on Right */}
           <MenuItem
