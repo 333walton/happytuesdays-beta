@@ -362,6 +362,12 @@ class CustomBalloonManager {
 
       // Remove current balloon
       if (this.currentBalloon && this.currentBalloon.parentNode) {
+        // Check if this was a welcome balloon and mark as completed
+        const balloonContent = this.currentBalloon.textContent || '';
+        if (balloonContent.includes('Welcome to Hydra98') && window.markWelcomeBalloonCompleted) {
+          window.markWelcomeBalloonCompleted();
+        }
+        
         this.currentBalloon.remove();
         devLog("Balloon removed from DOM");
       }

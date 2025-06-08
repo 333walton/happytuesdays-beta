@@ -48,8 +48,8 @@
 
 | Feature           | Behavior           | Implementation         |
 |-------------------|-------------------|------------------------|
-| **Position Lock** | Default: Locked   | Toggle via lock button |
-| **Drag Unlock**   | Long press unlocks| Auto-locks on drop     |
+| **Position Lock** | Default: Locked   | Toggle via controls    |
+| **Drag Unlock**   | Via controls menu | Manual unlock required |
 | **Touch Targets** | ≥44px minimum     | iOS compliance         |
 | **Zoom Prevention** | 16px font inputs| Prevents iOS zoom      |
 

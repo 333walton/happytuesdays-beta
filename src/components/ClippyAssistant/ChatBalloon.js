@@ -184,6 +184,9 @@ class ChatBalloonManager {
     const selectedAgent = getCurrentAgent();
     const agentTitle = `Chat with ${selectedAgent}`;
 
+    // FIXED: Mobile-responsive close button styling
+    const isMobile = this.isMobile();
+    
     // Create chat balloon HTML
     container.innerHTML = `
     <button class="custom-clippy-balloon-close" aria-label="Close chat" style="
@@ -192,15 +195,17 @@ class ChatBalloonManager {
       right: 8px;
       cursor: pointer;
       font-weight: bold;
-      font-size: 16px;
-      padding: 2px 6px;
+      font-size: ${isMobile ? '18px' : '16px'};
+      padding: ${isMobile ? '4px 8px' : '2px 6px'};
       background: none;
       border: none;
       line-height: 1;
-      min-width: 28px;
-      min-height: 28px;
+      min-width: ${isMobile ? '32px' : '28px'};
+      min-height: ${isMobile ? '32px' : '28px'};
       color: #666666;
       -webkit-text-fill-color: #666666;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     ">×</button>
     
     <div <div class="custom-clippy-balloon-title" style="

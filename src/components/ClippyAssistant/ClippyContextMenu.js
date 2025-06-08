@@ -515,11 +515,39 @@ const ClippyContextMenu = ({
           if (animations.includes(animationName)) {
             logAnimation(animationName, "context menu selection");
             
-            // Add 2 second delay specifically for "Hide" animation
+            // Special handling for Hide animation
             if (animationName === "Hide") {
+              window.clippy.play(animationName);
+              
+              // Hide Clippy for 2 seconds after animation completes
               setTimeout(() => {
-                window.clippy.play(animationName);
-              }, 2000);
+                const clippyEl = document.querySelector(".clippy");
+                const overlayEl = document.getElementById("clippy-clickable-overlay");
+                
+                if (clippyEl) {
+                  clippyEl.style.visibility = "hidden";
+                  clippyEl.style.opacity = "0";
+                }
+                if (overlayEl) {
+                  overlayEl.style.visibility = "hidden";
+                  overlayEl.style.pointerEvents = "none";
+                }
+                
+                console.log("Hide animation completed, Clippy hidden for 2 seconds");
+                
+                // Show Clippy again after 2 seconds
+                setTimeout(() => {
+                  if (clippyEl) {
+                    clippyEl.style.visibility = "visible";
+                    clippyEl.style.opacity = "1";
+                  }
+                  if (overlayEl) {
+                    overlayEl.style.visibility = "visible";
+                    overlayEl.style.pointerEvents = "auto";
+                  }
+                  console.log("Clippy shown again after Hide animation delay");
+                }, 2000); // 2 second hide delay
+              }, 2000); // Wait for animation to complete
             } else {
               window.clippy.play(animationName);
             }

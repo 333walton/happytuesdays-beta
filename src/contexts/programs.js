@@ -335,9 +335,9 @@ class ProgramProvider extends Component {
       activeId: newProgram.id,
     });
 
-    // App-specific speech balloons with 25% chance
+    // App-specific speech balloons with 33% chance
     const targetApps = ["Read Me", "FAQ", "Change Log"];
-    if (targetApps.includes(program.title) && Math.random() < 0.25) {
+    if (targetApps.includes(program.title) && Math.random() < 0.33) {
       setTimeout(() => {
         if (window.showClippyCustomBalloon) {
           let message;
