@@ -30,50 +30,50 @@ const ClippyContextMenu = ({
 
   // Animation mapping: { displayName: animationName }
   const animationList = {
-    "Congratulate": "Congratulate",
+    Congratulate: "Congratulate",
     "Look Right": "LookRight",
     "Send Mail": "SendMail",
-    "Thinking": "Thinking",
-    "Explain": "Explain",
+    Thinking: "Thinking",
+    Explain: "Explain",
     "Idle Rope Pile": "IdleRopePile",
     "Idle Atom": "IdleAtom",
-    "Print": "Print",
+    Print: "Print",
     //"Hide": "Hide", // removed for now since its buggy
     "Get Attention": "GetAttention",
-    "Save": "Save",
+    Save: "Save",
     "Get Techy": "GetTechy",
     "Gesture Up": "GestureUp",
-    "Writing": "Writing",
-    "Processing": "Processing",
-    "Alert": "Alert",
+    Writing: "Writing",
+    Processing: "Processing",
+    Alert: "Alert",
     "Look Up Right": "LookUpRight",
     "Idle Side to Side": "IdleSideToSide",
     "Good Bye": "GoodBye",
     "Look Left": "LookLeft",
     "Idle Head Scratch": "IdleHeadScratch",
     "Look Up Left": "LookUpLeft",
-    "Checking": "CheckingSomething", // RENAMED: Display "Checking" instead of "CheckingSomething"
-    "Hearing": "Hearing_1",
+    Checking: "CheckingSomething", // RENAMED: Display "Checking" instead of "CheckingSomething"
+    Hearing: "Hearing_1",
     "Get Wizardy": "GetWizardy",
     "Idle Finger Tap": "IdleFingerTap",
     "Gesture Left": "GestureLeft",
-    "Wave": "Wave",
+    Wave: "Wave",
     "Gesture Right": "GestureRight",
     "Idle Snooze": "IdleSnooze",
     "Look Down Right": "LookDownRight",
     "Get Artsy": "GetArtsy",
-    "Show": "Show",
+    Show: "Show",
     "Look Down": "LookDown",
-    "Searching": "Searching",
+    Searching: "Searching",
     "Empty Trash": "EmptyTrash",
-    "Greeting": "Greeting",
+    Greeting: "Greeting",
     "Look Up": "LookUp",
     "Gesture Down": "GestureDown",
     "Rest Pose": "RestPose",
     "Idle Eyebrow Raise": "IdleEyeBrowRaise",
     "Look Down Left": "LookDownLeft",
   };
-  
+
   // Get display names and animation names
   const animations = Object.values(animationList); // For validation
   const displayNames = Object.keys(animationList); // For menu display
@@ -162,7 +162,7 @@ const ClippyContextMenu = ({
   useEffect(() => {
     const menuWidth = 180;
     const menuHeight = 250;
-    const margin = 10;
+    const margin = 0; // FIXED: Remove margin to allow flush submenu positioning
     const mobileBottomMargin = 100; // Minimum distance from bottom on mobile
     const viewport = getViewport();
     let adjustedX = Math.max(
@@ -326,10 +326,12 @@ const ClippyContextMenu = ({
     const viewport = getViewport();
 
     // Get main menu dimensions to prevent overlap
-    const mainMenu = document.querySelector('.context-menu-content.clippy-context-menu');
+    const mainMenu = document.querySelector(
+      ".context-menu-content.clippy-context-menu"
+    );
     const mainMenuRect = mainMenu ? mainMenu.getBoundingClientRect() : null;
     const mainMenuWidth = mainMenuRect ? mainMenuRect.width : 160; // fallback width
-    
+
     // Check if submenu would actually overflow viewport boundaries (no artificial margins)
     const wouldOverflowRight = rect.right + submenuWidth > viewport.right;
     const wouldOverflowBottom = rect.top + submenuHeight > viewport.bottom;
@@ -394,21 +396,9 @@ const ClippyContextMenu = ({
       }
     }
 
-    // FIXED: Only apply viewport constraints when actually needed for submenus
+    // FIXED: No viewport constraints for submenus - position exactly where calculated
     let constrainedX = newX;
-    
-    // Only constrain if submenu would actually go outside viewport
-    if (constrainedX < viewport.left) {
-      constrainedX = viewport.left;
-    }
-    if (constrainedX + submenuWidth > viewport.right) {
-      constrainedX = viewport.right - submenuWidth;
-    }
-    
-    // Remove overlap detection entirely - let submenus position exactly where calculated
-    // The 2px overlap in newX calculation should handle border merging
-    // No additional adjustments needed
-    
+
     let constrainedY = Math.max(
       viewport.top + 5,
       Math.min(
@@ -426,23 +416,47 @@ const ClippyContextMenu = ({
     console.log(`🎯 Submenu positioning (${submenuType}):`, {
       viewport: { left: viewport.left, right: viewport.right },
       menuItemRect: { left: rect.left, right: rect.right },
-      mainMenu: mainMenuRect ? { left: mainMenuRect.left, right: mainMenuRect.right } : 'null',
+      mainMenu: mainMenuRect
+        ? { left: mainMenuRect.left, right: mainMenuRect.right }
+        : "null",
       submenuWidth: submenuWidth,
       wouldOverflowRight: wouldOverflowRight,
-      overflowCheck: `${rect.right} + ${submenuWidth} = ${rect.right + submenuWidth} > ${viewport.right} = ${wouldOverflowRight}`,
+      overflowCheck: `${rect.right} + ${submenuWidth} = ${
+        rect.right + submenuWidth
+      } > ${viewport.right} = ${wouldOverflowRight}`,
       calculatedNewX: newX,
       beforeViewportConstraint: newX,
       afterViewportConstraint: constrainedX,
       viewportConstraintApplied: newX !== constrainedX,
       finalPosition: { x: constrainedX, y: constrainedY },
-      actualGap: wouldOverflowRight ? 
-        `${mainMenuRect?.left - (constrainedX + submenuWidth)}px` : 
-        `${constrainedX - mainMenuRect?.right}px`,
+      actualGap: wouldOverflowRight
+        ? `${mainMenuRect?.left - (constrainedX + submenuWidth)}px`
+        : `${constrainedX - mainMenuRect?.right}px`,
     });
 
+    // FIXED: Shift submenus right with device-specific adjustments
+    let finalX = Math.round(constrainedX);
+    if (wouldOverflowRight) {
+      if (isMobile) {
+        // Mobile-specific adjustments
+        if (submenuType === "animations") {
+          finalX += 18; // Mobile shift for animations submenu
+        } else if (submenuType === "agents") {
+          finalX += 18; // Mobile shift for agents submenu
+        }
+      } else {
+        // Desktop-specific adjustments
+        if (submenuType === "animations") {
+          finalX += 18; // Desktop shift for animations submenu
+        } else if (submenuType === "agents") {
+          finalX += 18; // Desktop shift for agents submenu
+        }
+      }
+    }
+
     setSubmenuPosition({
-      x: constrainedX,
-      y: constrainedY,
+      x: finalX,
+      y: Math.round(constrainedY),
       openLeft: wouldOverflowRight,
     });
 
@@ -735,7 +749,7 @@ const ClippyContextMenu = ({
     borderTop: "1px solid #808080",
   };
 
-  // FIXED: Enhanced submenu styles for perfect alignment (NO GAP)
+  // FIXED: Enhanced submenu styles with fixed width to prevent expansion
   const submenuStyle = {
     position: "absolute",
     left: `${submenuPosition.x}px`,
@@ -743,20 +757,22 @@ const ClippyContextMenu = ({
     backgroundColor: "#c0c0c0",
     border: "2px outset #c0c0c0",
     boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
-    minWidth: "140px",
+    width: "140px", // Fixed width instead of minWidth to prevent expansion
     maxHeight: "240px",
     overflowY: "auto",
+    overflowX: "hidden", // Hide horizontal overflow
     fontFamily: "Tahoma, sans-serif",
     fontSize: "11px",
     pointerEvents: "auto",
     visibility: "visible",
     opacity: 1,
     display: "block",
-    transform: "translateZ(0) translate3d(0, 0, 0)", // FIXED: Snap to pixel boundaries
+    transform: "translateZ(0) translate3d(0, 0, 0)",
     zIndex: 2,
     textAlign: "left",
-    margin: "0", // FIXED: Ensure no margin that could create gaps
-    padding: "0", // FIXED: Ensure no padding that could create gaps
+    margin: "0",
+    padding: "0",
+    whiteSpace: "nowrap", // Prevent text wrapping that could change width
   };
 
   // Add mobile-specific styles and standard submenu alignment
@@ -853,6 +869,15 @@ const ClippyContextMenu = ({
         cursor: not-allowed;
         color: #666666;
         -webkit-text-fill-color: #666666;
+      }
+
+      /* Desktop-only: Match main menu item height to submenu item height */
+      @media (min-width: 769px) {
+        .clippy-context-menu .context-menu-item:not(.submenu-item) {
+          height: 25px !important;
+          padding: 4px 16px !important; /* Adjust padding to achieve 25px total height */
+          min-height: 25px !important;
+        }
       }
     `;
     document.head.appendChild(style);
@@ -1055,7 +1080,9 @@ const ClippyContextMenu = ({
             {displayNames.map((displayName) => (
               <MenuItem
                 key={displayName}
-                onClick={() => handleMenuAction("playAnimation", animationList[displayName])}
+                onClick={() =>
+                  handleMenuAction("playAnimation", animationList[displayName])
+                }
                 isSubmenuItem
                 leftIcon={null}
                 rightIcon={null}
