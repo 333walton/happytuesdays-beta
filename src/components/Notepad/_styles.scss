@@ -10,29 +10,79 @@
   user-select: none;
 }
 
+// FIXED: Ensure scrollbars work properly in all Notepad instances
+.Notepad textarea::-webkit-scrollbar-thumb {
+  cursor: default !important; // Force standard cursor
+}
+
+.Notepad textarea::-webkit-scrollbar-track {
+  cursor: default !important; // Force standard cursor
+}
+
 .Notepad {
   &__textarea {
     @include shadow-input;
     padding: 2px 2px 3px 1px;
-    overflow: hidden;
+    overflow: auto; // FIXED: Enable scrollbars
     background-color: white;
     display: flex;
     flex-grow: 1;
     margin-bottom: 2px;
+    
+    // FIXED: Proper scrollbar styling
+    scrollbar-width: thin;
+    scrollbar-color: #c0c0c0 #f0f0f0;
+    
+    &::-webkit-scrollbar {
+      width: 16px;
+      height: 16px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f0f0f0;
+      border: 1px inset #c0c0c0;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #c0c0c0;
+      border: 1px outset #c0c0c0;
+      cursor: pointer; // FIXED: Standard cursor for scrollbar
+    }
+    
+    &::-webkit-scrollbar-thumb:hover {
+      background: #d0d0d0;
+      cursor: pointer; // FIXED: Standard cursor for scrollbar hover
+    }
+    
+    &::-webkit-scrollbar-corner {
+      background: #f0f0f0;
+    }
   }
   textarea {
     font-family: "FixedSys", "Courier New", Courier, monospace;
     resize: none;
-    white-space: nowrap;
+    white-space: pre-wrap; // FIXED: Enable text wrapping by default
     outline: none;
     min-height: 100%;
     border: none;
     flex-grow: 1;
+    overflow: auto; // FIXED: Enable scrolling
+    word-wrap: break-word; // FIXED: Break long words
+    
+    // FIXED: Remove spell-check red underlines
+    spellcheck: false;
+    -webkit-spellcheck: false;
+    -moz-spellcheck: false;
+    
+    // FIXED: Prevent text selection interference with scrollbars
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
   }
   &--wrap {
     textarea {
       width: 100%;
-      white-space: normal;
+      white-space: pre-wrap; // FIXED: Use pre-wrap instead of normal for better formatting
     }
   }
 }

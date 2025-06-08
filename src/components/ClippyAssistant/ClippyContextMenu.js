@@ -28,52 +28,55 @@ const ClippyContextMenu = ({
   const menuRef = useRef(null);
   const [dynamicPosition, setDynamicPosition] = useState({ x, y });
 
-  // All available Clippy animations
-  const animations = [
-    "Congratulate",
-    "LookRight",
-    "SendMail",
-    "Thinking",
-    "Explain",
-    "IdleRopePile",
-    "IdleAtom",
-    "Print",
-    "Hide",
-    "GetAttention",
-    "Save",
-    "GetTechy",
-    "GestureUp",
-    "Writing",
-    "Processing",
-    "Alert",
-    "LookUpRight",
-    "IdleSideToSide",
-    "GoodBye",
-    "LookLeft",
-    "IdleHeadScratch",
-    "LookUpLeft",
-    "CheckingSomething",
-    "Hearing_1",
-    "GetWizardy",
-    "IdleFingerTap",
-    "GestureLeft",
-    "Wave",
-    "GestureRight",
-    "Writing",
-    "IdleSnooze",
-    "LookDownRight",
-    "GetArtsy",
-    "Show",
-    "LookDown",
-    "Searching",
-    "EmptyTrash",
-    "Greeting",
-    "LookUp",
-    "GestureDown",
-    "RestPose",
-    "IdleEyeBrowRaise",
-    "LookDownLeft",
-  ];
+  // Animation mapping: { displayName: animationName }
+  const animationList = {
+    "Congratulate": "Congratulate",
+    "Look Right": "LookRight",
+    "Send Mail": "SendMail",
+    "Thinking": "Thinking",
+    "Explain": "Explain",
+    "Idle Rope Pile": "IdleRopePile",
+    "Idle Atom": "IdleAtom",
+    "Print": "Print",
+    //"Hide": "Hide", // removed for now since its buggy
+    "Get Attention": "GetAttention",
+    "Save": "Save",
+    "Get Techy": "GetTechy",
+    "Gesture Up": "GestureUp",
+    "Writing": "Writing",
+    "Processing": "Processing",
+    "Alert": "Alert",
+    "Look Up Right": "LookUpRight",
+    "Idle Side to Side": "IdleSideToSide",
+    "Good Bye": "GoodBye",
+    "Look Left": "LookLeft",
+    "Idle Head Scratch": "IdleHeadScratch",
+    "Look Up Left": "LookUpLeft",
+    "Checking": "CheckingSomething", // RENAMED: Display "Checking" instead of "CheckingSomething"
+    "Hearing": "Hearing_1",
+    "Get Wizardy": "GetWizardy",
+    "Idle Finger Tap": "IdleFingerTap",
+    "Gesture Left": "GestureLeft",
+    "Wave": "Wave",
+    "Gesture Right": "GestureRight",
+    "Idle Snooze": "IdleSnooze",
+    "Look Down Right": "LookDownRight",
+    "Get Artsy": "GetArtsy",
+    "Show": "Show",
+    "Look Down": "LookDown",
+    "Searching": "Searching",
+    "Empty Trash": "EmptyTrash",
+    "Greeting": "Greeting",
+    "Look Up": "LookUp",
+    "Gesture Down": "GestureDown",
+    "Rest Pose": "RestPose",
+    "Idle Eyebrow Raise": "IdleEyeBrowRaise",
+    "Look Down Left": "LookDownLeft",
+  };
+  
+  // Get display names and animation names
+  const animations = Object.values(animationList); // For validation
+  const displayNames = Object.keys(animationList); // For menu display
 
   // Get desktop viewport boundaries for positioning
   const getDesktopViewport = () => {
@@ -322,12 +325,34 @@ const ClippyContextMenu = ({
         : 200;
     const viewport = getViewport();
 
-    // Check if submenu would overflow desktop or mobile viewport boundaries
-    const wouldOverflowRight = rect.right + submenuWidth > viewport.right - 10;
-    const wouldOverflowBottom = rect.top + submenuHeight > viewport.bottom - 10;
+    // Get main menu dimensions to prevent overlap
+    const mainMenu = document.querySelector('.context-menu-content.clippy-context-menu');
+    const mainMenuRect = mainMenu ? mainMenu.getBoundingClientRect() : null;
+    const mainMenuWidth = mainMenuRect ? mainMenuRect.width : 160; // fallback width
+    
+    // Check if submenu would actually overflow viewport boundaries (no artificial margins)
+    const wouldOverflowRight = rect.right + submenuWidth > viewport.right;
+    const wouldOverflowBottom = rect.top + submenuHeight > viewport.bottom;
 
-    // Position submenu directly bordering main menu (no gap)
-    const newX = wouldOverflowRight ? rect.left - submenuWidth : rect.right;
+    // Position submenu with slight overlap to ensure no visible gap
+    // Use slight negative spacing to make borders overlap
+    const OVERLAP = 2; // Overlap by 2px to ensure borders merge
+    let newX;
+    if (wouldOverflowRight) {
+      // Position to the left with slight overlap
+      if (mainMenuRect) {
+        newX = mainMenuRect.left - submenuWidth + OVERLAP; // Overlap borders
+      } else {
+        newX = rect.left - submenuWidth + OVERLAP;
+      }
+    } else {
+      // Position to the right with slight overlap
+      if (mainMenuRect) {
+        newX = mainMenuRect.right - OVERLAP; // Overlap borders
+      } else {
+        newX = rect.right - OVERLAP;
+      }
+    }
 
     let currentMobileBottomMargin = 10; // Default for desktop
     if (isMobile) {
@@ -369,10 +394,21 @@ const ClippyContextMenu = ({
       }
     }
 
-    let constrainedX = Math.max(
-      viewport.left + 5,
-      Math.min(newX, viewport.right - submenuWidth - 5)
-    );
+    // FIXED: Only apply viewport constraints when actually needed for submenus
+    let constrainedX = newX;
+    
+    // Only constrain if submenu would actually go outside viewport
+    if (constrainedX < viewport.left) {
+      constrainedX = viewport.left;
+    }
+    if (constrainedX + submenuWidth > viewport.right) {
+      constrainedX = viewport.right - submenuWidth;
+    }
+    
+    // Remove overlap detection entirely - let submenus position exactly where calculated
+    // The 2px overlap in newX calculation should handle border merging
+    // No additional adjustments needed
+    
     let constrainedY = Math.max(
       viewport.top + 5,
       Math.min(
@@ -381,29 +417,28 @@ const ClippyContextMenu = ({
       )
     );
 
-    // Adjust vertical position for desktop agents submenu - Apply here after declaration
+    // Adjust vertical position for desktop agents submenu
     if (!isMobile && submenuType === "agents") {
       constrainedY -= 20; // Raise by 20px
     }
 
-    // Apply horizontal adjustment ONLY for mobile
-    if (isMobile) {
-      constrainedX += 57;
-    }
-    // Apply horizontal adjustment ONLY for desktop
-    if (!isMobile) {
-      constrainedX += 36; // Apply offset ONLY for desktop
-    }
-
-    // Throttled logging to reduce console congestion
-    if (Math.random() < 0.1) { // Only log 10% of the time
-      console.log(`🎯 Submenu positioning (${submenuType}):`, {
-        menuItem: { left: rect.left, right: rect.right, top: rect.top },
-        submenu: { x: constrainedX, y: constrainedY },
-        openLeft: wouldOverflowRight,
-        isMobile: isMobile,
-      });
-    }
+    // DEBUGGING: Show detailed positioning calculations
+    console.log(`🎯 Submenu positioning (${submenuType}):`, {
+      viewport: { left: viewport.left, right: viewport.right },
+      menuItemRect: { left: rect.left, right: rect.right },
+      mainMenu: mainMenuRect ? { left: mainMenuRect.left, right: mainMenuRect.right } : 'null',
+      submenuWidth: submenuWidth,
+      wouldOverflowRight: wouldOverflowRight,
+      overflowCheck: `${rect.right} + ${submenuWidth} = ${rect.right + submenuWidth} > ${viewport.right} = ${wouldOverflowRight}`,
+      calculatedNewX: newX,
+      beforeViewportConstraint: newX,
+      afterViewportConstraint: constrainedX,
+      viewportConstraintApplied: newX !== constrainedX,
+      finalPosition: { x: constrainedX, y: constrainedY },
+      actualGap: wouldOverflowRight ? 
+        `${mainMenuRect?.left - (constrainedX + submenuWidth)}px` : 
+        `${constrainedX - mainMenuRect?.right}px`,
+    });
 
     setSubmenuPosition({
       x: constrainedX,
@@ -514,40 +549,68 @@ const ClippyContextMenu = ({
           const animationName = String(data).trim();
           if (animations.includes(animationName)) {
             logAnimation(animationName, "context menu selection");
-            
-            // Special handling for Hide animation
+
+            // FIXED: Proper Hide animation - play animation, then hide for 2 seconds
             if (animationName === "Hide") {
+              console.log("🎭 Playing Hide animation");
+
+              // Disable all interactions immediately
+              window.clippyIsHiding = true;
+
+              // Play the hide animation
               window.clippy.play(animationName);
-              
-              // Hide Clippy for 2 seconds after animation completes
+
+              // Wait for hide animation to complete (approximately 2 seconds)
               setTimeout(() => {
+                console.log(
+                  "🎭 Hide animation completed, hiding Clippy for 2 seconds"
+                );
+
                 const clippyEl = document.querySelector(".clippy");
-                const overlayEl = document.getElementById("clippy-clickable-overlay");
-                
+                const overlayEl = document.getElementById(
+                  "clippy-clickable-overlay"
+                );
+
+                // Completely hide Clippy elements
                 if (clippyEl) {
                   clippyEl.style.visibility = "hidden";
                   clippyEl.style.opacity = "0";
+                  clippyEl.style.transform = "translateX(-9999px)";
                 }
                 if (overlayEl) {
                   overlayEl.style.visibility = "hidden";
+                  overlayEl.style.opacity = "0";
                   overlayEl.style.pointerEvents = "none";
+                  overlayEl.style.transform = "translateX(-9999px)";
                 }
-                
-                console.log("Hide animation completed, Clippy hidden for 2 seconds");
-                
-                // Show Clippy again after 2 seconds
+
+                // Set global flag to prevent any Clippy rendering
+                window.clippyIsHidden = true;
+
+                // Restore Clippy after 2 seconds of being hidden
                 setTimeout(() => {
+                  console.log("🎭 Restoring Clippy after hide period");
+
+                  // Clear both flags
+                  window.clippyIsHidden = false;
+                  window.clippyIsHiding = false;
+
+                  // Restore Clippy elements
                   if (clippyEl) {
                     clippyEl.style.visibility = "visible";
                     clippyEl.style.opacity = "1";
+                    clippyEl.style.transform = "";
                   }
                   if (overlayEl) {
                     overlayEl.style.visibility = "visible";
+                    overlayEl.style.opacity = "1";
                     overlayEl.style.pointerEvents = "auto";
+                    overlayEl.style.transform = "";
                   }
-                  console.log("Clippy shown again after Hide animation delay");
-                }, 2000); // 2 second hide delay
-              }, 2000); // Wait for animation to complete
+
+                  console.log("🎭 Clippy fully restored after hide sequence");
+                }, 2000); // Hidden for 2 seconds
+              }, 2000); // Wait for hide animation to complete (~2 seconds)
             } else {
               window.clippy.play(animationName);
             }
@@ -579,6 +642,8 @@ const ClippyContextMenu = ({
             icon: "textchat32",
             data: {
               content: clippyFaq,
+              wrap: true, // FIXED: Enable text wrapping for FAQ content
+              readOnly: true, // Make FAQ read-only
             },
           });
         } else {
@@ -987,16 +1052,16 @@ const ClippyContextMenu = ({
               }
             }}
           >
-            {animations.slice(0, 20).map((animation) => (
+            {displayNames.map((displayName) => (
               <MenuItem
-                key={animation}
-                onClick={() => handleMenuAction("playAnimation", animation)}
+                key={displayName}
+                onClick={() => handleMenuAction("playAnimation", animationList[displayName])}
                 isSubmenuItem
                 leftIcon={null}
                 rightIcon={null}
                 currentSubmenuOpen={submenuOpen}
               >
-                {animation}
+                {displayName}
               </MenuItem>
             ))}
           </div>

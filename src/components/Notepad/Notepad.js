@@ -12,7 +12,7 @@ class Notepad extends Component {
     data: {}
   };
   state = {
-    wrap: false,
+    wrap: this.props.data?.wrap || false, // FIXED: Use wrap from props if provided
     data: {
       content: "",
       ...this.props.data
@@ -102,6 +102,8 @@ class Notepad extends Component {
               className="text"
               onChange={setText}
               value={state.data.content}
+              spellCheck={false}
+              readOnly={props.data?.readOnly || false}
             />
           </div>
         </Window>

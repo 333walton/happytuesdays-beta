@@ -431,9 +431,15 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       const now = Date.now();
 
-      // Check cooldown
+      // Check cooldown and hiding state
       if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
         devLog(`Desktop single click blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
+        return false;
+      }
+      
+      // Block all interactions if Clippy is hiding or hidden
+      if (window.clippyIsHiding || window.clippyIsHidden) {
+        devLog("Desktop single click blocked - Clippy is hiding/hidden");
         return false;
       }
 
@@ -635,9 +641,15 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       const now = Date.now();
 
-      // Check cooldown
+      // Check cooldown and hiding state
       if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
         devLog(`Mobile single tap blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
+        return false;
+      }
+      
+      // Block all interactions if Clippy is hiding or hidden
+      if (window.clippyIsHiding || window.clippyIsHidden) {
+        devLog("Mobile single tap blocked - Clippy is hiding/hidden");
         return false;
       }
 
@@ -932,6 +944,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       // Block if any balloon is already open
       if (isAnyBalloonOpen()) {
         devLog("Right-click blocked - balloon is already open");
+        return false;
+      }
+      
+      // Block all interactions if Clippy is hiding or hidden
+      if (window.clippyIsHiding || window.clippyIsHidden) {
+        devLog("Right-click blocked - Clippy is hiding/hidden");
         return false;
       }
 
@@ -1485,6 +1503,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         devLog("Clippy interaction cooldown reset");
         return true;
       };
+      
+      // FIXED: Initialize hiding flags
+      if (window.clippyIsHidden === undefined) {
+        window.clippyIsHidden = false;
+      }
+      if (window.clippyIsHiding === undefined) {
+        window.clippyIsHiding = false;
+      }
 
       // FIXED: Mark welcome balloon as completed
       window.markWelcomeBalloonCompleted = () => {
@@ -1522,6 +1548,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         delete window.showClippyContextMenu;
         delete window.resetClippyCooldown;
         delete window.markWelcomeBalloonCompleted;
+        delete window.clippyIsHidden;
+        delete window.clippyIsHiding;
         delete window._clippyGlobalsInitialized;
       }
     };
@@ -1842,6 +1870,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }, [currentAgent, clippy]);
 
     useEffect(() => {
+      // FIXED: Check if Clippy is globally hidden or hiding
+      if (window.clippyIsHidden || window.clippyIsHiding) {
+        devLog("ClippyController: Clippy is hidden/hiding, not rendering");
+        return;
+      }
+      
       if (!clippy || !assistantVisible || !shouldRenderClippy) {
         devLog("ClippyController: Conditions not met for rendering", {
           hasClippy: !!clippy,
@@ -2056,6 +2090,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       handleRightClick,
     ]);
 
+    // FIXED: Handle hidden/hiding state with conditional rendering
+    if (window.clippyIsHidden || window.clippyIsHiding) {
+      return null;
+    }
+    
     return null;
   };
 
