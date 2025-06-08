@@ -407,12 +407,20 @@ const ClippyContextMenu = ({
       )
     );
 
-    // Adjust vertical position for desktop submenus
+    // Adjust vertical position for both desktop and mobile submenus
     if (!isMobile) {
+      // Desktop vertical adjustments
       if (submenuType === "agents") {
         constrainedY -= 30; // Raise by 30px (original 20px + additional 10px)
       } else if (submenuType === "animations") {
         constrainedY -= 16; // Raise by 16px
+      }
+    } else {
+      // Mobile vertical adjustments
+      if (submenuType === "agents") {
+        constrainedY -= 9; // Raise by 9px for mobile
+      } else if (submenuType === "animations") {
+        constrainedY -= 9; // Raise by 9px for mobile
       }
     }
 
@@ -444,9 +452,9 @@ const ClippyContextMenu = ({
       if (isMobile) {
         // Mobile-specific adjustments
         if (submenuType === "animations") {
-          finalX += 18; // Mobile shift for animations submenu
+          finalX += 38; // Mobile shift for animations submenu (18 + 20)
         } else if (submenuType === "agents") {
-          finalX += 18; // Mobile shift for agents submenu
+          finalX += 38; // Mobile shift for agents submenu (18 + 20)
         }
       } else {
         // Desktop-specific adjustments
