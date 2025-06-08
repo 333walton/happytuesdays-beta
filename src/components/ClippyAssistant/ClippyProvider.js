@@ -411,39 +411,29 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }, 800);
   }, [isAnyBalloonOpen]);
 
-  // FIXED: Enhanced interaction handler with guaranteed responses and scale preservation
-  const handleInteraction = useCallback(
-    (e, interactionType = "tap") => {
+  // NEW: Desktop single click handler with 75%/25% animation/balloon split
+  const handleDesktopSingleClick = useCallback(
+    (e) => {
       e.preventDefault();
       e.stopPropagation();
 
       const now = Date.now();
 
-      // FIXED: Enforce 1.5s cooldown for ALL interactions
+      // Check cooldown
       if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-        devLog(
-          `Interaction blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`
-        );
+        devLog(`Desktop single click blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
         return false;
       }
 
-      // FIXED: Block if animation is currently playing
+      // Block if animation is currently playing
       if (isAnimationPlaying) {
-        devLog("Interaction blocked - animation currently playing");
+        devLog("Desktop single click blocked - animation currently playing");
         return false;
       }
 
-      // FIXED: Check if persistent chat is open - don't allow new interactions
-      if (isChatBalloonVisible() && isUserInteractingWithChat()) {
-        devLog(
-          "Interaction blocked - user is actively using chat balloon (persistent)"
-        );
-        return false;
-      }
-
-      // FIXED: Block if any balloon is already open
+      // Block if any balloon is already open
       if (isAnyBalloonOpen()) {
-        devLog("Interaction blocked - another balloon is already open");
+        devLog("Desktop single click blocked - balloon is already open");
         return false;
       }
 
@@ -453,7 +443,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       const newCount = interactionCount + 1;
       setInteractionCount(newCount);
 
-      devLog(`${interactionType} interaction #${newCount} triggered`);
+      devLog(`Desktop single click #${newCount} triggered`);
 
       if (!mountedRef.current || !clippyInstanceRef.current) {
         if (window.clippy) {
@@ -464,54 +454,197 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         }
       }
 
-      // FIXED: Preserve Clippy's positioning and scale during interaction
+      // Preserve Clippy's positioning and scale during interaction
       const clippyEl = document.querySelector(".clippy");
       if (clippyEl && ClippyPositioning?.preserveClippyScale) {
-        // Store and preserve current scale before interaction
         const preserved = ClippyPositioning.preserveClippyScale(clippyEl);
-        devLog(
-          `Clippy scale preservation: ${preserved ? "success" : "failed"}`
-        );
+        devLog(`Clippy scale preservation: ${preserved ? "success" : "failed"}`);
 
-        // After interaction completes, ensure positioning is maintained
         setTimeout(() => {
           if (ClippyPositioning?.positionClippyAndOverlay) {
-            const overlayEl = document.getElementById(
-              "clippy-clickable-overlay"
-            );
-            ClippyPositioning.positionClippyAndOverlay(
-              clippyEl,
-              overlayEl,
-              null
-            );
+            const overlayEl = document.getElementById("clippy-clickable-overlay");
+            ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
             devLog("Clippy positioning restored after interaction");
           }
         }, 100);
       }
 
-      // FIXED: GUARANTEED RESPONSE - Every interaction gets either animation OR balloon (never both except initial)
-      const isInitialInteraction =
-        !greetingPlayedRef.current && !initialMessageShownRef.current;
+      // NEW RULE: 75% chance for animation, 25% chance for balloon
+      const shouldShowAnimation = Math.random() < 0.75;
+
+      devLog(`Desktop single click pattern:`, {
+        shouldShowAnimation,
+        percentage: shouldShowAnimation ? "75% - Animation" : "25% - Balloon"
+      });
+
+      return safeExecute(
+        () => {
+          if (shouldShowAnimation) {
+            // 75% case: Play random animation only
+            devLog("Desktop single click - playing random animation (75%)");
+
+            if (clippyInstanceRef.current.play) {
+              setIsAnimationPlaying(true);
+
+              // Available animations for random selection
+              const animations = [
+                "Wave", "Congratulate", "GetAttention", "Thinking", "Writing", 
+                "GoodBye", "Processing", "Alert", "GetArtsy", "Searching", 
+                "Explain", "Greeting", "GestureRight", "GestureLeft", "GestureUp"
+              ];
+              
+              const randomIndex = Math.floor(Math.random() * animations.length);
+              const animationName = animations[randomIndex];
+              
+              logAnimation(animationName, `desktop single click (75% animation)`);
+              clippyInstanceRef.current.play(animationName);
+
+              setTimeout(() => {
+                setIsAnimationPlaying(false);
+              }, 2000);
+            }
+          } else {
+            // 25% case: Show custom balloon message
+            devLog("Desktop single click - showing custom balloon (25%)");
+
+            setTimeout(() => {
+              if (mountedRef.current && !isAnyBalloonOpen()) {
+                // Random balloon messages
+                const balloonMessages = [
+                  "Hi there! Having a good day?",
+                  "Click me again for another surprise!",
+                  "I'm here if you need any help!",
+                  "Enjoying Hydra98 so far?",
+                  "Try right-clicking me for more options!",
+                  "Double-click me to open my menu!",
+                  "Need help? Just let me know!",
+                  "Welcome to the nostalgic world of Windows 98!",
+                  "Feeling productive today?",
+                  "Don't forget to save your work!"
+                ];
+                
+                const randomMessage = balloonMessages[Math.floor(Math.random() * balloonMessages.length)];
+                showCustomBalloon(randomMessage, 4000);
+                devLog(`Custom balloon shown: "${randomMessage}"`);
+              }
+            }, 200);
+          }
+
+          return true;
+        },
+        false,
+        "desktop single click"
+      );
+    },
+    [
+      isInCooldown,
+      lastInteractionTime,
+      isAnimationPlaying,
+      isAnyBalloonOpen,
+      startCooldown,
+      interactionCount,
+      setInteractionCount,
+      setLastInteractionTime,
+      setIsAnimationPlaying,
+      mountedRef,
+      clippyInstanceRef,
+      showCustomBalloon
+    ]
+  );
+
+  // NEW: Desktop double click handler for context menu
+  const handleDesktopDoubleClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      devLog("Desktop double click - opening context menu");
+
+      // Show context menu at click position
+      showContextMenu(e.clientX, e.clientY);
+      return true;
+    },
+    [showContextMenu]
+  );
+
+  // UPDATED: Mobile interaction handler (existing mobile logic)
+  const handleMobileInteraction = useCallback(
+    (e, interactionType = "tap") => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const now = Date.now();
+
+      // Check cooldown
+      if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
+        devLog(`Mobile interaction blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
+        return false;
+      }
+
+      // Block if animation is currently playing
+      if (isAnimationPlaying) {
+        devLog("Mobile interaction blocked - animation currently playing");
+        return false;
+      }
+
+      // Check if persistent chat is open
+      if (isChatBalloonVisible() && isUserInteractingWithChat()) {
+        devLog("Mobile interaction blocked - user is actively using chat balloon (persistent)");
+        return false;
+      }
+
+      // Block if any balloon is already open
+      if (isAnyBalloonOpen()) {
+        devLog("Mobile interaction blocked - another balloon is already open");
+        return false;
+      }
+
+      setLastInteractionTime(now);
+      startCooldown();
+
+      const newCount = interactionCount + 1;
+      setInteractionCount(newCount);
+
+      devLog(`Mobile ${interactionType} interaction #${newCount} triggered`);
+
+      if (!mountedRef.current || !clippyInstanceRef.current) {
+        if (window.clippy) {
+          clippyInstanceRef.current = window.clippy;
+        } else {
+          devLog("No clippy instance available");
+          return false;
+        }
+      }
+
+      // Preserve Clippy's positioning and scale during interaction
+      const clippyEl = document.querySelector(".clippy");
+      if (clippyEl && ClippyPositioning?.preserveClippyScale) {
+        const preserved = ClippyPositioning.preserveClippyScale(clippyEl);
+        devLog(`Clippy scale preservation: ${preserved ? "success" : "failed"}`);
+
+        setTimeout(() => {
+          if (ClippyPositioning?.positionClippyAndOverlay) {
+            const overlayEl = document.getElementById("clippy-clickable-overlay");
+            ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
+            devLog("Clippy positioning restored after interaction");
+          }
+        }, 100);
+      }
+
+      // Handle initial interaction
+      const isInitialInteraction = !greetingPlayedRef.current && !initialMessageShownRef.current;
 
       if (isInitialInteraction) {
-        // SPECIAL CASE: Initial interaction gets BOTH animation AND enhanced welcome balloon
-        devLog(
-          "Initial interaction - will show BOTH animation and enhanced welcome balloon"
-        );
+        devLog("Initial mobile interaction - will show BOTH animation and enhanced welcome balloon");
 
         return safeExecute(
           () => {
             if (clippyInstanceRef.current.play) {
               setIsAnimationPlaying(true);
 
-              const randomIndex = Math.floor(
-                Math.random() * GREETING_ANIMATIONS.length
-              );
+              const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
               const animationName = GREETING_ANIMATIONS[randomIndex];
-              logAnimation(
-                animationName,
-                `initial interaction (both animation + enhanced welcome)`
-              );
+              logAnimation(animationName, `initial mobile interaction (both animation + enhanced welcome)`);
 
               clippyInstanceRef.current.play(animationName);
               greetingPlayedRef.current = true;
@@ -520,11 +653,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 setIsAnimationPlaying(false);
               }, 2000);
 
-              // Show enhanced welcome balloon after animation
               setTimeout(() => {
                 if (mountedRef.current && !initialMessageShownRef.current) {
                   initialMessageShownRef.current = true;
-                  showWelcomeBalloon(); // Enhanced welcome with buttons
+                  showWelcomeBalloon();
                   devLog("Enhanced welcome balloon shown");
                 }
               }, 1200);
@@ -532,57 +664,42 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             return true;
           },
           false,
-          "initial interaction"
+          "initial mobile interaction"
         );
       }
 
-      // FIXED: STANDARD INTERACTIONS - Guaranteed animation OR balloon (never both, never neither)
-      const shouldShowChatBalloon =
-        newCount % 2 === 0 && interactionType !== "long-press";
+      // Mobile standard interactions - Keep existing mobile logic
+      const shouldShowChatBalloon = newCount % 2 === 0 && interactionType !== "long-press";
       const shouldShowSpeechBalloon = !shouldShowChatBalloon;
 
-      // RULE: Even interactions (2, 4, 6...) = Chat balloon only (no animation)
-      // RULE: Odd interactions (1, 3, 5...) = Animation + Enhanced Speech balloon
-
-      devLog(`Enhanced interaction pattern for #${newCount}:`, {
+      devLog(`Mobile interaction pattern for #${newCount}:`, {
         isEven: newCount % 2 === 0,
         willShowChat: shouldShowChatBalloon,
         willShowSpeech: shouldShowSpeechBalloon,
-        willPlayAnimation: shouldShowSpeechBalloon, // Animation only with speech
+        willPlayAnimation: shouldShowSpeechBalloon
       });
 
       return safeExecute(
         () => {
           if (shouldShowChatBalloon) {
-            // EVEN INTERACTIONS: Chat balloon only (no animation)
-            devLog("Even interaction - showing chat balloon (no animation)");
+            devLog("Mobile even interaction - showing chat balloon (no animation)");
 
             setTimeout(() => {
               if (mountedRef.current && !isAnyBalloonOpen()) {
-                const chatMessage = isMobile
-                  ? "Hi! What would you like to chat about?"
-                  : "Hello! How can I help you today?";
+                const chatMessage = "Hi! What would you like to chat about?";
                 showChatBalloon(chatMessage);
-                devLog("Chat balloon shown for even interaction");
+                devLog("Chat balloon shown for mobile even interaction");
               }
             }, 200);
           } else {
-            // ODD INTERACTIONS: Animation + Enhanced Speech balloon with buttons
-            devLog(
-              "Odd interaction - playing animation + showing enhanced speech balloon"
-            );
+            devLog("Mobile odd interaction - playing animation + showing enhanced speech balloon");
 
             if (clippyInstanceRef.current.play) {
               setIsAnimationPlaying(true);
 
-              const randomIndex = Math.floor(
-                Math.random() * GREETING_ANIMATIONS.length
-              );
+              const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
               const animationName = GREETING_ANIMATIONS[randomIndex];
-              logAnimation(
-                animationName,
-                `${interactionType} interaction #${newCount} (odd - with enhanced speech)`
-              );
+              logAnimation(animationName, `mobile ${interactionType} interaction #${newCount} (odd - with enhanced speech)`);
 
               clippyInstanceRef.current.play(animationName);
 
@@ -590,13 +707,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 setIsAnimationPlaying(false);
               }, 2000);
 
-              // Show enhanced speech balloon with contextual buttons
               setTimeout(() => {
                 if (mountedRef.current && !isAnyBalloonOpen()) {
                   const enhancedMessage = {
-                    message: isMobile
-                      ? "How may I help you?"
-                      : "How may I help you?",
+                    message: "How may I help you?",
                     buttons: [
                       {
                         text: "💬 Let's chat",
@@ -606,18 +720,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                         text: "🎭 Show me tricks",
                         action: () => {
                           if (window.clippy?.play) {
-                            const tricks = [
-                              "GetAttention",
-                              "Congratulate",
-                              "Wave",
-                              "GestureRight",
-                            ];
-                            const randomTrick =
-                              tricks[Math.floor(Math.random() * tricks.length)];
-                            logAnimation(
-                              randomTrick,
-                              "enhanced balloon trick button"
-                            );
+                            const tricks = ["GetAttention", "Congratulate", "Wave", "GestureRight"];
+                            const randomTrick = tricks[Math.floor(Math.random() * tricks.length)];
+                            logAnimation(randomTrick, "enhanced balloon trick button");
                             window.clippy.play(randomTrick);
                           }
                         },
@@ -628,8 +733,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                       },
                       {
                         text: "👋 Just saying hi",
-                        message:
-                          "Well hello there! It's great to see you. Feel free to explore Hydra98!",
+                        message: "Well hello there! It's great to see you. Feel free to explore Hydra98!",
                       },
                     ],
                   };
@@ -644,7 +748,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           return true;
         },
         false,
-        `${interactionType} interaction`
+        `mobile ${interactionType} interaction`
       );
     },
     [
@@ -657,8 +761,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     ]
   );
 
-  // FIXED: Long press guaranteed response
-  const handleLongPress = useCallback(
+  // NEW: Mobile long press handler
+  const handleMobileLongPress = useCallback(
     (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -668,26 +772,26 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       const now = Date.now();
 
       if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-        devLog("Long press blocked - in cooldown");
+        devLog("Mobile long press blocked - in cooldown");
         return false;
       }
 
       if (isAnimationPlaying) {
-        devLog("Long press blocked - animation playing");
+        devLog("Mobile long press blocked - animation playing");
         return false;
       }
 
       if (isChatBalloonVisible() && isUserInteractingWithChat()) {
-        devLog("Long press blocked - user is actively using chat balloon");
+        devLog("Mobile long press blocked - user is actively using chat balloon");
         return false;
       }
 
       if (isAnyBalloonOpen()) {
-        devLog("Long press blocked - another balloon is open");
+        devLog("Mobile long press blocked - another balloon is open");
         return false;
       }
 
-      devLog("Long press interaction - GUARANTEED chat balloon");
+      devLog("Mobile long press interaction - GUARANTEED chat balloon");
 
       setLastInteractionTime(now);
       startCooldown();
@@ -698,14 +802,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           setTimeout(() => {
             if (mountedRef.current && !isAnyBalloonOpen()) {
               showChatBalloon("Hi! What would you like to chat about?");
-              devLog("Long press chat balloon guaranteed");
+              devLog("Mobile long press chat balloon guaranteed");
             }
           }, 100);
 
           return true;
         },
         false,
-        "long press interaction"
+        "mobile long press interaction"
       );
     },
     [
@@ -1395,7 +1499,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
         // Only handle single tap if we're not in a potential double-tap sequence
         if (timeSinceLastTap >= DOUBLE_TAP_THRESHOLD) {
-          handleInteraction(e, "tap");
+          handleMobileInteraction(e, "tap");
         }
 
         // Reset tap count after double tap threshold if no second tap occurs
@@ -1522,7 +1626,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
               // Only handle single tap if we're not in a potential double-tap sequence
               if (timeSinceLastTap >= DOUBLE_TAP_THRESHOLD) {
-                handleInteraction(e, "tap");
+                handleMobileInteraction(e, "tap");
               }
 
               // Reset tap count after double tap threshold if no second tap occurs
@@ -1573,7 +1677,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         dragState.longPressTimer = setTimeout(() => {
           if (!dragState.dragStarted && mountedRef.current) {
             clearTimeout(dragState.longPressTimer);
-            handleLongPress(e);
+            handleMobileLongPress(e);
             // Reset tap count after long press
             tapCount = 0;
             lastTapTime = 0;
@@ -1598,25 +1702,37 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       },
     };
   }, [
-    handleInteraction,
-    handleLongPress,
+    handleMobileInteraction,
+    handleMobileLongPress,
     lastInteractionTime,
     positionLocked,
     isInCooldown,
     showContextMenu,
+    isAnyBalloonOpen,
   ]);
 
-  // FIXED: Desktop interaction with 1.5s cooldown
-  const handleDesktopInteraction = useCallback(
+  // NEW: Desktop click handler with proper single/double click separation
+  const handleDesktopClick = useCallback(
     (e) => {
-      const now = Date.now();
-      if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-        devLog("Desktop interaction blocked - in cooldown");
-        return;
+      // Use a timeout to distinguish between single and double clicks
+      if (e.detail === 1) {
+        // Single click - set timeout to check if it becomes a double click
+        const singleClickTimer = setTimeout(() => {
+          handleDesktopSingleClick(e);
+        }, 250); // Wait 250ms to see if there's a second click
+        
+        // Store timer for potential cancellation
+        e.target._singleClickTimer = singleClickTimer;
+      } else if (e.detail === 2) {
+        // Double click detected - cancel single click timer and handle double click
+        if (e.target._singleClickTimer) {
+          clearTimeout(e.target._singleClickTimer);
+          delete e.target._singleClickTimer;
+        }
+        handleDesktopDoubleClick(e);
       }
-      return handleInteraction(e, "double-click");
     },
-    [handleInteraction, lastInteractionTime, isInCooldown]
+    [handleDesktopSingleClick, handleDesktopDoubleClick]
   );
 
   // FIXED: Enhanced ClippyController with agent monitoring and scale preservation
@@ -1761,7 +1877,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                   overlay._cleanupHandlers = handlers.cleanup;
                 }
               } else {
-                overlay.addEventListener("dblclick", handleDesktopInteraction);
+                // NEW: Use single click handler that handles both single and double clicks
+                overlay.addEventListener("click", handleDesktopClick);
                 // FIXED: Enhanced context menu binding
                 overlay.addEventListener(
                   "contextmenu",
@@ -1854,7 +1971,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       isScreenPoweredOn,
       currentAgent, // ADDED: React to agent changes
       createMobileTouchHandlers,
-      handleDesktopInteraction,
+      handleDesktopClick,
       handleRightClick,
     ]);
 
@@ -1981,8 +2098,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     hideContextMenu,
 
     // Interaction handlers
-    handleInteraction,
-    handleLongPress,
+    handleMobileInteraction,
+    handleMobileLongPress,
     handleRightClick,
 
     // Agent change function
