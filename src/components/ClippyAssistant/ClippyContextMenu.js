@@ -420,7 +420,7 @@ const ClippyContextMenu = ({
       if (submenuType === "agents") {
         constrainedY -= 15; // Raise by 15px for mobile
       } else if (submenuType === "animations") {
-        constrainedY -= 32; // Raise by 32px for mobile
+        constrainedY -= 35; // Raise by 35px for mobile
       }
     }
 
