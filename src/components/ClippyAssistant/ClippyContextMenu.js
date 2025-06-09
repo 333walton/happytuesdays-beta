@@ -28,6 +28,18 @@ const ClippyContextMenu = ({
   const menuRef = useRef(null);
   const [dynamicPosition, setDynamicPosition] = useState({ x, y });
 
+  // FIXED: Centralized positioning rules for submenu alignment
+  const SUBMENU_POSITIONING_RULES = {
+    desktop: {
+      agents: { horizontalOffset: 18, verticalOffset: -47 },
+      animations: { horizontalOffset: 18, verticalOffset: -16 }
+    },
+    mobile: {
+      agents: { horizontalOffset: 38, verticalOffset: -32 },
+      animations: { horizontalOffset: 38, verticalOffset: -35 }
+    }
+  };
+
   // Animation mapping: { displayName: animationName }
   const animationList = {
     Congratulate: "Congratulate",
@@ -198,7 +210,7 @@ const ClippyContextMenu = ({
       adjustedY -= 18; // Total reduction for 6 main menu items
     }
 
-    setDynamicPosition({ x: adjustedX, y: adjustedY });
+    setDynamicPosition({ x: adjustedX, y: adjustedY - 40 }); // Move main menu up by 40px
   }, [x, y, portalContainer]);
 
   // FIXED: Enhanced MenuItem with proper hover handling and flexible icon/arrow placement
@@ -407,21 +419,12 @@ const ClippyContextMenu = ({
       )
     );
 
-    // Adjust vertical position for both desktop and mobile submenus
-    if (!isMobile) {
-      // Desktop vertical adjustments
-      if (submenuType === "agents") {
-        constrainedY -= 30; // Raise by 30px (original 20px + additional 10px)
-      } else if (submenuType === "animations") {
-        constrainedY += 24; // Lower by 24px (was -16, now +24 = 40px adjustment)
-      }
-    } else {
-      // Mobile vertical adjustments
-      if (submenuType === "agents") {
-        constrainedY -= 15; // Raise by 15px for mobile
-      } else if (submenuType === "animations") {
-        constrainedY += 5; // Lower by 5px for mobile (was -35, now +5 = 40px adjustment)
-      }
+    // Apply centralized positioning rules for vertical alignment
+    const deviceType = isMobile ? "mobile" : "desktop";
+    const positioningRule = SUBMENU_POSITIONING_RULES[deviceType][submenuType];
+    
+    if (positioningRule) {
+      constrainedY += positioningRule.verticalOffset;
     }
 
     // DEBUGGING: Show detailed positioning calculations
@@ -446,24 +449,10 @@ const ClippyContextMenu = ({
         : `${constrainedX - mainMenuRect?.right}px`,
     });
 
-    // FIXED: Shift submenus right with device-specific adjustments
+    // Apply centralized positioning rules for horizontal alignment
     let finalX = Math.round(constrainedX);
-    if (wouldOverflowRight) {
-      if (isMobile) {
-        // Mobile-specific adjustments
-        if (submenuType === "animations") {
-          finalX += 38; // Mobile shift for animations submenu (18 + 20)
-        } else if (submenuType === "agents") {
-          finalX += 38; // Mobile shift for agents submenu (18 + 20)
-        }
-      } else {
-        // Desktop-specific adjustments
-        if (submenuType === "animations") {
-          finalX += 18; // Desktop shift for animations submenu
-        } else if (submenuType === "agents") {
-          finalX += 18; // Desktop shift for agents submenu
-        }
-      }
+    if (wouldOverflowRight && positioningRule) {
+      finalX += positioningRule.horizontalOffset;
     }
 
     setSubmenuPosition({
