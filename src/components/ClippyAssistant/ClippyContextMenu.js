@@ -954,6 +954,7 @@ const ClippyContextMenu = ({
         font-feature-settings: 'liga' off, 'kern' off !important;
         -webkit-font-feature-settings: 'liga' off, 'kern' off !important;
         text-rendering: geometricPrecision !important;
+        font-weight: normal !important;
       }
 
       /* Mobile arrow using CSS pseudo-element to avoid emoji */
@@ -961,7 +962,8 @@ const ClippyContextMenu = ({
         content: "◀";
         display: inline-block;
         font-family: 'Courier New', 'Monaco', 'Lucida Console', monospace !important;
-        font-size: 8px;
+        font-size: 10px;
+        font-weight: bold;
         color: #000000;
         margin-left: 2px;
         font-variant-emoji: text !important;
