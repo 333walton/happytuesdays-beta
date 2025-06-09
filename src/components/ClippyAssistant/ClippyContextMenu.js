@@ -413,14 +413,14 @@ const ClippyContextMenu = ({
       if (submenuType === "agents") {
         constrainedY -= 30; // Raise by 30px (original 20px + additional 10px)
       } else if (submenuType === "animations") {
-        constrainedY -= 16; // Raise by 16px
+        constrainedY += 24; // Lower by 24px (was -16, now +24 = 40px adjustment)
       }
     } else {
       // Mobile vertical adjustments
       if (submenuType === "agents") {
         constrainedY -= 15; // Raise by 15px for mobile
       } else if (submenuType === "animations") {
-        constrainedY -= 35; // Raise by 35px for mobile
+        constrainedY += 5; // Lower by 5px for mobile (was -35, now +5 = 40px adjustment)
       }
     }
 
@@ -771,7 +771,7 @@ const ClippyContextMenu = ({
     boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
     width: "140px", // Fixed width to prevent expansion
     height: "auto", // Allow height to adjust to content
-    maxHeight: "240px", // Prevent excessive height
+    maxHeight: "200px", // Prevent excessive height
     minHeight: "25px", // Ensure minimum height matches menu item height
     overflowY: "auto",
     overflowX: "hidden",
