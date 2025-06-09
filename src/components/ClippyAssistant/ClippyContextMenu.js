@@ -318,7 +318,7 @@ const ClippyContextMenu = ({
         data-submenu={hasSubmenu ? submenuType : undefined}
       >
         {(leftIcon || (hasSubmenu && isMobile)) && (
-          <span className={`arrow ${isMobile ? "arrow-mobile" : ""}`} style={{ 
+          <span className={`arrow ${isMobile ? "arrow-mobile" : ""} ${isHighlighted && !disabled ? "arrow-highlighted" : ""}`} style={{ 
             marginRight: "8px", 
             fontSize: isMobile ? "11px" : "12px",
             fontFamily: "Arial, Helvetica, sans-serif",
@@ -958,23 +958,19 @@ const ClippyContextMenu = ({
 
       /* Mobile arrow using CSS pseudo-element to avoid emoji */
       .arrow-mobile::after {
-        content: "";
+        content: "◀";
         display: inline-block;
-        background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOCIgaGVpZ2h0PSI4IiB2aWV3Qm94PSIwIDAgOCA4IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNNiAyTDQgNEw2IDZWMloiIGZpbGw9IiMwMDAwMDAiLz4KPHN2Zz4K");
-        width: 8px;
-        height: 8px;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
+        font-family: 'Courier New', 'Monaco', 'Lucida Console', monospace !important;
+        font-size: 8px;
+        color: #000000;
         margin-left: 2px;
-        transform: scaleX(-1);
-        -webkit-transform: scaleX(-1);
+        font-variant-emoji: text !important;
+        -webkit-font-variant-emoji: text !important;
       }
 
-      /* White arrow when menu item is highlighted (hovered/active) */
-      .context-menu-item:hover .arrow-mobile::after,
-      .context-menu-item.mobile:active .arrow-mobile::after {
-        background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOCIgaGVpZ2h0PSI4IiB2aWV3Qm94PSIwIDAgOCA4IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNNiAyTDQgNEw2IDZWMloiIGZpbGw9IiNmZmZmZmYiLz4KPHN2Zz4K");
+      /* White arrow when menu item is highlighted */
+      .arrow-highlighted.arrow-mobile::after {
+        color: #ffffff !important;
       }
     `;
     document.head.appendChild(style);
