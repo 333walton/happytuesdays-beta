@@ -247,13 +247,13 @@ class ChatBalloonManager {
       right: 8px;
       cursor: pointer;
       font-weight: bold;
-      font-size: ${isMobile ? '18px' : '16px'};
-      padding: ${isMobile ? '4px 8px' : '2px 6px'};
+      font-size: 16px;
+      padding: 2px 6px;
       background: none;
       border: none;
       line-height: 1;
-      min-width: ${isMobile ? '32px' : '28px'};
-      min-height: ${isMobile ? '32px' : '28px'};
+      min-width: 28px;
+      min-height: 28px;
       color: #666666;
       -webkit-text-fill-color: #666666;
       -webkit-tap-highlight-color: transparent;
@@ -841,7 +841,7 @@ class ChatBalloonManager {
         };
       }
 
-      // Position balloon 1px above the TOP of Clippy overlay (new positioning rule)
+      // Position balloon 1px above the TOP of Clippy overlay (same rule for mobile and desktop)
       let left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2;
       let top = overlayRect.top - chatHeight - 1; // 1px above the TOP of overlay
 
