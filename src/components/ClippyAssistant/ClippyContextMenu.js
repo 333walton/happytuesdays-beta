@@ -933,6 +933,17 @@ const ClippyContextMenu = ({
         .context-submenu {
           box-sizing: border-box !important;
         }
+
+        /* Fix arrow symbol rendering on mobile to match desktop */
+        .context-menu-item span:first-child {
+          font-family: 'Arial', 'Helvetica', sans-serif !important;
+          font-weight: normal !important;
+          color: #000000 !important;
+          -webkit-text-fill-color: #000000 !important;
+          text-rendering: auto !important;
+          -webkit-font-smoothing: auto !important;
+          -moz-osx-font-smoothing: auto !important;
+        }
       }
     `;
     document.head.appendChild(style);
