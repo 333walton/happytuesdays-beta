@@ -999,10 +999,10 @@ const ClippyContextMenu = ({
         border-right-color: #ffffff !important;
       }
 
-      /* Agents submenu specific styling - 20% width reduction from left */
+      /* Agents submenu specific styling - width reduction for flush alignment */
       .agents-submenu {
-        width: 112px !important; /* 140px reduced by 20% (28px) */
-        margin-left: 28px !important; /* Push right by the amount reduced */
+        width: 100px !important; /* Reduced width to prevent overlap */
+        margin-left: 20px !important; /* Adjust margin for proper alignment */
       }
 
       /* Submenu icons (checkmarks) - prevent CSS triangle styling */

@@ -3,6 +3,23 @@ import React from "react";
 import { devLog, errorLog } from "./ClippyPositioning";
 
 /**
+ * Get agent nickname for display in chat dialogue
+ * @param {string} agentName - The full agent name
+ * @returns {string} - Agent nickname for dialogue
+ */
+const getAgentNickname = (agentName) => {
+  const nicknames = {
+    "Clippy GPT": "Clippy",
+    "Links": "Links",
+    "Bonzi": "Bonzi", 
+    "Genie": "Genie",
+    "Merlin": "Merlin",
+    "Rover": "Rover"
+  };
+  return nicknames[agentName] || "Clippy";
+};
+
+/**
  * Creates and manages interactive chat balloons for Clippy
  * Uses direct DOM manipulation for maximum compatibility
  */
@@ -182,6 +199,7 @@ class ChatBalloonManager {
     };
 
     const selectedAgent = getCurrentAgent();
+    const agentNickname = getAgentNickname(selectedAgent);
     const agentTitle = `Chat with ${selectedAgent}`;
 
     // FIXED: Mobile-responsive close button styling
@@ -240,7 +258,7 @@ class ChatBalloonManager {
         -webkit-text-fill-color: #000;
         text-align: left;
       ">
-        <strong>${selectedAgent}:</strong> ${initialMessage}
+        <strong>${agentNickname}:</strong> ${initialMessage}
       </div>
     </div>
     
@@ -292,7 +310,8 @@ class ChatBalloonManager {
           titleEl.innerHTML = `💬 Chat with ${currentAgent}`;
         }
         if (messageEl) {
-          messageEl.textContent = `${currentAgent}:`;
+          const nickname = getAgentNickname(currentAgent);
+          messageEl.textContent = `${nickname}:`;
         }
       }
     };
@@ -480,9 +499,10 @@ class ChatBalloonManager {
 
     // Get current agent name for the message
     const currentAgent = window.selectedAIAgent || "Clippy";
+    const nickname = getAgentNickname(currentAgent);
 
     if (sender === "clippy") {
-      messageEl.innerHTML = `<strong>${currentAgent}:</strong> ${message}`;
+      messageEl.innerHTML = `<strong>${nickname}:</strong> ${message}`;
     } else {
       messageEl.innerHTML = `<strong>You:</strong> ${message}`;
     }
