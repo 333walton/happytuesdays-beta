@@ -540,7 +540,9 @@ const startMenuData = [
             component: "Notepad",
             multiInstance: true,
             data: {
-              content: faq,
+              content: faq.content,
+              enableHtml: faq.enableHtml,
+              readOnly: true,
             },
           },
           {

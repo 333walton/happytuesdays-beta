@@ -54,7 +54,7 @@ class Desktop extends Component {
             <ShutDown />
 
             {/* ClippyProvider now handles all initialization and positioning */}
-            <ClippyProvider defaultAgent="Clippy" />
+            <ClippyProvider defaultAgent="Clippy GPT" />
 
             {context.crt && <CRTOverlay />}
           </Theme>

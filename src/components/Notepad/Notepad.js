@@ -9,32 +9,32 @@ import FileManager from "../tools/FileManager";
 
 class Notepad extends Component {
   static defaultProps = {
-    data: {}
+    data: {},
   };
   state = {
     wrap: this.props.data?.wrap || false, // FIXED: Use wrap from props if provided
     data: {
       content: "",
-      ...this.props.data
+      ...this.props.data,
     },
     saveScreen: false,
-    newFilename: ""
+    newFilename: "",
   };
 
-  toggleWrap = () => this.setState(state => ({ wrap: !state.wrap }));
-  setText = e => {
+  toggleWrap = () => this.setState((state) => ({ wrap: !state.wrap }));
+  setText = (e) => {
     e.persist();
-    this.setState(state => ({
+    this.setState((state) => ({
       data: {
         ...state.data,
-        content: e && e.target && e.target.value
-      }
+        content: e && e.target && e.target.value,
+      },
     }));
   };
-  toggleSavescreen = saveAction =>
-    this.setState(state => ({
+  toggleSavescreen = (saveAction) =>
+    this.setState((state) => ({
       saveScreen: !state.saveScreen,
-      actionName: saveAction
+      actionName: saveAction,
     }));
 
   save = () => {
@@ -49,7 +49,7 @@ class Notepad extends Component {
   };
   open = (prog) => {
     this.toggleSavescreen();
-  }
+  };
 
   render() {
     const { props, toggleWrap, toggleSavescreen, setText, state } = this;
@@ -60,7 +60,7 @@ class Notepad extends Component {
           icon={notepad16}
           footer={[
             { text: "needs 100% width height" },
-            { text: "overflow control" }
+            { text: "overflow control" },
           ]}
           menuOptions={buildMenu(
             {
@@ -69,25 +69,25 @@ class Notepad extends Component {
               onSave: !this.props.data.readOnly ? this.quickSave : undefined,
               onSaveAs: () => toggleSavescreen("save"),
               onOpenSearch: () => toggleSavescreen("open"),
-              readOnly: props.data.readOnly
+              readOnly: props.data.readOnly,
             },
             {
               edit: [
                 {
                   title: "Wrap",
                   onClick: () => toggleWrap(!state.wrap),
-                  className: state.wrap ? "checked" : undefined
-                }
-              ]
+                  className: state.wrap ? "checked" : undefined,
+                },
+              ],
             }
           )}
           className={cx("Notepad", props.className, {
             "Notepad--wrap": state.wrap,
-            "Window--blocked": state.saveScreen
+            "Window--blocked": state.saveScreen,
           })}
           title={`${
             props.title !== "Notepad" ? props.title : "Untitled"
-          } - Notepad${props.data.readOnly ? "(Read Only)" : ""}`}
+          } - Notepad${props.data.readOnly ? "" : ""}`}
           Component={WindowProgram}
           maximizeOnOpen={false} // Prevent maximizing on open
           forceNoMobileMax={true} // Prevent maximization on mobile devices
@@ -98,13 +98,30 @@ class Notepad extends Component {
           position={{ x: 10, y: 2 }} // Explicitly set the position
         >
           <div className="Notepad__textarea">
-            <textarea
-              className="text"
-              onChange={setText}
-              value={state.data.content}
-              spellCheck={false}
-              readOnly={props.data?.readOnly || false}
-            />
+            {props.data?.readOnly && props.data?.enableHtml ? (
+              <div 
+                className="text rich-text"
+                style={{
+                  fontFamily: "FixedSys, Courier New, Courier, monospace",
+                  whiteSpace: "pre-wrap",
+                  padding: "2px",
+                  minHeight: "100%",
+                  backgroundColor: "white",
+                  border: "none",
+                  overflow: "auto",
+                  lineHeight: "1.2"
+                }}
+                dangerouslySetInnerHTML={{ __html: state.data.content }}
+              />
+            ) : (
+              <textarea
+                className="text"
+                onChange={setText}
+                value={state.data.content}
+                spellCheck={false}
+                readOnly={props.data?.readOnly || false}
+              />
+            )}
           </div>
         </Window>
         {state.saveScreen && (

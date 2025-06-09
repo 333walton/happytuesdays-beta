@@ -85,4 +85,15 @@
       white-space: pre-wrap; // FIXED: Use pre-wrap instead of normal for better formatting
     }
   }
+
+  // Rich text rendering for HTML-enabled content
+  .rich-text {
+    span[style*="cursor: pointer"] {
+      cursor: pointer !important;
+      
+      &:hover {
+        text-decoration: underline !important;
+      }
+    }
+  }
 }

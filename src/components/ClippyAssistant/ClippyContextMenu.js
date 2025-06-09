@@ -318,13 +318,13 @@ const ClippyContextMenu = ({
         data-submenu={hasSubmenu ? submenuType : undefined}
       >
         {(leftIcon || hasSubmenu) && (
-          <span className={`arrow ${isMobile ? "arrow-mobile" : "arrow-desktop"} ${isHighlighted && !disabled ? "arrow-highlighted" : ""}`} style={{ 
+          <span className={`arrow ${isSubmenuItem ? "submenu-icon" : (isMobile ? "arrow-mobile" : "arrow-desktop")} ${isHighlighted && !disabled ? "arrow-highlighted" : ""}`} style={{ 
             marginRight: "8px", 
             fontSize: isMobile ? "11px" : "12px",
-            fontFamily: "Arial, Helvetica, sans-serif",
+            fontFamily: isSubmenuItem ? "Arial, Helvetica, sans-serif" : "Arial, Helvetica, sans-serif",
             fontWeight: isMobile ? "bold" : "normal",
-            position: isMobile ? "absolute" : "absolute",
-            left: isMobile ? "6px" : "6px"
+            position: isSubmenuItem ? "static" : (isMobile ? "absolute" : "absolute"),
+            left: isSubmenuItem ? "auto" : (isMobile ? "6px" : "6px")
           }}>
             {leftIcon}
           </span>
@@ -985,6 +985,19 @@ const ClippyContextMenu = ({
       .agents-submenu {
         width: 112px !important; /* 140px reduced by 20% (28px) */
         transform: translateX(20px) !important; /* Move right to close the gap */
+      }
+
+      /* Submenu icons (checkmarks) - prevent CSS triangle styling */
+      .submenu-icon {
+        display: inline !important;
+        position: static !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 12px !important;
+        color: inherit !important;
+      }
+
+      .submenu-icon::after {
+        display: none !important; /* Prevent CSS pseudo-element triangles */
       }
     `;
     document.head.appendChild(style);
