@@ -88,6 +88,13 @@
 
   // Rich text rendering for HTML-enabled content
   .rich-text {
+    width: 384px !important;
+    max-width: 384px !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    white-space: pre !important; // Prevent wrapping and preserve formatting
+    
     span[style*="cursor: pointer"] {
       cursor: pointer !important;
       

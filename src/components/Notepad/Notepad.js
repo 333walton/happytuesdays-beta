@@ -108,8 +108,12 @@ class Notepad extends Component {
                   minHeight: "100%",
                   backgroundColor: "white",
                   border: "none",
-                  overflow: "auto",
-                  lineHeight: "1.2"
+                  lineHeight: "1.2",
+                  width: "384px",
+                  maxWidth: "384px",
+                  overflowX: "auto",
+                  overflowY: "auto",
+                  boxSizing: "border-box"
                 }}
                 dangerouslySetInnerHTML={{ __html: state.data.content }}
               />

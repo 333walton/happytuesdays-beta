@@ -3,9 +3,9 @@ export default `About Clippy & AI Assistants
 
 Welcome to Hydra98's Enhanced AI Assistant System!
 
-╔══════════════════════════════════════════╗
-║             AVAILABLE AI AGENTS                   ║
-╚══════════════════════════════════════════╝
+╔═══════════════════════════════════════════╗
+║                 AVAILABLE AI AGENTS               ║
+╚═══════════════════════════════════════════╝
 
 • Clippy GPT - The classic Office Assistant with
   enhanced AI capabilities
@@ -18,7 +18,7 @@ Welcome to Hydra98's Enhanced AI Assistant System!
   companion
 
 ╔═══════════════════════════════════════════╗
-║            DESKTOP INTERACTIONS           ║
+║                DESKTOP INTERACTIONS               ║
 ╚═══════════════════════════════════════════╝
 
 • Single Click: Random animation (75%) or helpful
@@ -30,7 +30,7 @@ Welcome to Hydra98's Enhanced AI Assistant System!
   unlocked)
 
 ╔═══════════════════════════════════════════╗
-║            MOBILE INTERACTIONS            ║
+║                MOBILE INTERACTIONS                ║
 ╚═══════════════════════════════════════════╝
 
 • Single Tap: Random animation (75%) or helpful
@@ -41,7 +41,7 @@ Welcome to Hydra98's Enhanced AI Assistant System!
   position first)
 
 ╔═══════════════════════════════════════════╗
-║           CONTEXT MENU FEATURES           ║
+║               CONTEXT MENU FEATURES               ║
 ╚═══════════════════════════════════════════╝
 
 • About Clippy: View this detailed information
@@ -53,7 +53,7 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Say Hello: Receive a personalized greeting
 
 ╔═══════════════════════════════════════════╗
-║             ADVANCED FEATURES             ║
+║                 ADVANCED FEATURES                 ║
 ╚═══════════════════════════════════════════╝
 
 • Smart Positioning: Automatically adjusts to 
@@ -70,7 +70,7 @@ Welcome to Hydra98's Enhanced AI Assistant System!
   AI for conversations
 
 ╔═══════════════════════════════════════════╗
-║            ASSISTANT BEHAVIORS            ║
+║                ASSISTANT BEHAVIORS                ║
 ╚═══════════════════════════════════════════╝
 
 • Each agent has unique personality traits and 
@@ -86,7 +86,7 @@ Welcome to Hydra98's Enhanced AI Assistant System!
   character's personality
 
 ╔═══════════════════════════════════════════╗
-║           MOBILE OPTIMIZATIONS            ║
+║                MOBILE OPTIMIZATIONS               ║
 ╚═══════════════════════════════════════════╝
 
 • Touch-friendly 32px minimum button sizes
@@ -99,7 +99,7 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Optimized performance for mobile devices
 
 ╔═══════════════════════════════════════════╗
-║            TECHNICAL FEATURES             ║
+║                 TECHNICAL FEATURES                ║
 ╚═══════════════════════════════════════════╝
 
 • Built with modern React and enhanced Microsoft 
@@ -115,7 +115,7 @@ Welcome to Hydra98's Enhanced AI Assistant System!
   performance
 
 ╔═══════════════════════════════════════════╗
-║              TROUBLESHOOTING              ║
+║                  TROUBLESHOOTING                  ║
 ╚═══════════════════════════════════════════╝
 
 • If assistant seems stuck, right-click and try
@@ -131,7 +131,7 @@ Welcome to Hydra98's Enhanced AI Assistant System!
   issues
 
 ╔═══════════════════════════════════════════╗
-║             ABOUT THIS SYSTEM             ║
+║                  ABOUT THIS SYSTEM                ║
 ╚═══════════════════════════════════════════╝
 
 This is a modernized recreation of Microsoft Agent
