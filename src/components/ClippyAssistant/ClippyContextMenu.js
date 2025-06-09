@@ -933,19 +933,12 @@ const ClippyContextMenu = ({
         .context-submenu {
           box-sizing: border-box !important;
         }
+      }
 
-        /* Fix ◀ arrow symbol rendering on mobile to match desktop (main menu only) */
-        .clippy-context-menu .context-menu-item:not(.submenu-item) span:first-child {
-          font-family: 'MS Sans Serif', 'Tahoma', sans-serif !important;
-          font-weight: normal !important;
-          color: #000000 !important;
-          -webkit-text-fill-color: #000000 !important;
-          text-rendering: geometricPrecision !important;
-          -webkit-font-smoothing: none !important;
-          -moz-osx-font-smoothing: unset !important;
-          font-variant-emoji: text !important;
-          font-feature-settings: 'liga' off, 'calt' off !important;
-        }
+      /* Make ⯇ arrow symbol larger using transform scale (both desktop and mobile) */
+      .clippy-context-menu .context-menu-item[data-submenu] span:first-child {
+        transform: scale(1.3) !important;
+        display: inline-block !important;
       }
     `;
     document.head.appendChild(style);
@@ -1037,11 +1030,11 @@ const ClippyContextMenu = ({
           {/* Separator */}
           <div style={separatorStyle} />
 
-          {/* Select Agent - Emoji on Left, Arrow on Right pointing Left */}
+          {/* Select Agent - Unicode Arrow on Left, Emoji on Right */}
           <MenuItem
             hasSubmenu
             onMouseEnter={(e) => handleSubmenuOpen("agents", e)}
-            leftIcon="◀"
+            leftIcon="⯇"
             rightIcon="🤖"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
             submenuType="agents" // Indicate submenu type
@@ -1049,11 +1042,11 @@ const ClippyContextMenu = ({
             Select AI Agent
           </MenuItem>
 
-          {/* Play Animation - Emoji on Left, Arrow on Right pointing Left */}
+          {/* Play Animation - Unicode Arrow on Left, Emoji on Right */}
           <MenuItem
             hasSubmenu
             onMouseEnter={(e) => handleSubmenuOpen("animations", e)}
-            leftIcon="◀"
+            leftIcon="⯇"
             rightIcon="🎭"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
             submenuType="animations" // Indicate submenu type
