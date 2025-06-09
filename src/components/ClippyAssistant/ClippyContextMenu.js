@@ -980,6 +980,12 @@ const ClippyContextMenu = ({
       .arrow-highlighted.arrow-desktop::after {
         border-right-color: #ffffff !important;
       }
+
+      /* Agents submenu specific styling - 20% width reduction from left */
+      .agents-submenu {
+        width: 112px !important; /* 140px reduced by 20% (28px) */
+        transform: translateX(20px) !important; /* Move right to close the gap */
+      }
     `;
     document.head.appendChild(style);
     return () => style.remove();
@@ -1119,7 +1125,7 @@ const ClippyContextMenu = ({
         {/* Agents Submenu - Left Aligned, Checkmark on Left */}
         {submenuOpen === "agents" && (
           <div
-            className="context-submenu"
+            className="context-submenu agents-submenu"
             style={{
               ...submenuStyle,
               padding: "0px",
