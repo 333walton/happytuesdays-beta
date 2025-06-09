@@ -35,7 +35,7 @@ const ClippyContextMenu = ({
       animations: { horizontalOffset: 18, verticalOffset: -36 } // Raised to align with main menu
     },
     mobile: {
-      agents: { horizontalOffset: 38, verticalOffset: -36 }, // Raised by 4px (-32 to -36)
+      agents: { horizontalOffset: 38, verticalOffset: -35 }, // Lowered by 1px (-36 to -35)
       animations: { horizontalOffset: 38, verticalOffset: -55 } // Raised to align with main menu
     }
   };
