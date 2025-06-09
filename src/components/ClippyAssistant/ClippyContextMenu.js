@@ -28,6 +28,10 @@ const ClippyContextMenu = ({
   const menuRef = useRef(null);
   const [dynamicPosition, setDynamicPosition] = useState({ x, y });
 
+  // FIXED: Device-specific arrow symbols
+  const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const leftArrowIcon = isMobile ? "⯇" : "◀";
+
   // FIXED: Centralized positioning rules for submenu alignment
   const SUBMENU_POSITIONING_RULES = {
     desktop: {
@@ -934,18 +938,6 @@ const ClippyContextMenu = ({
           box-sizing: border-box !important;
         }
 
-        /* Replace ◀ with ⯇ symbol on mobile to prevent emoji rendering */
-        .clippy-context-menu .context-menu-item[data-submenu] span:first-child {
-          font-size: 11px !important;
-        }
-        
-        .clippy-context-menu .context-menu-item[data-submenu] span:first-child::before {
-          content: "⯇" !important;
-        }
-        
-        .clippy-context-menu .context-menu-item[data-submenu] span:first-child {
-          font-size: 0 !important;
-        }
       }
     `;
     document.head.appendChild(style);
@@ -1041,7 +1033,7 @@ const ClippyContextMenu = ({
           <MenuItem
             hasSubmenu
             onMouseEnter={(e) => handleSubmenuOpen("agents", e)}
-            leftIcon="◀"
+            leftIcon={leftArrowIcon}
             rightIcon="🤖"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
             submenuType="agents" // Indicate submenu type
@@ -1053,7 +1045,7 @@ const ClippyContextMenu = ({
           <MenuItem
             hasSubmenu
             onMouseEnter={(e) => handleSubmenuOpen("animations", e)}
-            leftIcon="◀"
+            leftIcon={leftArrowIcon}
             rightIcon="🎭"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
             submenuType="animations" // Indicate submenu type
