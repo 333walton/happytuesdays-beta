@@ -1,3 +1,4 @@
+import * as icons from "../../icons";
 import clippyFaq from "./clippyFaq.js";
 
 const faqHtml = `Frequently Asked Questions
@@ -119,7 +120,7 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
     component: 'Notepad',
     multiInstance: true,
     title: 'About Clippy',
-    icon: 'textchat32',
+    icon: icons.textchat32,
     data: {
       content: window.clippyFaqContent,
       wrap: true,
@@ -230,7 +231,7 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
     component: 'Notepad',
     multiInstance: true,
     title: 'About Clippy',
-    icon: 'textchat32',
+    icon: icons.textchat32,
     data: {
       content: window.clippyFaqContent,
       wrap: true,
