@@ -934,15 +934,17 @@ const ClippyContextMenu = ({
           box-sizing: border-box !important;
         }
 
-        /* Fix arrow symbol rendering on mobile to match desktop */
-        .context-menu-item span:first-child {
-          font-family: 'Arial', 'Helvetica', sans-serif !important;
+        /* Fix ◀ arrow symbol rendering on mobile to match desktop (main menu only) */
+        .clippy-context-menu .context-menu-item:not(.submenu-item) span:first-child {
+          font-family: 'MS Sans Serif', 'Tahoma', sans-serif !important;
           font-weight: normal !important;
           color: #000000 !important;
           -webkit-text-fill-color: #000000 !important;
-          text-rendering: auto !important;
-          -webkit-font-smoothing: auto !important;
-          -moz-osx-font-smoothing: auto !important;
+          text-rendering: geometricPrecision !important;
+          -webkit-font-smoothing: none !important;
+          -moz-osx-font-smoothing: unset !important;
+          font-variant-emoji: text !important;
+          font-feature-settings: 'liga' off, 'calt' off !important;
         }
       }
     `;
