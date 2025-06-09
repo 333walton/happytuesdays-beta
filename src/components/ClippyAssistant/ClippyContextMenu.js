@@ -30,7 +30,7 @@ const ClippyContextMenu = ({
 
   // FIXED: Device-specific arrow symbols with fallback rendering
   const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const leftArrowIcon = isMobile ? "◀" : "◀"; // Use consistent symbol for now
+  const leftArrowIcon = isMobile ? "" : "◀"; // Use CSS pseudo-element for mobile, Unicode for desktop
 
   // FIXED: Centralized positioning rules for submenu alignment
   const SUBMENU_POSITIONING_RULES = {
@@ -317,12 +317,13 @@ const ClippyContextMenu = ({
         style={finalStyle}
         data-submenu={hasSubmenu ? submenuType : undefined}
       >
-        {leftIcon && (
-          <span className="arrow" style={{ 
+        {(leftIcon || (hasSubmenu && isMobile)) && (
+          <span className={`arrow ${isMobile ? "arrow-mobile" : ""}`} style={{ 
             marginRight: "8px", 
             fontSize: isMobile ? "11px" : "12px",
             fontFamily: "Arial, Helvetica, sans-serif",
-            fontWeight: isMobile ? "bold" : "normal"
+            fontWeight: isMobile ? "bold" : "normal",
+            position: isMobile ? "relative" : "static"
           }}>
             {leftIcon}
           </span>
@@ -947,10 +948,25 @@ const ClippyContextMenu = ({
 
       /* Arrow symbol styling to prevent emoji substitution */
       .arrow {
-        font-family: 'Arial', 'Helvetica', 'sans-serif' !important;
+        font-family: 'Courier New', 'Monaco', 'Lucida Console', monospace !important;
+        font-variant-emoji: text !important;
+        -webkit-font-variant-emoji: text !important;
         font-feature-settings: 'liga' off, 'kern' off !important;
         -webkit-font-feature-settings: 'liga' off, 'kern' off !important;
         text-rendering: geometricPrecision !important;
+      }
+
+      /* Mobile arrow using CSS pseudo-element to avoid emoji */
+      .arrow-mobile::after {
+        content: "";
+        display: inline-block;
+        background-image: url("data:image/gif;base64,R0lGODlhBAAHAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAEAAcAAAIIjB4maeyrlCgAOw==");
+        width: 8px;
+        height: 8px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        margin-left: 2px;
       }
     `;
     document.head.appendChild(style);
