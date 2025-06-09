@@ -911,6 +911,32 @@ const ClippyContextMenu = ({
           box-sizing: border-box !important;
         }
       }
+
+      /* Mobile-only: Fix bottom alignment for mobile context menus */
+      @media (max-width: 768px) {
+        .clippy-context-menu .context-menu-item {
+          height: auto !important;
+          min-height: auto !important;
+          padding-top: 4.5px !important;
+          padding-bottom: 4.5px !important;
+          box-sizing: border-box !important;
+        }
+
+        /* Ensure mobile submenu items have consistent height for bottom alignment */
+        .context-submenu .context-menu-item {
+          height: auto !important;
+          min-height: auto !important;
+          padding: 4.5px 12px !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+
+        /* Ensure mobile submenu container maintains bottom alignment */
+        .context-submenu {
+          box-sizing: border-box !important;
+        }
+      }
     `;
     document.head.appendChild(style);
     return () => style.remove();
