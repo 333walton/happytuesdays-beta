@@ -28,9 +28,9 @@ const ClippyContextMenu = ({
   const menuRef = useRef(null);
   const [dynamicPosition, setDynamicPosition] = useState({ x, y });
 
-  // FIXED: Device-specific arrow symbols
+  // FIXED: Device-specific arrow symbols with fallback rendering
   const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const leftArrowIcon = isMobile ? "⯇" : "◀";
+  const leftArrowIcon = isMobile ? "◀" : "◀"; // Use consistent symbol for now
 
   // FIXED: Centralized positioning rules for submenu alignment
   const SUBMENU_POSITIONING_RULES = {
@@ -318,7 +318,12 @@ const ClippyContextMenu = ({
         data-submenu={hasSubmenu ? submenuType : undefined}
       >
         {leftIcon && (
-          <span style={{ marginRight: "8px", fontSize: "12px" }}>
+          <span style={{ 
+            marginRight: "8px", 
+            fontSize: isMobile ? "11px" : "12px",
+            fontFamily: "Arial, sans-serif",
+            fontWeight: isMobile ? "bold" : "normal"
+          }}>
             {leftIcon}
           </span>
         )}
