@@ -318,10 +318,10 @@ const ClippyContextMenu = ({
         data-submenu={hasSubmenu ? submenuType : undefined}
       >
         {leftIcon && (
-          <span style={{ 
+          <span className="arrow" style={{ 
             marginRight: "8px", 
             fontSize: isMobile ? "11px" : "12px",
-            fontFamily: "Arial, sans-serif",
+            fontFamily: "Arial, Helvetica, sans-serif",
             fontWeight: isMobile ? "bold" : "normal"
           }}>
             {leftIcon}
@@ -943,6 +943,14 @@ const ClippyContextMenu = ({
           box-sizing: border-box !important;
         }
 
+      }
+
+      /* Arrow symbol styling to prevent emoji substitution */
+      .arrow {
+        font-family: 'Arial', 'Helvetica', 'sans-serif' !important;
+        font-feature-settings: 'liga' off, 'kern' off !important;
+        -webkit-font-feature-settings: 'liga' off, 'kern' off !important;
+        text-rendering: geometricPrecision !important;
       }
     `;
     document.head.appendChild(style);
