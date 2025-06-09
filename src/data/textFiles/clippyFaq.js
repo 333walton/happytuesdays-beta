@@ -1,11 +1,11 @@
 export default `About Clippy & AI Assistants
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Welcome to Hydra98's Enhanced AI Assistant System!
 
-╔═══════════════════════════════════════════╗
-║                 AVAILABLE AI AGENTS               ║
-╚═══════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║               AVAILABLE AI AGENTS              ║
+╚════════════════════════════════════════╝
 
 • Clippy GPT - The classic Office Assistant with
   enhanced AI capabilities
@@ -17,9 +17,9 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Rover - The reliable search and assistance 
   companion
 
-╔═══════════════════════════════════════════╗
-║                DESKTOP INTERACTIONS               ║
-╚═══════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║              DESKTOP INTERACTIONS              ║
+╚════════════════════════════════════════╝
 
 • Single Click: Random animation (75%) or helpful
   tip (25%)
@@ -29,9 +29,9 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Drag: Move assistant around the desktop (when
   unlocked)
 
-╔═══════════════════════════════════════════╗
-║                MOBILE INTERACTIONS                ║
-╚═══════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║              MOBILE INTERACTIONS               ║
+╚════════════════════════════════════════╝
 
 • Single Tap: Random animation (75%) or helpful
   tip (25%)
@@ -40,9 +40,9 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Drag: Move assistant (requires unlocking 
   position first)
 
-╔═══════════════════════════════════════════╗
-║               CONTEXT MENU FEATURES               ║
-╚═══════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║              CONTEXT MENU FEATURES             ║
+╚════════════════════════════════════════╝
 
 • About Clippy: View this detailed information
 • Select AI Agent: Switch between all 6 available
@@ -52,9 +52,9 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Chat: Start an interactive conversation with AI
 • Say Hello: Receive a personalized greeting
 
-╔═══════════════════════════════════════════╗
-║                 ADVANCED FEATURES                 ║
-╚═══════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║               ADVANCED FEATURES                ║
+╚════════════════════════════════════════╝
 
 • Smart Positioning: Automatically adjusts to 
   screen size and zoom
@@ -69,9 +69,9 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • AI-Powered Responses: Each agent uses advanced 
   AI for conversations
 
-╔═══════════════════════════════════════════╗
-║                ASSISTANT BEHAVIORS                ║
-╚═══════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║             ASSISTANT BEHAVIORS                ║
+╚════════════════════════════════════════╝
 
 • Each agent has unique personality traits and 
   responses
@@ -85,9 +85,9 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Intelligent responses tailored to each 
   character's personality
 
-╔═══════════════════════════════════════════╗
-║                MOBILE OPTIMIZATIONS               ║
-╚═══════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║             MOBILE OPTIMIZATIONS               ║
+╚════════════════════════════════════════╝
 
 • Touch-friendly 32px minimum button sizes
 • Visual viewport handling for keyboard 
@@ -98,9 +98,9 @@ Welcome to Hydra98's Enhanced AI Assistant System!
   precision
 • Optimized performance for mobile devices
 
-╔═══════════════════════════════════════════╗
-║                 TECHNICAL FEATURES                ║
-╚═══════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║              TECHNICAL FEATURES                ║
+╚════════════════════════════════════════╝
 
 • Built with modern React and enhanced Microsoft 
   Agent technology
@@ -114,9 +114,9 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Modern web technologies ensuring smooth 
   performance
 
-╔═══════════════════════════════════════════╗
-║                  TROUBLESHOOTING                  ║
-╚═══════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║                 TROUBLESHOOTING                ║
+╚════════════════════════════════════════╝
 
 • If assistant seems stuck, right-click and try
   "Say Hello"
@@ -130,9 +130,9 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Refresh the page if you encounter persistent 
   issues
 
-╔═══════════════════════════════════════════╗
-║                  ABOUT THIS SYSTEM                ║
-╚═══════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║               ABOUT THIS SYSTEM                ║
+╚════════════════════════════════════════╝
 
 This is a modernized recreation of Microsoft Agent
 technology, bringing Windows 98 nostalgia into the
@@ -147,5 +147,5 @@ as you explore Hydra98.
 Enjoy your nostalgic computing experience with 
 AI-powered assistance!
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-© 2024 Hydra98 Enhanced AI Assistant System`;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`;

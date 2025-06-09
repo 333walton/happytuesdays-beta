@@ -1,6 +1,7 @@
 // ClippyContextMenu.js - COMPLETE FIXED VERSION with submenu gap fix and agent switching
 
 import React, { useState, useEffect, useRef } from "react";
+import * as icons from "../../icons";
 import ReactDOM from "react-dom";
 import clippyFaq from "../../data/textFiles/clippyFaq";
 
@@ -29,19 +30,23 @@ const ClippyContextMenu = ({
   const [dynamicPosition, setDynamicPosition] = useState({ x, y });
 
   // FIXED: Device-specific arrow symbols with fallback rendering
-  const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isMobile =
+    window.innerWidth <= 768 ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
   const leftArrowIcon = ""; // Use CSS pseudo-element for both mobile and desktop
 
   // FIXED: Centralized positioning rules for submenu alignment
   const SUBMENU_POSITIONING_RULES = {
     desktop: {
       agents: { horizontalOffset: 18, verticalOffset: -47 },
-      animations: { horizontalOffset: 18, verticalOffset: -36 } // Raised to align with main menu
+      animations: { horizontalOffset: 18, verticalOffset: -36 }, // Raised to align with main menu
     },
     mobile: {
       agents: { horizontalOffset: 38, verticalOffset: -35 }, // Lowered by 1px (-36 to -35)
-      animations: { horizontalOffset: 38, verticalOffset: -55 } // Raised to align with main menu
-    }
+      animations: { horizontalOffset: 38, verticalOffset: -55 }, // Raised to align with main menu
+    },
   };
 
   // Animation mapping: { displayName: animationName }
@@ -148,11 +153,13 @@ const ClippyContextMenu = ({
   // Create portal container on mount and trigger Gesture Up animation
   useEffect(() => {
     console.log("🎯 ClippyContextMenu creating portal container");
-    
+
     // FIXED: Trigger "Gesture Up" animation when context menu opens, bypassing all rules
     if (window.clippy?.play) {
       setTimeout(() => {
-        console.log('🎭 Context Menu Opened: Playing "Gesture Up" animation (bypassing all cooldowns)');
+        console.log(
+          '🎭 Context Menu Opened: Playing "Gesture Up" animation (bypassing all cooldowns)'
+        );
         window.clippy.play("GestureUp");
       }, 200); // Small delay to ensure smooth opening
     }
@@ -318,22 +325,31 @@ const ClippyContextMenu = ({
         data-submenu={hasSubmenu ? submenuType : undefined}
       >
         {(leftIcon || hasSubmenu) && (
-          <span className={`arrow ${isSubmenuItem ? "submenu-icon" : (isMobile ? "arrow-mobile" : "arrow-desktop")} ${isHighlighted && !disabled ? "arrow-highlighted" : ""}`} style={{ 
-            marginRight: "8px", 
-            fontSize: isMobile ? "11px" : "12px",
-            fontFamily: isSubmenuItem ? "Arial, Helvetica, sans-serif" : "Arial, Helvetica, sans-serif",
-            fontWeight: isMobile ? "bold" : "normal",
-            position: isSubmenuItem ? "static" : (isMobile ? "absolute" : "absolute"),
-            left: isSubmenuItem ? "auto" : (isMobile ? "6px" : "6px")
-          }}>
+          <span
+            className={`arrow ${isMobile ? "arrow-mobile" : "arrow-desktop"} ${
+              isHighlighted && !disabled ? "arrow-highlighted" : ""
+            }`}
+            style={{
+              marginRight: "8px",
+              fontSize: isMobile ? "11px" : "12px",
+              fontFamily: "Arial, Helvetica, sans-serif",
+              fontWeight: isMobile ? "bold" : "normal",
+              position: isMobile ? "absolute" : "absolute",
+              left: isMobile ? "6px" : "6px",
+            }}
+          >
             {leftIcon}
           </span>
         )}
-        <span style={{
-          textAlign: hasSubmenu ? "center" : "left",
-          width: hasSubmenu ? "100%" : "auto",
-          display: hasSubmenu ? "block" : "inline"
-        }}>{children}</span>
+        <span
+          style={{
+            textAlign: hasSubmenu ? "center" : "left",
+            width: hasSubmenu ? "100%" : "auto",
+            display: hasSubmenu ? "block" : "inline",
+          }}
+        >
+          {children}
+        </span>
         {rightIcon && (
           <span style={{ marginLeft: "8px", fontSize: "12px" }}>
             {rightIcon}
@@ -445,7 +461,7 @@ const ClippyContextMenu = ({
     // Apply centralized positioning rules for vertical alignment
     const deviceType = isMobile ? "mobile" : "desktop";
     const positioningRule = SUBMENU_POSITIONING_RULES[deviceType][submenuType];
-    
+
     if (positioningRule) {
       constrainedY += positioningRule.verticalOffset;
     }
@@ -677,7 +693,7 @@ const ClippyContextMenu = ({
             component: "Notepad",
             multiInstance: true,
             title: "About Clippy",
-            icon: "textchat32",
+            icon: icons.textchat32,
             data: {
               content: clippyFaq,
               wrap: true, // FIXED: Enable text wrapping for FAQ content
@@ -984,20 +1000,7 @@ const ClippyContextMenu = ({
       /* Agents submenu specific styling - 20% width reduction from left */
       .agents-submenu {
         width: 112px !important; /* 140px reduced by 20% (28px) */
-        transform: translateX(20px) !important; /* Move right to close the gap */
-      }
-
-      /* Submenu icons (checkmarks) - prevent CSS triangle styling */
-      .submenu-icon {
-        display: inline !important;
-        position: static !important;
-        font-family: Arial, Helvetica, sans-serif !important;
-        font-size: 12px !important;
-        color: inherit !important;
-      }
-
-      .submenu-icon::after {
-        display: none !important; /* Prevent CSS pseudo-element triangles */
+        margin-left: 28px !important; /* Push right by the amount reduced */
       }
     `;
     document.head.appendChild(style);

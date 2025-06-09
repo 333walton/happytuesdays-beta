@@ -3,9 +3,9 @@ import clippyFaq from "./clippyFaq.js";
 const faqHtml = `Frequently Asked Questions
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-╔════════════════════════════════════════════╗
-║                   DISPLAY & VISUALS                 ║
-╚════════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║                 DISPLAY & VISUALS              ║
+╚════════════════════════════════════════╝
 
 🖥️ Why does the screen flicker?
 → That's a CRT effect to recreate the authentic 
@@ -29,9 +29,9 @@ const faqHtml = `Frequently Asked Questions
   can change themes and wallpapers by right-clicking
   the desktop.
 
-╔════════════════════════════════════════════╗
-║                  FILES & STORAGE                    ║
-╚════════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║                 FILES & STORAGE                ║
+╚════════════════════════════════════════╝
 
 💾 Can I delete files?
 → File deletion isn't implemented yet, but you can
@@ -55,9 +55,9 @@ const faqHtml = `Frequently Asked Questions
   limits, typically 5-10MB. Think of it as a 
   nostalgic floppy disk experience!
 
-╔════════════════════════════════════════════╗
-║                  PROGRAMS & GAMES                   ║
-╚════════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║                 PROGRAMS & GAMES               ║
+╚════════════════════════════════════════╝
 
 🎮 Which programs actually work?
 → Most programs are fully functional! Notepad, Paint,
@@ -80,9 +80,9 @@ const faqHtml = `Frequently Asked Questions
   are fully playable with the same rules as the 
   originals.
 
-╔════════════════════════════════════════════╗
-║                CLIPPY & AI ASSISTANTS               ║
-╚════════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║              CLIPPY & AI ASSISTANTS            ║
+╚════════════════════════════════════════╝
 
 📎 How do I interact with Clippy?
 → Desktop: Single-click for animations/tips, 
@@ -130,9 +130,9 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
 ">Clippy guide</span> for detailed information about 
   all AI features and capabilities.
 
-╔════════════════════════════════════════════╗
-║                 MONITOR & CONTROLS                  ║
-╚════════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║                MONITOR & CONTROLS              ║
+╚════════════════════════════════════════╝
 
 📺 What are the monitor controls?
 → Look for monitor control buttons around the screen
@@ -155,9 +155,9 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
   websites like MySpace for that authentic late 90s/
   early 2000s browsing experience!
 
-╔════════════════════════════════════════════╗
-║                 SYSTEM & SETTINGS                   ║
-╚════════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║                SYSTEM & SETTINGS               ║
+╚════════════════════════════════════════╝
 
 ⚙️ How do I access system settings?
 → Right-click the desktop for display options, or go
@@ -178,9 +178,9 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
   sequence, complete with the classic "It is now safe
   to turn off your computer" screen.
 
-╔════════════════════════════════════════════╗
-║                  TROUBLESHOOTING                    ║
-╚════════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║                 TROUBLESHOOTING                ║
+╚════════════════════════════════════════╝
 
 🚫 A program isn't responding, what do I do?
 → Press Ctrl+Alt+Del to open Task Manager, just like
@@ -206,9 +206,9 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
   Try rotating your device or adjusting your browser's
   zoom level.
 
-╔════════════════════════════════════════════╗
-║                   TIPS & TRICKS                     ║
-╚════════════════════════════════════════════╝
+╔════════════════════════════════════════╗
+║                   TIPS & TRICKS                ║
+╚════════════════════════════════════════╝
 
 💡 Expert Tips:
 • Double-click program icons to launch them quickly
