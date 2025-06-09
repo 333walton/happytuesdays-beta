@@ -95,7 +95,16 @@ const INITIAL_MESSAGE_CONTENT =
 // FIXED: Increased cooldown to 3 seconds to prevent animation queue
 const INTERACTION_COOLDOWN_MS = 3000;
 
-const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
+// ENHANCED: Global animation logging function
+const logAllAnimations = (animationName, context = "unknown") => {
+  console.log(
+    `%c🎭 CLIPPY ANIMATION: "${animationName}"%c (triggered from: ${context})`,
+    "color: #ff6b35; font-weight: bold; font-size: 14px; background: #fff3cd; padding: 2px 6px; border-radius: 3px;",
+    "color: #856404; font-size: 12px;"
+  );
+};
+
+const ClippyProvider = ({ children, defaultAgent = "Clippy GPT" }) => {
   // Core state
   const [startupComplete, setStartupComplete] = useState(false);
   const [assistantVisible, setAssistantVisible] = useState(true);
@@ -1863,6 +1872,17 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           clippy.load(currentAgent, () => {
             clippyInstanceRef.current = clippy;
             window.clippy = clippy;
+            
+            // ENHANCED: Re-intercept animations after agent reload
+            if (clippy && clippy.play) {
+              const originalPlay = clippy.play.bind(clippy);
+              clippy.play = function(animationName, ...args) {
+                logAllAnimations(animationName, "clippy.play() call");
+                return originalPlay(animationName, ...args);
+              };
+              window.clippy.play = clippy.play;
+            }
+            
             devLog(`ClippyController reloaded with agent: ${currentAgent}`);
           });
         }
@@ -1889,6 +1909,16 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       mountedRef.current = true;
       clippyInstanceRef.current = clippy;
       window.clippy = clippy;
+
+      // ENHANCED: Intercept all animation calls for comprehensive logging
+      if (clippy && clippy.play) {
+        const originalPlay = clippy.play.bind(clippy);
+        clippy.play = function(animationName, ...args) {
+          logAllAnimations(animationName, "clippy.play() call");
+          return originalPlay(animationName, ...args);
+        };
+        window.clippy.play = clippy.play;
+      }
 
       devLog(`ClippyController mounted with agent: ${currentAgent}`);
 

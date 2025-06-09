@@ -101,6 +101,7 @@ class Notepad extends Component {
             {props.data?.readOnly && props.data?.enableHtml ? (
               <div 
                 className="text rich-text"
+                data-content={props.title === "About Clippy" ? "clippyfaq" : "other"}
                 style={{
                   fontFamily: "FixedSys, Courier New, Courier, monospace",
                   whiteSpace: "pre-wrap",

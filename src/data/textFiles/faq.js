@@ -120,7 +120,7 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
     component: 'Notepad',
     multiInstance: true,
     title: 'About Clippy',
-    icon: icons.textchat32,
+    icon: window.textchat32Icon,
     data: {
       content: window.clippyFaqContent,
       wrap: true,
@@ -231,7 +231,7 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
     component: 'Notepad',
     multiInstance: true,
     title: 'About Clippy',
-    icon: icons.textchat32,
+    icon: window.textchat32Icon,
     data: {
       content: window.clippyFaqContent,
       wrap: true,
@@ -250,9 +250,10 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
 
 const faq = faqHtml;
 
-// Make clippyFaq content available globally for hyperlink onclick handlers
+// Make clippyFaq content and icon available globally for hyperlink onclick handlers
 if (typeof window !== "undefined") {
   window.clippyFaqContent = clippyFaq;
+  window.textchat32Icon = icons.textchat32;
 }
 
 export default {
