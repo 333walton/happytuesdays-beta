@@ -30,7 +30,7 @@ const ClippyContextMenu = ({
 
   // FIXED: Device-specific arrow symbols with fallback rendering
   const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const leftArrowIcon = isMobile ? "" : "◀"; // Use CSS pseudo-element for mobile, Unicode for desktop
+  const leftArrowIcon = ""; // Use CSS pseudo-element for both mobile and desktop
 
   // FIXED: Centralized positioning rules for submenu alignment
   const SUBMENU_POSITIONING_RULES = {
@@ -317,22 +317,22 @@ const ClippyContextMenu = ({
         style={finalStyle}
         data-submenu={hasSubmenu ? submenuType : undefined}
       >
-        {(leftIcon || (hasSubmenu && isMobile)) && (
-          <span className={`arrow ${isMobile ? "arrow-mobile" : ""} ${isHighlighted && !disabled ? "arrow-highlighted" : ""}`} style={{ 
+        {(leftIcon || hasSubmenu) && (
+          <span className={`arrow ${isMobile ? "arrow-mobile" : "arrow-desktop"} ${isHighlighted && !disabled ? "arrow-highlighted" : ""}`} style={{ 
             marginRight: "8px", 
             fontSize: isMobile ? "11px" : "12px",
             fontFamily: "Arial, Helvetica, sans-serif",
             fontWeight: isMobile ? "bold" : "normal",
-            position: isMobile ? "absolute" : "static",
-            left: isMobile ? "6px" : "auto"
+            position: isMobile ? "absolute" : "absolute",
+            left: isMobile ? "6px" : "6px"
           }}>
             {leftIcon}
           </span>
         )}
         <span style={{
-          textAlign: isMobile && hasSubmenu ? "center" : "left",
-          width: isMobile && hasSubmenu ? "100%" : "auto",
-          display: isMobile && hasSubmenu ? "block" : "inline"
+          textAlign: hasSubmenu ? "center" : "left",
+          width: hasSubmenu ? "100%" : "auto",
+          display: hasSubmenu ? "block" : "inline"
         }}>{children}</span>
         {rightIcon && (
           <span style={{ marginLeft: "8px", fontSize: "12px" }}>
@@ -962,8 +962,9 @@ const ClippyContextMenu = ({
         font-weight: normal !important;
       }
 
-      /* Mobile arrow using CSS pseudo-element to avoid emoji */
-      .arrow-mobile::after {
+      /* Mobile and Desktop arrow using CSS pseudo-element */
+      .arrow-mobile::after,
+      .arrow-desktop::after {
         content: "";
         display: inline-block;
         width: 0;
@@ -975,7 +976,8 @@ const ClippyContextMenu = ({
       }
 
       /* White arrow when menu item is highlighted */
-      .arrow-highlighted.arrow-mobile::after {
+      .arrow-highlighted.arrow-mobile::after,
+      .arrow-highlighted.arrow-desktop::after {
         border-right-color: #ffffff !important;
       }
     `;
