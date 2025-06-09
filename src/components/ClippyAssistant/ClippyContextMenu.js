@@ -32,11 +32,11 @@ const ClippyContextMenu = ({
   const SUBMENU_POSITIONING_RULES = {
     desktop: {
       agents: { horizontalOffset: 18, verticalOffset: -47 },
-      animations: { horizontalOffset: 18, verticalOffset: -16 }
+      animations: { horizontalOffset: 18, verticalOffset: -36 } // Raised to align with main menu
     },
     mobile: {
       agents: { horizontalOffset: 38, verticalOffset: -32 },
-      animations: { horizontalOffset: 38, verticalOffset: -35 }
+      animations: { horizontalOffset: 38, verticalOffset: -55 } // Raised to align with main menu
     }
   };
 
@@ -210,7 +210,7 @@ const ClippyContextMenu = ({
       adjustedY -= 18; // Total reduction for 6 main menu items
     }
 
-    setDynamicPosition({ x: adjustedX, y: adjustedY - 40 }); // Move main menu up by 40px
+    setDynamicPosition({ x: adjustedX - 8, y: adjustedY - 60 }); // Move main menu left by 8px and up by 60px
   }, [x, y, portalContainer]);
 
   // FIXED: Enhanced MenuItem with proper hover handling and flexible icon/arrow placement
