@@ -933,12 +933,19 @@ const ClippyContextMenu = ({
         .context-submenu {
           box-sizing: border-box !important;
         }
-      }
 
-      /* Make ⯇ arrow symbol larger using transform scale (both desktop and mobile) */
-      .clippy-context-menu .context-menu-item[data-submenu] span:first-child {
-        transform: scale(1.3) !important;
-        display: inline-block !important;
+        /* Replace ◀ with ⯇ symbol on mobile to prevent emoji rendering */
+        .clippy-context-menu .context-menu-item[data-submenu] span:first-child {
+          font-size: 11px !important;
+        }
+        
+        .clippy-context-menu .context-menu-item[data-submenu] span:first-child::before {
+          content: "⯇" !important;
+        }
+        
+        .clippy-context-menu .context-menu-item[data-submenu] span:first-child {
+          font-size: 0 !important;
+        }
       }
     `;
     document.head.appendChild(style);
@@ -1030,11 +1037,11 @@ const ClippyContextMenu = ({
           {/* Separator */}
           <div style={separatorStyle} />
 
-          {/* Select Agent - Unicode Arrow on Left, Emoji on Right */}
+          {/* Select Agent - Arrow on Left, Emoji on Right */}
           <MenuItem
             hasSubmenu
             onMouseEnter={(e) => handleSubmenuOpen("agents", e)}
-            leftIcon="⯇"
+            leftIcon="◀"
             rightIcon="🤖"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
             submenuType="agents" // Indicate submenu type
@@ -1042,11 +1049,11 @@ const ClippyContextMenu = ({
             Select AI Agent
           </MenuItem>
 
-          {/* Play Animation - Unicode Arrow on Left, Emoji on Right */}
+          {/* Play Animation - Arrow on Left, Emoji on Right */}
           <MenuItem
             hasSubmenu
             onMouseEnter={(e) => handleSubmenuOpen("animations", e)}
-            leftIcon="⯇"
+            leftIcon="◀"
             rightIcon="🎭"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
             submenuType="animations" // Indicate submenu type
