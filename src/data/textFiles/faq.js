@@ -2,7 +2,7 @@ import * as icons from "../../icons";
 import clippyFaq from "./clippyFaq.js";
 
 const faqHtml = `Frequently Asked Questions
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ╔════════════════════════════════════════╗
 ║                 DISPLAY & VISUALS              ║
@@ -242,10 +242,9 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
 ">Clippy guide</span> for comprehensive AI 
   assistant information!
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎉 Created by a developer with impeccable taste in 
-   retro interfaces and just the right amount of 
-   90s nostalgia obsession!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎉 Created by a based developer with impeccable taste in 
+   retro interfaces!
 
 `;
 

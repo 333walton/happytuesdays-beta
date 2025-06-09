@@ -1,5 +1,5 @@
 export default `About Clippy & AI Assistants
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Welcome to Hydra98's Enhanced AI Assistant System!
 
@@ -147,5 +147,5 @@ as you explore Hydra98.
 Enjoy your nostalgic computing experience with 
 AI-powered assistance!
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `;
