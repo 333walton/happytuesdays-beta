@@ -276,8 +276,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
   height: 190px !important;
   max-height: calc(100vh - 100px) !important;
 
-  /* Ensure minimum 20px margin from viewport edges */
-  margin-right: 20px !important;
+  /* Ensure minimum margin from viewport edges - handled in JavaScript positioning */
   max-width: calc(100vw - 40px) !important;
 
   /* iOS Safari text fix - CRITICAL */

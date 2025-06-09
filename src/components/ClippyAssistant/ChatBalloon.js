@@ -236,7 +236,7 @@ class ChatBalloonManager {
       top: -2px;
       left: 0;
       right: 0;
-      height: 8px;
+      height: ${isMobile ? '10px' : '8px'};
       cursor: n-resize;
       background: transparent;
       z-index: 1000;
@@ -312,21 +312,21 @@ class ChatBalloonManager {
         outline: none;
         -webkit-appearance: none;
         appearance: none;
-        min-height: ${this.isMobile() ? "36px" : "24px"};
-        height: ${this.isMobile() ? "36px" : "24px"};
+        min-height: 30px;
+        height: 30px;
       " />
       <button class="chat-send" style="
-        padding: ${this.isMobile() ? "8px 12px" : "4px 12px"};
+        padding: 4px 12px;
         background: #c0c0c0;
         border: 1px outset #c0c0c0;
-        font-size: ${this.isMobile() ? "12px" : "11px"};
+        font-size: 11px;
         cursor: pointer;
         color: #000;
         -webkit-text-fill-color: #000;
         font-family: 'Tahoma', sans-serif;
-        min-height: ${this.isMobile() ? "36px" : "24px"};
-        height: ${this.isMobile() ? "36px" : "24px"};
-        min-width: ${this.isMobile() ? "60px" : "50px"};
+        min-height: 30px;
+        height: 30px;
+        min-width: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -774,7 +774,7 @@ class ChatBalloonManager {
     const maxWidth = isMobile ? 330 : 330; // 10% increase for both mobile and desktop (300 * 1.1 = 330)
     const minHeight = 140; // Reduced from 200
     const maxHeight = 190; // FIXED: Match actual CSS height (190px)
-    const safeMargin = 16; // Tighter margin for mobile
+    const safeMargin = isMobile ? 8 : 16; // FIXED: Proportional margin - mobile gets half the margin
     const clippyMargin = 32; // Slightly less gap for mobile
     let viewportWidth,
       viewportHeight,
