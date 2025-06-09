@@ -141,9 +141,17 @@ const ClippyContextMenu = ({
     return getDesktopViewport();
   };
 
-  // Create portal container on mount
+  // Create portal container on mount and trigger Gesture Up animation
   useEffect(() => {
     console.log("🎯 ClippyContextMenu creating portal container");
+    
+    // FIXED: Trigger "Gesture Up" animation when context menu opens, bypassing all rules
+    if (window.clippy?.play) {
+      setTimeout(() => {
+        console.log('🎭 Context Menu Opened: Playing "Gesture Up" animation (bypassing all cooldowns)');
+        window.clippy.play("GestureUp");
+      }, 200); // Small delay to ensure smooth opening
+    }
 
     const container = document.createElement("div");
     container.id = "clippy-context-menu-portal";
