@@ -233,7 +233,7 @@ class ChatBalloonManager {
     container.innerHTML = `
     <div class="chat-resize-handle" style="
       position: absolute;
-      top: 0;
+      top: -2px;
       left: 0;
       right: 0;
       height: 8px;
@@ -291,6 +291,9 @@ class ChatBalloonManager {
         color: #000;
         -webkit-text-fill-color: #000;
         text-align: left;
+        font-size: 11px !important;
+        line-height: 1.3;
+        font-family: 'Tahoma', sans-serif !important;
       ">
         <strong>${agentNickname}:</strong> ${initialMessage}
       </div>
@@ -533,8 +536,9 @@ class ChatBalloonManager {
       color: ${sender === "user" ? "#000080" : "#000"};
       -webkit-text-fill-color: ${sender === "user" ? "#000080" : "#000"};
       text-align: ${sender === "user" ? "right" : "left"};
-      font-size: 11px;
+      font-size: 11px !important;
       line-height: 1.3;
+      font-family: 'Tahoma', sans-serif !important;
     `;
 
     // Get current agent name for the message
@@ -767,7 +771,7 @@ class ChatBalloonManager {
       );
       
     const minWidth = 260;
-    const maxWidth = isMobile ? 330 : 300; // 10% increase for mobile (300 * 1.1 = 330)
+    const maxWidth = isMobile ? 330 : 330; // 10% increase for both mobile and desktop (300 * 1.1 = 330)
     const minHeight = 140; // Reduced from 200
     const maxHeight = 190; // FIXED: Match actual CSS height (190px)
     const safeMargin = 16; // Tighter margin for mobile
