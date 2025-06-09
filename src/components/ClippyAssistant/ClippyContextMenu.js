@@ -323,12 +323,17 @@ const ClippyContextMenu = ({
             fontSize: isMobile ? "11px" : "12px",
             fontFamily: "Arial, Helvetica, sans-serif",
             fontWeight: isMobile ? "bold" : "normal",
-            position: isMobile ? "relative" : "static"
+            position: isMobile ? "absolute" : "static",
+            left: isMobile ? "6px" : "auto"
           }}>
             {leftIcon}
           </span>
         )}
-        <span>{children}</span>
+        <span style={{
+          textAlign: isMobile && hasSubmenu ? "center" : "left",
+          width: isMobile && hasSubmenu ? "100%" : "auto",
+          display: isMobile && hasSubmenu ? "block" : "inline"
+        }}>{children}</span>
         {rightIcon && (
           <span style={{ marginLeft: "8px", fontSize: "12px" }}>
             {rightIcon}
@@ -959,20 +964,19 @@ const ClippyContextMenu = ({
 
       /* Mobile arrow using CSS pseudo-element to avoid emoji */
       .arrow-mobile::after {
-        content: "◀";
+        content: "";
         display: inline-block;
-        font-family: 'Courier New', 'Monaco', 'Lucida Console', monospace !important;
-        font-size: 10px;
-        font-weight: bold;
-        color: #000000;
+        width: 0;
+        height: 0;
+        border-top: 4.8px solid transparent;
+        border-bottom: 4.8px solid transparent;
+        border-right: 6.4px solid #000000;
         margin-left: 2px;
-        font-variant-emoji: text !important;
-        -webkit-font-variant-emoji: text !important;
       }
 
       /* White arrow when menu item is highlighted */
       .arrow-highlighted.arrow-mobile::after {
-        color: #ffffff !important;
+        border-right-color: #ffffff !important;
       }
     `;
     document.head.appendChild(style);
