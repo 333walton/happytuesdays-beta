@@ -69,6 +69,10 @@ class ChatBalloonManager {
       chatContainer.style.top = `${position.top}px`;
       chatContainer.style.width = `${position.width}px`;
       chatContainer.style.height = `${position.height}px`;
+      
+      // Store the original top position and bottom position for resize functionality
+      chatContainer.dataset.originalTop = position.top;
+      chatContainer.dataset.originalBottom = position.top + position.height;
       chatContainer.style.zIndex = "9999";
       chatContainer.style.visibility = "visible";
       chatContainer.style.opacity = "1";
@@ -152,6 +156,22 @@ class ChatBalloonManager {
 
       // Remove dynamic repositioning
       this._removeDynamicRepositioning();
+      
+      // Clean up visibility monitoring
+      if (this._visibilityCheckInterval) {
+        clearInterval(this._visibilityCheckInterval);
+        this._visibilityCheckInterval = null;
+      }
+      
+      if (this._clippyObserver) {
+        this._clippyObserver.disconnect();
+        this._clippyObserver = null;
+      }
+      
+      if (this._overlayObserver) {
+        this._overlayObserver.disconnect();
+        this._overlayObserver = null;
+      }
 
       return true;
     } catch (error) {
@@ -205,8 +225,22 @@ class ChatBalloonManager {
     // FIXED: Mobile-responsive close button styling
     const isMobile = this.isMobile();
     
+    // Store original height for minimum resize constraint
+    const originalHeight = 190; // FIXED: Match actual CSS height (190px)
+    container.dataset.originalHeight = originalHeight;
+
     // Create chat balloon HTML
     container.innerHTML = `
+    <div class="chat-resize-handle" style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      cursor: n-resize;
+      background: transparent;
+      z-index: 1000;
+    "></div>
     <button class="custom-clippy-balloon-close" aria-label="Close chat" style="
       position: absolute;
       top: 4px;
@@ -249,7 +283,7 @@ class ChatBalloonManager {
       min-height: 60px;
       max-height: 70px;
       font-family: 'Tahoma', sans-serif;
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.3;
     ">
       <div style="
@@ -267,10 +301,10 @@ class ChatBalloonManager {
         flex: 1;
         padding: 4px 6px;
         border: 1px inset #999;
-        font-size: ${this.isMobile() ? "16px" : "11px"};
+        font-size: 11px !important;
         color: #000;
         -webkit-text-fill-color: #000;
-        font-family: 'Tahoma', sans-serif;
+        font-family: 'MS Sans Serif', sans-serif !important;
         background-color: #fff;
         outline: none;
         -webkit-appearance: none;
@@ -345,6 +379,12 @@ class ChatBalloonManager {
 
     // Attach event listeners
     this.attachEventListeners(container);
+    
+    // Add vertical resize functionality
+    this.addResizeFunctionality(container);
+    
+    // Set up Clippy visibility monitoring
+    this.setupClippyVisibilityMonitoring();
   }
 
   /**
@@ -493,7 +533,7 @@ class ChatBalloonManager {
       color: ${sender === "user" ? "#000080" : "#000"};
       -webkit-text-fill-color: ${sender === "user" ? "#000080" : "#000"};
       text-align: ${sender === "user" ? "right" : "left"};
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.3;
     `;
 
@@ -512,24 +552,226 @@ class ChatBalloonManager {
   }
 
   /**
+   * Add vertical resize functionality to chat balloon
+   * @param {HTMLElement} container - The chat balloon container
+   */
+  /**
+   * Handle Clippy visibility changes - hide/show chat balloon but preserve history
+   */
+  handleClippyVisibilityChange() {
+    const clippyEl = document.querySelector('.clippy');
+    const overlayEl = document.getElementById('clippy-clickable-overlay');
+    
+    if (!this.currentChatBalloon) return;
+    
+    // Check if Clippy and overlay are hidden
+    const clippyHidden = !clippyEl || 
+      clippyEl.style.visibility === 'hidden' || 
+      clippyEl.style.display === 'none' ||
+      window.clippyIsHidden || 
+      window.clippyIsHiding;
+      
+    const overlayHidden = !overlayEl || 
+      overlayEl.style.visibility === 'hidden' || 
+      overlayEl.style.display === 'none';
+    
+    if (clippyHidden || overlayHidden) {
+      // Hide chat balloon but preserve it
+      this.currentChatBalloon.style.visibility = 'hidden';
+      this.currentChatBalloon.style.opacity = '0';
+      this.currentChatBalloon.style.pointerEvents = 'none';
+    } else {
+      // Show chat balloon
+      this.currentChatBalloon.style.visibility = 'visible';
+      this.currentChatBalloon.style.opacity = '1';
+      this.currentChatBalloon.style.pointerEvents = 'auto';
+    }
+  }
+
+  /**
+   * Set up monitoring for Clippy visibility changes
+   */
+  setupClippyVisibilityMonitoring() {
+    // Check visibility every 500ms
+    this._visibilityCheckInterval = setInterval(() => {
+      this.handleClippyVisibilityChange();
+    }, 500);
+    
+    // Also set up MutationObserver for immediate style changes
+    const clippyEl = document.querySelector('.clippy');
+    const overlayEl = document.getElementById('clippy-clickable-overlay');
+    
+    if (clippyEl) {
+      this._clippyObserver = new MutationObserver(() => {
+        this.handleClippyVisibilityChange();
+      });
+      this._clippyObserver.observe(clippyEl, {
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
+    
+    if (overlayEl) {
+      this._overlayObserver = new MutationObserver(() => {
+        this.handleClippyVisibilityChange();
+      });
+      this._overlayObserver.observe(overlayEl, {
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
+  }
+
+  addResizeFunctionality(container) {
+    const resizeHandle = container.querySelector('.chat-resize-handle');
+    const chatMessages = container.querySelector('.chat-messages');
+    const originalHeight = parseInt(container.dataset.originalHeight) || 160;
+    
+    if (!resizeHandle || !chatMessages) return;
+    
+    let isResizing = false;
+    let startY = 0;
+    let startHeight = 0;
+    let containerStartHeight = 0;
+    
+    const startResize = (e) => {
+      isResizing = true;
+      startY = e.clientY || e.touches[0].clientY;
+      startHeight = chatMessages.offsetHeight;
+      containerStartHeight = container.offsetHeight;
+      
+      // Use the original top position that was set during creation
+      // Only set it if it doesn't exist (shouldn't happen, but safety check)
+      if (!container.dataset.originalTop) {
+        const currentTop = parseInt(container.style.top.replace('px', '')) || 0;
+        container.dataset.originalTop = currentTop;
+      }
+      
+      // Prevent text selection during resize
+      document.body.style.userSelect = 'none';
+      document.body.style.webkitUserSelect = 'none';
+      
+      // Add global event listeners
+      document.addEventListener('mousemove', doResize);
+      document.addEventListener('mouseup', stopResize);
+      document.addEventListener('touchmove', doResize);
+      document.addEventListener('touchend', stopResize);
+      
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    
+    const doResize = (e) => {
+      if (!isResizing) return;
+      
+      const currentY = e.clientY || e.touches[0].clientY;
+      const deltaY = startY - currentY; // Positive when dragging up (expanding)
+      
+      const newContainerHeight = containerStartHeight + deltaY;
+      const newChatHeight = startHeight + deltaY;
+      
+      // Get viewport boundaries for constraint checking
+      const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const viewport = isMobile ? {
+        top: 0,
+        bottom: window.innerHeight,
+        height: window.innerHeight
+      } : (() => {
+        const desktop = document.querySelector('.desktop.screen') || document.querySelector('.desktop') || document.querySelector('.w98');
+        if (desktop) {
+          const rect = desktop.getBoundingClientRect();
+          return { top: rect.top, bottom: rect.bottom, height: rect.height };
+        }
+        return { top: 0, bottom: window.innerHeight, height: window.innerHeight };
+      })();
+      
+      // Calculate current container position
+      const currentTop = parseInt(container.style.top.replace('px', '')) || parseInt(container.dataset.originalTop) || 0;
+      const currentBottom = currentTop + newContainerHeight;
+      
+      // Viewport constraints - prevent expanding beyond viewport
+      const minTop = viewport.top + 10; // Minimum 10px from top
+      const maxBottom = viewport.bottom - 10; // Minimum 10px from bottom
+      const maxAllowedHeight = maxBottom - minTop;
+      
+      // Constrain new height to viewport
+      const constrainedHeight = Math.min(newContainerHeight, maxAllowedHeight);
+      const constrainedChatHeight = Math.max(60, newChatHeight - (newContainerHeight - constrainedHeight));
+      
+      
+      // Enforce minimum height (can't be smaller than original)
+      if (constrainedHeight >= originalHeight && constrainedChatHeight >= 60) {
+        
+        // FIXED: Use the true original bottom position that was stored at creation
+        const originalTop = parseInt(container.dataset.originalTop);
+        const originalBottom = parseInt(container.dataset.originalBottom);
+        const heightDiff = constrainedHeight - originalHeight;
+        let newTop = originalTop - heightDiff;
+        
+        // CRITICAL: Absolutely lock bottom position - no shifting allowed
+        if (newTop < minTop) {
+          // We've hit the viewport boundary - STOP expanding and lock current state
+          // Do NOT change height or position when hitting viewport boundary
+          console.log('Viewport boundary hit - stopping resize to prevent bottom shift');
+          return; // Exit completely to prevent any position changes
+        } else {
+          // Normal resize - apply the calculated position maintaining bottom anchor
+          newTop = originalTop - heightDiff;
+          container.style.setProperty('height', `${constrainedHeight}px`, 'important');
+          chatMessages.style.setProperty('max-height', `${constrainedChatHeight}px`, 'important');
+          chatMessages.style.setProperty('min-height', `${constrainedChatHeight}px`, 'important');
+          chatMessages.style.setProperty('height', `${constrainedChatHeight}px`, 'important');
+        }
+        
+        // Apply the new top position
+        container.style.setProperty('top', `${newTop}px`, 'important');
+        
+      }
+      
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    
+    const stopResize = () => {
+      if (!isResizing) return;
+      
+      isResizing = false;
+      
+      // Restore text selection
+      document.body.style.userSelect = '';
+      document.body.style.webkitUserSelect = '';
+      
+      // Remove global event listeners
+      document.removeEventListener('mousemove', doResize);
+      document.removeEventListener('mouseup', stopResize);
+      document.removeEventListener('touchmove', doResize);
+      document.removeEventListener('touchend', stopResize);
+    };
+    
+    // Add event listeners to resize handle
+    resizeHandle.addEventListener('mousedown', startResize);
+    resizeHandle.addEventListener('touchstart', startResize);
+  }
+
+  /**
    * Calculate chat balloon position - FIXED with enhanced viewport constraints
    * @param {Object} customPosition - Optional custom position override
    * @returns {Object} - Position with left, top, width, and height properties
    */
   calculatePosition(customPosition = null) {
-    const minWidth = 260;
-    const maxWidth = 300;
-    const minHeight = 140; // Reduced from 200
-    const maxHeight = 160; // Reduced from 240
-    const safeMargin = 16; // Tighter margin for mobile
-    const clippyMargin = 32; // Slightly less gap for mobile
-
     // Use mobile viewport for mobile devices
     const isMobile =
       window.innerWidth <= 768 ||
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent
       );
+      
+    const minWidth = 260;
+    const maxWidth = isMobile ? 330 : 300; // 10% increase for mobile (300 * 1.1 = 330)
+    const minHeight = 140; // Reduced from 200
+    const maxHeight = 190; // FIXED: Match actual CSS height (190px)
+    const safeMargin = 16; // Tighter margin for mobile
+    const clippyMargin = 32; // Slightly less gap for mobile
     let viewportWidth,
       viewportHeight,
       viewportLeft = 0,
@@ -584,9 +826,6 @@ class ChatBalloonManager {
       const overlayHeight = overlayRect.height;
       const effectiveClippyHeight = Math.max(clippyHeight, overlayHeight);
 
-      // Get the topmost position between Clippy and overlay
-      const effectiveTop = Math.min(clippyRect.top, overlayRect.top);
-
       // For mobile, position at bottom of viewport when keyboard is open
       if (isMobile && window.visualViewport?.height < window.innerHeight) {
         return {
@@ -598,9 +837,9 @@ class ChatBalloonManager {
         };
       }
 
-      // Position balloon above Clippy's full height
+      // Position balloon 1px above the TOP of Clippy overlay (new positioning rule)
       let left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2;
-      let top = effectiveTop - chatHeight - clippyMargin;
+      let top = overlayRect.top - chatHeight - 1; // 1px above the TOP of overlay
 
       // Constrain to viewport horizontally
       left = Math.max(
@@ -611,7 +850,7 @@ class ChatBalloonManager {
       // Check if balloon fits above Clippy within viewport
       if (top < viewportTop + safeMargin) {
         // If not enough space above, try positioning to the left of Clippy
-        top = effectiveTop + 10; // Align roughly with Clippy's top
+        top = overlayRect.top + 10; // Align roughly with Clippy's top
         left = clippyRect.left - chatWidth - 30; // 30px gap to the left
 
         // If still doesn't fit on left, try right side
