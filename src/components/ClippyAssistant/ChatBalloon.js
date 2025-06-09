@@ -225,8 +225,8 @@ class ChatBalloonManager {
     // FIXED: Mobile-responsive close button styling
     const isMobile = this.isMobile();
     
-    // Store original height for minimum resize constraint
-    const originalHeight = 190; // FIXED: Match actual CSS height (190px)
+    // Store original height for minimum resize constraint  
+    const originalHeight = 190 + 20 + 6; // FIXED: Include padding (20px) + borders (6px) = 216px total
     container.dataset.originalHeight = originalHeight;
 
     // Create chat balloon HTML
@@ -773,7 +773,7 @@ class ChatBalloonManager {
     const minWidth = 260;
     const maxWidth = isMobile ? 330 : 330; // 10% increase for both mobile and desktop (300 * 1.1 = 330)
     const minHeight = 140; // Reduced from 200
-    const maxHeight = 190; // FIXED: Match actual CSS height (190px)
+    const maxHeight = 190 + 20 + 6; // FIXED: Include padding (20px) + borders (6px) = 216px total
     const safeMargin = isMobile ? 8 : 16; // FIXED: Proportional margin - mobile gets half the margin
     const clippyMargin = 32; // Slightly less gap for mobile
     let viewportWidth,
@@ -841,9 +841,18 @@ class ChatBalloonManager {
         };
       }
 
-      // Position balloon 1px above the TOP of Clippy overlay (same rule for mobile and desktop)
-      let left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2;
-      let top = overlayRect.top - chatHeight - 1; // 1px above the TOP of overlay
+      // Position balloon 1px above the TOP of Clippy overlay
+      let left, top;
+      
+      if (isMobile) {
+        // FIXED: Mobile right border should be 4px from right viewport edge
+        left = viewportLeft + viewportWidth - chatWidth - 4;
+      } else {
+        // Desktop: center on Clippy
+        left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2;
+      }
+      
+      top = overlayRect.top - chatHeight - 1; // 1px above the TOP of overlay
 
       // Constrain to viewport horizontally
       left = Math.max(
