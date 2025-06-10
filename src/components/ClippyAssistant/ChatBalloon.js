@@ -129,25 +129,32 @@ class ChatBalloonManager {
             devLog(`Mobile balloon width corrected: calculated=${position.width}px, actual=${actualWidth}px, newLeft=${correctedLeft}px`);
           }
           
-          // Fix height positioning - ensure 1px gap above clippy overlay
-          if (actualHeight !== position.height) {
+          // FORCE exact positioning: 1px above clippy overlay using actual rendered dimensions
+          const overlayEl = document.getElementById("clippy-clickable-overlay");
+          if (overlayEl) {
+            const overlayRect = overlayEl.getBoundingClientRect();
+            const balloonRect = chatContainer.getBoundingClientRect();
+            const trueBalloonHeight = balloonRect.height;
+            const forcedTop = overlayRect.top - trueBalloonHeight - 1; // 1px above overlay
+            chatContainer.style.top = `${forcedTop}px`;
+            
+            devLog(`Mobile balloon FORCED using true height: ${trueBalloonHeight}px, top=${forcedTop}px for 1px gap above clippy`);
+          }
+          
+          // CRITICAL: Calculate the EXACT bottom position that should never change
+          setTimeout(() => {
             const overlayEl = document.getElementById("clippy-clickable-overlay");
             if (overlayEl) {
               const overlayRect = overlayEl.getBoundingClientRect();
-              const correctedTop = overlayRect.top - actualHeight - 1; // 1px above overlay
-              chatContainer.style.top = `${correctedTop}px`;
+              const exactBottom = overlayRect.top - 1; // Exactly 1px above clippy
               
-              devLog(`Mobile balloon height corrected: calculated=${position.height}px, actual=${actualHeight}px, newTop=${correctedTop}px`);
+              chatContainer.dataset.originalBottom = exactBottom;
+              chatContainer.dataset.originalTop = chatContainer.getBoundingClientRect().top;
+              chatContainer.dataset.originalHeight = chatContainer.getBoundingClientRect().height;
+              
+              devLog(`Mobile balloon LOCKED bottom position: ${exactBottom}px (1px above clippy at ${overlayRect.top}px)`);
             }
-          }
-          
-          // CRITICAL: Always update stored values with actual final position after all corrections
-          const finalRect = chatContainer.getBoundingClientRect();
-          chatContainer.dataset.originalTop = finalRect.top;
-          chatContainer.dataset.originalBottom = finalRect.bottom;
-          chatContainer.dataset.originalHeight = actualHeight;
-          
-          devLog(`Mobile balloon final anchor positions: top=${finalRect.top}px, bottom=${finalRect.bottom}px, height=${actualHeight}px`);
+          }, 50);
         }, 0);
       }
 
@@ -264,8 +271,8 @@ class ChatBalloonManager {
     const isMobile = this.isMobile();
     
     // Store original height for minimum resize constraint  
-    // FIXED: Height reduced by 3px due to bottom padding adjustment (10px -> 7px)
-    const originalHeight = 204; // Reduced by 3px for tighter bottom spacing
+    // FIXED: Height reduced by 7px total (3px bottom padding + 4px margin reduction)
+    const originalHeight = 200; // Tightened spacing to eliminate empty area below send button
     container.dataset.originalHeight = originalHeight;
 
     // Create chat balloon HTML
@@ -316,7 +323,7 @@ class ChatBalloonManager {
       border: 1px inset #999;
       background: white;
       padding: 6px;
-      margin-bottom: 6px;
+      margin-bottom: 2px;
       color: #000;
       -webkit-text-fill-color: #000;
       min-height: 60px;
@@ -747,11 +754,9 @@ class ChatBalloonManager {
       // Enforce minimum height (can't be smaller than original)
       if (constrainedHeight >= originalHeight && constrainedChatHeight >= 60) {
         
-        // FIXED: Use the true original bottom position that was stored at creation
-        const originalTop = parseInt(container.dataset.originalTop);
+        // FIXED: Anchor to the exact bottom position, calculate top from there
         const originalBottom = parseInt(container.dataset.originalBottom);
-        const heightDiff = constrainedHeight - originalHeight;
-        let newTop = originalTop - heightDiff;
+        let newTop = originalBottom - constrainedHeight;
         
         // CRITICAL: Absolutely lock bottom position - no shifting allowed
         if (newTop < minTop) {
@@ -761,7 +766,6 @@ class ChatBalloonManager {
           return; // Exit completely to prevent any position changes
         } else {
           // Normal resize - apply the calculated position maintaining bottom anchor
-          newTop = originalTop - heightDiff;
           container.style.setProperty('height', `${constrainedHeight}px`, 'important');
           chatMessages.style.setProperty('max-height', `${constrainedChatHeight}px`, 'important');
           chatMessages.style.setProperty('min-height', `${constrainedChatHeight}px`, 'important');
@@ -814,7 +818,7 @@ class ChatBalloonManager {
     const minWidth = 260;
     const maxWidth = isMobile ? 330 : 330; // 10% increase for both mobile and desktop (300 * 1.1 = 330)
     const minHeight = 140; // Reduced from 200
-    const maxHeight = 204; // FIXED: Reduced by 3px for tighter bottom spacing
+    const maxHeight = 200; // FIXED: Tightened spacing to eliminate empty area below send button
     const safeMargin = isMobile ? 8 : 16; // FIXED: Proportional margin - mobile gets half the margin
     const clippyMargin = 32; // Slightly less gap for mobile
     let viewportWidth,
