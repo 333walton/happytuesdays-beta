@@ -751,29 +751,29 @@ class ChatBalloonManager {
       const constrainedChatHeight = Math.max(60, newChatHeight - (newContainerHeight - constrainedHeight));
       
       
-      // Enforce minimum height (can't be smaller than original)
-      if (constrainedHeight >= originalHeight && constrainedChatHeight >= 60) {
-        
-        // FIXED: Anchor to the exact bottom position, calculate top from there
-        const originalBottom = parseInt(container.dataset.originalBottom);
+      // FIXED: Anchor to bottom position and enforce minimum height to prevent bottom drift
+      const originalBottom = parseInt(container.dataset.originalBottom);
+      const minAllowedHeight = parseInt(container.dataset.originalHeight); // Don't shrink below original
+      
+      // Enforce minimum height while maintaining bottom anchor
+      if (constrainedHeight >= minAllowedHeight && constrainedChatHeight >= 60) {
         let newTop = originalBottom - constrainedHeight;
         
-        // CRITICAL: Absolutely lock bottom position - no shifting allowed
+        // CRITICAL: Check viewport boundary
         if (newTop < minTop) {
           // We've hit the viewport boundary - STOP expanding and lock current state
-          // Do NOT change height or position when hitting viewport boundary
           console.log('Viewport boundary hit - stopping resize to prevent bottom shift');
           return; // Exit completely to prevent any position changes
         } else {
-          // Normal resize - apply the calculated position maintaining bottom anchor
+          // Apply resize with bottom anchor (expanding only, no shrinking below original)
           container.style.setProperty('height', `${constrainedHeight}px`, 'important');
           chatMessages.style.setProperty('max-height', `${constrainedChatHeight}px`, 'important');
           chatMessages.style.setProperty('min-height', `${constrainedChatHeight}px`, 'important');
           chatMessages.style.setProperty('height', `${constrainedChatHeight}px`, 'important');
+          
+          // Apply the new top position calculated from bottom anchor
+          container.style.setProperty('top', `${newTop}px`, 'important');
         }
-        
-        // Apply the new top position
-        container.style.setProperty('top', `${newTop}px`, 'important');
         
       }
       
