@@ -9,12 +9,12 @@ import { devLog, errorLog } from "./ClippyPositioning";
  */
 const getAgentNickname = (agentName) => {
   const nicknames = {
-    "Clippy GPT": "Clippy",
-    Links: "Links",
-    Bonzi: "Bonzi",
-    Genie: "Genie",
-    Merlin: "Merlin",
-    Rover: "Rover",
+    "Clippy": "Clippy",
+    "Links": "Links",
+    "Bonzi": "Bonzi",
+    "Genie": "Genie", 
+    "Merlin": "Merlin",
+    "Rover": "Rover",
   };
   return nicknames[agentName] || "Clippy";
 };

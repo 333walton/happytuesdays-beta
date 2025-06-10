@@ -104,7 +104,7 @@ const logAllAnimations = (animationName, context = "unknown") => {
   );
 };
 
-const ClippyProvider = ({ children, defaultAgent = "Clippy GPT" }) => {
+const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   // Core state
   const [startupComplete, setStartupComplete] = useState(false);
   const [assistantVisible, setAssistantVisible] = useState(true);
@@ -2282,9 +2282,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy GPT" }) => {
             onClose={hideContextMenu}
             currentAgent={currentAgent}
             agents={[
-              "Clippy GPT",
+              "Clippy",
               "Links",
-              "Bonzi",
+              "Bonzi", 
               "Genie",
               "Merlin",
               "Rover",
