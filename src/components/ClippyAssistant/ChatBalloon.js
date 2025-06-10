@@ -264,8 +264,8 @@ class ChatBalloonManager {
     const isMobile = this.isMobile();
     
     // Store original height for minimum resize constraint  
-    // FIXED: Height increased due to close button styling changes (28px vs 22px + positioning changes)
-    const originalHeight = 207; // Updated for close button styling changes
+    // FIXED: Height reduced by 3px due to bottom padding adjustment (10px -> 7px)
+    const originalHeight = 204; // Reduced by 3px for tighter bottom spacing
     container.dataset.originalHeight = originalHeight;
 
     // Create chat balloon HTML
@@ -814,7 +814,7 @@ class ChatBalloonManager {
     const minWidth = 260;
     const maxWidth = isMobile ? 330 : 330; // 10% increase for both mobile and desktop (300 * 1.1 = 330)
     const minHeight = 140; // Reduced from 200
-    const maxHeight = 207; // FIXED: Updated for close button styling changes
+    const maxHeight = 204; // FIXED: Reduced by 3px for tighter bottom spacing
     const safeMargin = isMobile ? 8 : 16; // FIXED: Proportional margin - mobile gets half the margin
     const clippyMargin = 32; // Slightly less gap for mobile
     let viewportWidth,
