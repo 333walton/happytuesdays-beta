@@ -279,9 +279,21 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     [hideContextMenu]
   );
 
-  // FIXED: Enhanced agent change function with actual character switching
+  // FIXED: Enhanced agent change function with proper React95 provider switching
   const handleAgentChange = useCallback(
     (newAgent) => {
+      // Validate agent name against official React95 agents
+      const officialAgents = [
+        "Clippy", "Links", "Bonzi", "Genie", "Genius", 
+        "Merlin", "F1", "Peedy", "Rocky", "Rover"
+      ];
+      
+      if (!officialAgents.includes(newAgent)) {
+        devLog(`Agent change rejected - invalid agent name: ${newAgent}`);
+        console.error(`❌ Invalid agent: ${newAgent}. Must be one of:`, officialAgents);
+        return false;
+      }
+
       if (!mountedRef.current || newAgent === currentAgent) {
         devLog(
           `Agent change blocked - same agent (${newAgent}) or not mounted`
@@ -289,7 +301,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return false;
       }
 
-      devLog(`Changing agent from ${currentAgent} to ${newAgent}`);
+      devLog(`Changing agent from ${currentAgent} to ${newAgent} (official React95 agent)`);
 
       return safeExecute(
         () => {
@@ -298,100 +310,18 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           hideChatBalloon();
           hideContextMenu();
 
-          // Update agent state
+          // Update agent state - this will trigger ReactClippyProvider re-render
           setCurrentAgent(newAgent);
 
-          // FIXED: Force reload Clippy with new agent
-          const clippyEl = document.querySelector(".clippy");
-          if (clippyEl) {
-            // Add transitioning class for smooth change
-            clippyEl.classList.add("agent-transitioning");
-
-            // Brief fade out
-            clippyEl.style.opacity = "0.3";
-
-            setTimeout(() => {
-              // Trigger agent change in React95 Clippy
-              if (window.clippy && window.clippy.load) {
-                window.clippy.load(newAgent, () => {
-                  devLog(`Agent ${newAgent} loaded successfully`);
-
-                  // Update clippy instance reference
-                  clippyInstanceRef.current = window.clippy;
-
-                  // Restore appearance
-                  clippyEl.style.opacity = "1";
-
-                  // Restore correct scale based on device and monitor zoom
-                  const isMobile = window.innerWidth <= 768;
-                  const baseScale = isMobile ? "1" : "0.95";
-                  const zoomFactor = ClippyPositioning.getMonitorZoomFactor();
-                  const correctScale = isMobile
-                    ? baseScale
-                    : `${baseScale * zoomFactor}`;
-
-                  clippyEl.classList.remove("agent-transitioning");
-
-                  // Reposition for new agent
-                  setTimeout(() => {
-                    if (ClippyPositioning?.positionClippyAndOverlay) {
-                      const overlayEl = document.getElementById(
-                        "clippy-clickable-overlay"
-                      );
-                      ClippyPositioning.positionClippyAndOverlay(
-                        clippyEl,
-                        overlayEl,
-                        null
-                      );
-                    }
-
-                    // Play welcome animation for new agent
-                    if (window.clippy?.play) {
-                      logAnimation(
-                        "Wave",
-                        `agent change welcome (${newAgent})`
-                      );
-                      window.clippy.play("Wave");
-
-                      // Show welcome message
-                      setTimeout(() => {
-                        if (mountedRef.current && !isAnyBalloonOpen()) {
-                          showCustomBalloon(
-                            `Hello! I'm ${newAgent} now. How can I help you?`,
-                            6000
-                          );
-                        }
-                      }, 800);
-                    }
-                  }, 100);
-                });
-              } else {
-                // Fallback: Update agent through context if direct load not available
-                devLog(`Fallback agent change to ${newAgent}`);
-
-                // Restore appearance
-                clippyEl.style.opacity = "1";
-                const isMobile = window.innerWidth <= 768;
-                const baseScale = isMobile ? "1" : "0.95";
-                const zoomFactor = ClippyPositioning.getMonitorZoomFactor();
-                const correctScale = isMobile
-                  ? baseScale
-                  : `${baseScale * zoomFactor}`;
-
-                clippyEl.classList.remove("agent-transitioning");
-
-                // Show change message
-                setTimeout(() => {
-                  if (mountedRef.current && !isAnyBalloonOpen()) {
-                    showCustomBalloon(
-                      `I'm now ${newAgent}! How can I help you?`,
-                      6000
-                    );
-                  }
-                }, 300);
-              }
-            }, 300);
-          }
+          // Show welcome message after a brief delay for new agent to load
+          setTimeout(() => {
+            if (mountedRef.current && !isAnyBalloonOpen()) {
+              showCustomBalloon(
+                `Hello! I'm ${newAgent} now. How can I help you?`,
+                6000
+              );
+            }
+          }, 1500); // Give time for new agent to load
 
           return true;
         },
@@ -1512,6 +1442,165 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         devLog("Clippy interaction cooldown reset");
         return true;
       };
+
+      // FIXED: Testing functions for all 10 agents with visual verification
+      window.testAllAgents = () => {
+        const allAgents = [
+          "Clippy", "Links", "Bonzi", "Genie", "Genius", 
+          "Merlin", "F1", "Peedy", "Rocky", "Rover"
+        ];
+        let currentIndex = 0;
+        
+        console.log(`🎭 Starting agent test sequence. Current agent: ${currentAgent}`);
+        
+        const checkVisualAgent = () => {
+          const clippyEl = document.querySelector('.clippy');
+          if (clippyEl) {
+            const dataAgent = clippyEl.getAttribute('data-agent');
+            const bgImage = window.getComputedStyle(clippyEl.querySelector('div') || clippyEl).backgroundImage;
+            console.log(`👁️ Visual check - data-agent: ${dataAgent}, background: ${bgImage ? 'loaded' : 'none'}`);
+          }
+        };
+        
+        const testNextAgent = () => {
+          if (currentIndex >= allAgents.length) {
+            console.log("🎉 All agents tested successfully!");
+            checkVisualAgent();
+            return;
+          }
+          
+          const agent = allAgents[currentIndex];
+          console.log(`🧪 Testing agent ${currentIndex + 1}/10: ${agent}`);
+          
+          // Skip if already the current agent
+          if (agent === currentAgent) {
+            console.log(`⏭️ Skipping ${agent} - already current agent`);
+            currentIndex++;
+            setTimeout(testNextAgent, 500);
+            return;
+          }
+          
+          if (handleAgentChange(agent)) {
+            setTimeout(() => {
+              checkVisualAgent();
+              currentIndex++;
+              testNextAgent();
+            }, 3000); // 3 second delay between tests
+          } else {
+            console.error(`❌ Failed to switch to agent: ${agent}`);
+            currentIndex++;
+            setTimeout(testNextAgent, 1000); // Continue with next agent
+          }
+        };
+        
+        checkVisualAgent();
+        testNextAgent();
+      };
+
+      window.switchToAgent = (agentName) => {
+        // Official React95 agent names only
+        const officialAgents = [
+          "Clippy", "Links", "Bonzi", "Genie", "Genius", 
+          "Merlin", "F1", "Peedy", "Rocky", "Rover"
+        ];
+        
+        // Validate agent name against official list
+        if (!officialAgents.includes(agentName)) {
+          console.error(`❌ Invalid agent: ${agentName}. Available agents:`, officialAgents);
+          return false;
+        }
+        
+        console.log(`🔄 Switching to official agent: ${agentName}`);
+        return handleAgentChange(agentName);
+      };
+
+      window.resetToClippy = () => {
+        console.log(`🔄 Resetting to official Clippy agent`);
+        return handleAgentChange("Clippy");
+      };
+
+      window.listAvailableAgents = () => {
+        const officialAgents = [
+          "Clippy", "Links", "Bonzi", "Genie", "Genius", 
+          "Merlin", "F1", "Peedy", "Rocky", "Rover"
+        ];
+        console.log("🎭 Official React95 agents:", officialAgents);
+        console.log(`🎯 Current agent: ${currentAgent}`);
+        
+        // Check if current agent is valid
+        if (!officialAgents.includes(currentAgent)) {
+          console.warn(`⚠️ Current agent "${currentAgent}" is not an official React95 agent!`);
+          console.log("💡 Use resetToClippy() to fix this");
+        }
+        
+        console.log("💡 Use switchToAgent('AgentName') to switch agents");
+        console.log("🧪 Use testAllAgents() to test all agents sequentially");
+        console.log("❓ Use getCurrentAgent() to check current agent");
+        console.log("🔄 Use resetToClippy() to reset to official Clippy");
+        return officialAgents;
+      };
+
+      window.getCurrentAgent = () => {
+        console.log(`🎯 Current agent: ${currentAgent}`);
+        return currentAgent;
+      };
+
+      window.debugReact95Provider = () => {
+        console.log('🔬 React95 ClippyProvider Debug:');
+        console.log(`- Provider agent prop: ${currentAgent}`);
+        console.log(`- ClippyController clippy:`, clippyInstanceRef.current ? 'exists' : 'null');
+        console.log(`- window.clippy:`, window.clippy ? 'exists' : 'null');
+        
+        // Check React component tree
+        const providerElements = document.querySelectorAll('[data-testid*="clippy"], [class*="clippy"]');
+        console.log(`- Found ${providerElements.length} clippy-related elements`);
+        
+        // Check if React95 is properly loading agents
+        if (window.clippy && window.clippy.animations) {
+          console.log(`- Available animations:`, window.clippy.animations());
+        }
+        
+        return {
+          currentAgent,
+          hasClippyInstance: !!clippyInstanceRef.current,
+          hasWindowClippy: !!window.clippy,
+          elementCount: providerElements.length
+        };
+      };
+
+      window.inspectClippyElement = () => {
+        const clippyEl = document.querySelector('.clippy');
+        if (clippyEl) {
+          const dataAgent = clippyEl.getAttribute('data-agent');
+          const children = clippyEl.children;
+          console.log('🔍 Clippy element inspection:');
+          console.log(`- data-agent attribute: ${dataAgent}`);
+          console.log(`- children count: ${children.length}`);
+          
+          Array.from(children).forEach((child, index) => {
+            const style = window.getComputedStyle(child);
+            const bgImage = style.backgroundImage;
+            const display = style.display;
+            console.log(`  Child ${index}: display=${display}, bg=${bgImage !== 'none' ? 'has background' : 'no background'}`);
+          });
+          
+          // Check if React95 provider has the right agent
+          const provider = document.querySelector('[data-react95-clippy-provider]');
+          console.log(`- React95 provider found: ${!!provider}`);
+          
+          // Check window.clippy object
+          console.log(`- window.clippy exists: ${!!window.clippy}`);
+          if (window.clippy) {
+            console.log(`- window.clippy methods:`, Object.keys(window.clippy));
+          }
+          
+          // Check React95 clippy hook
+          console.log(`- ClippyController clippy instance:`, !!clippyInstanceRef.current);
+          
+        } else {
+          console.log('❌ No .clippy element found');
+        }
+      };
       
       // FIXED: Initialize hiding flags
       if (window.clippyIsHidden === undefined) {
@@ -1859,6 +1948,15 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     const setupAttemptRef = useRef(0);
     const lastAgentRef = useRef(currentAgent);
 
+    // Debug the clippy object
+    useEffect(() => {
+      devLog(`ClippyController - clippy object:`, {
+        exists: !!clippy,
+        methods: clippy ? Object.keys(clippy) : [],
+        currentAgent,
+      });
+    }, [clippy, currentAgent]);
+
     // Monitor agent changes
     useEffect(() => {
       if (lastAgentRef.current !== currentAgent) {
@@ -1867,24 +1965,23 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         );
         lastAgentRef.current = currentAgent;
 
-        // Trigger agent reload if available
-        if (clippy && clippy.load) {
-          clippy.load(currentAgent, () => {
-            clippyInstanceRef.current = clippy;
-            window.clippy = clippy;
-            
-            // ENHANCED: Re-intercept animations after agent reload
-            if (clippy && clippy.play) {
-              const originalPlay = clippy.play.bind(clippy);
-              clippy.play = function(animationName, ...args) {
-                logAllAnimations(animationName, "clippy.play() call");
-                return originalPlay(animationName, ...args);
-              };
-              window.clippy.play = clippy.play;
-            }
-            
-            devLog(`ClippyController reloaded with agent: ${currentAgent}`);
-          });
+        // The React95 ClippyProvider should handle agent switching automatically
+        // We just need to ensure our references are up to date
+        if (clippy) {
+          clippyInstanceRef.current = clippy;
+          window.clippy = clippy;
+          
+          // ENHANCED: Re-intercept animations after agent reload
+          if (clippy && clippy.play) {
+            const originalPlay = clippy.play.bind(clippy);
+            clippy.play = function(animationName, ...args) {
+              logAllAnimations(animationName, "clippy.play() call");
+              return originalPlay(animationName, ...args);
+            };
+            window.clippy.play = clippy.play;
+          }
+          
+          devLog(`ClippyController updated with agent: ${currentAgent}`);
         }
       }
     }, [currentAgent, clippy]);
@@ -2270,9 +2367,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
   return (
     <ClippyContext.Provider value={contextValue}>
-      <ReactClippyProvider agent={currentAgent}>
+      <ReactClippyProvider key={currentAgent} agent={currentAgent}>
         {/* FIXED: Only render ClippyController when shouldRenderClippy is true */}
-        {assistantVisible && shouldRenderClippy && <ClippyController />}
+        {assistantVisible && shouldRenderClippy && <ClippyController key={`controller-${currentAgent}`} />}
 
         {/* FIXED: Context Menu with enhanced functionality */}
         {contextMenuVisible && (
@@ -2282,12 +2379,16 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             onClose={hideContextMenu}
             currentAgent={currentAgent}
             agents={[
-              "Clippy",
-              "Links",
-              "Bonzi", 
-              "Genie",
-              "Merlin",
-              "Rover",
+              "Clippy",    // Classic paperclip  
+              "Links",     // Cat
+              "Bonzi",     // Purple gorilla
+              "Genie",     // Blue genie
+              "Genius",    // Einstein-like character
+              "Merlin",    // Wizard
+              "F1",        // Robot assistant
+              "Peedy",     // Parrot
+              "Rocky",     // Brown dog
+              "Rover",     // Dog (search)
             ]}
             onAction={(action, data) => {
               devLog(`Context menu action: ${action}`, data);

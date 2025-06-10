@@ -40,8 +40,28 @@ const ClippyAssistant = memo((props) => {
     );
   }, []);
 
-  // List of available assistants - memoized to prevent recreation on each render
-  const agents = useMemo(() => Object.keys(AGENTS || {}), []);
+  // List of available assistants - all 10 agents from React95 library
+  const agents = useMemo(() => {
+    console.log('🔍 AGENTS from React95:', AGENTS);
+    console.log('🔍 Available agent keys:', Object.keys(AGENTS || {}));
+    
+    // Use all 10 agents available in React95 library
+    const allAgents = [
+      "Clippy",    // Classic paperclip
+      "Links",     // Cat
+      "Bonzi",     // Purple gorilla
+      "Genie",     // Blue genie
+      "Genius",    // Einstein-like character
+      "Merlin",    // Wizard
+      "F1",        // Robot assistant
+      "Peedy",     // Parrot
+      "Rocky",     // Brown dog
+      "Rover",     // Dog (search)
+    ];
+    
+    console.log('🎭 Using static agent list:', allAgents);
+    return allAgents;
+  }, []);
 
   // Animations list - memoized to prevent recreation on each render
   const animations = useMemo(

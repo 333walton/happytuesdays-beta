@@ -10,10 +10,14 @@ import { devLog, errorLog } from "./ClippyPositioning";
 const getAgentNickname = (agentName) => {
   const nicknames = {
     "Clippy": "Clippy",
-    "Links": "Links",
+    "Links": "Links", 
     "Bonzi": "Bonzi",
-    "Genie": "Genie", 
+    "Genie": "Genie",
+    "Genius": "Genius",
     "Merlin": "Merlin",
+    "F1": "F1",
+    "Peedy": "Peedy", 
+    "Rocky": "Rocky",
     "Rover": "Rover",
   };
   return nicknames[agentName] || "Clippy";
