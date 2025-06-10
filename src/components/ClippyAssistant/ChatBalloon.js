@@ -116,15 +116,34 @@ class ChatBalloonManager {
       // Add dynamic repositioning
       this._addDynamicRepositioning(options);
       
-      // CRITICAL: Fix mobile positioning after DOM render using actual width
+      // CRITICAL: Fix mobile positioning after DOM render using actual dimensions
       if (this.isMobile()) {
         setTimeout(() => {
           const actualWidth = chatContainer.offsetWidth;
+          const actualHeight = chatContainer.offsetHeight;
+          
+          // Fix width positioning
           if (actualWidth !== position.width) {
-            // Recalculate left position using actual rendered width
             const correctedLeft = window.innerWidth - actualWidth - 14;
             chatContainer.style.left = `${correctedLeft}px`;
             devLog(`Mobile balloon width corrected: calculated=${position.width}px, actual=${actualWidth}px, newLeft=${correctedLeft}px`);
+          }
+          
+          // Fix height positioning - ensure 1px gap above clippy overlay
+          if (actualHeight !== position.height) {
+            const overlayEl = document.getElementById("clippy-clickable-overlay");
+            if (overlayEl) {
+              const overlayRect = overlayEl.getBoundingClientRect();
+              const correctedTop = overlayRect.top - actualHeight - 1; // 1px above overlay
+              chatContainer.style.top = `${correctedTop}px`;
+              
+              // Update stored values with actual dimensions
+              chatContainer.dataset.originalTop = correctedTop;
+              chatContainer.dataset.originalBottom = correctedTop + actualHeight;
+              chatContainer.dataset.originalHeight = actualHeight;
+              
+              devLog(`Mobile balloon height corrected: calculated=${position.height}px, actual=${actualHeight}px, newTop=${correctedTop}px`);
+            }
           }
         }, 0);
       }
