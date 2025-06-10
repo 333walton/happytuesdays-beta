@@ -292,25 +292,21 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
 /* Chat balloon close button */
 .custom-clippy-balloon-close {
   position: absolute !important;
-  top: 2px !important;
-  right: 4px !important;
+  top: 4px !important;
+  right: 8px !important;
   cursor: pointer !important;
   font-weight: bold !important;
-  font-size: 20px !important;
-  padding: 0px 0px 8px 0px !important;
-  background: none !important;
+  font-size: 16px !important;
+  padding: 2px 6px !important;
+  background: none transparent !important;
   border: none !important;
   line-height: 1 !important;
-  min-width: 32px !important;
-  min-height: 22px !important;
-
-  /* iOS Safari text fix */
-  color: #666666 !important;
-  -webkit-text-fill-color: #666666 !important;
-
-  /* Touch optimizations */
-  touch-action: manipulation !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  color: rgb(102, 102, 102) !important;
+  -webkit-text-fill-color: rgb(102, 102, 102) !important;
   -webkit-tap-highlight-color: transparent !important;
+  touch-action: manipulation !important;
   -webkit-touch-callout: none !important;
   -webkit-user-select: none !important;
   user-select: none !important;
@@ -320,18 +316,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
   background-color: #f0f0f0 !important;
-  border-radius: 4px !important;
-}
-
-/* Larger close button on mobile */
-@media (max-width: 768px),
-(pointer: coarse) {
-  .custom-clippy-balloon-close {
-    font-size: 24px !important;
-    padding: 4px 4px !important;
-    min-width: 22px !important;
-    min-height: 22px !important;
-  }
+  border-radius: 2px !important;
 }
 
 /* ===== CHAT ELEMENTS STYLING ===== */
@@ -412,16 +397,20 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
   .chat-input {
     font-size: 16px !important;
     /* Prevents iOS zoom */
-    padding: 12px !important;
-    min-height: 48px !important;
+    padding: 4px 6px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
     border-radius: 4px !important;
   }
 
   .chat-send {
-    padding: 12px 20px !important;
-    font-size: 16px !important;
-    min-height: 48px !important;
-    min-width: 80px !important;
+    padding: 4px 12px !important;
+    font-size: 11px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    min-width: 50px !important;
   }
 }
 

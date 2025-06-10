@@ -73,6 +73,9 @@ class ChatBalloonManager {
       // Store the original top position and bottom position for resize functionality
       chatContainer.dataset.originalTop = position.top;
       chatContainer.dataset.originalBottom = position.top + position.height;
+      
+      // CRITICAL: Store the calculated width for mobile positioning adjustments
+      chatContainer.dataset.calculatedWidth = position.width;
       chatContainer.style.zIndex = "9999";
       chatContainer.style.visibility = "visible";
       chatContainer.style.opacity = "1";
@@ -112,6 +115,19 @@ class ChatBalloonManager {
 
       // Add dynamic repositioning
       this._addDynamicRepositioning(options);
+      
+      // CRITICAL: Fix mobile positioning after DOM render using actual width
+      if (this.isMobile()) {
+        setTimeout(() => {
+          const actualWidth = chatContainer.offsetWidth;
+          if (actualWidth !== position.width) {
+            // Recalculate left position using actual rendered width
+            const correctedLeft = window.innerWidth - actualWidth - 14;
+            chatContainer.style.left = `${correctedLeft}px`;
+            devLog(`Mobile balloon width corrected: calculated=${position.width}px, actual=${actualWidth}px, newLeft=${correctedLeft}px`);
+          }
+        }, 0);
+      }
 
       return true;
     } catch (error) {
@@ -226,7 +242,7 @@ class ChatBalloonManager {
     const isMobile = this.isMobile();
     
     // Store original height for minimum resize constraint  
-    const originalHeight = 190 + 20 + 6; // FIXED: Include padding (20px) + borders (6px) = 216px total
+    const originalHeight = 203; // FIXED: Use actual rendered height on mobile
     container.dataset.originalHeight = originalHeight;
 
     // Create chat balloon HTML
@@ -249,13 +265,13 @@ class ChatBalloonManager {
       font-weight: bold;
       font-size: 16px;
       padding: 2px 6px;
-      background: none;
+      background: none transparent;
       border: none;
       line-height: 1;
       min-width: 28px;
       min-height: 28px;
-      color: #666666;
-      -webkit-text-fill-color: #666666;
+      color: rgb(102, 102, 102);
+      -webkit-text-fill-color: rgb(102, 102, 102);
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
     ">×</button>
@@ -312,20 +328,22 @@ class ChatBalloonManager {
         outline: none;
         -webkit-appearance: none;
         appearance: none;
-        min-height: 30px;
-        height: 30px;
+        min-height: 28px;
+        height: 28px;
+        max-height: 28px;
       " />
       <button class="chat-send" style="
         padding: 4px 12px;
-        background: #c0c0c0;
-        border: 1px outset #c0c0c0;
+        background: rgb(192, 192, 192);
+        border: 1px outset rgb(192, 192, 192);
         font-size: 11px;
         cursor: pointer;
-        color: #000;
-        -webkit-text-fill-color: #000;
+        color: rgb(0, 0, 0);
+        -webkit-text-fill-color: rgb(0, 0, 0);
         font-family: 'Tahoma', sans-serif;
-        min-height: 30px;
-        height: 30px;
+        min-height: 28px;
+        height: 28px;
+        max-height: 28px;
         min-width: 50px;
         display: flex;
         align-items: center;
@@ -773,7 +791,7 @@ class ChatBalloonManager {
     const minWidth = 260;
     const maxWidth = isMobile ? 330 : 330; // 10% increase for both mobile and desktop (300 * 1.1 = 330)
     const minHeight = 140; // Reduced from 200
-    const maxHeight = 190 + 20 + 6; // FIXED: Include padding (20px) + borders (6px) = 216px total
+    const maxHeight = 203; // FIXED: Use actual rendered height on mobile
     const safeMargin = isMobile ? 8 : 16; // FIXED: Proportional margin - mobile gets half the margin
     const clippyMargin = 32; // Slightly less gap for mobile
     let viewportWidth,
@@ -845,8 +863,8 @@ class ChatBalloonManager {
       let left, top;
       
       if (isMobile) {
-        // FIXED: Mobile right border should be 4px from right viewport edge
-        left = viewportLeft + viewportWidth - chatWidth - 4;
+        // FIXED: Mobile right border should be 14px from right viewport edge
+        left = viewportLeft + viewportWidth - chatWidth - 14;
       } else {
         // Desktop: center on Clippy
         left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2;

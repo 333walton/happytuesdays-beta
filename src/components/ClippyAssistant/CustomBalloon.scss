@@ -51,10 +51,10 @@
       border-radius: 0 !important;
       outline: none !important;
       min-width: 0 !important;
-      min-height: 36px !important;
+      min-height: 28px !important;
     }
 
-    button {
+    button:not(.custom-clippy-balloon-close):not(.chat-send) {
       font-family: inherit !important;
       font-size: 15px !important;
       background: #c0c0c0 !important;
@@ -65,30 +65,13 @@
       border-radius: 0 !important;
       outline: none !important;
       min-width: 60px !important;
-      min-height: 36px !important;
+      min-height: 28px !important;
       box-sizing: border-box !important;
       transition: background 0.1s;
     }
-    button:active {
+    button:not(.custom-clippy-balloon-close):not(.chat-send):active {
       border: 2px inset #c0c0c0 !important;
       background: #d0d0d0 !important;
     }
-        .custom-clippy-balloon-close {
-            min-width: 22px !important;
-            min-height: 22px !important;
-            font-family: inherit !important;
-            font-size: 15px !important;
-            background: #c0c0c0 !important;
-            border: 2px outset #c0c0c0 !important;
-            color: #000 !important;
-            padding: 4px 4px !important;
-            margin-right: 8px !important;
-            margin-top: 2px !important;
-            cursor: pointer !important;
-            border-radius: 0 !important;
-            outline: none !important;
-            box-sizing: border-box !important;
-            transition: background 0.1s;
-        }
   }
 } 
