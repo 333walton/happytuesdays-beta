@@ -137,14 +137,17 @@ class ChatBalloonManager {
               const correctedTop = overlayRect.top - actualHeight - 1; // 1px above overlay
               chatContainer.style.top = `${correctedTop}px`;
               
-              // Update stored values with actual dimensions
-              chatContainer.dataset.originalTop = correctedTop;
-              chatContainer.dataset.originalBottom = correctedTop + actualHeight;
-              chatContainer.dataset.originalHeight = actualHeight;
-              
               devLog(`Mobile balloon height corrected: calculated=${position.height}px, actual=${actualHeight}px, newTop=${correctedTop}px`);
             }
           }
+          
+          // CRITICAL: Always update stored values with actual final position after all corrections
+          const finalRect = chatContainer.getBoundingClientRect();
+          chatContainer.dataset.originalTop = finalRect.top;
+          chatContainer.dataset.originalBottom = finalRect.bottom;
+          chatContainer.dataset.originalHeight = actualHeight;
+          
+          devLog(`Mobile balloon final anchor positions: top=${finalRect.top}px, bottom=${finalRect.bottom}px, height=${actualHeight}px`);
         }, 0);
       }
 
@@ -261,7 +264,8 @@ class ChatBalloonManager {
     const isMobile = this.isMobile();
     
     // Store original height for minimum resize constraint  
-    const originalHeight = 203; // FIXED: Use actual rendered height on mobile
+    // FIXED: Height increased due to close button styling changes (28px vs 22px + positioning changes)
+    const originalHeight = 207; // Updated for close button styling changes
     container.dataset.originalHeight = originalHeight;
 
     // Create chat balloon HTML
@@ -810,7 +814,7 @@ class ChatBalloonManager {
     const minWidth = 260;
     const maxWidth = isMobile ? 330 : 330; // 10% increase for both mobile and desktop (300 * 1.1 = 330)
     const minHeight = 140; // Reduced from 200
-    const maxHeight = 203; // FIXED: Use actual rendered height on mobile
+    const maxHeight = 207; // FIXED: Updated for close button styling changes
     const safeMargin = isMobile ? 8 : 16; // FIXED: Proportional margin - mobile gets half the margin
     const clippyMargin = 32; // Slightly less gap for mobile
     let viewportWidth,
