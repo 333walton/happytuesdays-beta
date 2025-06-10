@@ -28,8 +28,8 @@
 
   /* Default Mobile scale */
   @media screen and (max-width: 768px) {
-  transform: scale(1) !important;
-  transform-origin: center bottom !important;
+    transform: scale(1) !important;
+    transform-origin: center bottom !important;
   }
   /* Default Desktop scale */
   @media screen and (min-width: 768px) {
@@ -125,9 +125,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
 }
 
 /* Mobile touch area expansion */
-@media (max-width: 768px),
-(pointer: coarse) {
-  
+@media (max-width: 768px), (pointer: coarse) {
   #clippy-clickable-overlay::before {
     content: "" !important;
     position: absolute !important;
@@ -139,7 +137,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
     pointer-events: auto !important;
     z-index: 1 !important;
   }
-  
+
   #clippy-clickable-overlay {
     min-width: 124px !important;
     min-height: 93px !important;
@@ -291,32 +289,36 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
 
 /* Chat balloon close button */
 .custom-clippy-balloon-close {
-  position: absolute !important;
-  top: 4px !important;
-  right: 8px !important;
-  cursor: pointer !important;
-  font-weight: bold !important;
-  font-size: 16px !important;
-  padding: 2px 6px !important;
-  background: none transparent !important;
-  border: none !important;
-  line-height: 1 !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
-  color: rgb(102, 102, 102) !important;
-  -webkit-text-fill-color: rgb(102, 102, 102) !important;
-  -webkit-tap-highlight-color: transparent !important;
-  touch-action: manipulation !important;
-  -webkit-touch-callout: none !important;
-  -webkit-user-select: none !important;
-  user-select: none !important;
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  background: none;
+  border: none;
+  color: rgb(102, 102, 102);
+  line-height: 1;
+  transition: all 0.2s ease-in-out !important;
+
+  -webkit-text-fill-color: rgb(102, 102, 102);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
 }
 
 .custom-clippy-balloon-close:hover {
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
-  background-color: #f0f0f0 !important;
-  border-radius: 2px !important;
+  color: #000000;
+  -webkit-text-fill-color: #000000;
+  background-color: #f0f0f0;
+  border-radius: 2px;
 }
 
 /* ===== CHAT ELEMENTS STYLING ===== */
@@ -328,7 +330,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
   padding: 8px !important;
   margin-bottom: 12px !important;
   min-height: 100px !important;
-  font-family: 'Tahoma', sans-serif !important;
+  font-family: "Tahoma", sans-serif !important;
   font-size: 12px !important;
 
   /* iOS Safari text fix */
@@ -392,8 +394,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
 }
 
 /* Mobile input optimization - CRITICAL for iOS Safari */
-@media (max-width: 768px),
-(pointer: coarse) {
+@media (max-width: 768px), (pointer: coarse) {
   .chat-input {
     font-size: 16px !important;
     /* Prevents iOS zoom */
