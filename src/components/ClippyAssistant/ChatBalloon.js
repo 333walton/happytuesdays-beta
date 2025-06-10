@@ -751,28 +751,44 @@ class ChatBalloonManager {
       const constrainedChatHeight = Math.max(60, newChatHeight - (newContainerHeight - constrainedHeight));
       
       
-      // FIXED: Anchor to bottom position and enforce minimum height to prevent bottom drift
-      const originalBottom = parseInt(container.dataset.originalBottom);
-      const minAllowedHeight = parseInt(container.dataset.originalHeight); // Don't shrink below original
-      
-      // Enforce minimum height while maintaining bottom anchor
-      if (constrainedHeight >= minAllowedHeight && constrainedChatHeight >= 60) {
-        let newTop = originalBottom - constrainedHeight;
+      // Enforce minimum height (can't be smaller than original)
+      if (constrainedHeight >= originalHeight && constrainedChatHeight >= 60) {
         
-        // CRITICAL: Check viewport boundary
-        if (newTop < minTop) {
-          // We've hit the viewport boundary - STOP expanding and lock current state
-          console.log('Viewport boundary hit - stopping resize to prevent bottom shift');
-          return; // Exit completely to prevent any position changes
-        } else {
-          // Apply resize with bottom anchor (expanding only, no shrinking below original)
-          container.style.setProperty('height', `${constrainedHeight}px`, 'important');
-          chatMessages.style.setProperty('max-height', `${constrainedChatHeight}px`, 'important');
-          chatMessages.style.setProperty('min-height', `${constrainedChatHeight}px`, 'important');
-          chatMessages.style.setProperty('height', `${constrainedChatHeight}px`, 'important');
+        // FIXED: Different resize behavior for mobile vs desktop
+        if (isMobile) {
+          // MOBILE: Bottom-anchored resize (bottom stays fixed)
+          const originalBottom = parseInt(container.dataset.originalBottom);
+          let newTop = originalBottom - constrainedHeight;
           
-          // Apply the new top position calculated from bottom anchor
-          container.style.setProperty('top', `${newTop}px`, 'important');
+          // CRITICAL: Check viewport boundary for mobile
+          if (newTop < minTop) {
+            console.log('Mobile viewport boundary hit - stopping resize to prevent bottom shift');
+            return; // Exit completely to prevent any position changes
+          } else {
+            // Apply mobile resize with bottom anchor
+            container.style.setProperty('height', `${constrainedHeight}px`, 'important');
+            chatMessages.style.setProperty('max-height', `${constrainedChatHeight}px`, 'important');
+            chatMessages.style.setProperty('min-height', `${constrainedChatHeight}px`, 'important');
+            chatMessages.style.setProperty('height', `${constrainedChatHeight}px`, 'important');
+            container.style.setProperty('top', `${newTop}px`, 'important');
+          }
+        } else {
+          // DESKTOP: Bottom-anchored resize (same as mobile - fixed bottom)
+          const originalBottom = parseInt(container.dataset.originalBottom);
+          let newTop = originalBottom - constrainedHeight;
+          
+          // CRITICAL: Check viewport boundary for desktop
+          if (newTop < minTop) {
+            console.log('Desktop viewport boundary hit - stopping resize to prevent bottom shift');
+            return; // Exit completely to prevent any position changes
+          } else {
+            // Apply desktop resize with bottom anchor (fixed bottom behavior)
+            container.style.setProperty('height', `${constrainedHeight}px`, 'important');
+            chatMessages.style.setProperty('max-height', `${constrainedChatHeight}px`, 'important');
+            chatMessages.style.setProperty('min-height', `${constrainedChatHeight}px`, 'important');
+            chatMessages.style.setProperty('height', `${constrainedChatHeight}px`, 'important');
+            container.style.setProperty('top', `${newTop}px`, 'important');
+          }
         }
         
       }
