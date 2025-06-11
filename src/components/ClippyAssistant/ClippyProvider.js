@@ -2082,6 +2082,66 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           }
           
           devLog(`ClippyController updated with agent: ${currentAgent}`);
+          
+          // FIXED: Apply ALL Clippy rules to new agent
+          setTimeout(() => {
+            const clippyEl = document.querySelector(".clippy");
+            if (clippyEl) {
+              // Apply all the CSS properties that Clippy gets
+              const clippyStyles = {
+                pointerEvents: "auto",
+                visibility: "visible",
+                opacity: "1",
+                display: "block",
+                userSelect: "none",
+                webkitUserSelect: "none",
+                overflow: "visible",
+                transform: "translateZ(0)",
+                backfaceVisibility: "hidden",
+                willChange: "transform",
+                contain: "layout style",
+                transition: "none",
+                animation: "none",
+                webkitTransform: "translateZ(0)",
+                webkitBackfaceVisibility: "hidden",
+                webkitFontSmoothing: "antialiased"
+              };
+              
+              // Apply all Clippy styles to new agent
+              Object.assign(clippyEl.style, clippyStyles);
+              
+              // Ensure agent has .clippy class and proper scale
+              clippyEl.classList.add("clippy");
+              if (window.innerWidth >= 768) {
+                clippyEl.style.transform = "translateZ(0) scale(0.95)";
+              } else {
+                clippyEl.style.transform = "translateZ(0) scale(1)";
+                clippyEl.style.transformOrigin = "center bottom";
+              }
+              
+              // Force positioning refresh for new agent
+              if (ClippyPositioning?.positionClippyAndOverlay) {
+                const overlayEl = document.getElementById("clippy-clickable-overlay");
+                ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
+                devLog(`Applied all Clippy rules and repositioned ${currentAgent}`);
+              }
+              
+              // Ensure overlay gets all the same properties
+              const overlayEl = document.getElementById("clippy-clickable-overlay");
+              if (overlayEl) {
+                const overlayStyles = {
+                  cursor: "pointer",
+                  background: "transparent",
+                  pointerEvents: "auto",
+                  userSelect: "none",
+                  webkitUserSelect: "none",
+                  transition: "none",
+                  animation: "none"
+                };
+                Object.assign(overlayEl.style, overlayStyles);
+              }
+            }
+          }, 200); // Longer delay to ensure React95 finishes
         }
       }
     }, [currentAgent, clippy]);
