@@ -1316,6 +1316,19 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           window._clippyCorrectStyles = clippyStyles;
         }
         
+        // REMOVE old agents completely from the DOM
+        if (currentAgent && currentAgent !== agent) {
+          console.log(`🧹 Removing old agent from DOM: ${currentAgent}`);
+          const oldAgents = document.querySelectorAll('.clippy');
+          oldAgents.forEach((el, index) => {
+            console.log(`🗑️ Removing old agent element ${index} from DOM`);
+            if (el.parentNode) {
+              el.parentNode.removeChild(el);
+              console.log(`✅ Old agent element ${index} removed from DOM`);
+            }
+          });
+        }
+        
         return handleAgentChange(agent);
       }, "setCurrentAgent");
 
@@ -1715,6 +1728,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       
       // SIMPLE: Apply Clippy's exact positioning to any agent
       window.applyClippyPositioning = (targetAgent) => {
+        
         // FIND ALL .clippy elements and fix them
         const allClippyEls = document.querySelectorAll('.clippy');
         console.log(`🔍 Found ${allClippyEls.length} .clippy elements in DOM`);
@@ -1739,20 +1753,23 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           const styles = window._clippyCorrectStyles;
           console.log(`📋 Using captured Clippy styles for overlay position: ${styles.visualLeft.toFixed(1)}, ${styles.visualTop.toFixed(1)}`);
           
-          // Apply to ALL .clippy elements
-          allClippyEls.forEach((clippyEl, index) => {
-            console.log(`🔧 Fixing clippy element ${index}...`);
+          // Only apply to visible elements
+          const activeClippyEls = Array.from(allClippyEls).filter(el => 
+            el.style.display !== 'none'
+          );
+          
+          console.log(`🔍 Found ${activeClippyEls.length} visible .clippy elements (filtered from ${allClippyEls.length} total)`);
+          
+          // Apply positioning only to active (new) agent elements
+          activeClippyEls.forEach((clippyEl, index) => {
+            console.log(`🔧 Fixing active clippy element ${index}...`);
             
-            // Preserve existing classes and add required ones
-            if (!clippyEl.classList.contains('clippy')) {
-              clippyEl.classList.add('clippy');
-            }
-            if (!clippyEl.classList.contains('clippy-anchored')) {
-              clippyEl.classList.add('clippy-anchored');
-            }
+            // Set CLEAN class structure for new agent (replace, don't accumulate)
+            const agentClass = agentName.toLowerCase();
+            clippyEl.className = `clippy clippy-anchored ${agentClass}`;
             clippyEl.setAttribute('data-agent', agentName);
             
-            // Apply only positioning-related styles, preserving React95 agent visual properties
+            // Apply ALL positioning-related styles from Clippy, preserving React95 agent visual properties
             clippyEl.style.setProperty('position', 'fixed', 'important');
             clippyEl.style.setProperty('left', styles.left, 'important');
             clippyEl.style.setProperty('top', styles.top, 'important');
@@ -1766,6 +1783,33 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             clippyEl.style.setProperty('display', 'block', 'important');
             clippyEl.style.setProperty('pointer-events', 'auto', 'important');
             
+            // Apply additional positioning constraints from ClippyPositioning
+            if (styles.willChange && styles.willChange !== 'auto') {
+              clippyEl.style.setProperty('will-change', styles.willChange, 'important');
+            }
+            if (styles.backfaceVisibility) {
+              clippyEl.style.setProperty('backface-visibility', styles.backfaceVisibility, 'important');
+            }
+            if (styles.containment && styles.containment !== 'none') {
+              clippyEl.style.setProperty('contain', styles.containment, 'important');
+            }
+            
+            // Ensure desktop viewport constraints are applied
+            if (!window.ClippyPositioning.isMobile) {
+              // Apply desktop-specific positioning rules that keep agent within desktop bounds
+              const desktop = document.querySelector('.desktop.screen') || 
+                             document.querySelector('.desktop') || 
+                             document.querySelector('.w98');
+              if (desktop) {
+                const desktopRect = desktop.getBoundingClientRect();
+                // Ensure the agent stays within desktop bounds
+                clippyEl.style.setProperty('max-width', '124px', 'important');
+                clippyEl.style.setProperty('max-height', '93px', 'important');
+                // Add clip-path to ensure it doesn't extend beyond desktop
+                clippyEl.style.setProperty('clip-path', `inset(0 0 0 0)`, 'important');
+              }
+            }
+            
             // DON'T override width/height - let React95 handle agent-specific dimensions
             
             // Force reflow
@@ -1774,21 +1818,23 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             console.log(`✅ Applied positioning to clippy element ${index}`);
           });
           
-          // Also ensure overlay matches
+          // Position overlay to match agents
           const overlayEl = document.getElementById('clippy-clickable-overlay');
-          if (overlayEl) {
-            overlayEl.style.cssText = `
-              position: fixed !important;
-              left: ${styles.left} !important;
-              top: ${styles.top} !important;
-              width: 124px !important;
-              height: 93px !important;
-              z-index: ${parseInt(styles.zIndex) + 10} !important;
-              background: transparent !important;
-              pointer-events: auto !important;
-              cursor: pointer !important;
-            `;
-            console.log(`✅ Overlay positioned to match at: ${styles.left}, ${styles.top}`);
+          if (overlayEl && activeClippyEls.length > 0) {
+            const firstActiveAgent = activeClippyEls[0];
+            const rect = firstActiveAgent.getBoundingClientRect();
+            
+            overlayEl.style.position = 'fixed';
+            overlayEl.style.left = `${rect.left}px`;
+            overlayEl.style.top = `${rect.top}px`;
+            overlayEl.style.width = '124px';
+            overlayEl.style.height = '93px';
+            overlayEl.style.zIndex = '2010';
+            overlayEl.style.background = 'transparent';
+            overlayEl.style.pointerEvents = 'auto';
+            overlayEl.style.cursor = 'pointer';
+            
+            console.log(`✅ Overlay positioned to match agent at: ${rect.left}px, ${rect.top}px`);
           }
           
           // Verify all elements after positioning
@@ -2466,6 +2512,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               // Force a reflow to ensure styles are applied
               void clippyEl.offsetHeight;
             }
+
+            // MINIMAL: Just apply our positioning after agent is loaded
+            setTimeout(() => {
+              if (window.applyClippyPositioning) {
+                console.log(`🎯 Applying positioning for ${currentAgent}`);
+                window.applyClippyPositioning(currentAgent);
+              }
+            }, 200); // Give React95 time to fully load the agent
 
             // FIXED: Bind right-click directly to Clippy element
             const addRightClickToElement = (element, elementName) => {
