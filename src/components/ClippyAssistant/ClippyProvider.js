@@ -2082,20 +2082,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           }
           
           devLog(`ClippyController updated with agent: ${currentAgent}`);
-          
-          // FIXED: Force positioning refresh after agent change
-          setTimeout(() => {
-            const clippyEl = document.querySelector(".clippy");
-            if (clippyEl && ClippyPositioning?.positionClippyAndOverlay) {
-              const overlayEl = document.getElementById("clippy-clickable-overlay");
-              const positioned = ClippyPositioning.positionClippyAndOverlay(
-                clippyEl,
-                overlayEl,
-                null
-              );
-              devLog(`Post-agent-change positioning for ${currentAgent}: ${positioned ? 'success' : 'failed'}`);
-            }
-          }, 200); // Wait for agent to fully load
         }
       }
     }, [currentAgent, clippy]);
@@ -2146,24 +2132,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             const clippyEl = document.querySelector(".clippy");
             if (!clippyEl) return false;
 
-            // Agent-specific styling and positioning setup
+            // Agent-specific styling if needed
             clippyEl.setAttribute("data-agent", currentAgent);
-            
-            // FIXED: Re-run positioning logic after agent change to ensure correct placement
-            devLog(`Setting up positioning for agent: ${currentAgent}`);
-            
-            // Force immediate positioning for the new agent
-            setTimeout(() => {
-              if (ClippyPositioning?.positionClippyAndOverlay) {
-                const overlayEl = document.getElementById("clippy-clickable-overlay");
-                const positioned = ClippyPositioning.positionClippyAndOverlay(
-                  clippyEl,
-                  overlayEl,
-                  null
-                );
-                devLog(`Agent ${currentAgent} positioning: ${positioned ? 'success' : 'failed'}`);
-              }
-            }, 100); // Small delay to let React95 complete agent loading
 
             // FIXED: Bind right-click directly to Clippy element
             const addRightClickToElement = (element, elementName) => {
@@ -2266,13 +2236,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               document.body.appendChild(overlay);
             }
 
-            // Position overlay
+            // Position overlay - ensure all agents get same positioning
             if (ClippyPositioning?.positionClippyAndOverlay) {
               ClippyPositioning.positionClippyAndOverlay(
                 clippyEl,
                 overlayRef.current,
                 null
               );
+              devLog(`Positioned agent ${currentAgent} in bottom-right`);
             }
 
             // Start resize handling
@@ -2497,7 +2468,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
   return (
     <ClippyContext.Provider value={contextValue}>
-      <ReactClippyProvider key={currentAgent} agent={currentAgent}>
+      <ReactClippyProvider key={currentAgent} agentName={currentAgent}>
         {/* FIXED: Only render ClippyController when shouldRenderClippy is true */}
         {assistantVisible && shouldRenderClippy && <ClippyController key={`controller-${currentAgent}`} />}
 
