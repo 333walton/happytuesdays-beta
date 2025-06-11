@@ -418,19 +418,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         }
       }
 
-      // Preserve Clippy's positioning and scale during interaction
+      // Preserve Clippy's scale during interaction (no repositioning needed)
       const clippyEl = document.querySelector(".clippy");
       if (clippyEl && ClippyPositioning?.preserveClippyScale) {
         const preserved = ClippyPositioning.preserveClippyScale(clippyEl);
         devLog(`Clippy scale preservation: ${preserved ? "success" : "failed"}`);
-
-        setTimeout(() => {
-          if (ClippyPositioning?.positionClippyAndOverlay) {
-            const overlayEl = document.getElementById("clippy-clickable-overlay");
-            ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
-            devLog("Clippy positioning restored after interaction");
-          }
-        }, 100);
+        // Removed unnecessary overlay repositioning - overlay is automatically synchronized
       }
 
       // NEW RULE: 75% chance for animation, 25% chance for balloon
@@ -555,16 +548,32 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return false;
       }
 
-      setLastInteractionTime(now);
-      startCooldown();
-
       devLog("Desktop double click - opening chat balloon");
 
-      // Show chat balloon
+      // Show chat balloon using the same global function as context menu
+      // CRITICAL: Don't set state until after balloon opens to prevent re-renders that disrupt positioning
       setTimeout(() => {
         if (mountedRef.current && !isAnyBalloonOpen()) {
-          showChatBalloon("Hi! What would you like to chat about?");
-          devLog("Desktop double click chat balloon shown");
+          // Use the global function to ensure consistent positioning
+          console.log(`🖱️ DOUBLE-CLICK: Opening chat balloon`, {
+            globalFunctionExists: !!window.showClippyChatBalloon,
+            agentPosition: document.querySelector('.clippy')?.getBoundingClientRect(),
+            overlayPosition: document.getElementById('clippy-clickable-overlay')?.getBoundingClientRect(),
+            desktopBounds: window._desktopViewportBounds
+          });
+          
+          if (window.showClippyChatBalloon) {
+            window.showClippyChatBalloon("Hi! What would you like to chat about?");
+            devLog("Desktop double click chat balloon shown via global function");
+          } else {
+            // Fallback to direct call if global function not available
+            showChatBalloon("Hi! What would you like to chat about?");
+            devLog("Desktop double click chat balloon shown via direct call (fallback)");
+          }
+          
+          // Set state AFTER balloon opens to prevent re-renders that disrupt balloon positioning
+          setLastInteractionTime(now);
+          startCooldown();
         }
       }, 200);
 
@@ -853,8 +862,15 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           // ONLY: Long press shows chat balloon (no animation)
           setTimeout(() => {
             if (mountedRef.current && !isAnyBalloonOpen()) {
-              showChatBalloon("Hi! What would you like to chat about?");
-              devLog("Mobile long press chat balloon shown");
+              // Use the global function to ensure consistent positioning
+              if (window.showClippyChatBalloon) {
+                window.showClippyChatBalloon("Hi! What would you like to chat about?");
+                devLog("Mobile long press chat balloon shown via global function");
+              } else {
+                // Fallback to direct call if global function not available
+                showChatBalloon("Hi! What would you like to chat about?");
+                devLog("Mobile long press chat balloon shown via direct call (fallback)");
+              }
             }
           }, 100);
 
@@ -1144,6 +1160,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               "clippy-clickable-overlay"
             );
             if (overlayElement) {
+              // For zoom changes, we need to clear synchronization and reposition
+              ClippyPositioning.clearOverlaySynchronization(overlayElement);
               ClippyPositioning.positionOverlay(overlayElement, clippyElement);
             }
           }
@@ -1378,6 +1396,15 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             );
             return false;
           }
+          // Debug: Log balloon positioning context
+          console.log(`🎈 showClippyChatBalloon called with:`, {
+            initialMessage,
+            timestamp: Date.now(),
+            agentPosition: document.querySelector('.clippy')?.getBoundingClientRect(),
+            overlayPosition: document.getElementById('clippy-clickable-overlay')?.getBoundingClientRect(),
+            desktopBounds: window._desktopViewportBounds
+          });
+          
           return showChatBalloon(initialMessage);
         },
         "showClippyChatBalloon"
@@ -1478,9 +1505,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           devLog("Cannot test chat - another balloon is already open");
           return false;
         }
-        const success = showChatBalloon(
-          "💬 Test chat - type a message to test chat functionality"
-        );
+        // Use the global function to ensure consistent positioning
+        const success = window.showClippyChatBalloon ? 
+          window.showClippyChatBalloon("💬 Test chat - type a message to test chat functionality") :
+          showChatBalloon("💬 Test chat - type a message to test chat functionality");
         devLog(`Chat creation success: ${success}`);
         return success;
       };
@@ -1785,10 +1813,78 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             clippyEl.className = `clippy clippy-anchored ${agentClass}`;
             clippyEl.setAttribute('data-agent', agentName);
             
-            // Apply ALL positioning-related styles from Clippy, preserving React95 agent visual properties
+            // Get desktop viewport for balloon positioning (but NOT for agent repositioning)
+            const desktop = document.querySelector('.desktop.screen') || 
+                           document.querySelector('.desktop') || 
+                           document.querySelector('.w98');
+            
+            let finalLeft = styles.left;
+            let finalTop = styles.top;
+            
+            // Store desktop bounds for balloon positioning but don't reposition agents
+            if (desktop) {
+              const desktopRect = desktop.getBoundingClientRect();
+              // Make desktop bounds available for balloon positioning
+              window._desktopViewportBounds = {
+                left: desktopRect.left,
+                top: desktopRect.top,
+                width: desktopRect.width,
+                height: desktopRect.height,
+                right: desktopRect.right,
+                bottom: desktopRect.bottom
+              };
+              console.log(`🖥️ Desktop viewport bounds stored for balloon positioning:`, window._desktopViewportBounds);
+            } else {
+              console.warn(`⚠️ No desktop viewport found for balloon positioning`);
+            }
+            
+            // DISABLED: Bottom-alignment and viewport constraints that move agents to desktop bottom
+            // if (desktop) {
+            //   const desktopRect = desktop.getBoundingClientRect();
+            //   const agentRect = clippyEl.getBoundingClientRect();
+            //   
+            //   // BOTTOM-ALIGN: Align agent's bottom with overlay's bottom (Clippy's position)
+            //   const overlayEl = document.getElementById('clippy-clickable-overlay');
+            //   if (overlayEl) {
+            //     const overlayRect = overlayEl.getBoundingClientRect();
+            //     const minDimensions = window._clippyMinOverlayDimensions || { width: 124, height: 93 };
+            //     
+            //     // Calculate bottom-aligned position
+            //     finalTop = `${overlayRect.bottom - agentRect.height}px`;
+            //     console.log(`🔄 Bottom-aligning ${agentName}: overlay bottom ${overlayRect.bottom} - agent height ${agentRect.height} = top ${finalTop}`);
+            //   }
+            //   
+            //   // VIEWPORT CONSTRAINTS: Ensure agent doesn't render outside desktop bounds
+            //   const leftPx = parseFloat(finalLeft);
+            //   const topPx = parseFloat(finalTop);
+            //   const maxRight = desktopRect.left + desktopRect.width;
+            //   const maxBottom = desktopRect.top + desktopRect.height;
+            //   
+            //   // Constrain horizontally
+            //   if (leftPx + agentRect.width > maxRight) {
+            //     finalLeft = `${maxRight - agentRect.width}px`;
+            //     console.log(`⚠️ ${agentName} width constrained: moved left to ${finalLeft}`);
+            //   }
+            //   if (leftPx < desktopRect.left) {
+            //     finalLeft = `${desktopRect.left}px`;
+            //     console.log(`⚠️ ${agentName} left constrained to desktop edge`);
+            //   }
+            //   
+            //   // Constrain vertically
+            //   if (topPx + agentRect.height > maxBottom) {
+            //     finalTop = `${maxBottom - agentRect.height}px`;
+            //     console.log(`⚠️ ${agentName} height constrained: moved up to ${finalTop}`);
+            //   }
+            //   if (topPx < desktopRect.top) {
+            //     finalTop = `${desktopRect.top}px`;
+            //     console.log(`⚠️ ${agentName} top constrained to desktop edge`);
+            //   }
+            // }
+            
+            // Apply ALL positioning-related styles with viewport constraints
             clippyEl.style.setProperty('position', 'fixed', 'important');
-            clippyEl.style.setProperty('left', styles.left, 'important');
-            clippyEl.style.setProperty('top', styles.top, 'important');
+            clippyEl.style.setProperty('left', finalLeft, 'important');
+            clippyEl.style.setProperty('top', finalTop, 'important');
             clippyEl.style.setProperty('right', 'auto', 'important');
             clippyEl.style.setProperty('bottom', 'auto', 'important');
             clippyEl.style.setProperty('z-index', styles.zIndex, 'important');
@@ -1798,6 +1894,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             clippyEl.style.setProperty('opacity', '1', 'important');
             clippyEl.style.setProperty('display', 'block', 'important');
             clippyEl.style.setProperty('pointer-events', 'auto', 'important');
+            
+            // DISABLED: Update ClippyPositioning anchors - conflicts with overlay-based positioning
+            // if (window.ClippyPositioning && window.ClippyPositioning.refreshZoomAnchor && agentName !== 'Clippy') {
+            //   console.log(`🔄 Refreshing positioning anchor for ${agentName} to prevent snap-back`);
+            //   setTimeout(() => {
+            //     window.ClippyPositioning.refreshZoomAnchor(clippyEl);
+            //   }, 10);
+            // }
             
             // Apply additional positioning constraints from ClippyPositioning
             if (styles.willChange && styles.willChange !== 'auto') {
@@ -1916,6 +2020,19 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       
       window.forceAgentRepositioning = () => {
         return window.applyClippyPositioning(currentAgent);
+      };
+
+      // NEW: Force overlay repositioning for initial load issues
+      window.forceOverlayAlignment = () => {
+        const clippyEl = document.querySelector('.clippy');
+        if (clippyEl && ClippyPositioning?.forceOverlayRepositioning) {
+          console.log('🎯 Forcing overlay alignment to agent position');
+          const success = ClippyPositioning.forceOverlayRepositioning(clippyEl);
+          console.log(`Overlay repositioning: ${success ? 'SUCCESS' : 'FAILED'}`);
+          return success;
+        }
+        console.log('❌ No clippy element or forceOverlayRepositioning function found');
+        return false;
       };
       
       // FIXED: Initialize hiding flags
@@ -2453,13 +2570,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 devLog(`${currentAgent} overlay positioned and synced`);
               }
               
-              // Apply positioning system if available
-              if (ClippyPositioning?.positionClippyAndOverlay) {
-                setTimeout(() => {
-                  ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
-                  devLog(`${currentAgent} positioning system applied`);
-                }, 50);
-              }
+              // DISABLED: Apply positioning system - conflicts with overlay-based positioning
+              // if (ClippyPositioning?.positionClippyAndOverlay) {
+              //   setTimeout(() => {
+              //     ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
+              //     devLog(`${currentAgent} positioning system applied`);
+              //   }, 50);
+              // }
               
               // Verify final positioning
               setTimeout(() => {
@@ -2571,6 +2688,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               
               // Force a reflow to ensure styles are applied
               void clippyEl.offsetHeight;
+              
+              // CRITICAL: Apply the same balloon positioning logic that works for agent switching
+              if (overlayEl && ClippyPositioning?.handleAgentChange) {
+                devLog(`🎈 Setting up balloon positioning for initial ${currentAgent} (same as agent switching)`);
+                const success = ClippyPositioning.handleAgentChange(overlayEl, clippyEl, currentAgent);
+                devLog(`🎈 Initial balloon positioning setup: ${success ? "success" : "failed"}`);
+              }
             }
 
             // COMPLETE: Apply positioning AND start resize handling for all agents
@@ -2765,6 +2889,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               const success = window.applyClippyPositioning(currentAgent);
               if (success) {
                 devLog(`✅ Successfully applied Clippy's positioning to ${currentAgent}`);
+                
+                // CRITICAL: Handle agent change and position overlay AFTER agent positioning is complete
+                if (overlayRef.current && ClippyPositioning?.handleAgentChange) {
+                  // Use the agent change handler to ensure proper repositioning
+                  const success = ClippyPositioning.handleAgentChange(overlayRef.current, clippyEl, currentAgent);
+                  devLog(`Agent change overlay handling: ${success ? "success" : "failed"}`);
+                }
                 return;
               } else {
                 devLog(`⚠️ No captured Clippy styles - applying fallback positioning`);
@@ -2776,14 +2907,21 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             clippyEl.classList.add("clippy-anchored");
             clippyEl.setAttribute("data-agent", currentAgent);
             
-            if (ClippyPositioning?.positionClippyAndOverlay) {
-              const positioned = ClippyPositioning.positionClippyAndOverlay(
-                clippyEl,
-                overlayRef.current,
-                null
-              );
-              devLog(`Fallback positioning result for ${currentAgent}: ${positioned}`);
-            }
+            // DISABLED: Fallback positioning - conflicts with overlay-based positioning
+            // if (ClippyPositioning?.positionClippyAndOverlay) {
+            //   const positioned = ClippyPositioning.positionClippyAndOverlay(
+            //     clippyEl,
+            //     overlayRef.current,
+            //     null
+            //   );
+            //   devLog(`Fallback positioning result for ${currentAgent}: ${positioned}`);
+              
+              // DISABLED: Overlay positioning after fallback - conflicts with overlay-based positioning
+              // if (positioned && overlayRef.current && ClippyPositioning?.handleAgentChange) {
+              //   const success = ClippyPositioning.handleAgentChange(overlayRef.current, clippyEl, currentAgent);
+              //   devLog(`Fallback agent change overlay handling: ${success ? "success" : "failed"}`);
+              // }
+            // }
 
             // Start resize handling
             if (!resizeHandlingActiveRef.current) {
@@ -2827,34 +2965,58 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                   clippyEl.classList.add("clippy-anchored");
                   clippyEl.setAttribute("data-agent", currentAgent);
                   
-                  // Use overlay as positioning reference
+                  // CRITICAL: Use the EXACT same positioning logic that works for initial Clippy
+                  devLog(`🎯 MUTATION OBSERVER - Applying same positioning logic that works for initial Clippy`);
+                  
+                  // Get overlay position as reference (EXACT same logic as initial Clippy)
                   const overlayEl = document.getElementById("clippy-clickable-overlay");
                   if (overlayEl) {
                     const overlayRect = overlayEl.getBoundingClientRect();
-                    devLog(`🎯 MUTATION OBSERVER - Overlay reference: ${overlayRect.left.toFixed(1)}, ${overlayRect.top.toFixed(1)}`);
                     
-                    // FORCE position IMMEDIATELY - no delays
-                    clippyEl.style.cssText = `
-                      position: fixed !important;
-                      left: ${overlayRect.left}px !important;
-                      top: ${overlayRect.top}px !important;
-                      right: auto !important;
-                      bottom: auto !important;
-                      z-index: ${isMobile ? "1500" : "2000"} !important;
-                      pointer-events: auto !important;
-                      visibility: visible !important;
-                      opacity: 1 !important;
-                      display: block !important;
-                      transform: translateZ(0) scale(${isMobile ? 1 : 0.95}) !important;
-                      transform-origin: center bottom !important;
-                    `;
+                    // Force agent to match overlay position exactly (SAME as initial Clippy)
+                    clippyEl.style.position = "fixed";
+                    clippyEl.style.left = `${overlayRect.left}px`;
+                    clippyEl.style.top = `${overlayRect.top}px`;
+                    clippyEl.style.right = "auto";
+                    clippyEl.style.bottom = "auto";
+                    clippyEl.style.zIndex = isMobile ? "1500" : "2000";
+                    clippyEl.style.pointerEvents = "auto";
+                    clippyEl.style.visibility = "visible";
+                    clippyEl.style.opacity = "1";
+                    clippyEl.style.display = "block";
                     
-                    // Force reflow
+                    // Apply proper scaling (SAME as initial Clippy)
+                    const zoomFactor = ClippyPositioning?.getMonitorZoomFactor ? ClippyPositioning.getMonitorZoomFactor() : 1.0;
+                    const scale = isMobile ? 1 : (0.95 * zoomFactor);
+                    clippyEl.style.transform = `translateZ(0) scale(${scale})`;
+                    clippyEl.style.transformOrigin = "center bottom";
+                    
+                    // Force a reflow to ensure styles are applied (SAME as initial Clippy)
                     void clippyEl.offsetHeight;
                     
-                    const afterRect = clippyEl.getBoundingClientRect();
-                    devLog(`✅ MUTATION OBSERVER - Agent repositioned to: ${afterRect.left.toFixed(1)}, ${afterRect.top.toFixed(1)}`);
+                    devLog(`🎯 MUTATION OBSERVER - Agent positioned using overlay reference: ${overlayRect.left}, ${overlayRect.top}`);
+                    
+                    // Handle overlay after positioning
+                    if (ClippyPositioning?.handleAgentChange) {
+                      ClippyPositioning.handleAgentChange(overlayEl, clippyEl, currentAgent);
+                    }
+                    return;
                   }
+                  
+                  // DISABLED: Fallback positioning - conflicts with overlay-based positioning
+                  // if (ClippyPositioning?.positionClippyAndOverlay) {
+                  //   const positioned = ClippyPositioning.positionClippyAndOverlay(
+                  //     clippyEl,
+                  //     overlayEl,
+                  //     null
+                  //   );
+                  //   devLog(`🎯 MUTATION OBSERVER - Fallback positioning result for ${currentAgent}: ${positioned}`);
+                  //   
+                  //   // Handle overlay after positioning
+                  //   if (positioned && overlayEl && ClippyPositioning?.handleAgentChange) {
+                  //     ClippyPositioning.handleAgentChange(overlayEl, clippyEl, currentAgent);
+                  //   }
+                  // }
                 }
               }
             });
@@ -2932,6 +3094,40 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   useEffect(() => {
     mountedRef.current = true;
     devLog("ClippyProvider mounted");
+
+    // CRITICAL: Set up desktop viewport bounds for balloon positioning early
+    const setupDesktopBounds = () => {
+      const desktop = document.querySelector('.desktop.screen') || 
+                     document.querySelector('.desktop') || 
+                     document.querySelector('.w98');
+      if (desktop) {
+        const desktopRect = desktop.getBoundingClientRect();
+        window._desktopViewportBounds = {
+          left: desktopRect.left,
+          top: desktopRect.top,
+          width: desktopRect.width,
+          height: desktopRect.height,
+          right: desktopRect.right,
+          bottom: desktopRect.bottom
+        };
+        console.log(`🖥️ Early desktop viewport bounds setup for balloons:`, window._desktopViewportBounds);
+        return true;
+      }
+      return false;
+    };
+
+    // Try to set up desktop bounds immediately
+    if (!setupDesktopBounds()) {
+      // If desktop not ready, wait for it
+      const checkDesktop = () => {
+        if (setupDesktopBounds()) {
+          return;
+        }
+        // Keep checking until desktop is available
+        setTimeout(checkDesktop, 50);
+      };
+      setTimeout(checkDesktop, 50);
+    }
 
     return () => {
       mountedRef.current = false;
