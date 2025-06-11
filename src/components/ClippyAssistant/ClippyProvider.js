@@ -104,6 +104,7 @@ const logAllAnimations = (animationName, context = "unknown") => {
   );
 };
 
+
 const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   // Core state
   const [startupComplete, setStartupComplete] = useState(false);
@@ -1545,6 +1546,60 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return currentAgent;
       };
 
+      // DIAGNOSTIC: Add the diagnostic functions from the developer's brief
+      window.diagnoseAgentSwitching = () => {
+        console.log("🔍 AGENT SWITCHING DIAGNOSIS\n");
+        
+        // Check React95 imports
+        console.log("1. Checking @react95/clippy imports:");
+        try {
+          console.log("   ✅ @react95/clippy is imported");
+        } catch (e) {
+          console.log("   ❌ Import issue:", e.message);
+        }
+        
+        // Check ReactClippyProvider props
+        console.log("\n2. ReactClippyProvider Analysis:");
+        const providerElements = document.querySelectorAll('[data-react95-clippy]');
+        console.log(`   📍 Found ${providerElements.length} provider elements`);
+        
+        // Check current clippy instance
+        console.log("\n3. Current Clippy Instance:");
+        if (window.clippy) {
+          console.log("   ✅ window.clippy exists");
+          console.log("   🎭 Current agent:", window.clippy.agent || "Unknown");
+          console.log("   📋 Available methods:", Object.keys(window.clippy));
+          
+          // Test if load method exists
+          if (window.clippy.load) {
+            console.log("   ✅ clippy.load() method available");
+          } else {
+            console.log("   ❌ clippy.load() method NOT available");
+          }
+        } else {
+          console.log("   ❌ window.clippy not found");
+        }
+        
+        // Check DOM elements
+        console.log("\n4. DOM Elements:");
+        const clippyElements = document.querySelectorAll('.clippy');
+        console.log(`   📍 Found ${clippyElements.length} .clippy elements`);
+        
+        if (clippyElements.length > 0) {
+          const clippy = clippyElements[0];
+          const dataAgent = clippy.getAttribute('data-agent');
+          console.log(`   🎯 data-agent attribute: ${dataAgent}`);
+          console.log(`   📏 Visible: ${clippy.offsetParent !== null}`);
+        }
+        
+        return {
+          hasClippy: !!window.clippy,
+          hasLoadMethod: !!(window.clippy && window.clippy.load),
+          domElements: clippyElements.length,
+          currentAgent: window.clippy?.agent || "Unknown"
+        };
+      };
+
       window.debugReact95Provider = () => {
         console.log('🔬 React95 ClippyProvider Debug:');
         console.log(`- Provider agent prop: ${currentAgent}`);
@@ -1573,14 +1628,23 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         if (clippyEl) {
           const dataAgent = clippyEl.getAttribute('data-agent');
           const children = clippyEl.children;
+          const rect = clippyEl.getBoundingClientRect();
+          const style = window.getComputedStyle(clippyEl);
+          
           console.log('🔍 Clippy element inspection:');
           console.log(`- data-agent attribute: ${dataAgent}`);
+          console.log(`- Current agent in state: ${currentAgent}`);
           console.log(`- children count: ${children.length}`);
+          console.log(`- Position: left=${style.left}, top=${style.top}, right=${style.right}, bottom=${style.bottom}`);
+          console.log(`- Transform: ${style.transform}`);
+          console.log(`- BoundingRect: x=${rect.x}, y=${rect.y}, width=${rect.width}, height=${rect.height}`);
+          console.log(`- Visible: ${clippyEl.offsetParent !== null}`);
+          console.log(`- Z-index: ${style.zIndex}`);
           
           Array.from(children).forEach((child, index) => {
-            const style = window.getComputedStyle(child);
-            const bgImage = style.backgroundImage;
-            const display = style.display;
+            const childStyle = window.getComputedStyle(child);
+            const bgImage = childStyle.backgroundImage;
+            const display = childStyle.display;
             console.log(`  Child ${index}: display=${display}, bg=${bgImage !== 'none' ? 'has background' : 'no background'}`);
           });
           
@@ -1597,8 +1661,44 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           // Check React95 clippy hook
           console.log(`- ClippyController clippy instance:`, !!clippyInstanceRef.current);
           
+          // Check overlay
+          const overlay = document.getElementById('clippy-clickable-overlay');
+          if (overlay) {
+            const overlayRect = overlay.getBoundingClientRect();
+            const overlayStyle = window.getComputedStyle(overlay);
+            console.log(`- Overlay found: x=${overlayRect.x}, y=${overlayRect.y}, w=${overlayRect.width}, h=${overlayRect.height}`);
+            console.log(`- Overlay transform: ${overlayStyle.transform}`);
+          } else {
+            console.log(`- ❌ No overlay found`);
+          }
+          
         } else {
           console.log('❌ No .clippy element found');
+        }
+      };
+      
+      window.forceAgentRepositioning = () => {
+        console.log(`🔧 Forcing repositioning for agent: ${currentAgent}`);
+        const clippyEl = document.querySelector('.clippy');
+        const overlayEl = document.getElementById('clippy-clickable-overlay');
+        
+        if (clippyEl && ClippyPositioning?.positionClippyAndOverlay) {
+          const positioned = ClippyPositioning.positionClippyAndOverlay(
+            clippyEl,
+            overlayEl,
+            null
+          );
+          console.log(`Repositioning result: ${positioned ? '✅ Success' : '❌ Failed'}`);
+          
+          // Show position after repositioning
+          setTimeout(() => {
+            window.inspectClippyElement();
+          }, 100);
+          
+          return positioned;
+        } else {
+          console.log(`❌ Cannot reposition - missing element or positioning function`);
+          return false;
         }
       };
       
@@ -1982,6 +2082,20 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           }
           
           devLog(`ClippyController updated with agent: ${currentAgent}`);
+          
+          // FIXED: Force positioning refresh after agent change
+          setTimeout(() => {
+            const clippyEl = document.querySelector(".clippy");
+            if (clippyEl && ClippyPositioning?.positionClippyAndOverlay) {
+              const overlayEl = document.getElementById("clippy-clickable-overlay");
+              const positioned = ClippyPositioning.positionClippyAndOverlay(
+                clippyEl,
+                overlayEl,
+                null
+              );
+              devLog(`Post-agent-change positioning for ${currentAgent}: ${positioned ? 'success' : 'failed'}`);
+            }
+          }, 200); // Wait for agent to fully load
         }
       }
     }, [currentAgent, clippy]);
@@ -2032,8 +2146,24 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             const clippyEl = document.querySelector(".clippy");
             if (!clippyEl) return false;
 
-            // Agent-specific styling if needed
+            // Agent-specific styling and positioning setup
             clippyEl.setAttribute("data-agent", currentAgent);
+            
+            // FIXED: Re-run positioning logic after agent change to ensure correct placement
+            devLog(`Setting up positioning for agent: ${currentAgent}`);
+            
+            // Force immediate positioning for the new agent
+            setTimeout(() => {
+              if (ClippyPositioning?.positionClippyAndOverlay) {
+                const overlayEl = document.getElementById("clippy-clickable-overlay");
+                const positioned = ClippyPositioning.positionClippyAndOverlay(
+                  clippyEl,
+                  overlayEl,
+                  null
+                );
+                devLog(`Agent ${currentAgent} positioning: ${positioned ? 'success' : 'failed'}`);
+              }
+            }, 100); // Small delay to let React95 complete agent loading
 
             // FIXED: Bind right-click directly to Clippy element
             const addRightClickToElement = (element, elementName) => {
