@@ -1226,16 +1226,39 @@ class ClippyPositioning {
     if (!clippyElement) return false;
 
     const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
-    devLog(`Positioning Clippy and overlay for zoom level ${currentZoomLevel}`);
+    const agentName = clippyElement.getAttribute('data-agent') || 'Unknown';
+    devLog(`Positioning agent ${agentName} and overlay for zoom level ${currentZoomLevel}`);
+
+    // ENHANCED: Ensure all agents get the same essential properties as Clippy
+    clippyElement.classList.add("clippy");
+    clippyElement.classList.add("clippy-anchored");
+    
+    // Force positioning properties that all agents should have
+    clippyElement.style.position = "fixed";
+    clippyElement.style.zIndex = isMobile ? "1500" : "2000";
+    clippyElement.style.pointerEvents = "auto";
+    clippyElement.style.visibility = "visible";
+    clippyElement.style.opacity = "1";
+    clippyElement.style.display = "block";
 
     // Calculate the desired position
     const position = isMobile
       ? this.calculateMobilePosition(taskbarHeight)
       : this.getClippyPosition(customPosition);
 
-    // Apply basic styles (like position: fixed, transform) using applyStyles
-    // applyStyles will handle !important for transform
+    // ENHANCED: Apply comprehensive positioning for all agents
     const clippySuccess = this.applyStyles(clippyElement, position);
+
+    // Ensure proper transform is applied for all agents
+    if (clippySuccess) {
+      const zoomFactor = this.getMonitorZoomFactor();
+      const scale = isMobile ? 1 : (0.95 * zoomFactor);
+      clippyElement.style.transform = `translateZ(0) scale(${scale})`;
+      clippyElement.style.transformOrigin = "center bottom";
+      clippyElement.style.willChange = "transform";
+      
+      devLog(`Agent ${agentName} transform applied: scale(${scale})`);
+    }
 
     if (
       !isMobile &&
@@ -1243,17 +1266,28 @@ class ClippyPositioning {
       !resizeHandler.zoomLevelAnchors.has(currentZoomLevel)
     ) {
       devLog(
-        `Caching anchor after positioning for zoom level ${currentZoomLevel}`
+        `Caching anchor after positioning agent ${agentName} for zoom level ${currentZoomLevel}`
       );
       resizeHandler.cacheClippyAnchorPosition(clippyElement, currentZoomLevel);
     }
 
-    const overlaySuccess = overlayElement
-      ? this.positionOverlay(overlayElement, clippyElement)
-      : true;
+    // ENHANCED: Improved overlay positioning for all agents
+    let overlaySuccess = true;
+    if (overlayElement) {
+      overlaySuccess = this.positionOverlay(overlayElement, clippyElement);
+      
+      // Ensure overlay gets proper z-index for all agents
+      if (overlaySuccess) {
+        overlayElement.style.zIndex = isMobile ? "1510" : "2010";
+        overlayElement.style.background = "transparent";
+        overlayElement.style.pointerEvents = "auto";
+        overlayElement.style.cursor = "pointer";
+        devLog(`Agent ${agentName} overlay configured with z-index ${overlayElement.style.zIndex}`);
+      }
+    }
 
     const success = clippySuccess && overlaySuccess;
-    devLog(`Synchronized positioning: ${success ? "success" : "failed"}`);
+    devLog(`Agent ${agentName} synchronized positioning: ${success ? "success" : "failed"}`);
 
     return success;
   }
