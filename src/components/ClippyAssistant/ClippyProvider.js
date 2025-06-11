@@ -1312,6 +1312,15 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           
           console.log('📋 CAPTURED CLIPPY POSITIONING RULES:', clippyStyles);
           
+          // CAPTURE CLIPPY'S OVERLAY MINIMUM DIMENSIONS FOR CONSISTENCY
+          if (!window._clippyMinOverlayDimensions) {
+            window._clippyMinOverlayDimensions = {
+              width: rect.width,
+              height: rect.height
+            };
+            console.log('📏 CAPTURED CLIPPY MINIMUM OVERLAY DIMENSIONS:', window._clippyMinOverlayDimensions);
+          }
+          
           // Store globally for immediate application to new agents
           window._clippyCorrectStyles = clippyStyles;
         }
@@ -1825,23 +1834,67 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             console.log(`✅ Applied positioning to clippy element ${index}`);
           });
           
-          // Position overlay to match agents
+          // Position overlay with minimum dimensions and smooth viewport constraints
           const overlayEl = document.getElementById('clippy-clickable-overlay');
           if (overlayEl && activeClippyEls.length > 0) {
             const firstActiveAgent = activeClippyEls[0];
-            const rect = firstActiveAgent.getBoundingClientRect();
+            const agentRect = firstActiveAgent.getBoundingClientRect();
             
+            // Use Clippy's minimum dimensions as baseline
+            const minDimensions = window._clippyMinOverlayDimensions || { width: 124, height: 93 };
+            
+            // Get desktop viewport boundaries
+            const desktop = document.querySelector('.desktop.screen') || 
+                           document.querySelector('.desktop') || 
+                           document.querySelector('.w98');
+            
+            let constrainedOverlay = {
+              left: agentRect.left,
+              top: agentRect.top,
+              // Never smaller than Clippy's original dimensions
+              width: Math.max(agentRect.width, minDimensions.width),
+              height: Math.max(agentRect.height, minDimensions.height)
+            };
+            
+            if (desktop) {
+              const desktopRect = desktop.getBoundingClientRect();
+              console.log(`📐 Desktop viewport: ${desktopRect.width}x${desktopRect.height} at (${desktopRect.left}, ${desktopRect.top})`);
+              console.log(`📐 Agent size: ${agentRect.width}x${agentRect.height}, Min: ${minDimensions.width}x${minDimensions.height}`);
+              
+              // Constrain overlay to stay within desktop viewport
+              const maxRight = desktopRect.left + desktopRect.width;
+              const maxBottom = desktopRect.top + desktopRect.height;
+              
+              // Adjust width if overlay would extend beyond right edge (but maintain minimum)
+              if (agentRect.left + constrainedOverlay.width > maxRight) {
+                constrainedOverlay.width = Math.max(minDimensions.width, maxRight - agentRect.left);
+                console.log(`⚠️ Overlay width constrained to ${constrainedOverlay.width}px (min: ${minDimensions.width}px)`);
+              }
+              
+              // Adjust height if overlay would extend beyond bottom edge (but maintain minimum)
+              if (agentRect.top + constrainedOverlay.height > maxBottom) {
+                constrainedOverlay.height = Math.max(minDimensions.height, maxBottom - agentRect.top);
+                console.log(`⚠️ Overlay height constrained to ${constrainedOverlay.height}px (min: ${minDimensions.height}px)`);
+              }
+              
+              // Ensure overlay doesn't start outside desktop boundaries
+              constrainedOverlay.left = Math.max(desktopRect.left, Math.min(constrainedOverlay.left, maxRight - constrainedOverlay.width));
+              constrainedOverlay.top = Math.max(desktopRect.top, Math.min(constrainedOverlay.top, maxBottom - constrainedOverlay.height));
+            }
+            
+            // Apply constrained overlay positioning with smooth transition
             overlayEl.style.position = 'fixed';
-            overlayEl.style.left = `${rect.left}px`;
-            overlayEl.style.top = `${rect.top}px`;
-            overlayEl.style.width = '124px';
-            overlayEl.style.height = '93px';
-            overlayEl.style.zIndex = '2010';
+            overlayEl.style.left = `${constrainedOverlay.left}px`;
+            overlayEl.style.top = `${constrainedOverlay.top}px`;
+            overlayEl.style.width = `${constrainedOverlay.width}px`;
+            overlayEl.style.height = `${constrainedOverlay.height}px`;
+            overlayEl.style.zIndex = window.ClippyPositioning?.isMobile ? '1510' : '2010';
             overlayEl.style.background = 'transparent';
             overlayEl.style.pointerEvents = 'auto';
             overlayEl.style.cursor = 'pointer';
+            overlayEl.style.transition = 'all 0.2s ease-out'; // Smooth transitions
             
-            console.log(`✅ Overlay positioned to match agent at: ${rect.left}px, ${rect.top}px`);
+            console.log(`✅ Overlay positioned: ${constrainedOverlay.width}x${constrainedOverlay.height} at (${constrainedOverlay.left}, ${constrainedOverlay.top})`);
           }
           
           // Verify all elements after positioning
@@ -2542,6 +2595,58 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                   );
                   if (resizeStarted) {
                     console.log(`✅ Resize handling active for ${currentAgent}`);
+                    
+                    // FINAL: Ensure overlay maintains minimum dimensions and smooth positioning
+                    setTimeout(() => {
+                      if (overlayEl && newClippyEl) {
+                        console.log(`🎯 Final smooth overlay positioning for ${currentAgent}`);
+                        
+                        const agentRect = newClippyEl.getBoundingClientRect();
+                        const minDimensions = window._clippyMinOverlayDimensions || { width: 124, height: 93 };
+                        const desktop = document.querySelector('.desktop.screen') || 
+                                       document.querySelector('.desktop') || 
+                                       document.querySelector('.w98');
+                        
+                        let constrainedOverlay = {
+                          left: agentRect.left,
+                          top: agentRect.top,
+                          // Never smaller than Clippy's original dimensions
+                          width: Math.max(agentRect.width, minDimensions.width),
+                          height: Math.max(agentRect.height, minDimensions.height)
+                        };
+                        
+                        if (desktop) {
+                          const desktopRect = desktop.getBoundingClientRect();
+                          const maxRight = desktopRect.left + desktopRect.width;
+                          const maxBottom = desktopRect.top + desktopRect.height;
+                          
+                          // Apply viewport constraints while maintaining minimums
+                          if (agentRect.left + constrainedOverlay.width > maxRight) {
+                            constrainedOverlay.width = Math.max(minDimensions.width, maxRight - agentRect.left);
+                          }
+                          if (agentRect.top + constrainedOverlay.height > maxBottom) {
+                            constrainedOverlay.height = Math.max(minDimensions.height, maxBottom - agentRect.top);
+                          }
+                          constrainedOverlay.left = Math.max(desktopRect.left, Math.min(constrainedOverlay.left, maxRight - constrainedOverlay.width));
+                          constrainedOverlay.top = Math.max(desktopRect.top, Math.min(constrainedOverlay.top, maxBottom - constrainedOverlay.height));
+                        }
+                        
+                        // Apply final positioning with smooth transition
+                        overlayEl.style.position = 'fixed';
+                        overlayEl.style.left = `${constrainedOverlay.left}px`;
+                        overlayEl.style.top = `${constrainedOverlay.top}px`;
+                        overlayEl.style.width = `${constrainedOverlay.width}px`;
+                        overlayEl.style.height = `${constrainedOverlay.height}px`;
+                        overlayEl.style.zIndex = window.ClippyPositioning?.isMobile ? '1510' : '2010';
+                        overlayEl.style.background = 'transparent';
+                        overlayEl.style.pointerEvents = 'auto';
+                        overlayEl.style.cursor = 'pointer';
+                        overlayEl.style.transition = 'all 0.2s ease-out';
+                        
+                        console.log(`✅ Final overlay: ${constrainedOverlay.width}x${constrainedOverlay.height} at (${constrainedOverlay.left}, ${constrainedOverlay.top}), min: ${minDimensions.width}x${minDimensions.height}`);
+                      }
+                    }, 50); // Small delay to ensure everything is stable
+                    
                   } else {
                     console.log(`❌ Failed to start resize handling for ${currentAgent}`);
                   }
