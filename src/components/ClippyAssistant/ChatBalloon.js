@@ -16,9 +16,6 @@ const getAgentNickname = (agentName) => {
     "Genius": "Genius",
     "Merlin": "Merlin",
     "F1": "F1",
-    "Peedy": "Peedy", 
-    "Rocky": "Rocky",
-    "Rover": "Rover",
   };
   return nicknames[agentName] || "Clippy";
 };

@@ -14,8 +14,6 @@ Welcome to Hydra98's Enhanced AI Assistant System!
   gorilla
 • Genie - A magical helper with mystical wisdom
 • Merlin - The wise wizard with ancient knowledge
-• Rover - The reliable search and assistance 
-  companion
 
 ╔════════════════════════════════════════╗
 ║              DESKTOP INTERACTIONS              ║

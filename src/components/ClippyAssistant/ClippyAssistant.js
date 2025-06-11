@@ -45,7 +45,7 @@ const ClippyAssistant = memo((props) => {
     console.log('🔍 AGENTS from React95:', AGENTS);
     console.log('🔍 Available agent keys:', Object.keys(AGENTS || {}));
     
-    // Use all 10 agents available in React95 library
+    // Use 7 agents available in React95 library
     const allAgents = [
       "Clippy",    // Classic paperclip
       "Links",     // Cat
@@ -54,9 +54,6 @@ const ClippyAssistant = memo((props) => {
       "Genius",    // Einstein-like character
       "Merlin",    // Wizard
       "F1",        // Robot assistant
-      "Peedy",     // Parrot
-      "Rocky",     // Brown dog
-      "Rover",     // Dog (search)
     ];
     
     console.log('🎭 Using static agent list:', allAgents);

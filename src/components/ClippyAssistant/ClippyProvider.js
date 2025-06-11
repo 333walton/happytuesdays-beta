@@ -286,7 +286,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       // Validate agent name against official React95 agents
       const officialAgents = [
         "Clippy", "Links", "Bonzi", "Genie", "Genius", 
-        "Merlin", "F1", "Peedy", "Rocky", "Rover"
+        "Merlin", "F1"
       ];
       
       if (!officialAgents.includes(newAgent)) {
@@ -1537,11 +1537,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return true;
       };
 
-      // FIXED: Testing functions for all 10 agents with visual verification
+      // FIXED: Testing functions for all 7 agents with visual verification
       window.testAllAgents = () => {
         const allAgents = [
           "Clippy", "Links", "Bonzi", "Genie", "Genius", 
-          "Merlin", "F1", "Peedy", "Rocky", "Rover"
+          "Merlin", "F1"
         ];
         let currentIndex = 0;
         
@@ -1595,7 +1595,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         // Official React95 agent names only
         const officialAgents = [
           "Clippy", "Links", "Bonzi", "Genie", "Genius", 
-          "Merlin", "F1", "Peedy", "Rocky", "Rover"
+          "Merlin", "F1"
         ];
         
         // Validate agent name against official list
@@ -1616,7 +1616,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       window.listAvailableAgents = () => {
         const officialAgents = [
           "Clippy", "Links", "Bonzi", "Genie", "Genius", 
-          "Merlin", "F1", "Peedy", "Rocky", "Rover"
+          "Merlin", "F1"
         ];
         console.log("🎭 Official React95 agents:", officialAgents);
         console.log(`🎯 Current agent: ${currentAgent}`);
@@ -3194,24 +3194,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         /* Merlin keeps all Clippy positioning rules */
       }
 
-      .clippy[data-agent="Rover"] {
-        /* Rover keeps all Clippy positioning rules */
-      }
-
       .clippy[data-agent="Links"] {
         /* Links keeps all Clippy positioning rules */
       }
 
       .clippy[data-agent="F1"] {
         /* F1 keeps all Clippy positioning rules */
-      }
-
-      .clippy[data-agent="Peedy"] {
-        /* Peedy keeps all Clippy positioning rules */
-      }
-
-      .clippy[data-agent="Rocky"] {
-        /* Rocky keeps all Clippy positioning rules */
       }
 
       .clippy[data-agent="Genius"] {
@@ -3356,9 +3344,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               "Genius",    // Einstein-like character
               "Merlin",    // Wizard
               "F1",        // Robot assistant
-              "Peedy",     // Parrot
-              "Rocky",     // Brown dog
-              "Rover",     // Dog (search)
             ]}
             onAction={(action, data) => {
               devLog(`Context menu action: ${action}`, data);
