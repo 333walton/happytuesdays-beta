@@ -1316,12 +1316,19 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           window._clippyCorrectStyles = clippyStyles;
         }
         
-        // REMOVE old agents completely from the DOM
+        // REMOVE old agents completely from the DOM and stop their resize handling
         if (currentAgent && currentAgent !== agent) {
           console.log(`🧹 Removing old agent from DOM: ${currentAgent}`);
           const oldAgents = document.querySelectorAll('.clippy');
           oldAgents.forEach((el, index) => {
             console.log(`🗑️ Removing old agent element ${index} from DOM`);
+            
+            // Stop resize handling for old agent before removing
+            if (window.ClippyPositioning && window.ClippyPositioning.stopResizeHandling) {
+              console.log(`🛑 Stopping resize handling for old agent element ${index}`);
+              window.ClippyPositioning.stopResizeHandling(el);
+            }
+            
             if (el.parentNode) {
               el.parentNode.removeChild(el);
               console.log(`✅ Old agent element ${index} removed from DOM`);
@@ -2513,11 +2520,34 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               void clippyEl.offsetHeight;
             }
 
-            // MINIMAL: Just apply our positioning after agent is loaded
+            // COMPLETE: Apply positioning AND start resize handling for all agents
             setTimeout(() => {
-              if (window.applyClippyPositioning) {
-                console.log(`🎯 Applying positioning for ${currentAgent}`);
-                window.applyClippyPositioning(currentAgent);
+              const newClippyEl = document.querySelector('.clippy');
+              const overlayEl = document.getElementById('clippy-clickable-overlay');
+              
+              if (newClippyEl) {
+                // Apply our positioning
+                if (window.applyClippyPositioning) {
+                  console.log(`🎯 Applying positioning for ${currentAgent}`);
+                  window.applyClippyPositioning(currentAgent);
+                }
+                
+                // CRITICAL: Start resize handling for ALL agents, not just Clippy
+                if (window.ClippyPositioning && window.ClippyPositioning.startResizeHandling) {
+                  console.log(`🔄 Starting resize handling for ${currentAgent}`);
+                  const resizeStarted = window.ClippyPositioning.startResizeHandling(
+                    newClippyEl,
+                    overlayEl,
+                    null // customPositionGetter
+                  );
+                  if (resizeStarted) {
+                    console.log(`✅ Resize handling active for ${currentAgent}`);
+                  } else {
+                    console.log(`❌ Failed to start resize handling for ${currentAgent}`);
+                  }
+                } else {
+                  console.log(`❌ ClippyPositioning.startResizeHandling not available`);
+                }
               }
             }, 200); // Give React95 time to fully load the agent
 
