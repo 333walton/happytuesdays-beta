@@ -3,8 +3,22 @@
     "allow": [
       "Bash(rg:*)",
       "Bash(grep:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(cd /workspace)",
+      "Bash(timeout:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(node:*)",
+      "Bash(ls:*)",
+      "Bash(pwd:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(/bin/*)",
+      "Bash(/usr/bin/*)",
+      "FileSystem(/home/*)",
+      "FileSystem(/usr/*)"
     ],
     "deny": []
-  }
+  },
+  "model": "claude-4-sonnet"
 }

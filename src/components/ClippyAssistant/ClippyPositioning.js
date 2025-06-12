@@ -1,5 +1,13 @@
-// ClippyPositioning.js - Optimized with reduced logging and iOS Safari performance improvements
+// ClippyPositioning.js - Optimized with modular mobile handling
 // This is the SINGLE source of truth for all Clippy positioning
+
+// Import mobile modules
+import {
+  calculateMobilePosition,
+  enforceMobileBoundaries,
+  applyMobilePosition,
+  positionMobileOverlay,
+} from "./MobilePositioning";
 
 // Optimized logging system with reduced frequency
 const isDev = process.env.NODE_ENV === "development";
@@ -52,14 +60,11 @@ const isIOSSafari = (() => {
     const isSafari = /Safari/.test(userAgent);
 
     // More comprehensive check for common non-Safari browser indicators on iOS
-    // We look for specific strings that typically appear *instead* of or *in addition* to the base Safari string
     const isLikelyNotSafari =
       /CriOS\/|FxiOS\/|EdgiOS\/|OPiOS\/|Coast\/|AlohaBrowser\/|Vivaldi\/|DuckDuckGo\//.test(
         userAgent
       );
 
-    // It's iOS Safari if it's iOS, contains 'Safari', and does NOT contain stronger indicators of other browsers
-    // This is still heuristic and may not be perfect for all edge cases.
     return isIOS && isSafari && !isLikelyNotSafari;
   } catch {
     return false;
@@ -71,7 +76,6 @@ const isGoogleAppOnIOS = (() => {
   try {
     const userAgent = navigator.userAgent || "";
     const isIOS = /iPad|iPhone|iPod/.test(userAgent);
-    // Look for patterns typical in Google App (GSA) user agents
     const isGoogleApp = /GSA\//.test(userAgent);
     return isIOS && isGoogleApp;
   } catch {
@@ -558,55 +562,8 @@ class ClippyPositioning {
   }
 
   static calculateMobilePosition(taskbarHeight = 26) {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const clippyWidth = 124;
-    const clippyHeight = 93;
-    const gapAboveTaskbar = 13; // Adjusted gap above taskbar
-    const gapFromRight = 4;
-
-    // Try to detect the taskbar notification area
-    const taskbarNotifications = document.querySelector(
-      ".TaskBar__notifications"
-    );
-    let bottom, right;
-
-    if (taskbarNotifications) {
-      const taskbarRect = taskbarNotifications.getBoundingClientRect();
-      // Distance from bottom of viewport to top of taskbar
-      const taskbarFromBottom = viewportHeight - taskbarRect.top;
-      bottom = taskbarFromBottom + gapAboveTaskbar;
-      right = gapFromRight;
-    } else {
-      // Fallback defaults (your tuned values)
-      bottom = 115;
-      right = gapFromRight;
-
-      // Browser-specific adjustments
-      if (isIOSSafari) {
-        bottom += 30;
-      } else if (window.navigator.userAgent.includes("CriOS")) {
-        bottom += 15;
-        right += 3;
-      } else if (isGoogleAppOnIOS) {
-        bottom -= 30;
-      }
-    }
-
-    // Constrain to viewport (never off-screen)
-    bottom = Math.max(10, Math.min(bottom, viewportHeight - clippyHeight - 10));
-    right = Math.max(4, Math.min(right, viewportWidth - clippyWidth - 4));
-
-    return {
-      position: "fixed",
-      bottom: `${bottom}px`,
-      right: `${right}px`,
-      left: "auto",
-      top: "auto",
-      transform: "translateZ(0) scale(1)",
-      transformOrigin: "center bottom",
-      zIndex: "1500",
-    };
+    // Delegate to the new module
+    return calculateMobilePosition();
   }
 
   static calculateDesktopPosition() {
@@ -669,7 +626,7 @@ class ClippyPositioning {
     if (!clippyElement) return null;
 
     const rect = clippyElement.getBoundingClientRect();
-    
+
     // CRITICAL: Account for agent scale factor on desktop
     let scaleFactor = 1.0;
     if (!isMobile) {
@@ -677,7 +634,7 @@ class ClippyPositioning {
       scaleFactor = 0.95 * zoomFactor; // Desktop agents are scaled to 0.95 * zoom
       devLog(`Agent scale factor: ${scaleFactor} (zoom: ${zoomFactor})`);
     }
-    
+
     // Get desktop viewport boundaries for desktop positioning
     let viewportWidth = window.innerWidth;
     let viewportHeight = window.innerHeight;
@@ -686,10 +643,11 @@ class ClippyPositioning {
 
     if (!isMobile) {
       // For desktop, get the actual desktop viewport boundaries
-      const desktop = document.querySelector(".desktop.screen") ||
-                     document.querySelector(".desktop") ||
-                     document.querySelector(".w98");
-      
+      const desktop =
+        document.querySelector(".desktop.screen") ||
+        document.querySelector(".desktop") ||
+        document.querySelector(".w98");
+
       if (desktop) {
         const desktopRect = desktop.getBoundingClientRect();
         viewportWidth = desktopRect.width;
@@ -702,16 +660,24 @@ class ClippyPositioning {
     // Calculate the agent's VISUAL dimensions and position accounting for scale
     const visualWidth = rect.width * scaleFactor;
     const visualHeight = rect.height * scaleFactor;
-    
+
     // For scale transform with "center bottom" origin, the visual bottom stays the same
     // but the visual top and center shift due to scaling
     const visualCenterX = rect.left + rect.width / 2;
     const visualBottom = rect.bottom;
     const visualTop = visualBottom - visualHeight;
     const visualLeft = visualCenterX - visualWidth / 2;
-    
-    devLog(`Agent visual bounds: ${visualLeft.toFixed(1)}, ${visualTop.toFixed(1)}, ${visualWidth.toFixed(1)}x${visualHeight.toFixed(1)}`);
-    devLog(`Agent DOM bounds: ${rect.left.toFixed(1)}, ${rect.top.toFixed(1)}, ${rect.width.toFixed(1)}x${rect.height.toFixed(1)}`);
+
+    devLog(
+      `Agent visual bounds: ${visualLeft.toFixed(1)}, ${visualTop.toFixed(
+        1
+      )}, ${visualWidth.toFixed(1)}x${visualHeight.toFixed(1)}`
+    );
+    devLog(
+      `Agent DOM bounds: ${rect.left.toFixed(1)}, ${rect.top.toFixed(
+        1
+      )}, ${rect.width.toFixed(1)}x${rect.height.toFixed(1)}`
+    );
 
     // Overlay should match the agent's VISUAL dimensions and position
     let overlayLeft = visualLeft;
@@ -722,15 +688,21 @@ class ClippyPositioning {
     // Enforce viewport boundaries - overlay must stay within desktop borders
     const maxLeft = viewportLeft + viewportWidth - overlayWidth;
     const maxTop = viewportTop + viewportHeight - overlayHeight;
-    
+
     // Constrain to viewport boundaries
     overlayLeft = Math.max(viewportLeft, Math.min(overlayLeft, maxLeft));
     overlayTop = Math.max(viewportTop, Math.min(overlayTop, maxTop));
 
     // Calculate final overlay bottom for alignment verification
     const constrainedOverlayBottom = overlayTop + overlayHeight;
-    
-    devLog(`Overlay positioning: visual agent bottom=${visualBottom.toFixed(1)}, overlay bottom=${constrainedOverlayBottom.toFixed(1)}, aligned=${Math.abs(visualBottom - constrainedOverlayBottom) < 1}`);
+
+    devLog(
+      `Overlay positioning: visual agent bottom=${visualBottom.toFixed(
+        1
+      )}, overlay bottom=${constrainedOverlayBottom.toFixed(1)}, aligned=${
+        Math.abs(visualBottom - constrainedOverlayBottom) < 1
+      }`
+    );
 
     return {
       ...CLIPPY_POSITIONS.overlay,
@@ -1181,56 +1153,9 @@ class ClippyPositioning {
       }
     }
 
-    // For mobile, use a more forceful approach
     if (isMobile) {
-      const position = this.calculateMobilePosition(taskbarHeight);
-
-      // Method 1: Direct style attribute override
-      const forceStyles = `
-        position: fixed !important;
-        bottom: ${position.bottom} !important;
-        right: ${position.right} !important;
-        left: auto !important;
-        top: auto !important;
-        transform: translateZ(0) scale(1) !important;
-        transform-origin: center bottom !important;
-        z-index: 1500 !important;
-      `;
-
-      clippyElement.setAttribute("style", forceStyles);
-
-      // Method 2: Use setProperty with important flag
-      requestAnimationFrame(() => {
-        clippyElement.style.setProperty("bottom", position.bottom, "important");
-        clippyElement.style.setProperty("right", position.right, "important");
-        clippyElement.style.setProperty("position", "fixed", "important");
-        clippyElement.style.setProperty("left", "auto", "important");
-        clippyElement.style.setProperty("top", "auto", "important");
-      });
-
-      // Method 3: Create a style sheet rule specifically for this Clippy instance
-      const styleId = "clippy-mobile-position-override";
-      let styleElement = document.getElementById(styleId);
-      if (!styleElement) {
-        styleElement = document.createElement("style");
-        styleElement.id = styleId;
-        document.head.appendChild(styleElement);
-      }
-      styleElement.textContent = `
-        .clippy {
-          bottom: ${position.bottom} !important;
-          right: ${position.right} !important;
-          position: fixed !important;
-          left: auto !important;
-          top: auto !important;
-        }
-      `;
-
-      // Only log mobile position in verbose mode
-      devLog(
-        `Mobile position forced: bottom=${position.bottom}, right=${position.right}`
-      );
-      return true;
+      const position = calculateMobilePosition(customPosition);
+      return applyMobilePosition(clippyElement, position, false);
     }
 
     const position = isMobile
@@ -1241,70 +1166,87 @@ class ClippyPositioning {
 
   static positionOverlay(overlayElement, clippyElement) {
     if (!overlayElement || !clippyElement) return false;
-    
+
+    if (isMobile) {
+      return positionMobileOverlay(overlayElement, clippyElement);
+    }
+
     // Get current agent name
-    const currentAgent = clippyElement.getAttribute('data-agent') || 'Unknown';
-    const syncedAgent = overlayElement.getAttribute('data-synced-agent') || '';
-    
+    const currentAgent = clippyElement.getAttribute("data-agent") || "Unknown";
+    const syncedAgent = overlayElement.getAttribute("data-synced-agent") || "";
+
     // Check if overlay is already synchronized to the current agent
-    if (this.isOverlaySynchronized(overlayElement) && syncedAgent === currentAgent) {
-      devLog(`Overlay already synchronized to ${currentAgent}, skipping repositioning`);
+    if (
+      this.isOverlaySynchronized(overlayElement) &&
+      syncedAgent === currentAgent
+    ) {
+      devLog(
+        `Overlay already synchronized to ${currentAgent}, skipping repositioning`
+      );
       return true;
     }
-    
+
     // If agent changed, log it
     if (syncedAgent && syncedAgent !== currentAgent) {
-      devLog(`Agent changed from ${syncedAgent} to ${currentAgent} - repositioning required`);
+      devLog(
+        `Agent changed from ${syncedAgent} to ${currentAgent} - repositioning required`
+      );
     }
-    
+
     const agentRect = clippyElement.getBoundingClientRect();
     const position = this.getOverlayPosition(clippyElement);
     if (!position) return false;
-    
+
     // Remove transform from overlay position to avoid conflicts
     if (position.transform) delete position.transform;
-    
+
     // Apply overlay position
     const overlaySuccess = this.applyStyles(overlayElement, position);
-    
+
     if (overlaySuccess) {
       // Check if overlay bottom alignment is correct after positioning
       const overlayRect = overlayElement.getBoundingClientRect();
       const agentBottom = agentRect.bottom;
       const overlayBottom = overlayRect.bottom;
       const bottomMisalignment = Math.abs(agentBottom - overlayBottom);
-      
+
       // If there's significant misalignment (more than 1px), adjust the agent position
       if (bottomMisalignment > 1) {
-        devLog(`Bottom misalignment detected: ${bottomMisalignment}px. Adjusting agent position.`);
-        
+        devLog(
+          `Bottom misalignment detected: ${bottomMisalignment}px. Adjusting agent position.`
+        );
+
         // Calculate the agent's new top position to align bottoms
         const agentHeight = agentRect.height;
         const newAgentTop = overlayBottom - agentHeight;
-        
+
         // Only adjust if the new position would keep agent within viewport
         if (!isMobile) {
-          const desktop = document.querySelector(".desktop.screen") ||
-                         document.querySelector(".desktop") ||
-                         document.querySelector(".w98");
-          
+          const desktop =
+            document.querySelector(".desktop.screen") ||
+            document.querySelector(".desktop") ||
+            document.querySelector(".w98");
+
           if (desktop) {
             const desktopRect = desktop.getBoundingClientRect();
             const minAgentTop = desktopRect.top;
-            const maxAgentTop = desktopRect.top + desktopRect.height - agentHeight;
-            
+            const maxAgentTop =
+              desktopRect.top + desktopRect.height - agentHeight;
+
             if (newAgentTop >= minAgentTop && newAgentTop <= maxAgentTop) {
               // Adjust agent position to align with overlay bottom
               clippyElement.style.top = `${newAgentTop}px`;
               clippyElement.style.bottom = "auto";
-              
-              devLog(`Agent position adjusted to align bottom edges: top=${newAgentTop}px`);
+
+              devLog(
+                `Agent position adjusted to align bottom edges: top=${newAgentTop}px`
+              );
             }
           }
         }
       }
     }
-    
+
     return overlaySuccess;
   }
 
@@ -1312,53 +1254,80 @@ class ClippyPositioning {
     if (!overlayElement || !clippyElement) return false;
 
     devLog("Ensuring initial overlay positioning with scale awareness");
-    
+
     // Wait for agent's positioning, scaling, and dimensions to be fully established
     return new Promise((resolve) => {
       let attempts = 0;
       const maxAttempts = 200; // Maximum 2 second wait (increased for reliability)
-      
+
       const checkAndPosition = () => {
         attempts++;
-        
+
         const computedStyle = window.getComputedStyle(clippyElement);
         const transform = computedStyle.transform;
         const rect = clippyElement.getBoundingClientRect();
-        
+
         // Check if agent is properly positioned and scaled
-        const hasValidTransform = transform && transform !== "none" && transform.includes("scale");
-        const hasValidPosition = rect.width > 0 && rect.height > 0 && rect.left > 0 && rect.top > 0;
-        const isProperlyPositioned = hasValidPosition && (isMobile || hasValidTransform);
-        
+        const hasValidTransform =
+          transform && transform !== "none" && transform.includes("scale");
+        const hasValidPosition =
+          rect.width > 0 && rect.height > 0 && rect.left > 0 && rect.top > 0;
+        const isProperlyPositioned =
+          hasValidPosition && (isMobile || hasValidTransform);
+
         // Additional check: ensure agent is visible and has reasonable dimensions
         const hasReasonableDimensions = rect.width > 50 && rect.height > 50; // Agent should be at least 50x50
         const isFullyReady = isProperlyPositioned && hasReasonableDimensions;
-        
-        if (attempts <= 5 || attempts % 10 === 0) { // Log every 10 attempts after first 5
-          devLog(`Attempt ${attempts}: transform=${transform}, position=${rect.left.toFixed(1)},${rect.top.toFixed(1)}, size=${rect.width.toFixed(1)}x${rect.height.toFixed(1)}, ready=${isFullyReady}`);
+
+        if (attempts <= 5 || attempts % 10 === 0) {
+          // Log every 10 attempts after first 5
+          devLog(
+            `Attempt ${attempts}: transform=${transform}, position=${rect.left.toFixed(
+              1
+            )},${rect.top.toFixed(1)}, size=${rect.width.toFixed(
+              1
+            )}x${rect.height.toFixed(1)}, ready=${isFullyReady}`
+          );
         }
-        
+
         if (isFullyReady) {
           // Agent is ready, set up synchronization instead of one-time positioning
-          const success = this.setupOverlaySynchronization(overlayElement, clippyElement);
-          devLog(`Initial overlay synchronization complete: ${success ? "success" : "failed"}`);
-          
+          const success = this.setupOverlaySynchronization(
+            overlayElement,
+            clippyElement
+          );
+          devLog(
+            `Initial overlay synchronization complete: ${
+              success ? "success" : "failed"
+            }`
+          );
+
           // Verify the overlay was positioned correctly
           if (success) {
             const overlayRect = overlayElement.getBoundingClientRect();
             const agentRect = clippyElement.getBoundingClientRect();
-            devLog(`Final verification: agent=${agentRect.left.toFixed(1)},${agentRect.top.toFixed(1)}, overlay=${overlayRect.left.toFixed(1)},${overlayRect.top.toFixed(1)}`);
-            
+            devLog(
+              `Final verification: agent=${agentRect.left.toFixed(
+                1
+              )},${agentRect.top.toFixed(
+                1
+              )}, overlay=${overlayRect.left.toFixed(
+                1
+              )},${overlayRect.top.toFixed(1)}`
+            );
+
             // Double-check alignment
             const leftAligned = Math.abs(agentRect.left - overlayRect.left) < 2;
             const topAligned = Math.abs(agentRect.top - overlayRect.top) < 2;
             devLog(`Alignment check: left=${leftAligned}, top=${topAligned}`);
           }
-          
+
           resolve(success);
         } else if (attempts >= maxAttempts) {
           // Timeout reached, position anyway
-          devLog("Timeout reached, positioning overlay with current agent state");
+          devLog(
+            "Timeout reached, positioning overlay with current agent state"
+          );
           const success = this.positionOverlay(overlayElement, clippyElement);
           resolve(success);
         } else {
@@ -1366,7 +1335,7 @@ class ClippyPositioning {
           setTimeout(checkAndPosition, 10);
         }
       };
-      
+
       // Start checking immediately
       checkAndPosition();
     });
@@ -1410,8 +1379,8 @@ class ClippyPositioning {
     `;
 
     // Mark as synchronized to avoid unnecessary repositioning
-    overlayElement.setAttribute('data-synchronized', 'true');
-    clippyElement.setAttribute('data-overlay-synced', 'true');
+    overlayElement.setAttribute("data-synchronized", "true");
+    clippyElement.setAttribute("data-overlay-synced", "true");
 
     devLog("Overlay synchronization setup complete");
     return true;
@@ -1419,13 +1388,16 @@ class ClippyPositioning {
 
   // Check if overlay is already synchronized
   static isOverlaySynchronized(overlayElement) {
-    return overlayElement && overlayElement.getAttribute('data-synchronized') === 'true';
+    return (
+      overlayElement &&
+      overlayElement.getAttribute("data-synchronized") === "true"
+    );
   }
 
   // Clear overlay synchronization (force repositioning on next call)
   static clearOverlaySynchronization(overlayElement) {
     if (overlayElement) {
-      overlayElement.removeAttribute('data-synchronized');
+      overlayElement.removeAttribute("data-synchronized");
       devLog("Overlay synchronization cleared - will reposition on next call");
     }
   }
@@ -1434,20 +1406,25 @@ class ClippyPositioning {
   static handleAgentChange(overlayElement, clippyElement, agentName) {
     if (!overlayElement || !clippyElement) return false;
 
-    devLog(`Agent change detected: ${agentName} - forcing overlay repositioning`);
-    
+    devLog(
+      `Agent change detected: ${agentName} - forcing overlay repositioning`
+    );
+
     // Clear synchronization to force repositioning
     this.clearOverlaySynchronization(overlayElement);
-    
+
     // Set up new synchronization for this agent
-    const success = this.setupOverlaySynchronization(overlayElement, clippyElement);
-    
+    const success = this.setupOverlaySynchronization(
+      overlayElement,
+      clippyElement
+    );
+
     if (success) {
       // Mark which agent this overlay is synchronized to
-      overlayElement.setAttribute('data-synced-agent', agentName);
+      overlayElement.setAttribute("data-synced-agent", agentName);
       devLog(`Overlay successfully synchronized to agent: ${agentName}`);
     }
-    
+
     return success;
   }
 
@@ -1493,13 +1470,15 @@ class ClippyPositioning {
     if (!clippyElement) return false;
 
     const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
-    const agentName = clippyElement.getAttribute('data-agent') || 'Unknown';
-    devLog(`Positioning agent ${agentName} and overlay for zoom level ${currentZoomLevel}`);
+    const agentName = clippyElement.getAttribute("data-agent") || "Unknown";
+    devLog(
+      `Positioning agent ${agentName} and overlay for zoom level ${currentZoomLevel}`
+    );
 
     // ENHANCED: Ensure all agents get the same essential properties as Clippy
     clippyElement.classList.add("clippy");
     clippyElement.classList.add("clippy-anchored");
-    
+
     // Force positioning properties that all agents should have
     clippyElement.style.position = "fixed";
     clippyElement.style.zIndex = isMobile ? "1500" : "2000";
@@ -1510,49 +1489,76 @@ class ClippyPositioning {
 
     // FIXED: Preserve current position if agent was already positioned
     let position;
-    const hasCustomPosition = customPosition && customPosition.x !== undefined && customPosition.y !== undefined;
-    
+    const hasCustomPosition =
+      customPosition &&
+      customPosition.x !== undefined &&
+      customPosition.y !== undefined;
+
     if (hasCustomPosition) {
       // Use provided custom position
       position = isMobile
         ? this.calculateMobilePosition(taskbarHeight)
         : this.getClippyPosition(customPosition);
-      devLog(`Agent ${agentName} using custom position: ${customPosition.x}, ${customPosition.y}`);
+      devLog(
+        `Agent ${agentName} using custom position: ${customPosition.x}, ${customPosition.y}`
+      );
     } else {
       // Check if agent already has a positioned state - preserve it
       const currentRect = clippyElement.getBoundingClientRect();
-      const hasValidCurrentPosition = currentRect.width > 0 && currentRect.height > 0 &&
-        currentRect.left > 0 && currentRect.top > 0;
-      
-      if (hasValidCurrentPosition && !clippyElement.classList.contains('clippy-repositioning')) {
+      const hasValidCurrentPosition =
+        currentRect.width > 0 &&
+        currentRect.height > 0 &&
+        currentRect.left > 0 &&
+        currentRect.top > 0;
+
+      if (
+        hasValidCurrentPosition &&
+        !clippyElement.classList.contains("clippy-repositioning")
+      ) {
         // Agent is already positioned and not in the middle of repositioning - preserve current position
-        const currentLeft = parseFloat(clippyElement.style.left) || currentRect.left;
-        const currentTop = parseFloat(clippyElement.style.top) || currentRect.top;
-        
+        const currentLeft =
+          parseFloat(clippyElement.style.left) || currentRect.left;
+        const currentTop =
+          parseFloat(clippyElement.style.top) || currentRect.top;
+
         position = {
           position: "fixed",
           left: `${currentLeft}px`,
           top: `${currentTop}px`,
           right: "auto",
           bottom: "auto",
-          transform: clippyElement.style.transform || `translateZ(0) scale(${isMobile ? 1 : (0.95 * this.getMonitorZoomFactor())})`,
+          transform:
+            clippyElement.style.transform ||
+            `translateZ(0) scale(${
+              isMobile ? 1 : 0.95 * this.getMonitorZoomFactor()
+            })`,
           transformOrigin: "center bottom",
-          zIndex: isMobile ? "1500" : "2000"
+          zIndex: isMobile ? "1500" : "2000",
         };
-        
-        devLog(`Agent ${agentName} preserving current position: ${currentLeft}, ${currentTop}`);
-        
+
+        devLog(
+          `Agent ${agentName} preserving current position: ${currentLeft}, ${currentTop}`
+        );
+
         // CRITICAL: Ensure switched agents get position anchoring for resize events
-        if (!isMobile && agentName !== 'Clippy') {
+        if (!isMobile && agentName !== "Clippy") {
           const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
-          devLog(`Creating position anchor for switched agent ${agentName} at zoom level ${currentZoomLevel}`);
-          
+          devLog(
+            `Creating position anchor for switched agent ${agentName} at zoom level ${currentZoomLevel}`
+          );
+
           // Create anchor cache entry for this agent's preserved position
-          resizeHandler.cacheClippyAnchorPosition(clippyElement, currentZoomLevel);
-          
+          resizeHandler.cacheClippyAnchorPosition(
+            clippyElement,
+            currentZoomLevel
+          );
+
           // Mark as anchored to enable anchor-based positioning during resizes
           clippyElement.classList.add("clippy-anchored");
-          clippyElement.setAttribute("data-zoom-anchored", currentZoomLevel.toString());
+          clippyElement.setAttribute(
+            "data-zoom-anchored",
+            currentZoomLevel.toString()
+          );
         }
       } else {
         // Calculate new position normally
@@ -1569,30 +1575,38 @@ class ClippyPositioning {
     // Ensure proper transform is applied for all agents
     if (clippySuccess) {
       const zoomFactor = this.getMonitorZoomFactor();
-      const scale = isMobile ? 1 : (0.95 * zoomFactor);
-      
+      const scale = isMobile ? 1 : 0.95 * zoomFactor;
+
       // Only update transform if it wasn't already preserved from current position
-      if (!position.transform || position.transform.indexOf('scale') === -1) {
+      if (!position.transform || position.transform.indexOf("scale") === -1) {
         clippyElement.style.transform = `translateZ(0) scale(${scale})`;
       }
       clippyElement.style.transformOrigin = "center bottom";
       clippyElement.style.willChange = "transform";
-      
+
       devLog(`Agent ${agentName} transform applied: scale(${scale})`);
     }
 
     if (!isMobile && clippySuccess) {
       // CRITICAL FIX: Ensure all agents get anchor caching, not just when no anchor exists
-      if (!resizeHandler.zoomLevelAnchors.has(currentZoomLevel) || 
-          !clippyElement.classList.contains('clippy-anchored')) {
+      if (
+        !resizeHandler.zoomLevelAnchors.has(currentZoomLevel) ||
+        !clippyElement.classList.contains("clippy-anchored")
+      ) {
         devLog(
           `Caching anchor after positioning agent ${agentName} for zoom level ${currentZoomLevel}`
         );
-        resizeHandler.cacheClippyAnchorPosition(clippyElement, currentZoomLevel);
-        
+        resizeHandler.cacheClippyAnchorPosition(
+          clippyElement,
+          currentZoomLevel
+        );
+
         // Mark this agent as anchored for future resize events
         clippyElement.classList.add("clippy-anchored");
-        clippyElement.setAttribute("data-zoom-anchored", currentZoomLevel.toString());
+        clippyElement.setAttribute(
+          "data-zoom-anchored",
+          currentZoomLevel.toString()
+        );
       } else {
         devLog(
           `Agent ${agentName} already has anchor for zoom level ${currentZoomLevel}`
@@ -1604,19 +1618,25 @@ class ClippyPositioning {
     let overlaySuccess = true;
     if (overlayElement) {
       overlaySuccess = this.positionOverlay(overlayElement, clippyElement);
-      
+
       // Ensure overlay gets proper z-index for all agents
       if (overlaySuccess) {
         overlayElement.style.zIndex = isMobile ? "1510" : "2010";
         overlayElement.style.background = "transparent";
         overlayElement.style.pointerEvents = "auto";
         overlayElement.style.cursor = "pointer";
-        devLog(`Agent ${agentName} overlay configured with z-index ${overlayElement.style.zIndex}`);
+        devLog(
+          `Agent ${agentName} overlay configured with z-index ${overlayElement.style.zIndex}`
+        );
       }
     }
 
     const success = clippySuccess && overlaySuccess;
-    devLog(`Agent ${agentName} synchronized positioning: ${success ? "success" : "failed"}`);
+    devLog(
+      `Agent ${agentName} synchronized positioning: ${
+        success ? "success" : "failed"
+      }`
+    );
 
     return success;
   }
@@ -1624,89 +1644,13 @@ class ClippyPositioning {
   // Removed unused: calculateMobilePositionForDrag (not referenced anywhere)
 
   static applyMobilePosition(clippyElement, position, isDragging = false) {
-    if (!clippyElement) return false;
-
-    try {
-      if (isDragging) {
-        clippyElement.classList.add("clippy-dragging");
-        document.body.classList.add("clippy-drag-active");
-      } else {
-        clippyElement.classList.remove("clippy-dragging");
-        document.body.classList.remove("clippy-drag-active");
-      }
-
-      const mobileStyles = {
-        position: "fixed",
-        right: position.right || `${position.rightPx}px`,
-        bottom: position.bottom || `${position.bottomPx}px`,
-        left: "auto",
-        top: "auto",
-        transform: isDragging
-          ? "translateZ(0) scale(1.05)"
-          : "translateZ(0) scale(1)",
-        transformOrigin: "center bottom",
-        zIndex: isDragging ? "1550" : "1500",
-        backfaceVisibility: "hidden",
-        willChange: isDragging
-          ? "transform, opacity, right, bottom"
-          : "transform",
-        WebkitTransform: isDragging
-          ? "translateZ(0) scale(1.05)"
-          : "translateZ(0) scale(1)",
-        WebkitBackfaceVisibility: "hidden",
-        touchAction: "none",
-        userSelect: "none",
-        WebkitUserSelect: "none",
-        WebkitTouchCallout: "none",
-        transition: isDragging
-          ? "none"
-          : "transform 0.2s ease, right 0.2s ease, bottom 0.2s ease",
-      };
-
-      return this.applyStyles(clippyElement, mobileStyles);
-    } catch (error) {
-      errorLog("Error applying mobile position", error);
-      return false;
-    }
+    // Delegate to the new module
+    return applyMobilePosition(clippyElement, position, isDragging);
   }
 
   static enforceMobileBoundaries(position) {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    const safeLeft = Math.max(10, window.safeAreaInsets?.left || 0);
-    const safeRight = Math.max(10, window.safeAreaInsets?.right || 0);
-    const safeTop = Math.max(10, window.safeAreaInsets?.top || 0);
-    const safeBottom = Math.max(80, window.safeAreaInsets?.bottom || 0);
-
-    // Updated dimensions based on new scaling
-    const baseWidth = 124;
-    const baseHeight = 93;
-    const clippyWidth = baseWidth * 1; // Mobile scale is 1
-    const clippyHeight = baseHeight * 1; // Mobile scale is 1
-
-    const boundedPosition = {
-      rightPx: Math.max(
-        safeRight,
-        Math.min(
-          viewportWidth - clippyWidth - safeLeft,
-          position.rightPx || parseInt(position.right, 10) || 0
-        )
-      ),
-      bottomPx: Math.max(
-        safeBottom,
-        Math.min(
-          viewportHeight - clippyHeight - safeTop,
-          position.bottomPx || parseInt(position.bottom, 10) || 0
-        )
-      ),
-    };
-
-    return {
-      ...boundedPosition,
-      right: `${boundedPosition.rightPx}px`,
-      bottom: `${boundedPosition.bottomPx}px`,
-    };
+    // Delegate to the new module
+    return enforceMobileBoundaries(position);
   }
 
   static handleMobileDrag(
@@ -1718,18 +1662,9 @@ class ClippyPositioning {
     if (!clippyElement || !isMobile) return false;
 
     try {
-      // For iOS Safari, use the optimized method
-      if (isIOSSafari && isDragging) {
-        return this.optimizedIOSMobileDrag(
-          clippyElement,
-          overlayElement,
-          newPosition,
-          isDragging
-        );
-      }
-
-      const boundedPosition = this.enforceMobileBoundaries(newPosition);
-      const clippySuccess = this.applyMobilePosition(
+      // Use the new mobile positioning functions
+      const boundedPosition = enforceMobileBoundaries(newPosition);
+      const clippySuccess = applyMobilePosition(
         clippyElement,
         boundedPosition,
         isDragging
@@ -1737,13 +1672,7 @@ class ClippyPositioning {
 
       let overlaySuccess = true;
       if (overlayElement) {
-        if (isDragging) {
-          overlayElement.classList.add("overlay-dragging");
-        } else {
-          overlayElement.classList.remove("overlay-dragging");
-        }
-
-        overlaySuccess = this.positionOverlay(overlayElement, clippyElement);
+        overlaySuccess = positionMobileOverlay(overlayElement, clippyElement);
       }
 
       return clippySuccess && overlaySuccess;
@@ -1764,18 +1693,11 @@ class ClippyPositioning {
         overlayElement.classList.add("overlay-dragging");
       }
 
+      // Remove transitions for smooth dragging
       clippyElement.style.transition = "none";
       if (overlayElement) {
         overlayElement.style.transition = "none";
       }
-
-      const enhancedStyles = {
-        willChange: "transform, opacity, right, bottom",
-        contain: "layout style paint",
-        isolation: "isolate",
-      };
-
-      this.applyStyles(clippyElement, enhancedStyles);
 
       return true;
     } catch (error) {
@@ -1789,8 +1711,8 @@ class ClippyPositioning {
 
     try {
       if (finalPosition) {
-        const boundedPosition = this.enforceMobileBoundaries(finalPosition);
-        this.applyMobilePosition(clippyElement, boundedPosition, false);
+        const boundedPosition = enforceMobileBoundaries(finalPosition);
+        applyMobilePosition(clippyElement, boundedPosition, false);
       }
 
       clippyElement.classList.remove("clippy-dragging");
@@ -1798,8 +1720,10 @@ class ClippyPositioning {
 
       if (overlayElement) {
         overlayElement.classList.remove("overlay-dragging");
+        positionMobileOverlay(overlayElement, clippyElement);
       }
 
+      // Restore transitions
       setTimeout(() => {
         if (clippyElement) {
           clippyElement.style.transition = "";
@@ -1808,14 +1732,6 @@ class ClippyPositioning {
           overlayElement.style.transition = "";
         }
       }, 100);
-
-      const resetStyles = {
-        willChange: "transform",
-        contain: "",
-        isolation: "",
-      };
-
-      this.applyStyles(clippyElement, resetStyles);
 
       return true;
     } catch (error) {
@@ -1932,7 +1848,7 @@ class ClippyPositioning {
           );
 
           // Mark agent as being repositioned during zoom changes
-          clippyElement.classList.add('clippy-repositioning');
+          clippyElement.classList.add("clippy-repositioning");
 
           if (isMobile) {
             const customPosition = customPositionGetter
@@ -1945,26 +1861,36 @@ class ClippyPositioning {
             );
           } else {
             const newZoomLevel = data.newZoomLevel;
-            
+
             // CRITICAL FIX: Check if this agent has anchor data for the new zoom level
             const hasAnchor = resizeHandler.zoomLevelAnchors.has(newZoomLevel);
-            const isAnchored = clippyElement.classList.contains('clippy-anchored');
-            
+            const isAnchored =
+              clippyElement.classList.contains("clippy-anchored");
+
             if (hasAnchor || isAnchored) {
-              devLog(`Using anchored positioning for immediate zoom change (hasAnchor: ${hasAnchor}, isAnchored: ${isAnchored})`);
-              
+              devLog(
+                `Using anchored positioning for immediate zoom change (hasAnchor: ${hasAnchor}, isAnchored: ${isAnchored})`
+              );
+
               // If agent is marked as anchored but no anchor exists for new zoom, create one
               if (isAnchored && !hasAnchor) {
-                devLog(`Creating missing anchor for anchored agent at immediate zoom level ${newZoomLevel}`);
-                resizeHandler.cacheClippyAnchorPosition(clippyElement, newZoomLevel);
+                devLog(
+                  `Creating missing anchor for anchored agent at immediate zoom level ${newZoomLevel}`
+                );
+                resizeHandler.cacheClippyAnchorPosition(
+                  clippyElement,
+                  newZoomLevel
+                );
               }
-              
+
               const positioned = this.applyAnchoredPosition(clippyElement);
               if (positioned && overlayElement) {
                 this.positionOverlay(overlayElement, clippyElement);
               }
             } else {
-              devLog(`No anchor available for immediate zoom change, repositioning normally`);
+              devLog(
+                `No anchor available for immediate zoom change, repositioning normally`
+              );
               this.positionClippyAndOverlay(
                 clippyElement,
                 overlayElement,
@@ -1972,10 +1898,10 @@ class ClippyPositioning {
               );
             }
           }
-          
+
           // Remove repositioning flag after positioning is complete
           setTimeout(() => {
-            clippyElement.classList.remove('clippy-repositioning');
+            clippyElement.classList.remove("clippy-repositioning");
           }, 100);
           return;
         }
@@ -1986,7 +1912,7 @@ class ClippyPositioning {
           );
 
           // Mark agent as being repositioned during zoom changes
-          clippyElement.classList.add('clippy-repositioning');
+          clippyElement.classList.add("clippy-repositioning");
 
           setTimeout(() => {
             if (isMobile) {
@@ -2000,26 +1926,37 @@ class ClippyPositioning {
               );
             } else {
               const newZoomLevel = data.newZoomLevel;
-              
+
               // CRITICAL FIX: Check if this agent has anchor data for the new zoom level
-              const hasAnchor = resizeHandler.zoomLevelAnchors.has(newZoomLevel);
-              const isAnchored = clippyElement.classList.contains('clippy-anchored');
-              
+              const hasAnchor =
+                resizeHandler.zoomLevelAnchors.has(newZoomLevel);
+              const isAnchored =
+                clippyElement.classList.contains("clippy-anchored");
+
               if (hasAnchor || isAnchored) {
-                devLog(`Using anchored positioning for zoom change (hasAnchor: ${hasAnchor}, isAnchored: ${isAnchored})`);
-                
+                devLog(
+                  `Using anchored positioning for zoom change (hasAnchor: ${hasAnchor}, isAnchored: ${isAnchored})`
+                );
+
                 // If agent is marked as anchored but no anchor exists for new zoom, create one
                 if (isAnchored && !hasAnchor) {
-                  devLog(`Creating missing anchor for anchored agent at new zoom level ${newZoomLevel}`);
-                  resizeHandler.cacheClippyAnchorPosition(clippyElement, newZoomLevel);
+                  devLog(
+                    `Creating missing anchor for anchored agent at new zoom level ${newZoomLevel}`
+                  );
+                  resizeHandler.cacheClippyAnchorPosition(
+                    clippyElement,
+                    newZoomLevel
+                  );
                 }
-                
+
                 this.applyAnchoredPosition(clippyElement);
                 if (overlayElement) {
                   this.positionOverlay(overlayElement, clippyElement);
                 }
               } else {
-                devLog(`No anchor available for zoom change, repositioning normally`);
+                devLog(
+                  `No anchor available for zoom change, repositioning normally`
+                );
                 this.positionClippyAndOverlay(
                   clippyElement,
                   overlayElement,
@@ -2027,10 +1964,10 @@ class ClippyPositioning {
                 );
               }
             }
-            
+
             // Remove repositioning flag after positioning is complete
             setTimeout(() => {
-              clippyElement.classList.remove('clippy-repositioning');
+              clippyElement.classList.remove("clippy-repositioning");
             }, 100);
           }, 50);
           return;
@@ -2038,13 +1975,13 @@ class ClippyPositioning {
 
         if (eventType === "realtime-resize" || eventType === "resize-start") {
           // Mark agent as being repositioned during resize operations
-          clippyElement.classList.add('clippy-repositioning');
-          
+          clippyElement.classList.add("clippy-repositioning");
+
           // Clear overlay synchronization for resize events
           if (overlayElement) {
             this.clearOverlaySynchronization(overlayElement);
           }
-          
+
           if (isMobile) {
             const customPosition = customPositionGetter
               ? customPositionGetter()
@@ -2056,20 +1993,29 @@ class ClippyPositioning {
             );
           } else {
             const currentZoomLevel = resizeHandler.getCurrentZoomLevel();
-            
+
             // CRITICAL FIX: Check if this specific agent has an anchor, not just if any anchor exists
-            const hasAnchor = resizeHandler.zoomLevelAnchors.has(currentZoomLevel);
-            const isAnchored = clippyElement.classList.contains('clippy-anchored');
-            
+            const hasAnchor =
+              resizeHandler.zoomLevelAnchors.has(currentZoomLevel);
+            const isAnchored =
+              clippyElement.classList.contains("clippy-anchored");
+
             if (hasAnchor || isAnchored) {
-              devLog(`Using anchored positioning for resize (hasAnchor: ${hasAnchor}, isAnchored: ${isAnchored})`);
-              
+              devLog(
+                `Using anchored positioning for resize (hasAnchor: ${hasAnchor}, isAnchored: ${isAnchored})`
+              );
+
               // If agent is marked as anchored but no anchor exists, create one from current position
               if (isAnchored && !hasAnchor) {
-                devLog(`Creating missing anchor for anchored agent at zoom level ${currentZoomLevel}`);
-                resizeHandler.cacheClippyAnchorPosition(clippyElement, currentZoomLevel);
+                devLog(
+                  `Creating missing anchor for anchored agent at zoom level ${currentZoomLevel}`
+                );
+                resizeHandler.cacheClippyAnchorPosition(
+                  clippyElement,
+                  currentZoomLevel
+                );
               }
-              
+
               this.applyAnchoredPosition(clippyElement);
               if (overlayElement) {
                 this.positionOverlay(overlayElement, clippyElement);
@@ -2083,10 +2029,10 @@ class ClippyPositioning {
               );
             }
           }
-          
+
           // Remove repositioning flag after a brief delay to allow positioning to complete
           setTimeout(() => {
-            clippyElement.classList.remove('clippy-repositioning');
+            clippyElement.classList.remove("clippy-repositioning");
           }, 100);
         }
 

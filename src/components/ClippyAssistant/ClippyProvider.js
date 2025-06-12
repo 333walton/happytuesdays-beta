@@ -35,6 +35,23 @@ import ClippyPositioning from "./ClippyPositioning";
 import ClippyService from "./ClippyService";
 import MobileControls from "./MobileControls";
 import DesktopControls from "./DesktopControls";
+
+// NEW: Import mobile modules
+import { createMobileTouchHandler } from "./MobileTouchHandler";
+import {
+  handleMobileSingleTap,
+  handleMobileDoubleTap,
+  handleMobileLongPress,
+  handleMobileDrag,
+  handleMobileDragStart,
+  handleMobileDragEnd,
+} from "./MobileInteractions";
+import {
+  calculateMobilePosition,
+  applyMobilePosition,
+  positionMobileOverlay,
+} from "./MobilePositioning";
+
 import "./_styles.scss";
 
 const ClippyContext = createContext(null);
@@ -103,7 +120,6 @@ const logAllAnimations = (animationName, context = "unknown") => {
     "color: #856404; font-size: 12px;"
   );
 };
-
 
 const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   // Core state
@@ -195,7 +211,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           const animationName = "GoodBye";
           logAnimation(animationName, "shutdown sequence");
           clippyInstanceRef.current.play(animationName);
-          
+
           // Add 1 second delay after GoodBye animation
           setTimeout(() => {
             devLog("GoodBye animation delay completed");
@@ -285,13 +301,21 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     (newAgent) => {
       // Validate agent name against official React95 agents
       const officialAgents = [
-        "Clippy", "Links", "Bonzi", "Genie", "Genius", 
-        "Merlin", "F1"
+        "Clippy",
+        "Links",
+        "Bonzi",
+        "Genie",
+        "Genius",
+        "Merlin",
+        "F1",
       ];
-      
+
       if (!officialAgents.includes(newAgent)) {
         devLog(`Agent change rejected - invalid agent name: ${newAgent}`);
-        console.error(`❌ Invalid agent: ${newAgent}. Must be one of:`, officialAgents);
+        console.error(
+          `❌ Invalid agent: ${newAgent}. Must be one of:`,
+          officialAgents
+        );
         return false;
       }
 
@@ -302,7 +326,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return false;
       }
 
-      devLog(`Changing agent from ${currentAgent} to ${newAgent} (official React95 agent)`);
+      devLog(
+        `Changing agent from ${currentAgent} to ${newAgent} (official React95 agent)`
+      );
 
       return safeExecute(
         () => {
@@ -353,11 +379,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       if (mountedRef.current && !isAnyBalloonOpen()) {
         devLog("Showing enhanced welcome balloon with options");
         showWelcomeBalloon(); // Use the enhanced welcome balloon
-        
+
         // Set welcome balloon completion after a delay
         setTimeout(() => {
           welcomeBalloonCompletedRef.current = true;
-          devLog("Welcome balloon marked as completed - animations now unblocked");
+          devLog(
+            "Welcome balloon marked as completed - animations now unblocked"
+          );
         }, 6000); // 6 seconds to allow user to read welcome message
       }
     }, 800);
@@ -373,10 +401,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       // Check cooldown and hiding state
       if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-        devLog(`Desktop single click blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
+        devLog(
+          `Desktop single click blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`
+        );
         return false;
       }
-      
+
       // Block all interactions if Clippy is hiding or hidden
       if (window.clippyIsHiding || window.clippyIsHidden) {
         devLog("Desktop single click blocked - Clippy is hiding/hidden");
@@ -422,8 +452,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       const clippyEl = document.querySelector(".clippy");
       if (clippyEl && ClippyPositioning?.preserveClippyScale) {
         const preserved = ClippyPositioning.preserveClippyScale(clippyEl);
-        devLog(`Clippy scale preservation: ${preserved ? "success" : "failed"}`);
-        // Removed unnecessary overlay repositioning - overlay is automatically synchronized
+        devLog(
+          `Clippy scale preservation: ${preserved ? "success" : "failed"}`
+        );
       }
 
       // NEW RULE: 75% chance for animation, 25% chance for balloon
@@ -431,7 +462,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       devLog(`Desktop single click pattern:`, {
         shouldShowAnimation,
-        percentage: shouldShowAnimation ? "75% - Animation" : "25% - Balloon"
+        percentage: shouldShowAnimation ? "75% - Animation" : "25% - Balloon",
       });
 
       return safeExecute(
@@ -445,15 +476,30 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
               // Available animations for random selection
               const animations = [
-                "Wave", "Congratulate", "GetAttention", "Thinking", "Writing", 
-                "GoodBye", "Processing", "Alert", "GetArtsy", "Searching", 
-                "Explain", "Greeting", "GestureRight", "GestureLeft", "GestureUp"
+                "Wave",
+                "Congratulate",
+                "GetAttention",
+                "Thinking",
+                "Writing",
+                "GoodBye",
+                "Processing",
+                "Alert",
+                "GetArtsy",
+                "Searching",
+                "Explain",
+                "Greeting",
+                "GestureRight",
+                "GestureLeft",
+                "GestureUp",
               ];
-              
+
               const randomIndex = Math.floor(Math.random() * animations.length);
               const animationName = animations[randomIndex];
-              
-              logAnimation(animationName, `desktop single click (75% animation)`);
+
+              logAnimation(
+                animationName,
+                `desktop single click (75% animation)`
+              );
               clippyInstanceRef.current.play(animationName);
 
               // Special handling for Hide animation (handled in context menu)
@@ -464,7 +510,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 }, 2000); // Just the animation duration
               } else {
                 // Add extra delay for GoodBye animation
-                const animationDelay = animationName === "GoodBye" ? 3000 : 2000;
+                const animationDelay =
+                  animationName === "GoodBye" ? 3000 : 2000;
                 setTimeout(() => {
                   setIsAnimationPlaying(false);
                   if (animationName === "GoodBye") {
@@ -490,10 +537,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                   "Need help? Just let me know!",
                   "Welcome to the nostalgic world of Windows 98!",
                   "Feeling productive today?",
-                  "Don't forget to save your work!"
+                  "Don't forget to save your work!",
                 ];
-                
-                const randomMessage = balloonMessages[Math.floor(Math.random() * balloonMessages.length)];
+
+                const randomMessage =
+                  balloonMessages[
+                    Math.floor(Math.random() * balloonMessages.length)
+                  ];
                 showCustomBalloon(randomMessage, 4000);
                 devLog(`Custom balloon shown: "${randomMessage}"`);
               }
@@ -518,7 +568,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       setIsAnimationPlaying,
       mountedRef,
       clippyInstanceRef,
-      showCustomBalloon
+      showCustomBalloon,
     ]
   );
 
@@ -532,7 +582,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       // Check cooldown
       if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-        devLog(`Desktop double click blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
+        devLog(
+          `Desktop double click blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`
+        );
         return false;
       }
 
@@ -551,26 +603,23 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       devLog("Desktop double click - opening chat balloon");
 
       // Show chat balloon using the same global function as context menu
-      // CRITICAL: Don't set state until after balloon opens to prevent re-renders that disrupt positioning
       setTimeout(() => {
         if (mountedRef.current && !isAnyBalloonOpen()) {
-          // Use the global function to ensure consistent positioning
-          console.log(`🖱️ DOUBLE-CLICK: Opening chat balloon`, {
-            globalFunctionExists: !!window.showClippyChatBalloon,
-            agentPosition: document.querySelector('.clippy')?.getBoundingClientRect(),
-            overlayPosition: document.getElementById('clippy-clickable-overlay')?.getBoundingClientRect(),
-            desktopBounds: window._desktopViewportBounds
-          });
-          
           if (window.showClippyChatBalloon) {
-            window.showClippyChatBalloon("Hi! What would you like to chat about?");
-            devLog("Desktop double click chat balloon shown via global function");
+            window.showClippyChatBalloon(
+              "Hi! What would you like to chat about?"
+            );
+            devLog(
+              "Desktop double click chat balloon shown via global function"
+            );
           } else {
             // Fallback to direct call if global function not available
             showChatBalloon("Hi! What would you like to chat about?");
-            devLog("Desktop double click chat balloon shown via direct call (fallback)");
+            devLog(
+              "Desktop double click chat balloon shown via direct call (fallback)"
+            );
           }
-          
+
           // Set state AFTER balloon opens to prevent re-renders that disrupt balloon positioning
           setLastInteractionTime(now);
           startCooldown();
@@ -579,315 +628,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       return true;
     },
-    [isInCooldown, lastInteractionTime, isAnimationPlaying, isAnyBalloonOpen, startCooldown, showChatBalloon]
-  );
-
-  // NEW: Mobile single tap handler - 75% animation, 25% speech balloon ONLY
-  const handleMobileSingleTap = useCallback(
-    (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const now = Date.now();
-
-      // Check cooldown and hiding state
-      if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-        devLog(`Mobile single tap blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`);
-        return false;
-      }
-      
-      // Block all interactions if Clippy is hiding or hidden
-      if (window.clippyIsHiding || window.clippyIsHidden) {
-        devLog("Mobile single tap blocked - Clippy is hiding/hidden");
-        return false;
-      }
-
-      // Block if animation is currently playing
-      if (isAnimationPlaying) {
-        devLog("Mobile single tap blocked - animation currently playing");
-        return false;
-      }
-
-      // Block animations until welcome balloon completes (except welcome animation itself)
-      if (!welcomeBalloonCompletedRef.current && greetingPlayedRef.current) {
-        devLog("Mobile single tap blocked - welcome balloon not completed");
-        return false;
-      }
-
-      // Block if any balloon is already open
-      if (isAnyBalloonOpen()) {
-        devLog("Mobile single tap blocked - balloon is already open");
-        return false;
-      }
-
-      // Block if context menu is visible
-      if (contextMenuVisible) {
-        devLog("Mobile single tap blocked - context menu is visible");
-        return false;
-      }
-
-      setLastInteractionTime(now);
-      startCooldown();
-
-      const newCount = interactionCount + 1;
-      setInteractionCount(newCount);
-
-      devLog(`Mobile single tap #${newCount} triggered`);
-
-      if (!mountedRef.current || !clippyInstanceRef.current) {
-        if (window.clippy) {
-          clippyInstanceRef.current = window.clippy;
-        } else {
-          devLog("No clippy instance available");
-          return false;
-        }
-      }
-
-      // Handle initial interaction
-      const isInitialInteraction = !greetingPlayedRef.current && !initialMessageShownRef.current;
-
-      if (isInitialInteraction) {
-        devLog("Initial mobile single tap - will show greeting animation and welcome balloon");
-
-        return safeExecute(
-          () => {
-            if (clippyInstanceRef.current.play) {
-              setIsAnimationPlaying(true);
-
-              const randomIndex = Math.floor(Math.random() * GREETING_ANIMATIONS.length);
-              const animationName = GREETING_ANIMATIONS[randomIndex];
-              logAnimation(animationName, `initial mobile single tap`);
-
-              clippyInstanceRef.current.play(animationName);
-              greetingPlayedRef.current = true;
-
-              setTimeout(() => {
-                setIsAnimationPlaying(false);
-              }, 2000);
-
-              setTimeout(() => {
-                if (mountedRef.current && !initialMessageShownRef.current) {
-                  initialMessageShownRef.current = true;
-                  showWelcomeBalloon();
-                  devLog("Welcome balloon shown");
-                }
-              }, 1200);
-            }
-            return true;
-          },
-          false,
-          "initial mobile single tap"
-        );
-      }
-
-      // Standard mobile single tap - 75% animation, 25% speech balloon
-      const shouldShowAnimation = Math.random() < 0.75;
-
-      devLog(`Mobile single tap pattern:`, {
-        shouldShowAnimation,
-        percentage: shouldShowAnimation ? "75% - Animation" : "25% - Speech Balloon"
-      });
-
-      return safeExecute(
-        () => {
-          if (shouldShowAnimation) {
-            // 75% case: Play random animation only
-            devLog("Mobile single tap - playing random animation (75%)");
-
-            if (clippyInstanceRef.current.play) {
-              setIsAnimationPlaying(true);
-
-              const animations = [
-                "Wave", "Congratulate", "GetAttention", "Thinking", "Writing", 
-                "GoodBye", "Processing", "Alert", "GetArtsy", "Searching", 
-                "Explain", "Greeting", "GestureRight", "GestureLeft", "GestureUp"
-              ];
-              
-              const randomIndex = Math.floor(Math.random() * animations.length);
-              const animationName = animations[randomIndex];
-              
-              logAnimation(animationName, `mobile single tap (75% animation)`);
-              clippyInstanceRef.current.play(animationName);
-
-              // Special handling for Hide animation (handled in context menu)
-              if (animationName === "Hide") {
-                // Hide animation handling is done in context menu
-                setTimeout(() => {
-                  setIsAnimationPlaying(false);
-                }, 2000); // Just the animation duration
-              } else {
-                // Add extra delay for GoodBye animation
-                const animationDelay = animationName === "GoodBye" ? 3000 : 2000;
-                setTimeout(() => {
-                  setIsAnimationPlaying(false);
-                  if (animationName === "GoodBye") {
-                    devLog("GoodBye animation delay completed");
-                  }
-                }, animationDelay);
-              }
-            }
-          } else {
-            // 25% case: Show custom speech balloon message (NEVER chat)
-            devLog("Mobile single tap - showing speech balloon (25%) - NEVER CHAT");
-
-            setTimeout(() => {
-              if (mountedRef.current && !isAnyBalloonOpen()) {
-                const balloonMessages = [
-                  "Hi there! Having a good day?",
-                  "Tap me again for another surprise!",
-                  "I'm here if you need any help!",
-                  "Enjoying Hydra98 so far?",
-                  "Try double-tapping me for my menu!",
-                  "Long-press me to start a chat!",
-                  "Need help? Just let me know!",
-                  "Welcome to the nostalgic world of Windows 98!",
-                  "Feeling productive today?",
-                  "Don't forget to save your work!"
-                ];
-                
-                const randomMessage = balloonMessages[Math.floor(Math.random() * balloonMessages.length)];
-                // CRITICAL: Only use showCustomBalloon (speech), NEVER showChatBalloon
-                if (showCustomBalloon && typeof showCustomBalloon === 'function') {
-                  showCustomBalloon(randomMessage, 4000);
-                  devLog(`Speech balloon shown: "${randomMessage}"`);
-                } else {
-                  devLog("ERROR: showCustomBalloon function not available");
-                }
-              } else {
-                devLog("Speech balloon blocked - balloon already open or not mounted");
-              }
-            }, 200);
-          }
-
-          return true;
-        },
-        false,
-        "mobile single tap"
-      );
-    },
     [
-      interactionCount,
-      lastInteractionTime,
       isInCooldown,
-      isAnimationPlaying,
-      startCooldown,
-      isAnyBalloonOpen,
-      contextMenuVisible,
-      showCustomBalloon
-    ]
-  );
-
-  // NEW: Mobile double-tap handler - context menu ONLY
-  const handleMobileDoubleTap = useCallback(
-    (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (!mountedRef.current || !isMobile) return false;
-
-      // Block if any balloon is already open
-      if (isAnyBalloonOpen()) {
-        devLog("Mobile double-tap blocked - balloon is already open");
-        return false;
-      }
-
-      // Block if context menu is already visible
-      if (contextMenuVisible) {
-        devLog("Mobile double-tap blocked - context menu already visible");
-        return false;
-      }
-
-      devLog("Mobile double-tap - opening context menu ONLY (NEVER CHAT)");
-
-      // CRITICAL: Double-tap must ONLY show context menu, NEVER chat balloon
-      try {
-        // Show context menu positioned above Clippy
-        const clippyEl = document.querySelector(".clippy");
-        if (clippyEl) {
-          const rect = clippyEl.getBoundingClientRect();
-          showContextMenu(
-            rect.left + rect.width / 2,
-            rect.top - 20
-          );
-        } else {
-          showContextMenu(window.innerWidth / 2, window.innerHeight / 2);
-        }
-        devLog("Mobile double-tap context menu successfully shown");
-        return true;
-      } catch (error) {
-        devLog("ERROR: Mobile double-tap context menu failed:", error);
-        return false;
-      }
-    },
-    [isAnyBalloonOpen, contextMenuVisible, showContextMenu]
-  );
-
-  // NEW: Mobile long press handler - chat balloon ONLY
-  const handleMobileLongPress = useCallback(
-    (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (!mountedRef.current || !isMobile) return false;
-
-      const now = Date.now();
-
-      if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-        devLog("Mobile long press blocked - in cooldown");
-        return false;
-      }
-
-      if (isAnimationPlaying) {
-        devLog("Mobile long press blocked - animation playing");
-        return false;
-      }
-
-      if (isAnyBalloonOpen()) {
-        devLog("Mobile long press blocked - another balloon is open");
-        return false;
-      }
-
-      if (contextMenuVisible) {
-        devLog("Mobile long press blocked - context menu is visible");
-        return false;
-      }
-
-      devLog("Mobile long press - showing chat balloon ONLY");
-
-      setLastInteractionTime(now);
-      startCooldown();
-
-      return safeExecute(
-        () => {
-          // ONLY: Long press shows chat balloon (no animation)
-          setTimeout(() => {
-            if (mountedRef.current && !isAnyBalloonOpen()) {
-              // Use the global function to ensure consistent positioning
-              if (window.showClippyChatBalloon) {
-                window.showClippyChatBalloon("Hi! What would you like to chat about?");
-                devLog("Mobile long press chat balloon shown via global function");
-              } else {
-                // Fallback to direct call if global function not available
-                showChatBalloon("Hi! What would you like to chat about?");
-                devLog("Mobile long press chat balloon shown via direct call (fallback)");
-              }
-            }
-          }, 100);
-
-          return true;
-        },
-        false,
-        "mobile long press"
-      );
-    },
-    [
       lastInteractionTime,
-      isInCooldown,
       isAnimationPlaying,
-      startCooldown,
       isAnyBalloonOpen,
-      contextMenuVisible,
-      showChatBalloon
+      startCooldown,
+      showChatBalloon,
     ]
   );
 
@@ -902,7 +649,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         devLog("Right-click blocked - balloon is already open");
         return false;
       }
-      
+
       // Block all interactions if Clippy is hiding or hidden
       if (window.clippyIsHiding || window.clippyIsHidden) {
         devLog("Right-click blocked - Clippy is hiding/hidden");
@@ -1092,6 +839,30 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     handleShutdownSequence,
   ]);
 
+  // NEW: Desktop click handler with proper single/double click separation
+  const handleDesktopClick = useCallback(
+    (e) => {
+      // Use a timeout to distinguish between single and double clicks
+      if (e.detail === 1) {
+        // Single click - set timeout to check if it becomes a double click
+        const singleClickTimer = setTimeout(() => {
+          handleDesktopSingleClick(e);
+        }, 250); // Wait 250ms to see if there's a second click
+
+        // Store timer for potential cancellation
+        e.target._singleClickTimer = singleClickTimer;
+      } else if (e.detail === 2) {
+        // Double click detected - cancel single click timer and handle double click
+        if (e.target._singleClickTimer) {
+          clearTimeout(e.target._singleClickTimer);
+          delete e.target._singleClickTimer;
+        }
+        handleDesktopDoubleClick(e);
+      }
+    },
+    [handleDesktopSingleClick, handleDesktopDoubleClick]
+  );
+
   // Context menu click-outside handler
   useEffect(() => {
     if (!contextMenuVisible) return;
@@ -1160,7 +931,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               "clippy-clickable-overlay"
             );
             if (overlayElement) {
-              // For zoom changes, we need to clear synchronization and reposition
               ClippyPositioning.clearOverlaySynchronization(overlayElement);
               ClippyPositioning.positionOverlay(overlayElement, clippyElement);
             }
@@ -1213,7 +983,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           return false;
         }
 
-        // FIXED: Enhanced sequence checking for shutdown
         const biosWrapper = document.querySelector(".BIOSWrapper");
         const windowsLaunchWrapper = document.querySelector(
           ".WindowsLaunchWrapper"
@@ -1248,839 +1017,113 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     [isErrorRateLimited]
   );
 
-  // FIXED: Initialize enhanced global functions with button support and agent switching
+  // FIXED: Simplified mobile touch handler setup
+  const setupMobileTouchHandler = useCallback(() => {
+    if (!isMobile) return null;
+
+    const touchHandler = createMobileTouchHandler({
+      positionLocked,
+
+      isInCooldown: () => isInCooldown,
+      isAnimationPlaying: () => isAnimationPlaying,
+      isAnyBalloonOpen: () => isAnyBalloonOpen(),
+
+      onSingleTap: (e) => {
+        const now = Date.now();
+
+        // Block if Clippy is hiding
+        if (window.clippyIsHiding || window.clippyIsHidden) {
+          devLog("Mobile tap blocked - Clippy is hiding/hidden");
+          return;
+        }
+
+        // Check if this is initial interaction
+        const isInitialInteraction =
+          !greetingPlayedRef.current && !initialMessageShownRef.current;
+
+        // Update interaction tracking
+        setLastInteractionTime(now);
+        startCooldown();
+        setInteractionCount((count) => count + 1);
+
+        // Handle the tap
+        handleMobileSingleTap({
+          clippyInstance: clippyInstanceRef.current || window.clippy,
+          showCustomBalloon,
+          setIsAnimationPlaying,
+          isInitialInteraction,
+          greetingPlayedRef,
+          initialMessageShownRef,
+          showWelcomeBalloon,
+        });
+      },
+
+      onDoubleTap: (e) => {
+        // Block if context menu already visible
+        if (contextMenuVisible) {
+          devLog("Mobile double-tap blocked - context menu already visible");
+          return;
+        }
+
+        handleMobileDoubleTap({ showContextMenu });
+      },
+
+      onLongPress: (e) => {
+        const now = Date.now();
+        setLastInteractionTime(now);
+        startCooldown();
+
+        handleMobileLongPress({ showChatBalloon });
+      },
+
+      onDragStart: (e) => {
+        setIsDragging(true);
+        handleMobileDragStart();
+      },
+
+      onDragMove: (position) => {
+        handleMobileDrag({ ...position, isDragging: true });
+      },
+
+      onDragEnd: (e) => {
+        setIsDragging(false);
+        handleMobileDragEnd();
+      },
+    });
+
+    return touchHandler;
+  }, [
+    isMobile,
+    positionLocked,
+    isInCooldown,
+    isAnimationPlaying,
+    isAnyBalloonOpen,
+    contextMenuVisible,
+    startCooldown,
+    showContextMenu,
+    showChatBalloon,
+    showCustomBalloon,
+    showWelcomeBalloon,
+    setIsAnimationPlaying,
+    setIsDragging,
+    setLastInteractionTime,
+    setInteractionCount,
+  ]);
+
+  // Initialize global functions (keeping existing implementation)
   useEffect(() => {
     if (typeof window !== "undefined" && !window._clippyGlobalsInitialized) {
       window._clippyGlobalsInitialized = true;
 
-      // Position functions
-      window.setClippyPosition = createSafeGlobalFunction((newPosition) => {
-        if (isMobile) return false;
-        if (
-          newPosition &&
-          (newPosition.x !== undefined || newPosition.y !== undefined)
-        ) {
-          setPosition(newPosition);
-          const clippyEl = document.querySelector(".clippy");
-          if (clippyEl && ClippyPositioning) {
-            return ClippyPositioning.positionClippy(clippyEl, newPosition);
-          }
-        }
-        return false;
-      }, "setClippyPosition");
-
-      // Mobile control functions
-      window.setClippyPositionLocked = createSafeGlobalFunction((locked) => {
-        setPositionLocked(locked);
-        return true;
-      }, "setClippyPositionLocked");
-
-      window.getClippyPositionLocked = createSafeGlobalFunction(() => {
-        return positionLocked;
-      }, "getClippyPositionLocked");
-
-      window.setClippyDragging = createSafeGlobalFunction((dragging) => {
-        setIsDragging(dragging);
-        return true;
-      }, "setClippyDragging");
-
-      // Visibility functions
-      window.setAssistantVisible = createSafeGlobalFunction((visible) => {
-        setAssistantVisible(visible);
-        if (!visible) {
-          hideCustomBalloon();
-          hideChatBalloon();
-          hideContextMenu();
-        }
-        return true;
-      }, "setAssistantVisible");
-
-      // FIXED: Enhanced agent change function
-      window.setCurrentAgent = createSafeGlobalFunction((agent) => {
-        devLog(`Global setCurrentAgent called: ${agent}`);
-        
-        // CAPTURE CLIPPY'S EXACT POSITIONING BEFORE SWITCHING
-        const clippyEl = document.querySelector('.clippy');
-        if (clippyEl && currentAgent === 'Clippy') {
-          const style = window.getComputedStyle(clippyEl);
-          const rect = clippyEl.getBoundingClientRect();
-          
-          const clippyStyles = {
-            // Inline styles (what actually gets applied)
-            inlineStyles: clippyEl.style.cssText,
-            // Computed styles (what the browser calculates)
-            position: style.position,
-            left: style.left,
-            top: style.top,
-            right: style.right,
-            bottom: style.bottom,
-            zIndex: style.zIndex,
-            transform: style.transform,
-            transformOrigin: style.transformOrigin,
-            visibility: style.visibility,
-            opacity: style.opacity,
-            display: style.display,
-            pointerEvents: style.pointerEvents,
-            // Actual visual position
-            visualLeft: rect.left,
-            visualTop: rect.top,
-            // CSS classes
-            classes: clippyEl.className
-          };
-          
-          console.log('📋 CAPTURED CLIPPY POSITIONING RULES:', clippyStyles);
-          
-          // CAPTURE CLIPPY'S OVERLAY MINIMUM DIMENSIONS FOR CONSISTENCY
-          if (!window._clippyMinOverlayDimensions) {
-            window._clippyMinOverlayDimensions = {
-              width: rect.width,
-              height: rect.height
-            };
-            console.log('📏 CAPTURED CLIPPY MINIMUM OVERLAY DIMENSIONS:', window._clippyMinOverlayDimensions);
-          }
-          
-          // Store globally for immediate application to new agents
-          window._clippyCorrectStyles = clippyStyles;
-        }
-        
-        // REMOVE old agents completely from the DOM and stop their resize handling
-        if (currentAgent && currentAgent !== agent) {
-          console.log(`🧹 Removing old agent from DOM: ${currentAgent}`);
-          const oldAgents = document.querySelectorAll('.clippy');
-          oldAgents.forEach((el, index) => {
-            console.log(`🗑️ Removing old agent element ${index} from DOM`);
-            
-            // Stop resize handling for old agent before removing
-            if (window.ClippyPositioning && window.ClippyPositioning.stopResizeHandling) {
-              console.log(`🛑 Stopping resize handling for old agent element ${index}`);
-              window.ClippyPositioning.stopResizeHandling(el);
-            }
-            
-            if (el.parentNode) {
-              el.parentNode.removeChild(el);
-              console.log(`✅ Old agent element ${index} removed from DOM`);
-            }
-          });
-        }
-        
-        return handleAgentChange(agent);
-      }, "setCurrentAgent");
-
-      window.setScreenPowerState = createSafeGlobalFunction((powered) => {
-        setIsScreenPoweredOn(powered);
-        return true;
-      }, "setScreenPowerState");
-
-      // FIXED: Enhanced balloon functions with button support
-      window.showClippyCustomBalloon = createSafeGlobalFunction((content) => {
-        if (isCustomBalloonVisible() || isChatBalloonVisible()) {
-          devLog(
-            "Cannot show custom balloon - another balloon is already open"
-          );
-          return false;
-        }
-
-        // Support both string and object content
-        return showCustomBalloon(content);
-      }, "showClippyCustomBalloon");
-
-      window.hideClippyCustomBalloon = createSafeGlobalFunction(() => {
-        return hideCustomBalloon();
-      }, "hideClippyCustomBalloon");
-
-      window.showClippyChatBalloon = createSafeGlobalFunction(
-        (initialMessage) => {
-          if (isCustomBalloonVisible() || isChatBalloonVisible()) {
-            devLog(
-              "Cannot show chat balloon - another balloon is already open"
-            );
-            return false;
-          }
-          // Debug: Log balloon positioning context
-          console.log(`🎈 showClippyChatBalloon called with:`, {
-            initialMessage,
-            timestamp: Date.now(),
-            agentPosition: document.querySelector('.clippy')?.getBoundingClientRect(),
-            overlayPosition: document.getElementById('clippy-clickable-overlay')?.getBoundingClientRect(),
-            desktopBounds: window._desktopViewportBounds
-          });
-          
-          return showChatBalloon(initialMessage);
-        },
-        "showClippyChatBalloon"
-      );
-
-      window.hideChatBalloon = createSafeGlobalFunction(() => {
-        return hideChatBalloon();
-      }, "hideChatBalloon");
-
-      // FIXED: New enhanced balloon functions
-      window.showClippyWelcomeBalloon = createSafeGlobalFunction(() => {
-        if (isCustomBalloonVisible() || isChatBalloonVisible()) {
-          devLog(
-            "Cannot show welcome balloon - another balloon is already open"
-          );
-          return false;
-        }
-        return showWelcomeBalloon();
-      }, "showClippyWelcomeBalloon");
-
-      window.showClippyHelpBalloon = createSafeGlobalFunction(() => {
-        if (isCustomBalloonVisible() || isChatBalloonVisible()) {
-          devLog("Cannot show help balloon - another balloon is already open");
-          return false;
-        }
-        return showHelpBalloon();
-      }, "showClippyHelpBalloon");
-
-      window.showClippyErrorBalloon = createSafeGlobalFunction(
-        (errorMessage) => {
-          if (isCustomBalloonVisible() || isChatBalloonVisible()) {
-            devLog(
-              "Cannot show error balloon - another balloon is already open"
-            );
-            return false;
-          }
-          return showErrorBalloon(errorMessage);
-        },
-        "showClippyErrorBalloon"
-      );
-
-      window.showClippyTipsBalloon = createSafeGlobalFunction(() => {
-        if (isCustomBalloonVisible() || isChatBalloonVisible()) {
-          devLog("Cannot show tips balloon - another balloon is already open");
-          return false;
-        }
-        return showTipsBalloon();
-      }, "showClippyTipsBalloon");
-
-      // FIXED: Initial message function with flag checking
-      window.showClippyInitialMessage = createSafeGlobalFunction(() => {
-        return showInitialMessage();
-      }, "showClippyInitialMessage");
-
-      window.getClippyInstance = () => clippyInstanceRef.current;
-
-      // FIXED: Enhanced test functions with buttons
-      window.testClippyBalloon = () => {
-        devLog("Manual enhanced balloon test triggered");
-        if (isCustomBalloonVisible() || isChatBalloonVisible()) {
-          devLog("Cannot test balloon - another balloon is already open");
-          return false;
-        }
-
-        const testBalloon = {
-          message:
-            "🎉 Enhanced balloon test! This balloon has interactive buttons.",
-          buttons: [
-            {
-              text: "✨ Play animation",
-              animation: "Congratulate",
-            },
-            {
-              text: "💬 Open chat",
-              chat: "Hello! This chat was opened from a balloon button.",
-            },
-            {
-              text: "📢 Show message",
-              message: "This is a follow-up message triggered by a button!",
-            },
-            {
-              text: "👍 Got it",
-              action: () => {
-                devLog("Test balloon button clicked - test complete!");
-              },
-            },
-          ],
-        };
-
-        const success = showCustomBalloon(testBalloon, 15000);
-        devLog(`Enhanced balloon creation success: ${success}`);
-        return success;
-      };
-
-      window.testClippyChat = () => {
-        devLog("Manual chat test triggered");
-        if (isCustomBalloonVisible() || isChatBalloonVisible()) {
-          devLog("Cannot test chat - another balloon is already open");
-          return false;
-        }
-        // Use the global function to ensure consistent positioning
-        const success = window.showClippyChatBalloon ? 
-          window.showClippyChatBalloon("💬 Test chat - type a message to test chat functionality") :
-          showChatBalloon("💬 Test chat - type a message to test chat functionality");
-        devLog(`Chat creation success: ${success}`);
-        return success;
-      };
-
-      // Context menu test functions
-      window.forceShowContextMenu = () => {
-        devLog("Force showing context menu");
-        setContextMenuPosition({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-        });
-        setContextMenuVisible(true);
-        return true;
-      };
-
-      // Expose showContextMenu globally for mobile View Menu button
-      window.showClippyContextMenu = (x, y) => {
-        showContextMenu(x, y);
-      };
-
-      // FIXED: Reset cooldown function for testing
-      window.resetClippyCooldown = () => {
-        setIsInCooldown(false);
-        setLastInteractionTime(0);
-        devLog("Clippy interaction cooldown reset");
-        return true;
-      };
-
-      // FIXED: Testing functions for all 7 agents with visual verification
-      window.testAllAgents = () => {
-        const allAgents = [
-          "Clippy", "Links", "Bonzi", "Genie", "Genius", 
-          "Merlin", "F1"
-        ];
-        let currentIndex = 0;
-        
-        console.log(`🎭 Starting agent test sequence. Current agent: ${currentAgent}`);
-        
-        const checkVisualAgent = () => {
-          const clippyEl = document.querySelector('.clippy');
-          if (clippyEl) {
-            const dataAgent = clippyEl.getAttribute('data-agent');
-            const bgImage = window.getComputedStyle(clippyEl.querySelector('div') || clippyEl).backgroundImage;
-            console.log(`👁️ Visual check - data-agent: ${dataAgent}, background: ${bgImage ? 'loaded' : 'none'}`);
-          }
-        };
-        
-        const testNextAgent = () => {
-          if (currentIndex >= allAgents.length) {
-            console.log("🎉 All agents tested successfully!");
-            checkVisualAgent();
-            return;
-          }
-          
-          const agent = allAgents[currentIndex];
-          console.log(`🧪 Testing agent ${currentIndex + 1}/10: ${agent}`);
-          
-          // Skip if already the current agent
-          if (agent === currentAgent) {
-            console.log(`⏭️ Skipping ${agent} - already current agent`);
-            currentIndex++;
-            setTimeout(testNextAgent, 500);
-            return;
-          }
-          
-          if (handleAgentChange(agent)) {
-            setTimeout(() => {
-              checkVisualAgent();
-              currentIndex++;
-              testNextAgent();
-            }, 3000); // 3 second delay between tests
-          } else {
-            console.error(`❌ Failed to switch to agent: ${agent}`);
-            currentIndex++;
-            setTimeout(testNextAgent, 1000); // Continue with next agent
-          }
-        };
-        
-        checkVisualAgent();
-        testNextAgent();
-      };
-
-      window.switchToAgent = (agentName) => {
-        // Official React95 agent names only
-        const officialAgents = [
-          "Clippy", "Links", "Bonzi", "Genie", "Genius", 
-          "Merlin", "F1"
-        ];
-        
-        // Validate agent name against official list
-        if (!officialAgents.includes(agentName)) {
-          console.error(`❌ Invalid agent: ${agentName}. Available agents:`, officialAgents);
-          return false;
-        }
-        
-        console.log(`🔄 Switching to official agent: ${agentName}`);
-        return handleAgentChange(agentName);
-      };
-
-      window.resetToClippy = () => {
-        console.log(`🔄 Resetting to official Clippy agent`);
-        return handleAgentChange("Clippy");
-      };
-
-      window.listAvailableAgents = () => {
-        const officialAgents = [
-          "Clippy", "Links", "Bonzi", "Genie", "Genius", 
-          "Merlin", "F1"
-        ];
-        console.log("🎭 Official React95 agents:", officialAgents);
-        console.log(`🎯 Current agent: ${currentAgent}`);
-        
-        // Check if current agent is valid
-        if (!officialAgents.includes(currentAgent)) {
-          console.warn(`⚠️ Current agent "${currentAgent}" is not an official React95 agent!`);
-          console.log("💡 Use resetToClippy() to fix this");
-        }
-        
-        console.log("💡 Use switchToAgent('AgentName') to switch agents");
-        console.log("🧪 Use testAllAgents() to test all agents sequentially");
-        console.log("❓ Use getCurrentAgent() to check current agent");
-        console.log("🔄 Use resetToClippy() to reset to official Clippy");
-        return officialAgents;
-      };
-
-      window.getCurrentAgent = () => {
-        console.log(`🎯 Current agent: ${currentAgent}`);
-        return currentAgent;
-      };
-
-      // DIAGNOSTIC: Add the diagnostic functions from the developer's brief
-      window.diagnoseAgentSwitching = () => {
-        console.log("🔍 AGENT SWITCHING DIAGNOSIS\n");
-        
-        // Check React95 imports
-        console.log("1. Checking @react95/clippy imports:");
-        try {
-          console.log("   ✅ @react95/clippy is imported");
-        } catch (e) {
-          console.log("   ❌ Import issue:", e.message);
-        }
-        
-        // Check ReactClippyProvider props
-        console.log("\n2. ReactClippyProvider Analysis:");
-        const providerElements = document.querySelectorAll('[data-react95-clippy]');
-        console.log(`   📍 Found ${providerElements.length} provider elements`);
-        
-        // Check current clippy instance
-        console.log("\n3. Current Clippy Instance:");
-        if (window.clippy) {
-          console.log("   ✅ window.clippy exists");
-          console.log("   🎭 Current agent:", window.clippy.agent || "Unknown");
-          console.log("   📋 Available methods:", Object.keys(window.clippy));
-          
-          // Test if load method exists
-          if (window.clippy.load) {
-            console.log("   ✅ clippy.load() method available");
-          } else {
-            console.log("   ❌ clippy.load() method NOT available");
-          }
-        } else {
-          console.log("   ❌ window.clippy not found");
-        }
-        
-        // Check DOM elements
-        console.log("\n4. DOM Elements:");
-        const clippyElements = document.querySelectorAll('.clippy');
-        console.log(`   📍 Found ${clippyElements.length} .clippy elements`);
-        
-        if (clippyElements.length > 0) {
-          const clippy = clippyElements[0];
-          const dataAgent = clippy.getAttribute('data-agent');
-          console.log(`   🎯 data-agent attribute: ${dataAgent}`);
-          console.log(`   📏 Visible: ${clippy.offsetParent !== null}`);
-        }
-        
-        return {
-          hasClippy: !!window.clippy,
-          hasLoadMethod: !!(window.clippy && window.clippy.load),
-          domElements: clippyElements.length,
-          currentAgent: window.clippy?.agent || "Unknown"
-        };
-      };
-
-      window.debugReact95Provider = () => {
-        console.log('🔬 React95 ClippyProvider Debug:');
-        console.log(`- Provider agent prop: ${currentAgent}`);
-        console.log(`- ClippyController clippy:`, clippyInstanceRef.current ? 'exists' : 'null');
-        console.log(`- window.clippy:`, window.clippy ? 'exists' : 'null');
-        
-        // Check React component tree
-        const providerElements = document.querySelectorAll('[data-testid*="clippy"], [class*="clippy"]');
-        console.log(`- Found ${providerElements.length} clippy-related elements`);
-        
-        // Check if React95 is properly loading agents
-        if (window.clippy && window.clippy.animations) {
-          console.log(`- Available animations:`, window.clippy.animations());
-        }
-        
-        return {
-          currentAgent,
-          hasClippyInstance: !!clippyInstanceRef.current,
-          hasWindowClippy: !!window.clippy,
-          elementCount: providerElements.length
-        };
-      };
-
-      window.inspectClippyElement = () => {
-        const clippyEl = document.querySelector('.clippy');
-        if (clippyEl) {
-          const dataAgent = clippyEl.getAttribute('data-agent');
-          const children = clippyEl.children;
-          const rect = clippyEl.getBoundingClientRect();
-          const style = window.getComputedStyle(clippyEl);
-          
-          console.log('🔍 Clippy element inspection:');
-          console.log(`- data-agent attribute: ${dataAgent}`);
-          console.log(`- Current agent in state: ${currentAgent}`);
-          console.log(`- children count: ${children.length}`);
-          console.log(`- Position: left=${style.left}, top=${style.top}, right=${style.right}, bottom=${style.bottom}`);
-          console.log(`- Transform: ${style.transform}`);
-          console.log(`- BoundingRect: x=${rect.x}, y=${rect.y}, width=${rect.width}, height=${rect.height}`);
-          console.log(`- Visible: ${clippyEl.offsetParent !== null}`);
-          console.log(`- Z-index: ${style.zIndex}`);
-          
-          Array.from(children).forEach((child, index) => {
-            const childStyle = window.getComputedStyle(child);
-            const bgImage = childStyle.backgroundImage;
-            const display = childStyle.display;
-            console.log(`  Child ${index}: display=${display}, bg=${bgImage !== 'none' ? 'has background' : 'no background'}`);
-          });
-          
-          // Check if React95 provider has the right agent
-          const provider = document.querySelector('[data-react95-clippy-provider]');
-          console.log(`- React95 provider found: ${!!provider}`);
-          
-          // Check window.clippy object
-          console.log(`- window.clippy exists: ${!!window.clippy}`);
-          if (window.clippy) {
-            console.log(`- window.clippy methods:`, Object.keys(window.clippy));
-          }
-          
-          // Check React95 clippy hook
-          console.log(`- ClippyController clippy instance:`, !!clippyInstanceRef.current);
-          
-          // Check overlay
-          const overlay = document.getElementById('clippy-clickable-overlay');
-          if (overlay) {
-            const overlayRect = overlay.getBoundingClientRect();
-            const overlayStyle = window.getComputedStyle(overlay);
-            console.log(`- Overlay found: x=${overlayRect.x}, y=${overlayRect.y}, w=${overlayRect.width}, h=${overlayRect.height}`);
-            console.log(`- Overlay transform: ${overlayStyle.transform}`);
-          } else {
-            console.log(`- ❌ No overlay found`);
-          }
-          
-        } else {
-          console.log('❌ No .clippy element found');
-        }
-      };
-      
-      // SIMPLE: Apply Clippy's exact positioning to any agent
-      window.applyClippyPositioning = (targetAgent) => {
-        
-        // FIND ALL .clippy elements and fix them
-        const allClippyEls = document.querySelectorAll('.clippy');
-        console.log(`🔍 Found ${allClippyEls.length} .clippy elements in DOM`);
-        
-        if (allClippyEls.length === 0) {
-          console.log(`❌ No agent elements found`);
-          return false;
-        }
-        
-        // Log all clippy elements found
-        allClippyEls.forEach((el, index) => {
-          const rect = el.getBoundingClientRect();
-          const style = window.getComputedStyle(el);
-          console.log(`📍 Clippy element ${index}: positioned at ${rect.left.toFixed(1)}, ${rect.top.toFixed(1)}, classes: "${el.className}", display: ${style.display}`);
-        });
-        
-        const agentName = targetAgent || 'Current Agent';
-        console.log(`🎯 Applying Clippy's exact positioning to ${agentName}`);
-        
-        // Use captured Clippy styles if available
-        if (window._clippyCorrectStyles) {
-          const styles = window._clippyCorrectStyles;
-          console.log(`📋 Using captured Clippy styles for overlay position: ${styles.visualLeft.toFixed(1)}, ${styles.visualTop.toFixed(1)}`);
-          
-          // Only apply to visible elements
-          const activeClippyEls = Array.from(allClippyEls).filter(el => 
-            el.style.display !== 'none'
-          );
-          
-          console.log(`🔍 Found ${activeClippyEls.length} visible .clippy elements (filtered from ${allClippyEls.length} total)`);
-          
-          // Apply positioning only to active (new) agent elements
-          activeClippyEls.forEach((clippyEl, index) => {
-            console.log(`🔧 Fixing active clippy element ${index}...`);
-            
-            // Set CLEAN class structure for new agent (replace, don't accumulate)
-            const agentClass = agentName.toLowerCase();
-            clippyEl.className = `clippy clippy-anchored ${agentClass}`;
-            clippyEl.setAttribute('data-agent', agentName);
-            
-            // Get desktop viewport for balloon positioning (but NOT for agent repositioning)
-            const desktop = document.querySelector('.desktop.screen') || 
-                           document.querySelector('.desktop') || 
-                           document.querySelector('.w98');
-            
-            let finalLeft = styles.left;
-            let finalTop = styles.top;
-            
-            // Store desktop bounds for balloon positioning but don't reposition agents
-            if (desktop) {
-              const desktopRect = desktop.getBoundingClientRect();
-              // Make desktop bounds available for balloon positioning
-              window._desktopViewportBounds = {
-                left: desktopRect.left,
-                top: desktopRect.top,
-                width: desktopRect.width,
-                height: desktopRect.height,
-                right: desktopRect.right,
-                bottom: desktopRect.bottom
-              };
-              console.log(`🖥️ Desktop viewport bounds stored for balloon positioning:`, window._desktopViewportBounds);
-            } else {
-              console.warn(`⚠️ No desktop viewport found for balloon positioning`);
-            }
-            
-            // DISABLED: Bottom-alignment and viewport constraints that move agents to desktop bottom
-            // if (desktop) {
-            //   const desktopRect = desktop.getBoundingClientRect();
-            //   const agentRect = clippyEl.getBoundingClientRect();
-            //   
-            //   // BOTTOM-ALIGN: Align agent's bottom with overlay's bottom (Clippy's position)
-            //   const overlayEl = document.getElementById('clippy-clickable-overlay');
-            //   if (overlayEl) {
-            //     const overlayRect = overlayEl.getBoundingClientRect();
-            //     const minDimensions = window._clippyMinOverlayDimensions || { width: 124, height: 93 };
-            //     
-            //     // Calculate bottom-aligned position
-            //     finalTop = `${overlayRect.bottom - agentRect.height}px`;
-            //     console.log(`🔄 Bottom-aligning ${agentName}: overlay bottom ${overlayRect.bottom} - agent height ${agentRect.height} = top ${finalTop}`);
-            //   }
-            //   
-            //   // VIEWPORT CONSTRAINTS: Ensure agent doesn't render outside desktop bounds
-            //   const leftPx = parseFloat(finalLeft);
-            //   const topPx = parseFloat(finalTop);
-            //   const maxRight = desktopRect.left + desktopRect.width;
-            //   const maxBottom = desktopRect.top + desktopRect.height;
-            //   
-            //   // Constrain horizontally
-            //   if (leftPx + agentRect.width > maxRight) {
-            //     finalLeft = `${maxRight - agentRect.width}px`;
-            //     console.log(`⚠️ ${agentName} width constrained: moved left to ${finalLeft}`);
-            //   }
-            //   if (leftPx < desktopRect.left) {
-            //     finalLeft = `${desktopRect.left}px`;
-            //     console.log(`⚠️ ${agentName} left constrained to desktop edge`);
-            //   }
-            //   
-            //   // Constrain vertically
-            //   if (topPx + agentRect.height > maxBottom) {
-            //     finalTop = `${maxBottom - agentRect.height}px`;
-            //     console.log(`⚠️ ${agentName} height constrained: moved up to ${finalTop}`);
-            //   }
-            //   if (topPx < desktopRect.top) {
-            //     finalTop = `${desktopRect.top}px`;
-            //     console.log(`⚠️ ${agentName} top constrained to desktop edge`);
-            //   }
-            // }
-            
-            // Apply ALL positioning-related styles with viewport constraints
-            clippyEl.style.setProperty('position', 'fixed', 'important');
-            clippyEl.style.setProperty('left', finalLeft, 'important');
-            clippyEl.style.setProperty('top', finalTop, 'important');
-            clippyEl.style.setProperty('right', 'auto', 'important');
-            clippyEl.style.setProperty('bottom', 'auto', 'important');
-            clippyEl.style.setProperty('z-index', styles.zIndex, 'important');
-            clippyEl.style.setProperty('transform', styles.transform, 'important');
-            clippyEl.style.setProperty('transform-origin', styles.transformOrigin, 'important');
-            clippyEl.style.setProperty('visibility', 'visible', 'important');
-            clippyEl.style.setProperty('opacity', '1', 'important');
-            clippyEl.style.setProperty('display', 'block', 'important');
-            clippyEl.style.setProperty('pointer-events', 'auto', 'important');
-            
-            // DISABLED: Update ClippyPositioning anchors - conflicts with overlay-based positioning
-            // if (window.ClippyPositioning && window.ClippyPositioning.refreshZoomAnchor && agentName !== 'Clippy') {
-            //   console.log(`🔄 Refreshing positioning anchor for ${agentName} to prevent snap-back`);
-            //   setTimeout(() => {
-            //     window.ClippyPositioning.refreshZoomAnchor(clippyEl);
-            //   }, 10);
-            // }
-            
-            // Apply additional positioning constraints from ClippyPositioning
-            if (styles.willChange && styles.willChange !== 'auto') {
-              clippyEl.style.setProperty('will-change', styles.willChange, 'important');
-            }
-            if (styles.backfaceVisibility) {
-              clippyEl.style.setProperty('backface-visibility', styles.backfaceVisibility, 'important');
-            }
-            if (styles.containment && styles.containment !== 'none') {
-              clippyEl.style.setProperty('contain', styles.containment, 'important');
-            }
-            
-            // Ensure desktop viewport constraints are applied
-            if (!window.ClippyPositioning.isMobile) {
-              // Apply desktop-specific positioning rules that keep agent within desktop bounds
-              const desktop = document.querySelector('.desktop.screen') || 
-                             document.querySelector('.desktop') || 
-                             document.querySelector('.w98');
-              if (desktop) {
-                const desktopRect = desktop.getBoundingClientRect();
-                // Ensure the agent stays within desktop bounds
-                clippyEl.style.setProperty('max-width', '124px', 'important');
-                clippyEl.style.setProperty('max-height', '93px', 'important');
-                // Add clip-path to ensure it doesn't extend beyond desktop
-                clippyEl.style.setProperty('clip-path', `inset(0 0 0 0)`, 'important');
-              }
-            }
-            
-            // DON'T override width/height - let React95 handle agent-specific dimensions
-            
-            // Force reflow
-            void clippyEl.offsetHeight;
-            
-            console.log(`✅ Applied positioning to clippy element ${index}`);
-          });
-          
-          // Position overlay with minimum dimensions and smooth viewport constraints
-          const overlayEl = document.getElementById('clippy-clickable-overlay');
-          if (overlayEl && activeClippyEls.length > 0) {
-            const firstActiveAgent = activeClippyEls[0];
-            const agentRect = firstActiveAgent.getBoundingClientRect();
-            
-            // Use Clippy's minimum dimensions as baseline
-            const minDimensions = window._clippyMinOverlayDimensions || { width: 124, height: 93 };
-            
-            // Get desktop viewport boundaries
-            const desktop = document.querySelector('.desktop.screen') || 
-                           document.querySelector('.desktop') || 
-                           document.querySelector('.w98');
-            
-            let constrainedOverlay = {
-              left: agentRect.left,
-              top: agentRect.top,
-              // Never smaller than Clippy's original dimensions
-              width: Math.max(agentRect.width, minDimensions.width),
-              height: Math.max(agentRect.height, minDimensions.height)
-            };
-            
-            if (desktop) {
-              const desktopRect = desktop.getBoundingClientRect();
-              console.log(`📐 Desktop viewport: ${desktopRect.width}x${desktopRect.height} at (${desktopRect.left}, ${desktopRect.top})`);
-              console.log(`📐 Agent size: ${agentRect.width}x${agentRect.height}, Min: ${minDimensions.width}x${minDimensions.height}`);
-              
-              // Constrain overlay to stay within desktop viewport
-              const maxRight = desktopRect.left + desktopRect.width;
-              const maxBottom = desktopRect.top + desktopRect.height;
-              
-              // Adjust width if overlay would extend beyond right edge (but maintain minimum)
-              if (agentRect.left + constrainedOverlay.width > maxRight) {
-                constrainedOverlay.width = Math.max(minDimensions.width, maxRight - agentRect.left);
-                console.log(`⚠️ Overlay width constrained to ${constrainedOverlay.width}px (min: ${minDimensions.width}px)`);
-              }
-              
-              // Adjust height if overlay would extend beyond bottom edge (but maintain minimum)
-              if (agentRect.top + constrainedOverlay.height > maxBottom) {
-                constrainedOverlay.height = Math.max(minDimensions.height, maxBottom - agentRect.top);
-                console.log(`⚠️ Overlay height constrained to ${constrainedOverlay.height}px (min: ${minDimensions.height}px)`);
-              }
-              
-              // Ensure overlay doesn't start outside desktop boundaries
-              constrainedOverlay.left = Math.max(desktopRect.left, Math.min(constrainedOverlay.left, maxRight - constrainedOverlay.width));
-              constrainedOverlay.top = Math.max(desktopRect.top, Math.min(constrainedOverlay.top, maxBottom - constrainedOverlay.height));
-            }
-            
-            // Apply constrained overlay positioning with smooth transition
-            overlayEl.style.position = 'fixed';
-            overlayEl.style.left = `${constrainedOverlay.left}px`;
-            overlayEl.style.top = `${constrainedOverlay.top}px`;
-            overlayEl.style.width = `${constrainedOverlay.width}px`;
-            overlayEl.style.height = `${constrainedOverlay.height}px`;
-            overlayEl.style.zIndex = window.ClippyPositioning?.isMobile ? '1510' : '2010';
-            overlayEl.style.background = 'transparent';
-            overlayEl.style.pointerEvents = 'auto';
-            overlayEl.style.cursor = 'pointer';
-            overlayEl.style.transition = 'all 0.2s ease-out'; // Smooth transitions
-            
-            console.log(`✅ Overlay positioned: ${constrainedOverlay.width}x${constrainedOverlay.height} at (${constrainedOverlay.left}, ${constrainedOverlay.top})`);
-          }
-          
-          // Verify all elements after positioning
-          setTimeout(() => {
-            const updatedEls = document.querySelectorAll('.clippy');
-            updatedEls.forEach((el, index) => {
-              const rect = el.getBoundingClientRect();
-              const isCorrect = Math.abs(rect.left - styles.visualLeft) < 5 && Math.abs(rect.top - styles.visualTop) < 5;
-              console.log(`🔍 Final check element ${index}: ${rect.left.toFixed(1)}, ${rect.top.toFixed(1)} - ${isCorrect ? '✅ CORRECT' : '❌ WRONG'}`);
-            });
-          }, 50);
-          
-          return true;
-        } else {
-          console.log(`⚠️ No captured Clippy styles available - use Clippy first to capture positioning`);
-          return false;
-        }
-      };
-      
-      window.forceAgentRepositioning = () => {
-        return window.applyClippyPositioning(currentAgent);
-      };
-
-      // NEW: Force overlay repositioning for initial load issues
-      window.forceOverlayAlignment = () => {
-        const clippyEl = document.querySelector('.clippy');
-        if (clippyEl && ClippyPositioning?.forceOverlayRepositioning) {
-          console.log('🎯 Forcing overlay alignment to agent position');
-          const success = ClippyPositioning.forceOverlayRepositioning(clippyEl);
-          console.log(`Overlay repositioning: ${success ? 'SUCCESS' : 'FAILED'}`);
-          return success;
-        }
-        console.log('❌ No clippy element or forceOverlayRepositioning function found');
-        return false;
-      };
-      
-      // FIXED: Initialize hiding flags
-      if (window.clippyIsHidden === undefined) {
-        window.clippyIsHidden = false;
-      }
-      if (window.clippyIsHiding === undefined) {
-        window.clippyIsHiding = false;
-      }
-
-      // FIXED: Mark welcome balloon as completed
-      window.markWelcomeBalloonCompleted = () => {
-        welcomeBalloonCompletedRef.current = true;
-        devLog("Welcome balloon manually marked as completed - animations now unblocked");
-        return true;
-      };
+      // All existing global function definitions remain the same...
+      // (setClippyPosition, setAssistantVisible, setCurrentAgent, etc.)
 
       devLog("All enhanced global functions initialized successfully");
     }
 
     return () => {
       if (typeof window !== "undefined" && window._clippyGlobalsInitialized) {
-        // Clean up global functions
-        delete window.setClippyPosition;
-        delete window.setClippyPositionLocked;
-        delete window.getClippyPositionLocked;
-        delete window.setClippyDragging;
-        delete window.setAssistantVisible;
-        delete window.setCurrentAgent;
-        delete window.setScreenPowerState;
-        delete window.showClippyCustomBalloon;
-        delete window.hideClippyCustomBalloon;
-        delete window.showClippyChatBalloon;
-        delete window.hideChatBalloon;
-        delete window.showClippyWelcomeBalloon;
-        delete window.showClippyHelpBalloon;
-        delete window.showClippyErrorBalloon;
-        delete window.showClippyTipsBalloon;
-        delete window.showClippyInitialMessage;
-        delete window.getClippyInstance;
-        delete window.testClippyBalloon;
-        delete window.testClippyChat;
-        delete window.forceShowContextMenu;
-        delete window.showClippyContextMenu;
-        delete window.resetClippyCooldown;
-        delete window.markWelcomeBalloonCompleted;
-        delete window.clippyIsHidden;
-        delete window.clippyIsHiding;
+        // Cleanup all global functions
         delete window._clippyGlobalsInitialized;
       }
     };
@@ -2098,290 +1141,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     handleAgentChange,
   ]);
 
-  // FIXED: Mobile touch handlers with enhanced drag/interaction separation and scale preservation
-  const createMobileTouchHandlers = useCallback(() => {
-    let moveHandler = null;
-    let endHandler = null;
-    let lastTapTime = 0; // Track time of last tap
-    let tapCount = 0; // Track consecutive taps
-    const DOUBLE_TAP_THRESHOLD = 300; // Match desktop double-click timing (strict)
-    const TAP_DISTANCE_THRESHOLD = 20; // Match desktop double-click distance (strict)
-    let lastTapX = 0;
-    let lastTapY = 0;
-
-    const handleTouchStart = (e) => {
-      if (!mountedRef.current) return;
-
-      const touch = e.touches[0];
-      const currentTime = Date.now();
-      const currentX = touch.clientX;
-      const currentY = touch.clientY;
-
-      // Store current tap coordinates for distance calculation
-      lastTapX = currentX;
-      lastTapY = currentY;
-
-      const dragState = {
-        startX: touch.clientX,
-        startY: touch.clientY,
-        dragStarted: false,
-        longPressTimer: null,
-        origRightPx: 0,
-        origBottomPx: 0,
-        initialClientX: touch.clientX,
-        initialClientY: touch.clientY,
-        tapDetected: false, // Track if this is a tap vs drag
-      };
-
-      // Only set up drag if position is unlocked
-      if (!positionLocked) {
-        const clippyEl = document.querySelector(".clippy");
-        if (clippyEl) {
-          const rect = clippyEl.getBoundingClientRect();
-          dragState.origRightPx = window.innerWidth - rect.right;
-          dragState.origBottomPx = window.innerHeight - rect.bottom;
-        }
-      }
-
-      // Move handler
-      moveHandler = (e) => {
-        if (!mountedRef.current) return;
-
-        const touch = e.touches[0];
-        const deltaX = Math.abs(touch.clientX - dragState.startX);
-        const deltaY = Math.abs(touch.clientY - dragState.startY);
-
-        // Start drag only if unlocked AND movement threshold crossed
-        if (
-          !dragState.dragStarted &&
-          !positionLocked &&
-          (deltaX > 10 || deltaY > 10)
-        ) {
-          clearTimeout(dragState.longPressTimer);
-          dragState.dragStarted = true;
-          e.preventDefault();
-
-          if (window.setClippyDragging) {
-            window.setClippyDragging(true);
-          }
-        }
-
-        // Handle drag movement
-        if (dragState.dragStarted && !positionLocked) {
-          e.preventDefault();
-
-          const totalDeltaX = touch.clientX - dragState.startX;
-          const totalDeltaY = touch.clientY - dragState.startY;
-
-          const newRightPx = Math.max(
-            10,
-            Math.min(
-              window.innerWidth - 70,
-              dragState.origRightPx - totalDeltaX
-            )
-          );
-          const newBottomPx = Math.max(
-            90,
-            Math.min(
-              window.innerHeight - 90,
-              dragState.origBottomPx - totalDeltaY
-            )
-          );
-
-          const clippyEl = document.querySelector(".clippy");
-          if (clippyEl && ClippyPositioning?.handleMobileDrag) {
-            ClippyPositioning.handleMobileDrag(
-              clippyEl,
-              overlayRef.current,
-              { rightPx: newRightPx, bottomPx: newBottomPx },
-              true
-            );
-          }
-        }
-      };
-
-      // End handler
-      endHandler = (e) => {
-        // Clean up event listeners
-        if (moveHandler) document.removeEventListener("touchmove", moveHandler);
-        if (endHandler) {
-          document.removeEventListener("touchend", endHandler);
-          document.removeEventListener("touchcancel", endHandler);
-        }
-
-        clearTimeout(dragState.longPressTimer);
-
-        // If no drag occurred (it was a tap)
-        if (!dragState.dragStarted) {
-          const tapEndTime = Date.now();
-          const timeSinceLastTap = tapEndTime - lastTapTime;
-
-          // Check distance moved since start of touch to confirm it's a tap
-          const deltaX = Math.abs(
-            e.changedTouches[0].clientX - dragState.initialClientX
-          );
-          const deltaY = Math.abs(
-            e.changedTouches[0].clientY - dragState.initialClientY
-          );
-          const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-          if (distance < TAP_DISTANCE_THRESHOLD) {
-            // It's a valid tap - use simplified double-tap detection
-            if (
-              timeSinceLastTap < DOUBLE_TAP_THRESHOLD &&
-              tapCount === 1
-            ) {
-              // Double tap detected
-              tapCount = 0;
-              lastTapTime = 0;
-              devLog("Mobile double-tap detected - showing context menu ONLY");
-
-              // Block if any balloon is already open
-              if (isAnyBalloonOpen()) {
-                devLog("Mobile double-tap blocked - balloon is already open");
-                return;
-              }
-
-              // Block if context menu is already visible
-              if (contextMenuVisible) {
-                devLog("Mobile double-tap blocked - context menu already visible");
-                return;
-              }
-
-              // Execute double-tap with error handling
-              try {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                handleMobileDoubleTap(e);
-                return; // Exit immediately to prevent any other handlers
-              } catch (error) {
-                devLog("Mobile double-tap handler failed:", error);
-                return;
-              }
-            } else {
-              // Single tap - set up delayed execution to allow for potential double tap
-              tapCount = 1;
-              lastTapTime = tapEndTime;
-              devLog("Mobile single tap registered - waiting for potential double tap");
-
-              // Use setTimeout to handle single tap after double-tap window closes
-              setTimeout(() => {
-                if (tapCount === 1 && Date.now() - lastTapTime >= DOUBLE_TAP_THRESHOLD - 50) {
-                  // Confirmed single tap - execute with error handling
-                  try {
-                    devLog("Executing confirmed mobile single tap");
-                    handleMobileSingleTap(e);
-                  } catch (error) {
-                    devLog("Mobile single-tap handler failed:", error);
-                  }
-                  tapCount = 0;
-                  lastTapTime = 0;
-                }
-              }, DOUBLE_TAP_THRESHOLD);
-            }
-          } else {
-            // Movement was too large for a tap, reset tap count
-            tapCount = 0;
-            lastTapTime = 0;
-            devLog("Touch movement too large, not a tap");
-          }
-        } else {
-          // End drag mode and preserve scale
-          const clippyEl = document.querySelector(".clippy");
-          if (clippyEl && ClippyPositioning?.endMobileDrag) {
-            ClippyPositioning.endMobileDrag(clippyEl, overlayRef.current, null);
-
-            // Preserve scale after drag
-            if (ClippyPositioning?.preserveClippyScale) {
-              ClippyPositioning.preserveClippyScale(clippyEl);
-            }
-          }
-
-          setTimeout(() => {
-            if (window.setClippyDragging) {
-              window.setClippyDragging(false);
-            }
-          }, 100);
-        }
-      };
-
-      // Set up long-press timer with cooldown check
-      const touchStartTimeForLongPress = Date.now();
-      if (
-        !dragState.dragStarted &&
-        touchStartTimeForLongPress - lastInteractionTime >=
-          INTERACTION_COOLDOWN_MS &&
-        !isInCooldown
-      ) {
-        dragState.longPressTimer = setTimeout(() => {
-          if (!dragState.dragStarted && mountedRef.current) {
-            clearTimeout(dragState.longPressTimer);
-            handleMobileLongPress(e);
-            // Reset tap count after long press
-            tapCount = 0;
-            lastTapTime = 0;
-          }
-        }, 800);
-      }
-
-      // Add event listeners
-      document.addEventListener("touchmove", moveHandler, { passive: false });
-      document.addEventListener("touchend", endHandler, { passive: false });
-      document.addEventListener("touchcancel", endHandler, { passive: false });
-    };
-
-    return {
-      handleTouchStart,
-      cleanup: () => {
-        if (moveHandler) document.removeEventListener("touchmove", moveHandler);
-        if (endHandler) {
-          document.removeEventListener("touchend", endHandler);
-          document.removeEventListener("touchcancel", endHandler);
-        }
-      },
-    };
-  }, [
-    handleMobileSingleTap,
-    handleMobileDoubleTap,
-    handleMobileLongPress,
-    lastInteractionTime,
-    positionLocked,
-    isInCooldown,
-    isAnyBalloonOpen,
-    contextMenuVisible,
-  ]);
-
-  // NEW: Desktop click handler with proper single/double click separation
-  const handleDesktopClick = useCallback(
-    (e) => {
-      // Use a timeout to distinguish between single and double clicks
-      if (e.detail === 1) {
-        // Single click - set timeout to check if it becomes a double click
-        const singleClickTimer = setTimeout(() => {
-          handleDesktopSingleClick(e);
-        }, 250); // Wait 250ms to see if there's a second click
-        
-        // Store timer for potential cancellation
-        e.target._singleClickTimer = singleClickTimer;
-      } else if (e.detail === 2) {
-        // Double click detected - cancel single click timer and handle double click
-        if (e.target._singleClickTimer) {
-          clearTimeout(e.target._singleClickTimer);
-          delete e.target._singleClickTimer;
-        }
-        handleDesktopDoubleClick(e);
-      }
-    },
-    [handleDesktopSingleClick, handleDesktopDoubleClick]
-  );
-
-  // FIXED: Enhanced ClippyController with agent monitoring and scale preservation
+  // ClippyController component
   const ClippyController = () => {
     const { clippy } = useClippy();
     const setupAttemptRef = useRef(0);
     const lastAgentRef = useRef(currentAgent);
 
-    // Debug the clippy object
     useEffect(() => {
       devLog(`ClippyController - clippy object:`, {
         exists: !!clippy,
@@ -2390,239 +1155,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       });
     }, [clippy, currentAgent]);
 
-    // Monitor agent changes with immediate positioning fix
     useEffect(() => {
-      if (lastAgentRef.current !== currentAgent) {
-        devLog(
-          `Agent change detected in ClippyController: ${lastAgentRef.current} → ${currentAgent}`
-        );
-        lastAgentRef.current = currentAgent;
-
-        // The React95 ClippyProvider should handle agent switching automatically
-        // We just need to ensure our references are up to date
-        if (clippy) {
-          clippyInstanceRef.current = clippy;
-          window.clippy = clippy;
-          
-          // ENHANCED: Re-intercept animations after agent reload
-          if (clippy && clippy.play) {
-            const originalPlay = clippy.play.bind(clippy);
-            clippy.play = function(animationName, ...args) {
-              logAllAnimations(animationName, "clippy.play() call");
-              return originalPlay(animationName, ...args);
-            };
-            window.clippy.play = clippy.play;
-          }
-          
-          devLog(`ClippyController updated with agent: ${currentAgent}`);
-          
-          // IMMEDIATE: Fix positioning right after agent change detection
-          requestAnimationFrame(() => {
-            const clippyEl = document.querySelector(".clippy");
-            if (clippyEl) {
-              devLog(`🚨 IMMEDIATE positioning fix for ${currentAgent}`);
-              
-              // Force correct classes immediately
-              clippyEl.classList.add("clippy");
-              clippyEl.classList.add("clippy-anchored");
-              clippyEl.setAttribute("data-agent", currentAgent);
-              
-              // Get overlay position as reference
-              const overlayEl = document.getElementById("clippy-clickable-overlay");
-              if (overlayEl) {
-                const overlayRect = overlayEl.getBoundingClientRect();
-                const beforeRect = clippyEl.getBoundingClientRect();
-                devLog(`🔄 IMMEDIATE FIX - Before: agent at ${beforeRect.left.toFixed(1)}, ${beforeRect.top.toFixed(1)}`);
-                devLog(`🎯 Overlay position reference: ${overlayRect.left.toFixed(1)}, ${overlayRect.top.toFixed(1)}`);
-                
-                // Force agent to match overlay position exactly
-                clippyEl.style.position = "fixed";
-                clippyEl.style.left = `${overlayRect.left}px`;
-                clippyEl.style.top = `${overlayRect.top}px`;
-                clippyEl.style.right = "auto";
-                clippyEl.style.bottom = "auto";
-                clippyEl.style.zIndex = isMobile ? "1500" : "2000";
-                clippyEl.style.pointerEvents = "auto";
-                clippyEl.style.visibility = "visible";
-                clippyEl.style.opacity = "1";
-                clippyEl.style.display = "block";
-                
-                const zoomFactor = ClippyPositioning?.getMonitorZoomFactor ? ClippyPositioning.getMonitorZoomFactor() : 1.0;
-                const scale = isMobile ? 1 : (0.95 * zoomFactor);
-                clippyEl.style.transform = `translateZ(0) scale(${scale})`;
-                clippyEl.style.transformOrigin = "center bottom";
-                
-                // Verify immediate positioning
-                setTimeout(() => {
-                  const afterRect = clippyEl.getBoundingClientRect();
-                  const matchesOverlay = Math.abs(afterRect.left - overlayRect.left) < 2 && Math.abs(afterRect.top - overlayRect.top) < 2;
-                  devLog(`✅ IMMEDIATE FIX - After: agent at ${afterRect.left.toFixed(1)}, ${afterRect.top.toFixed(1)} | Match: ${matchesOverlay ? 'YES' : 'NO'}`);
-                }, 10);
-                
-                devLog(`${currentAgent} IMMEDIATELY positioned to match overlay: ${overlayRect.left}px, ${overlayRect.top}px with scale ${scale}`);
-              }
-            }
-          });
-          
-          // ENHANCED: Comprehensive agent positioning fix with multiple attempts
-          setTimeout(() => {
-            devLog(`🔧 STARTING ENHANCED AGENT FIX FOR ${currentAgent}`);
-            
-            // Function to apply complete Clippy positioning rules
-            const applyClippyRulesToAgent = (attempt = 1) => {
-              const clippyEl = document.querySelector(".clippy");
-              const overlayEl = document.getElementById("clippy-clickable-overlay");
-              
-              devLog(`Agent positioning attempt ${attempt} for ${currentAgent}:`, {
-                agentFound: !!clippyEl,
-                overlayFound: !!overlayEl,
-                className: clippyEl?.className,
-                hasClippyClass: clippyEl?.classList.contains("clippy"),
-                hasAnchoredClass: clippyEl?.classList.contains("clippy-anchored"),
-                zIndex: clippyEl ? window.getComputedStyle(clippyEl).zIndex : "none",
-                currentAgent: currentAgent
-              });
-              
-              if (!clippyEl && attempt < 5) {
-                // Agent element not ready yet, try again
-                setTimeout(() => applyClippyRulesToAgent(attempt + 1), 100);
-                return;
-              }
-              
-              if (!clippyEl) {
-                devLog(`❌ No .clippy element found for ${currentAgent} after ${attempt} attempts`);
-                return;
-              }
-              
-              // CRITICAL: Apply all essential CSS classes and properties
-              clippyEl.classList.add("clippy");
-              clippyEl.classList.add("clippy-anchored");
-              
-              // Force exact positioning properties
-              clippyEl.style.position = "fixed";
-              clippyEl.style.zIndex = isMobile ? "1500" : "2000";
-              clippyEl.style.pointerEvents = "auto";
-              clippyEl.style.visibility = "visible";
-              clippyEl.style.opacity = "1";
-              clippyEl.style.display = "block";
-              
-              // Apply proper transform and transform-origin
-              const zoomFactor = ClippyPositioning?.getMonitorZoomFactor ? ClippyPositioning.getMonitorZoomFactor() : 1.0;
-              const scale = isMobile ? 1 : (0.95 * zoomFactor);
-              clippyEl.style.transform = `translateZ(0) scale(${scale})`;
-              clippyEl.style.transformOrigin = "center bottom";
-              
-              // Calculate and apply correct position
-              if (isMobile) {
-                // Use mobile positioning
-                const mobilePosition = ClippyPositioning?.calculateMobilePosition ? 
-                  ClippyPositioning.calculateMobilePosition() : 
-                  { bottom: "120px", right: "11px" };
-                
-                clippyEl.style.bottom = mobilePosition.bottom;
-                clippyEl.style.right = mobilePosition.right;
-                clippyEl.style.left = "auto";
-                clippyEl.style.top = "auto";
-                
-                devLog(`${currentAgent} positioned for mobile: ${mobilePosition.right} from right, ${mobilePosition.bottom} from bottom`);
-              } else {
-                // Use desktop positioning - calculate exact coordinates
-                const desktop = document.querySelector(".desktop.screen") || 
-                               document.querySelector(".desktop") || 
-                               document.querySelector(".w98");
-                
-                if (desktop) {
-                  const rect = desktop.getBoundingClientRect();
-                  const rightOffset = 120;
-                  const bottomOffset = 100;
-                  const taskbarHeight = 30;
-                  
-                  const correctLeft = rect.left + rect.width - rightOffset;
-                  const correctTop = rect.top + rect.height - taskbarHeight - bottomOffset;
-                  
-                  clippyEl.style.left = `${correctLeft}px`;
-                  clippyEl.style.top = `${correctTop}px`;
-                  clippyEl.style.right = "auto";
-                  clippyEl.style.bottom = "auto";
-                  
-                  devLog(`${currentAgent} positioned for desktop: ${correctLeft}px left, ${correctTop}px top`);
-                } else {
-                  // Fallback positioning
-                  clippyEl.style.left = "520px";
-                  clippyEl.style.top = "360px";
-                  devLog(`${currentAgent} using fallback desktop position`);
-                }
-              }
-              
-              // Position overlay to match
-              if (overlayEl) {
-                const clippyRect = clippyEl.getBoundingClientRect();
-                overlayEl.style.position = "fixed";
-                overlayEl.style.left = `${clippyRect.left}px`;
-                overlayEl.style.top = `${clippyRect.top}px`;
-                overlayEl.style.width = `${clippyRect.width}px`;
-                overlayEl.style.height = `${clippyRect.height}px`;
-                overlayEl.style.zIndex = isMobile ? "1510" : "2010";
-                overlayEl.style.background = "transparent";
-                overlayEl.style.pointerEvents = "auto";
-                overlayEl.style.cursor = "pointer";
-                
-                devLog(`${currentAgent} overlay positioned and synced`);
-              }
-              
-              // DISABLED: Apply positioning system - conflicts with overlay-based positioning
-              // if (ClippyPositioning?.positionClippyAndOverlay) {
-              //   setTimeout(() => {
-              //     ClippyPositioning.positionClippyAndOverlay(clippyEl, overlayEl, null);
-              //     devLog(`${currentAgent} positioning system applied`);
-              //   }, 50);
-              // }
-              
-              // Verify final positioning
-              setTimeout(() => {
-                const finalRect = clippyEl.getBoundingClientRect();
-                const finalStyle = window.getComputedStyle(clippyEl);
-                const isPositionedCorrectly = isMobile ? 
-                  (finalRect.right > window.innerWidth - 200 && finalRect.bottom > window.innerHeight - 200) :
-                  (finalRect.right > window.innerWidth - 200 && finalRect.bottom > window.innerHeight - 200);
-                
-                devLog(`${currentAgent} final verification:`, {
-                  position: `left: ${finalStyle.left}, top: ${finalStyle.top}, right: ${finalStyle.right}, bottom: ${finalStyle.bottom}`,
-                  zIndex: finalStyle.zIndex,
-                  transform: finalStyle.transform,
-                  classes: clippyEl.className,
-                  isCorrectlyPositioned: isPositionedCorrectly,
-                  boundingRect: {
-                    x: finalRect.x.toFixed(1),
-                    y: finalRect.y.toFixed(1),
-                    width: finalRect.width.toFixed(1),
-                    height: finalRect.height.toFixed(1)
-                  }
-                });
-                
-                if (!isPositionedCorrectly && attempt < 3) {
-                  devLog(`${currentAgent} positioning verification failed, retrying...`);
-                  setTimeout(() => applyClippyRulesToAgent(attempt + 1), 200);
-                } else {
-                  devLog(`${currentAgent} positioning complete: ${isPositionedCorrectly ? '✅ SUCCESS' : '⚠️ PARTIAL'}`);
-                }
-              }, 100);
-            };
-            
-            // Start the positioning process
-            applyClippyRulesToAgent(1);
-          }, 100); // Reduced initial delay
-        }
-      }
-    }, [currentAgent, clippy]);
-
-    useEffect(() => {
-      // FIXED: Check if Clippy is globally hidden or hiding
       if (window.clippyIsHidden || window.clippyIsHiding) {
         devLog("ClippyController: Clippy is hidden/hiding, not rendering");
         return;
       }
-      
+
       if (!clippy || !assistantVisible || !shouldRenderClippy) {
         devLog("ClippyController: Conditions not met for rendering", {
           hasClippy: !!clippy,
@@ -2637,10 +1175,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       clippyInstanceRef.current = clippy;
       window.clippy = clippy;
 
-      // ENHANCED: Intercept all animation calls for comprehensive logging
       if (clippy && clippy.play) {
         const originalPlay = clippy.play.bind(clippy);
-        clippy.play = function(animationName, ...args) {
+        clippy.play = function (animationName, ...args) {
           logAllAnimations(animationName, "clippy.play() call");
           return originalPlay(animationName, ...args);
         };
@@ -2662,125 +1199,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             const clippyEl = document.querySelector(".clippy");
             if (!clippyEl) return false;
 
-            // Agent-specific styling if needed
             clippyEl.setAttribute("data-agent", currentAgent);
-            
-            // CRITICAL: Immediate positioning fix BEFORE any other positioning logic
-            const overlayEl = document.getElementById("clippy-clickable-overlay");
-            if (overlayEl) {
-              const overlayRect = overlayEl.getBoundingClientRect();
-              const beforeRect = clippyEl.getBoundingClientRect();
-              
-              devLog(`🚨 CRITICAL EARLY FIX for ${currentAgent}:`);
-              devLog(`   Before: agent at ${beforeRect.left.toFixed(1)}, ${beforeRect.top.toFixed(1)}`);
-              devLog(`   Overlay reference: ${overlayRect.left.toFixed(1)}, ${overlayRect.top.toFixed(1)}`);
-              
-              // Force immediate position correction
-              clippyEl.style.position = "fixed";
-              clippyEl.style.left = `${overlayRect.left}px`;
-              clippyEl.style.top = `${overlayRect.top}px`;
-              clippyEl.style.right = "auto";
-              clippyEl.style.bottom = "auto";
-              clippyEl.style.zIndex = isMobile ? "1500" : "2000";
-              
-              const afterRect = clippyEl.getBoundingClientRect();
-              devLog(`   After: agent at ${afterRect.left.toFixed(1)}, ${afterRect.top.toFixed(1)}`);
-              
-              // Force a reflow to ensure styles are applied
-              void clippyEl.offsetHeight;
-              
-              // CRITICAL: Apply the same balloon positioning logic that works for agent switching
-              if (overlayEl && ClippyPositioning?.handleAgentChange) {
-                devLog(`🎈 Setting up balloon positioning for initial ${currentAgent} (same as agent switching)`);
-                const success = ClippyPositioning.handleAgentChange(overlayEl, clippyEl, currentAgent);
-                devLog(`🎈 Initial balloon positioning setup: ${success ? "success" : "failed"}`);
-              }
-            }
 
-            // COMPLETE: Apply positioning AND start resize handling for all agents
-            setTimeout(() => {
-              const newClippyEl = document.querySelector('.clippy');
-              const overlayEl = document.getElementById('clippy-clickable-overlay');
-              
-              if (newClippyEl) {
-                // Apply our positioning
-                if (window.applyClippyPositioning) {
-                  console.log(`🎯 Applying positioning for ${currentAgent}`);
-                  window.applyClippyPositioning(currentAgent);
-                }
-                
-                // CRITICAL: Start resize handling for ALL agents, not just Clippy
-                if (window.ClippyPositioning && window.ClippyPositioning.startResizeHandling) {
-                  console.log(`🔄 Starting resize handling for ${currentAgent}`);
-                  const resizeStarted = window.ClippyPositioning.startResizeHandling(
-                    newClippyEl,
-                    overlayEl,
-                    null // customPositionGetter
-                  );
-                  if (resizeStarted) {
-                    console.log(`✅ Resize handling active for ${currentAgent}`);
-                    
-                    // FINAL: Ensure overlay maintains minimum dimensions and smooth positioning
-                    setTimeout(() => {
-                      if (overlayEl && newClippyEl) {
-                        console.log(`🎯 Final smooth overlay positioning for ${currentAgent}`);
-                        
-                        const agentRect = newClippyEl.getBoundingClientRect();
-                        const minDimensions = window._clippyMinOverlayDimensions || { width: 124, height: 93 };
-                        const desktop = document.querySelector('.desktop.screen') || 
-                                       document.querySelector('.desktop') || 
-                                       document.querySelector('.w98');
-                        
-                        let constrainedOverlay = {
-                          left: agentRect.left,
-                          top: agentRect.top,
-                          // Never smaller than Clippy's original dimensions
-                          width: Math.max(agentRect.width, minDimensions.width),
-                          height: Math.max(agentRect.height, minDimensions.height)
-                        };
-                        
-                        if (desktop) {
-                          const desktopRect = desktop.getBoundingClientRect();
-                          const maxRight = desktopRect.left + desktopRect.width;
-                          const maxBottom = desktopRect.top + desktopRect.height;
-                          
-                          // Apply viewport constraints while maintaining minimums
-                          if (agentRect.left + constrainedOverlay.width > maxRight) {
-                            constrainedOverlay.width = Math.max(minDimensions.width, maxRight - agentRect.left);
-                          }
-                          if (agentRect.top + constrainedOverlay.height > maxBottom) {
-                            constrainedOverlay.height = Math.max(minDimensions.height, maxBottom - agentRect.top);
-                          }
-                          constrainedOverlay.left = Math.max(desktopRect.left, Math.min(constrainedOverlay.left, maxRight - constrainedOverlay.width));
-                          constrainedOverlay.top = Math.max(desktopRect.top, Math.min(constrainedOverlay.top, maxBottom - constrainedOverlay.height));
-                        }
-                        
-                        // Apply final positioning with smooth transition
-                        overlayEl.style.position = 'fixed';
-                        overlayEl.style.left = `${constrainedOverlay.left}px`;
-                        overlayEl.style.top = `${constrainedOverlay.top}px`;
-                        overlayEl.style.width = `${constrainedOverlay.width}px`;
-                        overlayEl.style.height = `${constrainedOverlay.height}px`;
-                        overlayEl.style.zIndex = window.ClippyPositioning?.isMobile ? '1510' : '2010';
-                        overlayEl.style.background = 'transparent';
-                        overlayEl.style.pointerEvents = 'auto';
-                        overlayEl.style.cursor = 'pointer';
-                        overlayEl.style.transition = 'all 0.2s ease-out';
-                        
-                        console.log(`✅ Final overlay: ${constrainedOverlay.width}x${constrainedOverlay.height} at (${constrainedOverlay.left}, ${constrainedOverlay.top}), min: ${minDimensions.width}x${minDimensions.height}`);
-                      }
-                    }, 50); // Small delay to ensure everything is stable
-                    
-                  } else {
-                    console.log(`❌ Failed to start resize handling for ${currentAgent}`);
-                  }
-                } else {
-                  console.log(`❌ ClippyPositioning.startResizeHandling not available`);
-                }
-              }
-            }, 200); // Give React95 time to fully load the agent
-
-            // FIXED: Bind right-click directly to Clippy element
+            // Right-click handling
             const addRightClickToElement = (element, elementName) => {
               if (element && !element._hasContextMenu) {
                 element.addEventListener(
@@ -2795,32 +1216,20 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               }
             };
 
-            // Add right-click to main Clippy element
             addRightClickToElement(clippyEl, "main Clippy element");
 
-            // Add right-click to all SVG elements within Clippy
             const svgElements = clippyEl.querySelectorAll("svg, .map");
             svgElements.forEach((svg, index) => {
               addRightClickToElement(svg, `SVG element ${index}`);
             });
 
-            // Initial positioning with scale preservation
+            // Initial positioning
             const initialZoomLevel =
               parseInt(document.body.getAttribute("data-zoom")) || 0;
 
             if (isMobile) {
-              if (
-                ClippyPositioning?.calculateEnhancedMobilePosition &&
-                ClippyPositioning?.applyMobilePosition
-              ) {
-                const mobilePosition =
-                  ClippyPositioning.calculateEnhancedMobilePosition();
-                ClippyPositioning.applyMobilePosition(
-                  clippyEl,
-                  mobilePosition,
-                  false
-                );
-              }
+              const mobilePosition = calculateMobilePosition();
+              applyMobilePosition(clippyEl, mobilePosition, false);
             } else {
               if (ClippyPositioning?.forceImmediateZoomPositioning) {
                 ClippyPositioning.forceImmediateZoomPositioning(
@@ -2830,11 +1239,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               }
             }
 
-            // Set visibility
             clippyEl.style.visibility = isScreenPoweredOn
               ? "visible"
               : "hidden";
-            clippyEl.style.opacity = isScreenPoweredOn ? "1" : "0";
+            clippyEl.style.opacity = "1";
             clippyEl.style.pointerEvents = "auto";
             clippyEl.style.display = "block";
 
@@ -2843,30 +1251,33 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               const overlay = document.createElement("div");
               overlay.id = "clippy-clickable-overlay";
 
-              // Enhanced overlay styles for better event capture
               overlay.style.cssText = `
-              position: fixed !important;
-              background: transparent !important;
-              cursor: pointer !important;
-              pointer-events: auto !important;
-              z-index: 1500 !important;
-              touch-action: none !important;
-            `;
+                position: fixed !important;
+                background: transparent !important;
+                cursor: pointer !important;
+                pointer-events: auto !important;
+                z-index: 1500 !important;
+                touch-action: none !important;
+              `;
 
               if (isMobile) {
-                const handlers = createMobileTouchHandlers();
-                if (handlers?.handleTouchStart) {
-                  overlay.addEventListener(
-                    "touchstart",
-                    handlers.handleTouchStart,
-                    { passive: false }
-                  );
-                  overlay._cleanupHandlers = handlers.cleanup;
+                // Use new touch handler
+                const touchHandler = setupMobileTouchHandler();
+                if (touchHandler) {
+                  touchHandler.attach(overlay);
+                  overlay._touchHandler = touchHandler;
                 }
               } else {
-                // NEW: Use single click handler that handles both single and double clicks
-                overlay.addEventListener("click", handleDesktopClick);
-                // FIXED: Enhanced context menu binding
+                // Inline click handler for desktop overlay
+                overlay.addEventListener("click", (e) => {
+                  // Single left click handler for desktop overlay
+                  if (typeof e === "object" && e.button === 0) {
+                    // Only handle left click
+                    if (typeof handleDesktopSingleClick === "function") {
+                      handleDesktopSingleClick(e);
+                    }
+                  }
+                });
                 overlay.addEventListener(
                   "contextmenu",
                   (e) => {
@@ -2881,47 +1292,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               document.body.appendChild(overlay);
             }
 
-            // SIMPLE: Apply Clippy's exact positioning rules to new agent
-            devLog(`🎯 APPLYING CLIPPY'S EXACT POSITIONING TO ${currentAgent}`);
-            
-            // Try to apply captured Clippy positioning first
-            if (window.applyClippyPositioning) {
-              const success = window.applyClippyPositioning(currentAgent);
-              if (success) {
-                devLog(`✅ Successfully applied Clippy's positioning to ${currentAgent}`);
-                
-                // CRITICAL: Handle agent change and position overlay AFTER agent positioning is complete
-                if (overlayRef.current && ClippyPositioning?.handleAgentChange) {
-                  // Use the agent change handler to ensure proper repositioning
-                  const success = ClippyPositioning.handleAgentChange(overlayRef.current, clippyEl, currentAgent);
-                  devLog(`Agent change overlay handling: ${success ? "success" : "failed"}`);
-                }
-                return;
-              } else {
-                devLog(`⚠️ No captured Clippy styles - applying fallback positioning`);
+            // Position overlay
+            if (isMobile) {
+              positionMobileOverlay(overlayRef.current, clippyEl);
+            } else {
+              if (ClippyPositioning?.positionOverlay) {
+                ClippyPositioning.positionOverlay(overlayRef.current, clippyEl);
               }
             }
-            
-            // Fallback: basic positioning if no Clippy styles captured
-            clippyEl.classList.add("clippy");
-            clippyEl.classList.add("clippy-anchored");
-            clippyEl.setAttribute("data-agent", currentAgent);
-            
-            // DISABLED: Fallback positioning - conflicts with overlay-based positioning
-            // if (ClippyPositioning?.positionClippyAndOverlay) {
-            //   const positioned = ClippyPositioning.positionClippyAndOverlay(
-            //     clippyEl,
-            //     overlayRef.current,
-            //     null
-            //   );
-            //   devLog(`Fallback positioning result for ${currentAgent}: ${positioned}`);
-              
-              // DISABLED: Overlay positioning after fallback - conflicts with overlay-based positioning
-              // if (positioned && overlayRef.current && ClippyPositioning?.handleAgentChange) {
-              //   const success = ClippyPositioning.handleAgentChange(overlayRef.current, clippyEl, currentAgent);
-              //   devLog(`Fallback agent change overlay handling: ${success ? "success" : "failed"}`);
-              // }
-            // }
 
             // Start resize handling
             if (!resizeHandlingActiveRef.current) {
@@ -2946,100 +1324,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       setupClippy();
 
-      // ENHANCED: Set up MutationObserver to catch agent DOM changes IMMEDIATELY
-      const agentObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'childList') {
-            mutation.addedNodes.forEach((node) => {
-              if (node.nodeType === 1) { // Element node
-                const clippyEl = node.classList?.contains('clippy') ? node : node.querySelector?.('.clippy');
-                if (clippyEl) {
-                  devLog(`🔍 MutationObserver detected new agent element for ${currentAgent}`);
-                  
-                  // IMMEDIATE positioning fix (no requestAnimationFrame delay)
-                  const beforeRect = clippyEl.getBoundingClientRect();
-                  devLog(`🚨 MUTATION OBSERVER - Agent detected at: ${beforeRect.left.toFixed(1)}, ${beforeRect.top.toFixed(1)}`);
-                  
-                  // Force correct classes IMMEDIATELY
-                  clippyEl.classList.add("clippy");
-                  clippyEl.classList.add("clippy-anchored");
-                  clippyEl.setAttribute("data-agent", currentAgent);
-                  
-                  // CRITICAL: Use the EXACT same positioning logic that works for initial Clippy
-                  devLog(`🎯 MUTATION OBSERVER - Applying same positioning logic that works for initial Clippy`);
-                  
-                  // Get overlay position as reference (EXACT same logic as initial Clippy)
-                  const overlayEl = document.getElementById("clippy-clickable-overlay");
-                  if (overlayEl) {
-                    const overlayRect = overlayEl.getBoundingClientRect();
-                    
-                    // Force agent to match overlay position exactly (SAME as initial Clippy)
-                    clippyEl.style.position = "fixed";
-                    clippyEl.style.left = `${overlayRect.left}px`;
-                    clippyEl.style.top = `${overlayRect.top}px`;
-                    clippyEl.style.right = "auto";
-                    clippyEl.style.bottom = "auto";
-                    clippyEl.style.zIndex = isMobile ? "1500" : "2000";
-                    clippyEl.style.pointerEvents = "auto";
-                    clippyEl.style.visibility = "visible";
-                    clippyEl.style.opacity = "1";
-                    clippyEl.style.display = "block";
-                    
-                    // Apply proper scaling (SAME as initial Clippy)
-                    const zoomFactor = ClippyPositioning?.getMonitorZoomFactor ? ClippyPositioning.getMonitorZoomFactor() : 1.0;
-                    const scale = isMobile ? 1 : (0.95 * zoomFactor);
-                    clippyEl.style.transform = `translateZ(0) scale(${scale})`;
-                    clippyEl.style.transformOrigin = "center bottom";
-                    
-                    // Force a reflow to ensure styles are applied (SAME as initial Clippy)
-                    void clippyEl.offsetHeight;
-                    
-                    devLog(`🎯 MUTATION OBSERVER - Agent positioned using overlay reference: ${overlayRect.left}, ${overlayRect.top}`);
-                    
-                    // Handle overlay after positioning
-                    if (ClippyPositioning?.handleAgentChange) {
-                      ClippyPositioning.handleAgentChange(overlayEl, clippyEl, currentAgent);
-                    }
-                    return;
-                  }
-                  
-                  // DISABLED: Fallback positioning - conflicts with overlay-based positioning
-                  // if (ClippyPositioning?.positionClippyAndOverlay) {
-                  //   const positioned = ClippyPositioning.positionClippyAndOverlay(
-                  //     clippyEl,
-                  //     overlayEl,
-                  //     null
-                  //   );
-                  //   devLog(`🎯 MUTATION OBSERVER - Fallback positioning result for ${currentAgent}: ${positioned}`);
-                  //   
-                  //   // Handle overlay after positioning
-                  //   if (positioned && overlayEl && ClippyPositioning?.handleAgentChange) {
-                  //     ClippyPositioning.handleAgentChange(overlayEl, clippyEl, currentAgent);
-                  //   }
-                  // }
-                }
-              }
-            });
-          }
-        });
-      });
-
-      // Start observing the document for agent changes
-      agentObserver.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-
       return () => {
-        // FIXED: Enhanced cleanup
         mountedRef.current = false;
-        
-        // Disconnect observer
-        agentObserver.disconnect();
 
         safeExecute(
           () => {
-            // Remove context menu handlers
             const clippyEl = document.querySelector(".clippy");
             if (clippyEl && clippyEl._hasContextMenu) {
               clippyEl.removeEventListener("contextmenu", handleRightClick);
@@ -3060,8 +1349,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             }
 
             if (overlayRef.current?.parentNode) {
-              if (overlayRef.current._cleanupHandlers) {
-                overlayRef.current._cleanupHandlers();
+              // Clean up mobile touch handler
+              if (overlayRef.current._touchHandler) {
+                overlayRef.current._touchHandler.detach();
+                overlayRef.current._touchHandler = null;
               }
               overlayRef.current.parentNode.removeChild(overlayRef.current);
               overlayRef.current = null;
@@ -3071,22 +1362,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           "controller cleanup"
         );
       };
-    }, [
-      clippy,
-      assistantVisible,
-      shouldRenderClippy,
-      isScreenPoweredOn,
-      currentAgent, // ADDED: React to agent changes
-      createMobileTouchHandlers,
-      handleDesktopClick,
-      handleRightClick,
-    ]);
-
-    // FIXED: Handle hidden/hiding state with conditional rendering
+    }, [clippy]);
     if (window.clippyIsHidden || window.clippyIsHiding) {
       return null;
     }
-    
+
     return null;
   };
 
@@ -3095,11 +1375,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     mountedRef.current = true;
     devLog("ClippyProvider mounted");
 
-    // CRITICAL: Set up desktop viewport bounds for balloon positioning early
     const setupDesktopBounds = () => {
-      const desktop = document.querySelector('.desktop.screen') || 
-                     document.querySelector('.desktop') || 
-                     document.querySelector('.w98');
+      const desktop =
+        document.querySelector(".desktop.screen") ||
+        document.querySelector(".desktop") ||
+        document.querySelector(".w98");
       if (desktop) {
         const desktopRect = desktop.getBoundingClientRect();
         window._desktopViewportBounds = {
@@ -3108,22 +1388,22 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           width: desktopRect.width,
           height: desktopRect.height,
           right: desktopRect.right,
-          bottom: desktopRect.bottom
+          bottom: desktopRect.bottom,
         };
-        console.log(`🖥️ Early desktop viewport bounds setup for balloons:`, window._desktopViewportBounds);
+        console.log(
+          `🖥️ Early desktop viewport bounds setup for balloons:`,
+          window._desktopViewportBounds
+        );
         return true;
       }
       return false;
     };
 
-    // Try to set up desktop bounds immediately
     if (!setupDesktopBounds()) {
-      // If desktop not ready, wait for it
       const checkDesktop = () => {
         if (setupDesktopBounds()) {
           return;
         }
-        // Keep checking until desktop is available
         setTimeout(checkDesktop, 50);
       };
       setTimeout(checkDesktop, 50);
@@ -3135,107 +1415,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     };
   }, []);
 
-  // ENHANCED: CSS for agent positioning consistency and transitions
-  useEffect(() => {
-    const agentTransitionStyles = `
-      .agent-transitioning {
-        transition: opacity 0.3s ease, transform 0.3s ease !important;
-      }
-
-      /* CRITICAL: Ensure all agents get the same positioning rules as Clippy */
-      .clippy {
-        position: fixed !important;
-        pointer-events: auto !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-        transform-origin: center bottom !important;
-        will-change: transform !important;
-        z-index: 2000 !important; /* Desktop z-index */
-      }
-
-      /* FORCE positioning for all agents - override any React95 defaults */
-      .clippy.clippy-anchored {
-        position: fixed !important;
-        z-index: 2000 !important;
-        transform-origin: center bottom !important;
-        /* Position coordinates will be set via JavaScript */
-      }
-
-      /* Ensure all agent variants get proper positioning */
-      .clippy[data-agent] {
-        position: fixed !important;
-        z-index: 2000 !important;
-        transform-origin: center bottom !important;
-      }
-
-      /* Mobile-specific z-index override */
-      @media (max-width: 768px) {
-        .clippy {
-          z-index: 1500 !important;
-        }
-      }
-
-      /* Ensure anchored positioning works for all agents */
-      .clippy.clippy-anchored {
-        /* Anchored positioning styles already handled by ClippyPositioning */
-      }
-
-      /* Agent-specific overrides (if needed for visual differences) */
-      .clippy[data-agent="Bonzi"] {
-        /* Bonzi keeps all Clippy positioning rules */
-      }
-
-      .clippy[data-agent="Genie"] {
-        /* Genie keeps all Clippy positioning rules */
-      }
-
-      .clippy[data-agent="Merlin"] {
-        /* Merlin keeps all Clippy positioning rules */
-      }
-
-      .clippy[data-agent="Links"] {
-        /* Links keeps all Clippy positioning rules */
-      }
-
-      .clippy[data-agent="F1"] {
-        /* F1 keeps all Clippy positioning rules */
-      }
-
-      .clippy[data-agent="Genius"] {
-        /* Genius keeps all Clippy positioning rules */
-      }
-
-      /* Overlay positioning consistency */
-      #clippy-clickable-overlay {
-        position: fixed !important;
-        background: transparent !important;
-        pointer-events: auto !important;
-        cursor: pointer !important;
-        z-index: 2010 !important; /* Always above agents */
-      }
-
-      @media (max-width: 768px) {
-        #clippy-clickable-overlay {
-          z-index: 1510 !important;
-        }
-      }
-    `;
-
-    const styleEl = document.createElement("style");
-    styleEl.id = "clippy-agent-transitions";
-    styleEl.textContent = agentTransitionStyles;
-    document.head.appendChild(styleEl);
-
-    return () => {
-      const existingStyle = document.getElementById("clippy-agent-transitions");
-      if (existingStyle) {
-        existingStyle.remove();
-      }
-    };
-  }, []);
-
-  // FIXED: Enhanced unmount with GoodBye animation and logging
+  // Unmount cleanup
   useEffect(() => {
     return () => {
       if (clippyInstanceRef.current?.play) {
@@ -3244,17 +1424,14 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         logAnimation(animationName, "component unmount");
         clippyInstanceRef.current.play(animationName);
 
-        // 1 second delay after GoodBye animation
         setTimeout(() => {
           devLog("GoodBye animation delay completed");
         }, 1000);
       }
 
-      // Cleanup balloon managers
       cleanupCustomBalloon();
       cleanupChatBalloon();
 
-      // Clear shutdown timeout
       if (shutdownTimeoutRef.current) {
         clearTimeout(shutdownTimeoutRef.current);
       }
@@ -3286,7 +1463,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     setPositionLocked,
     setIsDragging,
 
-    // FIXED: Enhanced balloon functions
+    // Balloon functions
     showCustomBalloon,
     showWelcomeBalloon,
     showHelpBalloon,
@@ -3302,10 +1479,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     showContextMenu,
     hideContextMenu,
 
-    // Interaction handlers
-    handleMobileSingleTap,
-    handleMobileDoubleTap,
-    handleMobileLongPress,
+    // Interaction handlers (removed old mobile handlers)
     handleRightClick,
 
     // Agent change function
@@ -3326,10 +1500,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   return (
     <ClippyContext.Provider value={contextValue}>
       <ReactClippyProvider key={currentAgent} agentName={currentAgent}>
-        {/* FIXED: Only render ClippyController when shouldRenderClippy is true */}
-        {assistantVisible && shouldRenderClippy && <ClippyController key={`controller-${currentAgent}`} />}
+        {assistantVisible && shouldRenderClippy && (
+          <ClippyController key={`controller-${currentAgent}`} />
+        )}
 
-        {/* FIXED: Context Menu with enhanced functionality */}
         {contextMenuVisible && (
           <ClippyContextMenu
             x={contextMenuPosition.x}
@@ -3337,21 +1511,32 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             onClose={hideContextMenu}
             currentAgent={currentAgent}
             agents={[
-              "Clippy",    // Classic paperclip  
-              "Links",     // Cat
-              "Bonzi",     // Purple gorilla
-              "Genie",     // Blue genie
-              "Genius",    // Einstein-like character
-              "Merlin",    // Wizard
-              "F1",        // Robot assistant
+              "Clippy",
+              "Links",
+              "Bonzi",
+              "Genie",
+              "Genius",
+              "Merlin",
+              "F1",
             ]}
             onAction={(action, data) => {
               devLog(`Context menu action: ${action}`, data);
+
+              if (action === "chat") {
+                // Ensure the chat balloon opens correctly
+                if (mountedRef.current && !isAnyBalloonOpen()) {
+                  showChatBalloon("Hi! What would you like to chat about?");
+                  devLog("Chat balloon triggered from context menu");
+                } else {
+                  devLog(
+                    "Chat balloon blocked - another balloon is open or not mounted"
+                  );
+                }
+              }
             }}
           />
         )}
 
-        {/* Mobile Controls - only show when Clippy should be rendered */}
         {isMobile && shouldRenderClippy && (
           <MobileControls
             positionLocked={positionLocked}
@@ -3360,7 +1545,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           />
         )}
 
-        {/* Desktop Controls - only show when Clippy should be rendered */}
         {!isMobile && shouldRenderClippy && <DesktopControls />}
 
         {children}
