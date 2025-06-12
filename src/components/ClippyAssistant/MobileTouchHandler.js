@@ -2,7 +2,7 @@
 import { devLog } from "./ClippyPositioning";
 
 // Constants
-const DOUBLE_TAP_THRESHOLD = 30; // ms
+const DOUBLE_TAP_THRESHOLD = 250; // ms - Updated to match InteractionManager timing
 const TAP_DISTANCE_THRESHOLD = 20; // px
 const LONG_PRESS_DURATION = 500; // ms
 const DRAG_THRESHOLD = 10; // px
@@ -241,12 +241,14 @@ export class MobileTouchHandler {
       timeSinceLastTap < DOUBLE_TAP_THRESHOLD &&
       this.touchState.tapCount === 1
     ) {
-      // Double tap detected
-      devLog("Double tap detected");
+      // Double tap detected - bypasses cooldowns like desktop double-click!
+      devLog(
+        "Double tap detected - bypassing cooldowns (matches InteractionManager behavior)"
+      );
       this.touchState.tapCount = 0;
       this.touchState.lastTapTime = 0;
 
-      // Check blockers
+      // Double-taps only check for balloons, NOT cooldowns or animations (like desktop)
       if (this.options.isAnyBalloonOpen()) {
         devLog("Double tap blocked - balloon is open");
         return;

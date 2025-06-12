@@ -36,6 +36,13 @@ import ClippyService from "./ClippyService";
 import MobileControls from "./MobileControls";
 import DesktopControls from "./DesktopControls";
 
+// NEW: Import interaction manager for smart cooldowns and iOS Safari support
+import {
+  interactionManager,
+  COOLDOWN_TYPES,
+  isIOSSafari,
+} from "./InteractionManager";
+
 // NEW: Import mobile modules
 import { createMobileTouchHandler } from "./MobileTouchHandler";
 import {
@@ -109,8 +116,8 @@ const GREETING_ANIMATIONS = ["Wave"];
 const INITIAL_MESSAGE_CONTENT =
   "Welcome to Hydra98! Please enjoy and don't break anything";
 
-// FIXED: Increased cooldown to 3 seconds to prevent animation queue
-const INTERACTION_COOLDOWN_MS = 3000;
+// UPDATED: Using smart cooldown system from InteractionManager
+// Different cooldowns for different interaction types - no cooldown for double-click/double-tap
 
 // ENHANCED: Global animation logging function
 const logAllAnimations = (animationName, context = "unknown") => {
@@ -172,13 +179,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     );
   });
 
-  // FIXED: Enhanced cooldown management
+  // UPDATED: Enhanced cooldown management using InteractionManager
   const startCooldown = useCallback(() => {
     setIsInCooldown(true);
     setTimeout(() => {
       setIsInCooldown(false);
       devLog("Cooldown period ended");
-    }, INTERACTION_COOLDOWN_MS);
+    }, COOLDOWN_TYPES.ANIMATION); // Use animation cooldown for backwards compatibility
   }, []);
 
   // FIXED: Check if any balloon is currently open
@@ -399,13 +406,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       const now = Date.now();
 
-      // Check cooldown and hiding state
-      if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-        devLog(
-          `Desktop single click blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`
-        );
-        return false;
-      }
+      // InteractionManager already checked cooldown in processSingleClick() - no duplicate check needed
 
       // Block all interactions if Clippy is hiding or hidden
       if (window.clippyIsHiding || window.clippyIsHidden) {
@@ -580,13 +581,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       const now = Date.now();
 
-      // Check cooldown
-      if (isInCooldown || now - lastInteractionTime < INTERACTION_COOLDOWN_MS) {
-        devLog(
-          `Desktop double click blocked - in ${INTERACTION_COOLDOWN_MS}ms cooldown`
-        );
-        return false;
-      }
+      // Double-clicks bypass cooldowns in new InteractionManager!
+      devLog(
+        "Desktop double click - bypassing cooldowns (InteractionManager allows double-clicks)"
+      );
 
       // Block if animation is currently playing
       if (isAnimationPlaying) {
@@ -839,26 +837,26 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     handleShutdownSequence,
   ]);
 
-  // NEW: Desktop click handler with proper single/double click separation
+  // UPDATED: Desktop click handler using InteractionManager for smart click separation
   const handleDesktopClick = useCallback(
     (e) => {
-      // Use a timeout to distinguish between single and double clicks
-      if (e.detail === 1) {
-        // Single click - set timeout to check if it becomes a double click
-        const singleClickTimer = setTimeout(() => {
-          handleDesktopSingleClick(e);
-        }, 250); // Wait 250ms to see if there's a second click
+      const clippyEl = document.querySelector(".clippy");
 
-        // Store timer for potential cancellation
-        e.target._singleClickTimer = singleClickTimer;
-      } else if (e.detail === 2) {
-        // Double click detected - cancel single click timer and handle double click
-        if (e.target._singleClickTimer) {
-          clearTimeout(e.target._singleClickTimer);
-          delete e.target._singleClickTimer;
-        }
-        handleDesktopDoubleClick(e);
-      }
+      // Use InteractionManager for smart single/double click separation
+      interactionManager.handleClick(
+        clippyEl,
+        {
+          onSingleClick: (event) => {
+            // InteractionManager handles recording in processSingleClick() - no duplicate recording needed
+            return handleDesktopSingleClick(event);
+          },
+          onDoubleClick: (event) => {
+            // Double-clicks don't need recording - they bypass cooldowns
+            return handleDesktopDoubleClick(event);
+          },
+        },
+        e
+      );
     },
     [handleDesktopSingleClick, handleDesktopDoubleClick]
   );
@@ -1268,14 +1266,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                   overlay._touchHandler = touchHandler;
                 }
               } else {
-                // Inline click handler for desktop overlay
+                // Use InteractionManager for desktop overlay click handling
                 overlay.addEventListener("click", (e) => {
-                  // Single left click handler for desktop overlay
-                  if (typeof e === "object" && e.button === 0) {
+                  if (e.button === 0) {
                     // Only handle left click
-                    if (typeof handleDesktopSingleClick === "function") {
-                      handleDesktopSingleClick(e);
-                    }
+                    handleDesktopClick(e);
                   }
                 });
                 overlay.addEventListener(
