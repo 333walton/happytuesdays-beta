@@ -49,55 +49,184 @@ const ClippyContextMenu = ({
     },
   };
 
-  // Animation mapping: { displayName: animationName }
-  const animationList = {
-    Congratulate: "Congratulate",
-    "Look Right": "LookRight",
-    "Send Mail": "SendMail",
-    Thinking: "Thinking",
-    Explain: "Explain",
-    "Idle Rope Pile": "IdleRopePile",
-    "Idle Atom": "IdleAtom",
-    Print: "Print",
-    //"Hide": "Hide", // removed for now since its buggy
-    "Get Attention": "GetAttention",
-    Save: "Save",
-    "Get Techy": "GetTechy",
-    "Gesture Up": "GestureUp",
-    Writing: "Writing",
-    Processing: "Processing",
-    Alert: "Alert",
-    "Look Up Right": "LookUpRight",
-    "Idle Side to Side": "IdleSideToSide",
-    "Good Bye": "GoodBye",
-    "Look Left": "LookLeft",
-    "Idle Head Scratch": "IdleHeadScratch",
-    "Look Up Left": "LookUpLeft",
-    Checking: "CheckingSomething", // RENAMED: Display "Checking" instead of "CheckingSomething"
-    Hearing: "Hearing_1",
-    "Get Wizardy": "GetWizardy",
-    "Idle Finger Tap": "IdleFingerTap",
-    "Gesture Left": "GestureLeft",
-    Wave: "Wave",
-    "Gesture Right": "GestureRight",
-    "Idle Snooze": "IdleSnooze",
-    "Look Down Right": "LookDownRight",
-    "Get Artsy": "GetArtsy",
-    Show: "Show",
-    "Look Down": "LookDown",
-    Searching: "Searching",
-    "Empty Trash": "EmptyTrash",
-    Greeting: "Greeting",
-    "Look Up": "LookUp",
-    "Gesture Down": "GestureDown",
-    "Rest Pose": "RestPose",
-    "Idle Eyebrow Raise": "IdleEyeBrowRaise",
-    "Look Down Left": "LookDownLeft",
+  // PHASE 3: Dynamic agent-specific animation configurations
+  const AGENT_ANIMATIONS = {
+    Clippy: {
+      Congratulate: "Congratulate",
+      "Look Right": "LookRight",
+      "Send Mail": "SendMail",
+      Thinking: "Thinking",
+      Explain: "Explain",
+      "Idle Rope Pile": "IdleRopePile",
+      "Idle Atom": "IdleAtom",
+      Print: "Print",
+      "Get Attention": "GetAttention",
+      Save: "Save",
+      "Get Techy": "GetTechy",
+      "Gesture Up": "GestureUp",
+      Writing: "Writing",
+      Processing: "Processing",
+      Alert: "Alert",
+      "Look Up Right": "LookUpRight",
+      "Idle Side to Side": "IdleSideToSide",
+      "Good Bye": "GoodBye",
+      "Look Left": "LookLeft",
+      "Idle Head Scratch": "IdleHeadScratch",
+      "Look Up Left": "LookUpLeft",
+      Checking: "CheckingSomething",
+      Hearing: "Hearing_1",
+      "Get Wizardy": "GetWizardy",
+      "Idle Finger Tap": "IdleFingerTap",
+      "Gesture Left": "GestureLeft",
+      Wave: "Wave",
+      "Gesture Right": "GestureRight",
+      "Idle Snooze": "IdleSnooze",
+      "Look Down Right": "LookDownRight",
+      "Get Artsy": "GetArtsy",
+      Show: "Show",
+      "Look Down": "LookDown",
+      Searching: "Searching",
+      "Empty Trash": "EmptyTrash",
+      Greeting: "Greeting",
+      "Look Up": "LookUp",
+      "Gesture Down": "GestureDown",
+      "Rest Pose": "RestPose",
+      "Idle Eyebrow Raise": "IdleEyeBrowRaise",
+      "Look Down Left": "LookDownLeft",
+    },
+    Links: {
+      Wave: "Wave",
+      "Good Bye": "GoodBye",
+      Greeting: "Greeting",
+      "Get Attention": "GetAttention",
+      Alert: "Alert",
+      Thinking: "Thinking",
+      Writing: "Writing",
+      Processing: "Processing",
+      Searching: "Searching",
+      "Look Left": "LookLeft",
+      "Look Right": "LookRight",
+      "Look Up": "LookUp",
+      "Look Down": "LookDown",
+      "Gesture Up": "GestureUp",
+      "Gesture Down": "GestureDown",
+      "Gesture Left": "GestureLeft",
+      "Gesture Right": "GestureRight",
+      "Rest Pose": "RestPose",
+      Show: "Show",
+    },
+    Bonzi: {
+      Wave: "Wave",
+      "Good Bye": "GoodBye",
+      Greeting: "Greeting",
+      "Get Attention": "GetAttention",
+      Alert: "Alert",
+      Thinking: "Thinking",
+      Processing: "Processing",
+      "Look Left": "LookLeft",
+      "Look Right": "LookRight",
+      "Look Up": "LookUp",
+      "Look Down": "LookDown",
+      "Gesture Up": "GestureUp",
+      "Gesture Down": "GestureDown",
+      "Gesture Left": "GestureLeft",
+      "Gesture Right": "GestureRight",
+      "Rest Pose": "RestPose",
+      Show: "Show",
+      Explain: "Explain",
+    },
+    Genie: {
+      Wave: "Wave",
+      "Good Bye": "GoodBye",
+      Greeting: "Greeting",
+      "Get Attention": "GetAttention",
+      Alert: "Alert",
+      Thinking: "Thinking",
+      Processing: "Processing",
+      "Get Wizardy": "GetWizardy",
+      "Look Left": "LookLeft",
+      "Look Right": "LookRight",
+      "Look Up": "LookUp",
+      "Look Down": "LookDown",
+      "Gesture Up": "GestureUp",
+      "Gesture Down": "GestureDown",
+      "Gesture Left": "GestureLeft",
+      "Gesture Right": "GestureRight",
+      "Rest Pose": "RestPose",
+      Show: "Show",
+    },
+    Genius: {
+      Wave: "Wave",
+      "Good Bye": "GoodBye",
+      Greeting: "Greeting",
+      "Get Attention": "GetAttention",
+      Alert: "Alert",
+      Thinking: "Thinking",
+      Processing: "Processing",
+      "Get Techy": "GetTechy",
+      "Look Left": "LookLeft",
+      "Look Right": "LookRight",
+      "Look Up": "LookUp",
+      "Look Down": "LookDown",
+      "Gesture Up": "GestureUp",
+      "Gesture Down": "GestureDown",
+      "Gesture Left": "GestureLeft",
+      "Gesture Right": "GestureRight",
+      "Rest Pose": "RestPose",
+      Show: "Show",
+    },
+    Merlin: {
+      Wave: "Wave",
+      "Good Bye": "GoodBye",
+      Greeting: "Greeting",
+      "Get Attention": "GetAttention",
+      Alert: "Alert",
+      Thinking: "Thinking",
+      Processing: "Processing",
+      "Get Wizardy": "GetWizardy",
+      "Look Left": "LookLeft",
+      "Look Right": "LookRight",
+      "Look Up": "LookUp",
+      "Look Down": "LookDown",
+      "Gesture Up": "GestureUp",
+      "Gesture Down": "GestureDown",
+      "Gesture Left": "GestureLeft",
+      "Gesture Right": "GestureRight",
+      "Rest Pose": "RestPose",
+      Show: "Show",
+    },
+    F1: {
+      Wave: "Wave",
+      "Good Bye": "GoodBye",
+      Greeting: "Greeting",
+      "Get Attention": "GetAttention",
+      Alert: "Alert",
+      Thinking: "Thinking",
+      Processing: "Processing",
+      "Look Left": "LookLeft",
+      "Look Right": "LookRight",
+      "Look Up": "LookUp",
+      "Look Down": "LookDown",
+      "Gesture Up": "GestureUp",
+      "Gesture Down": "GestureDown",
+      "Gesture Left": "GestureLeft",
+      "Gesture Right": "GestureRight",
+      "Rest Pose": "RestPose",
+      Show: "Show",
+    },
   };
 
-  // Get display names and animation names
+  // PHASE 3: Get current agent's animations dynamically
+  const currentAgentAnimations =
+    AGENT_ANIMATIONS[currentAgent] || AGENT_ANIMATIONS.Clippy;
+  const animationList = currentAgentAnimations; // Use current agent's animations
   const animations = Object.values(animationList); // For validation
   const displayNames = Object.keys(animationList); // For menu display
+
+  console.log(`🎭 Dynamic animations for ${currentAgent}:`, {
+    count: displayNames.length,
+    animations: displayNames.slice(0, 5).join(", ") + "...",
+  });
 
   // Get desktop viewport boundaries for positioning
   const getDesktopViewport = () => {
@@ -327,17 +456,25 @@ const ClippyContextMenu = ({
         {(leftIcon || hasSubmenu) && (
           <span
             className={`arrow ${
-              isSubmenuItem ? "submenu-icon" : (isMobile ? "arrow-mobile" : "arrow-desktop")
-            } ${
-              isHighlighted && !disabled ? "arrow-highlighted" : ""
-            }`}
+              isSubmenuItem
+                ? "submenu-icon"
+                : isMobile
+                ? "arrow-mobile"
+                : "arrow-desktop"
+            } ${isHighlighted && !disabled ? "arrow-highlighted" : ""}`}
             style={{
               marginRight: "8px",
               fontSize: isMobile ? "11px" : "12px",
-              fontFamily: isSubmenuItem ? "Arial, Helvetica, sans-serif" : "Arial, Helvetica, sans-serif",
+              fontFamily: isSubmenuItem
+                ? "Arial, Helvetica, sans-serif"
+                : "Arial, Helvetica, sans-serif",
               fontWeight: isMobile ? "bold" : "normal",
-              position: isSubmenuItem ? "static" : (isMobile ? "absolute" : "absolute"),
-              left: isSubmenuItem ? "auto" : (isMobile ? "6px" : "6px")
+              position: isSubmenuItem
+                ? "static"
+                : isMobile
+                ? "absolute"
+                : "absolute",
+              left: isSubmenuItem ? "auto" : isMobile ? "6px" : "6px",
             }}
           >
             {leftIcon}

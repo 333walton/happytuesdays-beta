@@ -131,6 +131,104 @@ const CLIPPY_POSITIONS = {
   },
 };
 
+// PHASE 4: Agent-specific dimension and positioning configurations
+const AGENT_DIMENSIONS = {
+  Clippy: {
+    width: 124,
+    height: 93,
+    scale: { mobile: 1.0, desktop: 0.95 },
+    positioning: {
+      mobile: { rightOffset: 11, bottomOffset: 120 },
+      desktop: { rightOffset: 120, bottomOffset: 100 },
+    },
+  },
+  Links: {
+    width: 132, // Slightly wider than Clippy
+    height: 98, // Slightly taller than Clippy
+    scale: { mobile: 0.95, desktop: 0.9 }, // Slightly smaller scale to fit
+    positioning: {
+      mobile: { rightOffset: 8, bottomOffset: 125 }, // Adjusted for size
+      desktop: { rightOffset: 125, bottomOffset: 105 },
+    },
+  },
+  Bonzi: {
+    width: 140, // Wider character
+    height: 110, // Taller character
+    scale: { mobile: 0.88, desktop: 0.85 }, // Scaled down to fit
+    positioning: {
+      mobile: { rightOffset: 5, bottomOffset: 130 }, // More spacing needed
+      desktop: { rightOffset: 130, bottomOffset: 110 },
+    },
+  },
+  Genie: {
+    width: 128,
+    height: 105, // Taller due to lamp/hat
+    scale: { mobile: 0.92, desktop: 0.88 },
+    positioning: {
+      mobile: { rightOffset: 9, bottomOffset: 125 },
+      desktop: { rightOffset: 122, bottomOffset: 105 },
+    },
+  },
+  Genius: {
+    width: 126,
+    height: 96,
+    scale: { mobile: 0.96, desktop: 0.92 },
+    positioning: {
+      mobile: { rightOffset: 10, bottomOffset: 122 },
+      desktop: { rightOffset: 121, bottomOffset: 102 },
+    },
+  },
+  Merlin: {
+    width: 135, // Wider due to robes
+    height: 108, // Taller due to hat
+    scale: { mobile: 0.9, desktop: 0.86 },
+    positioning: {
+      mobile: { rightOffset: 7, bottomOffset: 128 },
+      desktop: { rightOffset: 127, bottomOffset: 108 },
+    },
+  },
+  F1: {
+    width: 118, // Race car is lower/wider
+    height: 85, // Lower profile
+    scale: { mobile: 1.02, desktop: 0.98 }, // Slightly larger since it's smaller
+    positioning: {
+      mobile: { rightOffset: 13, bottomOffset: 115 },
+      desktop: { rightOffset: 118, bottomOffset: 95 },
+    },
+  },
+};
+
+// PHASE 4: Get agent-specific dimensions and positioning
+const getAgentConfig = (agentName = "Clippy") => {
+  return AGENT_DIMENSIONS[agentName] || AGENT_DIMENSIONS.Clippy;
+};
+
+const getAgentDimensions = (agentName = "Clippy") => {
+  const config = getAgentConfig(agentName);
+  return {
+    width: config.width,
+    height: config.height,
+    scaledWidth: {
+      mobile: config.width * config.scale.mobile,
+      desktop: config.width * config.scale.desktop,
+    },
+    scaledHeight: {
+      mobile: config.height * config.scale.mobile,
+      desktop: config.height * config.scale.desktop,
+    },
+  };
+};
+
+const getAgentScale = (agentName = "Clippy", isMobile = false) => {
+  const config = getAgentConfig(agentName);
+  return isMobile ? config.scale.mobile : config.scale.desktop;
+};
+
+const getAgentPositioning = (agentName = "Clippy", isMobile = false) => {
+  const config = getAgentConfig(agentName);
+  return isMobile ? config.positioning.mobile : config.positioning.desktop;
+};
+
 // ===== ZOOM-AWARE REAL-TIME RESIZE HANDLING SYSTEM =====
 class ZoomAwareResizeHandler {
   constructor() {
@@ -539,21 +637,24 @@ const resizeHandler = new ZoomAwareResizeHandler();
 
 // ===== POSITIONING CALCULATOR =====
 class ClippyPositioning {
-  static getClippyPosition(customPosition = null) {
+  static getClippyPosition(customPosition = null, agentName = null) {
     if (isMobile) {
-      return this.calculateMobilePosition();
+      return this.calculateMobilePosition(null, agentName);
     }
 
     const desktop = { ...CLIPPY_POSITIONS.desktop };
     const zoomFactor = this.getMonitorZoomFactor();
-    const adjustedScale = 0.95 * zoomFactor;
+
+    // PHASE 4: Use agent-specific scale
+    const agentScale = getAgentScale(agentName || "Clippy", isMobile);
+    const adjustedScale = agentScale * zoomFactor;
     desktop.transform = `translateZ(0) scale(${adjustedScale})`;
 
     if (customPosition) {
       desktop.left = `${customPosition.x}px`;
       desktop.top = `${customPosition.y}px`;
     } else {
-      const calculated = this.calculateDesktopPosition();
+      const calculated = this.calculateDesktopPosition(agentName);
       desktop.left = `${calculated.x}px`;
       desktop.top = `${calculated.y}px`;
     }
@@ -561,12 +662,70 @@ class ClippyPositioning {
     return desktop;
   }
 
-  static calculateMobilePosition(taskbarHeight = 26) {
-    // Delegate to the new module
-    return calculateMobilePosition();
+  static calculateMobilePosition(taskbarHeight = 26, agentName = "Clippy") {
+    // PHASE 4: Use agent-specific mobile positioning
+    const agentConfig = getAgentConfig(agentName);
+    const agentPositioning = agentConfig.positioning.mobile;
+    const agentScale = agentConfig.scale.mobile;
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const clippyWidth = agentConfig.width * agentScale;
+    const clippyHeight = agentConfig.height * agentScale;
+    const gapAboveTaskbar = 13; // Adjusted gap above taskbar
+    const gapFromRight = agentPositioning.rightOffset || 4;
+
+    // Try to detect the taskbar notification area
+    const taskbarNotifications = document.querySelector(
+      ".TaskBar__notifications"
+    );
+    let bottom, right;
+
+    if (taskbarNotifications) {
+      const taskbarRect = taskbarNotifications.getBoundingClientRect();
+      // Distance from bottom of viewport to top of taskbar
+      const taskbarFromBottom = viewportHeight - taskbarRect.top;
+      bottom = taskbarFromBottom + gapAboveTaskbar;
+      right = gapFromRight;
+    } else {
+      // Use agent-specific positioning values as fallback
+      bottom = agentPositioning.bottomOffset;
+      right = gapFromRight;
+
+      // Browser-specific adjustments
+      if (isIOSSafari) {
+        bottom += 30;
+      } else if (window.navigator.userAgent.includes("CriOS")) {
+        bottom += 15;
+        right += 3;
+      } else if (isGoogleAppOnIOS) {
+        bottom -= 30;
+      }
+    }
+
+    // Constrain to viewport (never off-screen)
+    bottom = Math.max(10, Math.min(bottom, viewportHeight - clippyHeight - 10));
+    right = Math.max(4, Math.min(right, viewportWidth - clippyWidth - 4));
+
+    devLog(`Mobile position for ${agentName}:`, {
+      dimensions: `${clippyWidth.toFixed(1)}x${clippyHeight.toFixed(1)}`,
+      scale: agentScale,
+      position: `bottom=${bottom}px, right=${right}px`,
+    });
+
+    return {
+      position: "fixed",
+      bottom: `${bottom}px`,
+      right: `${right}px`,
+      left: "auto",
+      top: "auto",
+      transform: `translateZ(0) scale(${agentScale})`,
+      transformOrigin: "center bottom",
+      zIndex: "1500",
+    };
   }
 
-  static calculateDesktopPosition() {
+  static calculateDesktopPosition(agentName = "Clippy") {
     try {
       const desktop =
         document.querySelector(".desktop.screen") ||
@@ -575,6 +734,9 @@ class ClippyPositioning {
 
       if (desktop) {
         const rect = desktop.getBoundingClientRect();
+
+        // PHASE 4: Use agent-specific positioning values
+        const agentPositioning = getAgentPositioning(agentName, false); // false = desktop
         const values = CLIPPY_POSITIONS.desktopValues;
 
         const monitorContainer = document.querySelector(".monitor-container");
@@ -607,11 +769,23 @@ class ClippyPositioning {
           }
         }
 
+        // PHASE 4: Use agent-specific offsets
         const basePosition = {
-          x: rect.left + rect.width - values.rightOffset,
+          x: rect.left + rect.width - agentPositioning.rightOffset,
           y:
-            rect.top + rect.height - values.taskbarHeight - values.bottomOffset,
+            rect.top +
+            rect.height -
+            values.taskbarHeight -
+            agentPositioning.bottomOffset,
         };
+
+        devLog(`Desktop position for ${agentName}:`, {
+          rightOffset: agentPositioning.rightOffset,
+          bottomOffset: agentPositioning.bottomOffset,
+          position: `(${basePosition.x.toFixed(1)}, ${basePosition.y.toFixed(
+            1
+          )})`,
+        });
 
         return basePosition;
       }
