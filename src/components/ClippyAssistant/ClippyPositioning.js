@@ -734,9 +734,6 @@ class ClippyPositioning {
 
       if (desktop) {
         const rect = desktop.getBoundingClientRect();
-
-        // PHASE 4: Use agent-specific positioning values
-        const agentPositioning = getAgentPositioning(agentName, false); // false = desktop
         const values = CLIPPY_POSITIONS.desktopValues;
 
         const monitorContainer = document.querySelector(".monitor-container");
@@ -769,22 +766,28 @@ class ClippyPositioning {
           }
         }
 
-        // PHASE 4: Use agent-specific offsets
+        // EDGE-ALIGNED POSITIONING: Bottom edge = taskbar top, Right edge = desktop right
+        const agentConfig = getAgentConfig(agentName);
+        const agentScale = getAgentScale(agentName, false); // false = desktop
+        const actualScale = agentScale * zoomFactor;
+
+        // Calculate agent's actual rendered dimensions
+        const actualWidth = agentConfig.width * actualScale;
+        const actualHeight = agentConfig.height * actualScale;
+
         const basePosition = {
-          x: rect.left + rect.width - agentPositioning.rightOffset,
-          y:
-            rect.top +
-            rect.height -
-            values.taskbarHeight -
-            agentPositioning.bottomOffset,
+          x: rect.left + rect.width - actualWidth, // Right edge aligned to desktop right
+          y: rect.top + rect.height - values.taskbarHeight - actualHeight, // Bottom edge aligned to taskbar top
         };
 
         devLog(`Desktop position for ${agentName}:`, {
-          rightOffset: agentPositioning.rightOffset,
-          bottomOffset: agentPositioning.bottomOffset,
+          dimensions: `${agentConfig.width}×${agentConfig.height}`,
+          scale: actualScale,
+          actualSize: `${actualWidth.toFixed(1)}×${actualHeight.toFixed(1)}`,
           position: `(${basePosition.x.toFixed(1)}, ${basePosition.y.toFixed(
             1
           )})`,
+          method: "edge-aligned",
         });
 
         return basePosition;
@@ -801,89 +804,12 @@ class ClippyPositioning {
 
     const rect = clippyElement.getBoundingClientRect();
 
-    // CRITICAL: Account for agent scale factor on desktop
-    let scaleFactor = 1.0;
-    if (!isMobile) {
-      const zoomFactor = this.getMonitorZoomFactor();
-      scaleFactor = 0.95 * zoomFactor; // Desktop agents are scaled to 0.95 * zoom
-      devLog(`Agent scale factor: ${scaleFactor} (zoom: ${zoomFactor})`);
-    }
-
-    // Get desktop viewport boundaries for desktop positioning
-    let viewportWidth = window.innerWidth;
-    let viewportHeight = window.innerHeight;
-    let viewportLeft = 0;
-    let viewportTop = 0;
-
-    if (!isMobile) {
-      // For desktop, get the actual desktop viewport boundaries
-      const desktop =
-        document.querySelector(".desktop.screen") ||
-        document.querySelector(".desktop") ||
-        document.querySelector(".w98");
-
-      if (desktop) {
-        const desktopRect = desktop.getBoundingClientRect();
-        viewportWidth = desktopRect.width;
-        viewportHeight = desktopRect.height;
-        viewportLeft = desktopRect.left;
-        viewportTop = desktopRect.top;
-      }
-    }
-
-    // Calculate the agent's VISUAL dimensions and position accounting for scale
-    const visualWidth = rect.width * scaleFactor;
-    const visualHeight = rect.height * scaleFactor;
-
-    // For scale transform with "center bottom" origin, the visual bottom stays the same
-    // but the visual top and center shift due to scaling
-    const visualCenterX = rect.left + rect.width / 2;
-    const visualBottom = rect.bottom;
-    const visualTop = visualBottom - visualHeight;
-    const visualLeft = visualCenterX - visualWidth / 2;
-
-    devLog(
-      `Agent visual bounds: ${visualLeft.toFixed(1)}, ${visualTop.toFixed(
-        1
-      )}, ${visualWidth.toFixed(1)}x${visualHeight.toFixed(1)}`
-    );
-    devLog(
-      `Agent DOM bounds: ${rect.left.toFixed(1)}, ${rect.top.toFixed(
-        1
-      )}, ${rect.width.toFixed(1)}x${rect.height.toFixed(1)}`
-    );
-
-    // Overlay should match the agent's VISUAL dimensions and position
-    let overlayLeft = visualLeft;
-    let overlayTop = visualTop;
-    let overlayWidth = visualWidth;
-    let overlayHeight = visualHeight;
-
-    // Enforce viewport boundaries - overlay must stay within desktop borders
-    const maxLeft = viewportLeft + viewportWidth - overlayWidth;
-    const maxTop = viewportTop + viewportHeight - overlayHeight;
-
-    // Constrain to viewport boundaries
-    overlayLeft = Math.max(viewportLeft, Math.min(overlayLeft, maxLeft));
-    overlayTop = Math.max(viewportTop, Math.min(overlayTop, maxTop));
-
-    // Calculate final overlay bottom for alignment verification
-    const constrainedOverlayBottom = overlayTop + overlayHeight;
-
-    devLog(
-      `Overlay positioning: visual agent bottom=${visualBottom.toFixed(
-        1
-      )}, overlay bottom=${constrainedOverlayBottom.toFixed(1)}, aligned=${
-        Math.abs(visualBottom - constrainedOverlayBottom) < 1
-      }`
-    );
-
     return {
       ...CLIPPY_POSITIONS.overlay,
-      left: `${overlayLeft}px`,
-      top: `${overlayTop}px`,
-      width: `${overlayWidth}px`,
-      height: `${overlayHeight}px`,
+      left: `${rect.left}px`,
+      top: `${rect.top}px`,
+      width: `${rect.width}px`,
+      height: `${rect.height}px`,
       zIndex: isMobile ? "1510" : "2010",
     };
   }
@@ -1345,83 +1271,10 @@ class ClippyPositioning {
       return positionMobileOverlay(overlayElement, clippyElement);
     }
 
-    // Get current agent name
-    const currentAgent = clippyElement.getAttribute("data-agent") || "Unknown";
-    const syncedAgent = overlayElement.getAttribute("data-synced-agent") || "";
-
-    // Check if overlay is already synchronized to the current agent
-    if (
-      this.isOverlaySynchronized(overlayElement) &&
-      syncedAgent === currentAgent
-    ) {
-      devLog(
-        `Overlay already synchronized to ${currentAgent}, skipping repositioning`
-      );
-      return true;
-    }
-
-    // If agent changed, log it
-    if (syncedAgent && syncedAgent !== currentAgent) {
-      devLog(
-        `Agent changed from ${syncedAgent} to ${currentAgent} - repositioning required`
-      );
-    }
-
-    const agentRect = clippyElement.getBoundingClientRect();
+    // Simple agent-first approach: overlay matches agent's final position and dimensions
     const position = this.getOverlayPosition(clippyElement);
-    if (!position) return false;
-
-    // Remove transform from overlay position to avoid conflicts
-    if (position.transform) delete position.transform;
-
-    // Apply overlay position
-    const overlaySuccess = this.applyStyles(overlayElement, position);
-
-    if (overlaySuccess) {
-      // Check if overlay bottom alignment is correct after positioning
-      const overlayRect = overlayElement.getBoundingClientRect();
-      const agentBottom = agentRect.bottom;
-      const overlayBottom = overlayRect.bottom;
-      const bottomMisalignment = Math.abs(agentBottom - overlayBottom);
-
-      // If there's significant misalignment (more than 1px), adjust the agent position
-      if (bottomMisalignment > 1) {
-        devLog(
-          `Bottom misalignment detected: ${bottomMisalignment}px. Adjusting agent position.`
-        );
-
-        // Calculate the agent's new top position to align bottoms
-        const agentHeight = agentRect.height;
-        const newAgentTop = overlayBottom - agentHeight;
-
-        // Only adjust if the new position would keep agent within viewport
-        if (!isMobile) {
-          const desktop =
-            document.querySelector(".desktop.screen") ||
-            document.querySelector(".desktop") ||
-            document.querySelector(".w98");
-
-          if (desktop) {
-            const desktopRect = desktop.getBoundingClientRect();
-            const minAgentTop = desktopRect.top;
-            const maxAgentTop =
-              desktopRect.top + desktopRect.height - agentHeight;
-
-            if (newAgentTop >= minAgentTop && newAgentTop <= maxAgentTop) {
-              // Adjust agent position to align with overlay bottom
-              clippyElement.style.top = `${newAgentTop}px`;
-              clippyElement.style.bottom = "auto";
-
-              devLog(
-                `Agent position adjusted to align bottom edges: top=${newAgentTop}px`
-              );
-            }
-          }
-        }
-      }
-    }
-
-    return overlaySuccess;
+    if (position) delete position.transform;
+    return this.applyStyles(overlayElement, position);
   }
 
   static ensureInitialOverlayPositioning(overlayElement, clippyElement) {
@@ -1737,9 +1590,15 @@ class ClippyPositioning {
       } else {
         // Calculate new position normally
         position = isMobile
-          ? this.calculateMobilePosition(taskbarHeight)
-          : this.getClippyPosition(customPosition);
+          ? this.calculateMobilePosition(taskbarHeight, agentName)
+          : this.getClippyPosition(customPosition, agentName);
         devLog(`Agent ${agentName} calculating new position`);
+      }
+
+      // CRITICAL FIX: For Bonzi, always force recalculation to ensure edge alignment
+      if (agentName === "Bonzi" && !isMobile) {
+        devLog(`Forcing fresh edge-aligned calculation for Bonzi`);
+        position = this.getClippyPosition(customPosition, agentName);
       }
     }
 

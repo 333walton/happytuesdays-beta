@@ -512,36 +512,74 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 agent: newClippyEl?.getAttribute("data-agent"),
               });
 
-              if (newClippyEl && savedPosition) {
-                // Restore exact position from previous agent
-                Object.entries(savedPosition).forEach(([key, value]) => {
-                  if (value && value !== "auto" && value !== "none") {
-                    newClippyEl.style[key] = value;
-                  }
-                });
-
-                // Add positioning classes to match old agent
+              if (newClippyEl) {
+                // BOUNDARY-AWARE: Use proper positioning system instead of blindly preserving old position
+                newClippyEl.setAttribute("data-agent", newAgent);
                 newClippyEl.classList.add("clippy-anchored");
 
-                // Update data-agent attribute
-                newClippyEl.setAttribute("data-agent", newAgent);
+                devLog(`Setting up boundary-aware positioning for ${newAgent}`);
 
-                devLog(`Position restored for ${newAgent}:`, savedPosition);
+                // Apply boundary-aware positioning using the enhanced positioning system
+                if (ClippyPositioning?.positionClippyAndOverlay) {
+                  const overlayEl = document.getElementById(
+                    "clippy-clickable-overlay"
+                  );
+                  const positioned = ClippyPositioning.positionClippyAndOverlay(
+                    newClippyEl,
+                    overlayEl,
+                    null // No custom position - calculate proper boundary-aware position
+                  );
 
-                // Verify position was applied
-                const finalRect = newClippyEl.getBoundingClientRect();
-                devLog(`Final position verification:`, {
-                  left: finalRect.left,
-                  top: finalRect.top,
-                  applied: newClippyEl.style.left,
-                  className: newClippyEl.className,
-                });
+                  if (positioned) {
+                    devLog(
+                      `Boundary-aware positioning applied for ${newAgent}`
+                    );
+
+                    // Verify final position is within bounds
+                    const finalRect = newClippyEl.getBoundingClientRect();
+                    const isValid =
+                      ClippyPositioning.validateClippyPosition(newClippyEl);
+
+                    devLog(`Position validation for ${newAgent}:`, {
+                      position: `(${finalRect.left.toFixed(
+                        1
+                      )}, ${finalRect.top.toFixed(1)})`,
+                      size: `${finalRect.width.toFixed(
+                        1
+                      )}x${finalRect.height.toFixed(1)}`,
+                      valid: isValid,
+                      method: "boundary-aware positioning",
+                    });
+                  } else {
+                    devLog(
+                      `Boundary-aware positioning failed for ${newAgent}, falling back to saved position`
+                    );
+
+                    // Fallback: apply saved position only if boundary positioning fails
+                    if (savedPosition) {
+                      Object.entries(savedPosition).forEach(([key, value]) => {
+                        if (value && value !== "auto" && value !== "none") {
+                          newClippyEl.style[key] = value;
+                        }
+                      });
+                    }
+                  }
+                } else {
+                  devLog(
+                    `ClippyPositioning not available for ${newAgent}, using fallback`
+                  );
+
+                  // Fallback: apply saved position if positioning system unavailable
+                  if (savedPosition) {
+                    Object.entries(savedPosition).forEach(([key, value]) => {
+                      if (value && value !== "auto" && value !== "none") {
+                        newClippyEl.style[key] = value;
+                      }
+                    });
+                  }
+                }
               } else {
-                devLog(`Position restoration failed:`, {
-                  hasElement: !!newClippyEl,
-                  hasPosition: !!savedPosition,
-                  savedPosition,
-                });
+                devLog(`New agent element not found for ${newAgent}`);
               }
             }, 800); // Increased wait time for React95 re-render
           }, 200); // Wait for cleanup to settle
@@ -1504,6 +1542,16 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
             clippyEl.setAttribute("data-agent", currentAgent);
 
+            // ENHANCED: Add agent-specific class for SCSS targeting
+            clippyEl.classList.add(
+              "clippy",
+              "clippy-anchored",
+              currentAgent.toLowerCase()
+            );
+            devLog(
+              `Added agent-specific classes: clippy clippy-anchored ${currentAgent.toLowerCase()}`
+            );
+
             // Right-click handling
             const addRightClickToElement = (element, elementName) => {
               if (element && !element._hasContextMenu) {
@@ -1613,6 +1661,20 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                   resizeHandlingActiveRef.current = true;
                 }
               }
+            }
+
+            // Start overlay alignment monitoring to prevent positioning overrides
+            if (
+              overlayRef.current &&
+              ClippyPositioning?.startOverlayAlignmentMonitoring
+            ) {
+              ClippyPositioning.startOverlayAlignmentMonitoring(
+                clippyEl,
+                overlayRef.current
+              );
+              devLog(
+                `Started overlay alignment monitoring for ${currentAgent}`
+              );
             }
 
             return true;
