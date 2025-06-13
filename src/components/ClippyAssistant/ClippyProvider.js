@@ -339,39 +339,149 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       return safeExecute(
         () => {
-          // PHASE 2: Enhanced cleanup sequence before agent change
+          // COMPREHENSIVE: Enhanced cleanup sequence with complete DOM removal
           const cleanupPreviousAgent = () => {
-            const clippyEl = document.querySelector(".clippy");
-            const overlayEl = document.getElementById(
-              "clippy-clickable-overlay"
-            );
+            let savedPosition = null;
 
-            // Stop resize handling for old agent
-            if (clippyEl && ClippyPositioning?.stopResizeHandling) {
-              ClippyPositioning.stopResizeHandling(clippyEl);
-              devLog("Stopped resize handling for previous agent");
+            try {
+              // 1. POSITION PRESERVATION - Find the PRIMARY positioned agent (with clippy-anchored class)
+              let primaryAgent = document.querySelector(
+                ".clippy.clippy-anchored"
+              );
+              if (!primaryAgent) {
+                // Fallback to first .clippy if no anchored agent found
+                primaryAgent = document.querySelector(".clippy");
+              }
+
+              if (primaryAgent) {
+                const rect = primaryAgent.getBoundingClientRect();
+                const computedStyle = window.getComputedStyle(primaryAgent);
+                savedPosition = {
+                  left: primaryAgent.style.left || `${rect.left}px`,
+                  top: primaryAgent.style.top || `${rect.top}px`,
+                  right: primaryAgent.style.right,
+                  bottom: primaryAgent.style.bottom,
+                  transform: computedStyle.transform,
+                  zIndex: computedStyle.zIndex,
+                  position: computedStyle.position,
+                };
+                devLog(
+                  `Saved position for ${currentAgent} from primary agent:`,
+                  savedPosition
+                );
+              }
+
+              // 2. STOP ALL ACTIVE SYSTEMS for ALL agents
+              const allAgents = document.querySelectorAll(".clippy");
+              allAgents.forEach((agent, index) => {
+                if (agent && ClippyPositioning?.stopResizeHandling) {
+                  ClippyPositioning.stopResizeHandling(agent);
+                  devLog(`Stopped resize handling for agent ${index}`);
+                }
+
+                // Stop animations immediately
+                if (agent) {
+                  agent.style.animation = "none";
+                  agent.style.transition = "none";
+                  agent.classList.remove("clippy-dragging", "clippy-anchored");
+                  devLog(`Stopped animations for agent ${index}`);
+                }
+              });
+
+              // 3. EVENT LISTENER CLEANUP - Clean ALL agent elements
+              const elementsToClean = [
+                ...allAgents,
+                document.getElementById("clippy-clickable-overlay"),
+                ...document.querySelectorAll(".clippy svg, .clippy .map"),
+              ].filter(Boolean);
+
+              elementsToClean.forEach((element, index) => {
+                if (element && element.parentNode) {
+                  // Create clean clone without event listeners
+                  const cleanClone = element.cloneNode(true);
+                  element.parentNode.replaceChild(cleanClone, element);
+                  devLog(`Cleaned event listeners from element ${index}`);
+                }
+              });
+
+              // 4. OVERLAY CLEANUP
+              const overlayEl = document.getElementById(
+                "clippy-clickable-overlay"
+              );
+              if (overlayEl) {
+                // Clear overlay synchronization
+                if (ClippyPositioning?.clearOverlaySynchronization) {
+                  ClippyPositioning.clearOverlaySynchronization(overlayEl);
+                }
+
+                // Clean up mobile touch handler if exists
+                if (overlayEl._touchHandler) {
+                  overlayEl._touchHandler.detach();
+                  overlayEl._touchHandler = null;
+                }
+
+                // Force remove overlay
+                overlayEl.remove();
+                overlayRef.current = null;
+                devLog("Removed overlay and cleared touch handlers");
+              }
+
+              // 5. CRITICAL: FORCE REMOVE ALL AGENT ELEMENTS
+              const finalAgentCleanup = document.querySelectorAll(".clippy");
+              devLog(
+                `Force removing ${finalAgentCleanup.length} agent elements`
+              );
+              finalAgentCleanup.forEach((agent, index) => {
+                if (agent && agent.parentNode) {
+                  agent.parentNode.removeChild(agent);
+                  devLog(`Force removed agent ${index}`);
+                }
+              });
+
+              // Double-check removal worked
+              const remainingAgents = document.querySelectorAll(".clippy");
+              if (remainingAgents.length > 0) {
+                devLog(
+                  `WARNING: ${remainingAgents.length} agents still remain after cleanup`
+                );
+                // Force remove any stragglers
+                remainingAgents.forEach((agent, index) => {
+                  try {
+                    agent.remove();
+                    devLog(`Emergency removed remaining agent ${index}`);
+                  } catch (e) {
+                    devLog(`Failed to remove agent ${index}:`, e);
+                  }
+                });
+              }
+
+              // 7. RESET POSITIONING SYSTEMS
+              if (ClippyPositioning?.clearZoomAnchor) {
+                ClippyPositioning.clearZoomAnchor();
+                devLog("Cleared zoom anchors for agent change");
+              }
+
+              // 8. RESOURCE CLEANUP
+              if (window.agentCache) {
+                window.agentCache.clear();
+              }
+
+              // Clear any temporary clippy elements
+              document
+                .querySelectorAll(".temp-clippy, .clippy-temp")
+                .forEach((el) => el.remove());
+
+              // 9. STATE RESET
+              setIsAnimationPlaying(false);
+              resizeHandlingActiveRef.current = false;
+              devLog("Reset all agent state");
+
+              // 10. RETURN SAVED POSITION for restoration
+              return savedPosition;
+            } catch (error) {
+              devLog("Cleanup error (non-critical):", error);
+              return savedPosition; // Return whatever we managed to save
             }
-
-            // Clear overlay synchronization
-            if (overlayEl && ClippyPositioning?.clearOverlaySynchronization) {
-              ClippyPositioning.clearOverlaySynchronization(overlayEl);
-              devLog("Cleared overlay synchronization for agent change");
-            }
-
-            // Reset positioning anchors for agent switch
-            if (ClippyPositioning?.clearZoomAnchor) {
-              ClippyPositioning.clearZoomAnchor();
-              devLog("Cleared zoom anchors for agent change");
-            }
-
-            // Clear animation playing state
-            setIsAnimationPlaying(false);
-            devLog("Reset animation state for agent change");
-
-            // Update agent attributes
-            if (clippyEl) clippyEl.setAttribute("data-agent", newAgent);
-            if (overlayEl) overlayEl.setAttribute("data-agent", newAgent);
-            devLog(`Updated data-agent attributes to: ${newAgent}`);
           };
 
           // Hide any open balloons during transition
@@ -379,13 +489,64 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           hideChatBalloon();
           hideContextMenu();
 
-          // PHASE 2: Perform cleanup before state change
-          cleanupPreviousAgent();
+          // COMPREHENSIVE: Perform cleanup and get saved position
+          const savedPosition = cleanupPreviousAgent();
 
-          // Update agent state - this will trigger ReactClippyProvider re-render
-          setCurrentAgent(newAgent);
+          // Wait for cleanup to completely finish before state change
+          setTimeout(() => {
+            // Verify cleanup worked
+            const remainingAfterCleanup = document.querySelectorAll(".clippy");
+            devLog(
+              `Agents remaining after cleanup: ${remainingAfterCleanup.length}`
+            );
 
-          // Show welcome message after a brief delay for new agent to load
+            // Update agent state - this will trigger ReactClippyProvider re-render
+            setCurrentAgent(newAgent);
+
+            // POSITION RESTORATION - Wait longer for React95 to create new agent
+            setTimeout(() => {
+              const newClippyEl = document.querySelector(".clippy");
+              devLog(`New agent found after state change:`, {
+                found: !!newClippyEl,
+                className: newClippyEl?.className,
+                agent: newClippyEl?.getAttribute("data-agent"),
+              });
+
+              if (newClippyEl && savedPosition) {
+                // Restore exact position from previous agent
+                Object.entries(savedPosition).forEach(([key, value]) => {
+                  if (value && value !== "auto" && value !== "none") {
+                    newClippyEl.style[key] = value;
+                  }
+                });
+
+                // Add positioning classes to match old agent
+                newClippyEl.classList.add("clippy-anchored");
+
+                // Update data-agent attribute
+                newClippyEl.setAttribute("data-agent", newAgent);
+
+                devLog(`Position restored for ${newAgent}:`, savedPosition);
+
+                // Verify position was applied
+                const finalRect = newClippyEl.getBoundingClientRect();
+                devLog(`Final position verification:`, {
+                  left: finalRect.left,
+                  top: finalRect.top,
+                  applied: newClippyEl.style.left,
+                  className: newClippyEl.className,
+                });
+              } else {
+                devLog(`Position restoration failed:`, {
+                  hasElement: !!newClippyEl,
+                  hasPosition: !!savedPosition,
+                  savedPosition,
+                });
+              }
+            }, 800); // Increased wait time for React95 re-render
+          }, 200); // Wait for cleanup to settle
+
+          // Show welcome message after new agent loads and positions
           setTimeout(() => {
             if (mountedRef.current && !isAnyBalloonOpen()) {
               showCustomBalloon(
@@ -393,7 +554,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 6000
               );
             }
-          }, 1500); // Give time for new agent to load
+          }, 1500); // Give time for new agent to load and position
 
           return true;
         },
