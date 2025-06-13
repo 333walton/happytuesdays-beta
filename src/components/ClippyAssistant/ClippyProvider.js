@@ -339,10 +339,48 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       return safeExecute(
         () => {
+          // PHASE 2: Enhanced cleanup sequence before agent change
+          const cleanupPreviousAgent = () => {
+            const clippyEl = document.querySelector(".clippy");
+            const overlayEl = document.getElementById(
+              "clippy-clickable-overlay"
+            );
+
+            // Stop resize handling for old agent
+            if (clippyEl && ClippyPositioning?.stopResizeHandling) {
+              ClippyPositioning.stopResizeHandling(clippyEl);
+              devLog("Stopped resize handling for previous agent");
+            }
+
+            // Clear overlay synchronization
+            if (overlayEl && ClippyPositioning?.clearOverlaySynchronization) {
+              ClippyPositioning.clearOverlaySynchronization(overlayEl);
+              devLog("Cleared overlay synchronization for agent change");
+            }
+
+            // Reset positioning anchors for agent switch
+            if (ClippyPositioning?.clearZoomAnchor) {
+              ClippyPositioning.clearZoomAnchor();
+              devLog("Cleared zoom anchors for agent change");
+            }
+
+            // Clear animation playing state
+            setIsAnimationPlaying(false);
+            devLog("Reset animation state for agent change");
+
+            // Update agent attributes
+            if (clippyEl) clippyEl.setAttribute("data-agent", newAgent);
+            if (overlayEl) overlayEl.setAttribute("data-agent", newAgent);
+            devLog(`Updated data-agent attributes to: ${newAgent}`);
+          };
+
           // Hide any open balloons during transition
           hideCustomBalloon();
           hideChatBalloon();
           hideContextMenu();
+
+          // PHASE 2: Perform cleanup before state change
+          cleanupPreviousAgent();
 
           // Update agent state - this will trigger ReactClippyProvider re-render
           setCurrentAgent(newAgent);
@@ -1108,13 +1146,71 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     setInteractionCount,
   ]);
 
-  // Initialize global functions (keeping existing implementation)
+  // Initialize global functions
   useEffect(() => {
     if (typeof window !== "undefined" && !window._clippyGlobalsInitialized) {
       window._clippyGlobalsInitialized = true;
 
-      // All existing global function definitions remain the same...
-      // (setClippyPosition, setAssistantVisible, setCurrentAgent, etc.)
+      // Position management
+      window.setClippyPosition = createSafeGlobalFunction((x, y) => {
+        if (!isMobile) {
+          setPosition({ x, y });
+          return true;
+        }
+        return false;
+      }, "setClippyPosition");
+
+      // Lock management
+      window.setPositionLocked = createSafeGlobalFunction((locked) => {
+        setPositionLocked(locked);
+        return true;
+      }, "setPositionLocked");
+
+      window.getPositionLocked = createSafeGlobalFunction(
+        () => positionLocked,
+        "getPositionLocked"
+      );
+
+      // Drag state management
+      window.setClippyDragging = createSafeGlobalFunction((dragging) => {
+        setIsDragging(dragging);
+        return true;
+      }, "setClippyDragging");
+
+      // Visibility management
+      window.setAssistantVisible = createSafeGlobalFunction((visible) => {
+        setAssistantVisible(visible);
+        return true;
+      }, "setAssistantVisible");
+
+      // FIXED: Agent management - this is the missing function!
+      window.setCurrentAgent = createSafeGlobalFunction((newAgent) => {
+        devLog(`Global setCurrentAgent called with: ${newAgent}`);
+        return handleAgentChange(newAgent);
+      }, "setCurrentAgent");
+
+      window.getCurrentAgent = createSafeGlobalFunction(
+        () => currentAgent,
+        "getCurrentAgent"
+      );
+
+      // Screen power management
+      window.setIsScreenPoweredOn = createSafeGlobalFunction((powered) => {
+        setIsScreenPoweredOn(powered);
+        return true;
+      }, "setIsScreenPoweredOn");
+
+      // Message management
+      window.showClippyInitialMessage = createSafeGlobalFunction(() => {
+        showInitialMessage();
+        return true;
+      }, "showClippyInitialMessage");
+
+      // Context menu management
+      window.hideClippyContextMenu = createSafeGlobalFunction(() => {
+        hideContextMenu();
+        return true;
+      }, "hideClippyContextMenu");
 
       devLog("All enhanced global functions initialized successfully");
     }
@@ -1122,6 +1218,16 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     return () => {
       if (typeof window !== "undefined" && window._clippyGlobalsInitialized) {
         // Cleanup all global functions
+        delete window.setClippyPosition;
+        delete window.setPositionLocked;
+        delete window.getPositionLocked;
+        delete window.setClippyDragging;
+        delete window.setAssistantVisible;
+        delete window.setCurrentAgent;
+        delete window.getCurrentAgent;
+        delete window.setIsScreenPoweredOn;
+        delete window.showClippyInitialMessage;
+        delete window.hideClippyContextMenu;
         delete window._clippyGlobalsInitialized;
       }
     };
@@ -1133,6 +1239,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     setIsDragging,
     setAssistantVisible,
     setCurrentAgent,
+    currentAgent,
     setIsScreenPoweredOn,
     showInitialMessage,
     hideContextMenu,
@@ -1152,6 +1259,43 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         currentAgent,
       });
     }, [clippy, currentAgent]);
+
+    // PHASE 2: Enhanced agent change detection
+    useEffect(() => {
+      if (lastAgentRef.current !== currentAgent) {
+        devLog(`Agent changed: ${lastAgentRef.current} → ${currentAgent}`);
+        lastAgentRef.current = currentAgent;
+
+        // Force complete re-setup for new agent
+        setupAttemptRef.current = 0; // Reset setup attempts
+        devLog(`Reset setup attempts for new agent: ${currentAgent}`);
+
+        // Clear any stale positioning data for new agent
+        const clippyEl = document.querySelector(".clippy");
+        if (clippyEl && ClippyPositioning?.refreshZoomAnchor) {
+          ClippyPositioning.refreshZoomAnchor(clippyEl);
+          devLog(`Refreshed zoom anchor for new agent: ${currentAgent}`);
+        }
+      }
+    }, [currentAgent]);
+
+    // PHASE 2: State synchronization for agent changes
+    useEffect(() => {
+      if (currentAgent !== defaultAgent && clippy) {
+        // Agent was changed, ensure proper positioning after React95 re-render
+        const clippyEl = document.querySelector(".clippy");
+        if (clippyEl && ClippyPositioning?.positionClippyAndOverlay) {
+          setTimeout(() => {
+            // Re-apply positioning for new agent after DOM updates
+            ClippyPositioning.positionClippyAndOverlay(
+              clippyEl,
+              overlayRef.current
+            );
+            devLog(`Re-positioned new agent: ${currentAgent}`);
+          }, 100); // Small delay to ensure DOM is updated
+        }
+      }
+    }, [currentAgent, clippy, defaultAgent]); // React to agent changes
 
     useEffect(() => {
       if (window.clippyIsHidden || window.clippyIsHiding) {
