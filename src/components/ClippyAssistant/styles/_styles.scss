@@ -1,0 +1,468 @@
+/* ===== OPTIMIZED CLIPPY STYLES - TEST 1: ONLY :has() SELECTORS ===== */
+
+/* ===== CORE CLIPPY ELEMENT ===== */
+.clippy {
+  /* Essential display properties */
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  overflow: visible !important;
+
+  /* CRITICAL: Maximum performance optimizations for drag */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  will-change: transform !important;
+  contain: layout style !important;
+
+  /* CRITICAL: Remove ALL transitions for instant positioning */
+  transition: none !important;
+  animation: none !important;
+
+  /* iOS Safari specific optimizations */
+  -webkit-transform: translateZ(0) !important;
+  -webkit-backface-visibility: hidden !important;
+  -webkit-font-smoothing: antialiased !important;
+
+  /* Default Mobile scale */
+  @media screen and (max-width: 768px) {
+    transform: scale(1) !important;
+    transform-origin: center bottom !important;
+  }
+  /* Default Desktop scale */
+  @media screen and (min-width: 768px) {
+    transform: scale(0.95) !important;
+  }
+}
+
+/* Special drag state for maximum performance */
+.clippy.clippy-dragging {
+  /* PERFORMANCE: Lock down all styling during drag */
+  transition: none !important;
+  animation: none !important;
+  transform: translateZ(0) scale(1.05) !important;
+
+  /* iOS Safari drag optimizations */
+  touch-action: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+
+  /* Hardware acceleration */
+  contain: layout style paint !important;
+  isolation: isolate !important;
+  will-change: transform, right, bottom !important;
+
+  /* Visual feedback */
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) !important;
+  opacity: 0.9 !important;
+}
+
+/* Anchored state optimizations */
+.clippy.clippy-anchored {
+  transform-style: preserve-3d !important;
+  perspective: 1000px !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ===== TEST 1: ONLY :has() SELECTORS ===== */
+/* Primary approach with :has() selector - TESTING */
+body:has(.BIOSWrapper:not(.hidden)) .clippy,
+body:has(.BIOSWrapper:not(.hidden)) #clippy-clickable-overlay,
+body:has(.WindowsLaunchWrapper:not(.hidden)) .clippy,
+body:has(.WindowsLaunchWrapper:not(.hidden)) #clippy-clickable-overlay {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
+}
+
+/* Shutdown sequences with :has() selector - TESTING */
+body:has(.desktop.windowsShuttingDown) .clippy,
+body:has(.desktop.windowsShuttingDown) #clippy-clickable-overlay,
+body:has(.itIsNowSafeToTurnOffYourComputer) .clippy,
+body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) translateY(-9999px) !important;
+}
+
+/* ===== CLICKABLE OVERLAY ===== */
+#clippy-clickable-overlay {
+  /* Essential properties */
+  cursor: pointer !important;
+  background: transparent !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  border: none !important;
+  outline: none !important;
+
+  /* Performance optimizations */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  contain: layout !important;
+  transition: none !important;
+
+  /* iOS Safari touch optimizations */
+  -webkit-tap-highlight-color: transparent !important;
+  touch-action: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Overlay drag state */
+#clippy-clickable-overlay.overlay-dragging {
+  contain: layout !important;
+  will-change: transform, left, top !important;
+  transition: none !important;
+}
+
+/* Mobile touch area expansion */
+@media (max-width: 768px), (pointer: coarse) {
+  #clippy-clickable-overlay::before {
+    content: "" !important;
+    position: absolute !important;
+    top: -30px !important;
+    left: -30px !important;
+    right: -30px !important;
+    bottom: -30px !important;
+    background: transparent !important;
+    pointer-events: auto !important;
+    z-index: 1 !important;
+  }
+
+  #clippy-clickable-overlay {
+    min-width: 124px !important;
+    min-height: 93px !important;
+    touch-action: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+  }
+}
+
+/* ===== ANIMATION ELEMENTS - SIMPLIFIED ===== */
+.clippy .maps {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: visible !important;
+}
+
+.clippy .map {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+.clippy .map.animate {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.clippy svg,
+.clippy svg * {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline !important;
+}
+
+/* ===== HIDE ORIGINAL BALLOONS ===== */
+.clippy-balloon {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-9999px) !important;
+}
+
+/* ===== DOM-BASED CUSTOM SPEECH BALLOON ===== */
+.custom-clippy-balloon {
+  position: fixed !important;
+  background-color: #fffcde !important;
+  border: 3px solid #000 !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  font-family: "Tahoma", "MS Sans Serif", sans-serif !important;
+  font-size: 12px !important;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  z-index: 9999 !important;
+
+  /* Performance optimizations */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  will-change: transform, opacity !important;
+
+  /* iOS Safari text fix - CRITICAL */
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  line-height: 1.4 !important;
+  word-wrap: break-word !important;
+
+  /* Responsive sizing */
+  max-width: min(280px, calc(100vw - 40px)) !important;
+  min-width: 150px !important;
+
+  /* Animation entrance */
+  animation: balloonFadeIn 0.3s ease-out !important;
+}
+
+/* Balloon tail pointing down to Clippy */
+.custom-clippy-balloon:after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: -12px !important;
+  left: 80% !important;
+  transform: translateX(-50%) !important;
+  border-width: 12px 12px 0 !important;
+  border-style: solid !important;
+  border-color: #fffcde transparent !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.custom-clippy-balloon:before {
+  content: "" !important;
+  position: absolute !important;
+  bottom: -15px !important;
+  left: 80% !important;
+  transform: translateX(-50%) !important;
+  border-width: 12px 12px 0 !important;
+  border-style: solid !important;
+  border-color: #000 transparent !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* ===== DOM-BASED INTERACTIVE CHAT BALLOON ===== */
+.custom-clippy-chat-balloon {
+  position: fixed !important;
+  background-color: #fffcde !important;
+  border: 3px solid #000 !important;
+  border-radius: 8px !important;
+  padding: 10px 10px 7px 10px !important;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3) !important;
+  font-family: "Tahoma", "MS Sans Serif", sans-serif !important;
+  font-size: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 9999 !important;
+
+  /* Performance optimizations */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  will-change: transform, opacity !important;
+
+  /* Responsive sizing */
+  height: 190px !important;
+  max-height: calc(100vh - 100px) !important;
+
+  /* Ensure minimum margin from viewport edges - handled in JavaScript positioning */
+  max-width: calc(100vw - 40px) !important;
+
+  /* iOS Safari text fix - CRITICAL */
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+
+  /* Animation entrance */
+  animation: balloonFadeIn 0.3s ease-out !important;
+}
+
+/* Chat balloon close button */
+.custom-clippy-balloon-close {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  background: none;
+  border: none;
+  color: rgb(102, 102, 102);
+  line-height: 1;
+  transition: all 0.2s ease-in-out !important;
+
+  -webkit-text-fill-color: rgb(102, 102, 102);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.custom-clippy-balloon-close:hover {
+  color: #000000;
+  -webkit-text-fill-color: #000000;
+  background-color: #f0f0f0;
+  border-radius: 2px;
+}
+
+/* ===== CHAT ELEMENTS STYLING ===== */
+.chat-messages {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  border: 2px inset #ccc !important;
+  background: white !important;
+  padding: 8px !important;
+  margin-bottom: 12px !important;
+  min-height: 100px !important;
+  font-family: "Tahoma", sans-serif !important;
+  font-size: 12px !important;
+
+  /* iOS Safari text fix */
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+.chat-input {
+  flex: 1 !important;
+  border: 2px inset #ccc !important;
+  padding: 8px !important;
+  font-family: "Tahoma", "MS Sans Serif", sans-serif !important;
+  font-size: 14px !important;
+  background-color: #fff !important;
+  outline: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+
+  /* iOS Safari text fix - CRITICAL */
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+
+  /* Touch optimizations */
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.chat-input:focus {
+  border-color: #0078d4 !important;
+  box-shadow: 0 0 0 1px #0078d4 !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+.chat-send {
+  background: #c0c0c0 !important;
+  border: 2px outset #c0c0c0 !important;
+  padding: 8px 16px !important;
+  font-family: "Tahoma", "MS Sans Serif", sans-serif !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+
+  /* iOS Safari text fix */
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+
+  /* Touch optimizations */
+  touch-action: manipulation !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.chat-send:hover {
+  background: #d0d0d0 !important;
+}
+
+.chat-send:active {
+  border: 2px inset #c0c0c0 !important;
+  padding-top: 9px !important;
+  padding-left: 17px !important;
+}
+
+/* Mobile input optimization - CRITICAL for iOS Safari */
+@media (max-width: 768px), (pointer: coarse) {
+  .chat-input {
+    font-size: 16px !important;
+    /* Prevents iOS zoom */
+    padding: 4px 6px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    border-radius: 4px !important;
+  }
+
+  .chat-send {
+    padding: 4px 12px !important;
+    font-size: 11px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    min-width: 50px !important;
+  }
+}
+
+/* ===== BALLOON ANIMATIONS ===== */
+@keyframes balloonFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateZ(0) translateY(10px) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateZ(0) translateY(0) scale(1);
+  }
+}
+
+/* ===== CONTEXT MENU STYLING ===== */
+.clippy-context-menu,
+.context-menu-content,
+.context-submenu {
+  /* NUCLEAR VISIBILITY - HIGHEST Z-INDEX POSSIBLE */
+  position: fixed !important;
+  z-index: 2147483647 !important;
+
+  /* Force visibility */
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  pointer-events: auto !important;
+
+  /* Performance optimizations */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  will-change: transform, opacity !important;
+
+  /* Ensure it's isolated */
+  isolation: isolate !important;
+  contain: layout style paint !important;
+
+  /* iOS Safari text fix */
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+/* Screen power off state - SAFE */
+body.screen-off .clippy,
+body.screen-off #clippy-clickable-overlay,
+body.screen-off .custom-clippy-balloon,
+body.screen-off .custom-clippy-chat-balloon {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: visibility 0.3s, opacity 0.3s !important;
+}

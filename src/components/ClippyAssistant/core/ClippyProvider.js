@@ -11,7 +11,7 @@ import {
   ClippyProvider as ReactClippyProvider,
 } from "@react95/clippy";
 
-// FIXED: Import enhanced balloon managers from new organized structure
+// FIXED: Import enhanced balloon managers
 import {
   showCustomBalloon,
   showWelcomeBalloon,
@@ -21,34 +21,30 @@ import {
   hideCustomBalloon,
   cleanupCustomBalloon,
   isCustomBalloonVisible,
-} from "./chat/balloons/CustomBalloon";
+} from "./CustomBalloon";
 import {
   showChatBalloon,
   hideChatBalloon,
   cleanupChatBalloon,
   isChatBalloonVisible,
   isUserInteractingWithChat,
-} from "./chat/legacy/ChatBalloon";
+} from "./ChatBalloon";
 
-// NEW: Import Genius-specific Botpress chat
-import GeniusChat from "./agents/genius/GeniusChat";
-import { getAgentConfig } from "./agents/data/AgentPersonalities";
-
-import ClippyContextMenu from "./interactions/ClippyContextMenu";
-import ClippyPositioning from "./core/ClippyPositioning";
+import ClippyContextMenu from "./ClippyContextMenu";
+import ClippyPositioning from "./ClippyPositioning";
 import ClippyService from "./ClippyService";
-import MobileControls from "./interactions/MobileControls";
-import DesktopControls from "./interactions/DesktopControls";
+import MobileControls from "./MobileControls";
+import DesktopControls from "./DesktopControls";
 
 // NEW: Import interaction manager for smart cooldowns and iOS Safari support
 import {
   interactionManager,
   COOLDOWN_TYPES,
   isIOSSafari,
-} from "./interactions/InteractionManager";
+} from "./InteractionManager";
 
 // NEW: Import mobile modules
-import { createMobileTouchHandler } from "./interactions/MobileTouchHandler";
+import { createMobileTouchHandler } from "./MobileTouchHandler";
 import {
   handleMobileSingleTap,
   handleMobileDoubleTap,
@@ -56,14 +52,14 @@ import {
   handleMobileDrag,
   handleMobileDragStart,
   handleMobileDragEnd,
-} from "./interactions/MobileInteractions";
+} from "./MobileInteractions";
 import {
   calculateMobilePosition,
   applyMobilePosition,
   positionMobileOverlay,
-} from "./interactions/MobilePositioning";
+} from "./MobilePositioning";
 
-import "./styles/_styles.scss";
+import "./_styles.scss";
 
 const ClippyContext = createContext(null);
 
@@ -156,9 +152,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   // FIXED: Animation queue prevention
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
 
-  // NEW: Genius chat state
-  const [geniusChatVisible, setGeniusChatVisible] = useState(false);
-
   // Refs
   const clippyInstanceRef = useRef(null);
   const overlayRef = useRef(null);
@@ -195,33 +188,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }, COOLDOWN_TYPES.ANIMATION); // Use animation cooldown for backwards compatibility
   }, []);
 
-  // FIXED: Check if any balloon is currently open (including Genius chat)
+  // FIXED: Check if any balloon is currently open
   const isAnyBalloonOpen = useCallback(() => {
-    return (
-      isCustomBalloonVisible() || isChatBalloonVisible() || geniusChatVisible
-    );
-  }, [geniusChatVisible]);
-
-  // NEW: Genius chat management
-  const showGeniusChat = useCallback(() => {
-    console.log("🔍 showGeniusChat called:", {
-      currentAgent,
-      geniusChatVisible,
-    });
-    if (currentAgent === "Genius") {
-      devLog("Showing Genius chat for current agent");
-      console.log("🔍 Setting geniusChatVisible to true");
-      setGeniusChatVisible(true);
-      return true;
-    }
-    devLog("Genius chat blocked - current agent is not Genius");
-    console.log("🔍 Genius chat blocked - not Genius agent");
-    return false;
-  }, [currentAgent, geniusChatVisible]);
-
-  const hideGeniusChat = useCallback(() => {
-    devLog("Hiding Genius chat");
-    setGeniusChatVisible(false);
+    return isCustomBalloonVisible() || isChatBalloonVisible();
   }, []);
 
   // FIXED: Context menu management
@@ -518,7 +487,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           // Hide any open balloons during transition
           hideCustomBalloon();
           hideChatBalloon();
-          hideGeniusChat(); // FIXED: Also hide Genius chat
           hideContextMenu();
 
           // COMPREHENSIVE: Perform cleanup and get saved position
@@ -842,7 +810,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     ]
   );
 
-  // NEW: Desktop double click handler for chat balloon (Genius uses Botpress, others use legacy)
+  // NEW: Desktop double click handler for chat balloon
   const handleDesktopDoubleClick = useCallback(
     (e) => {
       e.preventDefault();
@@ -867,31 +835,24 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return false;
       }
 
-      devLog(`Desktop double click - opening chat for agent: ${currentAgent}`);
+      devLog("Desktop double click - opening chat balloon");
 
-      // Show appropriate chat based on current agent
+      // Show chat balloon using the same global function as context menu
       setTimeout(() => {
         if (mountedRef.current && !isAnyBalloonOpen()) {
-          if (currentAgent === "Genius") {
-            // Use Botpress chat for Genius
-            showGeniusChat();
-            devLog("Desktop double click Genius chat shown");
+          if (window.showClippyChatBalloon) {
+            window.showClippyChatBalloon(
+              "Hi! What would you like to chat about?"
+            );
+            devLog(
+              "Desktop double click chat balloon shown via global function"
+            );
           } else {
-            // Use legacy chat for other agents
-            if (window.showClippyChatBalloon) {
-              window.showClippyChatBalloon(
-                "Hi! What would you like to chat about?"
-              );
-              devLog(
-                "Desktop double click legacy chat balloon shown via global function"
-              );
-            } else {
-              // Fallback to direct call if global function not available
-              showChatBalloon("Hi! What would you like to chat about?");
-              devLog(
-                "Desktop double click legacy chat balloon shown via direct call (fallback)"
-              );
-            }
+            // Fallback to direct call if global function not available
+            showChatBalloon("Hi! What would you like to chat about?");
+            devLog(
+              "Desktop double click chat balloon shown via direct call (fallback)"
+            );
           }
 
           // Set state AFTER balloon opens to prevent re-renders that disrupt balloon positioning
@@ -908,9 +869,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       isAnimationPlaying,
       isAnyBalloonOpen,
       startCooldown,
-      currentAgent,
       showChatBalloon,
-      showGeniusChat,
     ]
   );
 
@@ -1349,11 +1308,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         setLastInteractionTime(now);
         startCooldown();
 
-        handleMobileLongPress({
-          showChatBalloon,
-          showGeniusChat,
-          currentAgent,
-        });
+        handleMobileLongPress({ showChatBalloon });
       },
 
       onDragStart: (e) => {
@@ -1932,15 +1887,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               if (action === "chat") {
                 // Ensure the chat balloon opens correctly
                 if (mountedRef.current && !isAnyBalloonOpen()) {
-                  if (currentAgent === "Genius") {
-                    // Use Botpress chat for Genius (consistent with double-click)
-                    showGeniusChat();
-                    devLog("Genius chat triggered from context menu");
-                  } else {
-                    // Use legacy chat for other agents
-                    showChatBalloon("Hi! What would you like to chat about?");
-                    devLog("Legacy chat balloon triggered from context menu");
-                  }
+                  showChatBalloon("Hi! What would you like to chat about?");
+                  devLog("Chat balloon triggered from context menu");
                 } else {
                   devLog(
                     "Chat balloon blocked - another balloon is open or not mounted"
@@ -1960,15 +1908,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         )}
 
         {!isMobile && shouldRenderClippy && <DesktopControls />}
-
-        {/* NEW: Render Genius chat when visible */}
-        {geniusChatVisible && (
-          <GeniusChat
-            currentAgent={currentAgent}
-            visible={geniusChatVisible}
-            onClose={hideGeniusChat}
-          />
-        )}
 
         {children}
       </ReactClippyProvider>

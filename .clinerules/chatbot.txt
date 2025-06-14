@@ -1,0 +1,16 @@
+1. Do not proceed to the next phase until the previous phase is reviewed and approved.
+2. Pause and ask for clarification if any requirements are unclear.
+3. List all files to be created/modified and all dependencies at the start of each phase.
+4. Provide explicit testing instructions for desktop, mobile, and accessibility tools.
+5. If a referenced link/library is unavailable, suggest reputable alternatives.
+6. All code must be well-commented and follow best practices for accessibility and modularity.
+7. After Phase 2, provide a WCAG 2.1 AA accessibility checklist.
+8. At the end, provide a "Getting Started" section for setup and testing.
+9. Output a "Questions/Assumptions" section at the start.
+10. After submitting each phase, wait for explicit approval before starting the next.
+11. Output a summary and rationale for major design/architecture decisions before implementing.
+12. For each phase, describe error handling and edge cases.
+13. Save or version the project at the end of each phase.
+14. Output a code review checklist at the end of each phase.
+15. Ensure all code includes concise inline documentation and update the README if needed.
+16. After each phase, prompt for feedback or additional requirements before proceeding.
