@@ -157,6 +157,30 @@ if (isMobile) {
 }
 ```
 
+## Agent Scale Standardization
+
+### Universal Scale Rules
+
+**All agents now use standardized scales for consistent sizing:**
+
+```javascript
+// Universal agent scale configuration
+const STANDARD_SCALES = {
+  desktop: 0.95, // All agents on desktop
+  mobile: 1.0, // All agents on mobile
+};
+
+// Applied to all agents: Clippy, Links, Bonzi, Genie, Genius, Merlin, F1
+const agentScale = isMobile ? 1.0 : 0.95;
+```
+
+**Benefits:**
+
+- ✅ Consistent visual appearance across all agents
+- ✅ Simplified positioning calculations
+- ✅ Uniform balloon positioning offsets
+- ✅ Predictable overlay synchronization
+
 ## Clippy Detection
 
 ### Finding Clippy Elements

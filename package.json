@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@botpress/webchat": "^2.2.1",
+    "@botpress/webchat": "^2.6.2",
     "@react95/clippy": "^2.0.2",
     "@react95/core": "^9.2.1",
     "@react95/icons": "^2.1.1",

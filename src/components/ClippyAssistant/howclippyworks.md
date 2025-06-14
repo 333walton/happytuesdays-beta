@@ -38,16 +38,19 @@ The Clippy implementation consists of several interconnected modules:
 ## Core Interaction Flow
 
 1. **Initialization**
+
    - ClippyPositioning calculates initial position based on device and zoom.
    - Overlay is auto-detected and positioned.
    - Device type and browser are detected for compatibility.
 
 2. **Positioning**
+
    - All positioning logic is centralized in ClippyPositioning.js.
    - Mobile and desktop logic are separated and optimized.
    - Overlay is always synchronized with Clippy's position.
 
 3. **Balloon Handling**
+
    - Only one balloon (speech or chat) can be open at a time.
    - Speech balloons are auto-closed after a timeout; chat balloons persist after user interaction.
    - The "How may I help you?" enhanced message balloon with 4 buttons is fully removed.
@@ -62,28 +65,41 @@ The Clippy implementation consists of several interconnected modules:
 ## Positioning System
 
 - **Centralized in ClippyPositioning.js**
+
   - All calculations for Clippy and overlay positions are performed here.
   - Handles both mobile (fixed, responsive) and desktop (zoom-aware, anchored) logic.
   - Overlay is always matched to Clippy's position and size.
 
+- **Universal Agent Scale Standardization**
+
+  - **Desktop**: All agents use `scale: 0.95` for consistent appearance
+  - **Mobile**: All agents use `scale: 1.0` for optimal touch interaction
+  - Eliminates size inconsistencies between different agents (Clippy, Links, Bonzi, Genie, Genius, Merlin, F1)
+  - Scale-aware positioning automatically adjusts all calculations
+
 - **Zoom-Aware Anchoring**
+
   - Desktop positions are cached per zoom level for instant repositioning.
   - Hybrid 4-phase system: movement detection, positioning, validation, correction.
+  - Scale standardization simplifies zoom calculations across all agents.
 
 - **Mobile Positioning**
   - Responsive to viewport size, safe areas, and browser quirks (iOS Safari, Google App).
   - Touch targets and safe area insets are respected.
+  - Universal scale ensures consistent touch interaction across all agents.
 
 ---
 
 ## Balloon System
 
 - **Speech Balloons (`custom-clippy-balloon`)**
+
   - Used for close-ended statements, tips, errors, and welcome messages.
   - May include buttons for help, tips, or error actions.
   - The "How may I help you?" enhanced message balloon with 4 buttons is fully blocked and cannot appear.
 
 - **Chat Balloons (`custom-clippy-chat-balloon`)**
+
   - Used for interactive chat with Clippy.
   - Becomes persistent after user interaction (typing, clicking input, sending message).
   - Only one chat balloon can be open at a time.
@@ -107,26 +123,31 @@ The Clippy implementation consists of several interconnected modules:
 ## User Interactions
 
 - **Mobile**
+
   - Single tap: Animation (75%) or speech balloon (25%). Never opens chat.
   - Double tap: Opens context menu ONLY.
   - Long press: Opens chat balloon ONLY.
   - Drag: Only when position unlocked via controls.
 
 - **Desktop**
+
   - Single click: Animation (75%) or speech balloon (25%). Never opens chat.
   - Double click: Opens chat balloon ONLY.
   - Right click: Shows context menu for agent/animation options.
 
 - **Context Menu Features**
+
   - Dynamic text: "Drag [CurrentAgent]" shows current agent name.
   - Mobile touch highlighting: Blue background with white text.
   - Hide animation: 2-second delay before execution.
 
 - **App-Specific Features**
+
   - Read Me, FAQ, Change Log apps trigger speech balloons (25% chance).
   - Contextual messages based on the specific application opened.
 
 - **Balloon Persistence**
+
   - Speech balloons auto-close after 6 seconds.
   - Chat balloons persist after user interaction until manually closed.
 
@@ -140,6 +161,7 @@ The Clippy implementation consists of several interconnected modules:
 ## Device Detection & iOS Safari Compatibility
 
 - **Device Detection**
+
   - Mobile detection uses user agent, screen size, and touch capability.
   - iOS Safari and Google App are specifically detected for quirks.
 
@@ -154,6 +176,7 @@ The Clippy implementation consists of several interconnected modules:
 ## Real-time Resize Handling
 
 - **ZoomAwareResizeHandler**
+
   - Uses requestAnimationFrame for real-time monitoring.
   - Caches anchor positions per zoom level.
   - Notifies listeners on resize, zoom, and orientation changes.
@@ -169,6 +192,7 @@ The Clippy implementation consists of several interconnected modules:
 ## Performance Optimizations
 
 - **Reduced Logging**
+
   - ClippyPositioning uses VERBOSE_LOGGING flag to reduce console noise.
   - Only critical events and errors are logged by default.
   - Detailed positioning logs only available in verbose mode.
@@ -193,6 +217,7 @@ The Clippy implementation consists of several interconnected modules:
 ## Testing & Verification
 
 - **Manual Testing**
+
   - Interact with Clippy on both desktop and mobile.
   - Resize and zoom the window; Clippy and overlay should remain anchored.
   - Open and close speech and chat balloons; only one should be visible at a time.
@@ -235,14 +260,15 @@ The Clippy implementation consists of several interconnected modules:
 - **Nuclear Option**:  
   `window.killClippy(); // Then refresh the page`
 
-- **4-Phase System Reset**:  
+- **4-Phase System Reset**:
+
   ```js
   const clippyEl = document.querySelector(".clippy");
   const currentZoom = ClippyPositioning.getCurrentZoomLevel();
   ClippyPositioning.hybridZoomPositioning(clippyEl, currentZoom);
   ```
 
-- **Real-time System Reset**:  
+- **Real-time System Reset**:
   ```js
   const clippyEl = document.querySelector(".clippy");
   const overlayEl = document.getElementById("clippy-clickable-overlay");
@@ -265,7 +291,8 @@ The Clippy implementation consists of several interconnected modules:
 - **Taskbar & Notification Area Awareness:**  
   On mobile, Clippy attempts to detect the presence and position of the taskbar or notification area (e.g., `.TaskBar__notifications`) and adjusts its bottom offset accordingly.
 
-- **Browser-Specific Adjustments:**  
+- **Browser-Specific Adjustments:**
+
   - **iOS Safari:** Adds extra bottom padding to avoid the browser's UI chrome.
   - **Google App on iOS:** Applies a different offset to visually match Safari.
   - **Chrome on iOS:** Detects `CriOS` in the user agent and tweaks position.

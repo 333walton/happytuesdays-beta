@@ -1,0 +1,386 @@
+/**
+ * EnhancedBotpressChatWidget.css - Windows 98 styling for Botpress integration
+ * 
+ * This file provides exact Windows 98 styling to match legacy chat balloons
+ * and enhances mobile UX with proper keyboard handling and accessibility.
+ */
+
+/* Main chat widget container */
+.enhanced-botpress-chat-widget {
+  /* Ensure Windows 98 fonts are loaded */
+  font-family: "MS Sans Serif", "Tahoma", sans-serif !important;
+
+  /* Windows 98 color scheme */
+  background-color: #c0c0c0 !important;
+  color: #000000 !important;
+
+  /* Classic Windows borders */
+  border: 2px outset #c0c0c0 !important;
+  border-radius: 0 !important;
+
+  /* Classic drop shadow */
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+
+  /* Remove any modern styling */
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+}
+
+/* Chat header Windows 98 styling */
+.enhanced-botpress-chat-widget .chat-header {
+  background: linear-gradient(to right, #000080 0%, #000040 100%) !important;
+  color: white !important;
+  border-bottom: 1px solid #808080 !important;
+  font-weight: bold !important;
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+}
+
+/* Close button Windows 98 styling */
+.enhanced-botpress-chat-widget .chat-header button {
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  padding: 2px 6px !important;
+  border-radius: 2px !important;
+  transition: background-color 0.1s ease !important;
+}
+
+.enhanced-botpress-chat-widget .chat-header button:hover {
+  background-color: #ff0000 !important;
+}
+
+/* Messages area styling */
+.enhanced-botpress-chat-widget .messages-area {
+  background-color: white !important;
+  border: 1px inset #999 !important;
+  padding: 8px !important;
+  overflow-y: auto !important;
+  scroll-behavior: smooth !important;
+}
+
+/* Individual message styling */
+.enhanced-botpress-chat-widget .message {
+  margin-bottom: 8px !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+  word-wrap: break-word !important;
+}
+
+.enhanced-botpress-chat-widget .message-bubble {
+  display: inline-block !important;
+  max-width: 85% !important;
+  padding: 4px 8px !important;
+  border: 1px solid #999 !important;
+  border-radius: 3px !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+  white-space: pre-line !important;
+}
+
+.enhanced-botpress-chat-widget .message-bubble.user {
+  background-color: #e3f2fd !important;
+  text-align: right !important;
+}
+
+.enhanced-botpress-chat-widget .message-bubble.bot {
+  background-color: #f5f5f5 !important;
+  text-align: left !important;
+}
+
+/* Quick replies Windows 98 button styling */
+.enhanced-botpress-chat-widget .quick-replies {
+  background-color: #f0f0f0 !important;
+  border-bottom: 1px solid #808080 !important;
+  padding: 4px 8px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+}
+
+.enhanced-botpress-chat-widget .quick-reply-button {
+  background: #e0e0e0 !important;
+  border: 1px outset #e0e0e0 !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+  cursor: pointer !important;
+  border-radius: 0 !important;
+  transition: all 0.1s ease !important;
+}
+
+.enhanced-botpress-chat-widget .quick-reply-button:hover {
+  background-color: #d0d0d0 !important;
+  border-color: #d0d0d0 !important;
+}
+
+.enhanced-botpress-chat-widget .quick-reply-button:active {
+  border: 1px inset #e0e0e0 !important;
+}
+
+/* Input area styling */
+.enhanced-botpress-chat-widget .input-area {
+  background-color: #f0f0f0 !important;
+  border-top: 1px solid #808080 !important;
+  padding: 6px 8px !important;
+  display: flex !important;
+  gap: 4px !important;
+  align-items: center !important;
+}
+
+.enhanced-botpress-chat-widget .message-input {
+  flex: 1 !important;
+  background-color: #ffffff !important;
+  border: 1px inset #999 !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  padding: 4px 6px !important;
+  outline: none !important;
+  border-radius: 0 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.enhanced-botpress-chat-widget .message-input:focus {
+  border-color: #0078d4 !important;
+  box-shadow: 0 0 0 1px #0078d4 !important;
+}
+
+/* Send button and emoji button styling */
+.enhanced-botpress-chat-widget .input-button {
+  background: #c0c0c0 !important;
+  border: 1px outset #c0c0c0 !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 11px !important;
+  cursor: pointer !important;
+  border-radius: 0 !important;
+  transition: all 0.1s ease !important;
+  min-height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.enhanced-botpress-chat-widget .input-button:hover {
+  background-color: #d0d0d0 !important;
+  border-color: #d0d0d0 !important;
+}
+
+.enhanced-botpress-chat-widget .input-button:active {
+  border: 1px inset #c0c0c0 !important;
+}
+
+.enhanced-botpress-chat-widget .emoji-button {
+  min-width: 32px !important;
+  font-size: 14px !important;
+}
+
+.enhanced-botpress-chat-widget .send-button {
+  min-width: 50px !important;
+  padding: 4px 12px !important;
+}
+
+/* Windows 98 styled emoji picker overlay */
+.enhanced-botpress-emoji-picker {
+  background-color: #c0c0c0 !important;
+  border: 2px outset #c0c0c0 !important;
+  border-radius: 0 !important;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+  padding: 4px !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+}
+
+/* Override emoji-mart default styles */
+.enhanced-botpress-emoji-picker .emoji-mart {
+  border: none !important;
+  border-radius: 0 !important;
+  background: #c0c0c0 !important;
+  color: #000000 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+}
+
+.enhanced-botpress-emoji-picker .emoji-mart-bar {
+  background: #c0c0c0 !important;
+  border-bottom: 1px solid #808080 !important;
+}
+
+.enhanced-botpress-emoji-picker .emoji-mart-anchors {
+  background: #c0c0c0 !important;
+  border-bottom: 1px solid #808080 !important;
+}
+
+.enhanced-botpress-emoji-picker .emoji-mart-anchor {
+  color: #000000 !important;
+  border-radius: 0 !important;
+}
+
+.enhanced-botpress-emoji-picker .emoji-mart-anchor:hover {
+  background: #d0d0d0 !important;
+}
+
+.enhanced-botpress-emoji-picker .emoji-mart-anchor-selected {
+  background: #000080 !important;
+  color: white !important;
+}
+
+.enhanced-botpress-emoji-picker .emoji-mart-category {
+  background: white !important;
+}
+
+.enhanced-botpress-emoji-picker .emoji-mart-category-label span {
+  background: #c0c0c0 !important;
+  color: #000000 !important;
+  border: 1px outset #c0c0c0 !important;
+  border-radius: 0 !important;
+  font-family: "MS Sans Serif", sans-serif !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+}
+
+.enhanced-botpress-emoji-picker .emoji-mart-emoji:hover {
+  background: #e0e0e0 !important;
+  border-radius: 2px !important;
+}
+
+/* Close button for emoji picker */
+.enhanced-botpress-emoji-picker .close-button {
+  position: absolute !important;
+  top: 2px !important;
+  right: 2px !important;
+  background: #c0c0c0 !important;
+  border: 1px outset #c0c0c0 !important;
+  color: #000000 !important;
+  font-size: 10px !important;
+  padding: 2px 4px !important;
+  cursor: pointer !important;
+  border-radius: 0 !important;
+}
+
+.enhanced-botpress-emoji-picker .close-button:hover {
+  background-color: #d0d0d0 !important;
+}
+
+.enhanced-botpress-emoji-picker .close-button:active {
+  border: 1px inset #c0c0c0 !important;
+}
+
+/* Mobile-specific enhancements */
+@media (max-width: 768px) {
+  .enhanced-botpress-chat-widget {
+    /* Mobile optimizations */
+    transition: all 0.3s ease-in-out !important;
+  }
+
+  .enhanced-botpress-chat-widget .input-area {
+    min-height: 48px !important;
+    padding: 8px !important;
+  }
+
+  .enhanced-botpress-chat-widget .message-input {
+    min-height: 32px !important;
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .enhanced-botpress-chat-widget .input-button {
+    min-height: 32px !important;
+    font-size: 12px !important;
+  }
+
+  .enhanced-botpress-chat-widget .emoji-button {
+    min-width: 40px !important;
+    font-size: 16px !important;
+  }
+
+  .enhanced-botpress-chat-widget .quick-reply-button {
+    min-height: 32px !important;
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+  }
+
+  .enhanced-botpress-chat-widget .messages-area {
+    min-height: 150px !important;
+  }
+
+  /* Mobile keyboard support */
+  .enhanced-botpress-chat-widget.keyboard-open {
+    max-height: calc(100vh - 100px) !important;
+  }
+}
+
+/* High contrast accessibility */
+@media (prefers-contrast: high) {
+  .enhanced-botpress-chat-widget {
+    border: 3px solid #000000 !important;
+  }
+
+  .enhanced-botpress-chat-widget .message-bubble {
+    border: 2px solid #000000 !important;
+  }
+
+  .enhanced-botpress-chat-widget .input-button {
+    border: 2px solid #000000 !important;
+  }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .enhanced-botpress-chat-widget,
+  .enhanced-botpress-chat-widget .messages-area,
+  .enhanced-botpress-chat-widget .input-button,
+  .enhanced-botpress-chat-widget .quick-reply-button {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Typing indicator styling */
+.enhanced-botpress-chat-widget .typing-indicator {
+  text-align: left !important;
+  font-style: italic !important;
+  color: #666666 !important;
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+}
+
+/* Focus styles for accessibility */
+.enhanced-botpress-chat-widget .message-input:focus,
+.enhanced-botpress-chat-widget .input-button:focus,
+.enhanced-botpress-chat-widget .quick-reply-button:focus {
+  outline: 2px solid #0078d4 !important;
+  outline-offset: 1px !important;
+}
+
+/* Screen reader only content */
+.enhanced-botpress-chat-widget .sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Safe area support for iOS */
+@supports (padding: max(0px)) {
+  .enhanced-botpress-chat-widget .input-area {
+    padding-bottom: max(6px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* Force hardware acceleration for smooth animations on mobile */
+.enhanced-botpress-chat-widget {
+  -webkit-transform: translateZ(0) !important;
+  transform: translateZ(0) !important;
+  -webkit-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
+}

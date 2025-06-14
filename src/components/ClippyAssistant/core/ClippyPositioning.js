@@ -132,11 +132,12 @@ const CLIPPY_POSITIONS = {
 };
 
 // PHASE 4: Agent-specific dimension and positioning configurations
+// UPDATED: Universal scale standardization - all agents use 0.95 desktop / 1.0 mobile
 const AGENT_DIMENSIONS = {
   Clippy: {
     width: 124,
     height: 93,
-    scale: { mobile: 1.0, desktop: 0.95 },
+    scale: { mobile: 1.0, desktop: 0.95 }, // ✅ Standard scales
     positioning: {
       mobile: { rightOffset: 11, bottomOffset: 120 },
       desktop: { rightOffset: 120, bottomOffset: 100 },
@@ -145,7 +146,7 @@ const AGENT_DIMENSIONS = {
   Links: {
     width: 132, // Slightly wider than Clippy
     height: 98, // Slightly taller than Clippy
-    scale: { mobile: 0.95, desktop: 0.9 }, // Slightly smaller scale to fit
+    scale: { mobile: 1.0, desktop: 0.95 }, // 🔧 Standardized from 0.95/0.9
     positioning: {
       mobile: { rightOffset: 8, bottomOffset: 125 }, // Adjusted for size
       desktop: { rightOffset: 125, bottomOffset: 105 },
@@ -154,7 +155,7 @@ const AGENT_DIMENSIONS = {
   Bonzi: {
     width: 140, // Wider character
     height: 110, // Taller character
-    scale: { mobile: 0.88, desktop: 0.85 }, // Scaled down to fit
+    scale: { mobile: 1.0, desktop: 0.95 }, // 🔧 Standardized from 0.88/0.85
     positioning: {
       mobile: { rightOffset: 5, bottomOffset: 130 }, // More spacing needed
       desktop: { rightOffset: 130, bottomOffset: 110 },
@@ -163,7 +164,7 @@ const AGENT_DIMENSIONS = {
   Genie: {
     width: 128,
     height: 105, // Taller due to lamp/hat
-    scale: { mobile: 0.92, desktop: 0.88 },
+    scale: { mobile: 1.0, desktop: 0.95 }, // 🔧 Standardized from 0.92/0.88
     positioning: {
       mobile: { rightOffset: 9, bottomOffset: 125 },
       desktop: { rightOffset: 122, bottomOffset: 105 },
@@ -172,7 +173,7 @@ const AGENT_DIMENSIONS = {
   Genius: {
     width: 126,
     height: 96,
-    scale: { mobile: 0.96, desktop: 0.92 },
+    scale: { mobile: 1.0, desktop: 0.95 }, // 🔧 Standardized from 0.96/0.92
     positioning: {
       mobile: { rightOffset: 10, bottomOffset: 122 },
       desktop: { rightOffset: 121, bottomOffset: 102 },
@@ -181,7 +182,7 @@ const AGENT_DIMENSIONS = {
   Merlin: {
     width: 135, // Wider due to robes
     height: 108, // Taller due to hat
-    scale: { mobile: 0.9, desktop: 0.86 },
+    scale: { mobile: 1.0, desktop: 0.95 }, // 🔧 Standardized from 0.9/0.86
     positioning: {
       mobile: { rightOffset: 7, bottomOffset: 128 },
       desktop: { rightOffset: 127, bottomOffset: 108 },
@@ -190,7 +191,7 @@ const AGENT_DIMENSIONS = {
   F1: {
     width: 118, // Race car is lower/wider
     height: 85, // Lower profile
-    scale: { mobile: 1.02, desktop: 0.98 }, // Slightly larger since it's smaller
+    scale: { mobile: 1.0, desktop: 0.95 }, // 🔧 Standardized from 1.02/0.98
     positioning: {
       mobile: { rightOffset: 13, bottomOffset: 115 },
       desktop: { rightOffset: 118, bottomOffset: 95 },

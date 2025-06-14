@@ -63,6 +63,9 @@ import {
   positionMobileOverlay,
 } from "./interactions/MobilePositioning";
 
+// NEW: Import balloon position validator for global testing functions
+import "./BalloonPositionValidator";
+
 import "./styles/_styles.scss";
 
 const ClippyContext = createContext(null);

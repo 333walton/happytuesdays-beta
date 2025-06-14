@@ -12,7 +12,7 @@ import {
   getConversationStarter,
   getQuickReplies,
 } from "../data/AgentResponses";
-import BotpressChatWidget from "./BotpressChatWidget";
+import EnhancedBotpressChatWidget from "./EnhancedBotpressChatWidget";
 
 const GeniusChat = ({
   currentAgent,
@@ -65,7 +65,7 @@ const GeniusChat = ({
 
   return (
     <div className="genius-chat-wrapper">
-      <BotpressChatWidget
+      <EnhancedBotpressChatWidget
         agentConfig={agentConfig}
         conversationStarter={conversationStarter}
         quickReplies={quickReplies}

@@ -1,41 +1,45 @@
 // CustomBalloon.js - COMPLETE UPDATED VERSION with enhanced viewport positioning
 // This file handles speech balloons (not chat balloons)
 import React from "react";
-import { devLog, errorLog } from './ClippyPositioning';
-import './CustomBalloon.scss';  // Import SCSS styles
+import { devLog, errorLog } from "./ClippyPositioning";
+import "./CustomBalloon.scss"; // Import SCSS styles
 
 // FIXED: Animation logging function
 const logAnimation = (animationName, context = "custom balloon") => {
   // Force log animation regardless of dev mode
   console.log(
     `%c🎭 Clippy Animation: "${animationName}"%c (from ${context})`,
-    'color: #0066cc; font-weight: bold; font-size: 14px;',
-    'color: #666; font-size: 12px;'
+    "color: #0066cc; font-weight: bold; font-size: 14px;",
+    "color: #666; font-size: 12px;"
   );
   // Log stack trace to see where the animation was called from
-  console.trace('Animation call stack:');
+  console.trace("Animation call stack:");
 };
 
 // Wrap clippy.play to ensure all animations are logged
 const wrapClippyPlay = () => {
   if (window.clippy && window.clippy.play) {
     const originalPlay = window.clippy.play;
-    window.clippy.play = function(animationName) {
+    window.clippy.play = function (animationName) {
       // Log the animation before playing it
-      console.group(`%c🎭 Clippy Animation Debug%c "${animationName}"`, 
-        'color: #0066cc; font-weight: bold; font-size: 14px;',
-        'color: #666; font-size: 12px;'
+      console.group(
+        `%c🎭 Clippy Animation Debug%c "${animationName}"`,
+        "color: #0066cc; font-weight: bold; font-size: 14px;",
+        "color: #666; font-size: 12px;"
       );
-      console.log('Animation name:', animationName);
-      console.log('Animation type:', typeof animationName);
-      console.log('Call stack:');
+      console.log("Animation name:", animationName);
+      console.log("Animation type:", typeof animationName);
+      console.log("Call stack:");
       console.trace();
       console.groupEnd();
-      
+
       // Call the original function
       return originalPlay.call(this, animationName);
     };
-    console.log("%c🎭 Clippy animation logging enabled", "color: #0066cc; font-weight: bold;");
+    console.log(
+      "%c🎭 Clippy animation logging enabled",
+      "color: #0066cc; font-weight: bold;"
+    );
   }
 };
 
@@ -63,18 +67,21 @@ class CustomBalloonManager {
   show(content, duration = 8000, options = {}) {
     try {
       // FIXED: Check if any balloon (speech or chat) is already open
-      const existingBalloons = document.querySelectorAll('.custom-clippy-balloon, .custom-clippy-chat-balloon');
+      const existingBalloons = document.querySelectorAll(
+        ".custom-clippy-balloon, .custom-clippy-chat-balloon"
+      );
       if (existingBalloons.length > 0) {
         devLog("Balloon creation blocked - another balloon is already open");
         return false;
       }
 
       // Parse content
-      let message, buttons = [];
-      if (typeof content === 'string') {
+      let message,
+        buttons = [];
+      if (typeof content === "string") {
         message = content;
-      } else if (content && typeof content === 'object') {
-        message = content.message || content.text || '';
+      } else if (content && typeof content === "object") {
+        message = content.message || content.text || "";
         buttons = content.buttons || [];
       } else {
         message = String(content);
@@ -86,41 +93,47 @@ class CustomBalloonManager {
         Array.isArray(buttons) &&
         buttons.length === 4
       ) {
-        devLog('Blocked display of "How may I help you?" enhanced message balloon.');
+        devLog(
+          'Blocked display of "How may I help you?" enhanced message balloon.'
+        );
         return false;
       }
 
-      devLog(`Creating custom balloon: "${message}" with ${buttons.length} buttons`);
-      
+      devLog(
+        `Creating custom balloon: "${message}" with ${buttons.length} buttons`
+      );
+
       // FIXED: Remove any existing balloons first
       this.hide();
 
       // Create balloon element
-      const balloonEl = document.createElement('div');
-      balloonEl.className = 'custom-clippy-balloon';
-      
+      const balloonEl = document.createElement("div");
+      balloonEl.className = "custom-clippy-balloon";
+
       // Calculate position relative to Clippy with desktop viewport boundaries
       const position = this.calculatePosition({
-        ...options.position
+        ...options.position,
       });
-      
+
       // Apply positioning
-      balloonEl.style.position = 'fixed';
+      balloonEl.style.position = "fixed";
       balloonEl.style.left = `${position.left}px`;
       balloonEl.style.top = `${position.top}px`;
-      balloonEl.style.zIndex = '9999';
-      balloonEl.style.visibility = 'visible';
-      balloonEl.style.opacity = '1';
-      balloonEl.style.display = 'block';
+      balloonEl.style.zIndex = "9999";
+      balloonEl.style.visibility = "visible";
+      balloonEl.style.opacity = "1";
+      balloonEl.style.display = "block";
 
       // SCALE DOWN: Reduce width and minHeight by 10%
       const hasButtons = buttons.length > 0;
       const baseWidth = Math.min(180, position.maxWidth * 0.9); // 200 -> 180, 10% smaller
-      const buttonHeight = hasButtons ? (buttons.length * 29) + 18 : 0; // 32 -> 29, 20 -> 18
+      const buttonHeight = hasButtons ? buttons.length * 29 + 18 : 0; // 32 -> 29, 20 -> 18
 
       balloonEl.style.maxWidth = `${position.maxWidth * 0.9}px`;
       balloonEl.style.width = `${baseWidth}px`;
-      balloonEl.style.minHeight = hasButtons ? `${Math.max(108, 72 + buttonHeight)}px` : 'auto'; // 120 -> 108, 80 -> 72
+      balloonEl.style.minHeight = hasButtons
+        ? `${Math.max(108, 72 + buttonHeight)}px`
+        : "auto"; // 120 -> 108, 80 -> 72
 
       // FIXED: Create balloon content with enhanced button support
       this.createBalloonContent(balloonEl, message, buttons);
@@ -128,14 +141,18 @@ class CustomBalloonManager {
       // Add to DOM
       document.body.appendChild(balloonEl);
       this.currentBalloon = balloonEl;
-      
+
       // Add dynamic repositioning
       this._addDynamicRepositioning(message, options);
-      
-      devLog(`Balloon positioned at (${position.left}, ${position.top}) with max width ${position.maxWidth}px`);
+
+      devLog(
+        `Balloon positioned at (${position.left}, ${position.top}) with max width ${position.maxWidth}px`
+      );
 
       // Set auto-hide timer (longer for balloons with buttons)
-      const autoHideDuration = hasButtons ? Math.max(duration, 15000) : duration;
+      const autoHideDuration = hasButtons
+        ? Math.max(duration, 15000)
+        : duration;
       this.balloonTimeout = setTimeout(() => {
         this.hide();
       }, autoHideDuration);
@@ -155,13 +172,21 @@ class CustomBalloonManager {
     this._resizeHandler = () => {
       if (!this.currentBalloon) return;
       const position = this.calculatePosition({
-        ...options.position
+        ...options.position,
       });
-      this.currentBalloon.style.setProperty('left', `${position.left}px`, 'important');
-      this.currentBalloon.style.setProperty('top', `${position.top}px`, 'important');
+      this.currentBalloon.style.setProperty(
+        "left",
+        `${position.left}px`,
+        "important"
+      );
+      this.currentBalloon.style.setProperty(
+        "top",
+        `${position.top}px`,
+        "important"
+      );
     };
-    window.addEventListener('resize', this._resizeHandler);
-    window.addEventListener('clippyRepositioned', this._resizeHandler);
+    window.addEventListener("resize", this._resizeHandler);
+    window.addEventListener("clippyRepositioned", this._resizeHandler);
   }
 
   /**
@@ -169,8 +194,8 @@ class CustomBalloonManager {
    */
   _removeDynamicRepositioning() {
     if (this._resizeHandler) {
-      window.removeEventListener('resize', this._resizeHandler);
-      window.removeEventListener('clippyRepositioned', this._resizeHandler);
+      window.removeEventListener("resize", this._resizeHandler);
+      window.removeEventListener("clippyRepositioned", this._resizeHandler);
       this._resizeHandler = null;
     }
   }
@@ -183,17 +208,23 @@ class CustomBalloonManager {
    */
   createBalloonContent(balloonEl, message, buttons = []) {
     // Clear any existing content
-    balloonEl.innerHTML = '';
+    balloonEl.innerHTML = "";
 
     // BLOCK: Do not render the enhanced message balloon content
-    if (message === "How may I help you?" && Array.isArray(buttons) && buttons.length === 4) {
-      devLog('Blocked rendering of "How may I help you?" enhanced message balloon content.');
+    if (
+      message === "How may I help you?" &&
+      Array.isArray(buttons) &&
+      buttons.length === 4
+    ) {
+      devLog(
+        'Blocked rendering of "How may I help you?" enhanced message balloon content.'
+      );
       return;
     }
 
     // Create message content
-    const messageEl = document.createElement('div');
-    messageEl.className = 'balloon-message';
+    const messageEl = document.createElement("div");
+    messageEl.className = "balloon-message";
     messageEl.innerHTML = message;
     messageEl.style.cssText = `
       color: #000000 !important;
@@ -201,7 +232,9 @@ class CustomBalloonManager {
       font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important;
       font-size: 12.6px !important; /* 14px -> 12.6px */
       line-height: 1.3 !important;   /* 1.4 -> 1.3 */
-      margin-bottom: ${buttons.length > 0 ? '10px' : '0'} !important; /* 12px -> 10px */
+      margin-bottom: ${
+        buttons.length > 0 ? "10px" : "0"
+      } !important; /* 12px -> 10px */
       word-wrap: break-word !important;
       padding: 0 !important;
       text-align: center !important;
@@ -210,8 +243,8 @@ class CustomBalloonManager {
 
     // Create buttons container if there are buttons
     if (buttons.length > 0) {
-      const buttonsContainer = document.createElement('div');
-      buttonsContainer.className = 'balloon-buttons';
+      const buttonsContainer = document.createElement("div");
+      buttonsContainer.className = "balloon-buttons";
       buttonsContainer.style.cssText = `
         display: flex !important;
         flex-direction: column !important;
@@ -221,10 +254,11 @@ class CustomBalloonManager {
       `;
 
       buttons.forEach((button, index) => {
-        const buttonEl = document.createElement('button');
-        buttonEl.className = 'balloon-button';
-        buttonEl.textContent = button.text || button.label || `Option ${index + 1}`;
-        
+        const buttonEl = document.createElement("button");
+        buttonEl.className = "balloon-button";
+        buttonEl.textContent =
+          button.text || button.label || `Option ${index + 1}`;
+
         // SCALE DOWN: Reduce button font size, padding, min-height
         buttonEl.style.cssText = `
           background: #c0c0c0 !important;
@@ -237,7 +271,9 @@ class CustomBalloonManager {
           cursor: pointer !important;
           text-align: left !important;
           width: 100% !important;
-          min-height: ${this.isMobile() ? '32px' : '25px'} !important; /* 36/28 -> 32/25 */
+          min-height: ${
+            this.isMobile() ? "32px" : "25px"
+          } !important; /* 36/28 -> 32/25 */
           touch-action: manipulation !important;
           -webkit-tap-highlight-color: transparent !important;
           -webkit-touch-callout: none !important;
@@ -254,43 +290,46 @@ class CustomBalloonManager {
         `;
 
         // Button hover interactions
-        buttonEl.addEventListener('mouseenter', () => {
-          buttonEl.style.background = '#d0d0d0 !important';
-          buttonEl.style.borderColor = '#d0d0d0 !important';
+        buttonEl.addEventListener("mouseenter", () => {
+          buttonEl.style.background = "#d0d0d0 !important";
+          buttonEl.style.borderColor = "#d0d0d0 !important";
         });
 
-        buttonEl.addEventListener('mouseleave', () => {
-          buttonEl.style.background = '#c0c0c0 !important';
-          buttonEl.style.borderColor = '#c0c0c0 !important';
+        buttonEl.addEventListener("mouseleave", () => {
+          buttonEl.style.background = "#c0c0c0 !important";
+          buttonEl.style.borderColor = "#c0c0c0 !important";
         });
 
         // Button press effect
-        buttonEl.addEventListener('mousedown', () => {
-          buttonEl.style.border = '2px inset #c0c0c0 !important';
-          buttonEl.style.paddingTop = '5px !important';
-          buttonEl.style.paddingLeft = '13px !important';
+        buttonEl.addEventListener("mousedown", () => {
+          buttonEl.style.border = "2px inset #c0c0c0 !important";
+          buttonEl.style.paddingTop = "5px !important";
+          buttonEl.style.paddingLeft = "13px !important";
         });
 
-        buttonEl.addEventListener('mouseup', () => {
-          buttonEl.style.border = '2px outset #c0c0c0 !important';
-          buttonEl.style.paddingTop = '4px !important';
-          buttonEl.style.paddingLeft = '12px !important';
+        buttonEl.addEventListener("mouseup", () => {
+          buttonEl.style.border = "2px outset #c0c0c0 !important";
+          buttonEl.style.paddingTop = "4px !important";
+          buttonEl.style.paddingLeft = "12px !important";
         });
 
         // Enhanced button click handler with multiple action types
-        buttonEl.addEventListener('click', (e) => {
+        buttonEl.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
           devLog(`Balloon button clicked: "${button.text}"`);
-          
+
           // Execute button action based on type
-          if (button.action && typeof button.action === 'function') {
+          if (button.action && typeof button.action === "function") {
             // Custom function action
             try {
               button.action();
               devLog(`Button custom action executed for: ${button.text}`);
             } catch (error) {
-              errorLog(`Error executing button action for ${button.text}`, error);
+              errorLog(
+                `Error executing button action for ${button.text}`,
+                error
+              );
             }
           } else if (button.message) {
             // Show follow-up message
@@ -330,13 +369,16 @@ class CustomBalloonManager {
               if (window.showClippyHelpBalloon) {
                 window.showClippyHelpBalloon();
               } else {
-                this.show("Here are some things I can help you with! Try right-clicking me for more options.", 8000);
+                this.show(
+                  "Here are some things I can help you with! Try right-clicking me for more options.",
+                  8000
+                );
               }
               devLog(`Button help shown`);
             }, 200);
             return; // Don't close balloon yet
           }
-          
+
           // Close balloon after action (unless it shows another balloon/chat)
           this.hide();
         });
@@ -363,18 +405,23 @@ class CustomBalloonManager {
       // Remove current balloon
       if (this.currentBalloon && this.currentBalloon.parentNode) {
         // Check if this was a welcome balloon and mark as completed
-        const balloonContent = this.currentBalloon.textContent || '';
-        if (balloonContent.includes('Welcome to Hydra98') && window.markWelcomeBalloonCompleted) {
+        const balloonContent = this.currentBalloon.textContent || "";
+        if (
+          balloonContent.includes("Welcome to Hydra98") &&
+          window.markWelcomeBalloonCompleted
+        ) {
           window.markWelcomeBalloonCompleted();
         }
-        
+
         this.currentBalloon.remove();
         devLog("Balloon removed from DOM");
       }
 
       // Also remove any orphaned balloons
-      const orphanedBalloons = document.querySelectorAll('.custom-clippy-balloon');
-      orphanedBalloons.forEach(balloon => {
+      const orphanedBalloons = document.querySelectorAll(
+        ".custom-clippy-balloon"
+      );
+      orphanedBalloons.forEach((balloon) => {
         balloon.remove();
         devLog("Removed orphaned balloon");
       });
@@ -396,7 +443,7 @@ class CustomBalloonManager {
    * @param {Object} customPosition - Optional custom position override
    * @returns {Object} - Position with left, top, and maxWidth properties
    */
-  
+
   calculatePosition(customPosition = {}) {
     // SCALE DOWN: Reduce balloonWidth and balloonHeight by 10%
     const balloonWidth = 252; // 280 * 0.9
@@ -405,12 +452,16 @@ class CustomBalloonManager {
     const clippyMargin = 45; // 50 * 0.9
 
     // Get desktop viewport
-    const desktop = document.querySelector(".desktop.screen") || 
-                   document.querySelector(".desktop") || 
-                   document.querySelector(".w98");
-    
-    let viewportWidth, viewportHeight, viewportLeft = 0, viewportTop = 0;
-    
+    const desktop =
+      document.querySelector(".desktop.screen") ||
+      document.querySelector(".desktop") ||
+      document.querySelector(".w98");
+
+    let viewportWidth,
+      viewportHeight,
+      viewportLeft = 0,
+      viewportTop = 0;
+
     if (desktop) {
       const desktopRect = desktop.getBoundingClientRect();
       viewportWidth = desktopRect.width;
@@ -422,28 +473,30 @@ class CustomBalloonManager {
       viewportHeight = window.innerHeight;
     }
 
-    const maxAvailableWidth = viewportWidth - (safeMargin * 2);
+    const maxAvailableWidth = viewportWidth - safeMargin * 2;
     const dynamicWidth = Math.min(balloonWidth, maxAvailableWidth);
 
     // Find Clippy and overlay
-    const clippyEl = document.querySelector('.clippy');
-    const overlayEl = document.getElementById('clippy-clickable-overlay');
-    
+    const clippyEl = document.querySelector(".clippy");
+    const overlayEl = document.getElementById("clippy-clickable-overlay");
+
     if (clippyEl) {
       const clippyRect = clippyEl.getBoundingClientRect();
-      const overlayRect = overlayEl ? overlayEl.getBoundingClientRect() : clippyRect;
-      
+      const overlayRect = overlayEl
+        ? overlayEl.getBoundingClientRect()
+        : clippyRect;
+
       // Calculate Clippy's full height including overlay
       const clippyHeight = clippyRect.height;
       const overlayHeight = overlayRect.height;
       const effectiveClippyHeight = Math.max(clippyHeight, overlayHeight);
-      
+
       // Get the topmost position between Clippy and overlay
       const effectiveTop = Math.min(clippyRect.top, overlayRect.top);
-      
+
       // Check if this is an enhanced message balloon
       const isEnhancedMessage = customPosition.isEnhancedMessage;
-      
+
       // For enhanced message balloon, use chat balloon's positioning logic
       if (isEnhancedMessage) {
         // Use chat balloon's width and height
@@ -451,7 +504,7 @@ class CustomBalloonManager {
         const chatHeight = 160;
         const chatMargin = 40;
 
-        let left = clippyRect.left + (clippyRect.width / 2) - (chatWidth / 2) + 140; // Shift 140px to the right
+        let left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2 + 140; // Shift 140px to the right
         let top = effectiveTop - chatHeight - (chatMargin + 80); // Move even higher above Clippy
 
         // Constrain horizontally to viewport
@@ -476,35 +529,38 @@ class CustomBalloonManager {
         // Final constraint checks
         left = Math.min(left, viewportLeft + viewportWidth - chatWidth - 20);
         left = Math.max(viewportLeft + 20, left);
-        top = Math.max(viewportTop + safeMargin, Math.min(top, viewportTop + viewportHeight - chatHeight - safeMargin));
+        top = Math.max(
+          viewportTop + safeMargin,
+          Math.min(top, viewportTop + viewportHeight - chatHeight - safeMargin)
+        );
 
         return {
           left,
           top,
-          maxWidth: chatWidth
+          maxWidth: chatWidth,
         };
       }
-      
-      // Position balloon above Clippy's full height
-      let left = clippyRect.left + (clippyRect.width / 2) - (dynamicWidth / 2);
-      let top = effectiveTop - balloonHeight - clippyMargin;
-      
+
+      // UNIFIED: Position balloon using same rule as ChatBalloon - 1px above overlay
+      let left = clippyRect.left + clippyRect.width / 2 - dynamicWidth / 2;
+      let top = overlayRect.top - balloonHeight - 1; // Same as chat balloons: 1px above overlay
+
       // Constrain to desktop viewport horizontally
       left = Math.max(
-        viewportLeft + safeMargin, 
+        viewportLeft + safeMargin,
         Math.min(left, viewportLeft + viewportWidth - dynamicWidth - safeMargin)
       );
-      
+
       // Check if balloon fits above Clippy within viewport
       if (top < viewportTop + safeMargin) {
         // If not enough space above, try positioning to the left of Clippy
         top = effectiveTop + 10; // Align roughly with Clippy's top
         left = clippyRect.left - dynamicWidth - 30; // 30px gap to the left
-        
+
         // If still doesn't fit on left, try right side
         if (left < viewportLeft + safeMargin) {
           left = clippyRect.right + 30; // 30px gap to the right
-          
+
           // Ensure it fits on the right
           if (left + dynamicWidth > viewportLeft + viewportWidth - safeMargin) {
             // Last resort: position at top of viewport
@@ -513,23 +569,25 @@ class CustomBalloonManager {
           }
         }
       }
-      
+
       // Final vertical constraint check
       top = Math.max(viewportTop + safeMargin, top);
-      
-      devLog(`Balloon position calculated: left=${left}, top=${top}, clippyHeight=${effectiveClippyHeight}`);
-      
-      return { 
-        left, 
+
+      devLog(
+        `Balloon position calculated: left=${left}, top=${top}, clippyHeight=${effectiveClippyHeight}`
+      );
+
+      return {
+        left,
         top,
-        maxWidth: maxAvailableWidth
+        maxWidth: maxAvailableWidth,
       };
     } else {
       // Fallback
       return {
         left: viewportLeft + (viewportWidth - dynamicWidth) / 2,
         top: viewportTop + safeMargin,
-        maxWidth: maxAvailableWidth
+        maxWidth: maxAvailableWidth,
       };
     }
   }
@@ -539,7 +597,12 @@ class CustomBalloonManager {
    * @returns {boolean}
    */
   isMobile() {
-    return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    return (
+      window.innerWidth <= 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    );
   }
 
   /**
@@ -561,7 +624,7 @@ class CustomBalloonManager {
     }
 
     try {
-      const messageEl = this.currentBalloon.querySelector('.balloon-message');
+      const messageEl = this.currentBalloon.querySelector(".balloon-message");
       if (messageEl) {
         messageEl.innerHTML = newMessage;
         devLog(`Balloon message updated to: "${newMessage}"`);
@@ -604,102 +667,126 @@ export const showWelcomeBalloon = () => {
     logAnimation("Wave", "welcome balloon");
     window.clippy.play("Wave");
   }
-  
-  const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  const isMobile =
+    window.innerWidth <= 768 ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
 
   // Custom position for mobile: shift right over Clippy's head
   let mobilePosition = undefined;
   if (isMobile) {
-    const clippyEl = document.querySelector('.clippy');
+    const clippyEl = document.querySelector(".clippy");
     if (clippyEl) {
       const rect = clippyEl.getBoundingClientRect();
       // Place balloon above and to the right of Clippy's head
       mobilePosition = {
         left: rect.left + rect.width * 0.7, // 70% to the right of Clippy
-        top: rect.top - 90 // 90px above Clippy
+        top: rect.top - 90, // 90px above Clippy
       };
     }
   }
-  
-  return showCustomBalloon({
-    message: isMobile 
-      ? `<span style="font-weight: 600;">Welcome to Hydra98!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Double-tap me to view menu.</span></i>`
-      : `<span style="font-weight: 600;">Welcome to Hydra98!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Right-click me to view menu.</span></i>`,
-    animation: "Wave",
-    buttons: isMobile ? [] : []
-  }, 6000, isMobile ? { position: mobilePosition } : {});
+
+  return showCustomBalloon(
+    {
+      message: isMobile
+        ? `<span style="font-weight: 600;">Welcome to Hydra98!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Double-tap me to view menu.</span></i>`
+        : `<span style="font-weight: 600;">Welcome to Hydra98!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Right-click me to view menu.</span></i>`,
+      animation: "Wave",
+      buttons: isMobile ? [] : [],
+    },
+    6000,
+    isMobile ? { position: mobilePosition } : {}
+  );
 };
 
 export const showHelpBalloon = () => {
-  return showCustomBalloon({
-    message: "What kind of help do you need?",
-    buttons: [
-      {
-        text: "🖱️ How do I interact with you?",
-        message: "You can double-click me for a quick greeting, or right-click for more options! On mobile, just tap me or long-press for chat."
-      },
-      {
-        text: "🎮 What can I do in Hydra98?",
-        message: "You can explore the desktop, run classic programs like Notepad and Paint, play games like Minesweeper, and even browse the web! Try clicking the Start button."
-      },
-      {
-        text: "⚙️ How do I change settings?",
-        message: "Right-click on the desktop to access display settings, or use the Start menu to find system preferences. You can also right-click me for agent options!"
-      },
-      {
-        text: "💬 I want to chat more",
-        chat: "Great! I love chatting. What's on your mind?"
-      }
-    ]
-  }, 15000);
+  return showCustomBalloon(
+    {
+      message: "What kind of help do you need?",
+      buttons: [
+        {
+          text: "🖱️ How do I interact with you?",
+          message:
+            "You can double-click me for a quick greeting, or right-click for more options! On mobile, just tap me or long-press for chat.",
+        },
+        {
+          text: "🎮 What can I do in Hydra98?",
+          message:
+            "You can explore the desktop, run classic programs like Notepad and Paint, play games like Minesweeper, and even browse the web! Try clicking the Start button.",
+        },
+        {
+          text: "⚙️ How do I change settings?",
+          message:
+            "Right-click on the desktop to access display settings, or use the Start menu to find system preferences. You can also right-click me for agent options!",
+        },
+        {
+          text: "💬 I want to chat more",
+          chat: "Great! I love chatting. What's on your mind?",
+        },
+      ],
+    },
+    15000
+  );
 };
 
 export const showErrorBalloon = (errorMessage) => {
-  return showCustomBalloon({
-    message: `Oops! ${errorMessage || "Something went wrong."}`,
-    buttons: [
-      {
-        text: "🔄 Try again",
-        action: () => {
-          window.location.reload();
-        }
-      },
-      {
-        text: "💬 Get help",
-        chat: "I'm having trouble. Can you help me figure out what went wrong?"
-      },
-      {
-        text: "😊 It's okay",
-        animation: "Wave",
-        message: "Thanks for being understanding! Let me know if you need anything else."
-      }
-    ]
-  }, 12000);
+  return showCustomBalloon(
+    {
+      message: `Oops! ${errorMessage || "Something went wrong."}`,
+      buttons: [
+        {
+          text: "🔄 Try again",
+          action: () => {
+            window.location.reload();
+          },
+        },
+        {
+          text: "💬 Get help",
+          chat: "I'm having trouble. Can you help me figure out what went wrong?",
+        },
+        {
+          text: "😊 It's okay",
+          animation: "Wave",
+          message:
+            "Thanks for being understanding! Let me know if you need anything else.",
+        },
+      ],
+    },
+    12000
+  );
 };
 
 export const showTipsBalloon = () => {
-  return showCustomBalloon({
-    message: "Here are some helpful tips for using Hydra98!",
-    buttons: [
-      {
-        text: "🖱️ Mouse tips",
-        message: "Try right-clicking on different things! Right-click the desktop for settings, right-click me for options, and double-click to open programs."
-      },
-      {
-        text: "⌨️ Keyboard shortcuts",
-        message: "Use Ctrl+Alt+Del for Task Manager, Alt+Tab to switch programs, and the Windows key to open the Start menu!"
-      },
-      {
-        text: "🎮 Fun stuff to try",
-        message: "Check out Minesweeper, Paint, Notepad, and the screensavers! You can also change the wallpaper by right-clicking the desktop."
-      },
-      {
-        text: "💭 More help",
-        help: true
-      }
-    ]
-  }, 18000);
- };
+  return showCustomBalloon(
+    {
+      message: "Here are some helpful tips for using Hydra98!",
+      buttons: [
+        {
+          text: "🖱️ Mouse tips",
+          message:
+            "Try right-clicking on different things! Right-click the desktop for settings, right-click me for options, and double-click to open programs.",
+        },
+        {
+          text: "⌨️ Keyboard shortcuts",
+          message:
+            "Use Ctrl+Alt+Del for Task Manager, Alt+Tab to switch programs, and the Windows key to open the Start menu!",
+        },
+        {
+          text: "🎮 Fun stuff to try",
+          message:
+            "Check out Minesweeper, Paint, Notepad, and the screensavers! You can also change the wallpaper by right-clicking the desktop.",
+        },
+        {
+          text: "💭 More help",
+          help: true,
+        },
+      ],
+    },
+    18000
+  );
+};
 
 // Add more close-ended speech balloons (statements only, no buttons) based on user observations/tips
 export const showObservationBalloon = (observationType) => {
@@ -782,7 +869,10 @@ export const showStatementBalloon1 = () => {
 };
 
 export const showStatementBalloon2 = () => {
-  return showCustomBalloon("Clippy is here to help if you need anything.", 5000);
+  return showCustomBalloon(
+    "Clippy is here to help if you need anything.",
+    5000
+  );
 };
 
 export const showStatementBalloon3 = () => {
@@ -790,7 +880,10 @@ export const showStatementBalloon3 = () => {
 };
 
 export const showStatementBalloon4 = () => {
-  return showCustomBalloon("Tip: You can right-click on the desktop for more options.", 5000);
+  return showCustomBalloon(
+    "Tip: You can right-click on the desktop for more options.",
+    5000
+  );
 };
 
 /**
