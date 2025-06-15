@@ -13,11 +13,11 @@ export const MARTECH_KNOWLEDGE = {
   // UTM Parameter Setup and Tracking
   utm_parameters: {
     setup_guide: [
-      "UTM Source: Identifies where traffic comes from (google, facebook, newsletter)",
-      "UTM Medium: Identifies the marketing medium (cpc, social, email, organic)",
-      "UTM Campaign: Identifies the specific campaign (summer_sale, product_launch)",
-      "UTM Term: Identifies paid search keywords (optional)",
-      "UTM Content: Differentiates similar content or ads (optional)",
+      "UTM Source: Identifies where traffic comes from (google, facebook, newsletter)\n",
+      "UTM Medium: Identifies the marketing medium (cpc, social, email, organic)\n",
+      "UTM Campaign: Identifies the specific campaign (summer_sale, product_launch)\n",
+      "UTM Term: Identifies paid search keywords (optional)\n",
+      "UTM Content: Differentiates similar content or ads (optional)\n",
     ],
     common_issues: [
       "Missing UTM parameters breaking attribution",
@@ -338,6 +338,7 @@ export const searchKnowledge = (agent, topic) => {
     }
   });
 
+  console.log("🔍 Debugging searchKnowledge results:", results);
   return results;
 };
 
@@ -358,3 +359,19 @@ export const getTroubleshootingSteps = (issue) => {
 
   return matchingKey ? troubleshootingMap[matchingKey] : [];
 };
+
+// Ensure all required fields exist in MARTECH_KNOWLEDGE
+MARTECH_KNOWLEDGE.utm_parameters.troubleshooting_steps =
+  MARTECH_KNOWLEDGE.utm_parameters.troubleshooting_steps || [];
+MARTECH_KNOWLEDGE.utm_parameters.best_practices =
+  MARTECH_KNOWLEDGE.utm_parameters.best_practices || [];
+MARTECH_KNOWLEDGE.google_analytics.troubleshooting_checklist =
+  MARTECH_KNOWLEDGE.google_analytics.troubleshooting_checklist || [];
+MARTECH_KNOWLEDGE.google_analytics.setup_priorities =
+  MARTECH_KNOWLEDGE.google_analytics.setup_priorities || [];
+MARTECH_KNOWLEDGE.tracking_pixels.common_pixel_issues =
+  MARTECH_KNOWLEDGE.tracking_pixels.common_pixel_issues || [];
+MARTECH_KNOWLEDGE.attribution_modeling.debugging_attribution =
+  MARTECH_KNOWLEDGE.attribution_modeling.debugging_attribution || [];
+MARTECH_KNOWLEDGE.campaign_analysis.key_metrics =
+  MARTECH_KNOWLEDGE.campaign_analysis.key_metrics || [];

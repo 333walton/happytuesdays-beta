@@ -110,10 +110,21 @@ const EnhancedBotpressChatWidget = ({
         };
       }
 
+      // Replace hardcoded responses with dynamic generation from MARTECH_KNOWLEDGE
       if (messageText === "UTM setup") {
+        const utmKnowledge = MARTECH_KNOWLEDGE.utm_parameters;
         return {
-          text: `🏷️ UTM Parameter Setup Guide:\n\n✅ Required Parameters:\n• utm_source: google, facebook, newsletter\n• utm_medium: cpc, social, email\n• utm_campaign: summer_sale, product_launch\n\n💡 Best Practices:\n• Use consistent naming (lowercase, underscores)\n• Document your taxonomy\n• Test URLs before launch\n\nNeed help with a specific UTM parameter?`,
-          quickReplies: ["Naming rules", "URL builder", "Testing", "Examples"],
+          text: `🏷️ UTM Parameter Setup Guide:\n\n✅ Required Parameters:\n• ${utmKnowledge.setup_guide
+            .slice(0, 3)
+            .join(
+              "\n• "
+            )}\n\n💡 Need help with common issues or best practices?`,
+          quickReplies: [
+            "Common issues",
+            "Best practices",
+            "Examples",
+            "More help",
+          ],
         };
       }
 
@@ -224,6 +235,8 @@ const EnhancedBotpressChatWidget = ({
 
       // Try general knowledge search
       const searchResults = searchKnowledge(agent, messageText);
+      console.log("🔍 Knowledge search results:", searchResults);
+
       if (searchResults.length > 0) {
         const result = searchResults[0];
         return {
@@ -433,9 +446,6 @@ const EnhancedBotpressChatWidget = ({
         return;
       }
 
-      console.log("📤 Sending message:", messageText);
-      console.log("🔧 Agent config:", agentConfig);
-
       // Add user message immediately
       addMessage(messageText, "user");
       setInputValue("");
@@ -450,6 +460,19 @@ const EnhancedBotpressChatWidget = ({
           agentConfig.personality,
           agentConfig
         );
+
+        // Add a dynamic fallback for unmatched inputs
+        if (!response) {
+          return {
+            text: "I'm not sure how to respond to that. Here are some things I can help with:",
+            quickReplies: [
+              "UTM tracking help",
+              "Analytics setup",
+              "Campaign optimization",
+              "Pixel troubleshooting",
+            ],
+          };
+        }
 
         console.log("💬 Generated response:", response);
 
@@ -466,16 +489,13 @@ const EnhancedBotpressChatWidget = ({
           console.log("✅ Response complete");
         }, 500); // Reduced delay for faster response
       } catch (error) {
+        // Error handling for the typing indicator
         console.error("❌ Error in knowledge response:", error);
-
-        // Ultimate fallback
-        setTimeout(() => {
-          addMessage(
-            "I'm here to help with marketing technology questions! Try asking about UTM tracking, analytics, or campaign optimization.",
-            "bot"
-          );
-          setIsTyping(false);
-        }, 500);
+        setMessages((prev) => [
+          ...prev,
+          { text: "Sorry, something went wrong. Please try again." },
+        ]);
+        setIsTyping(false);
       }
     },
     [inputValue, addMessage, agentConfig.personality, getKnowledgeResponse]
