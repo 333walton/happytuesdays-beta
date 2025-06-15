@@ -760,6 +760,7 @@ class ChatBalloonManager {
         parseInt(container.style.top.replace("px", "")) ||
         parseInt(container.dataset.originalTop) ||
         0;
+      const currentBottom = currentTop + newContainerHeight;
 
       // Viewport constraints - prevent expanding beyond viewport
       const minTop = viewport.top + 10; // Minimum 10px from top
@@ -769,97 +770,82 @@ class ChatBalloonManager {
       // Constrain new height to viewport
       const constrainedHeight = Math.min(newContainerHeight, maxAllowedHeight);
       const constrainedChatHeight = Math.max(
-        60,
+        60, //55?
         newChatHeight - (newContainerHeight - constrainedHeight)
       );
 
       // Enforce minimum height (can't be smaller than original)
       if (constrainedHeight >= originalHeight && constrainedChatHeight >= 60) {
+        // FIXED: Different resize behavior for mobile vs desktop
         if (isMobile) {
-          // MOBILE: Real-time Clippy position with 1px spacing enforcement
-          const overlayEl = document.getElementById("clippy-clickable-overlay");
-          if (!overlayEl) {
-            console.warn("Clippy overlay not found during resize");
-            return;
-          }
+          // MOBILE: Bottom-anchored resize (bottom stays fixed)
+          const originalBottom = parseInt(container.dataset.originalBottom);
+          let newTop = originalBottom - constrainedHeight;
 
-          const overlayRect = overlayEl.getBoundingClientRect();
-          const fixedBottomPosition = overlayRect.top - 1; // Exactly 1px above clippy
-          const requiredTop = fixedBottomPosition - constrainedHeight;
-
-          // Check if this would violate viewport boundaries
-          if (requiredTop < minTop) {
-            console.log(
-              "Mobile resize blocked - would violate 1px spacing rule above Clippy"
-            );
-            return; // Exit completely to prevent any position changes
-          }
-
-          // Apply mobile resize with real-time bottom anchor
-          // CRITICAL: Use setProperty without !important to avoid CSS conflicts
-          container.style.setProperty("height", `${constrainedHeight}px`);
-          chatMessages.style.setProperty(
-            "max-height",
-            `${constrainedChatHeight}px`
-          );
-          chatMessages.style.setProperty(
-            "min-height",
-            `${constrainedChatHeight}px`
-          );
-          chatMessages.style.setProperty(
-            "height",
-            `${constrainedChatHeight}px`
-          );
-          container.style.setProperty("top", `${requiredTop}px`);
-
-          console.log(
-            `Mobile resize: height=${constrainedHeight}px, top=${requiredTop}px, 1px above Clippy at ${overlayRect.top}px`
-          );
-        } else {
-          // DESKTOP: Fixed using real-time Clippy position (same logic as mobile)
-          const overlayEl = document.getElementById("clippy-clickable-overlay");
-          let targetBottom;
-
-          if (overlayEl) {
-            // Use real-time Clippy position for desktop too
-            const overlayRect = overlayEl.getBoundingClientRect();
-            targetBottom = overlayRect.top - 1; // 1px above current Clippy position
-          } else {
-            // Fallback to stored original bottom if Clippy not found
-            targetBottom = parseInt(container.dataset.originalBottom);
-          }
-
-          let newTop = targetBottom - constrainedHeight;
-
-          // Check viewport boundary for desktop
+          // CRITICAL: Check viewport boundary for mobile
           if (newTop < minTop) {
             console.log(
-              "Desktop resize blocked - would violate 1px spacing rule above Clippy"
+              "Mobile viewport boundary hit - stopping resize to prevent bottom shift"
             );
-            return;
+            return; // Exit completely to prevent any position changes
           } else {
-            // Apply desktop resize with real-time bottom anchor
-            // CRITICAL: Use setProperty without !important to avoid CSS conflicts
-            container.style.setProperty("height", `${constrainedHeight}px`);
+            // Apply mobile resize with bottom anchor
+            container.style.setProperty(
+              "height",
+              `${constrainedHeight}px`,
+              "important"
+            );
             chatMessages.style.setProperty(
               "max-height",
-              `${constrainedChatHeight}px`
+              `${constrainedChatHeight}px`,
+              "important"
             );
             chatMessages.style.setProperty(
               "min-height",
-              `${constrainedChatHeight}px`
+              `${constrainedChatHeight}px`,
+              "important"
             );
             chatMessages.style.setProperty(
               "height",
-              `${constrainedChatHeight}px`
+              `${constrainedChatHeight}px`,
+              "important"
             );
-            container.style.setProperty("top", `${newTop}px`);
+            container.style.setProperty("top", `${newTop}px`, "important");
+          }
+        } else {
+          // DESKTOP: Bottom-anchored resize (same as mobile - fixed bottom)
+          const originalBottom = parseInt(container.dataset.originalBottom);
+          let newTop = originalBottom - constrainedHeight;
 
+          // CRITICAL: Check viewport boundary for desktop
+          if (newTop < minTop) {
             console.log(
-              `Desktop resize: using ${
-                overlayEl ? "real-time" : "stored"
-              } bottom=${targetBottom}px, newTop=${newTop}px`
+              "Desktop viewport boundary hit - stopping resize to prevent bottom shift"
             );
+            return; // Exit completely to prevent any position changes
+          } else {
+            // Apply desktop resize with bottom anchor (fixed bottom behavior)
+            container.style.setProperty(
+              "height",
+              `${constrainedHeight}px`,
+              "important"
+            );
+            chatMessages.style.setProperty(
+              "max-height",
+              `${constrainedChatHeight}px`,
+              "important"
+            );
+            chatMessages.style.setProperty(
+              "min-height",
+              `${constrainedChatHeight}px`,
+              "important"
+            );
+            chatMessages.style.setProperty(
+              "height",
+              `${constrainedChatHeight}px`,
+              "important"
+            );
+            container.style.setProperty("top", `${newTop}px`, "important");
           }
         }
       }
