@@ -44,7 +44,7 @@ const ClippyContextMenu = ({
       animations: { horizontalOffset: 18, verticalOffset: 0 }, // aligns with main menu
     },
     mobile: {
-      agents: { horizontalOffset: 38, verticalOffset: -28 }, // aligns with main menu if 6 agents
+      agents: { horizontalOffset: 38, verticalOffset: -27 }, // aligns with main menu if 6 agents. closer to 0 = closer to taskbar
       animations: { horizontalOffset: 38, verticalOffset: -19 }, // aligns with main menu
     },
   };
