@@ -40,11 +40,11 @@ const ClippyContextMenu = ({
   // FIXED: Centralized positioning rules for submenu alignment
   const SUBMENU_POSITIONING_RULES = {
     desktop: {
-      agents: { horizontalOffset: 18, verticalOffset: -57 },
-      animations: { horizontalOffset: 18, verticalOffset: 0 }, // Raised to align with main menu
+      agents: { horizontalOffset: 18, verticalOffset: -57 }, // aligns with main menu if 6 agents
+      animations: { horizontalOffset: 18, verticalOffset: 0 }, // aligns with main menu
     },
     mobile: {
-      agents: { horizontalOffset: 38, verticalOffset: -35 }, // Lowered by 1px (-36 to -35)
+      agents: { horizontalOffset: 38, verticalOffset: -31 }, // aligns with main menu if 6 agents
       animations: { horizontalOffset: 38, verticalOffset: -19 }, // Raised to align with main menu
     },
   };
