@@ -21,30 +21,30 @@ import {
   hideCustomBalloon,
   cleanupCustomBalloon,
   isCustomBalloonVisible,
-} from "./CustomBalloon";
+} from "../CustomBalloon";
 import {
   showChatBalloon,
   hideChatBalloon,
   cleanupChatBalloon,
   isChatBalloonVisible,
   isUserInteractingWithChat,
-} from "./ChatBalloon";
+} from "../ChatBalloon";
 
-import ClippyContextMenu from "./ClippyContextMenu";
+import ClippyContextMenu from "../interactions/ClippyContextMenu";
 import ClippyPositioning from "./ClippyPositioning";
-import ClippyService from "./ClippyService";
-import MobileControls from "./MobileControls";
-import DesktopControls from "./DesktopControls";
+import ClippyService from "../ClippyService";
+import MobileControls from "../interactions/MobileControls";
+import DesktopControls from "../interactions/DesktopControls";
 
 // NEW: Import interaction manager for smart cooldowns and iOS Safari support
 import {
   interactionManager,
   COOLDOWN_TYPES,
   isIOSSafari,
-} from "./InteractionManager";
+} from "../interactions/InteractionManager";
 
 // NEW: Import mobile modules
-import { createMobileTouchHandler } from "./MobileTouchHandler";
+import { createMobileTouchHandler } from "../interactions/MobileTouchHandler";
 import {
   handleMobileSingleTap,
   handleMobileDoubleTap,
@@ -52,14 +52,14 @@ import {
   handleMobileDrag,
   handleMobileDragStart,
   handleMobileDragEnd,
-} from "./MobileInteractions";
+} from "../interactions/MobileInteractions";
 import {
   calculateMobilePosition,
   applyMobilePosition,
   positionMobileOverlay,
-} from "./MobilePositioning";
+} from "../interactions/MobilePositioning";
 
-import "./_styles.scss";
+import "../styles/_styles.scss";
 
 const ClippyContext = createContext(null);
 

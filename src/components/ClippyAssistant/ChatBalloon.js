@@ -1,6 +1,6 @@
 // ChatBalloon.js - COMPLETE FIXED VERSION with enhanced viewport positioning
 import React from "react";
-import { devLog, errorLog } from "./ClippyPositioning";
+import { devLog, errorLog } from "./core/ClippyPositioning";
 
 /**
  * Get agent nickname for display in chat dialogue
@@ -9,13 +9,13 @@ import { devLog, errorLog } from "./ClippyPositioning";
  */
 const getAgentNickname = (agentName) => {
   const nicknames = {
-    "Clippy": "Clippy",
-    "Links": "Links", 
-    "Bonzi": "Bonzi",
-    "Genie": "Genie",
-    "Genius": "Genius",
-    "Merlin": "Merlin",
-    "F1": "F1",
+    Clippy: "Clippy",
+    Links: "Links",
+    Bonzi: "Bonzi",
+    Genie: "Genie",
+    Genius: "Genius",
+    Merlin: "Merlin",
+    F1: "F1",
   };
   return nicknames[agentName] || "Clippy";
 };

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Button } from "@react95/core";
-import { useClippyContext } from "../ClippyProvider";
+import { useClippyContext } from "../core/ClippyProvider";
 import "./DesktopControls.scss";
 
 // Development mode check

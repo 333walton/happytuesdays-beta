@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { AGENTS } from "@react95/clippy";
 import { useClippy } from "@react95/clippy";
 import { useClippyContext } from "./ClippyProvider";
-import CustomWindow from "../CustomWindow";
-import * as icons from "../../icons";
+import CustomWindow from "../../CustomWindow";
+import * as icons from "../../../icons";
 import ClippyPositioning from "./ClippyPositioning";
 
 /**
@@ -42,21 +42,21 @@ const ClippyAssistant = memo((props) => {
 
   // List of available assistants - all 10 agents from React95 library
   const agents = useMemo(() => {
-    console.log('🔍 AGENTS from React95:', AGENTS);
-    console.log('🔍 Available agent keys:', Object.keys(AGENTS || {}));
-    
+    console.log("🔍 AGENTS from React95:", AGENTS);
+    console.log("🔍 Available agent keys:", Object.keys(AGENTS || {}));
+
     // Use 7 agents available in React95 library
     const allAgents = [
-      "Clippy",    // Classic paperclip
-      "Links",     // Cat
-      "Bonzi",     // Purple gorilla
-      "Genie",     // Blue genie
-      "Genius",    // Einstein-like character
-      "Merlin",    // Wizard
-      "F1",        // Robot assistant
+      "Clippy", // Classic paperclip
+      "Links", // Cat
+      "Bonzi", // Purple gorilla
+      "Genie", // Blue genie
+      "Genius", // Einstein-like character
+      "Merlin", // Wizard
+      "F1", // Robot assistant
     ];
-    
-    console.log('🎭 Using static agent list:', allAgents);
+
+    console.log("🎭 Using static agent list:", allAgents);
     return allAgents;
   }, []);
 
@@ -202,14 +202,17 @@ const ClippyAssistant = memo((props) => {
 
           // Position overlay on desktop
           if (overlayEl) {
-             ClippyPositioning.positionOverlay(overlayEl, clippyElement);
+            ClippyPositioning.positionOverlay(overlayEl, clippyElement);
           }
-
         } else {
           // Mobile: Ensure positioning is handled by ClippyPositioning method
           if (ClippyPositioning.positionClippyAndOverlay) {
             // Pass the calculated mobile position or null to let the method recalculate
-            ClippyPositioning.positionClippyAndOverlay(clippyElement, overlayEl, null);
+            ClippyPositioning.positionClippyAndOverlay(
+              clippyElement,
+              overlayEl,
+              null
+            );
           }
         }
       }

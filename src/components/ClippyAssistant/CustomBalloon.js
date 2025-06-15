@@ -1,7 +1,7 @@
 // CustomBalloon.js - COMPLETE UPDATED VERSION with enhanced viewport positioning
 // This file handles speech balloons (not chat balloons)
 import React from "react";
-import { devLog, errorLog } from "./ClippyPositioning";
+import { devLog, errorLog } from "./core/ClippyPositioning";
 import "./CustomBalloon.scss"; // Import SCSS styles
 
 // FIXED: Animation logging function

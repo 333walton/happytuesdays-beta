@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as icons from "../../../icons";
 import ReactDOM from "react-dom";
-import clippyFaq from "../data/textFiles/clippyFaq";
+import clippyFaq from "../../../data/textFiles/clippyFaq";
 
 // FIXED: Animation logging function
 const logAnimation = (animationName, context = "context menu") => {
