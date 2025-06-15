@@ -226,7 +226,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
 .custom-clippy-balloon:after {
   content: "" !important;
   position: absolute !important;
-  bottom: -12px !important;
+  bottom: -12px !important; // changed from -12px to fix balloon size shift on drag
   left: 80% !important;
   transform: translateX(-50%) !important;
   border-width: 12px 12px 0 !important;
@@ -234,6 +234,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
   border-color: #fffcde transparent !important;
   width: 0 !important;
   height: 0 !important;
+  //z-index: 10000 !important;
 }
 
 .custom-clippy-balloon:before {
@@ -247,6 +248,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
   border-color: #000 transparent !important;
   width: 0 !important;
   height: 0 !important;
+  //z-index: 10000 !important;
 }
 
 /* ===== DOM-BASED INTERACTIVE CHAT BALLOON ===== */
@@ -271,7 +273,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
   will-change: transform, opacity !important;
 
   /* Responsive sizing */
-  height: 190px !important;
+  //height: 190px !important;
   max-height: calc(100vh - 100px) !important;
 
   /* Ensure minimum margin from viewport edges - handled in JavaScript positioning */

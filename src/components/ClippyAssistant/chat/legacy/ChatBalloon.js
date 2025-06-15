@@ -770,7 +770,7 @@ class ChatBalloonManager {
       // Constrain new height to viewport
       const constrainedHeight = Math.min(newContainerHeight, maxAllowedHeight);
       const constrainedChatHeight = Math.max(
-        60,
+        60, //55?
         newChatHeight - (newContainerHeight - constrainedHeight)
       );
 
