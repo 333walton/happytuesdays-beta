@@ -37,15 +37,15 @@ const ClippyContextMenu = ({
     );
   const leftArrowIcon = ""; // Use CSS pseudo-element for both mobile and desktop
 
-  // FIXED: Centralized positioning rules for submenu alignment
+  // FIXED: Centralized positioning rules for submenu alignment | never adjust the horizontal offset
   const SUBMENU_POSITIONING_RULES = {
     desktop: {
       agents: { horizontalOffset: 18, verticalOffset: -57 }, // aligns with main menu if 6 agents
       animations: { horizontalOffset: 18, verticalOffset: 0 }, // aligns with main menu
     },
     mobile: {
-      agents: { horizontalOffset: 38, verticalOffset: -31 }, // aligns with main menu if 6 agents
-      animations: { horizontalOffset: 38, verticalOffset: -19 }, // Raised to align with main menu
+      agents: { horizontalOffset: 38, verticalOffset: -28 }, // aligns with main menu if 6 agents
+      animations: { horizontalOffset: 38, verticalOffset: -19 }, // aligns with main menu
     },
   };
 
