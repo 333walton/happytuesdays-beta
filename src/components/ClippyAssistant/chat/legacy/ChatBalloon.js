@@ -1,6 +1,6 @@
 // ChatBalloon.js - COMPLETE FIXED VERSION with enhanced viewport positioning
 import React from "react";
-import { devLog, errorLog } from "./core/ClippyPositioning";
+import { devLog, errorLog } from "../../core/ClippyPositioning";
 
 /**
  * Get agent nickname for display in chat dialogue
