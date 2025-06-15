@@ -64,7 +64,7 @@ class CustomBalloonManager {
    * @param {Object} options - Additional options
    * @returns {boolean} - Success status
    */
-  show(content, duration = 8000, options = {}) {
+  async show(content, duration = 8000, options = {}) {
     try {
       // Check if any balloon (speech or chat) is already open
       const existingBalloons = document.querySelectorAll(
@@ -74,6 +74,10 @@ class CustomBalloonManager {
         devLog("Balloon creation blocked - another balloon is already open");
         return false;
       }
+
+      // CRITICAL: Wait for overlay to stabilize before creating balloon
+      // This ensures proper measurements for agents with different heights
+      await this.waitForStableOverlay(800);
 
       // Allow enhanced message balloon to show
       // (Removed blocking code)
@@ -184,6 +188,9 @@ class CustomBalloonManager {
       // Add dynamic repositioning
       this._addDynamicRepositioning(message, options);
 
+      // CRITICAL: Ensure correct position after render
+      this.ensureCorrectPosition();
+
       // Set auto-hide timer (longer for balloons with buttons)
       const autoHideDuration = hasButtons
         ? Math.max(duration, 15000)
@@ -206,20 +213,10 @@ class CustomBalloonManager {
     this._removeDynamicRepositioning();
     this._resizeHandler = () => {
       if (!this.currentBalloon) return;
-      const position = this.calculatePosition({
-        ...options.position,
-      });
-      this.currentBalloon.style.setProperty(
-        "left",
-        `${position.left}px`,
-        "important"
-      );
-      this.currentBalloon.style.setProperty(
-        "top",
-        `${position.top}px`,
-        "important"
-      );
+      // Use ensureCorrectPosition for consistent positioning
+      this.ensureCorrectPosition();
     };
+
     window.addEventListener("resize", this._resizeHandler);
     window.addEventListener("clippyRepositioned", this._resizeHandler);
   }
@@ -233,6 +230,95 @@ class CustomBalloonManager {
       window.removeEventListener("clippyRepositioned", this._resizeHandler);
       this._resizeHandler = null;
     }
+  }
+
+  /**
+   * Wait for overlay to stabilize after agent changes
+   * Different agents have different heights and overlay needs time to adjust
+   */
+  waitForStableOverlay(timeout = 1000) {
+    return new Promise((resolve) => {
+      const overlayEl = document.getElementById("clippy-clickable-overlay");
+      if (!overlayEl) {
+        resolve(false);
+        return;
+      }
+
+      let lastHeight = 0;
+      let stableCount = 0;
+      const requiredStableCount = 3; // Must be stable for 3 checks
+      const checkInterval = 50; // Check every 50ms
+      const maxChecks = timeout / checkInterval;
+      let checkCount = 0;
+
+      const checkStability = () => {
+        const currentHeight = overlayEl.getBoundingClientRect().height;
+
+        if (Math.abs(currentHeight - lastHeight) < 1) {
+          stableCount++;
+          if (stableCount >= requiredStableCount) {
+            devLog(
+              `Overlay stabilized at height: ${currentHeight}px after ${
+                checkCount * checkInterval
+              }ms`
+            );
+            resolve(true);
+            return;
+          }
+        } else {
+          stableCount = 0;
+        }
+
+        lastHeight = currentHeight;
+        checkCount++;
+
+        if (checkCount >= maxChecks) {
+          devLog(
+            `Overlay stability timeout after ${timeout}ms, proceeding with height: ${currentHeight}px`
+          );
+          resolve(true);
+          return;
+        }
+
+        setTimeout(checkStability, checkInterval);
+      };
+
+      checkStability();
+    });
+  }
+
+  /**
+   * Ensure correct balloon positioning with 1px spacing above Clippy's overlay
+   * Uses actual rendered height and includes tail height in calculations
+   * Waits for overlay to stabilize before positioning
+   */
+  async ensureCorrectPosition() {
+    if (!this.currentBalloon) return;
+
+    // Wait for overlay to stabilize
+    await this.waitForStableOverlay();
+
+    requestAnimationFrame(() => {
+      if (this.currentBalloon) {
+        const overlayEl = document.getElementById("clippy-clickable-overlay");
+        if (overlayEl) {
+          const balloonRect = this.currentBalloon.getBoundingClientRect();
+          const overlayRect = overlayEl.getBoundingClientRect();
+          const tailHeight = 12; // Height of ::after pseudo-element
+
+          // Calculate where the balloon should be
+          const targetTop =
+            overlayRect.top - balloonRect.height - tailHeight - 1;
+
+          // Apply the corrected position
+          this.currentBalloon.style.top = `${targetTop}px`;
+
+          devLog(
+            `Balloon position corrected: height=${balloonRect.height}px, tail=${tailHeight}px, top=${targetTop}px, overlay=${overlayRect.height}px`
+          );
+        }
+      }
+    });
   }
 
   /**
@@ -650,7 +736,7 @@ class CustomBalloonManager {
   }
 
   /**
-   * Update balloon message without repositioning
+   * Update balloon message with repositioning
    * @param {string} newMessage - New message to display
    * @returns {boolean} - Success status
    */
@@ -663,6 +749,8 @@ class CustomBalloonManager {
       const messageEl = this.currentBalloon.querySelector(".balloon-message");
       if (messageEl) {
         messageEl.innerHTML = newMessage;
+        // Add repositioning after content update
+        this.ensureCorrectPosition();
         devLog(`Balloon message updated to: "${newMessage}"`);
         return true;
       }
