@@ -675,6 +675,9 @@ class ChatBalloonManager {
     }
   }
 
+  // FIXED: Mobile chat balloon resize logic with proper touch action handling
+  // Replace the existing addResizeFunctionality function in ChatBalloon.js
+
   addResizeFunctionality(container) {
     const resizeHandle = container.querySelector(".chat-resize-handle");
     const chatMessages = container.querySelector(".chat-messages");
@@ -694,20 +697,30 @@ class ChatBalloonManager {
       containerStartHeight = container.offsetHeight;
 
       // Use the original top position that was set during creation
-      // Only set it if it doesn't exist (shouldn't happen, but safety check)
       if (!container.dataset.originalTop) {
         const currentTop = parseInt(container.style.top.replace("px", "")) || 0;
         container.dataset.originalTop = currentTop;
       }
 
+      // CRITICAL: Override body touch-action during resize
+      const originalBodyTouchAction = document.body.style.touchAction;
+      document.body.style.touchAction = "none";
+
+      // Store original value to restore later
+      container.dataset.originalBodyTouchAction = originalBodyTouchAction;
+
       // Prevent text selection during resize
       document.body.style.userSelect = "none";
       document.body.style.webkitUserSelect = "none";
 
-      // Add global event listeners
+      // CRITICAL: Set touch-action on resize handle itself
+      resizeHandle.style.touchAction = "none";
+      container.style.touchAction = "none";
+
+      // Add global event listeners with passive: false for touch events
       document.addEventListener("mousemove", doResize);
       document.addEventListener("mouseup", stopResize);
-      document.addEventListener("touchmove", doResize);
+      document.addEventListener("touchmove", doResize, { passive: false });
       document.addEventListener("touchend", stopResize);
 
       e.preventDefault();
@@ -883,9 +896,21 @@ class ChatBalloonManager {
 
       isResizing = false;
 
+      // CRITICAL: Restore original body touch-action
+      const originalBodyTouchAction = container.dataset.originalBodyTouchAction;
+      if (originalBodyTouchAction !== undefined) {
+        document.body.style.touchAction = originalBodyTouchAction;
+      } else {
+        document.body.style.touchAction = "manipulation"; // Restore default
+      }
+
       // Restore text selection
       document.body.style.userSelect = "";
       document.body.style.webkitUserSelect = "";
+
+      // Reset touch-action on elements
+      resizeHandle.style.touchAction = "";
+      container.style.touchAction = "";
 
       // Remove global event listeners
       document.removeEventListener("mousemove", doResize);
@@ -894,9 +919,16 @@ class ChatBalloonManager {
       document.removeEventListener("touchend", stopResize);
     };
 
+    // CRITICAL: Set initial touch-action on resize handle
+    resizeHandle.style.touchAction = "none";
+    resizeHandle.style.userSelect = "none";
+    resizeHandle.style.webkitUserSelect = "none";
+
     // Add event listeners to resize handle
     resizeHandle.addEventListener("mousedown", startResize);
-    resizeHandle.addEventListener("touchstart", startResize);
+    resizeHandle.addEventListener("touchstart", startResize, {
+      passive: false,
+    });
   }
 
   /**
