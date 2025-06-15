@@ -66,7 +66,7 @@ class CustomBalloonManager {
    */
   show(content, duration = 8000, options = {}) {
     try {
-      // FIXED: Check if any balloon (speech or chat) is already open
+      // Check if any balloon (speech or chat) is already open
       const existingBalloons = document.querySelectorAll(
         ".custom-clippy-balloon, .custom-clippy-chat-balloon"
       );
@@ -74,6 +74,9 @@ class CustomBalloonManager {
         devLog("Balloon creation blocked - another balloon is already open");
         return false;
       }
+
+      // Allow enhanced message balloon to show
+      // (Removed blocking code)
 
       // Parse content
       let message,
@@ -87,23 +90,11 @@ class CustomBalloonManager {
         message = String(content);
       }
 
-      // BLOCK: Do not show the enhanced message balloon ("How may I help you?" with 4 buttons)
-      if (
-        message === "How may I help you?" &&
-        Array.isArray(buttons) &&
-        buttons.length === 4
-      ) {
-        devLog(
-          'Blocked display of "How may I help you?" enhanced message balloon.'
-        );
-        return false;
-      }
-
       devLog(
         `Creating custom balloon: "${message}" with ${buttons.length} buttons`
       );
 
-      // FIXED: Remove any existing balloons first
+      // Remove any existing balloons first
       this.hide();
 
       // Create balloon element
@@ -126,28 +117,72 @@ class CustomBalloonManager {
 
       // SCALE DOWN: Reduce width and minHeight by 10%
       const hasButtons = buttons.length > 0;
-      const baseWidth = Math.min(180, position.maxWidth * 0.9); // 200 -> 180, 10% smaller
-      const buttonHeight = hasButtons ? buttons.length * 29 + 18 : 0; // 32 -> 29, 20 -> 18
+      const baseWidth = Math.min(180, position.maxWidth * 0.9);
+      const buttonHeight = hasButtons ? buttons.length * 29 + 18 : 0;
 
       balloonEl.style.maxWidth = `${position.maxWidth * 0.9}px`;
       balloonEl.style.width = `${baseWidth}px`;
       balloonEl.style.minHeight = hasButtons
         ? `${Math.max(108, 72 + buttonHeight)}px`
-        : "auto"; // 120 -> 108, 80 -> 72
+        : "auto";
 
-      // FIXED: Create balloon content with enhanced button support
+      // Create balloon content with enhanced button support
       this.createBalloonContent(balloonEl, message, buttons);
 
       // Add to DOM
       document.body.appendChild(balloonEl);
       this.currentBalloon = balloonEl;
 
-      // Add dynamic repositioning
-      this._addDynamicRepositioning(message, options);
+      // Fix positioning with actual rendered height
+      requestAnimationFrame(() => {
+        if (this.currentBalloon) {
+          const overlayEl = document.getElementById("clippy-clickable-overlay");
+          if (overlayEl) {
+            const actualHeight =
+              this.currentBalloon.getBoundingClientRect().height;
+            const overlayTop = overlayEl.getBoundingClientRect().top;
+            const tailHeight = 12; // Height of the ::after pseudo-element tail
+            const correctedTop = overlayTop - actualHeight - tailHeight - 1;
+
+            // Only adjust if needed
+            const currentTop = this.currentBalloon.getBoundingClientRect().top;
+            if (Math.abs(currentTop - correctedTop) > 1) {
+              this.currentBalloon.style.top = `${correctedTop}px`;
+              devLog(
+                `Balloon repositioned: height=${actualHeight}px + tail=${tailHeight}px, moved to ${correctedTop}px (1px above overlay at ${overlayTop}px)`
+              );
+            }
+          }
+        }
+      });
+
+      // CRITICAL: Reposition after content is rendered to account for actual height
+      setTimeout(() => {
+        if (this.currentBalloon) {
+          const actualHeight = this.currentBalloon.offsetHeight;
+          const recalculatedPosition = this.calculatePosition({
+            ...options.position,
+          });
+
+          // Update position with actual height
+          this.currentBalloon.style.top = `${recalculatedPosition.top}px`;
+          this.currentBalloon.style.left = `${recalculatedPosition.left}px`;
+
+          devLog(
+            `Balloon repositioned after content render: height=${actualHeight}, top=${recalculatedPosition.top}`
+          );
+        }
+      }, 0);
+
+      // Note: CustomBalloon doesn't have chat history like ChatBalloon
+      // These lines were accidentally copied from ChatBalloon.js
 
       devLog(
         `Balloon positioned at (${position.left}, ${position.top}) with max width ${position.maxWidth}px`
       );
+
+      // Add dynamic repositioning
+      this._addDynamicRepositioning(message, options);
 
       // Set auto-hide timer (longer for balloons with buttons)
       const autoHideDuration = hasButtons
@@ -543,7 +578,8 @@ class CustomBalloonManager {
 
       // UNIFIED: Position balloon using same rule as ChatBalloon - 1px above overlay
       let left = clippyRect.left + clippyRect.width / 2 - dynamicWidth / 2;
-      let top = overlayRect.top - balloonHeight - 1; // Same as chat balloons: 1px above overlay
+      const tailHeight = 12; // Height of ::after pseudo-element
+      let top = overlayRect.top - balloonHeight - tailHeight - 1; // Include tail in calculation
 
       // Constrain to desktop viewport horizontally
       left = Math.max(

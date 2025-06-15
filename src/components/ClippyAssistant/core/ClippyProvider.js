@@ -120,8 +120,7 @@ const safeExecute = (operation, fallback = null, context = "operation") => {
 const GREETING_ANIMATIONS = ["Wave"];
 
 // FIXED: Initial message content from StartMessage component
-const INITIAL_MESSAGE_CONTENT =
-  "Welcome to Hydra98! Please enjoy and don't break anything";
+const INITIAL_MESSAGE_CONTENT = "";
 
 // UPDATED: Using smart cooldown system from InteractionManager
 // Different cooldowns for different interaction types - no cooldown for double-click/double-tap
