@@ -40,12 +40,12 @@ const ClippyContextMenu = ({
   // FIXED: Centralized positioning rules for submenu alignment
   const SUBMENU_POSITIONING_RULES = {
     desktop: {
-      agents: { horizontalOffset: 18, verticalOffset: -47 },
-      animations: { horizontalOffset: 18, verticalOffset: -36 }, // Raised to align with main menu
+      agents: { horizontalOffset: 18, verticalOffset: -57 },
+      animations: { horizontalOffset: 18, verticalOffset: 0 }, // Raised to align with main menu
     },
     mobile: {
       agents: { horizontalOffset: 38, verticalOffset: -35 }, // Lowered by 1px (-36 to -35)
-      animations: { horizontalOffset: 38, verticalOffset: -55 }, // Raised to align with main menu
+      animations: { horizontalOffset: 38, verticalOffset: -19 }, // Raised to align with main menu
     },
   };
 
@@ -975,6 +975,7 @@ const ClippyContextMenu = ({
         padding: 0;
         text-align: left;
         min-width: 120px !important;
+        max-height: 164px !important;
       }
 
       .context-submenu .context-menu-item {
