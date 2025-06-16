@@ -1,4 +1,4 @@
-// ClippyContextMenu.js - COMPLETE FIXED VERSION with submenu gap fix and agent switching
+// ClippyContextMenu.js - COMPLETE FIXED VERSION with proper positioning
 
 import React, { useState, useEffect, useRef } from "react";
 import * as icons from "../../../icons";
@@ -27,7 +27,8 @@ const ClippyContextMenu = ({
   const [submenuOpen, setSubmenuOpen] = useState(null);
   const [submenuPosition, setSubmenuPosition] = useState({ x: 0, y: 0 });
   const menuRef = useRef(null);
-  const [dynamicPosition, setDynamicPosition] = useState({ x, y });
+  // FIXED: Start with null position to prevent flashing
+  const [dynamicPosition, setDynamicPosition] = useState(null);
 
   // FIXED: Device-specific arrow symbols with fallback rendering
   const isMobile =
@@ -36,18 +37,6 @@ const ClippyContextMenu = ({
       navigator.userAgent
     );
   const leftArrowIcon = ""; // Use CSS pseudo-element for both mobile and desktop
-
-  // FIXED: Centralized positioning rules for submenu alignment | never adjust the horizontal offset
-  const SUBMENU_POSITIONING_RULES = {
-    desktop: {
-      agents: { horizontalOffset: 18, verticalOffset: -57 }, // aligns with main menu if 6 agents
-      animations: { horizontalOffset: 18, verticalOffset: 0 }, // aligns with main menu
-    },
-    mobile: {
-      agents: { horizontalOffset: 38, verticalOffset: -27 }, // aligns with main menu if 6 agents. closer to 0 = closer to taskbar
-      animations: { horizontalOffset: 38, verticalOffset: -19 }, // aligns with main menu
-    },
-  };
 
   // PHASE 3: Dynamic agent-specific animation configurations
   const AGENT_ANIMATIONS = {
@@ -318,47 +307,63 @@ const ClippyContextMenu = ({
     };
   }, []);
 
-  // Always constrain menu to viewport on mount and when x/y change
+  // FIXED: Calculate position once with delay for agent loading
   useEffect(() => {
-    const menuWidth = 180;
-    const menuHeight = 250;
-    const margin = 0; // FIXED: Remove margin to allow flush submenu positioning
-    const mobileBottomMargin = 100; // Minimum distance from bottom on mobile
-    const viewport = getViewport();
-    let adjustedX = Math.max(
-      viewport.left + margin,
-      Math.min(x, viewport.right - menuWidth - margin)
-    );
-    let adjustedY;
-    if (
-      window.innerWidth <= 768 ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      )
-    ) {
-      // On mobile, keep at least 20px above the bottom
-      adjustedY = Math.max(
-        viewport.top + margin,
-        Math.min(y, viewport.bottom - menuHeight - mobileBottomMargin)
-      );
-    } else {
-      adjustedY = Math.max(
-        viewport.top + margin,
-        Math.min(y, viewport.bottom - menuHeight - margin)
-      );
-    }
+    if (!portalContainer) return;
 
-    // Adjust main menu vertical position for mobile based on height reduction (6 items * 3px)
-    if (
-      window.innerWidth <= 768 ||
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      )
-    ) {
-      adjustedY -= 18; // Total reduction for 6 main menu items
-    }
+    // 150ms delay to wait for agent height adjustments
+    const timeoutId = setTimeout(() => {
+      const overlayEl = document.getElementById("clippy-clickable-overlay");
+      const menuWidth = 180;
+      const menuHeight = 250;
+      const fixedGap = 18; // 18px gap above overlay
+      const viewport = getViewport();
 
-    setDynamicPosition({ x: adjustedX - 8, y: adjustedY - 60 }); // Move main menu left by 8px and up by 60px
+      if (!overlayEl) {
+        // Fallback to click-based positioning if overlay not found
+        const fallbackX = Math.max(
+          viewport.left + 5,
+          Math.min(x, viewport.right - menuWidth - 5)
+        );
+        const fallbackY = Math.max(
+          viewport.top + 5,
+          Math.min(y - 60, viewport.bottom - menuHeight - 5)
+        );
+        setDynamicPosition({ x: fallbackX - 8, y: fallbackY });
+        return;
+      }
+
+      const overlayRect = overlayEl.getBoundingClientRect();
+
+      // Get actual menu height by checking the number of items
+      // 6 main menu items + 2 separators = approx 170px
+      const actualMenuHeight = 170;
+
+      // FIXED: Center horizontally above Clippy
+      const menuLeft = overlayRect.left + overlayRect.width / 2 - menuWidth / 2;
+      const constrainedLeft = Math.max(
+        viewport.left + 5,
+        Math.min(menuLeft, viewport.right - menuWidth - 5)
+      );
+
+      // FIXED: Position menu so its BOTTOM is 18px above overlay TOP
+      const menuBottom = overlayRect.top - fixedGap;
+      const menuTop = menuBottom - actualMenuHeight;
+
+      // Ensure menu stays within viewport
+      const constrainedTop = Math.max(viewport.top + 5, menuTop);
+
+      setDynamicPosition({
+        x: constrainedLeft - 8, // Keep the -8 adjustment
+        y: constrainedTop,
+      });
+
+      console.log(
+        `🎯 Context menu positioned: overlay at ${overlayRect.top}px, menu bottom at ${menuBottom}px, menu top at ${constrainedTop}px, gap: ${fixedGap}px`
+      );
+    }, 150);
+
+    return () => clearTimeout(timeoutId);
   }, [x, y, portalContainer]);
 
   // FIXED: Enhanced MenuItem with proper hover handling and flexible icon/arrow placement
@@ -498,148 +503,93 @@ const ClippyContextMenu = ({
     );
   };
 
-  // FIXED: Submenu positioning with NO GAP
+  // FIXED: Simplified submenu positioning with bottom alignment
   const handleSubmenuOpen = (submenuType, event) => {
     const isMobile =
       window.innerWidth <= 768 ||
       /Android|webOS|iPhone|iPad|Icod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent
       );
-    const rect = event.currentTarget.getBoundingClientRect();
-    const submenuWidth = isMobile ? 180 : 160; // Increased width for mobile
-    const submenuHeight =
-      submenuType === "animations" && isMobile
-        ? 150
-        : submenuType === "animations"
-        ? 300
-        : 200;
+    const submenuWidth = isMobile ? 180 : 160;
     const viewport = getViewport();
 
-    // Get main menu dimensions to prevent overlap
+    // Get main menu for alignment
     const mainMenu = document.querySelector(
       ".context-menu-content.clippy-context-menu"
     );
-    const mainMenuRect = mainMenu ? mainMenu.getBoundingClientRect() : null;
-    const mainMenuWidth = mainMenuRect ? mainMenuRect.width : 160; // fallback width
 
-    // Check if submenu would actually overflow viewport boundaries (no artificial margins)
-    const wouldOverflowRight = rect.right + submenuWidth > viewport.right;
-    const wouldOverflowBottom = rect.top + submenuHeight > viewport.bottom;
+    if (!mainMenu) {
+      console.warn("Main menu not found for submenu positioning");
+      return;
+    }
 
-    // Position submenu with slight overlap to ensure no visible gap
-    // Use slight negative spacing to make borders overlap
-    const OVERLAP = 2; // Overlap by 2px to ensure borders merge
-    let newX;
+    const mainMenuRect = mainMenu.getBoundingClientRect();
+
+    // Check if submenu would overflow right
+    const wouldOverflowRight =
+      mainMenuRect.right + submenuWidth > viewport.right;
+
+    // Position submenu horizontally with slight overlap
+    const OVERLAP = 2;
+    const HORIZONTAL_OFFSET = 19; // Desktop offset
+    const MOBILE_EXTRA_OFFSET = isMobile ? 19 : 0; // Additional 10px for mobile
+
+    let submenuX;
     if (wouldOverflowRight) {
-      // Position to the left with slight overlap
-      if (mainMenuRect) {
-        newX = mainMenuRect.left - submenuWidth + OVERLAP; // Overlap borders
-      } else {
-        newX = rect.left - submenuWidth + OVERLAP;
+      // Position to the left
+      submenuX =
+        mainMenuRect.left -
+        submenuWidth +
+        OVERLAP +
+        HORIZONTAL_OFFSET +
+        MOBILE_EXTRA_OFFSET;
+    } else {
+      // Position to the right
+      submenuX =
+        mainMenuRect.right - OVERLAP + HORIZONTAL_OFFSET + MOBILE_EXTRA_OFFSET;
+    }
+
+    // FIXED: More accurate submenu height calculation
+    let actualSubmenuHeight;
+    if (submenuType === "animations") {
+      // Animations submenu has many items, will hit max-height
+      actualSubmenuHeight = 166; // Based on CSS max-height
+    } else if (submenuType === "agents") {
+      // Agents submenu: 7 items * ~25px per item
+      actualSubmenuHeight = agents.length * 24 - 2; // +4 for borders
+
+      // Mobile-specific adjustment: reduce height by 2px to move it lower
+      if (isMobile) {
+        actualSubmenuHeight -= 2;
       }
     } else {
-      // Position to the right with slight overlap
-      if (mainMenuRect) {
-        newX = mainMenuRect.right - OVERLAP; // Overlap borders
-      } else {
-        newX = rect.right - OVERLAP;
-      }
+      actualSubmenuHeight = 200; // Default
     }
 
-    let currentMobileBottomMargin = 10; // Default for desktop
-    if (isMobile) {
-      if (submenuType === "animations") {
-        currentMobileBottomMargin = 223; // Specific margin for animations submenu on mobile
-      } else if (submenuType === "agents") {
-        currentMobileBottomMargin = 125; // Specific margin for agents submenu on mobile
-      } else {
-        currentMobileBottomMargin = 100; // Default mobile margin for other submenus (if any)
-      }
-    }
+    // CRITICAL: Account for border differences between main menu and submenu
+    // Main menu has 2px outset border, submenu has 2px outset border
+    // But they render slightly differently, so we need a small adjustment
+    // CRITICAL: Account for border differences between main menu and submenu
+    const borderAdjustment = 2;
 
-    let newY = wouldOverflowBottom
-      ? Math.max(
-          viewport.top + 5,
-          viewport.bottom - submenuHeight - currentMobileBottomMargin
-        )
-      : rect.top; // Revert to original calculation
+    // Position submenu so its bottom aligns with main menu bottom
+    const submenuTop =
+      mainMenuRect.bottom - actualSubmenuHeight + borderAdjustment;
 
-    // Adjust vertical position based on parent item index for mobile submenus
-    if (isMobile) {
-      let parentItemIndex = -1; // 0-indexed
-      // Find the index of the parent item in the main menu
-      const mainMenuActions = [
-        "hide",
-        "wave",
-        "selectAgent",
-        "playAnimation",
-        "chat",
-        "greet",
-      ];
-      parentItemIndex = mainMenuActions.indexOf(
-        submenuType === "agents" ? "selectAgent" : "playAnimation"
-      );
-
-      if (parentItemIndex !== -1) {
-        // Subtract the cumulative height reduction of items above the parent
-        newY -= parentItemIndex * 3;
-      }
-    }
-
-    // FIXED: No viewport constraints for submenus - position exactly where calculated
-    let constrainedX = newX;
-
-    let constrainedY = Math.max(
-      viewport.top + 5,
-      Math.min(
-        newY,
-        viewport.bottom - submenuHeight - currentMobileBottomMargin
-      )
-    );
-
-    // Apply centralized positioning rules for vertical alignment
-    const deviceType = isMobile ? "mobile" : "desktop";
-    const positioningRule = SUBMENU_POSITIONING_RULES[deviceType][submenuType];
-
-    if (positioningRule) {
-      constrainedY += positioningRule.verticalOffset;
-    }
-
-    // DEBUGGING: Show detailed positioning calculations
-    console.log(`🎯 Submenu positioning (${submenuType}):`, {
-      viewport: { left: viewport.left, right: viewport.right },
-      menuItemRect: { left: rect.left, right: rect.right },
-      mainMenu: mainMenuRect
-        ? { left: mainMenuRect.left, right: mainMenuRect.right }
-        : "null",
-      submenuWidth: submenuWidth,
-      wouldOverflowRight: wouldOverflowRight,
-      overflowCheck: `${rect.right} + ${submenuWidth} = ${
-        rect.right + submenuWidth
-      } > ${viewport.right} = ${wouldOverflowRight}`,
-      calculatedNewX: newX,
-      beforeViewportConstraint: newX,
-      afterViewportConstraint: constrainedX,
-      viewportConstraintApplied: newX !== constrainedX,
-      finalPosition: { x: constrainedX, y: constrainedY },
-      actualGap: wouldOverflowRight
-        ? `${mainMenuRect?.left - (constrainedX + submenuWidth)}px`
-        : `${constrainedX - mainMenuRect?.right}px`,
-    });
-
-    // Apply centralized positioning rules for horizontal alignment
-    let finalX = Math.round(constrainedX);
-    if (wouldOverflowRight && positioningRule) {
-      finalX += positioningRule.horizontalOffset;
-    }
+    // Ensure submenu doesn't go above viewport
+    const constrainedTop = Math.max(viewport.top + 5, submenuTop);
 
     setSubmenuPosition({
-      x: finalX,
-      y: Math.round(constrainedY),
+      x: Math.round(submenuX),
+      y: Math.round(constrainedTop),
       openLeft: wouldOverflowRight,
     });
 
     setSubmenuOpen(submenuType);
+
+    console.log(
+      `🎯 Submenu positioned: type=${submenuType}, main bottom=${mainMenuRect.bottom}px, submenu top=${constrainedTop}px, height=${actualSubmenuHeight}px`
+    );
   };
 
   const handleSubmenuClose = () => {
@@ -874,11 +824,11 @@ const ClippyContextMenu = ({
     onClose();
   };
 
-  // Styles
+  // Styles - Place this BEFORE the MenuItem component
   const menuStyle = {
     position: "absolute",
-    left: `${dynamicPosition.x}px`,
-    top: `${dynamicPosition.y}px`,
+    left: `${dynamicPosition?.x}px`,
+    top: `${dynamicPosition?.y}px`,
     backgroundColor: "#c0c0c0",
     border: "2px outset #c0c0c0",
     boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
@@ -915,7 +865,6 @@ const ClippyContextMenu = ({
   };
 
   const menuItemHoverStyle = {
-    ...menuItemStyle,
     backgroundColor: "#0066cc",
     color: "#ffffff",
     WebkitTextFillColor: "#ffffff",
@@ -928,7 +877,6 @@ const ClippyContextMenu = ({
     borderTop: "1px solid #808080",
   };
 
-  // FIXED: Enhanced submenu styles with fixed dimensions and bottom alignment preservation
   const submenuStyle = {
     position: "absolute",
     left: `${submenuPosition.x}px`,
@@ -936,10 +884,10 @@ const ClippyContextMenu = ({
     backgroundColor: "#c0c0c0",
     border: "2px outset #c0c0c0",
     boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
-    width: "140px", // Fixed width to prevent expansion
-    height: "auto", // Allow height to adjust to content
-    maxHeight: "200px", // Prevent excessive height
-    minHeight: "25px", // Ensure minimum height matches menu item height
+    width: "140px",
+    height: "auto",
+    maxHeight: "200px",
+    minHeight: "25px",
     overflowY: "auto",
     overflowX: "hidden",
     fontFamily: "Tahoma, sans-serif",
@@ -948,14 +896,14 @@ const ClippyContextMenu = ({
     visibility: "visible",
     opacity: 1,
     display: "flex",
-    flexDirection: "column", // Stack items vertically
+    flexDirection: "column",
     transform: "translateZ(0) translate3d(0, 0, 0)",
     zIndex: 2,
     textAlign: "left",
     margin: "0",
     padding: "0",
     whiteSpace: "nowrap",
-    boxSizing: "border-box", // Include borders in size calculations
+    boxSizing: "border-box",
   };
 
   // Add mobile-specific styles and standard submenu alignment
@@ -1373,8 +1321,8 @@ const ClippyContextMenu = ({
     );
   };
 
-  // Don't render until portal container is ready
-  if (!portalContainer) {
+  // Don't render until portal container is ready AND position is calculated
+  if (!portalContainer || !dynamicPosition) {
     return null;
   }
 
