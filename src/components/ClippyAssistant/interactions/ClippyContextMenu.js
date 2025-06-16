@@ -315,9 +315,15 @@ const ClippyContextMenu = ({
     const timeoutId = setTimeout(() => {
       const overlayEl = document.getElementById("clippy-clickable-overlay");
       const menuWidth = 180;
-      const menuHeight = 250;
       const fixedGap = 18; // 18px gap above overlay
       const viewport = getViewport();
+
+      // Detect if mobile
+      const isMobile =
+        window.innerWidth <= 768 ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
 
       if (!overlayEl) {
         // Fallback to click-based positioning if overlay not found
@@ -327,17 +333,13 @@ const ClippyContextMenu = ({
         );
         const fallbackY = Math.max(
           viewport.top + 5,
-          Math.min(y - 60, viewport.bottom - menuHeight - 5)
+          Math.min(y - 60, viewport.bottom - 170 - 5)
         );
         setDynamicPosition({ x: fallbackX - 8, y: fallbackY });
         return;
       }
 
       const overlayRect = overlayEl.getBoundingClientRect();
-
-      // Get actual menu height by checking the number of items
-      // 6 main menu items + 2 separators = approx 170px
-      const actualMenuHeight = 170;
 
       // FIXED: Center horizontally above Clippy
       const menuLeft = overlayRect.left + overlayRect.width / 2 - menuWidth / 2;
@@ -346,22 +348,49 @@ const ClippyContextMenu = ({
         Math.min(menuLeft, viewport.right - menuWidth - 5)
       );
 
-      // FIXED: Position menu so its BOTTOM is 18px above overlay TOP
-      const menuBottom = overlayRect.top - fixedGap;
-      const menuTop = menuBottom - actualMenuHeight;
-
-      // Ensure menu stays within viewport
-      const constrainedTop = Math.max(viewport.top + 5, menuTop);
+      // INITIAL POSITION: Set a temporary position first
+      // Position menu well above Clippy initially
+      const tempTop = overlayRect.top - 200; // Temporary position
 
       setDynamicPosition({
-        x: constrainedLeft - 8, // Keep the -8 adjustment
-        y: constrainedTop,
+        x: constrainedLeft - 8,
+        y: tempTop,
       });
 
-      console.log(
-        `🎯 Context menu positioned: overlay at ${overlayRect.top}px, menu bottom at ${menuBottom}px, menu top at ${constrainedTop}px, gap: ${fixedGap}px`
-      );
-    }, 150);
+      // CRITICAL: Wait for menu to render, then reposition with actual height
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const menuElement = document.querySelector(
+            ".context-menu-content.clippy-context-menu"
+          );
+          if (menuElement) {
+            const menuRect = menuElement.getBoundingClientRect();
+            const actualMenuHeight = menuRect.height;
+
+            // Now calculate the exact position with actual height
+            const menuBottom = overlayRect.top - fixedGap;
+            const finalMenuTop = menuBottom - actualMenuHeight;
+
+            // Ensure menu stays within viewport
+            const constrainedTop = Math.max(viewport.top + 5, finalMenuTop);
+
+            // Update to final position
+            setDynamicPosition({
+              x: constrainedLeft - 8,
+              y: constrainedTop,
+            });
+
+            console.log(
+              `🎯 Context menu final position (${
+                isMobile ? "mobile" : "desktop"
+              }): ` +
+                `overlay at ${overlayRect.top}px, actual menu height ${actualMenuHeight}px, ` +
+                `menu bottom at ${menuBottom}px, final top at ${constrainedTop}px, gap: ${fixedGap}px`
+            );
+          }
+        }, 10); // Small delay to ensure render is complete
+      });
+    }, 10);
 
     return () => clearTimeout(timeoutId);
   }, [x, y, portalContainer]);
@@ -558,9 +587,9 @@ const ClippyContextMenu = ({
       // Agents submenu: 7 items * ~25px per item
       actualSubmenuHeight = agents.length * 24 - 2; // +4 for borders
 
-      // Mobile-specific adjustment: reduce height by 2px to move it lower
+      // Mobile-specific adjustment: reduce height by 1px to move it lower
       if (isMobile) {
-        actualSubmenuHeight -= 2;
+        actualSubmenuHeight -= 1;
       }
     } else {
       actualSubmenuHeight = 200; // Default
@@ -1027,6 +1056,80 @@ const ClippyContextMenu = ({
           box-sizing: border-box !important;
         }
       }
+
+      /* Enlarge touch targets on mobile without changing visual appearance */
+      @media (max-width: 768px), (pointer: coarse) {
+        /* Use a different approach for touch targets that won't conflict with arrows */
+        .context-menu-item {
+          position: relative;
+          -webkit-tap-highlight-color: transparent !important;
+          touch-action: manipulation !important;
+          /* Add padding to the clickable area without ::before */
+          margin: -5px 0;
+          padding-top: calc(4.5px + 5px) !important;
+          padding-bottom: calc(4.5px + 5px) !important;
+        }
+        
+        /* Remove the ::before pseudo-element that was hiding arrows */
+        /* .context-menu-item::before { ... } - DELETE THIS BLOCK */
+        
+        /* Ensure arrows remain visible */
+        .arrow-mobile::after,
+        .arrow-desktop::after {
+          content: "" !important;
+          display: inline-block !important;
+          width: 0 !important;
+          height: 0 !important;
+          border-top: 4.8px solid transparent !important;
+          border-bottom: 4.8px solid transparent !important;
+          border-right: 6.4px solid #000000 !important;
+          margin-left: 2px !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+        }
+      }
+
+      // Also update the MenuItem component's touch handlers to be more responsive:
+
+      // In the MenuItem component, update the touch handlers:
+      const handleTouchStart = (e) => {
+        if (isMobile && !disabled) {
+          e.preventDefault(); // Prevent delay
+          setIsMobileTouched(true);
+        }
+      };
+
+      const handleTouchEnd = (e) => {
+        if (isMobile && !disabled) {
+          e.preventDefault(); // Prevent ghost clicks
+          setIsMobileTouched(false);
+          
+          // Trigger click immediately on touch end
+          if (onClick && !hasSubmenu) {
+            onClick(e);
+          }
+        }
+      };
+
+      // Add this to the div element in MenuItem:
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
+      style={{
+        ...finalStyle,
+        // Add for mobile only
+        ...(isMobile ? {
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          userSelect: 'none',
+          cursor: 'pointer',
+        } : {})
+      }}
+
+      // Also ensure submenus have higher z-index in the submenuStyle:
+      const submenuStyle = {
+        // ... existing properties ...
+        zIndex: isMobile ? 10000 : 2, // Much higher z-index for mobile
 
       /* Mobile-only: Fix bottom alignment for mobile context menus */
       @media (max-width: 768px) {
