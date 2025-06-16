@@ -343,11 +343,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       const officialAgents = [
         "Clippy",
         "Links",
-        "Bonzi",
-        "Genie",
         "Genius",
-        "Merlin",
         "F1",
+        "Merlin",
+        "Genie",
+        "Bonzi",
       ];
 
       if (!officialAgents.includes(newAgent)) {
@@ -1922,11 +1922,11 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             agents={[
               "Clippy",
               "Links",
-              "Bonzi",
-              "Genie",
               "Genius",
-              "Merlin",
               "F1",
+              "Merlin",
+              "Genie",
+              "Bonzi",
             ]}
             onAction={(action, data) => {
               devLog(`Context menu action: ${action}`, data);
