@@ -49,11 +49,11 @@ const ClippyAssistant = memo((props) => {
     const allAgents = [
       "Clippy", // Classic paperclip
       "Links", // Cat
-      "Bonzi", // Purple gorilla
-      "Genie", // Blue genie
       "Genius", // Einstein-like character
       "Merlin", // Wizard
       "F1", // Robot assistant
+      "Genie", // Blue genie
+      "Bonzi", // Purple gorilla
     ];
 
     console.log("🎭 Using static agent list:", allAgents);
