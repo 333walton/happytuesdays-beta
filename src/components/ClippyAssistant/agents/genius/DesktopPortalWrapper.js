@@ -3,7 +3,8 @@ import ReactDOM from "react-dom";
 
 /**
  * DesktopPortalWrapper - Renders children inside the desktop viewport using React Portal
- * This ensures the chat widget is contained within the monitor's desktop area
+ * FIXED: This ensures the chat widget is contained within the monitor's desktop area
+ * without disrupting the monitor image positioning
  */
 const DesktopPortalWrapper = ({ children }) => {
   const [portalContainer, setPortalContainer] = useState(null);
@@ -31,7 +32,8 @@ const DesktopPortalWrapper = ({ children }) => {
       let portal = targetContainer.querySelector("#genius-chat-portal");
 
       if (!portal) {
-        // Create portal container
+        // FIXED: Use insertBefore instead of appendChild to prevent layout shifts
+        // This ensures the portal is inserted without affecting existing positioned elements
         portal = document.createElement("div");
         portal.id = "genius-chat-portal";
         portal.style.cssText = `
@@ -43,9 +45,19 @@ const DesktopPortalWrapper = ({ children }) => {
           pointer-events: none;
           z-index: 2400;
           overflow: hidden;
-          contain: layout style paint;
+          contain: layout style paint size;
+          /* FIXED: Add explicit transforms to create new stacking context */
+          transform: translateZ(0);
+          will-change: auto;
         `;
-        targetContainer.appendChild(portal);
+
+        // FIXED: Insert as first child to minimize layout impact
+        if (targetContainer.firstChild) {
+          targetContainer.insertBefore(portal, targetContainer.firstChild);
+        } else {
+          targetContainer.appendChild(portal);
+        }
+
         console.log(
           "Created portal container inside:",
           targetContainer.className
@@ -55,7 +67,7 @@ const DesktopPortalWrapper = ({ children }) => {
       return portal;
     };
 
-    // Try to create portal container
+    // FIXED: Batch DOM operations to prevent multiple reflows
     const container = findOrCreatePortalContainer();
 
     if (!container) {
@@ -72,14 +84,19 @@ const DesktopPortalWrapper = ({ children }) => {
 
     setPortalContainer(container);
 
-    // Cleanup
+    // FIXED: Enhanced cleanup to prevent DOM pollution
     return () => {
       if (
         container &&
         container.parentNode &&
         container.childNodes.length === 0
       ) {
-        container.parentNode.removeChild(container);
+        // Use requestAnimationFrame to ensure cleanup happens after render
+        requestAnimationFrame(() => {
+          if (container.parentNode) {
+            container.parentNode.removeChild(container);
+          }
+        });
       }
     };
   }, []);
@@ -89,11 +106,27 @@ const DesktopPortalWrapper = ({ children }) => {
     return null;
   }
 
-  // Use React Portal to render children inside the desktop viewport
-  return ReactDOM.createPortal(
-    <div style={{ pointerEvents: "auto" }}>{children}</div>,
-    portalContainer
+  // FIXED: Add explicit positioning wrapper to prevent layout interference
+  const portalContent = (
+    <div
+      style={{
+        pointerEvents: "auto",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        /* Ensure this doesn't affect parent layout */
+        transform: "translateZ(0)",
+        contain: "layout style paint",
+      }}
+    >
+      {children}
+    </div>
   );
+
+  // Use React Portal to render children inside the desktop viewport
+  return ReactDOM.createPortal(portalContent, portalContainer);
 };
 
 export default DesktopPortalWrapper;

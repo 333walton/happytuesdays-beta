@@ -51,8 +51,6 @@ const MonitorFrame = ({
             position: "relative",
             // Don't block desktop interaction when power is on
             pointerEvents: isScreenPoweredOn ? "auto" : "none",
-            overflow: "hidden",
-            contain: "layout size style paint",
           }}
         >
           {/* CRT effect for when zoomed in */}
@@ -105,6 +103,7 @@ const MonitorFrame = ({
       {/* Monitor image */}
       {showMonitor && (
         <img
+          className="monitor-image"
           src="/static/monitor3.png"
           alt="Windows 98 Monitor"
           style={{

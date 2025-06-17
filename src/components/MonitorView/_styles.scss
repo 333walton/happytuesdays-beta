@@ -311,20 +311,11 @@
 
 /* Monitor container styles - for zoom functionality */
 .monitor-container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   width: auto;
   height: auto;
   transition: transform 0.3s ease;
   transform-origin: center center;
-  z-index: 100;
-
-  /* When zoomed, maintain centering */
-  &.zoomed {
-    transform: translate(-50%, -50%) scale(var(--zoom-scale, 1));
-  }
 }
 
 /* Monitor frame container */
@@ -333,10 +324,10 @@
   width: 800px;
   height: 700px;
   pointer-events: none;
-  margin: 0;
-  contain: layout size style paint;
 
-  /* No margin auto needed since parent handles centering */
+  /* Center the monitor in the viewport */
+  margin: 0 auto;
+
   /* Make sure the monitor scales properly on smaller screens */
   @media (max-width: 1200px) {
     transform: scale(0.9);
@@ -523,6 +514,11 @@ button.react95__tab[aria-selected="true"] {
   outline: 1px dotted #c0c0c0 !important;
   outline-offset: -1px !important;
   box-shadow: none !important;
+}
+
+.monitor-image {
+  max-width: none !important;
+  height: auto !important;
 }
 
 .react95__tab:focus,
