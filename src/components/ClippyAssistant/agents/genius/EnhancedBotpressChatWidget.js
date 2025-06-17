@@ -30,7 +30,7 @@ const EnhancedBotpressChatWidget = ({
   // State management
   const [isOpen, setIsOpen] = useState(true);
   const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState("");
+  // REMOVED: const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [quickReplies, setQuickReplies] = useState([
@@ -45,6 +45,7 @@ const EnhancedBotpressChatWidget = ({
   // Refs
   const messagesContainerRef = useRef(null);
   const chatContainerRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Check if we have valid Botpress credentials
   const hasValidClientId =
@@ -549,22 +550,30 @@ const EnhancedBotpressChatWidget = ({
     }, 100);
   }, []);
 
-  // Handle sending messages with enhanced debugging
+  // FIXED: Handle sending messages - use ref only, no state
   const handleSendMessage = useCallback(
-    async (messageText = inputValue.trim()) => {
-      if (!messageText) {
+    async (messageText) => {
+      // Get value from ref or parameter - NO STATE DEPENDENCY
+      const textToSend = messageText || (inputRef.current?.value || "").trim();
+
+      if (!textToSend) {
         console.log("❌ No message text provided");
         return;
       }
 
       // Add user message immediately
-      addMessage(messageText, "user");
-      setInputValue("");
+      addMessage(textToSend, "user");
+
+      // Clear ONLY the ref, no state
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+
       setIsTyping(true);
 
       try {
         const response = getKnowledgeResponse(
-          messageText,
+          textToSend,
           agentConfig.personality,
           agentConfig
         );
@@ -574,7 +583,6 @@ const EnhancedBotpressChatWidget = ({
         setTimeout(() => {
           addMessage(response.text, "bot");
 
-          // Update quick replies based on response
           if (response.quickReplies && response.quickReplies.length > 0) {
             console.log("🔄 Updating quick replies:", response.quickReplies);
             setQuickReplies(response.quickReplies);
@@ -589,7 +597,7 @@ const EnhancedBotpressChatWidget = ({
         setIsTyping(false);
       }
     },
-    [inputValue, addMessage, agentConfig, getKnowledgeResponse]
+    [addMessage, agentConfig, getKnowledgeResponse] // NO inputValue dependency
   );
 
   // Handle quick reply clicks
@@ -602,12 +610,15 @@ const EnhancedBotpressChatWidget = ({
   );
 
   // Handle input key press
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+  const handleKeyPress = useCallback(
+    (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    },
+    [handleSendMessage]
+  );
 
   // Initialize chat
   useEffect(() => {
@@ -998,7 +1009,7 @@ const EnhancedBotpressChatWidget = ({
           </div>
         )}
 
-        {/* Input Area */}
+        {/* Input Area - FIXED: Use ref only, no value prop */}
         <div
           style={{
             display: "flex",
@@ -1010,11 +1021,13 @@ const EnhancedBotpressChatWidget = ({
           }}
         >
           <input
+            ref={inputRef}
+            id="chat-message-input"
+            name="chatMessage"
             type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder="Ask about martech, UTM tracking, or campaigns..."
+            autoComplete="off"
             style={{
               flex: 1,
               padding: "4px 6px",
@@ -1030,14 +1043,14 @@ const EnhancedBotpressChatWidget = ({
             aria-label="Type your message"
           />
           <button
+            type="button"
             onClick={() => handleSendMessage()}
-            disabled={!inputValue.trim()}
             style={{
               padding: "4px 12px",
-              backgroundColor: inputValue.trim() ? "#c0c0c0" : "#e0e0e0",
+              backgroundColor: "#c0c0c0",
               border: "1px outset #c0c0c0",
               fontSize: "11px",
-              cursor: inputValue.trim() ? "pointer" : "not-allowed",
+              cursor: "pointer",
               color: "#000",
               fontFamily: "'MS Sans Serif', sans-serif",
               minHeight: "28px",
@@ -1045,14 +1058,10 @@ const EnhancedBotpressChatWidget = ({
               WebkitAppearance: "none",
             }}
             onMouseEnter={(e) => {
-              if (inputValue.trim()) {
-                e.target.style.backgroundColor = "#d0d0d0";
-              }
+              e.target.style.backgroundColor = "#d0d0d0";
             }}
             onMouseLeave={(e) => {
-              if (inputValue.trim()) {
-                e.target.style.backgroundColor = "#c0c0c0";
-              }
+              e.target.style.backgroundColor = "#c0c0c0";
             }}
             aria-label="Send message"
           >

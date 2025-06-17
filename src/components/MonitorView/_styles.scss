@@ -516,6 +516,8 @@ button.react95__tab[aria-selected="true"] {
   box-shadow: none !important;
 }
 
+/* =================== MONITOR IMAGE FIX =================== */
+/* Fix for monitor image shifting when DOM elements are added */
 .monitor-image {
   max-width: none !important;
   height: auto !important;
