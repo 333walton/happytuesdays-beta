@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Webchat, getClient } from "@botpress/webchat";
+import { buildTheme } from "@botpress/webchat-generator";
 import {
   searchKnowledge,
   getAgentKnowledge,
@@ -13,8 +15,9 @@ import {
 } from "../data/AgentResponses";
 
 /**
- * Enhanced Botpress Chat Widget with Windows 98 styling and martech expertise
- * Integrates real Botpress API with intelligent fallback to knowledge base
+ * Enhanced Botpress v2 Chat Widget with Windows 98 styling and martech expertise
+ * Combines real Botpress v2 integration with intelligent fallback system
+ * Includes advanced positioning, mobile support, and comprehensive martech knowledge
  */
 const EnhancedBotpressChatWidget = ({
   onClose,
@@ -25,6 +28,7 @@ const EnhancedBotpressChatWidget = ({
   conversationStarter = "Hello! I'm Genius, your marketing technology expert. I can help with UTM tracking, analytics setup, campaign optimization, and troubleshooting martech issues. What can I help you with today?",
 }) => {
   // State management
+  const [isOpen, setIsOpen] = useState(true);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -36,16 +40,40 @@ const EnhancedBotpressChatWidget = ({
     "Pixel troubleshooting",
   ]);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
 
   // Refs
-  const botpressWebchatRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const chatContainerRef = useRef(null);
+
+  // Check if we have valid Botpress credentials
+  const hasValidClientId =
+    process.env.REACT_APP_BOTPRESS_CLIENT_ID &&
+    process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "YOUR_CLIENT_ID_HERE";
+
+  // Botpress v2 client setup
+  const client = hasValidClientId
+    ? getClient({
+        clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
+      })
+    : null;
+
+  // Windows 98 theme configuration for Botpress v2
+  const { style, theme } = buildTheme({
+    themeName: "prism",
+    themeColor: "#008080", // Windows 98 teal
+  });
+
+  // Device detection
+  const isMobile =
+    window.innerWidth <= 768 ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
 
   // Enhanced knowledge response using rich prewritten content
   const getKnowledgeResponse = useCallback(
     (messageText, personality, agentConfigData) => {
-      // Fix: Properly detect Genius agent based on name/role, not just personality
       const agent =
         agentConfigData?.name === "Genius" ||
         agentConfigData?.displayName?.includes("Genius") ||
@@ -64,8 +92,6 @@ const EnhancedBotpressChatWidget = ({
         "| Config:",
         agentConfigData?.name
       );
-
-      // FIXED: Specific matches first, then general ones
 
       // Quick reply specific responses - MUST BE FIRST
       if (
@@ -260,17 +286,10 @@ const EnhancedBotpressChatWidget = ({
     []
   );
 
-  // Device detection
-  const isMobile =
-    window.innerWidth <= 768 ||
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-
   // Position calculation with improved desktop viewport detection
   const calculateChatPosition = useCallback(() => {
-    const chatWidth = isMobile ? Math.min(330, window.innerWidth - 16) : 330;
-    const chatHeight = isMobile ? Math.min(280, window.innerHeight - 150) : 230;
+    const chatWidth = isMobile ? Math.min(330, window.innerWidth - 16) : 400;
+    const chatHeight = isMobile ? Math.min(280, window.innerHeight - 150) : 600;
 
     console.log("🔍 Calculating chat position:", {
       isMobile,
@@ -309,7 +328,6 @@ const EnhancedBotpressChatWidget = ({
           viewportTop,
         });
       } else {
-        // Fallback to window dimensions
         viewportWidth = window.innerWidth;
         viewportHeight = window.innerHeight;
         viewportLeft = 0;
@@ -335,50 +353,32 @@ const EnhancedBotpressChatWidget = ({
         ? overlayEl.getBoundingClientRect()
         : clippyRect;
 
-      console.log("📍 Clippy position:", {
-        clippyRect: {
-          left: clippyRect.left,
-          top: clippyRect.top,
-          width: clippyRect.width,
-          height: clippyRect.height,
-        },
-        overlayRect: {
-          left: overlayRect.left,
-          top: overlayRect.top,
-          width: overlayRect.width,
-          height: overlayRect.height,
-        },
-      });
-
       let left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2;
       let top = overlayRect.top - chatHeight - 1;
 
-      console.log("💭 Initial calculated position:", { left, top });
-
-      // Constrain to viewport horizontally with more conservative margins
-      const horizontalMargin = 40; // Increased margin for better visibility
-      const verticalMargin = 30; // Increased margin for better visibility
+      // Constrain to viewport with margins
+      const horizontalMargin = 40;
+      const verticalMargin = 30;
 
       const minLeft = viewportLeft + horizontalMargin;
       const maxLeft =
         viewportLeft + viewportWidth - chatWidth - horizontalMargin;
       left = Math.max(minLeft, Math.min(left, maxLeft));
 
-      // Constrain to viewport vertically
       const minTop = viewportTop + verticalMargin;
       const maxTop = viewportTop + viewportHeight - chatHeight - verticalMargin;
       top = Math.max(minTop, Math.min(top, maxTop));
 
-      console.log("✅ Final constrained position:", {
+      return {
         left,
         top,
-        constraints: { minLeft, maxLeft, minTop, maxTop },
-      });
-
-      return { left, top, width: chatWidth, height: chatHeight };
+        width: chatWidth,
+        height: chatHeight,
+        position: "fixed",
+      };
     }
 
-    // Enhanced fallback position for desktop
+    // Fallback position
     const fallbackLeft = isMobile
       ? 14
       : Math.max(50, (viewportWidth - chatWidth) / 2);
@@ -386,13 +386,12 @@ const EnhancedBotpressChatWidget = ({
       ? 100
       : Math.max(50, (viewportHeight - chatHeight) / 2);
 
-    console.log("⚠️ Using fallback position:", { fallbackLeft, fallbackTop });
-
     return {
       left: fallbackLeft,
       top: fallbackTop,
       width: chatWidth,
       height: chatHeight,
+      position: "fixed",
     };
   }, [isMobile]);
 
@@ -405,8 +404,6 @@ const EnhancedBotpressChatWidget = ({
         const currentHeight = window.visualViewport.height;
         const isKeyboardVisible = currentHeight < window.innerHeight * 0.8;
         setIsKeyboardOpen(isKeyboardVisible);
-
-        // Recalculate position when keyboard state changes
         setChatPosition(calculateChatPosition());
       };
 
@@ -419,7 +416,7 @@ const EnhancedBotpressChatWidget = ({
     }
   }, [isMobile, calculateChatPosition]);
 
-  // Add message to chat
+  // Add message to chat (for fallback mode)
   const addMessage = useCallback((text, sender) => {
     const newMessage = {
       id: Date.now() + Math.random(),
@@ -451,28 +448,12 @@ const EnhancedBotpressChatWidget = ({
       setInputValue("");
       setIsTyping(true);
 
-      // Always use knowledge base (skip Botpress for now to debug)
-      console.log("🧠 Using knowledge base fallback");
-
       try {
         const response = getKnowledgeResponse(
           messageText,
           agentConfig.personality,
           agentConfig
         );
-
-        // Add a dynamic fallback for unmatched inputs
-        if (!response) {
-          return {
-            text: "I'm not sure how to respond to that. Here are some things I can help with:",
-            quickReplies: [
-              "UTM tracking help",
-              "Analytics setup",
-              "Campaign optimization",
-              "Pixel troubleshooting",
-            ],
-          };
-        }
 
         console.log("💬 Generated response:", response);
 
@@ -487,18 +468,14 @@ const EnhancedBotpressChatWidget = ({
 
           setIsTyping(false);
           console.log("✅ Response complete");
-        }, 500); // Reduced delay for faster response
+        }, 500);
       } catch (error) {
-        // Error handling for the typing indicator
         console.error("❌ Error in knowledge response:", error);
-        setMessages((prev) => [
-          ...prev,
-          { text: "Sorry, something went wrong. Please try again." },
-        ]);
+        addMessage("Sorry, something went wrong. Please try again.", "bot");
         setIsTyping(false);
       }
     },
-    [inputValue, addMessage, agentConfig.personality, getKnowledgeResponse]
+    [inputValue, addMessage, agentConfig, getKnowledgeResponse]
   );
 
   // Handle quick reply clicks
@@ -510,118 +487,6 @@ const EnhancedBotpressChatWidget = ({
     [handleSendMessage]
   );
 
-  // Handle Botpress events
-  const handleBotpressEvent = (event, data) => {
-    switch (event) {
-      case "MESSAGE.RECEIVED":
-        addMessage(data.text, "bot");
-        setIsTyping(false);
-        break;
-      case "MESSAGE.SENT":
-        setIsTyping(true);
-        break;
-      case "TYPING.ON":
-        setIsTyping(true);
-        break;
-      case "TYPING.OFF":
-        setIsTyping(false);
-        break;
-      case "WEBCHAT.READY":
-        console.log("Botpress webchat is ready");
-        break;
-      case "CONVERSATION.STARTED":
-        console.log("Botpress conversation started");
-        break;
-      default:
-        console.log("Unhandled Botpress event:", event, data);
-        break;
-    }
-  };
-
-  // Initialize chat with intro message and Botpress
-  useEffect(() => {
-    console.log("🚀 Initializing Enhanced Botpress Chat Widget");
-
-    // Show intro message immediately
-    const initialMessage = conversationStarter;
-    setMessages([
-      {
-        id: Date.now(),
-        text: initialMessage,
-        sender: "bot",
-        timestamp: new Date(),
-      },
-    ]);
-    setIsLoaded(true);
-
-    // Try to load Botpress in background
-    const initializeBotpress = async () => {
-      try {
-        if (!window.botpressWebChat) {
-          const script = document.createElement("script");
-          script.src = "https://cdn.botpress.cloud/webchat/v1/inject.js";
-          script.async = true;
-
-          script.onload = () => {
-            if (window.botpressWebChat) {
-              configureBotpress();
-            }
-          };
-
-          script.onerror = () => {
-            console.log(
-              "Botpress failed to load, continuing with simulation mode"
-            );
-          };
-
-          document.head.appendChild(script);
-        } else {
-          configureBotpress();
-        }
-      } catch (error) {
-        console.error("Failed to initialize Botpress:", error);
-      }
-    };
-
-    const configureBotpress = () => {
-      try {
-        if (!window.botpressWebChat) return;
-
-        window.botpressWebChat.init({
-          botId: process.env.REACT_APP_BOTPRESS_BOT_ID || "demo-bot",
-          hostUrl:
-            process.env.REACT_APP_BOTPRESS_HOST_URL ||
-            "https://cdn.botpress.cloud/webchat/v1",
-          messagingUrl:
-            process.env.REACT_APP_BOTPRESS_MESSAGING_URL ||
-            "https://messaging.botpress.cloud",
-          clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID || "demo-client",
-          hideWidget: true,
-          disableAnimations: false,
-          showConversationButton: false,
-          enableTranscriptDownload: false,
-          enableArrowNavigation: true,
-          stylesheet:
-            "data:text/css;base64;" +
-            btoa(`
-            .bpw-layout { display: none !important; }
-            .bpw-widget-btn { display: none !important; }
-          `),
-          onEvent: (event, data) => {
-            handleBotpressEvent(event, data);
-          },
-        });
-
-        botpressWebchatRef.current = window.botpressWebChat;
-        console.log("✅ Botpress configured successfully");
-      } catch (error) {
-        console.error("Error configuring Botpress:", error);
-      }
-    };
-
-    initializeBotpress();
-  }, [conversationStarter, addMessage]);
-
   // Handle input key press
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -630,33 +495,214 @@ const EnhancedBotpressChatWidget = ({
     }
   };
 
-  if (!isLoaded) {
-    return (
-      <div
-        style={{
-          position: "fixed",
-          left: `${chatPosition.left}px`,
-          top: `${chatPosition.top}px`,
-          width: `${chatPosition.width}px`,
-          height: "60px",
-          backgroundColor: "#c0c0c0",
-          border: "2px outset #c0c0c0",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "'MS Sans Serif', sans-serif",
-          fontSize: "11px",
-          zIndex: 9999,
-        }}
-      >
-        Loading chat...
-      </div>
-    );
-  }
+  // Initialize chat
+  useEffect(() => {
+    console.log("🚀 Initializing Enhanced Botpress v2 Chat Widget");
 
-  return (
-    <>
-      {/* Main Chat Container */}
+    // Show intro message immediately
+    if (useFallback || !hasValidClientId) {
+      setMessages([
+        {
+          id: Date.now(),
+          text: conversationStarter,
+          sender: "bot",
+          timestamp: new Date(),
+        },
+      ]);
+    }
+
+    setIsLoaded(true);
+
+    // Determine if we should use fallback
+    if (!hasValidClientId) {
+      console.warn("⚠️ No valid Botpress Client ID found, using fallback chat");
+      setUseFallback(true);
+    }
+  }, [conversationStarter, hasValidClientId, useFallback]);
+
+  // Windows 98 styles
+  const windows98Styles = `
+    ${style}
+    
+    /* Windows 98 Chat Overrides for Botpress v2 */
+    .bp-webchat {
+      font-family: 'MS Sans Serif', 'Tahoma', sans-serif !important;
+      font-size: 11px !important;
+      background-color: #c0c0c0 !important;
+      border: 2px outset #c0c0c0 !important;
+      border-radius: 0 !important;
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
+    }
+    
+    .bp-webchat-header {
+      background: linear-gradient(90deg, #0080c0 0%, #0080c0 100%) !important;
+      color: white !important;
+      font-weight: bold !important;
+      padding: 2px 4px !important;
+      font-size: 11px !important;
+    }
+    
+    .bp-webchat-message {
+      font-family: 'MS Sans Serif', sans-serif !important;
+      font-size: 11px !important;
+    }
+    
+    .bp-webchat-composer {
+      background-color: #c0c0c0 !important;
+      border-top: 1px inset #c0c0c0 !important;
+    }
+    
+    .bp-webchat-composer-input {
+      font-family: 'MS Sans Serif', sans-serif !important;
+      font-size: 11px !important;
+      background-color: white !important;
+      border: 1px inset #c0c0c0 !important;
+    }
+    
+    /* Fallback chat styles */
+    .fallback-chat {
+      font-family: 'MS Sans Serif', 'Tahoma', sans-serif;
+      font-size: 11px;
+      background-color: #c0c0c0;
+      border: 2px outset #c0c0c0;
+      border-radius: 0;
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .fallback-header {
+      background: linear-gradient(90deg, #0080c0 0%, #0080c0 100%);
+      color: white;
+      font-weight: bold;
+      padding: 4px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 20px;
+    }
+    
+    .fallback-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      background: white;
+      min-height: 120px;
+      max-height: 400px;
+    }
+    
+    .fallback-message {
+      margin-bottom: 8px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #000;
+    }
+    
+    .fallback-input-area {
+      background-color: #f0f0f0;
+      border-top: 1px solid #808080;
+      padding: 4px 8px;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    
+    .fallback-input {
+      flex: 1;
+      font-family: 'MS Sans Serif', sans-serif;
+      font-size: 11px;
+      padding: 4px 6px;
+      border: 1px inset #999;
+      background: white;
+      color: #000;
+      outline: none;
+    }
+    
+    .fallback-button {
+      font-family: 'MS Sans Serif', sans-serif;
+      font-size: 11px;
+      padding: 4px 12px;
+      border: 1px outset #c0c0c0;
+      background: #c0c0c0;
+      color: #000;
+      cursor: pointer;
+      min-height: 24px;
+    }
+    
+    .fallback-button:hover {
+      background: #d0d0d0;
+    }
+    
+    .fallback-button:active {
+      border: 1px inset #c0c0c0;
+    }
+    
+    .quick-replies {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 4px 8px;
+      background: #f0f0f0;
+      border-bottom: 1px solid #808080;
+    }
+    
+    .quick-reply-btn {
+      font-family: 'MS Sans Serif', sans-serif;
+      font-size: 10px;
+      padding: 2px 6px;
+      border: 1px outset #e0e0e0;
+      background: #e0e0e0;
+      color: #000;
+      cursor: pointer;
+      white-space: nowrap;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .quick-reply-btn:hover {
+      background: #f0f0f0;
+    }
+    
+    .quick-reply-btn:active {
+      border: 1px inset #e0e0e0;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .fallback-chat {
+        transition: all 0.3s ease-in-out;
+      }
+      
+      .fallback-input-area {
+        min-height: 48px;
+        padding: 8px;
+      }
+      
+      .fallback-input {
+        min-height: 32px;
+        padding: 6px 8px;
+        font-size: 12px;
+      }
+      
+      .fallback-button {
+        min-height: 32px;
+        font-size: 12px;
+      }
+      
+      .quick-reply-btn {
+        min-height: 32px;
+        font-size: 11px;
+        padding: 4px 8px;
+      }
+    }
+  `;
+
+  // Fallback chat component with detailed Windows 98 styling
+  const FallbackChat = () => {
+    return (
       <div
         ref={chatContainerRef}
         className="enhanced-botpress-chat-widget"
@@ -830,6 +876,7 @@ const EnhancedBotpressChatWidget = ({
                   (e.target.style.backgroundColor = "#e0e0e0")
                 }
                 aria-label={`Quick reply: ${reply}`}
+                title={reply}
               >
                 {reply}
               </button>
@@ -853,7 +900,7 @@ const EnhancedBotpressChatWidget = ({
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
+            placeholder="Ask about martech, UTM tracking, or campaigns..."
             style={{
               flex: 1,
               padding: "4px 6px",
@@ -899,6 +946,85 @@ const EnhancedBotpressChatWidget = ({
           </button>
         </div>
       </div>
+    );
+  };
+
+  if (!isLoaded) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          left: `${chatPosition.left}px`,
+          top: `${chatPosition.top}px`,
+          width: `${chatPosition.width}px`,
+          height: "60px",
+          backgroundColor: "#c0c0c0",
+          border: "2px outset #c0c0c0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "'MS Sans Serif', sans-serif",
+          fontSize: "11px",
+          zIndex: 9999,
+        }}
+      >
+        Loading chat...
+      </div>
+    );
+  }
+
+  // Use fallback mode if no valid client ID or forced fallback
+  if (useFallback || !hasValidClientId) {
+    return (
+      <>
+        <style>{windows98Styles}</style>
+        <FallbackChat />
+      </>
+    );
+  }
+
+  // Use real Botpress v2 when client ID is available
+  return (
+    <>
+      <style>{windows98Styles}</style>
+      <Webchat
+        client={client}
+        theme={theme}
+        style={{
+          ...chatPosition,
+          display: isOpen ? "flex" : "none",
+          zIndex: 9999,
+        }}
+      />
+
+      {/* Custom close button overlay for Botpress v2 */}
+      {isOpen && (
+        <button
+          onClick={() => {
+            setIsOpen(false);
+            if (onClose) onClose();
+          }}
+          style={{
+            position: "fixed",
+            top: `${chatPosition.top + 2}px`,
+            right: `${
+              window.innerWidth - chatPosition.left - chatPosition.width + 8
+            }px`,
+            zIndex: 10000,
+            background: "#c0c0c0",
+            border: "1px outset #c0c0c0",
+            padding: "0 4px",
+            fontSize: "10px",
+            fontFamily: "MS Sans Serif, sans-serif",
+            cursor: "pointer",
+            minHeight: "16px",
+            minWidth: "16px",
+          }}
+          aria-label="Close chat"
+        >
+          ✕
+        </button>
+      )}
     </>
   );
 };

@@ -1,5 +1,6 @@
 /**
  * GeniusChat - Wrapper component for Genius agent's Botpress chat integration
+ * UPDATED: Now uses Botpress v2 React components
  *
  * This component handles the conditional rendering of Botpress chat specifically
  * for the Genius agent (martech/adtech specialist) while maintaining consistency
@@ -56,7 +57,7 @@ const GeniusChat = ({
     return null;
   }
 
-  console.log("🔍 GeniusChat rendering:", {
+  console.log("🔍 GeniusChat rendering with v2:", {
     currentAgent,
     agentConfig,
     visible,
