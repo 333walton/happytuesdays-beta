@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Webchat, getClient } from "@botpress/webchat";
+import { Webchat, useWebchat } from "@botpress/webchat";
 import { buildTheme } from "@botpress/webchat-generator";
 import {
   searchKnowledge,
@@ -55,35 +55,28 @@ const EnhancedBotpressChatWidget = ({
   const chatContainerRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Check if we have valid Botpress credentials
+  // CHECK IF WE HAVE VALID BOTPRESS CREDENTIALS (keep this part)
   const hasValidClientId =
     process.env.REACT_APP_BOTPRESS_CLIENT_ID &&
     process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "YOUR_CLIENT_ID_HERE";
 
-  // ADD THIS LINE TO FORCE FALLBACK MODE:
-  const forceUseFallback = false; // Set to false when you want to try Botpress again
+  // REPLACE THE CLIENT SECTION WITH:
+  const forceUseFallback = false; // Keep this if you want it
 
-  // Botpress v2 client setup - ONLY create client if not forcing fallback
-  // Botpress v2 client setup with error handling
-  const client = hasValidClientId
-    ? (() => {
-        try {
-          console.log(
-            "🔗 Creating Botpress client with Bot ID:",
-            process.env.REACT_APP_BOTPRESS_BOT_ID
-          );
-          return getClient({
-            clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
-          });
-        } catch (error) {
-          console.warn(
-            "⚠️ Botpress client creation failed, will use fallback:",
-            error
-          );
-          return null;
-        }
-      })()
-    : null;
+  const botpressConfig = {
+    botId: process.env.REACT_APP_BOTPRESS_BOT_ID,
+    clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
+    hostUrl: process.env.REACT_APP_BOTPRESS_HOST_URL,
+    messagingUrl: process.env.REACT_APP_BOTPRESS_MESSAGING_URL,
+  };
+
+  console.log("🔍 Botpress Config:", botpressConfig);
+
+  const shouldUseBotpress =
+    hasValidClientId &&
+    !forceUseFallback &&
+    botpressConfig.botId &&
+    botpressConfig.clientId;
 
   // Windows 98 theme configuration for Botpress v2
   const { style, theme } = buildTheme({
@@ -1136,44 +1129,75 @@ const EnhancedBotpressChatWidget = ({
   return (
     <>
       <style>{windows98Styles}</style>
-      <Webchat
-        client={client}
-        theme={theme}
+      <div
         style={{
-          ...chatPosition,
+          position: chatPosition.position || "fixed",
+          left: `${chatPosition.left}px`,
+          top: `${chatPosition.top}px`,
+          width: `${chatPosition.width}px`,
+          height: `${chatPosition.height}px`,
+          zIndex: chatPosition.position === "absolute" ? 10 : 2500,
           display: isOpen ? "flex" : "none",
-          zIndex: 2500,
+          flexDirection: "column",
+          fontFamily: "'MS Sans Serif', 'Tahoma', sans-serif",
+          backgroundColor: "#c0c0c0",
+          border: "2px outset #c0c0c0",
+          borderRadius: "0",
+          boxShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+          overflow: "hidden",
         }}
-      />
-
-      {/* Custom close button overlay for Botpress v2 */}
-      {isOpen && (
-        <button
-          onClick={() => {
-            setIsOpen(false);
-            if (onClose) onClose();
-          }}
+      >
+        {/* Windows 98 Header */}
+        <div
           style={{
-            position: "fixed",
-            top: `${chatPosition.top + 2}px`,
-            right: `${
-              window.innerWidth - chatPosition.left - chatPosition.width + 8
-            }px`,
-            zIndex: 2600,
-            background: "#c0c0c0",
-            border: "1px outset #c0c0c0",
-            padding: "0 4px",
-            fontSize: "10px",
-            fontFamily: "MS Sans Serif, sans-serif",
-            cursor: "pointer",
-            minHeight: "16px",
-            minWidth: "16px",
+            backgroundColor: "#000080",
+            color: "white",
+            padding: "4px 8px",
+            fontSize: "11px",
+            fontWeight: "bold",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            minHeight: "20px",
           }}
-          aria-label="Close chat"
         >
-          ✕
-        </button>
-      )}
+          <span>💬 Clippy GPT - Martech Specialist</span>
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              if (onClose) onClose();
+            }}
+            style={{
+              backgroundColor: "transparent",
+              border: "none",
+              color: "white",
+              fontSize: "12px",
+              cursor: "pointer",
+              padding: "2px 6px",
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Botpress Webchat */}
+        <div style={{ flex: 1, overflow: "hidden" }}>
+          <Webchat
+            configuration={{
+              botId: botpressConfig.botId,
+              clientId: botpressConfig.clientId,
+              hostUrl: botpressConfig.hostUrl,
+              messagingUrl: botpressConfig.messagingUrl,
+            }}
+            theme={theme}
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+            }}
+          />
+        </div>
+      </div>
     </>
   );
 };
