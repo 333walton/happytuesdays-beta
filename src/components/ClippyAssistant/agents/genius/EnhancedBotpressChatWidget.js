@@ -60,17 +60,35 @@ const EnhancedBotpressChatWidget = ({
     process.env.REACT_APP_BOTPRESS_CLIENT_ID &&
     process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "YOUR_CLIENT_ID_HERE";
 
-  // Botpress v2 client setup
+  // ADD THIS LINE TO FORCE FALLBACK MODE:
+  const forceUseFallback = true; // Set to false when you want to try Botpress again
+
+  // Botpress v2 client setup - ONLY create client if not forcing fallback
+  // Botpress v2 client setup with error handling
   const client = hasValidClientId
-    ? getClient({
-        clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
-      })
+    ? (() => {
+        try {
+          console.log(
+            "🔗 Creating Botpress client with Bot ID:",
+            process.env.REACT_APP_BOTPRESS_BOT_ID
+          );
+          return getClient({
+            clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
+          });
+        } catch (error) {
+          console.warn(
+            "⚠️ Botpress client creation failed, will use fallback:",
+            error
+          );
+          return null;
+        }
+      })()
     : null;
 
   // Windows 98 theme configuration for Botpress v2
   const { style, theme } = buildTheme({
     themeName: "prism",
-    themeColor: "#008080", // Windows 98 teal
+    themeColor: "#3276EA", // Your bot's actual color
   });
 
   // Device detection
@@ -632,8 +650,8 @@ const EnhancedBotpressChatWidget = ({
   useEffect(() => {
     console.log("🚀 Initializing Enhanced Botpress v2 Chat Widget");
 
-    // Show intro message immediately
-    if (useFallback || !hasValidClientId) {
+    // Show intro message immediately for fallback or invalid client
+    if (useFallback || !hasValidClientId || forceUseFallback) {
       setMessages([
         {
           id: Date.now(),
@@ -647,11 +665,11 @@ const EnhancedBotpressChatWidget = ({
     setIsLoaded(true);
 
     // Determine if we should use fallback
-    if (!hasValidClientId) {
-      console.warn("⚠️ No valid Botpress Client ID found, using fallback chat");
+    if (!hasValidClientId || forceUseFallback) {
+      console.warn("⚠️ Using fallback chat mode");
       setUseFallback(true);
     }
-  }, [conversationStarter, hasValidClientId, useFallback]);
+  }, [conversationStarter, hasValidClientId, useFallback, forceUseFallback]);
 
   // Windows 98 styles
   const windows98Styles = `
@@ -1105,7 +1123,7 @@ const EnhancedBotpressChatWidget = ({
   }
 
   // Use fallback mode if no valid client ID or forced fallback
-  if (useFallback || !hasValidClientId) {
+  if (useFallback || !hasValidClientId || forceUseFallback) {
     return (
       <>
         <style>{windows98Styles}</style>
