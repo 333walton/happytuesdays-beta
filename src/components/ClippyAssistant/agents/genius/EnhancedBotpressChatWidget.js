@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Webchat, useWebchat } from "@botpress/webchat";
+import { WebchatProvider, Webchat, useWebchat } from "@botpress/webchat";
 import { buildTheme } from "@botpress/webchat-generator";
 import {
   searchKnowledge,
@@ -1180,9 +1180,9 @@ const EnhancedBotpressChatWidget = ({
           </button>
         </div>
 
-        {/* Botpress Webchat */}
+        {/* Botpress Webchat with Provider */}
         <div style={{ flex: 1, overflow: "hidden" }}>
-          <Webchat
+          <WebchatProvider
             configuration={{
               botId: botpressConfig.botId,
               clientId: botpressConfig.clientId,
@@ -1190,12 +1190,15 @@ const EnhancedBotpressChatWidget = ({
               messagingUrl: botpressConfig.messagingUrl,
             }}
             theme={theme}
-            style={{
-              width: "100%",
-              height: "100%",
-              border: "none",
-            }}
-          />
+          >
+            <Webchat
+              style={{
+                width: "100%",
+                height: "100%",
+                border: "none",
+              }}
+            />
+          </WebchatProvider>
         </div>
       </div>
     </>
