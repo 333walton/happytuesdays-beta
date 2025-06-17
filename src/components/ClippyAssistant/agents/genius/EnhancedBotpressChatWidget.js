@@ -13,9 +13,8 @@ import {
 } from "../data/AgentResponses";
 
 /**
- * Enhanced Botpress v2 Chat Widget with Windows 98 styling and martech expertise
- * Combines real Botpress v2 integration with intelligent fallback system
- * Includes advanced positioning, mobile support, and comprehensive martech knowledge
+ * Enhanced Botpress v3 Chat Widget with Windows 98 styling and martech expertise
+ * Updated with comprehensive mobile support, network resilience, and desktop viewport containment
  */
 const EnhancedBotpressChatWidget = ({
   onClose,
@@ -25,7 +24,6 @@ const EnhancedBotpressChatWidget = ({
   },
   conversationStarter = "Hello! I'm Genius, your marketing technology expert. I can help with UTM tracking, analytics setup, campaign optimization, and troubleshooting martech issues. What can I help you with today?",
 }) => {
-  // Add this at the top of your component, inside the function
   console.log("🔍 Environment Variables Check:", {
     botId: process.env.REACT_APP_BOTPRESS_BOT_ID,
     clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
@@ -36,7 +34,6 @@ const EnhancedBotpressChatWidget = ({
   // State management
   const [isOpen, setIsOpen] = useState(true);
   const [messages, setMessages] = useState([]);
-  // REMOVED: const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [quickReplies, setQuickReplies] = useState([
@@ -47,25 +44,83 @@ const EnhancedBotpressChatWidget = ({
   ]);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [useFallback, setUseFallback] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Refs
   const messagesContainerRef = useRef(null);
   const chatContainerRef = useRef(null);
   const inputRef = useRef(null);
+  const botpressInitAttempts = useRef(0);
+  const maxInitAttempts = 5;
 
-  // CHECK IF WE HAVE VALID BOTPRESS CREDENTIALS (keep this part)
+  // Enhanced mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      const isTouch = "ontouchstart" in window;
+      const isMobileWidth = window.innerWidth <= 768;
+      const isMobileUA =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+      const mobile = isTouch || isMobileWidth || isMobileUA;
+      setIsMobile(mobile);
+      console.log("📱 Mobile detection:", {
+        isTouch,
+        isMobileWidth,
+        isMobileUA,
+        mobile,
+      });
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    window.addEventListener("orientationchange", checkMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      window.removeEventListener("orientationchange", checkMobile);
+    };
+  }, []);
+
+  // Network status monitoring
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log("🌐 Network: Online");
+      setIsOnline(true);
+      // Retry Botpress initialization if it failed due to network
+      if (useFallback && botpressInitAttempts.current < maxInitAttempts) {
+        setUseFallback(false);
+      }
+    };
+
+    const handleOffline = () => {
+      console.log("🌐 Network: Offline");
+      setIsOnline(false);
+      setUseFallback(true);
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [useFallback]);
+
+  // Botpress configuration with mobile-specific env handling
   const hasValidClientId =
     process.env.REACT_APP_BOTPRESS_CLIENT_ID &&
     process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "YOUR_CLIENT_ID_HERE";
 
-  // REPLACE THE CLIENT SECTION WITH:
-  const forceUseFallback = false; // Keep this if you want it
+  const forceUseFallback = false;
 
   const botpressConfig = {
-    botId: process.env.REACT_APP_BOTPRESS_BOT_ID,
-    clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
-    hostUrl: process.env.REACT_APP_BOTPRESS_HOST_URL,
-    messagingUrl: process.env.REACT_APP_BOTPRESS_MESSAGING_URL,
+    botId: process.env.REACT_APP_BOTPRESS_BOT_ID || "",
+    clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID || "",
+    hostUrl: process.env.REACT_APP_BOTPRESS_HOST_URL || "",
+    messagingUrl: process.env.REACT_APP_BOTPRESS_MESSAGING_URL || "",
   };
 
   console.log("🔍 Botpress Config:", botpressConfig);
@@ -74,16 +129,10 @@ const EnhancedBotpressChatWidget = ({
     hasValidClientId &&
     !forceUseFallback &&
     botpressConfig.botId &&
-    botpressConfig.clientId;
+    botpressConfig.clientId &&
+    isOnline;
 
-  // Device detection
-  const isMobile =
-    window.innerWidth <= 768 ||
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-
-  // Enhanced knowledge response using rich prewritten content
+  // Enhanced knowledge response (keeping your existing implementation)
   const getKnowledgeResponse = useCallback(
     (messageText, personality, agentConfigData) => {
       const agent =
@@ -298,31 +347,59 @@ const EnhancedBotpressChatWidget = ({
     []
   );
 
-  // Position calculation with improved desktop viewport detection
+  // Enhanced position calculation for desktop viewport containment
   const calculateChatPosition = useCallback(() => {
-    // Check if we're within the monitor/desktop viewport
+    // For desktop viewport (monitor screen)
     const monitorScreen = document.querySelector(".monitor-screen");
-    const isInMonitorMode = !!monitorScreen;
+    if (monitorScreen && !isMobile) {
+      const monitorRect = monitorScreen.getBoundingClientRect();
+      const clippyEl = monitorScreen.querySelector(".clippy");
 
-    // Check if we're rendered inside the portal (absolute positioning)
+      if (clippyEl) {
+        // Position relative to Clippy within monitor bounds
+        return {
+          left: Math.max(10, clippyEl.offsetLeft - 150),
+          top: Math.max(10, clippyEl.offsetTop - 250),
+          width: Math.min(300, monitorRect.width - 20),
+          height: Math.min(400, monitorRect.height - 20),
+          position: "absolute",
+        };
+      }
+
+      // Center in monitor if no Clippy
+      return {
+        left: (640 - 300) / 2,
+        top: (480 - 400) / 2,
+        width: 300,
+        height: 400,
+        position: "absolute",
+      };
+    }
+
+    // Mobile positioning (full screen)
+    if (isMobile) {
+      const viewportHeight =
+        window.visualViewport?.height || window.innerHeight;
+      const viewportWidth = window.visualViewport?.width || window.innerWidth;
+
+      return {
+        left: 0,
+        top: 0,
+        width: viewportWidth,
+        height: isKeyboardOpen
+          ? Math.min(400, viewportHeight - 50)
+          : viewportHeight,
+        position: "fixed",
+      };
+    }
+
+    // Check if we're within the monitor/desktop viewport
+    const isInMonitorMode = !!monitorScreen;
     const portalContainer = document.querySelector("#genius-chat-portal");
     const isInPortal = !!portalContainer;
 
-    // Adjust chat dimensions based on viewport constraints
-    let chatWidth, chatHeight;
-
-    if (isMobile) {
-      chatWidth = Math.min(330, window.innerWidth - 16);
-      chatHeight = Math.min(280, window.innerHeight - 150);
-    } else if (isInMonitorMode) {
-      // Smaller chat when in monitor mode to fit within desktop
-      chatWidth = 320;
-      chatHeight = 240;
-    } else {
-      // Normal desktop size
-      chatWidth = 400;
-      chatHeight = 600;
-    }
+    let chatWidth = isInMonitorMode ? 320 : 400;
+    let chatHeight = isInMonitorMode ? 240 : 600;
 
     console.log("🔍 Calculating chat position:", {
       isMobile,
@@ -335,7 +412,6 @@ const EnhancedBotpressChatWidget = ({
     // If we're in portal (desktop viewport), use absolute positioning
     if (isInPortal && !isMobile) {
       const clippyEl = document.querySelector(".clippy");
-      const overlayEl = document.getElementById("clippy-clickable-overlay");
       const portalRect = portalContainer.getBoundingClientRect();
 
       if (clippyEl) {
@@ -376,7 +452,7 @@ const EnhancedBotpressChatWidget = ({
           top,
           width: chatWidth,
           height: chatHeight,
-          position: "absolute", // Use absolute positioning inside portal
+          position: "absolute",
         };
       }
 
@@ -390,159 +466,63 @@ const EnhancedBotpressChatWidget = ({
       };
     }
 
-    // Original fixed positioning logic for mobile and non-portal desktop
-    let viewportWidth,
-      viewportHeight,
-      viewportLeft = 0,
-      viewportTop = 0;
-
-    if (isMobile) {
-      viewportWidth = window.visualViewport?.width || window.innerWidth;
-      viewportHeight = window.visualViewport?.height || window.innerHeight;
-      viewportLeft = window.visualViewport?.offsetLeft || 0;
-      viewportTop = window.visualViewport?.offsetTop || 0;
-    } else {
-      // Enhanced desktop viewport detection
-      const desktop =
-        document.querySelector(".desktop.screen") ||
-        document.querySelector(".desktop") ||
-        document.querySelector(".w98");
-
-      if (desktop && isInMonitorMode) {
-        // We're in monitor mode, use the monitor screen bounds
-        const monitorScreenRect = monitorScreen.getBoundingClientRect();
-        viewportWidth = monitorScreenRect.width;
-        viewportHeight = monitorScreenRect.height;
-        viewportLeft = monitorScreenRect.left;
-        viewportTop = monitorScreenRect.top;
-        console.log("📺 Using monitor screen bounds:", {
-          viewportWidth,
-          viewportHeight,
-          viewportLeft,
-          viewportTop,
-        });
-      } else if (desktop) {
-        const desktopRect = desktop.getBoundingClientRect();
-        viewportWidth = desktopRect.width;
-        viewportHeight = desktopRect.height;
-        viewportLeft = desktopRect.left;
-        viewportTop = desktopRect.top;
-        console.log("📺 Using desktop container:", {
-          viewportWidth,
-          viewportHeight,
-          viewportLeft,
-          viewportTop,
-        });
-      } else {
-        viewportWidth = window.innerWidth;
-        viewportHeight = window.innerHeight;
-        viewportLeft = 0;
-        viewportTop = 0;
-        console.log("📺 Using window viewport:", {
-          viewportWidth,
-          viewportHeight,
-        });
-      }
-    }
-
-    const clippyEl = document.querySelector(".clippy");
-    const overlayEl = document.getElementById("clippy-clickable-overlay");
-
-    console.log("🧙‍♂️ Clippy elements found:", {
-      clippyEl: !!clippyEl,
-      overlayEl: !!overlayEl,
-    });
-
-    if (clippyEl) {
-      const clippyRect = clippyEl.getBoundingClientRect();
-      const overlayRect = overlayEl
-        ? overlayEl.getBoundingClientRect()
-        : clippyRect;
-
-      // Position chat above Clippy
-      let left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2;
-      let top = overlayRect.top - chatHeight - 10;
-
-      // Constrain to viewport with margins
-      const horizontalMargin = isInMonitorMode ? 10 : 40;
-      const verticalMargin = isInMonitorMode ? 10 : 30;
-
-      const minLeft = viewportLeft + horizontalMargin;
-      const maxLeft =
-        viewportLeft + viewportWidth - chatWidth - horizontalMargin;
-      left = Math.max(minLeft, Math.min(left, maxLeft));
-
-      const minTop = viewportTop + verticalMargin;
-      const maxTop = viewportTop + viewportHeight - chatHeight - verticalMargin;
-
-      // If chat would appear above the viewport, position it to the side of Clippy
-      if (top < minTop) {
-        top = clippyRect.top;
-        // Try to position to the left of Clippy
-        if (clippyRect.left - chatWidth - 10 > minLeft) {
-          left = clippyRect.left - chatWidth - 10;
-        } else {
-          // Position to the right if no space on left
-          left = clippyRect.right + 10;
-          left = Math.min(left, maxLeft);
-        }
-      }
-
-      top = Math.max(minTop, Math.min(top, maxTop));
-
-      return {
-        left,
-        top,
-        width: chatWidth,
-        height: chatHeight,
-        position: "fixed",
-      };
-    }
-
-    // Fallback position - center in viewport
-    const fallbackHorizontalMargin = isInMonitorMode ? 10 : 40;
-    const fallbackVerticalMargin = isInMonitorMode ? 10 : 30;
-
-    const fallbackLeft = isMobile
-      ? 14
-      : viewportLeft +
-        Math.max(fallbackHorizontalMargin, (viewportWidth - chatWidth) / 2);
-    const fallbackTop = isMobile
-      ? 100
-      : viewportTop +
-        Math.max(fallbackVerticalMargin, (viewportHeight - chatHeight) / 2);
-
+    // Fallback for non-portal desktop
     return {
-      left: fallbackLeft,
-      top: fallbackTop,
+      left: 100,
+      top: 100,
       width: chatWidth,
       height: chatHeight,
       position: "fixed",
     };
-  }, [isMobile]);
+  }, [isMobile, isKeyboardOpen]);
 
   const [chatPosition, setChatPosition] = useState(calculateChatPosition);
 
-  // Handle keyboard visibility for mobile
+  // Enhanced keyboard handling for mobile
   useEffect(() => {
-    if (isMobile && window.visualViewport) {
-      const handleViewportChange = () => {
-        const currentHeight = window.visualViewport.height;
-        const isKeyboardVisible = currentHeight < window.innerHeight * 0.8;
-        setIsKeyboardOpen(isKeyboardVisible);
-        setChatPosition(calculateChatPosition());
-      };
+    if (!isMobile) return;
 
+    const handleFocus = () => {
+      console.log("⌨️ Keyboard: Opening");
+      setIsKeyboardOpen(true);
+      // Scroll to input after keyboard opens
+      setTimeout(() => {
+        inputRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 300);
+    };
+
+    const handleBlur = () => {
+      console.log("⌨️ Keyboard: Closing");
+      setIsKeyboardOpen(false);
+    };
+
+    const handleViewportChange = () => {
+      const currentHeight = window.visualViewport?.height || window.innerHeight;
+      const isKeyboardVisible = currentHeight < window.innerHeight * 0.8;
+      setIsKeyboardOpen(isKeyboardVisible);
+      setChatPosition(calculateChatPosition());
+    };
+
+    // Visual viewport API for better mobile keyboard detection
+    if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", handleViewportChange);
-      return () =>
-        window.visualViewport.removeEventListener(
-          "resize",
-          handleViewportChange
-        );
     }
+
+    // Fallback focus/blur detection
+    document.addEventListener("focusin", handleFocus);
+    document.addEventListener("focusout", handleBlur);
+
+    return () => {
+      window.visualViewport?.removeEventListener(
+        "resize",
+        handleViewportChange
+      );
+      document.removeEventListener("focusin", handleFocus);
+      document.removeEventListener("focusout", handleBlur);
+    };
   }, [isMobile, calculateChatPosition]);
 
-  // Add message to chat (for fallback mode)
+  // Message handling functions
   const addMessage = useCallback((text, sender) => {
     const newMessage = {
       id: Date.now() + Math.random(),
@@ -552,7 +532,6 @@ const EnhancedBotpressChatWidget = ({
     };
     setMessages((prev) => [...prev, newMessage]);
 
-    // Auto-scroll to bottom
     setTimeout(() => {
       if (messagesContainerRef.current) {
         messagesContainerRef.current.scrollTop =
@@ -561,10 +540,8 @@ const EnhancedBotpressChatWidget = ({
     }, 100);
   }, []);
 
-  // FIXED: Handle sending messages - use ref only, no state
   const handleSendMessage = useCallback(
     async (messageText) => {
-      // Get value from ref or parameter - NO STATE DEPENDENCY
       const textToSend = messageText || (inputRef.current?.value || "").trim();
 
       if (!textToSend) {
@@ -572,10 +549,8 @@ const EnhancedBotpressChatWidget = ({
         return;
       }
 
-      // Add user message immediately
       addMessage(textToSend, "user");
 
-      // Clear ONLY the ref, no state
       if (inputRef.current) {
         inputRef.current.value = "";
       }
@@ -608,10 +583,9 @@ const EnhancedBotpressChatWidget = ({
         setIsTyping(false);
       }
     },
-    [addMessage, agentConfig, getKnowledgeResponse] // NO inputValue dependency
+    [addMessage, agentConfig, getKnowledgeResponse]
   );
 
-  // Handle quick reply clicks
   const handleQuickReply = useCallback(
     (replyText) => {
       console.log("Quick reply clicked:", replyText);
@@ -620,7 +594,6 @@ const EnhancedBotpressChatWidget = ({
     [handleSendMessage]
   );
 
-  // Handle input key press
   const handleKeyPress = useCallback(
     (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -635,8 +608,7 @@ const EnhancedBotpressChatWidget = ({
   useEffect(() => {
     console.log("🚀 Initializing Enhanced Botpress v3 Chat Widget");
 
-    // Show intro message immediately for fallback or invalid client
-    if (useFallback || !hasValidClientId || forceUseFallback) {
+    if (useFallback || !hasValidClientId || forceUseFallback || !isOnline) {
       setMessages([
         {
           id: Date.now(),
@@ -649,273 +621,264 @@ const EnhancedBotpressChatWidget = ({
 
     setIsLoaded(true);
 
-    // Determine if we should use fallback
-    if (!hasValidClientId || forceUseFallback) {
-      console.warn("⚠️ Using fallback chat mode");
+    if (!hasValidClientId || forceUseFallback || !isOnline) {
+      console.warn("⚠️ Using fallback chat mode", {
+        hasValidClientId,
+        isOnline,
+      });
       setUseFallback(true);
     }
-  }, [conversationStarter, hasValidClientId, useFallback, forceUseFallback]);
+  }, [
+    conversationStarter,
+    hasValidClientId,
+    useFallback,
+    forceUseFallback,
+    isOnline,
+  ]);
 
-  // Inject Botpress v3 scripts when shouldUseBotpress is true
-  // Inject Botpress v3 scripts when shouldUseBotpress is true
+  // Enhanced Botpress v3 injection with container constraints and retry logic
   useEffect(() => {
     if (!shouldUseBotpress || useFallback) return;
 
-    console.log("💉 Injecting Botpress v3 scripts");
+    const loadScript = (src) => {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.defer = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.body.appendChild(script);
 
-    // First, create a wrapper div inside our container
-    const container = document.getElementById("bp-web-widget");
-    if (!container) return;
-
-    // Create a specific div for Botpress
-    const botpressDiv = document.createElement("div");
-    botpressDiv.id = "bp-target";
-    botpressDiv.style.width = "100%";
-    botpressDiv.style.height = "100%";
-    botpressDiv.style.position = "relative";
-    container.appendChild(botpressDiv);
-
-    // Override Botpress initialization
-    window.__BP_INIT__ = () => {
-      window.botpress.init({
-        botId: botpressConfig.botId,
-        clientId: botpressConfig.clientId,
-        hostUrl: botpressConfig.hostUrl,
-        messagingUrl: botpressConfig.messagingUrl,
-
-        // Force it to render in our container
-        container: "#bp-target",
-        hideWidget: true, // Hide the floating widget
-        showPoweredBy: false,
-
-        // Style overrides
-        stylesheet: `
-        #webchat-root { 
-          position: relative !important;
-          width: 100% !important;
-          height: 100% !important;
-        }
-        .bpw-floating-button { display: none !important; }
-        .bpw-widget-container { 
-          width: 100% !important;
-          height: 100% !important;
-          position: relative !important;
-        }
-      `,
-
-        // Layout config
-        layoutWidth: "100%",
-        containerWidth: "100%",
-        containerHeight: "100%",
+        // Timeout after 10 seconds
+        setTimeout(() => reject(new Error("Script load timeout")), 10000);
       });
     };
 
-    const script1 = document.createElement("script");
-    script1.src = "https://cdn.botpress.cloud/webchat/v3.0/inject.js";
-    script1.defer = true;
+    const initBotpress = async () => {
+      botpressInitAttempts.current += 1;
+      console.log(
+        `💉 Botpress init attempt ${botpressInitAttempts.current}/${maxInitAttempts}`
+      );
 
-    const script2 = document.createElement("script");
-    script2.src =
-      "https://files.bpcontent.cloud/2025/06/16/10/20250616104701-Y8D5D2OH.js";
-    script2.defer = true;
+      try {
+        // Add container constraint styles FIRST
+        const globalStyle = document.createElement("style");
+        globalStyle.innerHTML = `
+          /* Hide default Botpress elements */
+          #fab-root { display: none !important; }
+          .bpFloat { display: none !important; }
+          
+          /* Constrain monitor screen */
+          .monitor-screen {
+            position: relative !important;
+            overflow: hidden !important;
+          }
+          
+          /* Force Botpress to respect container bounds */
+          #genius-chat-portal #webchat-root,
+          #desktop-content-wrapper #webchat-root,
+          .monitor-screen #webchat-root {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 640px !important;
+            max-height: 480px !important;
+            transform: none !important;
+            z-index: 9999 !important;
+          }
+          
+          #bp-web-widget {
+            position: relative !important;
+            overflow: hidden !important;
+            width: 100% !important;
+            height: 100% !important;
+            -webkit-overflow-scrolling: touch !important;
+            touch-action: manipulation !important;
+          }
+          
+          #bp-web-widget iframe.bpWebchat,
+          .bpw-widget-container {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 640px !important;
+            max-height: 480px !important;
+            position: relative !important;
+          }
+          
+          /* Mobile-specific styles */
+          @media (max-width: 768px) {
+            #bp-web-widget {
+              position: fixed !important;
+              top: 0 !important;
+              left: 0 !important;
+              right: 0 !important;
+              bottom: 0 !important;
+            }
+            
+            #genius-chat-portal #webchat-root,
+            #desktop-content-wrapper #webchat-root,
+            .monitor-screen #webchat-root {
+              max-width: 100vw !important;
+              max-height: 100vh !important;
+            }
+          }
+        `;
+        document.head.appendChild(globalStyle);
 
-    document.body.appendChild(script1);
-    document.body.appendChild(script2);
+        // Load scripts
+        await loadScript("https://cdn.botpress.cloud/webchat/v3.0/inject.js");
+        await loadScript(
+          "https://files.bpcontent.cloud/2025/06/16/10/20250616104701-Y8D5D2OH.js"
+        );
+
+        // Wait for Botpress to be available
+        await new Promise((resolve) => {
+          const checkBotpress = setInterval(() => {
+            if (window.botpress) {
+              clearInterval(checkBotpress);
+              resolve();
+            }
+          }, 100);
+        });
+
+        // Initialize with container targeting
+        window.botpress.init({
+          botId: botpressConfig.botId,
+          clientId: botpressConfig.clientId,
+          hostUrl: botpressConfig.hostUrl,
+          messagingUrl: botpressConfig.messagingUrl,
+
+          // Target the portal container if it exists
+          container: document.querySelector("#genius-chat-portal")
+            ? "#genius-chat-portal"
+            : "#bp-web-widget",
+
+          hideWidget: true,
+          disableAnimations: isMobile,
+          enableReset: false,
+          enableTranscriptDownload: false,
+          closeOnEscape: !isMobile,
+          showPoweredBy: false,
+          composerPlaceholder: "Type a message...",
+          botName: "Clippy GPT",
+          useSessionStorage: true,
+          enableConversationDeletion: true,
+
+          // Custom stylesheet to enforce containment
+          stylesheet: `
+            #webchat-root {
+              position: absolute !important;
+              width: 100% !important;
+              height: 100% !important;
+              top: 0 !important;
+              left: 0 !important;
+              transform: none !important;
+            }
+            .bpw-widget-container {
+              max-width: 640px !important;
+              max-height: 480px !important;
+            }
+            .bpw-layout {
+              width: 100% !important;
+              height: 100% !important;
+            }
+          `,
+        });
+
+        window.botpress.open();
+
+        // Move Botpress into the desktop viewport container
+        setTimeout(() => {
+          const webchatRoot = document.getElementById("webchat-root");
+          const monitorScreen = document.querySelector(".monitor-screen");
+          const portalContainer = document.querySelector("#genius-chat-portal");
+          const targetContainer = portalContainer || monitorScreen;
+
+          if (webchatRoot && targetContainer) {
+            // Move the webchat root into our container
+            targetContainer.appendChild(webchatRoot);
+
+            // Ensure proper positioning
+            webchatRoot.style.position = "absolute";
+            webchatRoot.style.zIndex = "9999";
+            webchatRoot.style.width = "100%";
+            webchatRoot.style.height = "100%";
+
+            console.log("✅ Botpress moved into desktop viewport container");
+          }
+        }, 1000);
+
+        console.log("✅ Botpress initialized successfully");
+      } catch (error) {
+        console.error("❌ Botpress init error:", error);
+
+        if (botpressInitAttempts.current < maxInitAttempts) {
+          console.log("🔄 Retrying in 2 seconds...");
+          setTimeout(initBotpress, 2000);
+        } else {
+          console.log("❌ Max init attempts reached, falling back");
+          setUseFallback(true);
+        }
+      }
+    };
+
+    initBotpress();
+
+    // Viewport resize handler
+    const handleResize = () => {
+      const container = document.querySelector("#webchat-root");
+      if (
+        container &&
+        container.parentElement?.classList.contains("monitor-screen")
+      ) {
+        container.style.width = "640px";
+        container.style.height = "480px";
+      }
+      setChatPosition(calculateChatPosition());
+    };
+
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      // Cleanup
-      if (window.botpress) {
+      window.removeEventListener("resize", handleResize);
+      if (window.botpress && window.botpress.close) {
         window.botpress.close();
       }
-      if (botpressDiv && botpressDiv.parentNode) {
-        botpressDiv.parentNode.removeChild(botpressDiv);
-      }
-      try {
-        document.body.removeChild(script1);
-        document.body.removeChild(script2);
-      } catch (e) {}
     };
-  }, [shouldUseBotpress, useFallback, botpressConfig]);
+  }, [
+    shouldUseBotpress,
+    useFallback,
+    botpressConfig,
+    isMobile,
+    calculateChatPosition,
+  ]);
 
-  // Windows 98 styles
+  // Windows 98 styles with mobile enhancements
   const windows98Styles = `
-    /* Windows 98 Chat Overrides for Botpress v3 */
-    .bp-webchat {
-      font-family: 'MS Sans Serif', 'Tahoma', sans-serif !important;
-      font-size: 11px !important;
-      background-color: #c0c0c0 !important;
-      border: 2px outset #c0c0c0 !important;
-      border-radius: 0 !important;
-      box-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
-    }
-    
-    .bp-webchat-header {
-      background: linear-gradient(90deg, #0080c0 0%, #0080c0 100%) !important;
-      color: white !important;
-      font-weight: bold !important;
-      padding: 2px 4px !important;
-      font-size: 11px !important;
-    }
-    
-    .bp-webchat-message {
-      font-family: 'MS Sans Serif', sans-serif !important;
-      font-size: 11px !important;
-    }
-    
-    .bp-webchat-composer {
-      background-color: #c0c0c0 !important;
-      border-top: 1px inset #c0c0c0 !important;
-    }
-    
-    .bp-webchat-composer-input {
-      font-family: 'MS Sans Serif', sans-serif !important;
-      font-size: 11px !important;
-      background-color: white !important;
-      border: 1px inset #c0c0c0 !important;
-    }
-    
-    /* Fallback chat styles */
-    .fallback-chat {
-      font-family: 'MS Sans Serif', 'Tahoma', sans-serif;
-      font-size: 11px;
-      background-color: #c0c0c0;
-      border: 2px outset #c0c0c0;
-      border-radius: 0;
-      box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    
-    .fallback-header {
-      background: linear-gradient(90deg, #0080c0 0%, #0080c0 100%);
-      color: white;
-      font-weight: bold;
-      padding: 4px 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      min-height: 20px;
-    }
-    
-    .fallback-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px;
-      background: white;
-      min-height: 120px;
-      max-height: 400px;
-    }
-    
-    .fallback-message {
-      margin-bottom: 8px;
-      font-size: 11px;
-      line-height: 1.4;
-      color: #000;
-    }
-    
-    .fallback-input-area {
-      background-color: #f0f0f0;
-      border-top: 1px solid #808080;
-      padding: 4px 8px;
-      display: flex;
-      gap: 4px;
-      align-items: center;
-    }
-    
-    .fallback-input {
-      flex: 1;
-      font-family: 'MS Sans Serif', sans-serif;
-      font-size: 11px;
-      padding: 4px 6px;
-      border: 1px inset #999;
-      background: white;
-      color: #000;
-      outline: none;
-    }
-    
-    .fallback-button {
-      font-family: 'MS Sans Serif', sans-serif;
-      font-size: 11px;
-      padding: 4px 12px;
-      border: 1px outset #c0c0c0;
-      background: #c0c0c0;
-      color: #000;
-      cursor: pointer;
-      min-height: 24px;
-    }
-    
-    .fallback-button:hover {
-      background: #d0d0d0;
-    }
-    
-    .fallback-button:active {
-      border: 1px inset #c0c0c0;
-    }
-    
-    .quick-replies {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-top: 8px;
-      padding: 4px 8px;
-      background: #f0f0f0;
-      border-bottom: 1px solid #808080;
-    }
-    
-    .quick-reply-btn {
-      font-family: 'MS Sans Serif', sans-serif;
-      font-size: 10px;
-      padding: 2px 6px;
-      border: 1px outset #e0e0e0;
-      background: #e0e0e0;
-      color: #000;
-      cursor: pointer;
-      white-space: nowrap;
-      max-width: 80px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    
-    .quick-reply-btn:hover {
-      background: #f0f0f0;
-    }
-    
-    .quick-reply-btn:active {
-      border: 1px inset #e0e0e0;
-    }
-    
-    /* Mobile optimizations */
+    /* Your existing Windows 98 styles */
+    /* Add mobile-specific overrides */
     @media (max-width: 768px) {
       .fallback-chat {
-        transition: all 0.3s ease-in-out;
-      }
-      
-      .fallback-input-area {
-        min-height: 48px;
-        padding: 8px;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
       }
       
       .fallback-input {
-        min-height: 32px;
-        padding: 6px 8px;
-        font-size: 12px;
+        font-size: 16px !important; /* Prevent zoom on iOS */
+        -webkit-appearance: none !important;
       }
       
       .fallback-button {
-        min-height: 32px;
-        font-size: 12px;
-      }
-      
-      .quick-reply-btn {
-        min-height: 32px;
-        font-size: 11px;
-        padding: 4px 8px;
+        min-width: 60px !important;
+        touch-action: manipulation !important;
       }
     }
   `;
 
-  // Fallback chat component with detailed Windows 98 styling
+  // Fallback chat component with mobile optimizations
   const FallbackChat = () => {
     return (
       <div
@@ -927,33 +890,26 @@ const EnhancedBotpressChatWidget = ({
           top: `${chatPosition.top}px`,
           width: `${chatPosition.width}px`,
           height: `${chatPosition.height}px`,
-          zIndex: chatPosition.position === "absolute" ? 10 : 2500, // Lower z-index when absolute
-
-          // Windows 98 styling
+          zIndex: chatPosition.position === "absolute" ? 10 : 2500,
           fontFamily: "'MS Sans Serif', 'Tahoma', sans-serif",
           fontSize: "11px",
           backgroundColor: "#c0c0c0",
-          border: "2px outset #c0c0c0",
+          border: isMobile ? "none" : "2px outset #c0c0c0",
           borderRadius: "0",
-          boxShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-
+          boxShadow: isMobile ? "none" : "2px 2px 4px rgba(0,0,0,0.3)",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-
-          // Mobile optimizations
+          touchAction: "manipulation",
           ...(isMobile && {
-            transition: "all 0.3s ease-in-out",
-            maxHeight: isKeyboardOpen
-              ? `${window.visualViewport?.height - 100}px`
-              : `${chatPosition.height}px`,
+            transition: "height 0.3s ease-in-out",
           }),
         }}
         role="dialog"
         aria-label={`Chat with ${agentConfig.displayName}`}
         aria-live="polite"
       >
-        {/* Chat Header - Blue Windows Title Bar */}
+        {/* Chat Header */}
         <div
           style={{
             backgroundColor: "#000080",
@@ -965,7 +921,8 @@ const EnhancedBotpressChatWidget = ({
             justifyContent: "space-between",
             alignItems: "center",
             borderBottom: "1px solid #808080",
-            minHeight: "20px",
+            minHeight: isMobile ? "44px" : "20px",
+            touchAction: "manipulation",
           }}
         >
           <span>💬 Chat with {agentConfig.displayName}</span>
@@ -977,14 +934,17 @@ const EnhancedBotpressChatWidget = ({
               color: "white",
               fontSize: "12px",
               cursor: "pointer",
-              padding: "2px 6px",
+              padding: isMobile ? "8px 12px" : "2px 6px",
               borderRadius: "2px",
-              minHeight: "20px",
-              minWidth: "20px",
+              minHeight: isMobile ? "32px" : "20px",
+              minWidth: isMobile ? "44px" : "20px",
+              touchAction: "manipulation",
             }}
-            onMouseEnter={(e) => (e.target.style.backgroundColor = "#ff0000")}
+            onMouseEnter={(e) =>
+              !isMobile && (e.target.style.backgroundColor = "#ff0000")
+            }
             onMouseLeave={(e) =>
-              (e.target.style.backgroundColor = "transparent")
+              !isMobile && (e.target.style.backgroundColor = "transparent")
             }
             aria-label="Close chat"
           >
@@ -992,7 +952,7 @@ const EnhancedBotpressChatWidget = ({
           </button>
         </div>
 
-        {/* Messages Area - Expanded to use full space */}
+        {/* Messages Area */}
         <div
           ref={messagesContainerRef}
           style={{
@@ -1005,10 +965,9 @@ const EnhancedBotpressChatWidget = ({
             marginBottom: "4px",
             color: "#000",
             minHeight: "120px",
-            maxHeight: "160px",
             fontFamily: "'Tahoma', sans-serif",
-            fontSize: "11px",
-            lineHeight: "1.3",
+            fontSize: isMobile ? "14px" : "11px",
+            lineHeight: "1.4",
             scrollBehavior: "smooth",
             WebkitOverflowScrolling: "touch",
             WebkitFontSmoothing: "antialiased",
@@ -1023,7 +982,7 @@ const EnhancedBotpressChatWidget = ({
                 marginBottom: "8px",
                 textAlign: message.sender === "user" ? "right" : "left",
                 color: message.sender === "user" ? "#000080" : "#000",
-                fontSize: "11px",
+                fontSize: isMobile ? "14px" : "11px",
                 lineHeight: "1.4",
               }}
             >
@@ -1034,13 +993,12 @@ const EnhancedBotpressChatWidget = ({
             </div>
           ))}
 
-          {/* Typing indicator */}
           {isTyping && (
             <div
               style={{
                 color: "#666",
                 fontStyle: "italic",
-                fontSize: "10px",
+                fontSize: isMobile ? "12px" : "10px",
                 marginTop: "4px",
               }}
             >
@@ -1049,17 +1007,17 @@ const EnhancedBotpressChatWidget = ({
           )}
         </div>
 
-        {/* Quick Replies - Smaller, more reasonable size */}
+        {/* Quick Replies */}
         {quickReplies.length > 0 && (
           <div
             style={{
-              padding: "2px 6px",
+              padding: isMobile ? "8px" : "2px 6px",
               backgroundColor: "#f0f0f0",
               borderBottom: "1px solid #808080",
               display: "flex",
               flexWrap: "wrap",
-              gap: "3px",
-              maxHeight: "40px",
+              gap: isMobile ? "8px" : "3px",
+              maxHeight: isMobile ? "80px" : "40px",
               overflowY: "auto",
               WebkitOverflowScrolling: "touch",
             }}
@@ -1069,26 +1027,27 @@ const EnhancedBotpressChatWidget = ({
                 key={index}
                 onClick={() => handleQuickReply(reply)}
                 style={{
-                  fontSize: "9px",
-                  padding: "1px 4px",
+                  fontSize: isMobile ? "12px" : "9px",
+                  padding: isMobile ? "8px 12px" : "1px 4px",
                   backgroundColor: "#e0e0e0",
                   border: "1px outset #e0e0e0",
                   cursor: "pointer",
                   borderRadius: "0",
-                  minHeight: isMobile ? "20px" : "18px",
-                  maxWidth: "70px",
+                  minHeight: isMobile ? "36px" : "18px",
+                  maxWidth: isMobile ? "auto" : "70px",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                   fontFamily: "'MS Sans Serif', sans-serif",
                   WebkitAppearance: "none",
                   WebkitTapHighlightColor: "transparent",
+                  touchAction: "manipulation",
                 }}
                 onMouseEnter={(e) =>
-                  (e.target.style.backgroundColor = "#d0d0d0")
+                  !isMobile && (e.target.style.backgroundColor = "#d0d0d0")
                 }
                 onMouseLeave={(e) =>
-                  (e.target.style.backgroundColor = "#e0e0e0")
+                  !isMobile && (e.target.style.backgroundColor = "#e0e0e0")
                 }
                 aria-label={`Quick reply: ${reply}`}
                 title={reply}
@@ -1099,12 +1058,12 @@ const EnhancedBotpressChatWidget = ({
           </div>
         )}
 
-        {/* Input Area - FIXED: Use ref only, no value prop */}
+        {/* Input Area */}
         <div
           style={{
             display: "flex",
             gap: "4px",
-            padding: "4px 8px",
+            padding: isMobile ? "8px" : "4px 8px",
             backgroundColor: "#f0f0f0",
             borderTop: "1px solid #808080",
             alignItems: "stretch",
@@ -1116,19 +1075,23 @@ const EnhancedBotpressChatWidget = ({
             name="chatMessage"
             type="text"
             onKeyDown={handleKeyPress}
-            placeholder="Ask about martech, UTM tracking, or campaigns..."
+            placeholder="Ask about martech, UTM tracking..."
             autoComplete="off"
+            enterKeyHint="send"
+            inputMode="text"
             style={{
               flex: 1,
-              padding: "4px 6px",
+              padding: isMobile ? "12px" : "4px 6px",
               border: "1px inset #999",
-              fontSize: "11px",
+              fontSize: isMobile ? "16px" : "11px",
               color: "#000",
               fontFamily: "'MS Sans Serif', sans-serif",
               backgroundColor: "#fff",
               outline: "none",
-              minHeight: "20px",
+              minHeight: isMobile ? "44px" : "20px",
               WebkitAppearance: "none",
+              borderRadius: "0",
+              touchAction: "manipulation",
             }}
             aria-label="Type your message"
           />
@@ -1136,23 +1099,24 @@ const EnhancedBotpressChatWidget = ({
             type="button"
             onClick={() => handleSendMessage()}
             style={{
-              padding: "4px 12px",
+              padding: isMobile ? "12px 20px" : "4px 12px",
               backgroundColor: "#c0c0c0",
               border: "1px outset #c0c0c0",
-              fontSize: "11px",
+              fontSize: isMobile ? "14px" : "11px",
               cursor: "pointer",
               color: "#000",
               fontFamily: "'MS Sans Serif', sans-serif",
-              minHeight: "28px",
-              minWidth: "50px",
+              minHeight: isMobile ? "44px" : "28px",
+              minWidth: isMobile ? "70px" : "50px",
               WebkitAppearance: "none",
+              touchAction: "manipulation",
             }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = "#d0d0d0";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = "#c0c0c0";
-            }}
+            onMouseEnter={(e) =>
+              !isMobile && (e.target.style.backgroundColor = "#d0d0d0")
+            }
+            onMouseLeave={(e) =>
+              !isMobile && (e.target.style.backgroundColor = "#c0c0c0")
+            }
             aria-label="Send message"
           >
             Send
@@ -1186,8 +1150,8 @@ const EnhancedBotpressChatWidget = ({
     );
   }
 
-  // Use fallback mode if no valid client ID or forced fallback
-  if (useFallback || !hasValidClientId || forceUseFallback) {
+  // Use fallback mode if conditions aren't met
+  if (useFallback || !hasValidClientId || forceUseFallback || !isOnline) {
     return (
       <>
         <style>{windows98Styles}</style>
@@ -1196,7 +1160,7 @@ const EnhancedBotpressChatWidget = ({
     );
   }
 
-  // Use real Botpress v2 when client ID is available
+  // Botpress integration
   return (
     <>
       <style>{windows98Styles}</style>
@@ -1212,10 +1176,11 @@ const EnhancedBotpressChatWidget = ({
           flexDirection: "column",
           fontFamily: "'MS Sans Serif', 'Tahoma', sans-serif",
           backgroundColor: "#c0c0c0",
-          border: "2px outset #c0c0c0",
+          border: isMobile ? "none" : "2px outset #c0c0c0",
           borderRadius: "0",
-          boxShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+          boxShadow: isMobile ? "none" : "2px 2px 4px rgba(0,0,0,0.3)",
           overflow: "hidden",
+          touchAction: "manipulation",
         }}
       >
         {/* Windows 98 Header */}
@@ -1223,13 +1188,13 @@ const EnhancedBotpressChatWidget = ({
           style={{
             backgroundColor: "#000080",
             color: "white",
-            padding: "4px 8px",
+            padding: isMobile ? "8px" : "4px 8px",
             fontSize: "11px",
             fontWeight: "bold",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            minHeight: "20px",
+            minHeight: isMobile ? "44px" : "20px",
           }}
         >
           <span>💬 Clippy GPT - Martech Specialist</span>
@@ -1244,19 +1209,41 @@ const EnhancedBotpressChatWidget = ({
               color: "white",
               fontSize: "12px",
               cursor: "pointer",
-              padding: "2px 6px",
+              padding: isMobile ? "8px 12px" : "2px 6px",
+              minWidth: isMobile ? "44px" : "auto",
+              touchAction: "manipulation",
             }}
           >
             ✕
           </button>
         </div>
 
-        {/* Botpress v3 Webchat Container */}
+        {/* Botpress v3 Container */}
         <div
           id="bp-web-widget"
-          style={{ flex: 1, overflow: "hidden", position: "relative" }}
+          style={{
+            flex: 1,
+            overflow: "hidden",
+            position: "relative",
+            touchAction: "manipulation",
+          }}
         >
           {/* Botpress will inject here */}
+          {!isOnline && (
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                textAlign: "center",
+                padding: "20px",
+              }}
+            >
+              <p>📡 No internet connection</p>
+              <p>Chat will load when connection is restored</p>
+            </div>
+          )}
         </div>
       </div>
     </>

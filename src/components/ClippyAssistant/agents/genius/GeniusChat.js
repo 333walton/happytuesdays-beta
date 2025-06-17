@@ -1,6 +1,6 @@
 /**
  * GeniusChat - Wrapper component for Genius agent's Botpress chat integration
- * UPDATED: Now uses Botpress v3 with mobile support
+ * UPDATED: Fixed mobile touch interaction issues
  *
  * This component handles the conditional rendering of Botpress chat specifically
  * for the Genius agent (martech/adtech specialist) while maintaining consistency
@@ -25,33 +25,86 @@ const GeniusChat = ({
 }) => {
   const [isReady, setIsReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const agentConfig = getAgentConfig(currentAgent);
 
-  // Update mobile detection to be reactive
+  // Enhanced mobile detection with touch support
   useEffect(() => {
     const checkMobile = () => {
-      const mobile =
-        window.innerWidth <= 768 ||
+      // Check for touch capability first
+      const hasTouch =
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 0 ||
+        navigator.msMaxTouchPoints > 0;
+
+      // Check viewport size
+      const isMobileWidth = window.innerWidth <= 768;
+
+      // Check user agent as fallback
+      const isMobileUA =
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
           navigator.userAgent
         );
+
+      // Device is mobile if it has touch AND (small screen OR mobile UA)
+      const mobile = hasTouch && (isMobileWidth || isMobileUA);
+
       setIsMobile(mobile);
-      console.log("📱 Mobile check:", { mobile, width: window.innerWidth });
+      console.log("📱 Mobile detection:", {
+        hasTouch,
+        isMobileWidth,
+        isMobileUA,
+        mobile,
+        width: window.innerWidth,
+      });
     };
 
     checkMobile();
-    window.addEventListener("resize", checkMobile);
 
-    return () => window.removeEventListener("resize", checkMobile);
+    // Listen for orientation changes and resize
+    window.addEventListener("resize", checkMobile);
+    window.addEventListener("orientationchange", checkMobile);
+
+    // Check on visibility change (important for mobile browsers)
+    document.addEventListener("visibilitychange", checkMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      window.removeEventListener("orientationchange", checkMobile);
+      document.removeEventListener("visibilitychange", checkMobile);
+    };
+  }, []);
+
+  // Network status monitoring
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log("🌐 Network: Online");
+      setIsOnline(true);
+    };
+
+    const handleOffline = () => {
+      console.log("🌐 Network: Offline");
+      setIsOnline(false);
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
   }, []);
 
   // Initialize chat when component mounts
   useEffect(() => {
-    if (visible) {
+    if (visible && isOnline) {
       console.log("🚀 GeniusChat becoming visible, setting ready");
       setIsReady(true);
+    } else if (!isOnline) {
+      console.log("📵 GeniusChat offline, not setting ready");
     }
-  }, [visible]);
+  }, [visible, isOnline]);
 
   // Only render if current agent is Genius and uses Botpress
   if (currentAgent !== "Genius" || agentConfig.chatSystem !== "botpress") {
@@ -79,6 +132,7 @@ const GeniusChat = ({
       isReady,
       visible,
       currentAgent,
+      isOnline,
     });
     return null;
   }
@@ -89,10 +143,11 @@ const GeniusChat = ({
     visible,
     isReady,
     isMobile,
+    isOnline,
     position,
   });
 
-  // Always render directly without portal on mobile
+  // Mobile rendering - FIXED: Removed problematic pointer-events wrapper
   if (isMobile) {
     console.log("📱 Rendering GeniusChat for mobile");
     return (
@@ -105,26 +160,21 @@ const GeniusChat = ({
           left: 0,
           width: "100%",
           height: "100%",
-          pointerEvents: "none", // Allow clicks to pass through except on the chat
+          // REMOVED pointer-events that was blocking touch
+          // Now using touchAction for better mobile handling
+          touchAction: "manipulation",
         }}
       >
-        <div
-          style={{
-            pointerEvents: "auto", // Re-enable clicks on the actual chat
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <EnhancedBotpressChatWidget
-            agentConfig={agentConfig}
-            conversationStarter={conversationStarter}
-            quickReplies={quickReplies}
-            position={position}
-            onClose={handleChatClose}
-            isMobile={true}
-            {...props}
-          />
-        </div>
+        <EnhancedBotpressChatWidget
+          agentConfig={agentConfig}
+          conversationStarter={conversationStarter}
+          quickReplies={quickReplies}
+          position={position}
+          onClose={handleChatClose}
+          isMobile={true}
+          isOnline={isOnline}
+          {...props}
+        />
       </div>
     );
   }
@@ -141,6 +191,7 @@ const GeniusChat = ({
           position={position}
           onClose={handleChatClose}
           isMobile={false}
+          isOnline={isOnline}
           {...props}
         />
       </div>
