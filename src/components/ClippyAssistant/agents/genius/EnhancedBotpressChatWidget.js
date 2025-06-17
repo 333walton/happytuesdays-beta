@@ -657,14 +657,59 @@ const EnhancedBotpressChatWidget = ({
   }, [conversationStarter, hasValidClientId, useFallback, forceUseFallback]);
 
   // Inject Botpress v3 scripts when shouldUseBotpress is true
+  // Inject Botpress v3 scripts when shouldUseBotpress is true
   useEffect(() => {
-    if (!shouldUseBotpress) {
-      return;
-    }
+    if (!shouldUseBotpress || useFallback) return;
 
     console.log("💉 Injecting Botpress v3 scripts");
 
-    // Create and append the Botpress v3 scripts
+    // First, create a wrapper div inside our container
+    const container = document.getElementById("bp-web-widget");
+    if (!container) return;
+
+    // Create a specific div for Botpress
+    const botpressDiv = document.createElement("div");
+    botpressDiv.id = "bp-target";
+    botpressDiv.style.width = "100%";
+    botpressDiv.style.height = "100%";
+    botpressDiv.style.position = "relative";
+    container.appendChild(botpressDiv);
+
+    // Override Botpress initialization
+    window.__BP_INIT__ = () => {
+      window.botpress.init({
+        botId: botpressConfig.botId,
+        clientId: botpressConfig.clientId,
+        hostUrl: botpressConfig.hostUrl,
+        messagingUrl: botpressConfig.messagingUrl,
+
+        // Force it to render in our container
+        container: "#bp-target",
+        hideWidget: true, // Hide the floating widget
+        showPoweredBy: false,
+
+        // Style overrides
+        stylesheet: `
+        #webchat-root { 
+          position: relative !important;
+          width: 100% !important;
+          height: 100% !important;
+        }
+        .bpw-floating-button { display: none !important; }
+        .bpw-widget-container { 
+          width: 100% !important;
+          height: 100% !important;
+          position: relative !important;
+        }
+      `,
+
+        // Layout config
+        layoutWidth: "100%",
+        containerWidth: "100%",
+        containerHeight: "100%",
+      });
+    };
+
     const script1 = document.createElement("script");
     script1.src = "https://cdn.botpress.cloud/webchat/v3.0/inject.js";
     script1.defer = true;
@@ -677,17 +722,20 @@ const EnhancedBotpressChatWidget = ({
     document.body.appendChild(script1);
     document.body.appendChild(script2);
 
-    // Cleanup on unmount
     return () => {
-      console.log("🧹 Cleaning up Botpress v3 scripts");
-      if (script1.parentNode) {
-        script1.parentNode.removeChild(script1);
+      // Cleanup
+      if (window.botpress) {
+        window.botpress.close();
       }
-      if (script2.parentNode) {
-        script2.parentNode.removeChild(script2);
+      if (botpressDiv && botpressDiv.parentNode) {
+        botpressDiv.parentNode.removeChild(botpressDiv);
       }
+      try {
+        document.body.removeChild(script1);
+        document.body.removeChild(script2);
+      } catch (e) {}
     };
-  }, [shouldUseBotpress]);
+  }, [shouldUseBotpress, useFallback, botpressConfig]);
 
   // Windows 98 styles
   const windows98Styles = `
@@ -1205,9 +1253,11 @@ const EnhancedBotpressChatWidget = ({
 
         {/* Botpress v3 Webchat Container */}
         <div
-          id="botpress-webchat-container"
-          style={{ flex: 1, overflow: "hidden" }}
-        ></div>
+          id="bp-web-widget"
+          style={{ flex: 1, overflow: "hidden", position: "relative" }}
+        >
+          {/* Botpress will inject here */}
+        </div>
       </div>
     </>
   );
