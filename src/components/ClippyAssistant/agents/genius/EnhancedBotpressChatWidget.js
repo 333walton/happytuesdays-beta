@@ -591,7 +591,7 @@ const EnhancedBotpressChatWidget = ({
           botId: process.env.REACT_APP_BOTPRESS_BOT_ID || "demo-bot",
           hostUrl:
             process.env.REACT_APP_BOTPRESS_HOST_URL ||
-            "https://demo.botpress.cloud",
+            "https://cdn.botpress.cloud/webchat/v1",
           messagingUrl:
             process.env.REACT_APP_BOTPRESS_MESSAGING_URL ||
             "https://messaging.botpress.cloud",
