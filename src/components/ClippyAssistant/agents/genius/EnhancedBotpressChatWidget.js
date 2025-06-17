@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { WebchatProvider, Webchat, useWebchat } from "@botpress/webchat";
-import { buildTheme } from "@botpress/webchat-generator";
 import {
   searchKnowledge,
   getAgentKnowledge,
@@ -77,12 +75,6 @@ const EnhancedBotpressChatWidget = ({
     !forceUseFallback &&
     botpressConfig.botId &&
     botpressConfig.clientId;
-
-  // Windows 98 theme configuration for Botpress v2
-  const { style, theme } = buildTheme({
-    themeName: "prism",
-    themeColor: "#3276EA", // Your bot's actual color
-  });
 
   // Device detection
   const isMobile =
@@ -641,7 +633,7 @@ const EnhancedBotpressChatWidget = ({
 
   // Initialize chat
   useEffect(() => {
-    console.log("🚀 Initializing Enhanced Botpress v2 Chat Widget");
+    console.log("🚀 Initializing Enhanced Botpress v3 Chat Widget");
 
     // Show intro message immediately for fallback or invalid client
     if (useFallback || !hasValidClientId || forceUseFallback) {
@@ -664,11 +656,42 @@ const EnhancedBotpressChatWidget = ({
     }
   }, [conversationStarter, hasValidClientId, useFallback, forceUseFallback]);
 
+  // Inject Botpress v3 scripts when shouldUseBotpress is true
+  useEffect(() => {
+    if (!shouldUseBotpress) {
+      return;
+    }
+
+    console.log("💉 Injecting Botpress v3 scripts");
+
+    // Create and append the Botpress v3 scripts
+    const script1 = document.createElement("script");
+    script1.src = "https://cdn.botpress.cloud/webchat/v3.0/inject.js";
+    script1.defer = true;
+
+    const script2 = document.createElement("script");
+    script2.src =
+      "https://files.bpcontent.cloud/2025/06/16/10/20250616104701-Y8D5D2OH.js";
+    script2.defer = true;
+
+    document.body.appendChild(script1);
+    document.body.appendChild(script2);
+
+    // Cleanup on unmount
+    return () => {
+      console.log("🧹 Cleaning up Botpress v3 scripts");
+      if (script1.parentNode) {
+        script1.parentNode.removeChild(script1);
+      }
+      if (script2.parentNode) {
+        script2.parentNode.removeChild(script2);
+      }
+    };
+  }, [shouldUseBotpress]);
+
   // Windows 98 styles
   const windows98Styles = `
-    ${style}
-    
-    /* Windows 98 Chat Overrides for Botpress v2 */
+    /* Windows 98 Chat Overrides for Botpress v3 */
     .bp-webchat {
       font-family: 'MS Sans Serif', 'Tahoma', sans-serif !important;
       font-size: 11px !important;
@@ -1180,26 +1203,11 @@ const EnhancedBotpressChatWidget = ({
           </button>
         </div>
 
-        {/* Botpress Webchat with Provider */}
-        <div style={{ flex: 1, overflow: "hidden" }}>
-          <WebchatProvider
-            configuration={{
-              botId: botpressConfig.botId,
-              clientId: botpressConfig.clientId,
-              hostUrl: botpressConfig.hostUrl,
-              messagingUrl: botpressConfig.messagingUrl,
-            }}
-            theme={theme}
-          >
-            <Webchat
-              style={{
-                width: "100%",
-                height: "100%",
-                border: "none",
-              }}
-            />
-          </WebchatProvider>
-        </div>
+        {/* Botpress v3 Webchat Container */}
+        <div
+          id="botpress-webchat-container"
+          style={{ flex: 1, overflow: "hidden" }}
+        ></div>
       </div>
     </>
   );
