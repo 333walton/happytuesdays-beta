@@ -27,6 +27,14 @@ const EnhancedBotpressChatWidget = ({
   },
   conversationStarter = "Hello! I'm Genius, your marketing technology expert. I can help with UTM tracking, analytics setup, campaign optimization, and troubleshooting martech issues. What can I help you with today?",
 }) => {
+  // Add this at the top of your component, inside the function
+  console.log("🔍 Environment Variables Check:", {
+    botId: process.env.REACT_APP_BOTPRESS_BOT_ID,
+    clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
+    hostUrl: process.env.REACT_APP_BOTPRESS_HOST_URL,
+    messagingUrl: process.env.REACT_APP_BOTPRESS_MESSAGING_URL,
+  });
+
   // State management
   const [isOpen, setIsOpen] = useState(true);
   const [messages, setMessages] = useState([]);
