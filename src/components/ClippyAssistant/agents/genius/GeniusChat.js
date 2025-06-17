@@ -14,6 +14,7 @@ import {
   getQuickReplies,
 } from "../data/AgentResponses";
 import EnhancedBotpressChatWidget from "./EnhancedBotpressChatWidget";
+import DesktopPortalWrapper from "./DesktopPortalWrapper";
 
 const GeniusChat = ({
   currentAgent,
@@ -64,17 +65,43 @@ const GeniusChat = ({
     isReady,
   });
 
+  // Check if we're on mobile
+  const isMobile =
+    window.innerWidth <= 768 ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
+  // On mobile, render directly. On desktop, use portal to render inside desktop viewport
+  if (isMobile) {
+    return (
+      <div className="genius-chat-wrapper">
+        <EnhancedBotpressChatWidget
+          agentConfig={agentConfig}
+          conversationStarter={conversationStarter}
+          quickReplies={quickReplies}
+          position={position}
+          onClose={handleChatClose}
+          {...props}
+        />
+      </div>
+    );
+  }
+
+  // Desktop: Use portal to render inside desktop viewport
   return (
-    <div className="genius-chat-wrapper">
-      <EnhancedBotpressChatWidget
-        agentConfig={agentConfig}
-        conversationStarter={conversationStarter}
-        quickReplies={quickReplies}
-        position={position}
-        onClose={handleChatClose}
-        {...props}
-      />
-    </div>
+    <DesktopPortalWrapper>
+      <div className="genius-chat-wrapper">
+        <EnhancedBotpressChatWidget
+          agentConfig={agentConfig}
+          conversationStarter={conversationStarter}
+          quickReplies={quickReplies}
+          position={position}
+          onClose={handleChatClose}
+          {...props}
+        />
+      </div>
+    </DesktopPortalWrapper>
   );
 };
 

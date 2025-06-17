@@ -288,15 +288,97 @@ const EnhancedBotpressChatWidget = ({
 
   // Position calculation with improved desktop viewport detection
   const calculateChatPosition = useCallback(() => {
-    const chatWidth = isMobile ? Math.min(330, window.innerWidth - 16) : 400;
-    const chatHeight = isMobile ? Math.min(280, window.innerHeight - 150) : 600;
+    // Check if we're within the monitor/desktop viewport
+    const monitorScreen = document.querySelector(".monitor-screen");
+    const isInMonitorMode = !!monitorScreen;
+
+    // Check if we're rendered inside the portal (absolute positioning)
+    const portalContainer = document.querySelector("#genius-chat-portal");
+    const isInPortal = !!portalContainer;
+
+    // Adjust chat dimensions based on viewport constraints
+    let chatWidth, chatHeight;
+
+    if (isMobile) {
+      chatWidth = Math.min(330, window.innerWidth - 16);
+      chatHeight = Math.min(280, window.innerHeight - 150);
+    } else if (isInMonitorMode) {
+      // Smaller chat when in monitor mode to fit within desktop
+      chatWidth = 320;
+      chatHeight = 240;
+    } else {
+      // Normal desktop size
+      chatWidth = 400;
+      chatHeight = 600;
+    }
 
     console.log("🔍 Calculating chat position:", {
       isMobile,
+      isInMonitorMode,
+      isInPortal,
       chatWidth,
       chatHeight,
     });
 
+    // If we're in portal (desktop viewport), use absolute positioning
+    if (isInPortal && !isMobile) {
+      const clippyEl = document.querySelector(".clippy");
+      const overlayEl = document.getElementById("clippy-clickable-overlay");
+      const portalRect = portalContainer.getBoundingClientRect();
+
+      if (clippyEl) {
+        const clippyRect = clippyEl.getBoundingClientRect();
+
+        // Calculate relative to portal container
+        let left =
+          clippyRect.left -
+          portalRect.left +
+          clippyRect.width / 2 -
+          chatWidth / 2;
+        let top = clippyRect.top - portalRect.top - chatHeight - 10;
+
+        // Constrain within portal bounds
+        const margin = 10;
+        const maxLeft = portalRect.width - chatWidth - margin;
+        const maxTop = portalRect.height - chatHeight - margin;
+
+        left = Math.max(margin, Math.min(left, maxLeft));
+
+        // If not enough space above, position to the side
+        if (top < margin) {
+          top = clippyRect.top - portalRect.top;
+          // Try left side first
+          if (clippyRect.left - portalRect.left - chatWidth - 10 > margin) {
+            left = clippyRect.left - portalRect.left - chatWidth - 10;
+          } else {
+            // Use right side
+            left = clippyRect.right - portalRect.left + 10;
+            left = Math.min(left, maxLeft);
+          }
+        }
+
+        top = Math.max(margin, Math.min(top, maxTop));
+
+        return {
+          left,
+          top,
+          width: chatWidth,
+          height: chatHeight,
+          position: "absolute", // Use absolute positioning inside portal
+        };
+      }
+
+      // Fallback center position in portal
+      return {
+        left: Math.max(10, (portalRect.width - chatWidth) / 2),
+        top: Math.max(10, (portalRect.height - chatHeight) / 2),
+        width: chatWidth,
+        height: chatHeight,
+        position: "absolute",
+      };
+    }
+
+    // Original fixed positioning logic for mobile and non-portal desktop
     let viewportWidth,
       viewportHeight,
       viewportLeft = 0,
@@ -312,10 +394,22 @@ const EnhancedBotpressChatWidget = ({
       const desktop =
         document.querySelector(".desktop.screen") ||
         document.querySelector(".desktop") ||
-        document.querySelector(".w98") ||
-        document.querySelector("body");
+        document.querySelector(".w98");
 
-      if (desktop && desktop !== document.querySelector("body")) {
+      if (desktop && isInMonitorMode) {
+        // We're in monitor mode, use the monitor screen bounds
+        const monitorScreenRect = monitorScreen.getBoundingClientRect();
+        viewportWidth = monitorScreenRect.width;
+        viewportHeight = monitorScreenRect.height;
+        viewportLeft = monitorScreenRect.left;
+        viewportTop = monitorScreenRect.top;
+        console.log("📺 Using monitor screen bounds:", {
+          viewportWidth,
+          viewportHeight,
+          viewportLeft,
+          viewportTop,
+        });
+      } else if (desktop) {
         const desktopRect = desktop.getBoundingClientRect();
         viewportWidth = desktopRect.width;
         viewportHeight = desktopRect.height;
@@ -353,12 +447,13 @@ const EnhancedBotpressChatWidget = ({
         ? overlayEl.getBoundingClientRect()
         : clippyRect;
 
+      // Position chat above Clippy
       let left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2;
-      let top = overlayRect.top - chatHeight - 1;
+      let top = overlayRect.top - chatHeight - 10;
 
       // Constrain to viewport with margins
-      const horizontalMargin = 40;
-      const verticalMargin = 30;
+      const horizontalMargin = isInMonitorMode ? 10 : 40;
+      const verticalMargin = isInMonitorMode ? 10 : 30;
 
       const minLeft = viewportLeft + horizontalMargin;
       const maxLeft =
@@ -367,6 +462,20 @@ const EnhancedBotpressChatWidget = ({
 
       const minTop = viewportTop + verticalMargin;
       const maxTop = viewportTop + viewportHeight - chatHeight - verticalMargin;
+
+      // If chat would appear above the viewport, position it to the side of Clippy
+      if (top < minTop) {
+        top = clippyRect.top;
+        // Try to position to the left of Clippy
+        if (clippyRect.left - chatWidth - 10 > minLeft) {
+          left = clippyRect.left - chatWidth - 10;
+        } else {
+          // Position to the right if no space on left
+          left = clippyRect.right + 10;
+          left = Math.min(left, maxLeft);
+        }
+      }
+
       top = Math.max(minTop, Math.min(top, maxTop));
 
       return {
@@ -378,13 +487,18 @@ const EnhancedBotpressChatWidget = ({
       };
     }
 
-    // Fallback position
+    // Fallback position - center in viewport
+    const fallbackHorizontalMargin = isInMonitorMode ? 10 : 40;
+    const fallbackVerticalMargin = isInMonitorMode ? 10 : 30;
+
     const fallbackLeft = isMobile
       ? 14
-      : Math.max(50, (viewportWidth - chatWidth) / 2);
+      : viewportLeft +
+        Math.max(fallbackHorizontalMargin, (viewportWidth - chatWidth) / 2);
     const fallbackTop = isMobile
       ? 100
-      : Math.max(50, (viewportHeight - chatHeight) / 2);
+      : viewportTop +
+        Math.max(fallbackVerticalMargin, (viewportHeight - chatHeight) / 2);
 
     return {
       left: fallbackLeft,
@@ -707,12 +821,12 @@ const EnhancedBotpressChatWidget = ({
         ref={chatContainerRef}
         className="enhanced-botpress-chat-widget"
         style={{
-          position: "fixed",
+          position: chatPosition.position || "fixed",
           left: `${chatPosition.left}px`,
           top: `${chatPosition.top}px`,
           width: `${chatPosition.width}px`,
           height: `${chatPosition.height}px`,
-          zIndex: 9999,
+          zIndex: chatPosition.position === "absolute" ? 10 : 2500, // Lower z-index when absolute
 
           // Windows 98 styling
           fontFamily: "'MS Sans Serif', 'Tahoma', sans-serif",
@@ -965,7 +1079,7 @@ const EnhancedBotpressChatWidget = ({
           justifyContent: "center",
           fontFamily: "'MS Sans Serif', sans-serif",
           fontSize: "11px",
-          zIndex: 9999,
+          zIndex: 2500,
         }}
       >
         Loading chat...
@@ -993,7 +1107,7 @@ const EnhancedBotpressChatWidget = ({
         style={{
           ...chatPosition,
           display: isOpen ? "flex" : "none",
-          zIndex: 9999,
+          zIndex: 2500,
         }}
       />
 
@@ -1010,7 +1124,7 @@ const EnhancedBotpressChatWidget = ({
             right: `${
               window.innerWidth - chatPosition.left - chatPosition.width + 8
             }px`,
-            zIndex: 10000,
+            zIndex: 2600,
             background: "#c0c0c0",
             border: "1px outset #c0c0c0",
             padding: "0 4px",

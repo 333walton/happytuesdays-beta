@@ -51,6 +51,8 @@ const MonitorFrame = ({
             position: "relative",
             // Don't block desktop interaction when power is on
             pointerEvents: isScreenPoweredOn ? "auto" : "none",
+            overflow: "hidden",
+            contain: "layout size style paint",
           }}
         >
           {/* CRT effect for when zoomed in */}

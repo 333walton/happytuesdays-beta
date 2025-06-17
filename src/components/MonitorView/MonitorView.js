@@ -212,12 +212,11 @@ class MonitorView extends Component {
 
     if (monitorContainer) {
       if (zoomFactor > 1) {
-        monitorContainer.style.transform = `scale(${zoomFactor})`;
-        monitorContainer.style.transformOrigin = "center center";
+        // Use CSS variable to maintain centering while zooming
+        monitorContainer.style.setProperty("--zoom-scale", zoomFactor);
         monitorContainer.classList.add("zoomed");
       } else {
-        monitorContainer.style.transform = "";
-        monitorContainer.style.transformOrigin = "";
+        monitorContainer.style.removeProperty("--zoom-scale");
         monitorContainer.classList.remove("zoomed");
       }
     }
@@ -230,8 +229,7 @@ class MonitorView extends Component {
     const monitorContainer = document.querySelector(".monitor-container");
 
     if (monitorContainer) {
-      monitorContainer.style.transform = "";
-      monitorContainer.style.transformOrigin = "";
+      monitorContainer.style.removeProperty("--zoom-scale");
       monitorContainer.classList.remove("zoomed");
     }
   };
@@ -600,13 +598,6 @@ class MonitorView extends Component {
           className={`monitor-container ${
             this.state.zoomLevel > 0 ? "zoomed" : ""
           }`}
-          style={{
-            position: "relative",
-            width: "auto",
-            height: "auto",
-            transition: "transform 0.3s ease",
-            transformOrigin: "center center",
-          }}
         >
           {/* Use MonitorFrame component */}
           <MonitorFrame
