@@ -61,7 +61,7 @@ const EnhancedBotpressChatWidget = ({
     process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "YOUR_CLIENT_ID_HERE";
 
   // ADD THIS LINE TO FORCE FALLBACK MODE:
-  const forceUseFallback = true; // Set to false when you want to try Botpress again
+  const forceUseFallback = false; // Set to false when you want to try Botpress again
 
   // Botpress v2 client setup - ONLY create client if not forcing fallback
   // Botpress v2 client setup with error handling
