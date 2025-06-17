@@ -800,6 +800,7 @@ const MonitorControlsPanel = ({
             justifyContent: "center",
             cursor: "pointer",
             outlineColor: "transparent",
+            color: "black" /* Or color: #000; or color: rgb(0, 0, 0); */,
           }}
         >
           {isCollapsed ? "▼" : "▲"}
@@ -1087,7 +1088,9 @@ const MonitorControlsPanel = ({
                               width: "100%",
                               height: "100%",
                               opacity: 0,
-                              cursor: isRocketActive ? "not-allowed" : "default",
+                              cursor: isRocketActive
+                                ? "not-allowed"
+                                : "default",
                               zIndex: 2, // Higher than the visual elements
                             }}
                             disabled={isRocketActive}
@@ -1115,7 +1118,8 @@ const MonitorControlsPanel = ({
                               fontFamily:
                                 '"ms_sans_serif", "ms sans serif", "Microsoft Sans Serif", sans-serif',
                               color:
-                                activeScreensaver === "default" && isRocketActive
+                                activeScreensaver === "default" &&
+                                isRocketActive
                                   ? "#888888"
                                   : "#000000",
                               display: "flex",
@@ -1220,8 +1224,8 @@ const MonitorControlsPanel = ({
                             fontSize: "11px",
                           }}
                         >
-                          <span style={{ fontWeight: "bold" }}>Hydra98</span> is a
-                          Windows 98 desktop
+                          <span style={{ fontWeight: "bold" }}>Hydra98</span> is
+                          a Windows 98 desktop
                         </span>
                       </div>
 
@@ -1262,8 +1266,8 @@ const MonitorControlsPanel = ({
                           }}
                         >
                           Use the{" "}
-                          <span style={{ fontWeight: "bold" }}>controls</span> to
-                          customize your
+                          <span style={{ fontWeight: "bold" }}>controls</span>{" "}
+                          to customize your
                         </span>
                       </div>
                       {/* Fourth line */}
