@@ -1,10 +1,6 @@
 /**
  * GeniusChat - Wrapper component for Genius agent's Botpress chat integration
- * UPDATED: Fixed mobile touch interaction issues
- *
- * This component handles the conditional rendering of Botpress chat specifically
- * for the Genius agent (martech/adtech specialist) while maintaining consistency
- * with the existing ClippyAssistant architecture.
+ * FIXED: Removed pointer-events blocking and improved mobile detection
  */
 
 import React, { useEffect, useState } from "react";
@@ -147,12 +143,12 @@ const GeniusChat = ({
     position,
   });
 
-  // Mobile rendering - FIXED: Removed problematic pointer-events wrapper
+  // Mobile rendering - FIXED: Removed pointer-events blocking
   if (isMobile) {
     console.log("📱 Rendering GeniusChat for mobile");
     return (
       <div
-        className="genius-chat-wrapper"
+        className="genius-chat-mobile-wrapper"
         style={{
           position: "fixed",
           zIndex: 9999,
@@ -160,9 +156,10 @@ const GeniusChat = ({
           left: 0,
           width: "100%",
           height: "100%",
-          // REMOVED pointer-events that was blocking touch
-          // Now using touchAction for better mobile handling
+          // Allow all touch events to pass through
           touchAction: "manipulation",
+          // Ensure the wrapper doesn't block interactions
+          background: "transparent",
         }}
       >
         <EnhancedBotpressChatWidget
@@ -183,7 +180,14 @@ const GeniusChat = ({
   console.log("💻 Rendering GeniusChat for desktop with portal");
   return (
     <DesktopPortalWrapper>
-      <div className="genius-chat-wrapper">
+      <div
+        className="genius-chat-desktop-wrapper"
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "relative",
+        }}
+      >
         <EnhancedBotpressChatWidget
           agentConfig={agentConfig}
           conversationStarter={conversationStarter}

@@ -14,7 +14,7 @@ import {
 
 /**
  * Enhanced Botpress v3 Chat Widget with Windows 98 styling and martech expertise
- * Updated with comprehensive mobile support, network resilience, and desktop viewport containment
+ * FIXED: Container rendering, version compatibility, and mobile touch issues
  */
 const EnhancedBotpressChatWidget = ({
   onClose,
@@ -46,13 +46,16 @@ const EnhancedBotpressChatWidget = ({
   const [useFallback, setUseFallback] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isMobile, setIsMobile] = useState(false);
+  const [botpressReady, setBotpressReady] = useState(false);
 
   // Refs
   const messagesContainerRef = useRef(null);
   const chatContainerRef = useRef(null);
   const inputRef = useRef(null);
-  const botpressInitAttempts = useRef(0);
+  const botpressInitialized = useRef(false);
+  const containerCheckInterval = useRef(null);
   const maxInitAttempts = 5;
+  const initAttempts = useRef(0);
 
   // Enhanced mobile detection
   useEffect(() => {
@@ -89,8 +92,9 @@ const EnhancedBotpressChatWidget = ({
       console.log("🌐 Network: Online");
       setIsOnline(true);
       // Retry Botpress initialization if it failed due to network
-      if (useFallback && botpressInitAttempts.current < maxInitAttempts) {
+      if (useFallback && initAttempts.current < maxInitAttempts) {
         setUseFallback(false);
+        initAttempts.current = 0;
       }
     };
 
@@ -109,7 +113,7 @@ const EnhancedBotpressChatWidget = ({
     };
   }, [useFallback]);
 
-  // Botpress configuration with mobile-specific env handling
+  // Fix environment variables - ensure correct v3 URLs
   const hasValidClientId =
     process.env.REACT_APP_BOTPRESS_CLIENT_ID &&
     process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "YOUR_CLIENT_ID_HERE";
@@ -119,11 +123,14 @@ const EnhancedBotpressChatWidget = ({
   const botpressConfig = {
     botId: process.env.REACT_APP_BOTPRESS_BOT_ID || "",
     clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID || "",
-    hostUrl: process.env.REACT_APP_BOTPRESS_HOST_URL || "",
-    messagingUrl: process.env.REACT_APP_BOTPRESS_MESSAGING_URL || "",
+    // Force v3 URLs regardless of env settings
+    hostUrl: "https://cdn.botpress.cloud/webchat/v3.0",
+    messagingUrl:
+      process.env.REACT_APP_BOTPRESS_MESSAGING_URL ||
+      "https://messaging.botpress.cloud",
   };
 
-  console.log("🔍 Botpress Config:", botpressConfig);
+  console.log("🔍 Botpress Config (Fixed):", botpressConfig);
 
   const shouldUseBotpress =
     hasValidClientId &&
@@ -636,125 +643,145 @@ const EnhancedBotpressChatWidget = ({
     isOnline,
   ]);
 
-  // Enhanced Botpress v3 injection with container constraints and retry logic
+  // Fixed Botpress v3 initialization with container creation
   useEffect(() => {
-    if (!shouldUseBotpress || useFallback) return;
+    if (!shouldUseBotpress || useFallback || botpressInitialized.current)
+      return;
 
     const loadScript = (src) => {
       return new Promise((resolve, reject) => {
+        // Check if script already exists
+        const existingScript = document.querySelector(`script[src="${src}"]`);
+        if (existingScript) {
+          resolve();
+          return;
+        }
+
         const script = document.createElement("script");
         script.src = src;
-        script.defer = true;
+        script.async = true;
         script.onload = resolve;
         script.onerror = reject;
         document.body.appendChild(script);
 
-        // Timeout after 10 seconds
-        setTimeout(() => reject(new Error("Script load timeout")), 10000);
+        // Timeout after 15 seconds
+        setTimeout(() => reject(new Error("Script load timeout")), 15000);
+      });
+    };
+
+    const waitForContainer = () => {
+      return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds max
+
+        containerCheckInterval.current = setInterval(() => {
+          const container = document.getElementById("bp-web-widget");
+          attempts++;
+
+          if (container) {
+            clearInterval(containerCheckInterval.current);
+            // Ensure container has dimensions
+            container.style.display = "block";
+            container.style.width = isMobile ? "100vw" : "100%";
+            container.style.height = isMobile ? "100vh" : "100%";
+            container.style.minHeight = "400px";
+            resolve(container);
+          } else if (attempts >= maxAttempts) {
+            clearInterval(containerCheckInterval.current);
+            reject(new Error("Container not found after timeout"));
+          }
+        }, 100);
       });
     };
 
     const initBotpress = async () => {
-      botpressInitAttempts.current += 1;
+      initAttempts.current++;
       console.log(
-        `💉 Botpress init attempt ${botpressInitAttempts.current}/${maxInitAttempts}`
+        `💉 Botpress init attempt ${initAttempts.current}/${maxInitAttempts}`
       );
 
       try {
-        // Add container constraint styles FIRST
-        const globalStyle = document.createElement("style");
-        globalStyle.innerHTML = `
-          /* Hide default Botpress elements */
-          #fab-root { display: none !important; }
-          .bpFloat { display: none !important; }
-          
-          /* Constrain monitor screen */
-          .monitor-screen {
-            position: relative !important;
-            overflow: hidden !important;
-          }
-          
-          /* Force Botpress to respect container bounds */
-          #genius-chat-portal #webchat-root,
-          #desktop-content-wrapper #webchat-root,
-          .monitor-screen #webchat-root {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            max-width: 640px !important;
-            max-height: 480px !important;
-            transform: none !important;
-            z-index: 9999 !important;
-          }
-          
-          #bp-web-widget {
-            position: relative !important;
-            overflow: hidden !important;
-            width: 100% !important;
-            height: 100% !important;
-            -webkit-overflow-scrolling: touch !important;
-            touch-action: manipulation !important;
-          }
-          
-          #bp-web-widget iframe.bpWebchat,
-          .bpw-widget-container {
-            width: 100% !important;
-            height: 100% !important;
-            max-width: 640px !important;
-            max-height: 480px !important;
-            position: relative !important;
-          }
-          
-          /* Mobile-specific styles */
-          @media (max-width: 768px) {
+        // Add global styles first
+        const styleId = "botpress-global-styles";
+        if (!document.getElementById(styleId)) {
+          const globalStyle = document.createElement("style");
+          globalStyle.id = styleId;
+          globalStyle.innerHTML = `
+            /* Hide default Botpress elements */
+            #fab-root { display: none !important; }
+            .bpFloat { display: none !important; }
+            
+            /* Ensure bp-web-widget container is visible */
             #bp-web-widget {
-              position: fixed !important;
-              top: 0 !important;
-              left: 0 !important;
-              right: 0 !important;
-              bottom: 0 !important;
+              display: block !important;
+              visibility: visible !important;
+              opacity: 1 !important;
             }
             
-            #genius-chat-portal #webchat-root,
-            #desktop-content-wrapper #webchat-root,
-            .monitor-screen #webchat-root {
-              max-width: 100vw !important;
-              max-height: 100vh !important;
+            /* Force Botpress to respect container bounds */
+            #bp-web-widget #webchat-root,
+            #bp-web-widget .bp-widget-web {
+              position: absolute !important;
+              top: 0 !important;
+              left: 0 !important;
+              width: 100% !important;
+              height: 100% !important;
+              transform: none !important;
+              z-index: auto !important;
             }
-          }
-        `;
-        document.head.appendChild(globalStyle);
+            
+            #bp-web-widget iframe.bpWebchat,
+            #bp-web-widget .bpw-widget-container {
+              width: 100% !important;
+              height: 100% !important;
+              position: relative !important;
+            }
+            
+            /* Mobile-specific styles */
+            @media (max-width: 768px) {
+              #bp-web-widget {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+              }
+            }
+          `;
+          document.head.appendChild(globalStyle);
+        }
 
-        // Load scripts
+        // Wait for container to exist
+        const container = await waitForContainer();
+        console.log("✅ Container found:", container);
+
+        // Load Botpress v3 scripts
         await loadScript("https://cdn.botpress.cloud/webchat/v3.0/inject.js");
         await loadScript(
           "https://files.bpcontent.cloud/2025/06/16/10/20250616104701-Y8D5D2OH.js"
         );
+        console.log("✅ Botpress scripts loaded");
 
-        // Wait for Botpress to be available
-        await new Promise((resolve) => {
-          const checkBotpress = setInterval(() => {
-            if (window.botpress) {
-              clearInterval(checkBotpress);
-              resolve();
-            }
-          }, 100);
-        });
+        // Wait for window.botpress to be available
+        let botpressCheckAttempts = 0;
+        while (!window.botpress && botpressCheckAttempts < 50) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          botpressCheckAttempts++;
+        }
 
-        // Initialize with container targeting
-        window.botpress.init({
+        if (!window.botpress) {
+          throw new Error("Botpress not available after loading script");
+        }
+
+        // Initialize Botpress with correct v3 configuration
+        await window.botpress.init({
           botId: botpressConfig.botId,
           clientId: botpressConfig.clientId,
           hostUrl: botpressConfig.hostUrl,
           messagingUrl: botpressConfig.messagingUrl,
-
-          // Target the portal container if it exists
-          container: document.querySelector("#genius-chat-portal")
-            ? "#genius-chat-portal"
-            : "#bp-web-widget",
-
+          container: "#bp-web-widget", // Target our specific container
           hideWidget: true,
           disableAnimations: isMobile,
           enableReset: false,
@@ -762,10 +789,16 @@ const EnhancedBotpressChatWidget = ({
           closeOnEscape: !isMobile,
           showPoweredBy: false,
           composerPlaceholder: "Type a message...",
-          botName: "Clippy GPT",
+          botName: agentConfig.displayName || "Clippy GPT",
           useSessionStorage: true,
           enableConversationDeletion: true,
-
+          containerWidth: "100%",
+          layoutWidth: "100%",
+          // Mobile-specific settings
+          ...(isMobile && {
+            enableMobileFullscreen: true,
+            mobileFullscreen: true,
+          }),
           // Custom stylesheet to enforce containment
           stylesheet: `
             #webchat-root {
@@ -777,8 +810,8 @@ const EnhancedBotpressChatWidget = ({
               transform: none !important;
             }
             .bpw-widget-container {
-              max-width: 640px !important;
-              max-height: 480px !important;
+              width: 100% !important;
+              height: 100% !important;
             }
             .bpw-layout {
               width: 100% !important;
@@ -787,34 +820,21 @@ const EnhancedBotpressChatWidget = ({
           `,
         });
 
-        window.botpress.open();
+        // Open the chat
+        if (window.botpress.open) {
+          window.botpress.open();
+        }
 
-        // Move Botpress into the desktop viewport container
-        setTimeout(() => {
-          const webchatRoot = document.getElementById("webchat-root");
-          const monitorScreen = document.querySelector(".monitor-screen");
-          const portalContainer = document.querySelector("#genius-chat-portal");
-          const targetContainer = portalContainer || monitorScreen;
-
-          if (webchatRoot && targetContainer) {
-            // Move the webchat root into our container
-            targetContainer.appendChild(webchatRoot);
-
-            // Ensure proper positioning
-            webchatRoot.style.position = "absolute";
-            webchatRoot.style.zIndex = "9999";
-            webchatRoot.style.width = "100%";
-            webchatRoot.style.height = "100%";
-
-            console.log("✅ Botpress moved into desktop viewport container");
-          }
-        }, 1000);
-
+        botpressInitialized.current = true;
+        setBotpressReady(true);
         console.log("✅ Botpress initialized successfully");
       } catch (error) {
         console.error("❌ Botpress init error:", error);
 
-        if (botpressInitAttempts.current < maxInitAttempts) {
+        if (
+          initAttempts.current < maxInitAttempts &&
+          !botpressInitialized.current
+        ) {
           console.log("🔄 Retrying in 2 seconds...");
           setTimeout(initBotpress, 2000);
         } else {
@@ -824,25 +844,14 @@ const EnhancedBotpressChatWidget = ({
       }
     };
 
+    // Start initialization
     initBotpress();
 
-    // Viewport resize handler
-    const handleResize = () => {
-      const container = document.querySelector("#webchat-root");
-      if (
-        container &&
-        container.parentElement?.classList.contains("monitor-screen")
-      ) {
-        container.style.width = "640px";
-        container.style.height = "480px";
-      }
-      setChatPosition(calculateChatPosition());
-    };
-
-    window.addEventListener("resize", handleResize);
-
+    // Cleanup
     return () => {
-      window.removeEventListener("resize", handleResize);
+      if (containerCheckInterval.current) {
+        clearInterval(containerCheckInterval.current);
+      }
       if (window.botpress && window.botpress.close) {
         window.botpress.close();
       }
@@ -852,13 +861,96 @@ const EnhancedBotpressChatWidget = ({
     useFallback,
     botpressConfig,
     isMobile,
-    calculateChatPosition,
+    agentConfig.displayName,
   ]);
 
   // Windows 98 styles with mobile enhancements
   const windows98Styles = `
-    /* Your existing Windows 98 styles */
-    /* Add mobile-specific overrides */
+    /* Windows 98 UI Styles */
+    .fallback-chat {
+      font-family: 'MS Sans Serif', 'Tahoma', sans-serif;
+      font-size: 11px;
+      background-color: #c0c0c0;
+      border: 2px outset #c0c0c0;
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .fallback-header {
+      background-color: #000080;
+      color: white;
+      padding: 4px 8px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .fallback-messages {
+      background: white;
+      border: 1px inset #999;
+      overflow-y: auto;
+      padding: 8px;
+    }
+    
+    .fallback-input-area {
+      display: flex;
+      gap: 4px;
+      padding: 4px 8px;
+      background-color: #f0f0f0;
+      border-top: 1px solid #808080;
+    }
+    
+    .fallback-input {
+      flex: 1;
+      padding: 4px 6px;
+      border: 1px inset #999;
+      font-family: 'MS Sans Serif', sans-serif;
+      font-size: 11px;
+    }
+    
+    .fallback-button {
+      padding: 4px 12px;
+      background-color: #c0c0c0;
+      border: 1px outset #c0c0c0;
+      font-family: 'MS Sans Serif', sans-serif;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    
+    .fallback-button:hover {
+      background-color: #d0d0d0;
+    }
+    
+    .fallback-button:active {
+      border: 1px inset #c0c0c0;
+    }
+    
+    .fallback-quick-replies {
+      padding: 2px 6px;
+      background-color: #f0f0f0;
+      border-bottom: 1px solid #808080;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+    }
+    
+    .fallback-quick-reply {
+      font-size: 9px;
+      padding: 1px 4px;
+      background-color: #e0e0e0;
+      border: 1px outset #e0e0e0;
+      cursor: pointer;
+      max-width: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .fallback-quick-reply:hover {
+      background-color: #d0d0d0;
+    }
+    
+    /* Mobile-specific overrides */
     @media (max-width: 768px) {
       .fallback-chat {
         border-radius: 0 !important;
@@ -866,14 +958,41 @@ const EnhancedBotpressChatWidget = ({
         box-shadow: none !important;
       }
       
+      .fallback-header {
+        min-height: 44px;
+        padding: 8px;
+      }
+      
       .fallback-input {
         font-size: 16px !important; /* Prevent zoom on iOS */
         -webkit-appearance: none !important;
+        padding: 12px !important;
       }
       
       .fallback-button {
         min-width: 60px !important;
+        min-height: 44px !important;
         touch-action: manipulation !important;
+        padding: 12px 20px !important;
+        font-size: 14px !important;
+      }
+      
+      .fallback-quick-replies {
+        padding: 8px;
+        gap: 8px;
+        max-height: 80px;
+        overflow-y: auto;
+      }
+      
+      .fallback-quick-reply {
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+        min-height: 36px !important;
+        max-width: auto !important;
+      }
+      
+      .fallback-messages {
+        font-size: 14px !important;
       }
     }
   `;
@@ -883,7 +1002,7 @@ const EnhancedBotpressChatWidget = ({
     return (
       <div
         ref={chatContainerRef}
-        className="enhanced-botpress-chat-widget"
+        className="enhanced-botpress-chat-widget fallback-chat"
         style={{
           position: chatPosition.position || "fixed",
           left: `${chatPosition.left}px`,
@@ -911,6 +1030,7 @@ const EnhancedBotpressChatWidget = ({
       >
         {/* Chat Header */}
         <div
+          className="fallback-header"
           style={{
             backgroundColor: "#000080",
             color: "white",
@@ -955,6 +1075,7 @@ const EnhancedBotpressChatWidget = ({
         {/* Messages Area */}
         <div
           ref={messagesContainerRef}
+          className="fallback-messages"
           style={{
             flex: 1,
             overflow: "auto",
@@ -1010,6 +1131,7 @@ const EnhancedBotpressChatWidget = ({
         {/* Quick Replies */}
         {quickReplies.length > 0 && (
           <div
+            className="fallback-quick-replies"
             style={{
               padding: isMobile ? "8px" : "2px 6px",
               backgroundColor: "#f0f0f0",
@@ -1026,6 +1148,7 @@ const EnhancedBotpressChatWidget = ({
               <button
                 key={index}
                 onClick={() => handleQuickReply(reply)}
+                className="fallback-quick-reply"
                 style={{
                   fontSize: isMobile ? "12px" : "9px",
                   padding: isMobile ? "8px 12px" : "1px 4px",
@@ -1060,6 +1183,7 @@ const EnhancedBotpressChatWidget = ({
 
         {/* Input Area */}
         <div
+          className="fallback-input-area"
           style={{
             display: "flex",
             gap: "4px",
@@ -1079,6 +1203,7 @@ const EnhancedBotpressChatWidget = ({
             autoComplete="off"
             enterKeyHint="send"
             inputMode="text"
+            className="fallback-input"
             style={{
               flex: 1,
               padding: isMobile ? "12px" : "4px 6px",
@@ -1098,6 +1223,7 @@ const EnhancedBotpressChatWidget = ({
           <button
             type="button"
             onClick={() => handleSendMessage()}
+            className="fallback-button"
             style={{
               padding: isMobile ? "12px 20px" : "4px 12px",
               backgroundColor: "#c0c0c0",
@@ -1126,6 +1252,7 @@ const EnhancedBotpressChatWidget = ({
     );
   };
 
+  // Loading state
   if (!isLoaded) {
     return (
       <div
@@ -1160,91 +1287,81 @@ const EnhancedBotpressChatWidget = ({
     );
   }
 
-  // Botpress integration
+  // Botpress integration - render container for Botpress to inject into
   return (
     <>
       <style>{windows98Styles}</style>
+      <style>{`
+        /* Ensure container is properly styled */
+        #bp-web-widget {
+          width: 100% !important;
+          height: 100% !important;
+          min-height: 400px !important;
+          position: relative !important;
+          display: block !important;
+          z-index: 9999 !important;
+          background: transparent !important;
+        }
+
+        /* Mobile fullscreen */
+        @media (max-width: 768px) {
+          #bp-web-widget {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            min-height: 100vh !important;
+          }
+        }
+
+        /* Hide default Botpress elements */
+        #fab-root { display: none !important; }
+        .bpFloat { display: none !important; }
+      `}</style>
+
       <div
+        id="bp-web-widget"
         style={{
-          position: chatPosition.position || "fixed",
-          left: `${chatPosition.left}px`,
-          top: `${chatPosition.top}px`,
-          width: `${chatPosition.width}px`,
-          height: `${chatPosition.height}px`,
-          zIndex: chatPosition.position === "absolute" ? 10 : 2500,
-          display: isOpen ? "flex" : "none",
-          flexDirection: "column",
-          fontFamily: "'MS Sans Serif', 'Tahoma', sans-serif",
-          backgroundColor: "#c0c0c0",
-          border: isMobile ? "none" : "2px outset #c0c0c0",
-          borderRadius: "0",
-          boxShadow: isMobile ? "none" : "2px 2px 4px rgba(0,0,0,0.3)",
-          overflow: "hidden",
+          position: isMobile ? "fixed" : chatPosition.position,
+          left: isMobile ? 0 : `${chatPosition.left}px`,
+          top: isMobile ? 0 : `${chatPosition.top}px`,
+          width: isMobile ? "100vw" : `${chatPosition.width}px`,
+          height: isMobile ? "100vh" : `${chatPosition.height}px`,
+          zIndex: 2500,
+          display: isOpen ? "block" : "none",
+          background: "transparent",
+          // Remove pointer-events that block mobile touch
           touchAction: "manipulation",
         }}
+        role="dialog"
+        aria-label={`Chat with ${agentConfig.displayName}`}
       >
-        {/* Windows 98 Header */}
-        <div
-          style={{
-            backgroundColor: "#000080",
-            color: "white",
-            padding: isMobile ? "8px" : "4px 8px",
-            fontSize: "11px",
-            fontWeight: "bold",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            minHeight: isMobile ? "44px" : "20px",
-          }}
-        >
-          <span>💬 Clippy GPT - Martech Specialist</span>
-          <button
-            onClick={() => {
-              setIsOpen(false);
-              if (onClose) onClose();
-            }}
+        {/* Botpress will inject its content here */}
+        {!botpressReady && (
+          <div
             style={{
-              backgroundColor: "transparent",
-              border: "none",
-              color: "white",
-              fontSize: "12px",
-              cursor: "pointer",
-              padding: isMobile ? "8px 12px" : "2px 6px",
-              minWidth: isMobile ? "44px" : "auto",
-              touchAction: "manipulation",
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#c0c0c0",
+              fontFamily: "'MS Sans Serif', sans-serif",
+              fontSize: "11px",
+              border: "2px outset #c0c0c0",
+              flexDirection: "column",
+              gap: "10px",
             }}
           >
-            ✕
-          </button>
-        </div>
-
-        {/* Botpress v3 Container */}
-        <div
-          id="bp-web-widget"
-          style={{
-            flex: 1,
-            overflow: "hidden",
-            position: "relative",
-            touchAction: "manipulation",
-          }}
-        >
-          {/* Botpress will inject here */}
-          {!isOnline && (
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                textAlign: "center",
-                padding: "20px",
-              }}
-            >
-              <p>📡 No internet connection</p>
-              <p>Chat will load when connection is restored</p>
-            </div>
-          )}
-        </div>
+            <div>Initializing chat...</div>
+            {!isOnline && (
+              <div style={{ color: "#666", fontSize: "10px" }}>
+                (Waiting for network connection)
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

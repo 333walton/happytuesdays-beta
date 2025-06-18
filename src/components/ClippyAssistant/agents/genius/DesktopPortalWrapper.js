@@ -3,8 +3,7 @@ import ReactDOM from "react-dom";
 
 /**
  * DesktopPortalWrapper - Renders children inside the desktop viewport using React Portal
- * FIXED: This ensures the chat widget is contained within the monitor's desktop area
- * without disrupting the monitor image positioning
+ * FIXED: Ensures bp-web-widget container is created before Botpress initialization
  */
 const DesktopPortalWrapper = ({ children }) => {
   const [portalContainer, setPortalContainer] = useState(null);
@@ -32,8 +31,7 @@ const DesktopPortalWrapper = ({ children }) => {
       let portal = targetContainer.querySelector("#genius-chat-portal");
 
       if (!portal) {
-        // FIXED: Use insertBefore instead of appendChild to prevent layout shifts
-        // This ensures the portal is inserted without affecting existing positioned elements
+        // Create portal container
         portal = document.createElement("div");
         portal.id = "genius-chat-portal";
         portal.style.cssText = `
@@ -46,12 +44,11 @@ const DesktopPortalWrapper = ({ children }) => {
           z-index: 2400;
           overflow: hidden;
           contain: layout style paint size;
-          /* FIXED: Add explicit transforms to create new stacking context */
           transform: translateZ(0);
           will-change: auto;
         `;
 
-        // FIXED: Insert as first child to minimize layout impact
+        // Insert as first child to minimize layout impact
         if (targetContainer.firstChild) {
           targetContainer.insertBefore(portal, targetContainer.firstChild);
         } else {
@@ -64,10 +61,33 @@ const DesktopPortalWrapper = ({ children }) => {
         );
       }
 
+      // CRITICAL: Create bp-web-widget container inside portal
+      let bpContainer = portal.querySelector("#bp-web-widget");
+      if (!bpContainer) {
+        bpContainer = document.createElement("div");
+        bpContainer.id = "bp-web-widget";
+        bpContainer.style.cssText = `
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 400px;
+          height: 600px;
+          max-width: 90%;
+          max-height: 90%;
+          pointer-events: auto;
+          z-index: 10;
+          display: block;
+          background: transparent;
+        `;
+        portal.appendChild(bpContainer);
+        console.log("Created bp-web-widget container inside portal");
+      }
+
       return portal;
     };
 
-    // FIXED: Batch DOM operations to prevent multiple reflows
+    // Create container immediately
     const container = findOrCreatePortalContainer();
 
     if (!container) {
@@ -84,14 +104,14 @@ const DesktopPortalWrapper = ({ children }) => {
 
     setPortalContainer(container);
 
-    // FIXED: Enhanced cleanup to prevent DOM pollution
+    // Cleanup function
     return () => {
+      // Only remove if no children remain
       if (
         container &&
         container.parentNode &&
         container.childNodes.length === 0
       ) {
-        // Use requestAnimationFrame to ensure cleanup happens after render
         requestAnimationFrame(() => {
           if (container.parentNode) {
             container.parentNode.removeChild(container);
@@ -106,7 +126,7 @@ const DesktopPortalWrapper = ({ children }) => {
     return null;
   }
 
-  // FIXED: Add explicit positioning wrapper to prevent layout interference
+  // Wrapper to ensure proper positioning
   const portalContent = (
     <div
       style={{
@@ -116,7 +136,6 @@ const DesktopPortalWrapper = ({ children }) => {
         left: 0,
         width: "100%",
         height: "100%",
-        /* Ensure this doesn't affect parent layout */
         transform: "translateZ(0)",
         contain: "layout style paint",
       }}
