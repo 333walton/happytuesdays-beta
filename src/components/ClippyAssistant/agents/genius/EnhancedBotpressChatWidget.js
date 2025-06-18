@@ -116,21 +116,9 @@ const EnhancedBotpressChatWidget = ({
   // Fix environment variables - ensure correct v3 URLs
   const hasValidClientId =
     process.env.REACT_APP_BOTPRESS_CLIENT_ID &&
-    process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "YOUR_CLIENT_ID_HERE" &&
-    process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "";
+    process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "YOUR_CLIENT_ID_HERE";
 
   const forceUseFallback = false;
-
-  // Debug environment in production
-  if (process.env.NODE_ENV === "production") {
-    console.log("🔍 Production environment check:", {
-      hasEnvVars: !!process.env.REACT_APP_BOTPRESS_BOT_ID,
-      nodeEnv: process.env.NODE_ENV,
-      allEnvKeys: Object.keys(process.env).filter((key) =>
-        key.startsWith("REACT_APP_")
-      ),
-    });
-  }
 
   const botpressConfig = {
     botId: process.env.REACT_APP_BOTPRESS_BOT_ID || "",
@@ -719,13 +707,9 @@ const EnhancedBotpressChatWidget = ({
           const globalStyle = document.createElement("style");
           globalStyle.id = styleId;
           globalStyle.innerHTML = `
-            /* Hide ALL Botpress floating elements */
+            /* Hide default Botpress elements */
             #fab-root { display: none !important; }
             .bpFloat { display: none !important; }
-            .bp-widget-floating { display: none !important; }
-            .bpFabImage { display: none !important; }
-            [class*="bp-fab"] { display: none !important; }
-            img[alt="Chatbot Button Image"] { display: none !important; }
             
             /* Ensure bp-web-widget container is visible */
             #bp-web-widget {
@@ -810,28 +794,13 @@ const EnhancedBotpressChatWidget = ({
           enableConversationDeletion: true,
           containerWidth: "100%",
           layoutWidth: "100%",
-          // CRITICAL: Disable floating action button
-          showBotInfoPage: false,
-          enablePersistHistory: false,
-          showCloseButton: true,
-          alwaysShowChatInterface: true,
-          disableNotificationSound: true,
-          // Force embedded mode
-          embedded: true,
           // Mobile-specific settings
           ...(isMobile && {
             enableMobileFullscreen: true,
             mobileFullscreen: true,
           }),
-          // Custom stylesheet to enforce containment and hide FAB
+          // Custom stylesheet to enforce containment
           stylesheet: `
-            /* Hide floating action button completely */
-            #fab-root { display: none !important; }
-            .bpFloat { display: none !important; }
-            .bp-widget-floating { display: none !important; }
-            .bpFabImage { display: none !important; }
-            
-            /* Force chat to fill container */
             #webchat-root {
               position: absolute !important;
               width: 100% !important;
@@ -840,22 +809,13 @@ const EnhancedBotpressChatWidget = ({
               left: 0 !important;
               transform: none !important;
             }
-            
             .bpw-widget-container {
               width: 100% !important;
               height: 100% !important;
-              position: relative !important;
             }
-            
             .bpw-layout {
               width: 100% !important;
               height: 100% !important;
-              border: none !important;
-              border-radius: 0 !important;
-            }
-            
-            .bpw-header {
-              border-radius: 0 !important;
             }
           `,
         });
