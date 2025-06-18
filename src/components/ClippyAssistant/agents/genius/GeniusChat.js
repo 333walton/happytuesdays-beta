@@ -1,6 +1,6 @@
 /**
  * GeniusChat - Wrapper component for Genius agent's Botpress chat integration
- * FIXED: Removed pointer-events blocking and improved mobile detection
+ * FIXED: Improved isReady state management and mobile detection
  */
 
 import React, { useEffect, useState } from "react";
@@ -92,18 +92,37 @@ const GeniusChat = ({
     };
   }, []);
 
-  // Initialize chat when component mounts
+  // FIXED: Improved isReady state management
   useEffect(() => {
-    if (visible && isOnline) {
-      console.log("🚀 GeniusChat becoming visible, setting ready");
+    console.log("🔍 GeniusChat state check:", {
+      visible,
+      isOnline,
+      currentAgent,
+      agentChatSystem: agentConfig?.chatSystem,
+    });
+
+    // Set isReady based on all conditions
+    if (
+      visible &&
+      currentAgent === "Genius" &&
+      agentConfig?.chatSystem === "botpress"
+    ) {
+      // Always set ready if visible and correct agent, regardless of network
+      // Network issues will be handled by fallback mode in the integration
+      console.log("🚀 GeniusChat becoming ready");
       setIsReady(true);
-    } else if (!isOnline) {
-      console.log("📵 GeniusChat offline, not setting ready");
+    } else {
+      console.log("❌ GeniusChat not ready:", {
+        visible,
+        correctAgent: currentAgent === "Genius",
+        correctChatSystem: agentConfig?.chatSystem === "botpress",
+      });
+      setIsReady(false);
     }
-  }, [visible, isOnline]);
+  }, [visible, isOnline, currentAgent, agentConfig]);
 
   // Only render if current agent is Genius and uses Botpress
-  if (currentAgent !== "Genius" || agentConfig.chatSystem !== "botpress") {
+  if (currentAgent !== "Genius" || agentConfig?.chatSystem !== "botpress") {
     console.log("🔍 GeniusChat not rendering - wrong agent or chat system:", {
       currentAgent,
       chatSystem: agentConfig?.chatSystem,
@@ -122,6 +141,28 @@ const GeniusChat = ({
       onClose();
     }
   };
+
+  // FIXED: Show loading state when not ready but should be visible
+  if (!isReady && visible && currentAgent === "Genius") {
+    console.log("🔍 GeniusChat showing loading state");
+    return (
+      <div
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          zIndex: 2100,
+          padding: "10px",
+          background: "#c0c0c0",
+          border: "2px outset #c0c0c0",
+          fontFamily: "'MS Sans Serif', sans-serif",
+          fontSize: "11px",
+        }}
+      >
+        Loading Genius Chat...
+      </div>
+    );
+  }
 
   if (!isReady || !visible) {
     console.log("🔍 GeniusChat not rendering:", {

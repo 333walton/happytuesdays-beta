@@ -242,6 +242,7 @@ const FallbackChat = ({ agentConfig, onClose, isMobile }) => {
 
 /**
  * Main Genius Webchat Integration Component
+ * FIXED: Improved FAB visibility and state management
  */
 const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
   const { activeAgent } = useClippyContext();
@@ -249,9 +250,26 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [useFallback, setUseFallback] = useState(false);
   const [botpressError, setBotpressError] = useState(false);
+  const [showFAB, setShowFAB] = useState(false);
 
-  // Only show FAB when Genius is active agent
-  const shouldShowFAB = activeAgent === "Genius";
+  // FIXED: Always show FAB when component mounts, regardless of activeAgent initially
+  useEffect(() => {
+    console.log("🔍 GeniusWebchatIntegration mounted, showing FAB");
+    setShowFAB(true);
+  }, []);
+
+  // FIXED: Better activeAgent handling
+  useEffect(() => {
+    console.log("🔍 Active agent changed:", activeAgent);
+
+    if (activeAgent === "Genius") {
+      setShowFAB(true);
+    } else {
+      // Hide chat when switching away from Genius
+      setIsWebchatOpen(false);
+      setShowFAB(false);
+    }
+  }, [activeAgent]);
 
   // Network status monitoring
   useEffect(() => {
@@ -276,13 +294,6 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
     };
   }, []);
 
-  // Auto-hide chat when switching agents
-  useEffect(() => {
-    if (activeAgent !== "Genius") {
-      setIsWebchatOpen(false);
-    }
-  }, [activeAgent]);
-
   // Botpress configuration
   const botpressConfig = {
     clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
@@ -296,10 +307,12 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
   };
 
   const handleToggleChat = useCallback(() => {
+    console.log("🔍 Toggling chat:", { isWebchatOpen });
     setIsWebchatOpen((prev) => !prev);
-  }, []);
+  }, [isWebchatOpen]);
 
   const handleCloseChat = useCallback(() => {
+    console.log("🔍 Closing chat");
     setIsWebchatOpen(false);
     if (onClose) onClose();
   }, [onClose]);
@@ -312,9 +325,14 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
     !botpressConfig.clientId ||
     botpressConfig.clientId === "YOUR_CLIENT_ID_HERE";
 
-  if (!shouldShowFAB && !isWebchatOpen) {
-    return null;
-  }
+  console.log("🔍 GeniusWebchatIntegration render state:", {
+    showFAB,
+    isWebchatOpen,
+    activeAgent,
+    shouldUseFallback,
+    isOnline,
+    botpressError,
+  });
 
   return (
     <>
@@ -357,17 +375,50 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
         </div>
       )}
 
-      {/* Floating Action Button */}
-      {shouldShowFAB && !isWebchatOpen && (
-        <Fab
+      {/* Floating Action Button - FIXED: Always visible when showFAB is true */}
+      {showFAB && !isWebchatOpen && (
+        <div
+          className="genius-fab"
           onClick={handleToggleChat}
           style={{
             position: "fixed",
             bottom: "20px",
             right: "20px",
             zIndex: 2100, // Slightly higher than chat widget
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            backgroundColor: "#007cff",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0, 124, 255, 0.4)",
+            fontSize: "24px",
+            userSelect: "none",
+            transition: "all 0.2s ease",
           }}
-        />
+          onMouseEnter={(e) => {
+            e.target.style.transform = "scale(1.1)";
+            e.target.style.boxShadow = "0 6px 16px rgba(0, 124, 255, 0.6)";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "scale(1)";
+            e.target.style.boxShadow = "0 4px 12px rgba(0, 124, 255, 0.4)";
+          }}
+          role="button"
+          aria-label="Open Genius Chat"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleToggleChat();
+            }
+          }}
+        >
+          💬
+        </div>
       )}
     </>
   );
