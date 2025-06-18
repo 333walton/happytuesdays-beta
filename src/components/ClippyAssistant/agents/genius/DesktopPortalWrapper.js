@@ -2,63 +2,53 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
 /**
- * DesktopPortalWrapper - Renders children inside the desktop viewport using React Portal
- * FIXED: Ensures bp-web-widget container is created before Botpress initialization
+ * DesktopPortalWrapper - Renders children directly into document.body using React Portal
+ * FIXED: Renders as sibling to .clippy element in the same DOM layer
+ * ENHANCED: Added future-ready portal infrastructure with fallback mode
  */
-const DesktopPortalWrapper = ({ children }) => {
+const DesktopPortalWrapper = ({
+  children,
+  portalTarget = null,
+  fallbackMode = true,
+}) => {
   const [portalContainer, setPortalContainer] = useState(null);
 
   useEffect(() => {
-    // Find or create portal container inside desktop viewport
-    const findOrCreatePortalContainer = () => {
-      // Try to find the desktop content wrapper inside monitor-screen
-      const desktopWrapper = document.querySelector(".desktop-content-wrapper");
-      const monitorScreen = document.querySelector(".monitor-screen");
-      const desktop =
-        document.querySelector(".desktop.screen") ||
-        document.querySelector(".desktop") ||
-        document.querySelector(".w98");
-
-      // Prefer desktop-content-wrapper, then monitor-screen, then desktop
-      const targetContainer = desktopWrapper || monitorScreen || desktop;
-
-      if (!targetContainer) {
-        console.warn("No desktop container found for portal");
-        return null;
+    // If using a custom portal target
+    if (portalTarget && !fallbackMode) {
+      const target = document.getElementById(portalTarget);
+      if (target) {
+        setPortalContainer(target);
+        return;
       }
+    }
 
+    // Create portal container as direct child of body
+    const findOrCreatePortalContainer = () => {
       // Check if portal container already exists
-      let portal = targetContainer.querySelector("#genius-chat-portal");
+      let portal = document.body.querySelector("#genius-chat-portal");
 
       if (!portal) {
         // Create portal container
         portal = document.createElement("div");
         portal.id = "genius-chat-portal";
         portal.style.cssText = `
-          position: absolute;
+          position: fixed;
           top: 0;
           left: 0;
           width: 100%;
           height: 100%;
           pointer-events: none;
-          z-index: 2400;
-          overflow: hidden;
-          contain: layout style paint size;
+          z-index: 2000;
+          overflow: visible;
           transform: translateZ(0);
           will-change: auto;
         `;
 
-        // Insert as first child to minimize layout impact
-        if (targetContainer.firstChild) {
-          targetContainer.insertBefore(portal, targetContainer.firstChild);
-        } else {
-          targetContainer.appendChild(portal);
-        }
+        // Append directly to body, making it a sibling to .clippy
+        document.body.appendChild(portal);
 
-        console.log(
-          "Created portal container inside:",
-          targetContainer.className
-        );
+        console.log("Created portal container as direct child of body");
       }
 
       // CRITICAL: Create bp-web-widget container inside portal
@@ -67,16 +57,13 @@ const DesktopPortalWrapper = ({ children }) => {
         bpContainer = document.createElement("div");
         bpContainer.id = "bp-web-widget";
         bpContainer.style.cssText = `
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
+          position: fixed;
+          bottom: 90px;
+          right: 20px;
           width: 400px;
           height: 600px;
-          max-width: 90%;
-          max-height: 90%;
           pointer-events: auto;
-          z-index: 10;
+          z-index: 2000;
           display: block;
           background: transparent;
         `;
@@ -119,10 +106,15 @@ const DesktopPortalWrapper = ({ children }) => {
         });
       }
     };
-  }, []);
+  }, [portalTarget, fallbackMode]);
 
+  // If in fallback mode without a portal container, render directly
+  if (fallbackMode && !portalContainer && !portalTarget) {
+    return <div className="genius-chat-container">{children}</div>;
+  }
+
+  // If no portal container available, render nothing
   if (!portalContainer) {
-    // If no portal container yet, render nothing
     return null;
   }
 

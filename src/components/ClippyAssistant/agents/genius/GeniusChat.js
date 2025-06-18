@@ -9,7 +9,7 @@ import {
   getConversationStarter,
   getQuickReplies,
 } from "../data/AgentResponses";
-import EnhancedBotpressChatWidget from "./EnhancedBotpressChatWidget";
+import GeniusWebchatIntegration from "./GeniusWebchatIntegration";
 import DesktopPortalWrapper from "./DesktopPortalWrapper";
 
 const GeniusChat = ({
@@ -162,14 +162,10 @@ const GeniusChat = ({
           background: "transparent",
         }}
       >
-        <EnhancedBotpressChatWidget
+        <GeniusWebchatIntegration
           agentConfig={agentConfig}
-          conversationStarter={conversationStarter}
-          quickReplies={quickReplies}
-          position={position}
           onClose={handleChatClose}
           isMobile={true}
-          isOnline={isOnline}
           {...props}
         />
       </div>
@@ -188,14 +184,10 @@ const GeniusChat = ({
           position: "relative",
         }}
       >
-        <EnhancedBotpressChatWidget
+        <GeniusWebchatIntegration
           agentConfig={agentConfig}
-          conversationStarter={conversationStarter}
-          quickReplies={quickReplies}
-          position={position}
           onClose={handleChatClose}
           isMobile={false}
-          isOnline={isOnline}
           {...props}
         />
       </div>

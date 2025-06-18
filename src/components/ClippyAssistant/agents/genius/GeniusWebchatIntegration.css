@@ -1,0 +1,285 @@
+/* Genius Webchat Integration Styles */
+
+/* Container styles */
+.genius-chat-container {
+  position: fixed;
+  z-index: 2000; /* Higher than .clippy's 1001 */
+}
+
+.genius-chat-container.mobile {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+.genius-chat-container.desktop {
+  bottom: 90px;
+  right: 20px;
+  width: 400px;
+  height: 600px;
+}
+
+/* Fallback Chat Styles (Windows 98 theme) */
+.fallback-chat {
+  font-family: "MS Sans Serif", "Tahoma", sans-serif;
+  font-size: 11px;
+  background-color: #c0c0c0;
+  border: 2px outset #c0c0c0;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.fallback-chat.mobile {
+  border: none;
+  box-shadow: none;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.fallback-chat.desktop {
+  width: 400px;
+  height: 600px;
+}
+
+/* Header */
+.fallback-header {
+  background-color: #000080;
+  color: white;
+  padding: 4px 8px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #808080;
+  min-height: 20px;
+}
+
+.close-button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 6px;
+  min-height: 20px;
+  min-width: 20px;
+}
+
+.close-button:hover {
+  background-color: #ff0000;
+}
+
+/* Messages Area */
+.fallback-messages {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px inset #999;
+  background: white;
+  padding: 8px;
+  margin: 4px;
+  color: #000;
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  -webkit-overflow-scrolling: touch;
+}
+
+.message {
+  margin-bottom: 8px;
+}
+
+.message.user {
+  text-align: right;
+  color: #000080;
+}
+
+.message.bot {
+  text-align: left;
+  color: #000;
+}
+
+.typing-indicator {
+  color: #666;
+  font-style: italic;
+  font-size: 10px;
+  margin-top: 4px;
+}
+
+/* Quick Replies */
+.fallback-quick-replies {
+  padding: 2px 6px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #808080;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-height: 40px;
+  overflow-y: auto;
+}
+
+.quick-reply-button {
+  font-size: 9px;
+  padding: 1px 4px;
+  background-color: #e0e0e0;
+  border: 1px outset #e0e0e0;
+  cursor: pointer;
+  border-radius: 0;
+  font-family: "MS Sans Serif", sans-serif;
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-reply-button:hover {
+  background-color: #d0d0d0;
+}
+
+.quick-reply-button:active {
+  border: 1px inset #e0e0e0;
+}
+
+/* Input Area */
+.fallback-input-area {
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px;
+  background-color: #f0f0f0;
+  border-top: 1px solid #808080;
+}
+
+.fallback-input {
+  flex: 1;
+  padding: 4px 6px;
+  border: 1px inset #999;
+  font-family: "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  background-color: #fff;
+  outline: none;
+}
+
+.send-button {
+  padding: 4px 12px;
+  background-color: #c0c0c0;
+  border: 1px outset #c0c0c0;
+  font-family: "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  color: #000;
+}
+
+.send-button:hover {
+  background-color: #d0d0d0;
+}
+
+.send-button:active {
+  border: 1px inset #c0c0c0;
+}
+
+/* Mobile-specific overrides with safe area handling */
+@media (max-width: 768px) {
+  /* FAB positioning with safe areas */
+  .genius-fab {
+    position: fixed !important;
+    bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+    right: calc(20px + env(safe-area-inset-right)) !important;
+    z-index: 10000 !important;
+    /* Ensure minimum touch target */
+    min-width: 44px !important;
+    min-height: 44px !important;
+    touch-action: manipulation !important;
+  }
+
+  /* Chat widget safe area handling */
+  .genius-chat-container.mobile {
+    height: calc(
+      100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+    );
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .fallback-chat.mobile {
+    border-radius: 0 !important;
+  }
+
+  .fallback-header {
+    min-height: 44px;
+    padding: 8px;
+  }
+
+  .fallback-input {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+    -webkit-appearance: none !important;
+    padding: 12px !important;
+    min-height: 44px !important;
+  }
+
+  .send-button {
+    min-width: 60px !important;
+    min-height: 44px !important;
+    touch-action: manipulation !important;
+    padding: 12px 20px !important;
+    font-size: 14px !important;
+  }
+
+  .fallback-quick-replies {
+    padding: 8px;
+    gap: 8px;
+    max-height: 80px;
+  }
+
+  .quick-reply-button {
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+    min-height: 36px !important;
+    max-width: auto !important;
+    touch-action: manipulation !important;
+  }
+
+  .fallback-messages {
+    font-size: 14px !important;
+  }
+
+  .close-button {
+    min-width: 44px !important;
+    min-height: 32px !important;
+    padding: 8px 12px !important;
+    touch-action: manipulation !important;
+  }
+}
+
+/* Prevent touch event blocking on underlying app */
+.genius-chat-container * {
+  touch-action: auto;
+}
+
+/* Only the FAB and chat widget should capture touch events */
+.genius-fab,
+.fallback-chat {
+  touch-action: manipulation;
+}
+
+/* Portal and widget z-index to ensure proper layering above .clippy */
+#genius-chat-portal {
+  pointer-events: none;
+  z-index: 2000 !important;
+}
+
+#bp-web-widget {
+  pointer-events: auto;
+  z-index: 2000 !important;
+}
+
+/* Ensure the actual Botpress webchat iframe is also properly layered */
+.bp-widget-web,
+#webchat-root {
+  z-index: 2000 !important;
+}
