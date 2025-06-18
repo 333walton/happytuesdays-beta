@@ -24,6 +24,8 @@ const GeniusChat = ({
   const [isMobile, setIsMobile] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const agentConfig = getAgentConfig(currentAgent);
+  const effectiveAgent = currentAgent || "Genius";
+  const effectiveChatSystem = chatSystem || "botpress";
 
   // Enhanced mobile detection with touch support
   useEffect(() => {
@@ -81,13 +83,12 @@ const GeniusChat = ({
     };
   }, []);
 
-  // FIXED: Improved isReady state management, now includes chatSystem check
+  // FIXED: Improved isReady state management - removed isOnline dependency
   useEffect(() => {
     console.log("🔍 GeniusChat state check:", {
       visible,
       isOnline,
       currentAgent,
-      chatSystem,
       agentChatSystem: agentConfig?.chatSystem,
     });
 
@@ -95,8 +96,11 @@ const GeniusChat = ({
     if (
       visible &&
       currentAgent === "Genius" &&
-      (chatSystem === "botpress" || agentConfig?.chatSystem === "botpress")
+      (agentConfig?.chatSystem === "botpress" ||
+        agentConfig?.chatSystem === "enhanced_legacy")
     ) {
+      // Always set ready if visible and correct agent, regardless of network
+      // Network issues will be handled by fallback mode in the integration
       console.log("🚀 GeniusChat becoming ready");
       setIsReady(true);
     } else {
@@ -104,11 +108,13 @@ const GeniusChat = ({
         visible,
         correctAgent: currentAgent === "Genius",
         correctChatSystem:
-          chatSystem === "botpress" || agentConfig?.chatSystem === "botpress",
+          agentConfig?.chatSystem === "botpress" ||
+          agentConfig?.chatSystem === "enhanced_legacy",
+        chatSystem: agentConfig?.chatSystem,
       });
       setIsReady(false);
     }
-  }, [visible, currentAgent, chatSystem, agentConfig]);
+  }, [visible, currentAgent, agentConfig]);
 
   // Only render if current agent is Genius and uses Botpress
   if (

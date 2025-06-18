@@ -1963,9 +1963,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
         {!isMobile && shouldRenderClippy && <DesktopControls />}
 
-        {/* NEW: Render Genius chat when visible */}
         {geniusChatVisible && currentAgent === "Genius" && (
-          <GeniusChat visible={geniusChatVisible} onClose={hideGeniusChat} />
+          <GeniusChat
+            visible={geniusChatVisible}
+            onClose={hideGeniusChat}
+            currentAgent={currentAgent}
+            chatSystem="botpress" // Explicitly set to "botpress"
+          />
         )}
 
         {children}
