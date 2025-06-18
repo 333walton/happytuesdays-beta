@@ -794,7 +794,17 @@ const ClippyContextMenu = ({
         break;
 
       case "chat":
-        // Open chat balloon
+        // Force FAB visibility for the current agent
+        if (window.setGeniusFABVisible) {
+          window.setGeniusFABVisible(true, currentAgent);
+        }
+
+        // Ensure active agent is properly set
+        if (window.setActiveAgentForChat) {
+          window.setActiveAgentForChat(currentAgent);
+        }
+
+        // Existing functionality
         if (window.showClippyChatBalloon) {
           window.showClippyChatBalloon(
             "Hi! What would you like to chat about?"

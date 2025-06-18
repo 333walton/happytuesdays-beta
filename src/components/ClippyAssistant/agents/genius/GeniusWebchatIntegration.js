@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useContext,
-} from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Fab, Webchat } from "@botpress/webchat";
 import { useClippyContext } from "../../core/ClippyProvider";
 import {
@@ -242,59 +236,40 @@ const FallbackChat = ({ agentConfig, onClose, isMobile }) => {
 
 /**
  * Main Genius Webchat Integration Component
- * FIXED: Improved FAB visibility and state management
  */
 const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
-  const { activeAgent } = useClippyContext();
+  const { chatSystem, currentAgent } = useClippyContext();
   const [isWebchatOpen, setIsWebchatOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [useFallback, setUseFallback] = useState(false);
   const [botpressError, setBotpressError] = useState(false);
-  const [showFAB, setShowFAB] = useState(false);
 
-  // FIXED: Always show FAB when component mounts, regardless of activeAgent initially
+  // Only show FAB if Genius is active
+  const shouldShowFAB = currentAgent === "Genius";
+
   useEffect(() => {
-    console.log("🔍 GeniusWebchatIntegration mounted, showing FAB");
-    setShowFAB(true);
-  }, []);
-
-  // FIXED: Better activeAgent handling
-  useEffect(() => {
-    console.log("🔍 Active agent changed:", activeAgent);
-
-    if (activeAgent === "Genius") {
-      setShowFAB(true);
-    } else {
-      // Hide chat when switching away from Genius
+    if (currentAgent !== "Genius") {
       setIsWebchatOpen(false);
-      setShowFAB(false);
     }
-  }, [activeAgent]);
+  }, [currentAgent]);
 
-  // Network status monitoring
   useEffect(() => {
     const handleOnline = () => {
-      console.log("🌐 Network: Online");
       setIsOnline(true);
       setUseFallback(false);
     };
-
     const handleOffline = () => {
-      console.log("🌐 Network: Offline");
       setIsOnline(false);
       setUseFallback(true);
     };
-
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
-
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
-  // Botpress configuration
   const botpressConfig = {
     clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
     hostUrl:
@@ -307,32 +282,20 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
   };
 
   const handleToggleChat = useCallback(() => {
-    console.log("🔍 Toggling chat:", { isWebchatOpen });
     setIsWebchatOpen((prev) => !prev);
-  }, [isWebchatOpen]);
+  }, []);
 
   const handleCloseChat = useCallback(() => {
-    console.log("🔍 Closing chat");
     setIsWebchatOpen(false);
     if (onClose) onClose();
   }, [onClose]);
 
-  // Check if we should use fallback
   const shouldUseFallback =
     useFallback ||
     !isOnline ||
     botpressError ||
     !botpressConfig.clientId ||
     botpressConfig.clientId === "YOUR_CLIENT_ID_HERE";
-
-  console.log("🔍 GeniusWebchatIntegration render state:", {
-    showFAB,
-    isWebchatOpen,
-    activeAgent,
-    shouldUseFallback,
-    isOnline,
-    botpressError,
-  });
 
   return (
     <>
@@ -350,7 +313,7 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
               />
             }
           >
-            {shouldUseFallback ? (
+            {shouldUseFallback || chatSystem !== "botpress" ? (
               <FallbackChat
                 agentConfig={agentConfig}
                 onClose={handleCloseChat}
@@ -366,7 +329,7 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
                   position: "fixed",
                   bottom: isMobile ? "0" : "90px",
                   right: isMobile ? "0" : "20px",
-                  zIndex: 2000, // Higher than .clippy's 1001
+                  zIndex: 2000,
                 }}
                 onError={() => setBotpressError(true)}
               />
@@ -375,8 +338,8 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
         </div>
       )}
 
-      {/* Floating Action Button - FIXED: Always visible when showFAB is true */}
-      {showFAB && !isWebchatOpen && (
+      {/* Floating Action Button - only visible for Genius agent */}
+      {shouldShowFAB && !isWebchatOpen && (
         <div
           className="genius-fab"
           onClick={handleToggleChat}
@@ -384,7 +347,7 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
             position: "fixed",
             bottom: "20px",
             right: "20px",
-            zIndex: 2100, // Slightly higher than chat widget
+            zIndex: 2100,
             width: "56px",
             height: "56px",
             borderRadius: "50%",
