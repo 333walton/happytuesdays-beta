@@ -653,22 +653,6 @@ const ClippyContextMenu = ({
       window.hideChatBalloon();
     }
 
-    // Trigger FAB visibility for Genius agent
-    if (newAgent === "Genius") {
-      window.dispatchEvent(
-        new CustomEvent("showGeniusFAB", {
-          detail: { agent: newAgent, show: true },
-        })
-      );
-    } else {
-      // Hide FAB for other agents
-      window.dispatchEvent(
-        new CustomEvent("showGeniusFAB", {
-          detail: { agent: newAgent, show: false },
-        })
-      );
-    }
-
     // Brief visual feedback
     const clippyEl = document.querySelector(".clippy");
     if (clippyEl) {
@@ -810,36 +794,12 @@ const ClippyContextMenu = ({
         break;
 
       case "chat":
-        // Optionally ensure the Genius FAB is visible (if needed for your logic)
-        if (window.setGeniusFABVisible) {
-          window.setGeniusFABVisible(true, currentAgent);
-        }
-
-        // Optionally ensure the correct agent is set
-        if (window.setActiveAgentForChat) {
-          window.setActiveAgentForChat(currentAgent);
-        }
-
-        // Show a chat balloon if desired
+        // Open chat balloon
         if (window.showClippyChatBalloon) {
           window.showClippyChatBalloon(
             "Hi! What would you like to chat about?"
           );
         }
-
-        // Programmatically click the hidden FAB, or dispatch a fallback event
-        const fabElement = document.querySelector(".genius-fab");
-        if (fabElement) {
-          fabElement.click();
-        } else {
-          window.dispatchEvent(
-            new CustomEvent("triggerGeniusChat", {
-              detail: { source: "contextMenu" },
-            })
-          );
-        }
-
-        // Any other existing logic
         onAction("chat");
         break;
 
@@ -1128,6 +1088,48 @@ const ClippyContextMenu = ({
           opacity: 1 !important;
         }
       }
+
+      // Also update the MenuItem component's touch handlers to be more responsive:
+
+      // In the MenuItem component, update the touch handlers:
+      const handleTouchStart = (e) => {
+        if (isMobile && !disabled) {
+          e.preventDefault(); // Prevent delay
+          setIsMobileTouched(true);
+        }
+      };
+
+      const handleTouchEnd = (e) => {
+        if (isMobile && !disabled) {
+          e.preventDefault(); // Prevent ghost clicks
+          setIsMobileTouched(false);
+          
+          // Trigger click immediately on touch end
+          if (onClick && !hasSubmenu) {
+            onClick(e);
+          }
+        }
+      };
+
+      // Add this to the div element in MenuItem:
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
+      style={{
+        ...finalStyle,
+        // Add for mobile only
+        ...(isMobile ? {
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          userSelect: 'none',
+          cursor: 'pointer',
+        } : {})
+      }}
+
+      // Also ensure submenus have higher z-index in the submenuStyle:
+      const submenuStyle = {
+        // ... existing properties ...
+        zIndex: isMobile ? 10000 : 2, // Much higher z-index for mobile
 
       /* Mobile-only: Fix bottom alignment for mobile context menus */
       @media (max-width: 768px) {

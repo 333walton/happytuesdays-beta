@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Fab, Webchat } from "@botpress/webchat";
 import { useClippyContext } from "../../core/ClippyProvider";
 import {
@@ -244,80 +238,111 @@ const FallbackChat = ({ agentConfig, onClose, isMobile }) => {
  * Main Genius Webchat Integration Component
  */
 const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
-  const { activeAgent } = useClippyContext();
+  const { chatSystem, currentAgent } = useClippyContext();
   const [isWebchatOpen, setIsWebchatOpen] = useState(false);
-  const [showFAB, setShowFAB] = useState(false);
-  const [fabHidden, setFabHidden] = useState(false); // New state for hiding FAB
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [useFallback, setUseFallback] = useState(false);
   const [botpressError, setBotpressError] = useState(false);
 
-  // Listen for agent selection events
+  // Only show FAB if Genius is active
+  const shouldShowFAB = currentAgent === "Genius";
+
   useEffect(() => {
-    const handleShowFAB = (event) => {
-      const { agent, show } = event.detail;
-      if (agent === "Genius") {
-        setShowFAB(show);
-        // Keep FAB functional but hidden after first chat trigger
-        if (show && fabHidden) {
-          setFabHidden(false);
-        }
-      }
+    if (currentAgent !== "Genius") {
+      setIsWebchatOpen(false);
+    }
+  }, [currentAgent]);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setUseFallback(false);
     };
-
-    const handleTriggerChat = (event) => {
-      // Programmatic chat trigger from context menu
-      setIsWebchatOpen(true);
-      setFabHidden(true); // Hide FAB after programmatic trigger
+    const handleOffline = () => {
+      setIsOnline(false);
+      setUseFallback(true);
     };
-
-    window.addEventListener("showGeniusFAB", handleShowFAB);
-    window.addEventListener("triggerGeniusChat", handleTriggerChat);
-
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
     return () => {
-      window.removeEventListener("showGeniusFAB", handleShowFAB);
-      window.removeEventListener("triggerGeniusChat", handleTriggerChat);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
-  }, [fabHidden]);
-
-  // Fix Botpress configuration to prevent fallback mode
-  const botpressConfig = useMemo(() => {
-    const config = {
-      clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
-      botId: process.env.REACT_APP_BOTPRESS_BOT_ID,
-      hostUrl:
-        process.env.REACT_APP_BOTPRESS_HOST_URL ||
-        "https://cdn.botpress.cloud/webchat/v3.0",
-      messagingUrl:
-        process.env.REACT_APP_BOTPRESS_MESSAGING_URL ||
-        "https://messaging.botpress.cloud",
-    };
-
-    console.log("Botpress config:", config);
-    return config;
   }, []);
 
-  // Fix shouldUseFallback logic
-  const shouldUseFallback = useMemo(() => {
-    const hasValidConfig =
-      botpressConfig.clientId &&
-      botpressConfig.clientId !== "YOUR_CLIENT_ID_HERE" &&
-      botpressConfig.botId;
+  const botpressConfig = {
+    clientId: process.env.REACT_APP_BOTPRESS_CLIENT_ID,
+    hostUrl:
+      process.env.REACT_APP_BOTPRESS_HOST_URL ||
+      "https://cdn.botpress.cloud/webchat/v3.0",
+    messagingUrl:
+      process.env.REACT_APP_BOTPRESS_MESSAGING_URL ||
+      "https://messaging.botpress.cloud",
+    botId: process.env.REACT_APP_BOTPRESS_BOT_ID,
+  };
 
-    const result = !navigator.onLine || botpressError || !hasValidConfig;
-    console.log("shouldUseFallback:", result, {
-      hasValidConfig,
-      online: navigator.onLine,
-      error: botpressError,
-    });
-    return result;
-  }, [botpressConfig, botpressError]);
+  const handleToggleChat = useCallback(() => {
+    setIsWebchatOpen((prev) => !prev);
+  }, []);
+
+  const handleCloseChat = useCallback(() => {
+    setIsWebchatOpen(false);
+    if (onClose) onClose();
+  }, [onClose]);
+
+  const shouldUseFallback =
+    useFallback ||
+    !isOnline ||
+    botpressError ||
+    !botpressConfig.clientId ||
+    botpressConfig.clientId === "YOUR_CLIENT_ID_HERE";
 
   return (
     <>
-      {/* FAB - Hidden but functional when fabHidden is true */}
-      {showFAB && (
+      {/* Webchat Widget */}
+      {isWebchatOpen && (
+        <div
+          className={`genius-chat-container ${isMobile ? "mobile" : "desktop"}`}
+        >
+          <BotpressErrorBoundary
+            fallback={
+              <FallbackChat
+                agentConfig={agentConfig}
+                onClose={handleCloseChat}
+                isMobile={isMobile}
+              />
+            }
+          >
+            {shouldUseFallback || chatSystem !== "botpress" ? (
+              <FallbackChat
+                agentConfig={agentConfig}
+                onClose={handleCloseChat}
+                isMobile={isMobile}
+              />
+            ) : (
+              <Webchat
+                clientId={botpressConfig.clientId}
+                style={{
+                  width: isMobile ? "100vw" : "400px",
+                  height: isMobile ? "100vh" : "600px",
+                  display: "flex",
+                  position: "fixed",
+                  bottom: isMobile ? "0" : "90px",
+                  right: isMobile ? "0" : "20px",
+                  zIndex: 2000,
+                }}
+                onError={() => setBotpressError(true)}
+              />
+            )}
+          </BotpressErrorBoundary>
+        </div>
+      )}
+
+      {/* Floating Action Button - only visible for Genius agent */}
+      {shouldShowFAB && !isWebchatOpen && (
         <div
           className="genius-fab"
-          onClick={() => setIsWebchatOpen(!isWebchatOpen)}
+          onClick={handleToggleChat}
           style={{
             position: "fixed",
             bottom: "20px",
@@ -328,43 +353,34 @@ const GeniusWebchatIntegration = ({ agentConfig, onClose, isMobile }) => {
             borderRadius: "50%",
             backgroundColor: "#007cff",
             color: "white",
-            display: fabHidden ? "none" : "flex", // Hide when fabHidden is true
+            display: "flex",
             alignItems: "center",
             justifyContent: "center",
             cursor: "pointer",
-            // ... other styles
+            boxShadow: "0 4px 12px rgba(0, 124, 255, 0.4)",
+            fontSize: "24px",
+            userSelect: "none",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = "scale(1.1)";
+            e.target.style.boxShadow = "0 6px 16px rgba(0, 124, 255, 0.6)";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "scale(1)";
+            e.target.style.boxShadow = "0 4px 12px rgba(0, 124, 255, 0.4)";
+          }}
+          role="button"
+          aria-label="Open Genius Chat"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleToggleChat();
+            }
           }}
         >
           💬
-        </div>
-      )}
-
-      {/* Webchat Widget */}
-      {isWebchatOpen && (
-        <div className="genius-chat-container">
-          {shouldUseFallback ? (
-            <FallbackChat
-              agentConfig={agentConfig}
-              onClose={() => setIsWebchatOpen(false)}
-              isMobile={isMobile}
-            />
-          ) : (
-            <Webchat
-              {...botpressConfig}
-              style={{
-                width: isMobile ? "100vw" : "400px",
-                height: isMobile ? "100vh" : "600px",
-                position: "fixed",
-                bottom: isMobile ? "0" : "90px",
-                right: isMobile ? "0" : "20px",
-                zIndex: 2000,
-              }}
-              onError={(error) => {
-                console.error("Botpress error:", error);
-                setBotpressError(true);
-              }}
-            />
-          )}
         </div>
       )}
     </>

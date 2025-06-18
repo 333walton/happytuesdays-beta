@@ -160,7 +160,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
   // NEW: Genius chat state
   const [geniusChatVisible, setGeniusChatVisible] = useState(false);
-  const [geniusFABVisible, setGeniusFABVisible] = useState(false);
 
   // Refs
   const clippyInstanceRef = useRef(null);
@@ -212,11 +211,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       geniusChatVisible,
     });
     if (currentAgent === "Genius") {
-      window.dispatchEvent(
-        new CustomEvent("triggerGeniusChat", {
-          detail: { source: "provider" },
-        })
-      );
       devLog("Showing Genius chat for current agent");
       console.log("🔍 Setting geniusChatVisible to true");
       setGeniusChatVisible(true);
@@ -355,14 +349,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         "Genie",
         "Bonzi",
       ];
-      if (newAgent === "Genius") {
-        setGeniusFABVisible(true);
-      } else {
-        setGeniusFABVisible(false);
-        if (geniusChatVisible) {
-          setGeniusChatVisible(false);
-        }
-      }
 
       if (!officialAgents.includes(newAgent)) {
         devLog(`Agent change rejected - invalid agent name: ${newAgent}`);
