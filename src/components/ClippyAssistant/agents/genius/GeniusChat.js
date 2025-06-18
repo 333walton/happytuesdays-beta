@@ -14,6 +14,7 @@ import DesktopPortalWrapper from "./DesktopPortalWrapper";
 
 const GeniusChat = ({
   currentAgent,
+  chatSystem, // <-- Ensure this is passed from ClippyProvider or parent
   onClose,
   visible = true,
   position,
@@ -27,22 +28,15 @@ const GeniusChat = ({
   // Enhanced mobile detection with touch support
   useEffect(() => {
     const checkMobile = () => {
-      // Check for touch capability first
       const hasTouch =
         "ontouchstart" in window ||
         navigator.maxTouchPoints > 0 ||
         navigator.msMaxTouchPoints > 0;
-
-      // Check viewport size
       const isMobileWidth = window.innerWidth <= 768;
-
-      // Check user agent as fallback
       const isMobileUA =
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
           navigator.userAgent
         );
-
-      // Device is mobile if it has touch AND (small screen OR mobile UA)
       const mobile = hasTouch && (isMobileWidth || isMobileUA);
 
       setIsMobile(mobile);
@@ -56,12 +50,8 @@ const GeniusChat = ({
     };
 
     checkMobile();
-
-    // Listen for orientation changes and resize
     window.addEventListener("resize", checkMobile);
     window.addEventListener("orientationchange", checkMobile);
-
-    // Check on visibility change (important for mobile browsers)
     document.addEventListener("visibilitychange", checkMobile);
 
     return () => {
@@ -77,7 +67,6 @@ const GeniusChat = ({
       console.log("🌐 Network: Online");
       setIsOnline(true);
     };
-
     const handleOffline = () => {
       console.log("🌐 Network: Offline");
       setIsOnline(false);
@@ -92,12 +81,13 @@ const GeniusChat = ({
     };
   }, []);
 
-  // FIXED: Improved isReady state management
+  // FIXED: Improved isReady state management, now includes chatSystem check
   useEffect(() => {
     console.log("🔍 GeniusChat state check:", {
       visible,
       isOnline,
       currentAgent,
+      chatSystem,
       agentChatSystem: agentConfig?.chatSystem,
     });
 
@@ -105,32 +95,34 @@ const GeniusChat = ({
     if (
       visible &&
       currentAgent === "Genius" &&
-      agentConfig?.chatSystem === "botpress"
+      (chatSystem === "botpress" || agentConfig?.chatSystem === "botpress")
     ) {
-      // Always set ready if visible and correct agent, regardless of network
-      // Network issues will be handled by fallback mode in the integration
       console.log("🚀 GeniusChat becoming ready");
       setIsReady(true);
     } else {
       console.log("❌ GeniusChat not ready:", {
         visible,
         correctAgent: currentAgent === "Genius",
-        correctChatSystem: agentConfig?.chatSystem === "botpress",
+        correctChatSystem:
+          chatSystem === "botpress" || agentConfig?.chatSystem === "botpress",
       });
       setIsReady(false);
     }
-  }, [visible, isOnline, currentAgent, agentConfig]);
+  }, [visible, currentAgent, chatSystem, agentConfig]);
 
   // Only render if current agent is Genius and uses Botpress
-  if (currentAgent !== "Genius" || agentConfig?.chatSystem !== "botpress") {
+  if (
+    currentAgent !== "Genius" ||
+    (chatSystem !== "botpress" && agentConfig?.chatSystem !== "botpress")
+  ) {
     console.log("🔍 GeniusChat not rendering - wrong agent or chat system:", {
       currentAgent,
-      chatSystem: agentConfig?.chatSystem,
+      chatSystem: chatSystem || agentConfig?.chatSystem,
     });
     return null;
   }
 
-  // Get Genius-specific conversation starter
+  // Get Genius-specific conversation starter and quick replies
   const conversationStarter = getConversationStarter("genius", false);
   const quickReplies = getQuickReplies("genius");
 
@@ -142,7 +134,7 @@ const GeniusChat = ({
     }
   };
 
-  // FIXED: Show loading state when not ready but should be visible
+  // Show loading state when not ready but should be visible
   if (!isReady && visible && currentAgent === "Genius") {
     console.log("🔍 GeniusChat showing loading state");
     return (
@@ -184,7 +176,7 @@ const GeniusChat = ({
     position,
   });
 
-  // Mobile rendering - FIXED: Removed pointer-events blocking
+  // Mobile rendering
   if (isMobile) {
     console.log("📱 Rendering GeniusChat for mobile");
     return (
@@ -197,9 +189,7 @@ const GeniusChat = ({
           left: 0,
           width: "100%",
           height: "100%",
-          // Allow all touch events to pass through
           touchAction: "manipulation",
-          // Ensure the wrapper doesn't block interactions
           background: "transparent",
         }}
       >
@@ -207,6 +197,8 @@ const GeniusChat = ({
           agentConfig={agentConfig}
           onClose={handleChatClose}
           isMobile={true}
+          conversationStarter={conversationStarter}
+          quickReplies={quickReplies}
           {...props}
         />
       </div>
@@ -229,6 +221,8 @@ const GeniusChat = ({
           agentConfig={agentConfig}
           onClose={handleChatClose}
           isMobile={false}
+          conversationStarter={conversationStarter}
+          quickReplies={quickReplies}
           {...props}
         />
       </div>
