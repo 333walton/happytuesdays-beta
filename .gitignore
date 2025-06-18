@@ -18,6 +18,7 @@
 .env.test.local
 .env.production.local
 .env
+.env.production
 [.env.example](http://_vscodecontentref_/7)
 
 npm-debug.log*
