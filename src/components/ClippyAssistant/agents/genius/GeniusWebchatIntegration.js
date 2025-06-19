@@ -22,7 +22,9 @@ const GeniusWebchatIntegration = ({
     window.triggerGeniusChatFAB = () => {
       console.log("🎯 Triggering Genius FAB click remotely");
       if (fabRef.current) {
-        fabRef.current.click();
+        // Directly set the state instead of clicking the button
+        setIsWebchatOpen(true);
+        console.log("✅ Genius chat opened programmatically");
         return true;
       }
       console.warn("⚠️ Genius FAB not available for remote trigger");
@@ -39,11 +41,12 @@ const GeniusWebchatIntegration = ({
   }, []);
 
   const handleToggleChat = useCallback(() => {
-    console.log("🔍 FAB clicked - toggling chat:", {
+    console.log("🔍 FAB clicked - opening chat:", {
       currentState: isWebchatOpen,
-      newState: !isWebchatOpen,
+      newState: true,
     });
-    setIsWebchatOpen((prev) => !prev);
+    // Always set to true when triggered - don't toggle
+    setIsWebchatOpen(true);
   }, [isWebchatOpen]);
 
   const handleCloseChat = useCallback(() => {
@@ -91,25 +94,26 @@ const GeniusWebchatIntegration = ({
         onClick={handleToggleChat}
         style={{
           position: "fixed",
-          bottom: "-100px", // Hidden below viewport
-          right: "-100px", // Hidden to the right
-          zIndex: -1, // Behind everything
+          bottom: "-1000px", // Far below viewport
+          right: "-1000px", // Far to the right
+          zIndex: -9999, // Behind everything
           width: "1px",
           height: "1px",
           opacity: 0,
-          pointerEvents: "auto", // Still clickable programmatically
+          pointerEvents: "none", // Prevent any accidental clicks
           visibility: "hidden",
           overflow: "hidden",
           border: "none",
           background: "transparent",
           cursor: "default",
+          display: "none", // Completely hide from display
         }}
         role="button"
         aria-label="Hidden Genius Chat Trigger"
         aria-hidden="true"
         tabIndex={-1}
       >
-        {/* Empty button - just needs to be clickable */}
+        {/* Empty button - just needs to be clickable programmatically */}
       </button>
     </>
   );

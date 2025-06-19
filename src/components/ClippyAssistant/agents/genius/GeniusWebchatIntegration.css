@@ -1,5 +1,3 @@
-/* Genius Webchat Integration Styles */
-
 /* Container styles */
 .genius-chat-container {
   position: fixed;
@@ -282,4 +280,48 @@
 .bp-widget-web,
 #webchat-root {
   z-index: 2000 !important;
+}
+
+/* CRITICAL: Hide ALL FAB and floating button elements */
+#fab-root,
+.bpFloat,
+.bp-widget-launcher,
+.bp-fab,
+.bpw-floating-button,
+.bpw-fab,
+.bp-floating-action-button,
+[class*="fab"],
+[class*="launcher"],
+[class*="floating-action"],
+[class*="floating-button"],
+button[aria-label*="Open chat"],
+button[aria-label*="Chat"],
+div[class*="floating-action-button"],
+div[role="button"][class*="fab"],
+.genius-fab:not(.genius-fab-hidden),
+#fab-root > *,
+.bpFloat > * {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  z-index: -9999 !important;
+}
+
+/* Ensure our hidden FAB stays hidden */
+.genius-fab-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: fixed !important;
+  bottom: -1000px !important;
+  right: -1000px !important;
+  z-index: -9999 !important;
+  pointer-events: none !important;
 }

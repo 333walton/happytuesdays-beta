@@ -794,39 +794,41 @@ const ClippyContextMenu = ({
         break;
 
       case "chat":
-        // Open chat balloon
-        if (window.showClippyChatBalloon) {
-          window.showClippyChatBalloon(
-            "Hi! What would you like to chat about?"
-          );
-        }
-        onAction("chat");
-        break;
+        // Check if current agent is Genius
+        if (currentAgent === "Genius") {
+          console.log("🎯 Chat with Genius - triggering FAB");
 
-      case "wave":
-        // FIXED: Change Wave action to open Notepad with FAQ content
-        console.log("🎯 Context menu action: Open About Clippy (Notepad)");
-        if (window.ProgramContext?.onOpen) {
-          window.ProgramContext.onOpen({
-            component: "Notepad",
-            multiInstance: true,
-            title: "About Clippy",
-            icon: icons.textchat32,
-            data: {
-              content: clippyFaq,
-              wrap: true, // FIXED: Enable text wrapping for FAQ content
-              readOnly: true, // Make FAQ read-only
-            },
-          });
+          // Try to trigger Genius FAB
+          if (window.triggerGeniusChatFAB) {
+            const triggered = window.triggerGeniusChatFAB();
+            console.log("Chat menu - Genius FAB trigger result:", triggered);
+
+            if (!triggered) {
+              // Fallback if FAB not available
+              console.warn("⚠️ Genius FAB not available");
+              if (window.showClippyCustomBalloon) {
+                window.showClippyCustomBalloon(
+                  "Genius chat is initializing, please try again in a moment."
+                );
+              }
+            }
+          } else {
+            console.warn("⚠️ triggerGeniusChatFAB not available");
+            if (window.showClippyCustomBalloon) {
+              window.showClippyCustomBalloon(
+                "Genius chat is not available yet. Please try again."
+              );
+            }
+          }
         } else {
-          console.warn("window.ProgramContext.onOpen is not available.");
-          if (window.showClippyCustomBalloon) {
-            window.showClippyCustomBalloon(
-              "Sorry, I couldn't open the About Clippy information."
+          // For non-Genius agents, show regular chat balloon
+          if (window.showClippyChatBalloon) {
+            window.showClippyChatBalloon(
+              "Hi! What would you like to chat about?"
             );
           }
         }
-        onAction("aboutClippy");
+        onAction("chat");
         break;
 
       case "greet":

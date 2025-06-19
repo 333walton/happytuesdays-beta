@@ -1,8 +1,3 @@
-/**
- * GeniusChat - Wrapper component for Genius agent's Botpress chat integration
- * FIXED: Always renders when Genius is active agent to keep FAB available
- */
-
 import React, { useEffect, useState } from "react";
 import { getAgentConfig } from "../data/AgentPersonalities";
 import {
@@ -56,6 +51,37 @@ const GeniusChat = ({
       window.removeEventListener("resize", checkMobile);
       window.removeEventListener("orientationchange", checkMobile);
       document.removeEventListener("visibilitychange", checkMobile);
+    };
+  }, []);
+
+  useEffect(() => {
+    const desktop =
+      document.querySelector(".desktop.screen") ||
+      document.querySelector(".desktop") ||
+      document.querySelector(".w98");
+
+    if (!desktop) return;
+
+    let portalContainer = document.getElementById("genius-chat-portal");
+    if (!portalContainer) {
+      portalContainer = document.createElement("div");
+      portalContainer.id = "genius-chat-portal";
+      portalContainer.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2000;
+    `;
+      desktop.appendChild(portalContainer);
+    }
+
+    return () => {
+      if (portalContainer && portalContainer.parentNode) {
+        portalContainer.remove();
+      }
     };
   }, []);
 
@@ -115,29 +141,28 @@ const GeniusChat = ({
     );
   }
 
-  // Desktop: Use portal to render inside desktop viewport
-  console.log("💻 Rendering GeniusChat wrapper for desktop with portal");
+  // Desktop: Render within desktop viewport
+  console.log("💻 Rendering GeniusChat wrapper for desktop");
+
   return (
-    <DesktopPortalWrapper>
-      <div
-        className="genius-chat-desktop-wrapper"
-        style={{
-          width: "100%",
-          height: "100%",
-          position: "relative",
-          pointerEvents: "none", // Don't block interactions when FAB is hidden
-        }}
-      >
-        <GeniusWebchatIntegration
-          agentConfig={agentConfig}
-          onClose={handleChatClose}
-          isMobile={false}
-          conversationStarter={conversationStarter}
-          quickReplies={quickReplies}
-          {...props}
-        />
-      </div>
-    </DesktopPortalWrapper>
+    <div
+      className="genius-chat-desktop-wrapper"
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none", // Don't block interactions when FAB is hidden
+      }}
+    >
+      <GeniusWebchatIntegration
+        agentConfig={agentConfig}
+        onClose={handleChatClose}
+        isMobile={false}
+        conversationStarter={conversationStarter}
+        quickReplies={quickReplies}
+        {...props}
+      />
+    </div>
   );
 };
 
