@@ -1,6 +1,6 @@
 /**
  * GeniusChat - Wrapper component for Genius agent's Botpress chat integration
- * FIXED: Improved isReady state management and mobile detection
+ * FIXED: Always renders when Genius is active agent to keep FAB available
  */
 
 import React, { useEffect, useState } from "react";
@@ -14,18 +14,14 @@ import DesktopPortalWrapper from "./DesktopPortalWrapper";
 
 const GeniusChat = ({
   currentAgent,
-  chatSystem, // <-- Ensure this is passed from ClippyProvider or parent
+  chatSystem,
   onClose,
-  visible = true,
+  visible = true, // Not used anymore, kept for compatibility
   position,
   ...props
 }) => {
-  const [isReady, setIsReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const agentConfig = getAgentConfig(currentAgent);
-  const effectiveAgent = currentAgent || "Genius";
-  const effectiveChatSystem = chatSystem || "botpress";
 
   // Enhanced mobile detection with touch support
   useEffect(() => {
@@ -42,7 +38,7 @@ const GeniusChat = ({
       const mobile = hasTouch && (isMobileWidth || isMobileUA);
 
       setIsMobile(mobile);
-      console.log("📱 Mobile detection:", {
+      console.log("📱 GeniusChat Mobile detection:", {
         hasTouch,
         isMobileWidth,
         isMobileUA,
@@ -63,67 +59,11 @@ const GeniusChat = ({
     };
   }, []);
 
-  // Network status monitoring
-  useEffect(() => {
-    const handleOnline = () => {
-      console.log("🌐 Network: Online");
-      setIsOnline(true);
-    };
-    const handleOffline = () => {
-      console.log("🌐 Network: Offline");
-      setIsOnline(false);
-    };
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-
-  // FIXED: Improved isReady state management - removed isOnline dependency
-  useEffect(() => {
-    console.log("🔍 GeniusChat state check:", {
-      visible,
-      isOnline,
+  // FIXED: Always render if current agent is Genius, regardless of visibility
+  // This ensures the hidden FAB is always available for remote triggering
+  if (currentAgent !== "Genius") {
+    console.log("🔍 GeniusChat not rendering - not Genius agent:", {
       currentAgent,
-      agentChatSystem: agentConfig?.chatSystem,
-    });
-
-    // Set isReady based on all conditions
-    if (
-      visible &&
-      currentAgent === "Genius" &&
-      (agentConfig?.chatSystem === "botpress" ||
-        agentConfig?.chatSystem === "enhanced_legacy")
-    ) {
-      // Always set ready if visible and correct agent, regardless of network
-      // Network issues will be handled by fallback mode in the integration
-      console.log("🚀 GeniusChat becoming ready");
-      setIsReady(true);
-    } else {
-      console.log("❌ GeniusChat not ready:", {
-        visible,
-        correctAgent: currentAgent === "Genius",
-        correctChatSystem:
-          agentConfig?.chatSystem === "botpress" ||
-          agentConfig?.chatSystem === "enhanced_legacy",
-        chatSystem: agentConfig?.chatSystem,
-      });
-      setIsReady(false);
-    }
-  }, [visible, currentAgent, agentConfig]);
-
-  // Only render if current agent is Genius and uses Botpress
-  if (
-    currentAgent !== "Genius" ||
-    (chatSystem !== "botpress" && agentConfig?.chatSystem !== "botpress")
-  ) {
-    console.log("🔍 GeniusChat not rendering - wrong agent or chat system:", {
-      currentAgent,
-      chatSystem: chatSystem || agentConfig?.chatSystem,
     });
     return null;
   }
@@ -133,58 +73,21 @@ const GeniusChat = ({
   const quickReplies = getQuickReplies("genius");
 
   const handleChatClose = () => {
-    console.log("🔍 GeniusChat closing");
-    setIsReady(false);
+    console.log("🔍 GeniusChat wrapper handling close");
     if (onClose) {
       onClose();
     }
   };
 
-  // Show loading state when not ready but should be visible
-  if (!isReady && visible && currentAgent === "Genius") {
-    console.log("🔍 GeniusChat showing loading state");
-    return (
-      <div
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          right: "20px",
-          zIndex: 2100,
-          padding: "10px",
-          background: "#c0c0c0",
-          border: "2px outset #c0c0c0",
-          fontFamily: "'MS Sans Serif', sans-serif",
-          fontSize: "11px",
-        }}
-      >
-        Loading Genius Chat...
-      </div>
-    );
-  }
-
-  if (!isReady || !visible) {
-    console.log("🔍 GeniusChat not rendering:", {
-      isReady,
-      visible,
-      currentAgent,
-      isOnline,
-    });
-    return null;
-  }
-
-  console.log("🔍 GeniusChat rendering:", {
+  console.log("🔍 GeniusChat rendering with hidden FAB for Genius agent:", {
     currentAgent,
-    agentConfig,
-    visible,
-    isReady,
+    hasAgentConfig: !!agentConfig,
     isMobile,
-    isOnline,
-    position,
   });
 
   // Mobile rendering
   if (isMobile) {
-    console.log("📱 Rendering GeniusChat for mobile");
+    console.log("📱 Rendering GeniusChat wrapper for mobile");
     return (
       <div
         className="genius-chat-mobile-wrapper"
@@ -197,6 +100,7 @@ const GeniusChat = ({
           height: "100%",
           touchAction: "manipulation",
           background: "transparent",
+          pointerEvents: "none", // Don't block interactions when FAB is hidden
         }}
       >
         <GeniusWebchatIntegration
@@ -212,7 +116,7 @@ const GeniusChat = ({
   }
 
   // Desktop: Use portal to render inside desktop viewport
-  console.log("💻 Rendering GeniusChat for desktop with portal");
+  console.log("💻 Rendering GeniusChat wrapper for desktop with portal");
   return (
     <DesktopPortalWrapper>
       <div
@@ -221,6 +125,7 @@ const GeniusChat = ({
           width: "100%",
           height: "100%",
           position: "relative",
+          pointerEvents: "none", // Don't block interactions when FAB is hidden
         }}
       >
         <GeniusWebchatIntegration

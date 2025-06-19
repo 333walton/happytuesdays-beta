@@ -158,9 +158,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   // FIXED: Animation queue prevention
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(false);
 
-  // NEW: Genius chat state
-  const [geniusChatVisible, setGeniusChatVisible] = useState(false);
-
   // Refs
   const clippyInstanceRef = useRef(null);
   const overlayRef = useRef(null);
@@ -199,32 +196,45 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
   // FIXED: Check if any balloon is currently open (including Genius chat)
   const isAnyBalloonOpen = useCallback(() => {
-    return (
-      isCustomBalloonVisible() || isChatBalloonVisible() || geniusChatVisible
-    );
-  }, [geniusChatVisible]);
+    return isCustomBalloonVisible() || isChatBalloonVisible();
+  }, []); // No dependencies needed
+
+  const triggerGeniusFAB = useCallback(() => {
+    console.log("🔍 Attempting to trigger Genius FAB");
+    if (currentAgent === "Genius" && window.triggerGeniusChatFAB) {
+      const triggered = window.triggerGeniusChatFAB();
+      if (triggered) {
+        console.log("✅ Genius FAB triggered successfully");
+        return true;
+      }
+    }
+    console.log("❌ Genius FAB trigger failed:", {
+      isGeniusAgent: currentAgent === "Genius",
+      hasTriggerFunction: !!window.triggerGeniusChatFAB,
+    });
+    return false;
+  }, [currentAgent]);
 
   // NEW: Genius chat management
-  const showGeniusChat = useCallback(() => {
-    console.log("🔍 showGeniusChat called:", {
-      currentAgent,
-      geniusChatVisible,
-    });
-    if (currentAgent === "Genius") {
-      devLog("Showing Genius chat for current agent");
-      console.log("🔍 Setting geniusChatVisible to true");
-      setGeniusChatVisible(true);
-      return true;
-    }
-    devLog("Genius chat blocked - current agent is not Genius");
-    console.log("🔍 Genius chat blocked - not Genius agent");
-    return false;
-  }, [currentAgent, geniusChatVisible]);
+  //const showGeniusChat = useCallback(() => {
+  //console.log("🔍 showGeniusChat called:", {
+  //currentAgent,
+  //});
+  //if (currentAgent === "Genius") {
+  //devLog("Showing Genius chat for current agent");
+  //console.log("🔍 Setting geniusChatVisible to true");
+  //setGeniusChatVisible(true);
+  //return true;
+  //}
+  //devLog("Genius chat blocked - current agent is not Genius");
+  //console.log("🔍 Genius chat blocked - not Genius agent");
+  //return false;
+  //}, [currentAgent]);
 
-  const hideGeniusChat = useCallback(() => {
-    devLog("Hiding Genius chat");
-    setGeniusChatVisible(false);
-  }, []);
+  //const hideGeniusChat = useCallback(() => {
+  //devLog("Hiding Genius chat");
+  //setGeniusChatVisible(false);
+  //}, []);
 
   // FIXED: Context menu management
   const showContextMenu = useCallback((x, y) => {
@@ -520,7 +530,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           // Hide any open balloons during transition
           hideCustomBalloon();
           hideChatBalloon();
-          hideGeniusChat(); // FIXED: Also hide Genius chat
+          //hideGeniusChat(); // FIXED: Also hide Genius chat
           hideContextMenu();
 
           // COMPREHENSIVE: Perform cleanup and get saved position
@@ -640,6 +650,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       hideChatBalloon,
       hideContextMenu,
       isAnyBalloonOpen,
+      showCustomBalloon,
+      // REMOVED: hideGeniusChat from dependencies
     ]
   );
 
@@ -852,18 +864,15 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       const now = Date.now();
 
-      // Double-clicks bypass cooldowns in new InteractionManager!
       devLog(
         "Desktop double click - bypassing cooldowns (InteractionManager allows double-clicks)"
       );
 
-      // Block if animation is currently playing
       if (isAnimationPlaying) {
         devLog("Desktop double click blocked - animation currently playing");
         return false;
       }
 
-      // Block if any balloon is already open
       if (isAnyBalloonOpen()) {
         devLog("Desktop double click blocked - balloon is already open");
         return false;
@@ -876,8 +885,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         if (mountedRef.current && !isAnyBalloonOpen()) {
           if (currentAgent === "Genius") {
             // Use Botpress chat for Genius
-            showGeniusChat();
-            devLog("Desktop double click Genius chat shown");
+            triggerGeniusFAB();
+            devLog("Desktop double click - triggered Genius FAB");
           } else {
             // Use legacy chat for other agents
             if (window.showClippyChatBalloon) {
@@ -888,7 +897,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 "Desktop double click legacy chat balloon shown via global function"
               );
             } else {
-              // Fallback to direct call if global function not available
               showChatBalloon("Hi! What would you like to chat about?");
               devLog(
                 "Desktop double click legacy chat balloon shown via direct call (fallback)"
@@ -896,7 +904,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             }
           }
 
-          // Set state AFTER balloon opens to prevent re-renders that disrupt balloon positioning
           setLastInteractionTime(now);
           startCooldown();
         }
@@ -905,14 +912,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       return true;
     },
     [
-      isInCooldown,
-      lastInteractionTime,
       isAnimationPlaying,
       isAnyBalloonOpen,
       startCooldown,
       currentAgent,
       showChatBalloon,
-      showGeniusChat,
+      triggerGeniusFAB, // CHANGED: Added triggerGeniusFAB
     ]
   );
 
@@ -1353,7 +1358,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
         handleMobileLongPress({
           showChatBalloon,
-          showGeniusChat,
+          triggerGeniusFAB, // CHANGED: Pass triggerGeniusFAB instead of showGeniusChat
           currentAgent,
         });
       },
@@ -1386,6 +1391,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     showChatBalloon,
     showCustomBalloon,
     showWelcomeBalloon,
+    triggerGeniusFAB, // CHANGED: Added triggerGeniusFAB
+    currentAgent,
     setIsAnimationPlaying,
     setIsDragging,
     setLastInteractionTime,
@@ -1847,7 +1854,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     };
   }, []);
 
-  // Context value
   const contextValue = {
     // State
     assistantVisible,
@@ -1888,7 +1894,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     showContextMenu,
     hideContextMenu,
 
-    // Interaction handlers (removed old mobile handlers)
+    // Interaction handlers
     handleRightClick,
 
     // Agent change function
@@ -1896,6 +1902,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
     // Greeting function
     playInitialGreeting,
+
+    // ADDED: Genius FAB trigger
+    triggerGeniusFAB,
 
     // Refs
     clippyInstanceRef,
@@ -1935,9 +1944,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 // Ensure the chat balloon opens correctly
                 if (mountedRef.current && !isAnyBalloonOpen()) {
                   if (currentAgent === "Genius") {
-                    // Use Botpress chat for Genius (consistent with double-click)
-                    showGeniusChat();
-                    devLog("Genius chat triggered from context menu");
+                    // CHANGED: Trigger FAB for Genius
+                    triggerGeniusFAB();
+                    devLog("Genius FAB triggered from context menu");
                   } else {
                     // Use legacy chat for other agents
                     showChatBalloon("Hi! What would you like to chat about?");
@@ -1963,12 +1972,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
         {!isMobile && shouldRenderClippy && <DesktopControls />}
 
-        {geniusChatVisible && currentAgent === "Genius" && (
+        {currentAgent === "Genius" && (
           <GeniusChat
-            visible={geniusChatVisible}
-            onClose={hideGeniusChat}
+            visible={false} // Not used anymore, FAB handles visibility
+            onClose={() => {}} // FAB handles its own close
             currentAgent={currentAgent}
-            chatSystem="botpress" // Explicitly set to "botpress"
+            chatSystem="botpress"
           />
         )}
 

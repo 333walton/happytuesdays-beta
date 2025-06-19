@@ -1,232 +1,188 @@
-// MobileInteractions.js - Simplified mobile interaction logic
-import { devLog } from "../core/ClippyPositioning";
-import ClippyPositioning from "../core/ClippyPositioning";
+// MobileInteractions.js - Mobile interaction handlers
+// FIXED: Updated to trigger FAB for Genius agent
 
-// Animation pool for random selection
-const MOBILE_ANIMATIONS = [
-  "Wave",
-  "Congratulate",
-  "GetAttention",
-  "Thinking",
-  "Writing",
-  "GoodBye",
-  "Processing",
-  "Alert",
-  "GetArtsy",
-  "Searching",
-  "Explain",
-  "Greeting",
-  "GestureRight",
-  "GestureLeft",
-  "GestureUp",
-];
+import { interactionManager, COOLDOWN_TYPES } from "./InteractionManager";
 
-// Balloon messages for mobile
-const MOBILE_BALLOON_MESSAGES = [
-  "Hi there! Having a good day?",
-  "Tap me again for another surprise!",
-  "I'm here if you need any help!",
-  "Enjoying Hydra98 so far?",
-  "Try double-tapping me for my menu!",
-  "Long-press me to start a chat!",
-  "Need help? Just let me know!",
-  "Welcome to the nostalgic world of Windows 98!",
-  "Feeling productive today?",
-  "Don't forget to save your work!",
-];
+const isDev = process.env.NODE_ENV === "development";
+const devLog = (message, ...args) => {
+  if (isDev) {
+    console.log(`📱 MobileInteractions: ${message}`, ...args);
+  }
+};
 
-/**
- * Handle mobile single tap interaction
- * 75% animation, 25% speech balloon
- */
-export function handleMobileSingleTap({
+// Enhanced animation logging
+const logAnimation = (animationName, context = "mobile interaction") => {
+  console.log(
+    `%c🎭 Mobile Animation: "${animationName}"%c (from ${context})`,
+    "color: #0066cc; font-weight: bold; font-size: 14px;",
+    "color: #666; font-size: 12px;"
+  );
+};
+
+export const handleMobileSingleTap = ({
   clippyInstance,
   showCustomBalloon,
   setIsAnimationPlaying,
-  isInitialInteraction = false,
+  isInitialInteraction,
   greetingPlayedRef,
   initialMessageShownRef,
   showWelcomeBalloon,
-}) {
-  devLog("Processing mobile single tap");
+}) => {
+  devLog("Single tap handler called", { isInitialInteraction });
 
   // Handle initial interaction
-  if (isInitialInteraction) {
-    devLog("Initial mobile tap - showing welcome");
+  if (isInitialInteraction && !greetingPlayedRef.current) {
+    devLog("First interaction - playing greeting");
+    greetingPlayedRef.current = true;
 
     if (clippyInstance?.play) {
       setIsAnimationPlaying(true);
-      clippyInstance.play("Wave");
-      greetingPlayedRef.current = true;
+      const animationName = "Wave";
+      logAnimation(animationName, "initial mobile greeting");
+      clippyInstance.play(animationName);
 
       setTimeout(() => {
         setIsAnimationPlaying(false);
-      }, 2000);
-
-      setTimeout(() => {
         if (!initialMessageShownRef.current) {
           initialMessageShownRef.current = true;
           showWelcomeBalloon();
-          devLog("Welcome balloon shown");
         }
-      }, 1200);
+      }, 2500);
     }
-    return true;
+    return;
   }
 
-  // Standard tap: 75% animation, 25% speech balloon
+  // Regular tap: 75% animation, 25% balloon
   const shouldShowAnimation = Math.random() < 0.75;
 
-  if (shouldShowAnimation) {
-    // Play random animation
-    devLog("Mobile tap - playing animation (75%)");
+  if (shouldShowAnimation && clippyInstance?.play) {
+    devLog("Mobile tap - showing animation (75% chance)");
+    setIsAnimationPlaying(true);
 
-    if (clippyInstance?.play) {
-      setIsAnimationPlaying(true);
+    const animations = [
+      "Wave",
+      "GetAttention",
+      "Thinking",
+      "Writing",
+      "Alert",
+      "Searching",
+      "Explain",
+      "GestureRight",
+      "GestureLeft",
+    ];
 
-      const randomAnimation =
-        MOBILE_ANIMATIONS[Math.floor(Math.random() * MOBILE_ANIMATIONS.length)];
-      clippyInstance.play(randomAnimation);
+    const randomIndex = Math.floor(Math.random() * animations.length);
+    const animationName = animations[randomIndex];
 
-      const animationDuration = randomAnimation === "GoodBye" ? 3000 : 2000;
-      setTimeout(() => {
-        setIsAnimationPlaying(false);
-      }, animationDuration);
-    }
-  } else {
-    // Show speech balloon
-    devLog("Mobile tap - showing speech balloon (25%)");
+    logAnimation(animationName, "mobile single tap (75% animation)");
+    clippyInstance.play(animationName);
 
     setTimeout(() => {
-      const randomMessage =
-        MOBILE_BALLOON_MESSAGES[
-          Math.floor(Math.random() * MOBILE_BALLOON_MESSAGES.length)
-        ];
-      showCustomBalloon(randomMessage, 4000);
-    }, 200);
+      setIsAnimationPlaying(false);
+    }, 2000);
+  } else {
+    devLog("Mobile tap - showing balloon (25% chance)");
+    const messages = [
+      "Tap me again for more!",
+      "Having fun with Hydra98?",
+      "Try a long press!",
+      "Double-tap for options!",
+      "I'm here to help!",
+    ];
+
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+    showCustomBalloon(randomMessage, 3000);
   }
+};
 
-  return true;
-}
+export const handleMobileDoubleTap = ({ showContextMenu }) => {
+  devLog("Double tap triggered - showing context menu");
 
-/**
- * Handle mobile double tap interaction
- * Always shows context menu
- */
-export function handleMobileDoubleTap({ showContextMenu }) {
-  devLog("Mobile double tap - showing context menu");
-
-  // Position context menu above Clippy
+  // Get tap position for context menu
   const clippyEl = document.querySelector(".clippy");
   if (clippyEl) {
     const rect = clippyEl.getBoundingClientRect();
-    showContextMenu(rect.left + rect.width / 2, rect.top - 20);
-  } else {
-    showContextMenu(window.innerWidth / 2, window.innerHeight / 2);
+    const x = rect.left + rect.width / 2;
+    const y = rect.top;
+    showContextMenu(x, y);
   }
+};
 
-  return true;
-}
-
-/**
- * Handle mobile long press interaction
- * Shows agent-specific chat (Botpress for Genius, legacy for others)
- */
-export function handleMobileLongPress({
+// FIXED: Updated to trigger FAB for Genius
+export const handleMobileLongPress = ({
   showChatBalloon,
-  showGeniusChat,
-  currentAgent = "Clippy",
-}) {
-  devLog(`Mobile long press - showing ${currentAgent} chat`);
+  triggerGeniusFAB, // Changed from showGeniusChat
+  currentAgent,
+}) => {
+  devLog("Long press triggered");
 
-  // Prevent text selection/highlighting during long press (webkit fix)
-  document.body.style.webkitUserSelect = "none";
-  document.body.style.userSelect = "none";
+  // Haptic feedback for long press
+  if (window.navigator?.vibrate) {
+    window.navigator.vibrate(50);
+  }
 
-  setTimeout(() => {
-    // Re-enable text selection after interaction
-    document.body.style.webkitUserSelect = "";
-    document.body.style.userSelect = "";
+  // Open appropriate chat based on current agent
+  if (currentAgent === "Genius") {
+    // Trigger FAB for Genius instead of showing chat directly
+    devLog("Long press for Genius - triggering FAB");
 
-    if (currentAgent === "Genius" && showGeniusChat) {
-      // Use Botpress chat for Genius agent
-      showGeniusChat();
-      devLog("Genius Botpress chat shown via mobile long press");
+    if (window.triggerGeniusChatFAB) {
+      const triggered = window.triggerGeniusChatFAB();
+      devLog("Mobile long press - Genius FAB trigger result:", triggered);
+    } else if (triggerGeniusFAB) {
+      // Fallback to passed function if global not available yet
+      triggerGeniusFAB();
+      devLog("Mobile long press - triggered Genius FAB via callback");
     } else {
-      // Use legacy chat for other agents
-      if (window.showClippyChatBalloon) {
-        window.showClippyChatBalloon("Hi! What would you like to chat about?");
-        devLog("Legacy chat balloon shown via global function");
-      } else {
-        showChatBalloon("Hi! What would you like to chat about?");
-        devLog("Legacy chat balloon shown via direct call");
-      }
+      devLog("Mobile long press - no FAB trigger available");
     }
-  }, 100);
+  } else {
+    // Legacy chat for other agents
+    devLog("Long press for non-Genius agent - showing chat balloon");
+    showChatBalloon("Hi! What would you like to chat about?");
+  }
+};
 
-  return true;
-}
+export const handleMobileDragStart = () => {
+  devLog("Drag started");
 
-/**
- * Handle mobile drag interactions
- */
-export function handleMobileDrag({ rightPx, bottomPx, isDragging = true }) {
+  // Visual feedback
   const clippyEl = document.querySelector(".clippy");
-  const overlayEl = document.getElementById("clippy-clickable-overlay");
-
-  if (!clippyEl) return false;
-
-  if (ClippyPositioning?.handleMobileDrag) {
-    return ClippyPositioning.handleMobileDrag(
-      clippyEl,
-      overlayEl,
-      { rightPx, bottomPx },
-      isDragging
-    );
+  if (clippyEl) {
+    clippyEl.style.opacity = "0.8";
+    clippyEl.style.transition = "opacity 0.2s";
   }
+};
 
-  return false;
-}
-
-/**
- * Handle drag start
- */
-export function handleMobileDragStart() {
-  devLog("Mobile drag started");
-
-  if (window.setClippyDragging) {
-    window.setClippyDragging(true);
-  }
+export const handleMobileDrag = ({ x, y, isDragging }) => {
+  if (!isDragging) return;
 
   const clippyEl = document.querySelector(".clippy");
   const overlayEl = document.getElementById("clippy-clickable-overlay");
 
-  if (ClippyPositioning?.startMobileDrag) {
-    ClippyPositioning.startMobileDrag(clippyEl, overlayEl);
+  if (clippyEl && overlayEl) {
+    // Update positions
+    clippyEl.style.left = `${x}px`;
+    clippyEl.style.top = `${y}px`;
+
+    overlayEl.style.left = `${x}px`;
+    overlayEl.style.top = `${y}px`;
   }
-}
+};
 
-/**
- * Handle drag end
- */
-export function handleMobileDragEnd() {
-  devLog("Mobile drag ended");
+export const handleMobileDragEnd = () => {
+  devLog("Drag ended");
 
+  // Restore opacity
   const clippyEl = document.querySelector(".clippy");
-  const overlayEl = document.getElementById("clippy-clickable-overlay");
-
-  if (ClippyPositioning?.endMobileDrag) {
-    ClippyPositioning.endMobileDrag(clippyEl, overlayEl, null);
-
-    // Preserve scale after drag
-    if (ClippyPositioning?.preserveClippyScale) {
-      ClippyPositioning.preserveClippyScale(clippyEl);
-    }
+  if (clippyEl) {
+    clippyEl.style.opacity = "1";
   }
 
-  setTimeout(() => {
-    if (window.setClippyDragging) {
-      window.setClippyDragging(false);
-    }
-  }, 100);
-}
+  // Save position if needed
+  const overlayEl = document.getElementById("clippy-clickable-overlay");
+  if (overlayEl) {
+    const rect = overlayEl.getBoundingClientRect();
+    devLog("Final position:", { x: rect.left, y: rect.top });
+  }
+};
