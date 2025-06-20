@@ -218,14 +218,14 @@ const ReactBotpressChatWidget = ({
   `;
 
   // Fallback timeout
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!isLoaded && hasValidConfig) {
-        setShowFallback(true);
-      }
-    }, 5000);
-    return () => clearTimeout(timeout);
-  }, [isLoaded, hasValidConfig]);
+  //useEffect(() => {
+  //const timeout = setTimeout(() => {
+  //if (!isLoaded && hasValidConfig) {
+  //setShowFallback(true);
+  //}
+  //}, 5000);
+  //return () => clearTimeout(timeout);
+  //}, [isLoaded, hasValidConfig]);
 
   // Custom header component
   const CustomHeader = () => (
