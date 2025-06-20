@@ -112,5 +112,18 @@
 iframe.bpFab,
 iframe[name="fab"],
 iframe.bp-fab {
-  transform: scale(0.001) !important;
+  position: fixed !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(100%) !important;
+  box-shadow: none !important;
+  border: none !important;
+  transform: scale(0.001) translateX(-10000px) !important;
+  transform-origin: 0 0 !important;
 }
