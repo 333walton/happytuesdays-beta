@@ -853,78 +853,17 @@ const ClippyContextMenu = ({
       case "chat":
         // Check if current agent is Genius
         if (currentAgent === "Genius") {
-          console.log("🎯 Chat with Genius - accessing FAB iframe");
+          console.log("🎯 Chat with Genius - triggering FAB");
 
-          // Find and click the Botpress FAB button
+          // Small delay to ensure Botpress is loaded
           setTimeout(() => {
-            // Look for the Botpress FAB iframe
-            const fabIframe =
-              document.querySelector("iframe.bpFab") ||
-              document.querySelector('iframe[name="fab"]') ||
-              document.querySelector('iframe[title="Botpress"]');
-
-            console.log("🤖 Found FAB iframe:", fabIframe);
-
-            if (fabIframe) {
-              try {
-                // Access the iframe's content
-                const iframeDoc =
-                  fabIframe.contentDocument || fabIframe.contentWindow.document;
-
-                if (iframeDoc) {
-                  // Look for the actual button inside the iframe
-                  const fabButton =
-                    iframeDoc.querySelector("button") ||
-                    iframeDoc.querySelector('[role="button"]') ||
-                    iframeDoc.querySelector(".bp-widget-launcher") ||
-                    iframeDoc.querySelector('[class*="launcher"]') ||
-                    iframeDoc.querySelector('[class*="fab"]');
-
-                  if (fabButton) {
-                    console.log("✅ Found button inside iframe, clicking it");
-                    fabButton.click();
-                  } else {
-                    console.warn("⚠️ Button not found inside iframe");
-                    // Try clicking on the iframe body as fallback
-                    const iframeBody = iframeDoc.body;
-                    if (iframeBody) {
-                      console.log("🎯 Clicking iframe body as fallback");
-                      iframeBody.click();
-                    }
-                  }
-                } else {
-                  console.warn(
-                    "⚠️ Cannot access iframe content (cross-origin restriction)"
-                  );
-                  // If we can't access iframe content, use the trigger function
-                  if (window.triggerGeniusChatFAB) {
-                    console.log(
-                      "Using trigger function due to iframe restrictions"
-                    );
-                    window.triggerGeniusChatFAB();
-                  }
-                }
-              } catch (e) {
-                console.warn("⚠️ Error accessing iframe:", e);
-                // Cross-origin error - fall back to trigger function
-                if (window.triggerGeniusChatFAB) {
-                  console.log(
-                    "Using trigger function due to cross-origin restrictions"
-                  );
-                  window.triggerGeniusChatFAB();
-                } else {
-                  if (window.showClippyCustomBalloon) {
-                    window.showClippyCustomBalloon(
-                      "Unable to open chat directly. Please try again."
-                    );
-                  }
-                }
-              }
+            if (window.botpress && window.botpress.open) {
+              console.log("✅ Opening Genius chat via botpress.open()");
+              window.botpress.open();
             } else {
-              console.warn("⚠️ FAB iframe not found");
-              // Fallback - try the trigger function if it exists
+              console.warn("⚠️ Botpress not found, trying fallback");
+              // Fallback to trigger function if available
               if (window.triggerGeniusChatFAB) {
-                console.log("Using fallback trigger function");
                 window.triggerGeniusChatFAB();
               } else {
                 if (window.showClippyCustomBalloon) {
@@ -934,7 +873,7 @@ const ClippyContextMenu = ({
                 }
               }
             }
-          }, 200); // Small delay to ensure FAB is rendered
+          }, 200); // Small delay to ensure everything is loaded
         } else {
           // For non-Genius agents, show regular chat balloon
           if (window.showClippyChatBalloon) {
