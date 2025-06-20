@@ -13,6 +13,25 @@ import {
   getErrorMessage,
 } from "../data/AgentResponses";
 
+// Safe localStorage utility functions
+const safeGetLocalStorage = (key, defaultValue = null) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.warn(`Error parsing localStorage item "${key}":`, error);
+    return defaultValue;
+  }
+};
+
+const safeSetLocalStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.warn(`Error setting localStorage item "${key}":`, error);
+  }
+};
+
 /**
  * React-based Botpress Chat Widget using v3.0.0 API
  */
@@ -27,6 +46,52 @@ const ReactBotpressChatWidget = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [botpressReady, setBotpressReady] = useState(false);
+
+  // Safe localStorage integration for user state
+  const [userState, setUserState] = useState(() =>
+    safeGetLocalStorage("user", null)
+  );
+
+  // Update localStorage when userState changes
+  useEffect(() => {
+    if (userState) {
+      safeSetLocalStorage("user", userState);
+    }
+  }, [userState]);
+
+  // Enhanced script loading function with better error handling
+  const loadScript = (src) => {
+    return new Promise((resolve, reject) => {
+      // Check if script already exists
+      const existingScript = document.querySelector(`script[src="${src}"]`);
+      if (existingScript) {
+        console.log(`✅ Script already loaded: ${src}`);
+        resolve();
+        return;
+      }
+
+      console.log(`🔄 Loading script: ${src}`);
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = true;
+      script.onload = () => {
+        console.log(`✅ Script loaded successfully: ${src}`);
+        resolve();
+      };
+      script.onerror = (error) => {
+        console.error(`❌ Script failed to load: ${src}`, error);
+        reject(new Error(`Failed to load script: ${src}`));
+      };
+      document.body.appendChild(script);
+
+      // Timeout after 15 seconds
+      setTimeout(() => {
+        console.error(`⏱️ Script load timeout: ${src}`);
+        reject(new Error(`Script load timeout: ${src}`));
+      }, 15000);
+    });
+  };
 
   // Mobile detection
   useEffect(() => {
@@ -72,16 +137,101 @@ const ReactBotpressChatWidget = ({
 
   const hasValidConfig = hasValidClientId && hasValidBotId;
 
-  // Log configuration status for debugging
+  // Enhanced configuration validation with detailed logging
   useEffect(() => {
-    console.log("Botpress Configuration Status:", {
+    const configStatus = {
       hasValidClientId,
       hasValidBotId,
       hasValidConfig,
       clientIdLength: process.env.REACT_APP_BOTPRESS_CLIENT_ID?.length || 0,
       botIdLength: process.env.REACT_APP_BOTPRESS_BOT_ID?.length || 0,
-    });
+      clientIdValue: process.env.REACT_APP_BOTPRESS_CLIENT_ID
+        ? `${process.env.REACT_APP_BOTPRESS_CLIENT_ID.substring(0, 8)}...`
+        : "undefined",
+      botIdValue: process.env.REACT_APP_BOTPRESS_BOT_ID
+        ? `${process.env.REACT_APP_BOTPRESS_BOT_ID.substring(0, 8)}...`
+        : "undefined",
+    };
+
+    console.log("🔧 Botpress Configuration Status:", configStatus);
+
+    if (!hasValidConfig) {
+      console.error("❌ Invalid Botpress configuration detected");
+      console.error("📋 Required environment variables:");
+      console.error(
+        "   - REACT_APP_BOTPRESS_CLIENT_ID (current:",
+        configStatus.clientIdValue,
+        ")"
+      );
+      console.error(
+        "   - REACT_APP_BOTPRESS_BOT_ID (current:",
+        configStatus.botIdValue,
+        ")"
+      );
+    }
   }, [hasValidClientId, hasValidBotId, hasValidConfig]);
+
+  // Enhanced Botpress script initialization with comprehensive error handling
+  useEffect(() => {
+    const initBotpress = async () => {
+      try {
+        console.log("🚀 Starting Botpress initialization...");
+
+        // Load Botpress v3 scripts sequentially
+        console.log("📦 Loading core Botpress scripts...");
+        await loadScript("https://cdn.botpress.cloud/webchat/v3.0/inject.js");
+        await loadScript(
+          "https://files.bpcontent.cloud/2025/06/16/10/20250616104701-Y8D5D2OH.js"
+        );
+
+        console.log("⏳ Waiting for window.botpress to be available...");
+        // Wait for window.botpress to be available with enhanced polling
+        let attempts = 0;
+        const maxAttempts = 50;
+        const pollInterval = 100; // 100ms intervals
+
+        while (!window.botpress && attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, pollInterval));
+          attempts++;
+          if (attempts % 10 === 0) {
+            console.log(
+              `🔍 Still waiting for botpress... (${attempts}/${maxAttempts})`
+            );
+          }
+        }
+
+        if (window.botpress) {
+          console.log("✅ Botpress core initialized successfully");
+          console.log("🔧 Botpress object available:", typeof window.botpress);
+          setBotpressReady(true);
+          setIsLoaded(true);
+        } else {
+          throw new Error(
+            `Botpress not available after ${maxAttempts * pollInterval}ms`
+          );
+        }
+      } catch (error) {
+        console.error("❌ Botpress initialization failed:", error);
+        console.error("📊 Error details:", {
+          message: error.message,
+          stack: error.stack,
+          timestamp: new Date().toISOString(),
+        });
+        setShowFallback(true);
+        setBotpressReady(false);
+      }
+    };
+
+    // Only initialize if we have valid config and haven't shown fallback
+    if (hasValidConfig && !showFallback && !botpressReady) {
+      initBotpress();
+    } else if (!hasValidConfig) {
+      console.warn(
+        "⚠️ Invalid Botpress configuration, skipping initialization"
+      );
+      setShowFallback(true);
+    }
+  }, [hasValidConfig, showFallback, botpressReady]);
 
   // Use the webchat connection state only if we have valid config
   const clientState = useWebchat({
@@ -217,15 +367,19 @@ const ReactBotpressChatWidget = ({
     }
   `;
 
-  // Fallback timeout
-  //useEffect(() => {
-  //const timeout = setTimeout(() => {
-  //if (!isLoaded && hasValidConfig) {
-  //setShowFallback(true);
-  //}
-  //}, 5000);
-  //return () => clearTimeout(timeout);
-  //}, [isLoaded, hasValidConfig]);
+  // Enhanced fallback timeout with better state management
+  useEffect(() => {
+    if (!hasValidConfig) return;
+
+    const timeout = setTimeout(() => {
+      if (!isLoaded && !showFallback && hasValidConfig) {
+        console.warn("⚠️ Botpress initialization timeout - showing fallback");
+        setShowFallback(true);
+      }
+    }, 10000); // Increased to 10 seconds for better reliability
+
+    return () => clearTimeout(timeout);
+  }, [isLoaded, showFallback, hasValidConfig]);
 
   // Custom header component
   const CustomHeader = () => (
@@ -457,11 +611,25 @@ const ReactBotpressChatWidget = ({
             messagingUrl: botpressConfig.messagingUrl,
           }}
           onInit={() => {
-            console.log("Botpress initialized successfully");
+            console.log("✅ Botpress Webchat initialized successfully");
+            console.log("🎯 Bot ID:", botpressConfig.botId);
+            console.log(
+              "👤 Client ID:",
+              botpressConfig.clientId.substring(0, 8) + "..."
+            );
             setIsLoaded(true);
           }}
           onError={(error) => {
-            console.error("Botpress initialization failed:", error);
+            console.error("❌ Botpress Webchat initialization failed:", error);
+            console.error("🔍 Error context:", {
+              botId: botpressConfig.botId,
+              clientId: botpressConfig.clientId
+                ? `${botpressConfig.clientId.substring(0, 8)}...`
+                : "undefined",
+              hostUrl: botpressConfig.hostUrl,
+              messagingUrl: botpressConfig.messagingUrl,
+              timestamp: new Date().toISOString(),
+            });
             setShowFallback(true);
           }}
         />
