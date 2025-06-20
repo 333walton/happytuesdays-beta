@@ -761,6 +761,13 @@ const ClippyContextMenu = ({
       case "selectAgent":
         // FIXED: Enhanced agent change with actual character switching
         handleAgentChange(data);
+
+        // Special handling for Genius - set flag to auto-open chat
+        if (data === "Genius") {
+          console.log("🎯 Genius selected - setting flag to auto-open chat");
+          window.geniusShouldAutoOpenChat = true;
+        }
+
         onAction("selectAgent", data);
         break;
 
@@ -846,30 +853,88 @@ const ClippyContextMenu = ({
       case "chat":
         // Check if current agent is Genius
         if (currentAgent === "Genius") {
-          console.log("🎯 Chat with Genius - triggering FAB");
+          console.log("🎯 Chat with Genius - accessing FAB iframe");
 
-          // Try to trigger Genius FAB
-          if (window.triggerGeniusChatFAB) {
-            const triggered = window.triggerGeniusChatFAB();
-            console.log("Chat menu - Genius FAB trigger result:", triggered);
+          // Find and click the Botpress FAB button
+          setTimeout(() => {
+            // Look for the Botpress FAB iframe
+            const fabIframe =
+              document.querySelector("iframe.bpFab") ||
+              document.querySelector('iframe[name="fab"]') ||
+              document.querySelector('iframe[title="Botpress"]');
 
-            if (!triggered) {
-              // Fallback if FAB not available
-              console.warn("⚠️ Genius FAB not available");
-              if (window.showClippyCustomBalloon) {
-                window.showClippyCustomBalloon(
-                  "Genius chat is initializing, please try again in a moment."
-                );
+            console.log("🤖 Found FAB iframe:", fabIframe);
+
+            if (fabIframe) {
+              try {
+                // Access the iframe's content
+                const iframeDoc =
+                  fabIframe.contentDocument || fabIframe.contentWindow.document;
+
+                if (iframeDoc) {
+                  // Look for the actual button inside the iframe
+                  const fabButton =
+                    iframeDoc.querySelector("button") ||
+                    iframeDoc.querySelector('[role="button"]') ||
+                    iframeDoc.querySelector(".bp-widget-launcher") ||
+                    iframeDoc.querySelector('[class*="launcher"]') ||
+                    iframeDoc.querySelector('[class*="fab"]');
+
+                  if (fabButton) {
+                    console.log("✅ Found button inside iframe, clicking it");
+                    fabButton.click();
+                  } else {
+                    console.warn("⚠️ Button not found inside iframe");
+                    // Try clicking on the iframe body as fallback
+                    const iframeBody = iframeDoc.body;
+                    if (iframeBody) {
+                      console.log("🎯 Clicking iframe body as fallback");
+                      iframeBody.click();
+                    }
+                  }
+                } else {
+                  console.warn(
+                    "⚠️ Cannot access iframe content (cross-origin restriction)"
+                  );
+                  // If we can't access iframe content, use the trigger function
+                  if (window.triggerGeniusChatFAB) {
+                    console.log(
+                      "Using trigger function due to iframe restrictions"
+                    );
+                    window.triggerGeniusChatFAB();
+                  }
+                }
+              } catch (e) {
+                console.warn("⚠️ Error accessing iframe:", e);
+                // Cross-origin error - fall back to trigger function
+                if (window.triggerGeniusChatFAB) {
+                  console.log(
+                    "Using trigger function due to cross-origin restrictions"
+                  );
+                  window.triggerGeniusChatFAB();
+                } else {
+                  if (window.showClippyCustomBalloon) {
+                    window.showClippyCustomBalloon(
+                      "Unable to open chat directly. Please try again."
+                    );
+                  }
+                }
+              }
+            } else {
+              console.warn("⚠️ FAB iframe not found");
+              // Fallback - try the trigger function if it exists
+              if (window.triggerGeniusChatFAB) {
+                console.log("Using fallback trigger function");
+                window.triggerGeniusChatFAB();
+              } else {
+                if (window.showClippyCustomBalloon) {
+                  window.showClippyCustomBalloon(
+                    "Genius chat is initializing, please try again in a moment."
+                  );
+                }
               }
             }
-          } else {
-            console.warn("⚠️ triggerGeniusChatFAB not available");
-            if (window.showClippyCustomBalloon) {
-              window.showClippyCustomBalloon(
-                "Genius chat is not available yet. Please try again."
-              );
-            }
-          }
+          }, 200); // Small delay to ensure FAB is rendered
         } else {
           // For non-Genius agents, show regular chat balloon
           if (window.showClippyChatBalloon) {

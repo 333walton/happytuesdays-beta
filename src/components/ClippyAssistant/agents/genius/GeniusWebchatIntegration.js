@@ -27,10 +27,22 @@ const GeniusWebchatIntegration = ({
 
     console.log("✅ Global triggerGeniusChatFAB function created");
 
+    // ADD THIS: Check if we should auto-open the chat
+    if (window.geniusShouldAutoOpenChat) {
+      console.log("🎯 Auto-opening Genius chat from agent selection");
+      setIsWebchatOpen(true);
+      // Clear the flag
+      window.geniusShouldAutoOpenChat = false;
+    }
+
     // Cleanup on unmount
     return () => {
       console.log("🧹 Cleaning up triggerGeniusChatFAB function");
       delete window.triggerGeniusChatFAB;
+      // Also clear the flag if it exists
+      if (window.geniusShouldAutoOpenChat) {
+        window.geniusShouldAutoOpenChat = false;
+      }
     };
   }, []);
 
