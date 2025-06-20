@@ -77,7 +77,7 @@ const GeniusChat = ({
         width: 100%;
         height: 100%;
         pointer-events: none;
-        z-index: 2000;
+        z-index: -2000; // Behind everything else as a quick fix 6.20.25
       `;
       desktop.appendChild(container);
     }
