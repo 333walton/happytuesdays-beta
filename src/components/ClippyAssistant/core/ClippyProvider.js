@@ -884,9 +884,26 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       setTimeout(() => {
         if (mountedRef.current && !isAnyBalloonOpen()) {
           if (currentAgent === "Genius") {
-            // Use Botpress chat for Genius
-            triggerGeniusFAB();
-            devLog("Desktop double click - triggered Genius FAB");
+            // Use same logic as "Chat with Genius" menu item
+            console.log("🎯 Genius double-clicked - triggering FAB");
+
+            setTimeout(() => {
+              if (window.botpress && window.botpress.open) {
+                console.log("✅ Opening Genius chat via botpress.open()");
+                window.botpress.open();
+              } else {
+                console.warn("⚠️ Botpress not found, trying fallback");
+                if (window.triggerGeniusChatFAB) {
+                  window.triggerGeniusChatFAB();
+                } else {
+                  if (window.showClippyCustomBalloon) {
+                    window.showClippyCustomBalloon(
+                      "Genius chat is initializing, please try again in a moment."
+                    );
+                  }
+                }
+              }
+            }, 200); // Same delay as menu item
           } else {
             // Use legacy chat for other agents
             if (window.showClippyChatBalloon) {

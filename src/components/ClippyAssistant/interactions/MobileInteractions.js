@@ -111,7 +111,7 @@ export const handleMobileDoubleTap = ({ showContextMenu }) => {
 // FIXED: Updated to trigger FAB for Genius
 export const handleMobileLongPress = ({
   showChatBalloon,
-  triggerGeniusFAB, // Changed from showGeniusChat
+  triggerGeniusFAB,
   currentAgent,
 }) => {
   devLog("Long press triggered");
@@ -123,19 +123,22 @@ export const handleMobileLongPress = ({
 
   // Open appropriate chat based on current agent
   if (currentAgent === "Genius") {
-    // Trigger FAB for Genius instead of showing chat directly
     devLog("Long press for Genius - triggering FAB");
 
-    if (window.triggerGeniusChatFAB) {
-      const triggered = window.triggerGeniusChatFAB();
-      devLog("Mobile long press - Genius FAB trigger result:", triggered);
-    } else if (triggerGeniusFAB) {
-      // Fallback to passed function if global not available yet
-      triggerGeniusFAB();
-      devLog("Mobile long press - triggered Genius FAB via callback");
-    } else {
-      devLog("Mobile long press - no FAB trigger available");
-    }
+    // Use same logic as "Chat with Genius" menu item
+    setTimeout(() => {
+      if (window.botpress && window.botpress.open) {
+        console.log("✅ Opening Genius chat via botpress.open()");
+        window.botpress.open();
+      } else {
+        console.warn("⚠️ Botpress not found, trying fallback");
+        if (window.triggerGeniusChatFAB) {
+          window.triggerGeniusChatFAB();
+        } else {
+          devLog("Mobile long press - no FAB trigger available");
+        }
+      }
+    }, 200); // Same delay as menu item
   } else {
     // Legacy chat for other agents
     devLog("Long press for non-Genius agent - showing chat balloon");
