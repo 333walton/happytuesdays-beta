@@ -84,7 +84,7 @@ const ReactBotpressChatWidget = ({
   }, [hasValidClientId, hasValidBotId, hasValidConfig]);
 
   // Use the webchat connection state only if we have valid config
-  const { client, clientState } = useWebchat({
+  const clientState = useWebchat({
     clientId: hasValidConfig ? botpressConfig.clientId : undefined,
   });
 
