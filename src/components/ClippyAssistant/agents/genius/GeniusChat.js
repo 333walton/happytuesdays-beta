@@ -125,7 +125,7 @@ const GeniusChat = ({
         className="genius-chat-mobile-wrapper"
         style={{
           position: "fixed",
-          zIndex: 9999,
+          zIndex: -2000 /* quick fix 6.20.25 */,
           top: 0,
           left: 0,
           width: "100%",
