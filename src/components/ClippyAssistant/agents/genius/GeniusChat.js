@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom";
 import { getAgentConfig } from "../data/AgentPersonalities";
 import {
   getConversationStarter,
   getQuickReplies,
 } from "../data/AgentResponses";
 import GeniusWebchatIntegration from "./GeniusWebchatIntegration";
-import DesktopPortalWrapper from "./DesktopPortalWrapper";
 
 const GeniusChat = ({
   currentAgent,
@@ -16,6 +16,7 @@ const GeniusChat = ({
   ...props
 }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [portalContainer, setPortalContainer] = useState(null);
   const agentConfig = getAgentConfig(currentAgent);
 
   // Enhanced mobile detection with touch support
@@ -54,7 +55,10 @@ const GeniusChat = ({
     };
   }, []);
 
+  // Setup desktop portal container
   useEffect(() => {
+    if (isMobile) return;
+
     const desktop =
       document.querySelector(".desktop.screen") ||
       document.querySelector(".desktop") ||
@@ -62,31 +66,32 @@ const GeniusChat = ({
 
     if (!desktop) return;
 
-    let portalContainer = document.getElementById("genius-chat-portal");
-    if (!portalContainer) {
-      portalContainer = document.createElement("div");
-      portalContainer.id = "genius-chat-portal";
-      portalContainer.style.cssText = `
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 2000;
-    `;
-      desktop.appendChild(portalContainer);
+    let container = document.getElementById("genius-chat-portal");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "genius-chat-portal";
+      container.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 2000;
+      `;
+      desktop.appendChild(container);
     }
 
+    setPortalContainer(container);
+
     return () => {
-      if (portalContainer && portalContainer.parentNode) {
-        portalContainer.remove();
+      if (container && container.parentNode) {
+        container.remove();
       }
     };
-  }, []);
+  }, [isMobile]);
 
-  // FIXED: Always render if current agent is Genius, regardless of visibility
-  // This ensures the hidden FAB is always available for remote triggering
+  // Always render if current agent is Genius
   if (currentAgent !== "Genius") {
     console.log("🔍 GeniusChat not rendering - not Genius agent:", {
       currentAgent,
@@ -105,13 +110,14 @@ const GeniusChat = ({
     }
   };
 
-  console.log("🔍 GeniusChat rendering with hidden FAB for Genius agent:", {
+  console.log("🔍 GeniusChat rendering for Genius agent:", {
     currentAgent,
     hasAgentConfig: !!agentConfig,
     isMobile,
+    hasPortalContainer: !!portalContainer,
   });
 
-  // Mobile rendering
+  // Mobile rendering - direct DOM render
   if (isMobile) {
     console.log("📱 Rendering GeniusChat wrapper for mobile");
     return (
@@ -124,9 +130,7 @@ const GeniusChat = ({
           left: 0,
           width: "100%",
           height: "100%",
-          touchAction: "manipulation",
-          background: "transparent",
-          pointerEvents: "none", // Don't block interactions when FAB is hidden
+          pointerEvents: "none", // Don't block interactions when chat is closed
         }}
       >
         <GeniusWebchatIntegration
@@ -141,17 +145,29 @@ const GeniusChat = ({
     );
   }
 
-  // Desktop: Render within desktop viewport
-  console.log("💻 Rendering GeniusChat wrapper for desktop");
+  // Desktop: Wait for portal container before rendering
+  if (!portalContainer) {
+    console.log("💻 Waiting for portal container...");
+    return null;
+  }
 
-  return (
+  // Desktop: Render within desktop viewport portal
+  console.log("💻 Rendering GeniusChat wrapper for desktop with portal");
+
+  return ReactDOM.createPortal(
     <div
       className="genius-chat-desktop-wrapper"
       style={{
-        position: "relative",
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none", // Don't block interactions when FAB is hidden
+        position: "absolute",
+        // Center the chat within the desktop viewport
+        left: "50%",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "400px",
+        height: "500px",
+        maxWidth: "calc(100% - 40px)", // Leave some margin from edges
+        maxHeight: "calc(100% - 80px)", // Account for taskbar
+        pointerEvents: "none", // Don't block desktop interactions when chat is closed
       }}
     >
       <GeniusWebchatIntegration
@@ -162,7 +178,8 @@ const GeniusChat = ({
         quickReplies={quickReplies}
         {...props}
       />
-    </div>
+    </div>,
+    portalContainer
   );
 };
 

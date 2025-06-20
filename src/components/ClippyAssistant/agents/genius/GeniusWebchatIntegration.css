@@ -12,190 +12,65 @@
 }
 
 .genius-chat-container.desktop {
+  /* These will be overridden by inline styles but provide defaults */
   bottom: 90px;
   right: 20px;
   width: 400px;
   height: 600px;
 }
 
-/* Fallback Chat Styles (Windows 98 theme) */
-.fallback-chat {
-  font-family: "MS Sans Serif", "Tahoma", sans-serif;
-  font-size: 11px;
-  background-color: #c0c0c0;
-  border: 2px outset #c0c0c0;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+/* React Botpress Container */
+.react-botpress-container {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: 100%;
   overflow: hidden;
 }
 
-.fallback-chat.mobile {
-  border: none;
-  box-shadow: none;
-  width: 100vw;
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
+/* Override any default Botpress styles to maintain Windows 98 theme */
+.react-botpress-container .bpw-chat-container {
+  font-family: "MS Sans Serif", "Tahoma", sans-serif !important;
+  background-color: #c0c0c0 !important;
 }
 
-.fallback-chat.desktop {
-  width: 400px;
-  height: 600px;
+.react-botpress-container .bpw-header {
+  background-color: #000080 !important;
+  color: white !important;
+  font-size: 11px !important;
+  padding: 4px 8px !important;
+  border-bottom: 1px solid #808080 !important;
 }
 
-/* Header */
-.fallback-header {
-  background-color: #000080;
-  color: white;
-  padding: 4px 8px;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #808080;
-  min-height: 20px;
+.react-botpress-container .bpw-composer {
+  background-color: #f0f0f0 !important;
+  border-top: 1px solid #808080 !important;
+  padding: 4px 8px !important;
 }
 
-.close-button {
-  background-color: transparent;
-  border: none;
-  color: white;
-  font-size: 12px;
-  cursor: pointer;
-  padding: 2px 6px;
-  min-height: 20px;
-  min-width: 20px;
+.react-botpress-container .bpw-composer-inner {
+  border: 1px inset #999 !important;
+  background-color: white !important;
 }
 
-.close-button:hover {
-  background-color: #ff0000;
+.react-botpress-container .bpw-keyboard-single-choice {
+  background-color: #e0e0e0 !important;
+  border: 1px outset #e0e0e0 !important;
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  margin: 2px !important;
 }
 
-/* Messages Area */
-.fallback-messages {
-  flex: 1;
-  overflow-y: auto;
-  border: 1px inset #999;
-  background: white;
-  padding: 8px;
-  margin: 4px;
-  color: #000;
-  font-family: "Tahoma", sans-serif;
-  font-size: 11px;
-  line-height: 1.4;
-  -webkit-overflow-scrolling: touch;
+.react-botpress-container .bpw-keyboard-single-choice:hover {
+  background-color: #d0d0d0 !important;
 }
 
-.message {
-  margin-bottom: 8px;
-}
-
-.message.user {
-  text-align: right;
-  color: #000080;
-}
-
-.message.bot {
-  text-align: left;
-  color: #000;
-}
-
-.typing-indicator {
-  color: #666;
-  font-style: italic;
-  font-size: 10px;
-  margin-top: 4px;
-}
-
-/* Quick Replies */
-.fallback-quick-replies {
-  padding: 2px 6px;
-  background-color: #f0f0f0;
-  border-bottom: 1px solid #808080;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-  max-height: 40px;
-  overflow-y: auto;
-}
-
-.quick-reply-button {
-  font-size: 9px;
-  padding: 1px 4px;
-  background-color: #e0e0e0;
-  border: 1px outset #e0e0e0;
-  cursor: pointer;
-  border-radius: 0;
-  font-family: "MS Sans Serif", sans-serif;
-  max-width: 70px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.quick-reply-button:hover {
-  background-color: #d0d0d0;
-}
-
-.quick-reply-button:active {
-  border: 1px inset #e0e0e0;
-}
-
-/* Input Area */
-.fallback-input-area {
-  display: flex;
-  gap: 4px;
-  padding: 4px 8px;
-  background-color: #f0f0f0;
-  border-top: 1px solid #808080;
-}
-
-.fallback-input {
-  flex: 1;
-  padding: 4px 6px;
-  border: 1px inset #999;
-  font-family: "MS Sans Serif", sans-serif;
-  font-size: 11px;
-  background-color: #fff;
-  outline: none;
-}
-
-.send-button {
-  padding: 4px 12px;
-  background-color: #c0c0c0;
-  border: 1px outset #c0c0c0;
-  font-family: "MS Sans Serif", sans-serif;
-  font-size: 11px;
-  cursor: pointer;
-  color: #000;
-}
-
-.send-button:hover {
-  background-color: #d0d0d0;
-}
-
-.send-button:active {
-  border: 1px inset #c0c0c0;
+.react-botpress-container .bpw-keyboard-single-choice:active {
+  border: 1px inset #e0e0e0 !important;
 }
 
 /* Mobile-specific overrides with safe area handling */
 @media (max-width: 768px) {
-  /* FAB positioning with safe areas */
-  .genius-fab {
-    position: fixed !important;
-    bottom: calc(20px + env(safe-area-inset-bottom)) !important;
-    right: calc(20px + env(safe-area-inset-right)) !important;
-    z-index: 10000 !important;
-    /* Ensure minimum touch target */
-    min-width: 44px !important;
-    min-height: 44px !important;
-    touch-action: manipulation !important;
-  }
-
-  /* Chat widget safe area handling */
   .genius-chat-container.mobile {
     height: calc(
       100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom)
@@ -204,124 +79,32 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  .fallback-chat.mobile {
-    border-radius: 0 !important;
+  .react-botpress-container .bpw-header {
+    min-height: 44px !important;
+    padding: 8px !important;
   }
 
-  .fallback-header {
-    min-height: 44px;
-    padding: 8px;
-  }
-
-  .fallback-input {
+  .react-botpress-container .bpw-composer textarea {
     font-size: 16px !important; /* Prevent zoom on iOS */
     -webkit-appearance: none !important;
-    padding: 12px !important;
-    min-height: 44px !important;
   }
 
-  .send-button {
+  .react-botpress-container .bpw-send-button {
     min-width: 60px !important;
     min-height: 44px !important;
     touch-action: manipulation !important;
-    padding: 12px 20px !important;
-    font-size: 14px !important;
-  }
-
-  .fallback-quick-replies {
-    padding: 8px;
-    gap: 8px;
-    max-height: 80px;
-  }
-
-  .quick-reply-button {
-    font-size: 12px !important;
-    padding: 8px 12px !important;
-    min-height: 36px !important;
-    max-width: auto !important;
-    touch-action: manipulation !important;
-  }
-
-  .fallback-messages {
-    font-size: 14px !important;
-  }
-
-  .close-button {
-    min-width: 44px !important;
-    min-height: 32px !important;
-    padding: 8px 12px !important;
-    touch-action: manipulation !important;
   }
 }
 
-/* Prevent touch event blocking on underlying app */
-.genius-chat-container * {
-  touch-action: auto;
-}
-
-/* Only the FAB and chat widget should capture touch events */
-.genius-fab,
-.fallback-chat {
-  touch-action: manipulation;
-}
-
-/* Portal and widget z-index to ensure proper layering above .clippy */
+/* Ensure proper layering above .clippy */
 #genius-chat-portal {
   pointer-events: none;
   z-index: 2000 !important;
 }
 
-#bp-web-widget {
-  pointer-events: auto;
-  z-index: 2000 !important;
-}
-
-/* Ensure the actual Botpress webchat iframe is also properly layered */
-.bp-widget-web,
-#webchat-root {
-  z-index: 2000 !important;
-}
-
-/* CRITICAL: Hide ALL FAB and floating button elements */
-#fab-root,
-.bpFloat,
-.bp-widget-launcher,
-.bp-fab,
-.bpw-floating-button,
-.bpw-fab,
-.bp-floating-action-button,
-[class*="fab"],
-[class*="launcher"],
-[class*="floating-action"],
-[class*="floating-button"],
-button[aria-label*="Open chat"],
-button[aria-label*="Chat"],
-div[class*="floating-action-button"],
-div[role="button"][class*="fab"],
-.genius-fab:not(.genius-fab-hidden),
-#fab-root > *,
-.bpFloat > * {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
-  position: absolute !important;
-  left: -9999px !important;
-  top: -9999px !important;
-  z-index: -9999 !important;
-}
-
-/* Ensure our hidden FAB stays hidden */
-.genius-fab-hidden {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  position: fixed !important;
-  bottom: -1000px !important;
-  right: -1000px !important;
-  z-index: -9999 !important;
-  pointer-events: none !important;
+/* For desktop containment within the monitor viewport */
+@media (min-width: 769px) {
+  .genius-chat-container.desktop {
+    position: absolute !important; /* Changed from fixed to absolute for desktop containment */
+  }
 }
