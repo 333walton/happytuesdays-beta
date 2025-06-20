@@ -108,3 +108,9 @@
     position: absolute !important; /* Changed from fixed to absolute for desktop containment */
   }
 }
+
+iframe.bpFab,
+iframe[name="fab"],
+iframe.bp-fab {
+  transform: scale(0.001) !important;
+}
