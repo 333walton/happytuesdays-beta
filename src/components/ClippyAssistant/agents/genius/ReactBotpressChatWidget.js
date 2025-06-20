@@ -59,9 +59,33 @@ const ReactBotpressChatWidget = ({
       "https://messaging.botpress.cloud",
   };
 
-  // Use the webchat connection state
+  // Validate configuration before using
+  const hasValidClientId =
+    process.env.REACT_APP_BOTPRESS_CLIENT_ID &&
+    process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "YOUR_CLIENT_ID_HERE" &&
+    process.env.REACT_APP_BOTPRESS_CLIENT_ID.length > 0;
+
+  const hasValidBotId =
+    process.env.REACT_APP_BOTPRESS_BOT_ID &&
+    process.env.REACT_APP_BOTPRESS_BOT_ID !== "YOUR_BOT_ID_HERE" &&
+    process.env.REACT_APP_BOTPRESS_BOT_ID.length > 0;
+
+  const hasValidConfig = hasValidClientId && hasValidBotId;
+
+  // Log configuration status for debugging
+  useEffect(() => {
+    console.log("Botpress Configuration Status:", {
+      hasValidClientId,
+      hasValidBotId,
+      hasValidConfig,
+      clientIdLength: process.env.REACT_APP_BOTPRESS_CLIENT_ID?.length || 0,
+      botIdLength: process.env.REACT_APP_BOTPRESS_BOT_ID?.length || 0,
+    });
+  }, [hasValidClientId, hasValidBotId, hasValidConfig]);
+
+  // Use the webchat connection state only if we have valid config
   const { client, clientState } = useWebchat({
-    clientId: botpressConfig.clientId,
+    clientId: hasValidConfig ? botpressConfig.clientId : undefined,
   });
 
   // Custom styling (Windows 98/classic theme)
@@ -193,20 +217,15 @@ const ReactBotpressChatWidget = ({
     }
   `;
 
-  // Valid config check
-  const hasValidClientId =
-    process.env.REACT_APP_BOTPRESS_CLIENT_ID &&
-    process.env.REACT_APP_BOTPRESS_CLIENT_ID !== "YOUR_CLIENT_ID_HERE";
-
   // Fallback timeout
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (!isLoaded && hasValidClientId) {
+      if (!isLoaded && hasValidConfig) {
         setShowFallback(true);
       }
     }, 5000);
     return () => clearTimeout(timeout);
-  }, [isLoaded, hasValidClientId]);
+  }, [isLoaded, hasValidConfig]);
 
   // Custom header component
   const CustomHeader = () => (
@@ -286,7 +305,9 @@ const ReactBotpressChatWidget = ({
           ...prev,
           {
             id: Date.now() + 1,
-            text: "I apologize, but I'm currently unable to connect to the main chat service. Please try again later or contact support if the issue persists.",
+            text: !hasValidConfig
+              ? "Please configure Botpress with valid Bot ID and Client ID in your environment variables. Check the console for more details."
+              : "I apologize, but I'm currently unable to connect to the main chat service. Please try again later or contact support if the issue persists.",
             sender: "bot",
             timestamp: new Date(),
           },
@@ -339,6 +360,29 @@ const ReactBotpressChatWidget = ({
             </div>
           )}
           <div ref={messagesEndRef} />
+          {!hasValidConfig && (
+            <div
+              style={{
+                marginTop: "20px",
+                padding: "10px",
+                backgroundColor: "#ffffe0",
+                border: "1px solid #808080",
+                fontSize: "10px",
+              }}
+            >
+              <strong>Setup Required:</strong>
+              <br />
+              1. Create a .env file in your project root
+              <br />
+              2. Add: REACT_APP_BOTPRESS_BOT_ID=your-bot-id
+              <br />
+              3. Add: REACT_APP_BOTPRESS_CLIENT_ID=your-client-id
+              <br />
+              4. Get these values from your Botpress Cloud dashboard
+              <br />
+              5. Restart your development server
+            </div>
+          )}
         </div>
         <div
           style={{
@@ -383,11 +427,11 @@ const ReactBotpressChatWidget = ({
   };
 
   // Show fallback if no valid configuration or loading failed
-  if (!hasValidClientId || showFallback) {
+  if (!hasValidConfig || showFallback) {
     return <FallbackChat />;
   }
 
-  // Main render
+  // Main render with proper Webchat configuration
   return (
     <Container
       connected={clientState !== "disconnected"}
@@ -406,7 +450,12 @@ const ReactBotpressChatWidget = ({
       <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
         <style>{customStyle}</style>
         <Webchat
-          config={botpressConfig}
+          botId={botpressConfig.botId}
+          config={{
+            clientId: botpressConfig.clientId,
+            hostUrl: botpressConfig.hostUrl,
+            messagingUrl: botpressConfig.messagingUrl,
+          }}
           onInit={() => {
             console.log("Botpress initialized successfully");
             setIsLoaded(true);
