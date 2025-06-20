@@ -56,7 +56,7 @@ const ReactBotpressChatWidget = ({
     hostUrl: "https://cdn.botpress.cloud/webchat/v3.0",
     messagingUrl:
       process.env.REACT_APP_BOTPRESS_MESSAGING_URL ||
-      "https://messaging.botpress.cloud",
+      "https://messaging.botpress.cloud/",
   };
 
   // Validate configuration before using
