@@ -646,54 +646,47 @@ const ClippyContextMenu = ({
     if (currentAgent === "Genius" && newAgent !== "Genius") {
       console.log("🔄 Switching away from Genius - closing chat window");
 
-      // Look for the close button in the Botpress chat
+      // Look for the close button in the Botpress chat header
       setTimeout(() => {
-        // Try multiple selectors for the close button
+        // Target the close button in the header, not the container close button
         const closeButton =
           document.querySelector(
-            ".lucide.lucide-x.bpHeaderContentActionsIcons"
+            ".bpHeaderContentActionsContainer .lucide.lucide-x"
           ) ||
-          document.querySelector('[aria-label="Close Chatbot Button"]') ||
-          document.querySelector(".bpHeaderContentActionsIcons") ||
-          document.querySelector("svg.lucide-x") ||
-          document.querySelector('[class*="lucide-x"]');
+          document.querySelector(
+            ".bpHeaderContentActionsContainer svg.lucide-x"
+          ) ||
+          document.querySelector(
+            '.bpHeaderContentActionsContainer [class*="lucide-x"]'
+          ) ||
+          document.querySelector('[aria-label="Close Chatbot Button"]');
 
         if (closeButton) {
-          console.log(
-            "✅ Found close button:",
-            closeButton.tagName,
-            closeButton
-          );
+          console.log("✅ Found header close button:", closeButton);
 
-          // Create and dispatch click event (works for all element types)
-          const clickEvent = new MouseEvent("click", {
-            bubbles: true,
-            cancelable: true,
-            view: window,
-          });
-          closeButton.dispatchEvent(clickEvent);
+          // Find the clickable parent (usually a button)
+          const clickableElement =
+            closeButton.closest("button") ||
+            closeButton.closest('[role="button"]') ||
+            closeButton.parentElement;
 
-          // If it's an SVG, try clicking its parent element
-          if (closeButton.tagName === "svg" || closeButton.tagName === "SVG") {
-            const parentButton =
-              closeButton.closest("button") || closeButton.parentElement;
-            if (parentButton) {
-              console.log("Clicking parent button element");
-              if (typeof parentButton.click === "function") {
-                parentButton.click();
-              } else {
-                parentButton.dispatchEvent(clickEvent);
-              }
-            }
+          if (clickableElement) {
+            console.log("Clicking parent button element");
+            const clickEvent = new MouseEvent("click", {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+            });
+            clickableElement.dispatchEvent(clickEvent);
+          } else {
+            // Fallback: dispatch click on the SVG itself
+            const clickEvent = new MouseEvent("click", {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+            });
+            closeButton.dispatchEvent(clickEvent);
           }
-
-          // Also try pointer events for better compatibility
-          const pointerEvent = new PointerEvent("pointerdown", {
-            bubbles: true,
-            cancelable: true,
-            view: window,
-          });
-          closeButton.dispatchEvent(pointerEvent);
         } else {
           console.warn("⚠️ Close button not found, trying alternative methods");
 

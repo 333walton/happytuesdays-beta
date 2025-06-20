@@ -1,7 +1,7 @@
 /* Container styles */
 .genius-chat-container {
   position: fixed;
-  z-index: 2000; /* Higher than .clippy's 1001 */
+  z-index: -2000; /* quick fix 6.20.25 */
 }
 
 .genius-chat-container.mobile {
@@ -99,7 +99,7 @@
 /* Ensure proper layering above .clippy */
 #genius-chat-portal {
   pointer-events: none;
-  z-index: 2000 !important;
+  z-index: -2000 !important; /* quick fix 6.20.25 */
 }
 
 /* For desktop containment within the monitor viewport */
