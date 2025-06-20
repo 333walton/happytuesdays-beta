@@ -9,6 +9,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  z-index: -2000; /* quick fix 6.20.25 */
 }
 
 .genius-chat-container.desktop {
@@ -77,6 +78,7 @@
     );
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
+    z-index: -2000; /* quick fix 6.20.25 */
   }
 
   .react-botpress-container .bpw-header {
