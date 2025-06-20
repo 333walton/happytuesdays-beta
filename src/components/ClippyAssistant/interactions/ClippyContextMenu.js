@@ -637,6 +637,7 @@ const ClippyContextMenu = ({
   };
 
   // FIXED: Enhanced agent change function with actual character switching
+  // FIXED: Enhanced agent change function with actual character switching
   const handleAgentChange = (newAgent) => {
     console.log(`🎯 Changing agent from ${currentAgent} to ${newAgent}`);
 
@@ -688,6 +689,55 @@ const ClippyContextMenu = ({
                 overlayEl,
                 null
               );
+            }
+
+            // If switching to Genius, set up a polling mechanism to trigger FAB when ready
+            if (newAgent === "Genius") {
+              console.log(
+                "🎯 Genius selected - waiting for FAB to be available"
+              );
+
+              // Poll for the FAB trigger function to be available
+              let attempts = 0;
+              const maxAttempts = 20; // 10 seconds max wait
+
+              const checkAndTriggerFAB = setInterval(() => {
+                attempts++;
+
+                if (window.triggerGeniusChatFAB) {
+                  console.log(
+                    `✅ FAB trigger found after ${attempts} attempts`
+                  );
+                  clearInterval(checkAndTriggerFAB);
+
+                  // Trigger the FAB
+                  const triggered = window.triggerGeniusChatFAB();
+                  console.log(
+                    "Genius agent selection - FAB trigger result:",
+                    triggered
+                  );
+
+                  if (!triggered) {
+                    console.warn("⚠️ Genius FAB trigger returned false");
+                  }
+                } else if (attempts >= maxAttempts) {
+                  console.warn(
+                    `⚠️ FAB trigger not available after ${maxAttempts} attempts`
+                  );
+                  clearInterval(checkAndTriggerFAB);
+
+                  // Show a message to the user
+                  if (window.showClippyCustomBalloon) {
+                    window.showClippyCustomBalloon(
+                      "Genius is ready! Right-click me and select 'Chat with Genius' to start."
+                    );
+                  }
+                } else {
+                  console.log(
+                    `🔄 Waiting for FAB trigger... attempt ${attempts}/${maxAttempts}`
+                  );
+                }
+              }, 500); // Check every 500ms
             }
           }, 200);
         }
