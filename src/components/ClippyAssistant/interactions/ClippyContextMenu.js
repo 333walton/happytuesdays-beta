@@ -767,6 +767,33 @@ const ClippyContextMenu = ({
         onAction("hide");
         break;
 
+      case "about":
+        console.log("🎯 Context menu action: Open About Clippy (Notepad)");
+        if (typeof window !== "undefined") {
+          window.clippyFaqContent = clippyFaq;
+          window.textchat32Icon = icons.textchat32;
+          window.ProgramContext.onOpen({
+            component: "Notepad",
+            multiInstance: true,
+            title: "About Clippy",
+            icon: "icons.textchat32",
+            data: {
+              content: clippyFaq,
+              wrap: true, // FIXED: Enable text wrapping for FAQ content
+              readOnly: true, // Make FAQ read-only
+            },
+          });
+        } else {
+          console.warn("window.ProgramContext.onOpen is not available.");
+          if (window.showClippyCustomBalloon) {
+            window.showClippyCustomBalloon(
+              "Sorry, I couldn't open the About Clippy information."
+            );
+          }
+        }
+        onAction("aboutClippy");
+        break;
+
       case "selectAgent":
         // FIXED: Enhanced agent change with actual character switching
         handleAgentChange(data);
@@ -1352,7 +1379,7 @@ const ClippyContextMenu = ({
           </MenuItem>
           {/* Wave - Emoji on Right */}
           <MenuItem
-            onClick={() => handleMenuAction("wave")}
+            onClick={() => handleMenuAction("about")}
             rightIcon="👋"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
           >
