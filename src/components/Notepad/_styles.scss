@@ -23,37 +23,40 @@
   &__textarea {
     @include shadow-input;
     padding: 2px 2px 3px 1px;
-    overflow: auto; // FIXED: Enable scrollbars
+    overflow: auto;
     background-color: white;
     display: flex;
     flex-grow: 1;
     margin-bottom: 2px;
-    
+    width: 100%; // Add this
+    height: 100%; // Add this
+    box-sizing: border-box; // Add this
+
     // FIXED: Proper scrollbar styling
     scrollbar-width: thin;
     scrollbar-color: #c0c0c0 #f0f0f0;
-    
+
     &::-webkit-scrollbar {
       width: 16px;
       height: 16px;
     }
-    
+
     &::-webkit-scrollbar-track {
       background: #f0f0f0;
       border: 1px inset #c0c0c0;
     }
-    
+
     &::-webkit-scrollbar-thumb {
       background: #c0c0c0;
       border: 1px outset #c0c0c0;
       cursor: pointer; // FIXED: Standard cursor for scrollbar
     }
-    
+
     &::-webkit-scrollbar-thumb:hover {
       background: #d0d0d0;
       cursor: pointer; // FIXED: Standard cursor for scrollbar hover
     }
-    
+
     &::-webkit-scrollbar-corner {
       background: #f0f0f0;
     }
@@ -68,12 +71,12 @@
     flex-grow: 1;
     overflow: auto; // FIXED: Enable scrolling
     word-wrap: break-word; // FIXED: Break long words
-    
+
     // FIXED: Remove spell-check red underlines
     spellcheck: false;
     -webkit-spellcheck: false;
     -moz-spellcheck: false;
-    
+
     // FIXED: Prevent text selection interference with scrollbars
     user-select: text;
     -webkit-user-select: text;
@@ -88,21 +91,24 @@
 
   // Rich text rendering for HTML-enabled content
   .rich-text {
-    width: 384px !important;
-    max-width: 384px !important;
+    //width: 384px !important;
+    //max-width: 384px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100px; // Prevent collapse
     overflow-x: auto !important;
     overflow-y: auto !important;
     box-sizing: border-box !important;
     white-space: pre !important; // Prevent wrapping and preserve formatting
-    
+
     span[style*="cursor: pointer"] {
       cursor: pointer !important;
-      
+
       &:hover {
         text-decoration: underline !important;
       }
     }
-    
+
     // Mobile-only font size increase for ClippyFAQ content
     @media (max-width: 768px) and (hover: none) and (pointer: coarse) {
       &[data-content="clippyfaq"] {

@@ -4,7 +4,6 @@ import { Rnd } from "react-rnd";
 import { SettingsContext } from "../../contexts";
 import "./_window.scss";
 
-
 const handleClasses = {
   bottom: "ns-resize",
   bottomLeft: "nesw-resize",
@@ -12,10 +11,10 @@ const handleClasses = {
   left: "ew-resize",
   right: "ew-resize",
   top: "ns-resize",
-  topLeft: "nwse-resize"
+  topLeft: "nwse-resize",
 };
 
-const resizeStyles = pixels => {
+const resizeStyles = (pixels) => {
   const corners = pixels * 4;
   return {
     bottom: { height: pixels, bottom: -pixels },
@@ -24,17 +23,17 @@ const resizeStyles = pixels => {
       height: corners,
       width: corners,
       right: -pixels * 2,
-      bottom: -pixels * 2
+      bottom: -pixels * 2,
     },
     left: { width: pixels, right: -pixels },
     right: { width: pixels, marginLeft: "100%" },
     top: { height: pixels },
     topLeft: { height: corners, width: corners, left: -pixels, top: -pixels },
-    topRight: { width: 0, height: 0 }
+    topRight: { width: 0, height: 0 },
   };
 };
 
-const randomizeLaunchSpot = max => Math.ceil(Math.random() * max);
+const randomizeLaunchSpot = (max) => Math.ceil(Math.random() * max);
 
 const launchPositions = (propX, propY, isMobile) => {
   const random = randomizeLaunchSpot(80);
@@ -43,11 +42,11 @@ const launchPositions = (propX, propY, isMobile) => {
   return !isMobile
     ? {
         x,
-        y
+        y,
       }
     : {
         x: x / 2,
-        y: y / 2
+        y: y / 2,
       };
 };
 
@@ -55,30 +54,29 @@ class Window extends React.PureComponent {
   static contextType = SettingsContext;
 
   state = {
-  height: this.props.initialHeight,
-  width: this.props.initialWidth,
-  maximized:
-    (!this.props.forceNoMobileMax &&
-      this.context?.isMobile &&
-      this.props.resizable) ||
-    this.props.maximizeOnOpen,
-  ...launchPositions(this.props.initialX, this.props.initialY)
-};
-
+    height: this.props.initialHeight,
+    width: this.props.initialWidth,
+    maximized:
+      (!this.props.forceNoMobileMax &&
+        this.context?.isMobile &&
+        this.props.resizable) ||
+      this.props.maximizeOnOpen,
+    ...launchPositions(this.props.initialX, this.props.initialY),
+  };
 
   updateLocation = (a, b) => {
     this.setState({ x: b.x, y: b.y, isDragging: false });
-  }
+  };
   resize = (e, direction, ref, delta, position) =>
     this.setState({
       width: ref.style.width,
       height: ref.style.height,
-      ...position
+      ...position,
     });
   maximize = () => this.setState({ maximized: true });
   restore = () => this.setState({ maximized: false });
-  toggleDrag = val => () => this.setState({ isDragging: val });
-  toggleResize = val => () => this.setState({ isResizing: val });
+  toggleDrag = (val) => () => this.setState({ isDragging: val });
+  toggleResize = (val) => () => this.setState({ isResizing: val });
 
   render() {
     const { context, props } = this;
@@ -88,7 +86,7 @@ class Window extends React.PureComponent {
             resizeHandleStyles: resizeStyles(4),
             onResize: this.resize,
             onResizeStart: this.toggleResize(true),
-            onResizeStop: this.toggleResize(false)
+            onResizeStop: this.toggleResize(false),
           }
         : { resizeHandleStyles: resizeStyles(0) };
 
@@ -96,7 +94,7 @@ class Window extends React.PureComponent {
       ? {
           size: { width: "100%" },
           position: { x: -2, y: -3 },
-          disableDragging: true
+          disableDragging: true,
         }
       : undefined;
     return (
@@ -121,22 +119,18 @@ class Window extends React.PureComponent {
           </Rnd>
         )}
         <Rnd
-          className={
-            cx(
-              {
-                "react-draggable-maximized-hack": this.state.maximized,
-                'Window--minimized': this.props.minimized,
-              }
-            )
-          }
+          className={cx({
+            "react-draggable-maximized-hack": this.state.maximized,
+            "Window--minimized": this.props.minimized,
+          })}
           style={{
             zIndex: this.props.zIndex,
-            visibility: this.props.minimized ? 'hidden' : undefined,
+            visibility: this.props.minimized ? "hidden" : undefined,
           }}
           size={
             !this.state.maximized && {
               width: this.state.width,
-              height: this.state.height
+              height: this.state.height,
             }
           }
           position={{ x: this.state.x, y: this.state.y }}
@@ -166,16 +160,19 @@ class Window extends React.PureComponent {
               footer={props.footer}
               onOpen={props.multiInstance && props.onOpen}
               onClose={() => props.onClose(props)}
-              onMinimize={props.onMinimize && (() => props.onMinimize(props.id))}
+              onMinimize={
+                props.onMinimize && (() => props.onMinimize(props.id))
+              }
               onRestore={props.resizable ? this.restore : undefined}
               onMaximize={props.onMaximize !== null ? this.maximize : undefined}
               disableMaximize={props.onMaximize === null}
               changingState={this.state.isDragging || this.state.isResizing}
               maximizeOnOpen={
-                (!this.props.forceNoMobileMax && this.context.isMobile) || this.props.maximizeOnOpen
+                (!this.props.forceNoMobileMax && this.context.isMobile) ||
+                this.props.maximizeOnOpen
               }
               className={cx(props.className, {
-                "Window--active": props.isActive
+                "Window--active": props.isActive,
               })}
               resizable={props.resizable}
               menuOptions={props.menuOptions}
@@ -199,7 +196,7 @@ class Window extends React.PureComponent {
 
 Window.defaultProps = {
   minWidth: 162,
-  minHeight: '137px !important', //this is the best number for keeping windows from dragging below the taskbar - doesnt work??
+  minHeight: 137, //this is the best number for keeping windows from dragging below the taskbar - doesnt work??
   initialWidth: 200,
   initialHeight: 200,
   // maxHeight: 448,
@@ -207,7 +204,7 @@ Window.defaultProps = {
   resizable: true,
 
   scale: 1,
-  title: "Needs default"
+  title: "Needs default",
 };
 
 export default Window;

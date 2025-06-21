@@ -93,17 +93,18 @@ class Notepad extends Component {
           forceNoMobileMax={true} // Prevent maximization on mobile devices
           initialWidth={390} // Set the initial width of the window
           initialHeight={300} // Set the initial height of the window
+          maxHeight={600} // Set the maximum height of the window
           initialX={10} // Set the initial X position of the window
           initialY={2} // Set the initial Y position of the window
-          position={{ x: 10, y: 2 }} // Explicitly set the position
+          //position={{ x: 10, y: 2 }} // Explicitly set the position
         >
           <div className="Notepad__textarea">
             {props.data?.readOnly && props.data?.enableHtml ? (
-              <div 
+              <div
                 className="text rich-text"
-                data-content={props.title === "About Clippy" ? "clippyfaq" : "other"}
                 style={{
                   fontFamily: "FixedSys, Courier New, Courier, monospace",
+                  fontSize: props.title === "FAQ" ? "110%" : undefined, // Changed condition
                   whiteSpace: "pre-wrap",
                   padding: "2px",
                   minHeight: "100%",
@@ -111,10 +112,11 @@ class Notepad extends Component {
                   border: "none",
                   lineHeight: "1.2",
                   width: "384px",
-                  maxWidth: "384px",
+                  //maxWidth: "384px",
+                  maxHeight: "600px", // Set the maximum height of the window
                   overflowX: "auto",
                   overflowY: "auto",
-                  boxSizing: "border-box"
+                  boxSizing: "border-box",
                 }}
                 dangerouslySetInnerHTML={{ __html: state.data.content }}
               />

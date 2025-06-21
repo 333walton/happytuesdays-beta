@@ -776,7 +776,7 @@ const ClippyContextMenu = ({
             component: "Notepad",
             multiInstance: true,
             title: "About Clippy",
-            icon: "icons.textchat32",
+            icon: icons.textchat32,
             data: {
               content: clippyFaq,
               wrap: true, // FIXED: Enable text wrapping for FAQ content
