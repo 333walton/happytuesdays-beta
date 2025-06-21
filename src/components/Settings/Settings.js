@@ -7,7 +7,7 @@ import {
   Checkbox,
   Radio,
   ButtonForm,
-  InputText
+  InputText,
 } from "packard-belle";
 import Window from "../tools/Window";
 
@@ -16,27 +16,27 @@ import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
 const backgroundStyleGenerator = (bgStyle) => {
-  if (bgStyle === 'tile') {
+  if (bgStyle === "tile") {
     return {
       backgroundSize: 30,
-      backgroundRepeat: 'repeat',
+      backgroundRepeat: "repeat",
     };
   }
-  if (bgStyle === 'contain') {
+  if (bgStyle === "contain") {
     return {
-      backgroundSize: '80%',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
+      backgroundSize: "80%",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
     };
   }
-  if (bgStyle === 'stretch') {
+  if (bgStyle === "stretch") {
     return {
-      backgroundSize: '100% 100%',
-      backgroundRepeat: 'no-repeat',
+      backgroundSize: "100% 100%",
+      backgroundRepeat: "no-repeat",
     };
   }
   return {};
-}
+};
 
 class Settings extends Component {
   static contextType = SettingsContext;
@@ -44,12 +44,12 @@ class Settings extends Component {
     selected: null,
     bgImg: this.context.bgImg,
     bgStyle: this.context.bgStyle,
-    bgColor: this.context.bgColor
+    bgColor: this.context.bgColor,
   };
   timeout;
   fileReader;
 
-  changeColor = v => {
+  changeColor = (v) => {
     this.setState({ bgColor: v });
   };
 
@@ -60,9 +60,9 @@ class Settings extends Component {
     }
     this.context.updateLocalStorage("bgStyle", this.state.bgStyle);
     this.context.updateLocalStorage("bgImg", this.state.bgImg);
-  }
+  };
 
-  onSelect = selected => this.setState({ selected });
+  onSelect = (selected) => this.setState({ selected });
 
   exit = () => {
     if (this.state.selected) {
@@ -87,10 +87,10 @@ class Settings extends Component {
   };
 
   uploadBackground = () => {
-    document.getElementById('bgImg').click();
+    document.getElementById("bgImg").click();
   };
 
-  updateBackgroundStyle = e => {
+  updateBackgroundStyle = (e) => {
     const val = e.target.value;
     this.setState({ bgStyle: val });
   };
@@ -104,9 +104,7 @@ class Settings extends Component {
   handleFileRead = () => {
     const content = this.fileReader.result;
     if (content.length < 120000) {
-      this.setState(
-        { bgImg: content },
-      );
+      this.setState({ bgImg: content });
     } else {
       window.alert("100kb or less please, sorry =/");
     }
@@ -115,14 +113,14 @@ class Settings extends Component {
   handleFileChosen = ({ target: { files } }) => {
     this.fileReader = new FileReader();
     this.fileReader.onloadend = this.handleFileRead;
-    this.fileReader.readAsDataURL(files[0]);
+    this.fileReader.readAsDataURL(files[0]); // Fixed: use files[0]
   };
 
   render() {
     const { context, props } = this;
     return (
       <ProgramContext.Consumer>
-        {program =>
+        {(program) =>
           program.settingsDisplay && (
             <Window
               {...props}
@@ -137,7 +135,7 @@ class Settings extends Component {
               onClose={() => program.toggleSettings(false)}
               menuOptions={buildMenu({
                 ...props,
-                onClose: program.toggleSettings
+                onClose: program.toggleSettings,
               })}
               resizable={false}
               onMinimize={null}
@@ -154,6 +152,7 @@ class Settings extends Component {
                   onChange={context.toggleMobile}
                   checked={context.isMobile === true}
                 />
+                {/* CRT Effect: Default OFF for mobile via context provider */}
                 <Checkbox
                   id="CRT Effect"
                   label="CRT Effect"
@@ -170,12 +169,12 @@ class Settings extends Component {
               {!context.isMobile && (
                 <DetailsSection title="Scale Options (Confirmation Prompt)">
                   <div className="options-row">
-                    {[1, 1.5, 2].map(scale => (
+                    {[1, 1.5, 2].map((scale) => (
                       <Radio
                         id={scale}
                         label={`${scale * 100}%`}
                         value={scale}
-                        onChange={e => {
+                        onChange={(e) => {
                           this.tempChange(
                             () => context.changeScale(+e.target.value),
                             () => context.changeScale(context.scale)
@@ -194,7 +193,7 @@ class Settings extends Component {
                     {this.state.bgImg ? (
                       <>
                         <div>
-                          {["tile", "stretch", "contain"].map(v => (
+                          {["tile", "stretch", "contain"].map((v) => (
                             <Radio
                               key={v}
                               id={v}
@@ -209,16 +208,14 @@ class Settings extends Component {
                     ) : (
                       <div>
                         <input
-                          style={{ display: 'none' }}
+                          style={{ display: "none" }}
                           type="file"
                           onChange={this.handleFileChosen}
                           name="bgImg"
                           id="bgImg"
                         />
                         <div>
-                          <ButtonForm
-                            onClick={this.uploadBackground}
-                          >
+                          <ButtonForm onClick={this.uploadBackground}>
                             Upload Image
                           </ButtonForm>
                         </div>
@@ -239,17 +236,17 @@ class Settings extends Component {
                       width: 100,
                       height: 75,
                       margin: 2,
-                      border: '1px solid black',
+                      border: "1px solid black",
                       ...backgroundStyleGenerator(this.state.bgStyle),
                     }}
                   />
                 </div>
-
+                ...{" "}
                 <div className="Settings__background-update">
-                  <ButtonForm onClick={this.updateBackground}>Update</ButtonForm>
-                  <ButtonForm onClick={this.removeBackground}>
-                    Reset
+                  <ButtonForm onClick={this.updateBackground}>
+                    Update
                   </ButtonForm>
+                  <ButtonForm onClick={this.removeBackground}>Reset</ButtonForm>
                 </div>
               </DetailsSection>
               {this.state.tempChange && "Previewing Changes"}
