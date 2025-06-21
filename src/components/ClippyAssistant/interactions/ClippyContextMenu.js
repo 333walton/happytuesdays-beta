@@ -511,7 +511,8 @@ const ClippyContextMenu = ({
               left: isSubmenuItem ? "auto" : isMobile ? "6px" : "6px",
             }}
           >
-            {leftIcon}
+            {/* For submenu items, show the leftIcon (checkmark), otherwise show empty for arrow */}
+            {isSubmenuItem ? leftIcon : ""}
           </span>
         )}
         <span
@@ -1019,7 +1020,7 @@ const ClippyContextMenu = ({
     display: "flex",
     flexDirection: "column",
     transform: "translateZ(0) translate3d(0, 0, 0)",
-    zIndex: 2,
+    zIndex: isMobile ? 10000 : 2, // Much higher z-index for mobile
     textAlign: "left",
     margin: "0",
     padding: "0",
@@ -1161,67 +1162,7 @@ const ClippyContextMenu = ({
           padding-top: calc(4.5px + 5px) !important;
           padding-bottom: calc(4.5px + 5px) !important;
         }
-        
-        /* Remove the ::before pseudo-element that was hiding arrows */
-        /* .context-menu-item::before { ... } - DELETE THIS BLOCK */
-        
-        /* Ensure arrows remain visible */
-        .arrow-mobile::after,
-        .arrow-desktop::after {
-          content: "" !important;
-          display: inline-block !important;
-          width: 0 !important;
-          height: 0 !important;
-          border-top: 4.8px solid transparent !important;
-          border-bottom: 4.8px solid transparent !important;
-          border-right: 6.4px solid #000000 !important;
-          margin-left: 2px !important;
-          visibility: visible !important;
-          opacity: 1 !important;
-        }
       }
-
-      // Also update the MenuItem component's touch handlers to be more responsive:
-
-      // In the MenuItem component, update the touch handlers:
-      const handleTouchStart = (e) => {
-        if (isMobile && !disabled) {
-          e.preventDefault(); // Prevent delay
-          setIsMobileTouched(true);
-        }
-      };
-
-      const handleTouchEnd = (e) => {
-        if (isMobile && !disabled) {
-          e.preventDefault(); // Prevent ghost clicks
-          setIsMobileTouched(false);
-          
-          // Trigger click immediately on touch end
-          if (onClick && !hasSubmenu) {
-            onClick(e);
-          }
-        }
-      };
-
-      // Add this to the div element in MenuItem:
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchCancel}
-      style={{
-        ...finalStyle,
-        // Add for mobile only
-        ...(isMobile ? {
-          WebkitTouchCallout: 'none',
-          WebkitUserSelect: 'none',
-          userSelect: 'none',
-          cursor: 'pointer',
-        } : {})
-      }}
-
-      // Also ensure submenus have higher z-index in the submenuStyle:
-      const submenuStyle = {
-        // ... existing properties ...
-        zIndex: isMobile ? 10000 : 2, // Much higher z-index for mobile
 
       /* Mobile-only: Fix bottom alignment for mobile context menus */
       @media (max-width: 768px) {
@@ -1247,7 +1188,6 @@ const ClippyContextMenu = ({
         .context-submenu {
           box-sizing: border-box !important;
         }
-
       }
 
       /* Arrow symbol styling to prevent emoji substitution */
@@ -1261,17 +1201,21 @@ const ClippyContextMenu = ({
         font-weight: normal !important;
       }
 
-      /* Mobile and Desktop arrow using CSS pseudo-element */
+      /* FIXED: Consolidated arrow styles - Mobile and Desktop arrow using CSS pseudo-element */
       .arrow-mobile::after,
       .arrow-desktop::after {
-        content: "";
-        display: inline-block;
-        width: 0;
-        height: 0;
-        border-top: 4.8px solid transparent;
-        border-bottom: 4.8px solid transparent;
-        border-right: 6.4px solid #000000;
-        margin-left: 2px;
+        content: "" !important;
+        display: inline-block !important;
+        width: 0 !important;
+        height: 0 !important;
+        border-top: 4.8px solid transparent !important;
+        border-bottom: 4.8px solid transparent !important;
+        border-right: 6.4px solid #000000 !important;
+        margin-left: 2px !important;
+        position: relative !important;
+        z-index: 1 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
       }
 
       /* White arrow when menu item is highlighted */
@@ -1300,6 +1244,22 @@ const ClippyContextMenu = ({
       }
     `;
     document.head.appendChild(style);
+
+    // Debug: Check if arrow elements exist after a short delay
+    setTimeout(() => {
+      const arrowElements = document.querySelectorAll(
+        ".arrow-mobile, .arrow-desktop"
+      );
+      console.log("🔍 Arrow elements found:", arrowElements.length);
+      arrowElements.forEach((el, index) => {
+        console.log(`🔍 Arrow ${index + 1}:`, {
+          className: el.className,
+          computedStyle: window.getComputedStyle(el, "::after"),
+          parent: el.parentElement?.textContent?.trim(),
+        });
+      });
+    }, 1000);
+
     return () => style.remove();
   }, []);
 

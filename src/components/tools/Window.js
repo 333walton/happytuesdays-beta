@@ -5,31 +5,70 @@ import { SettingsContext } from "../../contexts";
 import "./_window.scss";
 
 const handleClasses = {
+  top: "ns-resize",
+  topRight: "nesw-resize",
+  right: "ew-resize",
+  bottomRight: "nwse-resize",
   bottom: "ns-resize",
   bottomLeft: "nesw-resize",
-  bottomRight: "nwse-resize",
   left: "ew-resize",
-  right: "ew-resize",
-  top: "ns-resize",
   topLeft: "nwse-resize",
 };
 
 const resizeStyles = (pixels) => {
-  const corners = pixels * 4;
+  const thickness = pixels + 1;
+  const nsOffset = 2;
+  const ewOffset = 2;
+
   return {
-    bottom: { height: pixels, bottom: -pixels },
-    bottomLeft: { height: corners, width: corners, left: -pixels },
-    bottomRight: {
-      height: corners,
-      width: corners,
-      right: -pixels * 2,
-      bottom: -pixels * 2,
+    top: {
+      height: thickness,
+      top: -thickness / 2 + nsOffset,
+      left: 0,
+      right: 0,
     },
-    left: { width: pixels, right: -pixels },
-    right: { width: pixels, marginLeft: "100%" },
-    top: { height: pixels },
-    topLeft: { height: corners, width: corners, left: -pixels, top: -pixels },
-    topRight: { width: 0, height: 0 },
+    topRight: {
+      width: thickness,
+      height: thickness,
+      top: -thickness / 2 + nsOffset,
+      right: -thickness / 2 + ewOffset,
+    },
+    right: {
+      width: thickness,
+      top: 0,
+      right: -thickness / 2 + ewOffset,
+      bottom: 0,
+    },
+    bottomRight: {
+      width: thickness,
+      height: thickness,
+      bottom: -thickness / 2 + nsOffset,
+      right: -thickness / 2 + ewOffset,
+    },
+    bottom: {
+      height: thickness,
+      left: 0,
+      right: 0,
+      bottom: -thickness / 2 + nsOffset,
+    },
+    bottomLeft: {
+      width: thickness,
+      height: thickness,
+      bottom: -thickness / 2 + nsOffset,
+      left: -thickness / 2 + ewOffset,
+    },
+    left: {
+      width: thickness,
+      top: 0,
+      left: -thickness / 2 + ewOffset,
+      bottom: 0,
+    },
+    topLeft: {
+      width: thickness,
+      height: thickness,
+      top: -thickness / 2 + nsOffset,
+      left: -thickness / 2 + ewOffset,
+    },
   };
 };
 
@@ -98,111 +137,84 @@ class Window extends React.PureComponent {
         }
       : undefined;
     return (
-      <>
-        {this.state.isDragging && (
-          <Rnd
-            size={{ width: this.state.width, height: this.state.height }}
-            position={{ x: this.state.x, y: this.state.y }}
-            scale={context.scale}
-            style={{
-              zIndex: this.props.zIndex,
-            }}
-          >
-            <props.Component
-              {...props}
-              {...this.state}
-              isDragging={false}
-              className={cx(props.className, "Window--active")}
-            >
-              {!props.hideOnDrag && props.children}
-            </props.Component>
-          </Rnd>
-        )}
-        <Rnd
-          className={cx({
-            "react-draggable-maximized-hack": this.state.maximized,
-            "Window--minimized": this.props.minimized,
-          })}
-          style={{
-            zIndex: this.props.zIndex,
-            visibility: this.props.minimized ? "hidden" : undefined,
-          }}
-          size={
-            !this.state.maximized && {
-              width: this.state.width,
-              height: this.state.height,
+      <Rnd
+        className={cx({
+          "react-draggable-maximized-hack": this.state.maximized,
+          "Window--minimized": this.props.minimized,
+          "react-draggable-dragging": this.state.isDragging,
+        })}
+        style={{
+          zIndex: this.props.zIndex,
+          visibility: this.props.minimized ? "hidden" : undefined,
+        }}
+        size={
+          !this.state.maximized && {
+            width: this.state.width,
+            height: this.state.height,
+          }
+        }
+        position={{ x: this.state.x, y: this.state.y }}
+        dragHandleClassName="Window__title"
+        disableDragging={props.draggable === false || this.state.maximized}
+        resizeHandleClasses={handleClasses}
+        onDragStart={this.toggleDrag(true)}
+        onDragStop={!this.state.maximized && this.updateLocation}
+        bounds=".w98"
+        minWidth={this.props.minWidth}
+        minHeight={this.props.minHeight}
+        scale={context.scale}
+        onMouseDown={
+          this.props.moveToTop
+            ? () => this.props.moveToTop(this.props.id)
+            : undefined
+        }
+        {...resizeProps}
+        {...maximizedProps}
+      >
+        {props.Component ? (
+          <props.Component
+            title={props.title}
+            icon={props.icon}
+            footer={props.footer}
+            onOpen={props.multiInstance && props.onOpen}
+            onClose={() => props.onClose(props)}
+            onMinimize={props.onMinimize && (() => props.onMinimize(props.id))}
+            onRestore={props.resizable ? this.restore : undefined}
+            onMaximize={props.onMaximize !== null ? this.maximize : undefined}
+            disableMaximize={props.onMaximize === null}
+            changingState={this.state.isDragging || this.state.isResizing}
+            maximizeOnOpen={
+              (!this.props.forceNoMobileMax && this.context.isMobile) ||
+              this.props.maximizeOnOpen
             }
-          }
-          position={{ x: this.state.x, y: this.state.y }}
-          dragHandleClassName="Window__title"
-          disableDragging={props.draggable === false || this.state.maximized}
-          resizeHandleClasses={handleClasses}
-          onDragStart={this.toggleDrag(true)}
-          onDragStop={!this.state.maximized && this.updateLocation}
-          bounds=".w98"
-          minWidth={this.props.minWidth}
-          minHeight={this.props.minHeight}
-          //maxWidth={!this.state.maximized ? this.props.maxWidth : "105%"}
-          //maxHeight={!this.state.maximized ? this.props.maxHeight : "105%"}
-          scale={context.scale}
-          onMouseDown={
-            this.props.moveToTop
-              ? () => this.props.moveToTop(this.props.id)
-              : undefined
-          }
-          {...resizeProps}
-          {...maximizedProps}
-        >
-          {props.Component ? (
-            <props.Component
-              title={props.title}
-              icon={props.icon}
-              footer={props.footer}
-              onOpen={props.multiInstance && props.onOpen}
-              onClose={() => props.onClose(props)}
-              onMinimize={
-                props.onMinimize && (() => props.onMinimize(props.id))
-              }
-              onRestore={props.resizable ? this.restore : undefined}
-              onMaximize={props.onMaximize !== null ? this.maximize : undefined}
-              disableMaximize={props.onMaximize === null}
-              changingState={this.state.isDragging || this.state.isResizing}
-              maximizeOnOpen={
-                (!this.props.forceNoMobileMax && this.context.isMobile) ||
-                this.props.maximizeOnOpen
-              }
-              className={cx(props.className, {
-                "Window--active": props.isActive,
-              })}
-              resizable={props.resizable}
-              menuOptions={props.menuOptions}
-              hasMenu={props.hasMenu}
-              explorerOptions={props.explorerOptions}
-              data={props.data}
-              style={props.style}
-              children={props.children}
-            />
-          ) : (
-            <div>
-              Error: Component not found
-              {console.error("Component not found:", props.Component)}
-            </div>
-          )}
-        </Rnd>
-      </>
+            className={cx(props.className, {
+              "Window--active": props.isActive,
+            })}
+            resizable={props.resizable}
+            menuOptions={props.menuOptions}
+            hasMenu={props.hasMenu}
+            explorerOptions={props.explorerOptions}
+            data={props.data}
+            style={props.style}
+            children={props.children}
+          />
+        ) : (
+          <div>
+            Error: Component not found
+            {console.error("Component not found:", props.Component)}
+          </div>
+        )}
+      </Rnd>
     );
   }
 }
 
 Window.defaultProps = {
   minWidth: 162,
-  minHeight: 137, //this is the best number for keeping windows from dragging below the taskbar - doesnt work??
+  minHeight: 137,
   initialWidth: 200,
   initialHeight: 200,
-  // maxHeight: 448,
-  // maxWidth: 635,
   resizable: true,
-
   scale: 1,
   title: "Needs default",
 };
