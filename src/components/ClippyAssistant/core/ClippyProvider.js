@@ -352,11 +352,10 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       // Validate agent name against official React95 agents
       const officialAgents = [
         "Clippy",
-        "Links",
-        "Genius",
         "F1",
+        "Genius",
         "Merlin",
-        //"Genie",
+        "Links",
         "Bonzi",
       ];
 
@@ -1945,15 +1944,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             y={contextMenuPosition.y}
             onClose={hideContextMenu}
             currentAgent={currentAgent}
-            agents={[
-              "Clippy",
-              "Links",
-              "Genius",
-              "F1",
-              "Merlin",
-              //"Genie",
-              "Bonzi",
-            ]}
+            agents={["Clippy", "F1", "Genius", "Merlin", "Links", "Bonzi"]}
             onAction={(action, data) => {
               devLog(`Context menu action: ${action}`, data);
 
