@@ -7,15 +7,7 @@
  */
 class BalloonPositionValidator {
   constructor() {
-    this.agents = [
-      "Clippy",
-      "Links",
-      "Bonzi",
-      "Genie",
-      "Genius",
-      "Merlin",
-      "F1",
-    ];
+    this.agents = ["Clippy", "Links", "Bonzi", "Genius", "Merlin", "F1"];
     this.balloonTypes = {
       welcome: () => window.showWelcomeBalloon?.(),
       help: () => window.showHelpBalloon?.(),

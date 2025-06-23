@@ -12,7 +12,6 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Links - A friendly and helpful cat companion  
 • Bonzi - The playful and entertaining purple 
   gorilla
-• Genie - A magical helper with mystical wisdom
 • Merlin - The wise wizard with ancient knowledge
 
 ╔════════════════════════════════════════╗

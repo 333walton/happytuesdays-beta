@@ -14,7 +14,7 @@ Transform Hydra98 from a nostalgic interface into a fully functional AI-powered 
 
 ### Core Objectives:
 
-- **Launch 6 Specialized AI Agents** with distinct personalities and expertise areas (Clippy, Bonzi, Merlin, Genie, Genius, F1)
+- **Launch 6 Specialized AI Agents** with distinct personalities and expertise areas (Clippy, Bonzi, Merlin, Genius, F1)
 - **Establish Content Authority** in 5 key verticals: Gaming, Digital Art, AI/Tech, Business, and Motivation
 - **Build Creator Community** of 1,000+ active users across gamers, artists, entrepreneurs, and builders
 - **Prove Product-Market Fit** through engagement metrics and user feedback on AI agent interactions

@@ -94,7 +94,7 @@ const faqHtml = `Frequently Asked Questions
 🤖 Can I change to a different assistant?
 → Yes! Right-click Clippy and select "Select AI Agent"
   to choose from 5 different characters: Clippy GPT, 
-  Bonzi, Genie, Merlin, or Links.
+  Bonzi, Genius, Merlin, or Links.
 
 ❓ Why isn't Clippy responding?
 → Check if any balloons are already open (only one can

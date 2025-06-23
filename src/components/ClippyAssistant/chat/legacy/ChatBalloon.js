@@ -12,7 +12,7 @@ const getAgentNickname = (agentName) => {
     Clippy: "Clippy",
     Links: "Links",
     Bonzi: "Bonzi",
-    Genie: "Genie",
+    //Genie: "Genie",
     Genius: "Genius",
     Merlin: "Merlin",
     F1: "F1",

@@ -356,7 +356,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         "Genius",
         "F1",
         "Merlin",
-        "Genie",
+        //"Genie",
         "Bonzi",
       ];
 
@@ -1951,7 +1951,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               "Genius",
               "F1",
               "Merlin",
-              "Genie",
+              //"Genie",
               "Bonzi",
             ]}
             onAction={(action, data) => {

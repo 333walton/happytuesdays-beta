@@ -312,7 +312,7 @@ export const getAgentKnowledge = (agent) => {
     genius: MARTECH_KNOWLEDGE,
     bonzi: GAMING_KNOWLEDGE,
     merlin: ART_KNOWLEDGE,
-    genie: AI_KNOWLEDGE,
+    //genie: AI_KNOWLEDGE,
     f1: BUSINESS_KNOWLEDGE,
     clippy: SITE_KNOWLEDGE,
   };

@@ -52,7 +52,7 @@ const ClippyAssistant = memo((props) => {
       "Genius", // Einstein-like character
       "Merlin", // Wizard
       "F1", // Robot assistant
-      "Genie", // Blue genie
+      //"Genie", // Blue genie
       "Bonzi", // Purple gorilla
     ];
 

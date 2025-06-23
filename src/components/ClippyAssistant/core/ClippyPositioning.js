@@ -161,15 +161,15 @@ const AGENT_DIMENSIONS = {
       desktop: { rightOffset: 130, bottomOffset: 110 },
     },
   },
-  Genie: {
-    width: 128,
-    height: 105, // Taller due to lamp/hat
-    scale: { mobile: 1.0, desktop: 0.95 }, // 🔧 Standardized from 0.92/0.88
-    positioning: {
-      mobile: { rightOffset: 9, bottomOffset: 125 },
-      desktop: { rightOffset: 122, bottomOffset: 105 },
-    },
-  },
+  //Genie: {
+  //width: 128,
+  //height: 105, // Taller due to lamp/hat
+  //scale: { mobile: 1.0, desktop: 0.95 }, // 🔧 Standardized from 0.92/0.88
+  //positioning: {
+  //mobile: { rightOffset: 9, bottomOffset: 125 },
+  //desktop: { rightOffset: 122, bottomOffset: 105 },
+  //},
+  //},
   Genius: {
     width: 126,
     height: 96,

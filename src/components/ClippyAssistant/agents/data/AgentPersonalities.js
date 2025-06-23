@@ -84,31 +84,31 @@ export const AGENT_PERSONALITIES = {
     ],
   },
 
-  Genie: {
-    name: "Genie",
-    displayName: "Genie GPT",
-    role: "AI News & Entrepreneurship",
-    specialties: [
-      "AI news summaries",
-      "startup advice",
-      "product management",
-      "entrepreneurship",
-      "tech trends",
-    ],
-    personality: "wise, entrepreneurial, forward-thinking, magical",
-    chatSystem: "enhanced_legacy",
-    emoji: "🧞‍♂️",
-    color: "#3498db",
-    description:
-      "Your AI and entrepreneurship oracle with startup wisdom and tech insights",
-    capabilities: [
-      "Latest AI news summaries",
-      "Startup validation advice",
-      "Product management tips",
-      "Entrepreneurial guidance",
-      "Tech trend analysis",
-    ],
-  },
+  //Genie: {
+  //name: "Genie",
+  //displayName: "Genie GPT",
+  //role: "AI News & Entrepreneurship",
+  //specialties: [
+  //"AI news summaries",
+  //"startup advice",
+  //"product management",
+  //"entrepreneurship",
+  //"tech trends",
+  //],
+  //personality: "wise, entrepreneurial, forward-thinking, magical",
+  //chatSystem: "enhanced_legacy",
+  //emoji: "🧞‍♂️",
+  //color: "#3498db",
+  //description:
+  //"Your AI and entrepreneurship oracle with startup wisdom and tech insights",
+  //capabilities: [
+  //"Latest AI news summaries",
+  //"Startup validation advice",
+  //"Product management tips",
+  //"Entrepreneurial guidance",
+  //"Tech trend analysis",
+  //],
+  //},
 
   Genius: {
     name: "Genius",
@@ -226,13 +226,13 @@ export const AGENT_THEMES = {
     chatBubbleColor: "#e1bee7",
     textColor: "#000000",
   },
-  Genie: {
-    primaryColor: "#3498db",
-    secondaryColor: "#e3f2fd",
-    accentColor: "#1976d2",
-    chatBubbleColor: "#bbdefb",
-    textColor: "#000000",
-  },
+  //Genie: {
+  //primaryColor: "#3498db",
+  //secondaryColor: "#e3f2fd",
+  //accentColor: "#1976d2",
+  //chatBubbleColor: "#bbdefb",
+  //textColor: "#000000",
+  //},
   Genius: {
     primaryColor: "#e74c3c",
     secondaryColor: "#ffebee",

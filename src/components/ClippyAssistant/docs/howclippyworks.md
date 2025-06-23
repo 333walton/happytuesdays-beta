@@ -74,7 +74,7 @@ The Clippy implementation consists of several interconnected modules:
 
   - **Desktop**: All agents use `scale: 0.95` for consistent appearance
   - **Mobile**: All agents use `scale: 1.0` for optimal touch interaction
-  - Eliminates size inconsistencies between different agents (Clippy, Links, Bonzi, Genie, Genius, Merlin, F1)
+  - Eliminates size inconsistencies between different agents (Clippy, Links, Bonzi, Genius, Merlin, F1)
   - Scale-aware positioning automatically adjusts all calculations
 
 - **Zoom-Aware Anchoring**

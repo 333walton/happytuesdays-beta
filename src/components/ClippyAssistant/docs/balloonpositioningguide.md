@@ -170,7 +170,7 @@ const STANDARD_SCALES = {
   mobile: 1.0, // All agents on mobile
 };
 
-// Applied to all agents: Clippy, Links, Bonzi, Genie, Genius, Merlin, F1
+// Applied to all agents: Clippy, Links, Bonzi, Genius, Merlin, F1
 const agentScale = isMobile ? 1.0 : 0.95;
 ```
 

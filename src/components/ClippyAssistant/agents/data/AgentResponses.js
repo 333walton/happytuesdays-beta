@@ -16,12 +16,12 @@ export const PLACEHOLDER_MESSAGES = {
     "📚 Currently updating my knowledge base with everything about Hydra98... Soon I'll be able to help you with site features, provide developer insights, and assist with any technical questions you might have!",
     "⚡ Loading my expertise on Hydra98's retro goodness... Give me just a moment and I'll be ready to guide you through all the desktop apps, games, and features this site has to offer!",
   ],
-  genie: [
-    "🧞♂️ Greetings! I'm Genie GPT, your AI and entrepreneurship oracle! I'm currently absorbing the latest AI news and startup wisdom. Once ready, I'll share cutting-edge insights and entrepreneurial guidance!",
-    "🚀 Downloading the latest AI trends and startup strategies... Soon I'll be your personal advisor for all things artificial intelligence, product management, and entrepreneurial success!",
-    "🎯 Compiling real-time AI news and entrepreneurship best practices... In a moment, I'll be ready to discuss the latest in machine learning, startup validation, and business strategy!",
-    "📡 Syncing with the entrepreneurial zeitgeist and AI frontier... Almost ready to share insights on the latest developments in artificial intelligence and startup methodologies!",
-  ],
+  //genie: [
+  //"🧞♂️ Greetings! I'm Genie GPT, your AI and entrepreneurship oracle! I'm currently absorbing the latest AI news and startup wisdom. Once ready, I'll share cutting-edge insights and entrepreneurial guidance!",
+  //"🚀 Downloading the latest AI trends and startup strategies... Soon I'll be your personal advisor for all things artificial intelligence, product management, and entrepreneurial success!",
+  //"🎯 Compiling real-time AI news and entrepreneurship best practices... In a moment, I'll be ready to discuss the latest in machine learning, startup validation, and business strategy!",
+  //"📡 Syncing with the entrepreneurial zeitgeist and AI frontier... Almost ready to share insights on the latest developments in artificial intelligence and startup methodologies!",
+  //],
   genius: [
     "🏎️ Hey there! I'm Genius GPT, your martech and adtech specialist! I'm currently calibrating my marketing technology sensors. Soon I'll be ready to help troubleshoot campaigns and optimize your digital advertising!",
     "📊 Loading marketing automation protocols and advertising best practices... Once online, I'll help you debug tracking pixels, optimize Google Ads, and master your martech stack!",
@@ -59,12 +59,12 @@ export const PROGRESS_PLACEHOLDERS = {
     stage3: "⚡ Optimizing help responses... 75%",
     stage4: "💻 Almost ready to assist you! 95%",
   },
-  genie: {
-    stage1: "🔄 Connecting to AI news feeds... 25%",
-    stage2: "🧞 Processing entrepreneurship data... 50%",
-    stage3: "🚀 Calibrating startup insights... 75%",
-    stage4: "🎯 Ready to share AI wisdom! 95%",
-  },
+  //genie: {
+  //stage1: "🔄 Connecting to AI news feeds... 25%",
+  //stage2: "🧞 Processing entrepreneurship data... 50%",
+  //stage3: "🚀 Calibrating startup insights... 75%",
+  //stage4: "🎯 Ready to share AI wisdom! 95%",
+  //},
   genius: {
     stage1: "🔄 Loading martech protocols... 25%",
     stage2: "📊 Syncing with advertising platforms... 50%",
@@ -98,8 +98,8 @@ export const PROGRESS_PLACEHOLDERS = {
 export const FALLBACK_MESSAGES = {
   clippy:
     "I'm having trouble connecting right now, but I'm here to help with any questions about Hydra98! Try asking me about site features or the developer.",
-  genie:
-    "My AI news feed is temporarily down, but I can still chat about entrepreneurship and product management! What startup challenge are you facing?",
+  //genie:
+  //"My AI news feed is temporarily down, but I can still chat about entrepreneurship and product management! What startup challenge are you facing?",
   genius:
     "My martech systems are updating, but I can still help with general marketing questions! What campaign issue can I assist with?",
   bonzi:
@@ -122,14 +122,14 @@ export const QUICK_REPLIES = {
     "Site navigation",
     "Technical help",
   ],
-  genie: [
-    "Latest AI news",
-    "Startup advice",
-    "Product tips",
-    "Tech trends",
-    "Business strategy",
-    "Entrepreneurship",
-  ],
+  //genie: [
+  //"Latest AI news",
+  //"Startup advice",
+  //"Product tips",
+  //"Tech trends",
+  //"Business strategy",
+  //"Entrepreneurship",
+  //],
   genius: [
     "Fix tracking pixels",
     "Google Ads help",
@@ -183,13 +183,13 @@ export const CONVERSATION_STARTERS = {
     newUser: "Hey there! I'm Bonzi - jokes, games, and good vibes! 🦕",
     returning: "Welcome back, buddy! Ready for some entertainment?",
   },
-  genie: {
-    morning: "Good morning, entrepreneur! Ready for AI insights?",
-    afternoon: "Afternoon startup wisdom coming up!",
-    evening: "Evening tech trends and business strategy?",
-    newUser: "Greetings! I'm Genie, your AI and business oracle 🧞‍♂️",
-    returning: "Welcome back! What business challenge shall we tackle?",
-  },
+  //genie: {
+  //morning: "Good morning, entrepreneur! Ready for AI insights?",
+  //afternoon: "Afternoon startup wisdom coming up!",
+  //evening: "Evening tech trends and business strategy?",
+  //newUser: "Greetings! I'm Genie, your AI and business oracle 🧞‍♂️",
+  //returning: "Welcome back! What business challenge shall we tackle?",
+  //},
   genius: {
     morning: "Morning! Ready to optimize some campaigns?",
     afternoon: "Afternoon martech troubleshooting session?",
@@ -236,8 +236,8 @@ export const BONZI_JOKES = [
 export const ERROR_MESSAGES = {
   clippy:
     "Oops! Something went wrong with my help system. Let me try to assist you anyway!",
-  genie:
-    "My crystal ball seems cloudy at the moment. Let me consult my backup wisdom!",
+  //genie:
+  //"My crystal ball seems cloudy at the moment. Let me consult my backup wisdom!",
   genius:
     "Error detected in my diagnostic systems. Running backup troubleshooting protocols...",
   bonzi: "Uh oh! That didn't work. But hey, at least I've got jokes! 😄",
