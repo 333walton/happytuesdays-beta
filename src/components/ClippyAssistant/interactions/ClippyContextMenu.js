@@ -512,7 +512,7 @@ const ClippyContextMenu = ({
             }}
           >
             {/* For submenu items, show the leftIcon (checkmark), otherwise show empty for arrow */}
-            {isSubmenuItem ? leftIcon : ""}
+            {isSubmenuItem ? leftIcon : "►"}
             {hasSubmenu &&
               !isSubmenuItem &&
               console.log(
@@ -1230,6 +1230,26 @@ javascript      /* Enlarge touch targets on mobile without changing visual appea
         opacity: 1 !important;
       }
 
+/* Force arrow visibility with higher specificity */
+.context-menu-content .arrow-mobile::after,
+.context-menu-content .arrow-desktop::after {
+  content: "" !important;
+  display: inline-block !important;
+  width: 0 !important;
+  height: 0 !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-top-width: 4.8px !important;
+  border-bottom-width: 4.8px !important;
+  border-left-width: 0 !important;
+  border-right-width: 6.4px !important;
+  border-right-color: #000000 !important;
+  margin-left: 2px !important;
+  position: relative !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
       /* White arrow when menu item is highlighted */
       .arrow-highlighted.arrow-mobile::after,
       .arrow-highlighted.arrow-desktop::after {
@@ -1257,6 +1277,26 @@ javascript      /* Enlarge touch targets on mobile without changing visual appea
       }
     `;
     document.head.appendChild(style);
+
+    // TEMPORARY DEBUG: Add a test arrow
+    setTimeout(() => {
+      const testDiv = document.createElement("div");
+      testDiv.className = "arrow-mobile";
+      testDiv.style.cssText =
+        "position: fixed; top: 100px; left: 100px; background: red; width: 50px; height: 20px; z-index: 99999;";
+      testDiv.textContent = "TEST";
+      document.body.appendChild(testDiv);
+
+      console.log("Test arrow element added. Checking computed styles...");
+      const computed = window.getComputedStyle(testDiv, "::after");
+      console.log("::after content:", computed.content);
+      console.log("::after display:", computed.display);
+      console.log(
+        "::after border-right:",
+        computed.borderRightWidth,
+        computed.borderRightColor
+      );
+    }, 2000);
 
     // Debug: Check if arrow elements exist after a short delay
     setTimeout(() => {
