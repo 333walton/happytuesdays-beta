@@ -598,7 +598,7 @@ const ClippyContextMenu = ({
 
       // Mobile-specific adjustment
       if (isMobile && submenuType === "agents") {
-        actualSubmenuHeight += 3; // Comment out or remove this line
+        actualSubmenuHeight += 7; // Comment out or remove this line
       }
     } else {
       actualSubmenuHeight = 200; // Default
