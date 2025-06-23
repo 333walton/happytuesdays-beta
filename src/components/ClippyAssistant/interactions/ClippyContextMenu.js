@@ -513,6 +513,12 @@ const ClippyContextMenu = ({
           >
             {/* For submenu items, show the leftIcon (checkmark), otherwise show empty for arrow */}
             {isSubmenuItem ? leftIcon : ""}
+            {hasSubmenu &&
+              !isSubmenuItem &&
+              console.log(
+                "Arrow span rendered with class:",
+                `arrow ${isMobile ? "arrow-mobile" : "arrow-desktop"}`
+              )}
           </span>
         )}
         <span
@@ -1150,14 +1156,18 @@ const ClippyContextMenu = ({
         }
       }
 
-      /* Enlarge touch targets on mobile without changing visual appearance */
+      Here are the fixes in easy-to-paste chunks:
+Fix 1: First, locate this line in your useEffect where styles are created:
+Find this section (around line 771):
+javascript      /* Enlarge touch targets on mobile without changing visual appearance */
       @media (max-width: 768px), (pointer: coarse) {
-        /* Use a different approach for touch targets that won't conflict with arrows */
+Fix 2: Replace everything from that line until the end of the style content with this:
+javascript      /* Enlarge touch targets on mobile without changing visual appearance */
+      @media (max-width: 768px), (pointer: coarse) {
         .context-menu-item {
           position: relative;
           -webkit-tap-highlight-color: transparent !important;
           touch-action: manipulation !important;
-          /* Add padding to the clickable area without ::before */
           margin: -5px 0;
           padding-top: calc(4.5px + 5px) !important;
           padding-bottom: calc(4.5px + 5px) !important;
@@ -1187,6 +1197,7 @@ const ClippyContextMenu = ({
         /* Ensure mobile submenu container maintains bottom alignment */
         .context-submenu {
           box-sizing: border-box !important;
+          z-index: 10000 !important;
         }
       }
 
@@ -1202,8 +1213,9 @@ const ClippyContextMenu = ({
       }
 
       /* FIXED: Consolidated arrow styles - Mobile and Desktop arrow using CSS pseudo-element */
-      .arrow-mobile::after,
-      .arrow-desktop::after {
+      /* FIXED: Consolidated arrow styles - Mobile and Desktop arrow using CSS pseudo-element */
+      .arrow-highlighted.arrow-mobile::after,
+      .arrow-highlighted.arrow-desktop::after {
         content: "" !important;
         display: inline-block !important;
         width: 0 !important;
@@ -1224,10 +1236,11 @@ const ClippyContextMenu = ({
         border-right-color: #ffffff !important;
       }
 
+
       /* Agents submenu specific styling - width reduction for flush alignment */
       .agents-submenu {
-        width: 100px !important; /* Reduced width to prevent overlap */
-        margin-left: 20px !important; /* Adjust margin for proper alignment */
+        width: 100px !important;
+        margin-left: 20px !important;
       }
 
       /* Submenu icons (checkmarks) - prevent CSS triangle styling */
@@ -1240,7 +1253,7 @@ const ClippyContextMenu = ({
       }
 
       .submenu-icon::after {
-        display: none !important; /* Prevent CSS pseudo-element triangles */
+        display: none !important;
       }
     `;
     document.head.appendChild(style);
