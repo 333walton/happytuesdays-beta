@@ -815,8 +815,8 @@ export const showWelcomeBalloon = () => {
   return showCustomBalloon(
     {
       message: isMobile
-        ? `<span style="font-weight: 600;">Welcome to Hydra98!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Double-tap me to view menu.</span></i>`
-        : `<span style="font-weight: 600;">Welcome to Hydra98!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Right-click me to view menu.</span></i>`,
+        ? `<span style="font-weight: 600;">Welcome!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Double-tap me to view menu.</span></i>`
+        : `<span style="font-weight: 600;">Welcome!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Right-click me to view menu.</span></i>`,
       animation: "Wave",
       buttons: isMobile ? [] : [],
     },
