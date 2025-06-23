@@ -589,14 +589,16 @@ const ClippyContextMenu = ({
     let actualSubmenuHeight;
     if (submenuType === "animations") {
       // Animations submenu has many items, will hit max-height
-      actualSubmenuHeight = 165; // Based on CSS max-height
+      actualSubmenuHeight = 166; // Based on CSS max-height
     } else if (submenuType === "agents") {
-      // Agents submenu: 7 items * ~25px per item
-      actualSubmenuHeight = agents.length * 24 - 2; // +4 for borders
+      // Calculate based on actual number of agents
+      // Each item is 25px height (including borders/padding)
+      // Plus 4px for the submenu borders (2px top + 2px bottom)
+      actualSubmenuHeight = agents.length * 25 + 6;
 
       // Mobile-specific adjustment: reduce height by 1px to move it lower
       if (isMobile) {
-        actualSubmenuHeight -= 1;
+        actualSubmenuHeight -= 0;
       }
     } else {
       actualSubmenuHeight = 200; // Default
