@@ -512,7 +512,7 @@ const ClippyContextMenu = ({
             }}
           >
             {/* For submenu items, show the leftIcon (checkmark), otherwise show empty for arrow */}
-            {isSubmenuItem ? leftIcon : "►"}
+            {isSubmenuItem ? leftIcon : "◄"}
             {hasSubmenu &&
               !isSubmenuItem &&
               console.log(
@@ -589,7 +589,7 @@ const ClippyContextMenu = ({
     let actualSubmenuHeight;
     if (submenuType === "animations") {
       // Animations submenu has many items, will hit max-height
-      actualSubmenuHeight = 166; // Based on CSS max-height
+      actualSubmenuHeight = 167; // Based on CSS max-height
     } else if (submenuType === "agents") {
       // Agents submenu: 7 items * ~25px per item
       actualSubmenuHeight = agents.length * 24 - 2; // +4 for borders
@@ -1277,26 +1277,6 @@ javascript      /* Enlarge touch targets on mobile without changing visual appea
       }
     `;
     document.head.appendChild(style);
-
-    // TEMPORARY DEBUG: Add a test arrow
-    setTimeout(() => {
-      const testDiv = document.createElement("div");
-      testDiv.className = "arrow-mobile";
-      testDiv.style.cssText =
-        "position: fixed; top: 100px; left: 100px; background: red; width: 50px; height: 20px; z-index: 99999;";
-      testDiv.textContent = "TEST";
-      document.body.appendChild(testDiv);
-
-      console.log("Test arrow element added. Checking computed styles...");
-      const computed = window.getComputedStyle(testDiv, "::after");
-      console.log("::after content:", computed.content);
-      console.log("::after display:", computed.display);
-      console.log(
-        "::after border-right:",
-        computed.borderRightWidth,
-        computed.borderRightColor
-      );
-    }, 2000);
 
     // Debug: Check if arrow elements exist after a short delay
     setTimeout(() => {
