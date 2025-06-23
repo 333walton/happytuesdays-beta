@@ -788,8 +788,9 @@ const ClippyContextMenu = ({
             icon: icons.textchat32,
             data: {
               content: clippyFaq,
-              wrap: true, // FIXED: Enable text wrapping for FAQ content
-              readOnly: true, // Make FAQ read-only
+              wrap: true,
+              readOnly: true,
+              enableHtml: true, // ADD THIS LINE
             },
           });
         } else {

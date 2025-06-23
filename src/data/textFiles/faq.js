@@ -124,7 +124,8 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
     data: {
       content: window.clippyFaqContent,
       wrap: true,
-      readOnly: true
+      readOnly: true,
+      enableHtml: true
     }
   });
 }
@@ -235,7 +236,8 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
     data: {
       content: window.clippyFaqContent,
       wrap: true,
-      readOnly: true
+      readOnly: true,
+      enableHtml: true
     }
   });
 }
