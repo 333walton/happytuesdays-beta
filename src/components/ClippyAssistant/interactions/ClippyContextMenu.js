@@ -596,9 +596,9 @@ const ClippyContextMenu = ({
       // Plus 4px for the submenu borders (2px top + 2px bottom)
       actualSubmenuHeight = agents.length * 25 + 6;
 
-      // Mobile-specific adjustment: reduce height by 1px to move it lower
-      if (isMobile) {
-        actualSubmenuHeight -= 0;
+      // Mobile-specific adjustment
+      if (isMobile && submenuType === "agents") {
+        actualSubmenuHeight += 3; // Comment out or remove this line
       }
     } else {
       actualSubmenuHeight = 200; // Default
