@@ -104,7 +104,10 @@ class Notepad extends Component {
                 className="text rich-text"
                 style={{
                   fontFamily: "FixedSys, Courier New, Courier, monospace",
-                  fontSize: props.title === "FAQ" ? "110%" : undefined, // Changed condition
+                  fontSize:
+                    props.title === "FAQ" || props.title === "About Clippy"
+                      ? "110%"
+                      : undefined,
                   whiteSpace: "pre-wrap",
                   padding: "2px",
                   minHeight: "100%",

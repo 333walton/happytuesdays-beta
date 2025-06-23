@@ -109,10 +109,26 @@
       }
     }
 
-    // Mobile-only font size increase for ClippyFAQ content
-    @media (max-width: 768px) and (hover: none) and (pointer: coarse) {
-      &[data-content="clippyfaq"] {
-        font-size: 110% !important;
+    // Add mobile-specific rules for all textareas
+    @media (max-width: 768px) and (hover: none) and (pointer: coarse),
+      (-webkit-min-device-pixel-ratio: 2) and (max-device-width: 768px) {
+      textarea {
+        font-size: 16px !important; // Prevents iOS zoom on focus
+        -webkit-text-size-adjust: 100% !important; // Prevents iOS text size adjustment
+      }
+
+      // If the content is marked as ClippyFAQ
+      &[data-content-type="clippyfaq"] textarea,
+      &.Notepad--clippyfaq textarea {
+        font-size: 18px !important; // Even larger for FAQ content
+      }
+    }
+
+    // iOS-specific targeting
+    @supports (-webkit-touch-callout: none) {
+      textarea {
+        font-size: 16px !important;
+        -webkit-text-size-adjust: 100% !important;
       }
     }
   }
