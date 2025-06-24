@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 class Starfield2 extends Component {
   constructor(props) {
@@ -37,8 +37,9 @@ class Starfield2 extends Component {
       }
 
       // Create script element for P5.js
-      this.script = document.createElement('script');
-      this.script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js';
+      this.script = document.createElement("script");
+      this.script.src =
+        "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js";
       this.script.async = true;
       this.script.onload = () => resolve();
       this.script.onerror = (error) => reject(error);
@@ -78,15 +79,30 @@ class Starfield2 extends Component {
       };
 
       p.doubleClicked = () => {
+        // Ignore clicks in the monitor controls area (top-left)
+        if (p.mouseX < 250 && p.mouseY < 500) {
+          return;
+        }
+
         const fs = p.fullscreen();
         p.fullscreen(!fs);
       };
 
       p.mousePressed = () => {
+        // Ignore clicks in the monitor controls area (top-left)
+        if (p.mouseX < 250 && p.mouseY < 500) {
+          return;
+        }
+
         p.noCursor();
       };
 
       p.mouseReleased = () => {
+        // Ignore clicks in the monitor controls area (top-left)
+        if (p.mouseX < 250 && p.mouseY < 500) {
+          return;
+        }
+
         p.cursor();
       };
 
@@ -95,8 +111,11 @@ class Starfield2 extends Component {
         p.clear();
         p.background(0, 0, 0);
 
+        // Check if mouse is in the monitor controls area
+        const isInControlsArea = p.mouseX < 250 && p.mouseY < 500;
+
         // Make it so!
-        if (p.mouseIsPressed) {
+        if (p.mouseIsPressed && !isInControlsArea) {
           setViewPoint(p.mouseX - p.width / 2, p.mouseY - p.height / 2);
           for (let i = 0; i < 20; i++) {
             let star = new Star(createVectorTunnel());
@@ -145,10 +164,10 @@ class Starfield2 extends Component {
         );
         this.direction = this.vector.copy().normalize();
 
-        this.draw = function() {
+        this.draw = function () {
           p.noStroke();
           p.fill(p.map(this.color, 0, 100, 0, 254));
-          this.direction.mult(p.random(1.07, 1.10));
+          this.direction.mult(p.random(1.07, 1.1));
           this.position.add(this.direction);
           this.position.add(viewPoint);
           p.ellipse(this.position.x, this.position.y, this.size);
@@ -158,7 +177,7 @@ class Starfield2 extends Component {
           }
         };
 
-        this.isDead = function() {
+        this.isDead = function () {
           return (
             this.position.x < 0 ||
             this.position.y < 0 ||
@@ -178,13 +197,13 @@ class Starfield2 extends Component {
       <div
         ref={this.canvasRef}
         style={{
-          position: 'fixed',
+          position: "fixed",
           top: 0,
           left: 0,
-          width: '100%',
-          height: '100%',
+          width: "100%",
+          height: "100%",
           zIndex: 90, // Lower than monitor overlay (100)
-          pointerEvents: 'auto' // Allow mouse interactions for effect
+          pointerEvents: "auto", // Allow mouse interactions for effect
         }}
       />
     );

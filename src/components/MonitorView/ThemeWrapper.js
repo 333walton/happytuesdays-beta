@@ -1,42 +1,42 @@
-import React from 'react';
-import { ThemeProvider, createGlobalStyle } from 'styled-components';
-import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
-import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
+import React from "react";
+import { ThemeProvider, createGlobalStyle } from "styled-components";
+import ms_sans_serif from "react95/dist/fonts/ms_sans_serif.woff2";
+import ms_sans_serif_bold from "react95/dist/fonts/ms_sans_serif_bold.woff2";
 
 // Theme definition remains the same
 const original = {
-  name: 'original',
-  anchor: '#1034a6',
-  anchorVisited: '#440381',
-  borderDark: '#868a8e',
-  borderDarkest: '#000000',
-  borderLight: '#dfe0e3',
-  borderLighter: '#ffffff',
-  borderLightest: '#ffffff',
-  canvas: '#ffffff',
-  canvasText: '#000000',
-  canvasTextDisabled: '#868a8e',
-  canvasTextDisabledShadow: '#ffffff',
-  canvasTextInvert: '#ffffff',
-  checkmark: '#000000',
-  checkmarkDisabled: '#868a8e',
-  desktopBackground: '#008080',
-  flatDark: '#9e9e9e',
-  flatLight: '#d8d8d8',
-  focusSecondary: '#fefe03',
-  headerBackground: '#000080',
-  headerNotActiveBackground: '#7f787f',
-  headerNotActiveText: '#d8d8d8',
-  headerText: '#ffffff',
-  hoverBackground: '#000080',
-  material: '#ced0cf',
-  materialDark: '#9a9e9c',
-  materialText: '#000000',
-  materialTextDisabled: '#868a8e',
-  materialTextDisabledShadow: '#ffffff',
-  materialTextInvert: '#ffffff',
-  progress: '#000080',
-  tooltip: '#fefbcc',
+  name: "original",
+  anchor: "#1034a6",
+  anchorVisited: "#440381",
+  borderDark: "#868a8e",
+  borderDarkest: "#000000",
+  borderLight: "#dfe0e3",
+  borderLighter: "#ffffff",
+  borderLightest: "#ffffff",
+  canvas: "#ffffff",
+  canvasText: "#000000",
+  canvasTextDisabled: "#868a8e",
+  canvasTextDisabledShadow: "#ffffff",
+  canvasTextInvert: "#ffffff",
+  checkmark: "#000000",
+  checkmarkDisabled: "#868a8e",
+  desktopBackground: "#008080",
+  flatDark: "#9e9e9e",
+  flatLight: "#d8d8d8",
+  focusSecondary: "#fefe03",
+  headerBackground: "#000080",
+  headerNotActiveBackground: "#7f787f",
+  headerNotActiveText: "#d8d8d8",
+  headerText: "#ffffff",
+  hoverBackground: "#000080",
+  material: "#ced0cf",
+  materialDark: "#9a9e9c",
+  materialText: "#000000",
+  materialTextDisabled: "#868a8e",
+  materialTextDisabledShadow: "#ffffff",
+  materialTextInvert: "#ffffff",
+  progress: "#000080",
+  tooltip: "#fefbcc",
 };
 
 // Updated styles with proper isolation
@@ -75,10 +75,16 @@ const ControlPanelStyles = createGlobalStyle`
   .monitor-controls-container {
     position: relative;
     z-index: 9999;
+    pointer-events: auto !important; /* Ensure container blocks all click-through */
     
     /* This ensures styles are only applied within the container */
     &, & * {
       font-family: 'ms_sans_serif_controls', sans-serif;
+    }
+    
+    /* All interactive elements should be clickable */
+    button, select, input, .react95__window-header {
+      pointer-events: auto !important;
     }
     
     /* React95 component styles scoped to the control panel */
@@ -162,9 +168,7 @@ export const MonitorThemeProvider = ({ children }) => (
   <>
     <ControlPanelStyles />
     <div className="monitor-controls-container">
-      <ThemeProvider theme={original}>
-        {children}
-      </ThemeProvider>
+      <ThemeProvider theme={original}>{children}</ThemeProvider>
     </div>
   </>
 );
