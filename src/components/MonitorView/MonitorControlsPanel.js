@@ -26,12 +26,15 @@ const StyledGroupBox = styled(GroupBox)`
 const AnimatedControlsContainer = styled.div`
   max-height: ${(props) => (props.visible ? "64px" : "0")};
   opacity: ${(props) => (props.visible ? "1" : "0")};
-  overflow: visible;
+  overflow: hidden; // Changed from 'visible' to 'hidden'
+  pointer-events: ${(props) =>
+    props.visible ? "auto" : "none"}; // Added to prevent clicking when hidden
   transform: translateY(${(props) => (props.visible ? "0" : "-10px")});
   transition: max-height 0.3s ease-out, opacity 0.3s ease-out,
-    transform 0.3s ease-out;
-  margin-left: 20px;
-  width: calc(100% - 45px);
+    transform 0.3s ease-out, pointer-events 0s ease-out;
+  margin-left: 0px; // Reduced significantly to account for double negative margins
+  width: calc(100% - 30px); // Adjusted width calculation accordingly
+  padding-left: 22px; // Add padding to provide space for the combined negative margins (-15px + -6px = -21px)
 `;
 
 // Compact button row for icon buttons
