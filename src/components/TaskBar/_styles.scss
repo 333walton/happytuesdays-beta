@@ -31,8 +31,7 @@
 }
 
 /* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .quick-launch-button-clippy,
   .TaskBar .quick-launch-button-clippy {
     text-rendering: optimizeLegibility;
@@ -46,4 +45,34 @@
   .TaskBar .quick-launch-button-clippy {
     transition: none !important;
   }
-} 
+}
+
+/* Alternative: If the time element is a direct child */
+.TaskBar__notifications__time::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url("../../icons/rss32-min.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* RSS icon in notifications area */
+.rss-icon {
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+/* Ensure notifications area items are aligned */
+.TaskBar__notifications {
+  display: flex;
+  align-items: center;
+}

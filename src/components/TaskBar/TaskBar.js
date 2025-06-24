@@ -5,20 +5,22 @@ import { ProgramContext } from "../../contexts";
 // Custom tooltip component
 const CustomTooltip = ({ text, visible }) => {
   if (!visible) return null;
-  
+
   return (
-    <div style={{
-      position: 'absolute',
-      bottom: 'calc(100% + 30px)',
-      left: '105px',
-      backgroundColor: '#ffffcc',
-      border: '1px solid black',
-      padding: '2px 4px',
-      fontSize: '10px',
-      whiteSpace: 'nowrap',
-      zIndex: 99999,
-      pointerEvents: 'none'
-    }}>
+    <div
+      style={{
+        position: "absolute",
+        bottom: "calc(100% + 30px)",
+        left: "105px",
+        backgroundColor: "#ffffcc",
+        border: "1px solid black",
+        padding: "2px 4px",
+        fontSize: "10px",
+        whiteSpace: "nowrap",
+        zIndex: 99999,
+        pointerEvents: "none",
+      }}
+    >
       {text}
     </div>
   );
@@ -28,7 +30,7 @@ const TaskBar = () => {
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipTimeout, setTooltipTimeout] = useState(null);
   const taskbarRef = useRef(null);
-  const [tooltipText, setTooltipText] = useState('');
+  const [tooltipText, setTooltipText] = useState("");
   const clippyButtonRef = useRef(null);
 
   const handleMouseEnter = () => {
@@ -50,10 +52,11 @@ const TaskBar = () => {
     const findClippyButton = () => {
       if (!taskbarRef.current) return;
 
-      const buttons = taskbarRef.current.querySelectorAll('button');
-      const clippyButton = Array.from(buttons).find(button => {
-        const hasClippyIcon = button.innerHTML.includes('textchat32');
-        const hasClippyTitle = button.title === 'Show Clippy' || button.title === 'Hide Clippy';
+      const buttons = taskbarRef.current.querySelectorAll("button");
+      const clippyButton = Array.from(buttons).find((button) => {
+        const hasClippyIcon = button.innerHTML.includes("textchat32");
+        const hasClippyTitle =
+          button.title === "Show Clippy" || button.title === "Hide Clippy";
         return hasClippyIcon || hasClippyTitle;
       });
 
@@ -61,20 +64,23 @@ const TaskBar = () => {
         clippyButtonRef.current = clippyButton;
         const buttonTitle = clippyButton.title;
         setTooltipText(buttonTitle);
-        
-        clippyButton.addEventListener('mouseenter', handleMouseEnter);
-        clippyButton.addEventListener('mouseleave', handleMouseLeave);
-        
-        clippyButton.removeAttribute('title');
-        clippyButton.removeAttribute('data-tooltip');
+
+        clippyButton.addEventListener("mouseenter", handleMouseEnter);
+        clippyButton.addEventListener("mouseleave", handleMouseLeave);
+
+        clippyButton.removeAttribute("title");
+        clippyButton.removeAttribute("data-tooltip");
 
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'title') {
-              const newTitle = clippyButton.getAttribute('title');
+            if (
+              mutation.type === "attributes" &&
+              mutation.attributeName === "title"
+            ) {
+              const newTitle = clippyButton.getAttribute("title");
               if (newTitle) {
                 setTooltipText(newTitle);
-                clippyButton.removeAttribute('title');
+                clippyButton.removeAttribute("title");
               }
             }
           });
@@ -82,12 +88,12 @@ const TaskBar = () => {
 
         observer.observe(clippyButton, {
           attributes: true,
-          attributeFilter: ['title']
+          attributeFilter: ["title"],
         });
-        
+
         return () => {
-          clippyButton.removeEventListener('mouseenter', handleMouseEnter);
-          clippyButton.removeEventListener('mouseleave', handleMouseLeave);
+          clippyButton.removeEventListener("mouseenter", handleMouseEnter);
+          clippyButton.removeEventListener("mouseleave", handleMouseLeave);
           observer.disconnect();
         };
       }
@@ -102,32 +108,88 @@ const TaskBar = () => {
     };
   }, []);
 
+  // Add RSS icon to notification area
+  useEffect(() => {
+    const addRSSIcon = () => {
+      if (!taskbarRef.current) return;
+
+      // Find the notifications area (system tray)
+      const notificationsArea = taskbarRef.current.querySelector(
+        ".TaskBar__notifications"
+      );
+
+      if (notificationsArea && !notificationsArea.querySelector(".rss-icon")) {
+        // Find the time element
+        const timeElement = notificationsArea.querySelector(
+          ".TaskBar__notifications__time"
+        );
+
+        if (timeElement) {
+          // Create RSS icon
+          const rssIcon = document.createElement("img");
+          rssIcon.src = require("../../icons/rss32-min.png");
+          rssIcon.alt = "RSS";
+          rssIcon.className = "rss-icon";
+          rssIcon.style.width = "16px";
+          rssIcon.style.height = "16px";
+          rssIcon.style.marginRight = "1px";
+          rssIcon.style.verticalAlign = "middle";
+          rssIcon.style.cursor = "pointer";
+
+          // Add click handler if needed
+          rssIcon.addEventListener("click", () => {
+            console.log("RSS icon clicked");
+            // Add your RSS functionality here
+          });
+
+          // Insert before the time element
+          timeElement.parentNode.insertBefore(rssIcon, timeElement);
+        }
+      }
+    };
+
+    // Try multiple times as the TaskBar might render asynchronously
+    addRSSIcon();
+    const timeouts = [100, 500, 1000].map((delay) =>
+      setTimeout(addRSSIcon, delay)
+    );
+
+    return () => {
+      timeouts.forEach((timeout) => clearTimeout(timeout));
+    };
+  }, []);
+
   return (
     <ProgramContext.Consumer>
-      {context => (
-        <div ref={taskbarRef} style={{ position: 'relative' }}>
+      {(context) => (
+        <div ref={taskbarRef} style={{ position: "relative" }}>
           <TaskBarComponent
             options={context.startMenu}
-            quickLaunch={context.quickLaunch.map(item => {
-              if (item.title === "Show Clippy" || item.title === "Hide Clippy") {
+            quickLaunch={context.quickLaunch.map((item) => {
+              if (
+                item.title === "Show Clippy" ||
+                item.title === "Hide Clippy"
+              ) {
                 return {
                   ...item,
                   isActive: item.active,
                   dataActive: item.active ? "true" : "false",
                   title: item.title,
-                  className: `quick-launch-button-clippy btn ButtonIconSmall ${item.className || ''}`,
+                  className: `quick-launch-button-clippy btn ButtonIconSmall ${
+                    item.className || ""
+                  }`,
                   style: {
-                    position: 'relative'
-                  }
+                    position: "relative",
+                  },
                 };
               }
               return {
                 ...item,
                 isActive: item.active,
-                dataActive: item.active ? "true" : "false"
+                dataActive: item.active ? "true" : "false",
               };
             })}
-            openWindows={context.openOrder.map(windowId => {
+            openWindows={context.openOrder.map((windowId) => {
               const { activePrograms } = context;
               const isActive = windowId === context.activeId;
               const onClick = isActive ? context.onMinimize : context.moveToTop;
@@ -137,7 +199,7 @@ const TaskBar = () => {
                 title,
                 icon,
                 isActive,
-                onClick: () => onClick(windowId)
+                onClick: () => onClick(windowId),
               };
             })}
           />
