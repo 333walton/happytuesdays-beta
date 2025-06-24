@@ -52,7 +52,7 @@ class MonitorView extends Component {
           // Position Windows Launch wrapper
           windowsLaunchWrapper.style.position = "absolute";
           windowsLaunchWrapper.style.top = monitorRect.top + "px";
-          windowsLaunchWrapper.style.left = monitorRect.left + "px";
+          windowsLaunchWrapper.style.left = monitorRect.left - 1.5 + "px";
           windowsLaunchWrapper.style.width = monitorRect.width + "px";
           windowsLaunchWrapper.style.height = monitorRect.height + "px";
           windowsLaunchWrapper.style.zIndex = "101";
