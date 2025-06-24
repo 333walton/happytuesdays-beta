@@ -1,4 +1,4 @@
-// ClippyIntegration.js - Updated with animation restoration code
+// ClippyIntegration.js - Updated with animation restoration code and rocket mode handling
 
 import { Component } from "react";
 
@@ -24,6 +24,10 @@ class ClippyIntegration extends Component {
     // Add initial body class
     this.updateBodyScreenClass(this.props.isScreenPoweredOn);
 
+    // Handle initial rocket mode state
+    this.updateBodyRocketClass(this.props.isRocketActive);
+    this.handleRocketModeChange(this.props.isRocketActive);
+
     // Inject styles for Clippy/screen integration
     this.injectClippyStyles();
 
@@ -48,6 +52,31 @@ class ClippyIntegration extends Component {
         }, 500);
       }
     }
+
+    // If rocket mode state changed, update Clippy visibility
+    if (prevProps.isRocketActive !== this.props.isRocketActive) {
+      this.updateBodyRocketClass(this.props.isRocketActive);
+      this.handleRocketModeChange(this.props.isRocketActive);
+
+      // If exiting rocket mode, wait for ClippyProvider to recreate Clippy
+      if (!this.props.isRocketActive && prevProps.isRocketActive) {
+        console.log("Exiting rocket mode - waiting for Clippy recreation");
+        // Don't restore animations immediately - wait for new Clippy to be created
+        setTimeout(() => {
+          // Check if a new Clippy has been created
+          const newClippy = document.querySelector(".clippy.clippy-anchored");
+          if (newClippy) {
+            console.log(
+              "New Clippy found after rocket mode - triggering repositioning"
+            );
+            // Trigger repositioning for the new Clippy
+            if (window.ClippyPositioning) {
+              window.ClippyPositioning.triggerRepositioning();
+            }
+          }
+        }, 1000); // Give ClippyProvider time to recreate Clippy
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -56,8 +85,9 @@ class ClippyIntegration extends Component {
       this.blackOverlayObserver.disconnect();
     }
 
-    // Remove body class
+    // Remove body classes
     document.body.classList.remove("screen-off");
+    document.body.classList.remove("rocket-mode");
 
     // Remove style element
     const style = document.getElementById("clippy-monitor-integration");
@@ -87,6 +117,84 @@ class ClippyIntegration extends Component {
       document.body.classList.remove("screen-off");
     } else {
       document.body.classList.add("screen-off");
+    }
+  }
+
+  /**
+   * Add a global class to body based on rocket mode
+   */
+  updateBodyRocketClass(isRocketActive) {
+    if (isRocketActive) {
+      document.body.classList.add("rocket-mode");
+    } else {
+      document.body.classList.remove("rocket-mode");
+    }
+  }
+
+  /**
+   * Handle rocket mode changes to hide/show Clippy
+   */
+  handleRocketModeChange(isRocketActive) {
+    if (isRocketActive) {
+      // COMPREHENSIVE CLEANUP when rocket mode is active
+      console.log("Rocket mode activated - performing complete Clippy cleanup");
+
+      // 1. Find all Clippy elements
+      const allClippyElements = document.querySelectorAll(".clippy");
+      const overlayElement = document.getElementById(
+        "clippy-clickable-overlay"
+      );
+
+      // 2. Stop any active systems
+      allClippyElements.forEach((clippy) => {
+        if (clippy && window.ClippyPositioning?.stopResizeHandling) {
+          window.ClippyPositioning.stopResizeHandling(clippy);
+        }
+        // Stop animations
+        clippy.style.animation = "none";
+        clippy.style.transition = "none";
+      });
+
+      // 3. Clean up event listeners
+      const elementsToClean = [
+        ...allClippyElements,
+        overlayElement,
+        ...document.querySelectorAll(".clippy svg, .clippy .map"),
+      ].filter(Boolean);
+
+      elementsToClean.forEach((element) => {
+        if (element && element.parentNode) {
+          const cleanClone = element.cloneNode(true);
+          element.parentNode.replaceChild(cleanClone, element);
+        }
+      });
+
+      // 4. Force remove ALL Clippy elements from DOM
+      document.querySelectorAll(".clippy").forEach((clippy) => {
+        if (clippy && clippy.parentNode) {
+          clippy.parentNode.removeChild(clippy);
+        }
+      });
+
+      // 5. Remove overlay
+      if (overlayElement && overlayElement.parentNode) {
+        overlayElement.parentNode.removeChild(overlayElement);
+      }
+
+      // 6. Clear positioning systems
+      if (window.ClippyPositioning?.clearZoomAnchor) {
+        window.ClippyPositioning.clearZoomAnchor();
+      }
+
+      console.log("Rocket mode cleanup complete - all Clippy elements removed");
+    } else {
+      // When rocket mode is inactive, ClippyProvider will handle re-rendering
+      console.log(
+        "Rocket mode deactivated - ClippyProvider will re-render Clippy"
+      );
+
+      // Just ensure body class is updated
+      // The actual Clippy recreation is handled by ClippyProvider re-mounting
     }
   }
 

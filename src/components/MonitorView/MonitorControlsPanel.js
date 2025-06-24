@@ -419,6 +419,21 @@ const MonitorControlsPanel = ({
         .monitor-controls-container:hover #rocket-cursor {
           display: none !important;
         }
+
+        .monitor-controls-container {
+          position: relative;
+          z-index: 9999;
+          pointer-events: auto !important; /* Ensure container blocks all click-through */
+          
+          /* This ensures styles are only applied within the container */
+          &, & * {
+            font-family: 'ms_sans_serif_controls', sans-serif;
+          }
+          
+          /* All interactive elements should be clickable */
+          button, select, input, .react95__window-header {
+            pointer-events: auto !important;
+          }
       `;
       document.head.appendChild(styleTag);
 
@@ -763,6 +778,7 @@ const MonitorControlsPanel = ({
         border: "2px outset #c0c0c0",
         backgroundColor: "#c0c0c0",
         zIndex: 9999,
+        pointerEvents: "auto", // Ensure the container blocks click-through
       }}
     >
       {/* Header Bar - Entire bar is clickable for collapse */}

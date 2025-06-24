@@ -641,9 +641,10 @@ class MonitorView extends Component {
 
     return (
       <>
-        {/* Clippy Integration Component */}
+        {/* Clippy Integration Component - UPDATED WITH ROCKET PROP */}
         <ClippyIntegration
           isScreenPoweredOn={this.state.isScreenPoweredOn}
+          isRocketActive={this.state.rocketActive}
           onPowerStateChange={this.handlePowerStateChange}
         />
 

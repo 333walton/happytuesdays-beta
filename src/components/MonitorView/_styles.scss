@@ -214,6 +214,13 @@
 
   /* Specific styling for monitor controls container */
   .monitor-controls-container {
+    pointer-events: auto !important; /* Block all click-through on the container */
+
+    /* Ensure all child elements are also clickable */
+    * {
+      pointer-events: auto !important;
+    }
+
     .react95__window,
     .react95__window-header,
     .react95__window-content,
