@@ -47,6 +47,10 @@
     "build-storybook": "storybook build",
     "storybook-test": "storybook test",
     "build-graph": "node scripts/build-knowledge-graph.js",
+    "graph:build:v2": "node scripts/build-knowledge-graph-v2.js",
+    "graph:build:safe": "npm run graph:build:v2 || npm run build-graph",
+    "graph:test": "node scripts/test-enhanced-parser.js",
+    "graph:debug": "node scripts/test-parser-debug.js",
     "graph-dev": "npm run build-graph && npm start",
     "analyze-codebase": "node scripts/analyze-codebase.js",
     "neo4j-setup": "node scripts/neo4j-setup.js"

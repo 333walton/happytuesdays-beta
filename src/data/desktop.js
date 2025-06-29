@@ -74,6 +74,12 @@ const desktopData = [
     },
     multiInstance: true,
   },
+  {
+    id: "graph-explorer",
+    title: "Knowledge Graph",
+    icon: icons.folderProgram24,
+    component: "GraphExplorer",
+  },
   // REMOVED: Office Assistant entry - this has been removed so we can add it in DesktopView.js
   {
     title: "Recycle",

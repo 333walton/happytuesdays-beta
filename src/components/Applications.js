@@ -38,3 +38,4 @@ export { default as Minesweeper } from "./Minesweeper";
 export { default as MinesweeperWithHelp } from "./MinesweeperWithHelp";
 export { default as ClippyAssistant } from "./ClippyAssistant";
 export { default as HamsterCreator } from "./HamsterCreator/HamsterCreator";
+export { default as GraphExplorer } from "./Apps/GraphExplorer/GraphExplorer";

@@ -20,5 +20,5 @@
     ],
     "deny": []
   },
-  "model": "claude-4-sonnet"
+  "model": "claude-4-opus-20241022"
 }

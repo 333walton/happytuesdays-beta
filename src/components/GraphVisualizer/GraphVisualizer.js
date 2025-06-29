@@ -137,6 +137,37 @@ const GraphVisualizer = ({ windowProps = {} }) => {
           },
         };
 
+      case "smart":
+        return {
+          Component: {
+            ...commonStyle,
+            color: function (node) {
+              const colors = {
+                page: "#1e90ff",
+                app: "#ff6347",
+                common: "#32cd32",
+                hook: "#ffd700",
+                context: "#9370db",
+                component: "#20b2aa",
+              };
+              return colors[node.properties.componentType] || "#008080";
+            },
+            caption: "name",
+            size: function (node) {
+              // Size by complexity or connections
+              const base = 20;
+              const complexity = node.properties.complexity || 1;
+              return Math.min(base + complexity * 2, 50);
+            },
+          },
+          Hook: {
+            ...commonStyle,
+            color: "#ffd700",
+            caption: "name",
+            size: 15,
+          },
+        };
+
       case "all":
         return {
           Component: {
@@ -201,6 +232,17 @@ const GraphVisualizer = ({ windowProps = {} }) => {
                                  'ClippyAssistant', 'GraphVisualizer']
                 OPTIONAL MATCH (c)-[r]-(related:Component)
                 RETURN c, r, related`;
+      case "smart":
+        return `
+          MATCH (c:Component)
+          WHERE c.componentType IN ['page', 'app'] 
+          OPTIONAL MATCH (c)-[r]-(related:Component)
+          RETURN c, r, related
+          UNION
+          MATCH (c:Component)-[r:USES_HOOK]->(h:Hook)
+          RETURN c, r, h
+          LIMIT 150
+        `;
       case "all":
         // Show EVERYTHING in the knowledge graph
         return "MATCH (n) OPTIONAL MATCH (n)-[r]-(m) RETURN n, r, m";
@@ -257,7 +299,7 @@ const GraphVisualizer = ({ windowProps = {} }) => {
       {/* View mode selector */}
       <div className="view-mode-selector">
         <div className="win98-radio-group">
-          {["components", "files", "apps", "all"].map((mode) => (
+          {["components", "files", "apps", "smart", "all"].map((mode) => (
             <label key={mode} className="win98-radio-label">
               <input
                 type="radio"
