@@ -35,3 +35,5 @@ node_modules/
 /playwright/.cache/
 
 .vercel
+
+.vscode/cline_mcp_settings.json
