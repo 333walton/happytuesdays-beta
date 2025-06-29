@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@babel/parser": "^7.27.7",
+    "@babel/traverse": "^7.27.7",
     "@botpress/webchat": "^3.0.0",
     "@botpress/webchat-generator": "^0.2.15",
     "@react95/clippy": "^2.0.2",
@@ -17,6 +19,8 @@
     "gl-matrix": "^3.4.3",
     "media-chrome": "^4.9.0",
     "nanoid": "^2.0.1",
+    "neo4j-driver": "^5.28.1",
+    "neovis.js": "^2.1.0",
     "nth-check": "^2.1.1",
     "packard-belle": "^0.4.0",
     "pb-minesweeper": "1.0.5",
