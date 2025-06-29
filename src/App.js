@@ -15,6 +15,7 @@ import ShutDown from "./components/ShutDown/ShutDown";
 import Background from "./components/tools/Background";
 import MonitorView from "./components/MonitorView/MonitorView";
 import { ClippyProvider } from "./components/ClippyAssistant/index";
+import BIOSPixelEffect from "./components/BIOSPixelEffect/BIOSPixelEffect";
 
 class Desktop extends Component {
   static contextType = SettingsContext;
@@ -66,6 +67,8 @@ class Desktop extends Component {
 
 const App = () => (
   <SettingsProvider>
+    {/* BIOSPixelEffect at root level, outside of Desktop */}
+    <BIOSPixelEffect />
     <Desktop />
   </SettingsProvider>
 );
