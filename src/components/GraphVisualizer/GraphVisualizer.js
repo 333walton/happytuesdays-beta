@@ -85,7 +85,8 @@ const GraphVisualizer = ({ windowProps = {} }) => {
             ...commonStyle,
             color: "#008080", // Teal - like Windows 98 title bars
             caption: "name",
-            size: 20,
+            size: "pagerank", // This will size nodes by importance
+            // Remove community for now since it doesn't exist
           },
           File: {
             ...commonStyle,
@@ -107,7 +108,7 @@ const GraphVisualizer = ({ windowProps = {} }) => {
             ...commonStyle,
             color: "#008080",
             caption: "name",
-            size: 15,
+            size: "pagerank", // This will size nodes by importance
           },
         };
 
@@ -133,7 +134,7 @@ const GraphVisualizer = ({ windowProps = {} }) => {
               return "#008080";
             },
             caption: "name",
-            size: 30,
+            size: "pagerank", // This will size nodes by importance
           },
         };
 
