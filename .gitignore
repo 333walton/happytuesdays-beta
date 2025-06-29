@@ -36,4 +36,5 @@ node_modules/
 
 .vercel
 
+.vscode
 .vscode/cline_mcp_settings.json
