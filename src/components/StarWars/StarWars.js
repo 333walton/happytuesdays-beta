@@ -6,7 +6,8 @@ import { rebelcommand16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
-class Doom extends Component {
+class StarWars extends Component {
+  // Changed from 'Doom' to 'StarWars'
   render() {
     const { props } = this;
 
@@ -17,23 +18,26 @@ class Doom extends Component {
         icon={rebelcommand16}
         menuOptions={buildMenu({
           ...props,
-          componentType: "Doom",
+          componentType: "StarWars", // Changed from 'Doom' to 'StarWars'
           showHelp: this.showHelp,
           options: {},
         })}
         Component={WindowProgram}
-        initialHeight={window.innerWidth <= 420 ? 225 : 270} // Adjust height for mobile
-        initialWidth={window.innerWidth <= 420 ? window.innerWidth * 0.978 : 505} // Adjust width for mobile
-        initialX={window.innerWidth <= 420 ? 1 : 1} // Center horizontally on mobile
-        initialY={window.innerWidth <= 420 ? 1 : 1} // Center vertically on mobile
-        resizable={false} // Disable resizing on mobile
-        onMaximize={window.innerWidth <= 420 ? null : undefined} // Disable maximize button on mobile
-        className={cx("Doom", "fixed-window", props.className)} // Add the custom class
+        initialHeight={window.innerWidth <= 420 ? 225 : 270}
+        initialWidth={
+          window.innerWidth <= 420 ? window.innerWidth * 0.978 : 505
+        }
+        initialX={window.innerWidth <= 420 ? 1 : 1}
+        initialY={window.innerWidth <= 420 ? 1 : 1}
+        resizable={false}
+        onMaximize={window.innerWidth <= 420 ? null : undefined}
+        className={cx("StarWars", props.className)} // Changed class name
       >
         <div
           style={{
-            height: window.innerWidth <= 420 ? "225px" : "270px", // Adjust iframe height for mobile
-            width: window.innerWidth <= 420 ? window.innerWidth * 0.96 : "499px", // Adjust iframe width for mobile
+            height: window.innerWidth <= 420 ? "225px" : "270px",
+            width:
+              window.innerWidth <= 420 ? window.innerWidth * 0.96 : "499px",
             overflow: "hidden",
             position: "relative",
           }}
@@ -43,13 +47,13 @@ class Doom extends Component {
             title="starwars"
             scrolling="no"
             style={{
-              transform: window.innerWidth <= 420 ? "scale(.70)" : "scale(.82)", // Adjust scaling for mobile
+              transform: window.innerWidth <= 420 ? "scale(.70)" : "scale(.82)",
               transformOrigin: "top left",
               width: "610px",
               height: "600px",
               position: "absolute",
               overflow: "hidden",
-              top: window.innerWidth <= 420 ? "-95px" : "-100px", // Adjust positioning for mobile
+              top: window.innerWidth <= 420 ? "-95px" : "-100px",
               left: window.innerWidth <= 420 ? "-15px" : "0px",
               border: "none",
             }}
@@ -60,4 +64,6 @@ class Doom extends Component {
   }
 }
 
-export default Doom;
+export default StarWars; // Changed from 'Doom' to 'StarWars'
+// Note: This component is now specifically for Star Wars, not Doom
+// It displays the Rebel Command Prompt with an ASCII art animation of Star Wars.

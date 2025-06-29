@@ -1,0 +1,154 @@
+/* Windows 98 styled Graph Visualizer */
+.graph-visualizer-container {
+  font-family: "MS Sans Serif", sans-serif;
+  background-color: #c0c0c0;
+  border: 2px outset #c0c0c0;
+  height: 600px;
+  width: 800px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header bar */
+.win98-header {
+  background: linear-gradient(90deg, #0000ff 0%, #008080 100%);
+  color: white;
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.win98-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.win98-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.win98-button {
+  background: #c0c0c0;
+  border: 1px outset #c0c0c0;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-family: "MS Sans Serif", sans-serif;
+  cursor: pointer;
+  color: black;
+}
+
+.win98-button:hover {
+  background: #e0e0e0;
+}
+
+.win98-button:active {
+  border: 1px inset #c0c0c0;
+  background: #a0a0a0;
+}
+
+/* View mode selector */
+.view-mode-selector {
+  background: #c0c0c0;
+  padding: 8px;
+  border-bottom: 1px solid #808080;
+}
+
+.win98-radio-group {
+  display: flex;
+  gap: 16px;
+}
+
+.win98-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.win98-radio {
+  width: 12px;
+  height: 12px;
+}
+
+/* Error and loading states */
+.win98-error {
+  background: #ffcccc;
+  border: 1px solid #ff0000;
+  padding: 8px;
+  margin: 4px;
+  font-size: 11px;
+  color: #800000;
+}
+
+.win98-loading {
+  background: #ffffcc;
+  border: 1px solid #cccc00;
+  padding: 8px;
+  margin: 4px;
+  font-size: 11px;
+  color: #666600;
+  text-align: center;
+}
+
+/* Main visualization area */
+.graph-visualization {
+  flex: 1;
+  margin: 4px;
+  position: relative;
+}
+
+/* Status bar */
+.win98-status-bar {
+  background: #c0c0c0;
+  border-top: 1px solid #808080;
+  padding: 2px 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #000000;
+}
+
+.status-section {
+  padding: 2px 8px;
+  border: 1px inset #c0c0c0;
+  background: #f0f0f0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .graph-visualizer-container {
+    width: 100%;
+    height: 400px;
+  }
+
+  .win98-radio-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .win98-controls {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .win98-button {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+}
+
+/* Neo4j visualization overrides */
+#hydra98-graph-viz .vis-network {
+  background: #ffffff !important;
+}
+
+#hydra98-graph-viz .vis-navigation {
+  background: #c0c0c0 !important;
+  border: 1px outset #c0c0c0 !important;
+}

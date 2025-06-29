@@ -6,7 +6,8 @@ import { minesweeper16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
-class Doom extends Component {
+class Minesweeper extends Component {
+  // Changed from 'Doom' to 'Minesweeper'
   render() {
     const { props } = this;
     return (
@@ -16,16 +17,15 @@ class Doom extends Component {
         icon={minesweeper16}
         menuOptions={buildMenu({
           ...props,
-          componentType: "Doom",
+          componentType: "Minesweeper", // Changed from 'Doom' to 'Minesweeper'
           showHelp: this.showHelp,
-          options: {
-          },
+          options: {},
         })}
         Component={WindowProgram}
         initialHeight={247}
         initialWidth={166}
-        resizable={false}           // This disables resizing
-        onMaximize={null}           // This disables the maximize button
+        resizable={false}
+        onMaximize={null}
         className={cx("Minesweeper", props.className)}
       >
         <iframe
@@ -35,7 +35,7 @@ class Doom extends Component {
           height="100%"
           style={{
             border: "none",
-            left: "-1px"
+            left: "-1px",
           }}
           frameBorder="0"
           scrolling="no"
@@ -45,4 +45,5 @@ class Doom extends Component {
   }
 }
 
-export default Doom;
+export default Minesweeper; // Changed from 'Doom' to 'Minesweeper'
+// Note: This component is now specifically for Minesweeper, not Doom

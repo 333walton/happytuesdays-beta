@@ -11,7 +11,8 @@
   src: url("../../assets/FixedsysStripped.woff2") format("woff2");
 }
 
-.Doom {
+.ASCIIMaze {
+  // Changed from '.Doom' to '.ASCIIMaze'
   input {
     filter: opacity(0%);
     position: absolute;
@@ -23,7 +24,7 @@
   }
 
   .IframeWindow {
-    >div:not(.Window__heading) {
+    > div:not(.Window__heading) {
       width: 100%;
       height: calc(100% - 10px);
     }
@@ -46,8 +47,7 @@
 
 .react-draggable-dragging {
   .IframeWindow {
-
-    >div,
+    > div,
     iframe {
       pointer-events: none;
     }

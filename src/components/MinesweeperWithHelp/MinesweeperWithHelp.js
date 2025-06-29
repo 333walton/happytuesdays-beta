@@ -9,8 +9,8 @@ import "./_styles.scss"; // Add specific styles for scrollbar removal
 
 // Optimization: Extract help dialog to a separate component to reduce re-renders
 const HelpDialog = React.memo(({ onClose }) => (
-  <div 
-    className="help-window" 
+  <div
+    className="help-window"
     style={{
       position: "absolute",
       top: "50%",
@@ -28,33 +28,41 @@ const HelpDialog = React.memo(({ onClose }) => (
       width: "80%",
     }}
   >
-    <h3 style={{ 
-      fontSize: "12px", 
-      margin: "0 0 8px 0", 
-      fontWeight: "bold",
-      fontFamily: "Microsoft Sans Serif, Tahoma, sans-serif"
-    }}>
+    <h3
+      style={{
+        fontSize: "12px",
+        margin: "0 0 8px 0",
+        fontWeight: "bold",
+        fontFamily: "Microsoft Sans Serif, Tahoma, sans-serif",
+      }}
+    >
       Minesweeper Help
     </h3>
-    <p style={{ 
-      margin: "6px 0", 
-      fontSize: "11px",
-      fontFamily: "Microsoft Sans Serif, Tahoma, sans-serif"
-    }}>
+    <p
+      style={{
+        margin: "6px 0",
+        fontSize: "11px",
+        fontFamily: "Microsoft Sans Serif, Tahoma, sans-serif",
+      }}
+    >
       Left click: Uncover a square
     </p>
-    <p style={{ 
-      margin: "6px 0", 
-      fontSize: "11px",
-      fontFamily: "Microsoft Sans Serif, Tahoma, sans-serif" 
-    }}>
+    <p
+      style={{
+        margin: "6px 0",
+        fontSize: "11px",
+        fontFamily: "Microsoft Sans Serif, Tahoma, sans-serif",
+      }}
+    >
       Right click: Flag a mine
     </p>
-    <p style={{ 
-      margin: "6px 0", 
-      fontSize: "11px",
-      fontFamily: "Microsoft Sans Serif, Tahoma, sans-serif" 
-    }}>
+    <p
+      style={{
+        margin: "6px 0",
+        fontSize: "11px",
+        fontFamily: "Microsoft Sans Serif, Tahoma, sans-serif",
+      }}
+    >
       Clear all non-mine squares to win!
     </p>
     <button
@@ -84,7 +92,7 @@ class MinesweeperWithHelp extends Component {
     super(props);
     // Optimization: Only track dialog state, keep it minimal
     this.state = {
-      showHelpDialog: false
+      showHelpDialog: false,
     };
   }
 
@@ -92,11 +100,11 @@ class MinesweeperWithHelp extends Component {
   showHelp = () => {
     this.setState({ showHelpDialog: true });
   };
-  
+
   hideHelp = () => {
     this.setState({ showHelpDialog: false });
   };
-  
+
   // Optimization: Create menu options once and memoize them
   getMenuOptions = () => {
     const { props } = this;
@@ -106,20 +114,18 @@ class MinesweeperWithHelp extends Component {
       showHelp: this.showHelp,
       options: {
         // Minimal menu options
-        help: [
-          { label: "How to Play", onClick: this.showHelp }
-        ]
-      }
+        help: [{ label: "How to Play", onClick: this.showHelp }],
+      },
     });
   };
 
   render() {
     const { props } = this;
     const { showHelpDialog } = this.state;
-    
+
     // Optimization: Create menu options outside render to avoid recreation
     const menuOptions = this.getMenuOptions();
-    
+
     return (
       <CustomWindow
         {...props}
@@ -138,7 +144,7 @@ class MinesweeperWithHelp extends Component {
       >
         {/* Optimization: Only render help dialog when needed */}
         {showHelpDialog && <HelpDialog onClose={this.hideHelp} />}
-        
+
         {/* Use a wrapper div to fully control iframe and prevent scrollbars */}
         <div className="minesweeper-iframe-container">
           <iframe
@@ -154,7 +160,7 @@ class MinesweeperWithHelp extends Component {
               transform: "translateZ(0)",
               backfaceVisibility: "hidden",
               // Remove scrollbar
-              overflow: "hidden"
+              overflow: "hidden",
             }}
             frameBorder="0"
             scrolling="no"

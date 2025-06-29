@@ -6,12 +6,14 @@ import { maze16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
-class Doom extends Component {
+class ASCIIMaze extends Component {
+  // Changed from 'Doom' to 'ASCIIMaze'
   iframeRef = null;
 
   sendKeyToIframe = (label, key) => {
     const iframe = this.iframeRef;
-    if (!iframe || !iframe.contentWindow || !iframe.contentWindow.document) return;
+    if (!iframe || !iframe.contentWindow || !iframe.contentWindow.document)
+      return;
 
     const keyCodeMap = {
       ArrowUp: 38,
@@ -47,55 +49,63 @@ class Doom extends Component {
 
     return (
       <Window
-  {...props}
-  title="ASCII Maze"
-  icon={maze16}
-  menuOptions={buildMenu({
-    ...props,
-    componentType: "Doom",
-    showHelp: this.showHelp,
-    options: {},
-  })}
-  Component={WindowProgram}
-  initialHeight={isMobile ? 350 : 315} // MATCH container height!
-  initialWidth={isMobile ? 270 : 280}  // MATCH iframe width (m : d)
-  initialX={1}
-  initialY={1}
-  resizable={false}
-  onMaximize={null}
-  className={cx("Doom", props.className)}
->
-  <div
-    style={{
-      width: "260px",     // MATCH iframe width
-      height: "250px",    // MATCH maze height
-      overflow: "hidden",
-      position: "relative",
-      background: "#bbc3c4"
-    }}
-  >
-    <iframe
-      ref={(ref) => (this.iframeRef = ref)}
-      src="/maze/index.html"
-      title="ASCII Maze"
-      style={{
-        width: "260px",
-        height: "250px",
-        border: "none",
-        position: "relative",
-      }}
-    />
-  </div>
+        {...props}
+        title="ASCII Maze"
+        icon={maze16}
+        menuOptions={buildMenu({
+          ...props,
+          componentType: "ASCIIMaze", // Changed from 'Doom' to 'ASCIIMaze'
+          showHelp: this.showHelp,
+          options: {},
+        })}
+        Component={WindowProgram}
+        initialHeight={isMobile ? 350 : 315}
+        initialWidth={isMobile ? 270 : 280}
+        initialX={1}
+        initialY={1}
+        resizable={false}
+        onMaximize={null}
+        className={cx("ASCIIMaze", props.className)} // Changed class name
+      >
+        <div
+          style={{
+            width: "260px",
+            height: "250px",
+            overflow: "hidden",
+            position: "relative",
+            background: "#bbc3c4",
+          }}
+        >
+          <iframe
+            ref={(ref) => (this.iframeRef = ref)}
+            src="/maze/index.html"
+            title="ASCII Maze"
+            style={{
+              width: "260px",
+              height: "250px",
+              border: "none",
+              position: "relative",
+            }}
+          />
+        </div>
 
         {/* Mobile Controls */}
         <div className="ASCIIMaze-controls">
           <div className="row">
-            <button onClick={() => this.sendKeyToIframe("Up", "ArrowUp")}>↑</button>
+            <button onClick={() => this.sendKeyToIframe("Up", "ArrowUp")}>
+              ↑
+            </button>
           </div>
           <div className="row">
-            <button onClick={() => this.sendKeyToIframe("Left", "ArrowLeft")}>←</button>
-            <button onClick={() => this.sendKeyToIframe("Down", "ArrowDown")}>↓</button>
-            <button onClick={() => this.sendKeyToIframe("Right", "ArrowRight")}>→</button>
+            <button onClick={() => this.sendKeyToIframe("Left", "ArrowLeft")}>
+              ←
+            </button>
+            <button onClick={() => this.sendKeyToIframe("Down", "ArrowDown")}>
+              ↓
+            </button>
+            <button onClick={() => this.sendKeyToIframe("Right", "ArrowRight")}>
+              →
+            </button>
           </div>
         </div>
       </Window>
@@ -103,4 +113,6 @@ class Doom extends Component {
   }
 }
 
-export default Doom;
+export default ASCIIMaze; // Changed from 'Doom' to 'ASCIIMaze'
+// Note: This component is now specifically for ASCIIMaze, not Doom
+// It displays an ASCII maze game with arrow key controls for navigation.
