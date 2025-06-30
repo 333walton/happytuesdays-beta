@@ -1,5 +1,6 @@
 import * as icons from "../icons";
 import readme from "./textFiles/readme";
+import GraphExplorer from "../components/Apps/GraphExplorer/GraphExplorer";
 
 const isMobile = () => {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -15,7 +16,7 @@ const desktopData = [
     title: "Computer",
     icon: icons.computer32,
     component: "ExplorerWindow",
-    maximizeOnOpen: false, // Prevent maximizing on mobile
+    maximizeOnOpen: false,
     data: {
       content: [
         {
@@ -66,7 +67,7 @@ const desktopData = [
     component: "IframeWindow",
     data: {
       src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
-      disableAlert: true, // Disable the alert for this iframe
+      disableAlert: true,
       style: {
         width: "100%",
         height: "100%",
@@ -74,18 +75,22 @@ const desktopData = [
     },
     multiInstance: true,
   },
-  {
-    id: "graph-explorer",
-    title: "Knowledge Graph",
-    icon: icons.folderProgram24,
-    component: "GraphExplorer",
-  },
-  // REMOVED: Office Assistant entry - this has been removed so we can add it in DesktopView.js
+  // Conditionally include GraphExplorer only in development
+  ...(process.env.NODE_ENV !== "production"
+    ? [
+        {
+          id: "graph-explorer",
+          title: "Knowledge Graph",
+          icon: icons.folderProgram24,
+          component: "GraphExplorer",
+        },
+      ]
+    : []),
   {
     title: "Recycle",
-    icon: icons.recycleempty32, // Default icon (This will be overridden in the component using state)
+    icon: icons.recycleempty32,
     component: "RecycleBin",
-    className: "recycle-icon", // Apply the CSS class
+    className: "recycle-icon",
   },
   // Conditionally add any mobile-specific icons/components here
   ...(!isMobile() ? [] : []),

@@ -91,6 +91,9 @@ class GraphExplorer extends Component {
   };
 
   render() {
+    if (process.env.NODE_ENV === "production") {
+      return null; // Don't render anything in production
+    }
     const { activeTab, queryResults, customQuery, loading, error } = this.state;
 
     console.log("GraphExplorer rendering...", { activeTab, loading });
