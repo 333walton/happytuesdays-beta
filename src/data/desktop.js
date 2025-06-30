@@ -75,6 +75,12 @@ const desktopData = [
     },
     multiInstance: true,
   },
+  {
+    title: "Recycle",
+    icon: icons.recycleempty32,
+    component: "RecycleBin",
+    className: "recycle-icon",
+  },
   // Conditionally include GraphExplorer only in development
   ...(process.env.NODE_ENV !== "production"
     ? [
@@ -86,12 +92,6 @@ const desktopData = [
         },
       ]
     : []),
-  {
-    title: "Recycle",
-    icon: icons.recycleempty32,
-    component: "RecycleBin",
-    className: "recycle-icon",
-  },
   // Conditionally add any mobile-specific icons/components here
   ...(!isMobile() ? [] : []),
 ];
