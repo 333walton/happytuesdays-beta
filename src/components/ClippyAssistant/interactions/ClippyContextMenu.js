@@ -646,11 +646,9 @@ const ClippyContextMenu = ({
   };
 
   // FIXED: Enhanced agent change function with actual character switching
-  // FIXED: Enhanced agent change function with actual character switching
   const handleAgentChange = (newAgent) => {
     console.log(`🎯 Changing agent from ${currentAgent} to ${newAgent}`);
 
-    // If switching away from Genius, close the chat by clicking the X button
     // If switching away from Genius, close the chat by clicking the X button
     if (currentAgent === "Genius" && newAgent !== "Genius") {
       console.log("🔄 Switching away from Genius - closing chat window");
@@ -712,6 +710,14 @@ const ClippyContextMenu = ({
     if (window.setCurrentAgent) {
       window.setCurrentAgent(newAgent);
     }
+
+    // Update global agent state for menu
+    window.currentAgent = newAgent;
+
+    // Trigger event to refresh start menu
+    window.dispatchEvent(
+      new CustomEvent("agentChanged", { detail: { agent: newAgent } })
+    );
 
     // Hide any open balloons during transition
     if (window.hideClippyCustomBalloon) {

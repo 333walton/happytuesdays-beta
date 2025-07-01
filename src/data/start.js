@@ -2,13 +2,90 @@ import * as icons from "../icons";
 import squirtel from "./textFiles/squirtel";
 import rollin from "./textFiles/rollin";
 import allStarTabs from "./textFiles/allStarTabs";
-import commits from "./textFiles/commits"; // Added import for commits
-import faq from "./textFiles/faq"; // Moved to programs.js
-import clippyFaq from "./textFiles/clippyFaq"; // Uncomment when file is available
+// Remove these imports to avoid circular dependencies
+// import commits from "./textFiles/commits";
+// import faq from "./textFiles/faq";
+import clippyFaq from "./textFiles/clippyFaq";
 
 // Utility function to detect mobile devices
 const isMobile = () =>
   /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+// Function to get current agent from global state
+const getCurrentAgent = () => {
+  return window.currentAgent || "Clippy";
+};
+
+// Function to create AI Assistants menu with dynamic checkmarks
+const createAIAssistants = () => {
+  const currentAgent = getCurrentAgent();
+
+  // Helper to generate onClick for each agent
+  const selectAgent = (agentName) => () => {
+    window.currentAgent = agentName;
+    // If you use React state/context for agent, trigger update here
+    if (window.onAgentChange) window.onAgentChange(agentName);
+    // Optionally, force a re-render or trigger any other logic
+  };
+
+  return [
+    {
+      title: "What Are These?",
+      icon: icons.help16,
+      component: "Notepad",
+      isDisabled: false,
+      data: {
+        content: clippyFaq,
+        wrap: true,
+        readOnly: true,
+        enableHtml: true,
+      },
+    },
+    {
+      title: currentAgent === "Clippy" ? "✓ Clippy GPT" : "Clippy GPT",
+      tooltip: "Site Guide",
+      icon: icons.vid16,
+      component: "",
+      isDisabled: false,
+      onClick: selectAgent("Clippy"),
+    },
+    {
+      title: currentAgent === "F1" ? "✓ F1 GPT" : "F1 GPT",
+      tooltip: "Tech Workshop",
+      icon: icons.vid16,
+      component: "",
+      isDisabled: false,
+      onClick: selectAgent("F1"),
+    },
+    {
+      title: currentAgent === "Genius" ? "✓ Genius GPT" : "Genius GPT",
+      tooltip: "Motivation Station",
+      icon: icons.vid16,
+      component: "",
+      isDisabled: false,
+      onClick: selectAgent("Genius"),
+    },
+    {
+      title: currentAgent === "Merlin" ? "✓ Merlin GPT" : "Merlin GPT",
+      tooltip: "Art Gallery",
+      icon: icons.vid16,
+      component: "",
+      isDisabled: false,
+      onClick: selectAgent("Merlin"),
+    },
+    {
+      title: currentAgent === "Bonzi" ? "✓ Bonzi GPT" : "Bonzi GPT",
+      tooltip: "Gaming Hub",
+      icon: icons.vid16,
+      component: "",
+      isDisabled: false,
+      onClick: selectAgent("Bonzi"),
+    },
+  ];
+};
+
+// Use a function to get aiAssistants dynamically
+const getAIAssistants = () => createAIAssistants();
 
 const accessories = [
   {
@@ -26,61 +103,12 @@ const accessories = [
   },
 ];
 
-const aiAssistants = [
-  {
-    title: "What Are These?",
-    icon: icons.faq16,
-    component: "Notepad",
-    isDisabled: false,
-    data: {
-      content: clippyFaq,
-      wrap: true,
-      readOnly: true,
-      enableHtml: true, // ADD THIS LINE
-    },
-  },
-  {
-    title: "Clippy GPT",
-    tooltip: "Site Guide",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-  {
-    title: "F1 GPT",
-    tooltip: "Tech Workshop",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-  {
-    title: "Genius GPT",
-    tooltip: "Motivation Station",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-  {
-    title: "Merlin GPT",
-    tooltip: "Art Gallery",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-  {
-    title: "Bonzi GPT",
-    tooltip: "Gaming Hub",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-];
-
-const programs = [
+// Modify programs to use dynamic AI assistants
+const getPrograms = () => [
   {
     title: "AI Assistants",
     icon: icons.folderProgram16,
-    options: aiAssistants,
+    options: getAIAssistants(), // Call function to get current state
   },
   {
     title: "Accessories",
@@ -175,71 +203,10 @@ const favorites = [
   },
   {
     title: "Community Favorites",
-    icon: icons.chart24,
+    icon: icons.folder16,
     options: communityFavorites,
   },
 ];
-
-// Moved WebGL items to Artifacts > Experiential
-// const webGLOptions = [
-//   {
-//     title: "Rain Physics",
-//     icon: icons.webglwindow32,
-//     component: "TestExplorer",
-//     data: {
-//       src: "https://loklok-volume.vercel.app/gpu",
-//       title: "Internet Explorer",
-//     },
-//     multiInstance: false,
-//   },
-//   {
-//     title: "Instance Points",
-//     icon: icons.webglwindow32,
-//     component: "TestExplorer",
-//     data: {
-//       src: "https://threejs.org/examples/webgpu_instance_points.html",
-//       title: "Internet Explorer",
-//     },
-//     multiInstance: false,
-//   },
-//   ...(!isMobile()
-//     ? [
-//         {
-//           title: "Minecraft Sim",
-//           icon: icons.webglwindow32,
-//           component: "TestExplorer",
-//           data: {
-//             src: "https://threejs.org/examples/webgl_geometry_minecraft.html",
-//             title: "Internet Explorer",
-//           },
-//           multiInstance: false,
-//         },
-//       ]
-//     : []),
-// ];
-
-// Commented out old Media options
-// const mediaOptions = [
-//   {
-//     title: "Good Music",
-//     type: "ExternalLink",
-//     icon: icons.mediacd16,
-//     isDisabled: true,
-//     href: "https://soundcloud.com/southbound_music/sets/best-techno?utm_source=good_techno&utm_medium=startmenu&utm_campaign=hydra98",
-//   },
-//   {
-//     title: "Good Movies",
-//     type: "ExternalLink",
-//     icon: icons.htmlFile16,
-//     href: "https://boxd.it/9UyaN",
-//   },
-//   {
-//     title: "Warpcast",
-//     type: "ExternalLink",
-//     icon: icons.htmlFile16,
-//     href: "https://warpcast.com/333walton",
-//   },
-// ];
 
 const newsFeeds = [
   {
@@ -291,23 +258,6 @@ const marketingTools = [
     href: "",
     isDisabled: true,
   },
-  // Commented out from Ad Tools
-  // {
-  //   title: "Cookie Consent",
-  //   icon: icons.cookie16,
-  //   href: "",
-  //   isDisabled: true,
-  // },
-  // {
-  //   title: "Hookscore Heatmap",
-  //   icon: icons.vid16,
-  //   component: "HookScoreHeatmap",
-  //   multiInstance: true,
-  //   isDisabled: true,
-  //   data: {
-  //     src: "",
-  //   },
-  // },
 ];
 
 const aiUtilities = [
@@ -510,34 +460,6 @@ const documents = [
     icon: icons.folderOpen24,
     options: artDesignDocs,
   },
-  // Commented out old documents structure
-  // {
-  //   title: "Ad Tools",
-  //   icon: icons.faq32,
-  //   options: [...],
-  // },
-  // {
-  //   title: "Guitar Tabs",
-  //   options: [
-  //     {
-  //       title: "Rollin",
-  //       icon: icons.notepadFile16,
-  //       component: "Notepad",
-  //       data: {
-  //         content: rollin,
-  //       },
-  //     },
-  //     {
-  //       title: "All Star",
-  //       icon: icons.notepadFile16,
-  //       component: "Notepad",
-  //       data: {
-  //         content: allStarTabs,
-  //       },
-  //     },
-  //   ],
-  //   icon: icons.folder16,
-  // },
 ];
 
 const dosGames = [
@@ -585,7 +507,6 @@ const classicGames = [
 ];
 
 const miscGames = [
-  // Moved HydraBurn to ASCII Art section
   {
     title: "ASCII Maze",
     icon: icons.maze16,
@@ -636,61 +557,53 @@ const games = [
   },
 ];
 
-//const asciiArt = [];
-//{
-// title: "Flames",
-// icon: icons.burn16,
-//component: "Burn",
-//multiInstance: true,
-//},
-// {
-//  title: "Pipes",
-// icon: icons.pipes16,
-//component: "Pipes",
-// multiInstance: true,
-// },
-//{
-// title: "Hourglass",
-// icon: icons.sand16,
-// component: "Sand",
-// multiInstance: true,
-//},
-// {
-//  title: "See More...",
-// icon: icons.vid16,
-// component: "",
-// isDisabled: true,
-//},
-// Moved Squirtel to "See More..."
-// {
-//   title: "Squirtel",
-//   icon: icons.notepad16,
-//   component: "Notepad",
-//   data: {
-//     content: squirtel,
-//   },
-//};
+const asciiArt = [
+  {
+    title: "Flames",
+    icon: icons.burn16,
+    component: "Burn",
+    multiInstance: true,
+  },
+  {
+    title: "Pipes",
+    icon: icons.pipes16,
+    component: "Pipes",
+    multiInstance: true,
+  },
+  {
+    title: "Hourglass",
+    icon: icons.sand16,
+    component: "Sand",
+    multiInstance: true,
+  },
+  {
+    title: "See More...",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
 
-//const demoscenes = [
-//{
-//title: "GleEst",
-//type: "ExternalLink",
-//icon: icons.htmlFile16,
-//href: "https://demozoo.org/productions/288839/",
-//},
-//{
-// title: "Micro1k",
-//type: "ExternalLink",
-//icon: icons.htmlFile16,
-//href: "https://demozoo.org/productions/128900/",
-//},
-//{
-// title: "Kishkoid",
-//type: "ExternalLink",
-//icon: icons.htmlFile16,
-//href: "https://demozoo.org/productions/13245/",
-//},
-//];
+const demoscenes = [
+  {
+    title: "GleEst",
+    type: "ExternalLink",
+    icon: icons.htmlFile16,
+    href: "https://demozoo.org/productions/288839/",
+  },
+  {
+    title: "Micro1k",
+    type: "ExternalLink",
+    icon: icons.htmlFile16,
+    href: "https://demozoo.org/productions/128900/",
+  },
+  {
+    title: "Kishkoid",
+    type: "ExternalLink",
+    icon: icons.htmlFile16,
+    href: "https://demozoo.org/productions/13245/",
+  },
+];
 
 const animated = [
   {
@@ -699,7 +612,6 @@ const animated = [
     component: "",
     isDisabled: true,
   },
-  // ...other still frame items...
   {
     title: "Demoscenes",
     icon: icons.vid16,
@@ -711,72 +623,69 @@ const animated = [
 const stillFrames = [
   {
     title: "Pixel Art",
-    icon: icons.folder16, // or another icon if you prefer,
+    icon: icons.folder16,
     isDisabled: true,
   },
   {
     title: "ASCII Art",
-    icon: icons.folder16, // or another icon if you prefer,
+    icon: icons.folder16,
     isDisabled: true,
   },
   {
     title: "3D Rendered",
-    icon: icons.folder16, // or another icon if you prefer,
+    icon: icons.folder16,
     isDisabled: true,
   },
-  // ...other still frame items...
 ];
 
 const interactive = [
   {
     title: "WebGL Experiments",
     icon: icons.folder16,
-    data: {
-      src: "",
-      title: "",
-    },
-    multiInstance: false,
+    options: [
+      {
+        title: "Rain Physics",
+        icon: icons.webglwindow32,
+        component: "TestExplorer",
+        data: {
+          src: "https://loklok-volume.vercel.app/gpu",
+          title: "Internet Explorer",
+        },
+        multiInstance: false,
+      },
+      {
+        title: "Instance Points",
+        icon: icons.webglwindow32,
+        component: "TestExplorer",
+        data: {
+          src: "https://threejs.org/examples/webgpu_instance_points.html",
+          title: "Internet Explorer",
+        },
+        multiInstance: false,
+      },
+      {
+        title: "Minecraft Sim",
+        icon: icons.webglwindow32,
+        component: "TestExplorer",
+        data: {
+          src: "https://threejs.org/examples/webgl_geometry_minecraft.html",
+          title: "Internet Explorer",
+        },
+        multiInstance: false,
+      },
+      {
+        title: "See More...",
+        icon: icons.vid16,
+        component: "",
+        isDisabled: true,
+      },
+    ],
   },
   {
     title: "ASCII Art",
     icon: icons.folder16,
-    data: {
-      src: "",
-      title: "",
-    },
-    multiInstance: false,
+    options: asciiArt,
   },
-
-  //{
-  //title: "Rain Physics",
-  //icon: icons.webglwindow32,
-  //component: "TestExplorer",
-  //data: {
-  //src: "https://loklok-volume.vercel.app/gpu",
-  //title: "Internet Explorer",
-  //},
-  //multiInstance: false,
-  //},
-  //{
-  //title: "Instance Points",
-  //icon: icons.webglwindow32,
-  //component: "TestExplorer",
-  //data: {
-  //src: "https://threejs.org/examples/webgpu_instance_points.html",
-  //title: "Internet Explorer",
-  //},
-  //multiInstance: false,
-  //},
-  //{
-  //title: "Minecraft Sim",
-  //icon: icons.webglwindow32,
-  //component: "TestExplorer",
-  //data: {
-  //src: "https://threejs.org/examples/webgl_geometry_minecraft.html",
-  //title: "Internet Explorer",
-  //},
-  //multiInstance: false,
-  //},
   {
     title: "Randomize",
     icon: icons.kodak16,
@@ -810,22 +719,6 @@ const gallery = [
     component: "DoodleSubmission",
     isDisabled: false,
   },
-  // Moved from old Doodle Gallery
-  // {
-  //   title: "Enter Gallery",
-  //   icon: icons.doodlegallery32,
-  //   component: "",
-  //   isDisabled: true,
-  // },
-  // {
-  //   title: "All Doodles",
-  //   icon: icons.folderOpen24,
-  //   component: "ExplorerWindow",
-  //   isDisabled: false,
-  //   data: {
-  //     content: [...],
-  //   },
-  // },
 ];
 
 const artifacts = [
@@ -849,70 +742,39 @@ const artifacts = [
     icon: icons.folder16,
     options: stillFrames,
   },
-  //{
-  // title: "ASCII Art",
-  // icon: icons.folder16,
-  // options: asciiArt,
-  //},
-  //{
-  //  title: "Demoscenes",
-  /// icon: icons.folder16,
-  // options: demoscenes,
-  //},
 ];
 
-const helpOptions = [
+export const find = [
   {
-    title: "FAQ",
-    icon: icons.faq32,
-    component: "Notepad",
-    multiInstance: true,
-    data: {
-      content: faq.content,
-      enableHtml: faq.enableHtml,
-      readOnly: true,
-    },
-  },
-  {
-    title: "Demo",
-    icon: icons.camera16,
-    component: isMobile ? "VideoPlayerMobile" : "VideoPlayerMobile",
-    multiInstance: true,
-    isDisabled: true,
-    data: {},
-  },
-  {
-    title: "Contact",
-    icon: icons.vid16,
-    component: "",
+    title: "Files or Folders...",
+    icon: icons.findFiles16,
     isDisabled: true,
   },
   {
-    title: "Change Log",
-    icon: icons.notepadFile16,
-    component: "Notepad",
-    data: {
-      content: commits,
-    },
+    title: "Computer...",
+    icon: icons.findComputer16,
+    isDisabled: true,
   },
-  // Commented out Office Assistant
-  // {
-  //   title: "Office Assistant",
-  //   icon: icons.textchat32,
-  //   component: "Clippy",
-  //   id: "clippy-assistant",
-  // },
+  {
+    title: "On the Internet...",
+    icon: icons.findOnline16,
+    type: "ExternalLink",
+    href: "https://google.com",
+  },
+  {
+    title: "People...",
+    icon: icons.findPeople16,
+    type: "ExternalLink",
+    href: "https://facebook.com",
+  },
 ];
 
-// Make sure faq and commits are imported or defined above, e.g.:
-// import faq from "./textFiles/faq";
-// import commits from "./textFiles/commits";
-
-const startMenuData = [
+// Export function to generate menu data dynamically
+const getStartMenuData = () => [
   {
     title: "Programs",
     icon: icons.folderProgram24,
-    options: programs,
+    options: getPrograms(), // Use dynamic programs
   },
   {
     title: "Favorites",
@@ -941,4 +803,5 @@ const startMenuData = [
   },
 ];
 
-export default startMenuData;
+// Export as a function instead of static data
+export default getStartMenuData;

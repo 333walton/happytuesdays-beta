@@ -2,22 +2,15 @@ import React, { Component } from "react";
 import nanoid from "nanoid";
 import * as icons from "../icons";
 import * as Applications from "../components/Applications";
-import startMenuData from "../data/start";
+import getStartMenuData from "../data/start";
 import desktopData from "../data/desktop";
 import { ProgramContext } from ".";
 import faq from "../data/textFiles/faq";
 import commits from "../data/textFiles/commits";
 
 // Utility function to detect mobile devices
-// const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-// Add this function at the top of programs.js
-function detectCycles(obj, seen = new WeakSet()) {
-  if (obj && typeof obj === "object") {
-    if (seen.has(obj)) throw new Error("Circular reference detected!");
-    seen.add(obj);
-    Object.values(obj).forEach((val) => detectCycles(val, seen));
-  }
-}
+const isMobile = () =>
+  /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 const transformLinks = (option) => ({
   ...option,
@@ -39,17 +32,79 @@ const transformLinks = (option) => ({
 const settings = (injectedData = []) => [
   [
     ...injectedData,
+    {
+      title: "Help",
+      icon: icons.help16,
+      options: [
+        {
+          title: "FAQ",
+          icon: icons.faq32,
+          component: "Notepad",
+          multiInstance: true,
+          data: {
+            content: faq.content,
+            enableHtml: faq.enableHtml,
+            readOnly: true,
+          },
+        },
+        {
+          title: "Demo",
+          icon: icons.mediavid16,
+          component: "",
+          multiInstance: true,
+        },
+        {
+          title: "Change Log",
+          icon: icons.notepadFile16,
+          component: "Notepad",
+          data: {
+            content: commits,
+          },
+        },
+        {
+          title: "Contact",
+          icon: icons.outlook16,
+          component: "",
+          multiInstance: true,
+        },
+      ],
+    },
+    {
+      title: "Control Panel",
+      onClick: () => this.toggleSettings(),
+      icon: icons.controlPanel16,
+    },
+    {
+      title: "CMD.exe",
+      icon: icons.command16,
+      component: "JSDos",
+      multiInstance: true,
+      //options: [
+      //{
+      //title: "Rebel CMD.exe",
+      //icon: icons.rebelcommand16,
+      //component: "StarWars",
+      //multiInstance: false,
+      //},
+      //],
+    },
+    {
+      title: "Task Manager",
+      onClick: () => this.toggleTaskManager(),
+      icon: icons.folderProgram16,
+    },
+    {
+      title: "Account Settings",
+      icon: icons.account32,
+      component: "",
+      multiInstance: false,
+    },
     //{
     //  title: "Active Desktop",
     //  icon: icons.activeDesktop16,
     //  isDisabled: true
     //}
   ],
-  //{
-  //  title: "Hydra Update...",
-  //  icon: icons.windowsUpdate16,
-  //  isDisabled: true,
-  //},
 ];
 
 const startMenu = (injectedData = [], set, shutDown) => [
@@ -65,6 +120,7 @@ const startMenu = (injectedData = [], set, shutDown) => [
     title: "Sign Up / Sign In",
     icon: icons.logOff24,
     isDisabled: true,
+    // Note: "Connect Wallet" is an option within the overlay
   },
   {
     title: "Shut Down...",
@@ -73,21 +129,19 @@ const startMenu = (injectedData = [], set, shutDown) => [
   },
 ];
 
-export const addIdsToData = (data, depth = 0) => {
-  if (depth > 50) throw new Error("Max recursion depth exceeded");
-  return Array.isArray(data)
+export const addIdsToData = (data) =>
+  Array.isArray(data)
     ? data.map((d) => {
         if (Array.isArray(d)) {
-          return addIdsToData(d, depth + 1);
+          return addIdsToData(d);
         }
         return {
           ...transformLinks(d),
           id: d.id || nanoid(),
-          options: addIdsToData(d.options, depth + 1),
+          options: addIdsToData(d.options),
         };
       })
     : undefined;
-};
 
 const desktopWithIds = (desktopData = []) =>
   addIdsToData(desktopData).map((entry) => {
@@ -141,7 +195,7 @@ const buildDesktop = (desktopData, open) => [
 
 class ProgramProvider extends Component {
   static defaultProps = {
-    startMenuData,
+    getStartMenuData: getStartMenuData,
     desktopData,
   };
 
@@ -158,76 +212,8 @@ class ProgramProvider extends Component {
       (p) => this.open(p),
       addIdsToData(
         startMenu(
-          this.props.startMenuData,
-          [
-            {
-              title: "Help",
-              icon: icons.help16,
-              options: [
-                {
-                  title: "FAQ",
-                  icon: icons.faq32,
-                  component: "Notepad",
-                  multiInstance: true,
-                  data: {
-                    content: faq.content,
-                    enableHtml: faq.enableHtml,
-                    readOnly: true,
-                  },
-                },
-                {
-                  title: "Demo",
-                  icon: icons.mediavid16,
-                  component: "",
-                  multiInstance: true,
-                },
-                {
-                  title: "Change Log",
-                  icon: icons.notepadFile16,
-                  component: "Notepad",
-                  data: {
-                    content: commits,
-                  },
-                },
-                {
-                  title: "Contact",
-                  icon: icons.outlook16,
-                  component: "",
-                  multiInstance: true,
-                },
-              ],
-            },
-            {
-              title: "Control Panel",
-              onClick: () => this.toggleSettings(),
-              icon: icons.controlPanel16,
-            },
-            {
-              title: "CMD.exe",
-              icon: icons.command16,
-              component: "JSDos",
-              multiInstance: true,
-              //options: [
-              //{
-              //title: "Rebel CMD.exe",
-              //icon: icons.rebelcommand16,
-              //component: "StarWars",
-              //multiInstance: false,
-              //},
-              //],
-            },
-            {
-              title: "Task Manager",
-              onClick: () => this.toggleTaskManager(),
-              icon: icons.folderProgram16,
-            },
-            {
-              title: "Account Settings",
-              icon: icons.account32,
-              component: "",
-              multiInstance: false,
-            },
-          ],
+          this.props.getStartMenuData(), // Call function to get current data
+          [],
           () => this.toggleShutDownMenu()
         )
       )
@@ -308,7 +294,6 @@ class ProgramProvider extends Component {
 
   componentDidMount() {
     const desktopSaved = JSON.parse(window.localStorage.getItem("desktop"));
-    detectCycles(startMenuData); // Add this before processing
     if (desktopSaved) {
       this.setState(() => ({
         desktop: buildDesktop(desktopSaved, () => this.open),
