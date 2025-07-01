@@ -790,7 +790,7 @@ const ClippyContextMenu = ({
           window.ProgramContext.onOpen({
             component: "Notepad",
             multiInstance: true,
-            title: "About Clippy",
+            title: `About ${window.currentAgent}`,
             icon: icons.textchat32,
             data: {
               content: clippyFaq,
@@ -1385,7 +1385,7 @@ javascript      /* Enlarge touch targets on mobile without changing visual appea
             rightIcon="👋"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
           >
-            About Clippy {/* Changed text from Wave */}
+            About {currentAgent} {/* Changed text from Wave */}
           </MenuItem>
           {/* Separator */}
           <div style={separatorStyle} />

@@ -293,6 +293,7 @@ class ProgramProvider extends Component {
   };
 
   componentDidMount() {
+    window.addEventListener("agentChanged", this.refreshStartMenu);
     const desktopSaved = JSON.parse(window.localStorage.getItem("desktop"));
     if (desktopSaved) {
       this.setState(() => ({
@@ -306,6 +307,26 @@ class ProgramProvider extends Component {
       setRecycleBinFull: this.setRecycleBinFull,
     };
   }
+
+  componentWillUnmount() {
+    window.removeEventListener("agentChanged", this.refreshStartMenu);
+  }
+
+  refreshStartMenu = () => {
+    console.log("🔄 Refreshing start menu after agent change");
+    this.setState({
+      startMenu: initialize(
+        (p) => this.open(p),
+        addIdsToData(
+          startMenu(
+            this.props.getStartMenuData(), // Get fresh data
+            [], // Use empty array instead of hardcoded settings
+            () => this.toggleShutDownMenu()
+          )
+        )
+      ),
+    });
+  };
 
   toggleShutDownMenu = () =>
     this.setState((state) => ({ shutDownMenu: !state.shutDownMenu }));

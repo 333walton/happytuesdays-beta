@@ -7,6 +7,51 @@ import allStarTabs from "./textFiles/allStarTabs";
 // import faq from "./textFiles/faq";
 import clippyFaq from "./textFiles/clippyFaq";
 
+// At the top of the file, add the agent change handler
+window.onAgentChange = (newAgent) => {
+  console.log(`🎯 Start Menu: Changing agent to ${newAgent}`);
+
+  // Use the same logic as ClippyContextMenu
+  if (window.setCurrentAgent) {
+    window.setCurrentAgent(newAgent);
+  }
+
+  // Update global state
+  window.currentAgent = newAgent;
+
+  // Trigger menu refresh
+  window.dispatchEvent(
+    new CustomEvent("agentChanged", { detail: { agent: newAgent } })
+  );
+
+  // Hide any open balloons during transition
+  if (window.hideClippyCustomBalloon) {
+    window.hideClippyCustomBalloon();
+  }
+  if (window.hideChatBalloon) {
+    window.hideChatBalloon();
+  }
+
+  // Play welcome animation
+  if (window.clippy?.play) {
+    setTimeout(() => {
+      window.clippy.play("Wave");
+      if (window.showClippyCustomBalloon) {
+        setTimeout(() => {
+          window.showClippyCustomBalloon(
+            `Hello! I'm ${newAgent} now. How can I help you?`
+          );
+        }, 800);
+      }
+    }, 200);
+  }
+
+  // Special handling for Genius
+  if (newAgent === "Genius") {
+    window.geniusShouldAutoOpenChat = true;
+  }
+};
+
 // Utility function to detect mobile devices
 const isMobile = () =>
   /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -23,9 +68,9 @@ const createAIAssistants = () => {
   // Helper to generate onClick for each agent
   const selectAgent = (agentName) => () => {
     window.currentAgent = agentName;
-    // If you use React state/context for agent, trigger update here
     if (window.onAgentChange) window.onAgentChange(agentName);
-    // Optionally, force a re-render or trigger any other logic
+    // Dispatch event to trigger start menu refresh
+    window.dispatchEvent(new Event("agentChanged"));
   };
 
   return [
