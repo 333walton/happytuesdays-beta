@@ -60,7 +60,7 @@ const startMenu = (injectedData = [], set, shutDown) => [
     },
   ],
   {
-    title: "Connect Wallet",
+    title: "Sign Up / Sign In",
     icon: icons.logOff24,
     isDisabled: true,
   },
@@ -164,18 +164,38 @@ class ProgramProvider extends Component {
               icon: icons.controlPanel16,
             },
             {
-              title: "CMD.exe",
+              title: "Help",
               icon: icons.command16,
               component: "JSDos",
               multiInstance: true,
               options: [
                 {
-                  title: "Rebel CMD.exe",
+                  title: "FAQ",
                   icon: icons.rebelcommand16,
-                  component: "StarWars",
-                  multiInstance: false,
+                  component: "",
+                  multiInstance: true,
                 },
               ],
+            },
+            {
+              title: "CMD.exe",
+              icon: icons.command16,
+              component: "JSDos",
+              multiInstance: true,
+              //options: [
+              //{
+              //title: "Rebel CMD.exe",
+              //icon: icons.rebelcommand16,
+              //component: "StarWars",
+              //multiInstance: false,
+              //},
+              //],
+            },
+            {
+              title: "Account Settings",
+              icon: icons.command16,
+              component: "",
+              multiInstance: false,
             },
             {
               title: "Task Manager",

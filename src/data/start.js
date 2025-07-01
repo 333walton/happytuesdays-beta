@@ -2,8 +2,8 @@ import * as icons from "../icons";
 import squirtel from "./textFiles/squirtel";
 import rollin from "./textFiles/rollin";
 import allStarTabs from "./textFiles/allStarTabs";
-import commits from "./textFiles/commits";
-import faq from "./textFiles/faq";
+import commits from "./textFiles/commits"; // Added import for commits
+import faq from "./textFiles/faq"; // Moved to programs.js
 // import clippyFaq from "./textFiles/clippyFaq"; // Uncomment when file is available
 
 // Utility function to detect mobile devices
@@ -37,31 +37,36 @@ const aiAssistants = [
     // },
   },
   {
-    title: "Clippy GPT (Site Guide)",
+    title: "Clippy GPT",
+    tooltip: "Site Guide",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
   },
   {
-    title: "F1 GPT (Tech Workshop)",
+    title: "F1 GPT",
+    tooltip: "Tech Workshop",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
   },
   {
-    title: "Genius GPT (Motivation Station)",
+    title: "Genius GPT",
+    tooltip: "Motivation Station",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
   },
   {
-    title: "Merlin GPT (Art Gallery)",
+    title: "Merlin GPT",
+    tooltip: "Art Gallery",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
   },
   {
-    title: "Bonzi GPT (Gaming Hub)",
+    title: "Bonzi GPT",
+    tooltip: "Gaming Hub",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
@@ -858,6 +863,11 @@ const helpOptions = [
   //   id: "clippy-assistant",
   // },
 ];
+
+// Make sure faq and commits are imported or defined above, e.g.:
+// import faq from "./textFiles/faq";
+// import commits from "./textFiles/commits";
+
 const startMenuData = [
   {
     title: "Programs",
@@ -865,7 +875,7 @@ const startMenuData = [
     options: programs,
   },
   {
-    title: "Favorites (Try to add)",
+    title: "Favorites",
     icon: icons.folderFavorites24,
     options: favorites,
   },
