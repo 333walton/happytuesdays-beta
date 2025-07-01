@@ -165,19 +165,19 @@ class ProgramProvider extends Component {
             },
             {
               title: "Help",
-              icon: icons.command16,
+              icon: icons.help16,
               component: "JSDos",
               multiInstance: true,
               options: [
                 {
                   title: "FAQ",
-                  icon: icons.rebelcommand16,
+                  icon: icons.faq32,
                   component: "",
                   multiInstance: true,
                 },
                 {
                   title: "Demo",
-                  icon: icons.rebelcommand16,
+                  icon: icons.mediavid16,
                   component: "",
                   multiInstance: true,
                 },
@@ -189,7 +189,7 @@ class ProgramProvider extends Component {
                 },
                 {
                   title: "Change Log",
-                  icon: icons.rebelcommand16,
+                  icon: icons.notepadFile16,
                   component: "",
                   multiInstance: true,
                 },
@@ -216,7 +216,7 @@ class ProgramProvider extends Component {
             },
             {
               title: "Account Settings",
-              icon: icons.command16,
+              icon: icons.account32,
               component: "",
               multiInstance: false,
             },

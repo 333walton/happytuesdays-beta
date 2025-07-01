@@ -29,7 +29,7 @@ const accessories = [
 const aiAssistants = [
   {
     title: "What Are These?",
-    icon: icons.vid16,
+    icon: icons.faq16,
     component: "",
     isDisabled: true,
     // data: {
@@ -172,7 +172,7 @@ const favorites = [
   },
   {
     title: "Community Favorites",
-    icon: icons.folderFavorites24,
+    icon: icons.chart24,
     options: communityFavorites,
   },
 ];
@@ -241,25 +241,25 @@ const favorites = [
 const newsFeeds = [
   {
     title: "Tech Feed",
-    icon: icons.vid16,
+    icon: icons.newsletter16,
     component: "",
     isDisabled: true,
   },
   {
     title: "Builders Feed",
-    icon: icons.vid16,
+    icon: icons.newsletter16,
     component: "",
     isDisabled: true,
   },
   {
     title: "Art/Design Feed",
-    icon: icons.vid16,
+    icon: icons.newsletter16,
     component: "",
     isDisabled: true,
   },
   {
     title: "Gaming Feed",
-    icon: icons.vid16,
+    icon: icons.newsletter16,
     component: "",
     isDisabled: true,
   },
@@ -465,7 +465,7 @@ const motivation = [
 
 const builderDocs = [
   {
-    title: "Entrepreneurship Resources",
+    title: "Builder Resources",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
@@ -759,25 +759,25 @@ const interactive = [
 const gallery = [
   {
     title: "What is this?",
-    icon: icons.vid16,
+    icon: icons.faq16,
     component: "",
     isDisabled: true,
   },
   {
     title: "Main Gallery",
-    icon: icons.vid16,
+    icon: icons.doodlegallery32,
     component: "",
     isDisabled: true,
   },
   {
     title: "Community Gallery",
-    icon: icons.vid16,
+    icon: icons.prompt16,
     component: "",
     isDisabled: true,
   },
   {
     title: "Submit Your Art",
-    icon: icons.prompt16,
+    icon: icons.cookie16,
     component: "DoodleSubmission",
     isDisabled: false,
   },
@@ -801,19 +801,9 @@ const gallery = [
 
 const artifacts = [
   {
-    title: "ASCII Art",
+    title: "Gallery",
     icon: icons.folder16,
-    options: asciiArt,
-  },
-  {
-    title: "Demoscenes",
-    icon: icons.folder16,
-    options: demoscenes,
-  },
-  {
-    title: "Pixel Art",
-    icon: icons.folder16,
-    options: pixelArt,
+    options: gallery,
   },
   {
     title: "Interactive",
@@ -821,9 +811,19 @@ const artifacts = [
     options: interactive,
   },
   {
-    title: "Gallery",
+    title: "ASCII Art",
     icon: icons.folder16,
-    options: gallery,
+    options: asciiArt,
+  },
+  {
+    title: "Pixel Art",
+    icon: icons.folder16,
+    options: pixelArt,
+  },
+  {
+    title: "Demoscenes",
+    icon: icons.folder16,
+    options: demoscenes,
   },
 ];
 
