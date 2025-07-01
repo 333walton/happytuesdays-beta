@@ -38,6 +38,7 @@ export { default as recycleempty32 } from "./recycleempty32-min.png";
 export { default as recyclefull32 } from "./recyclefull32-min.png";
 export { default as run24 } from "./run24-min.png";
 export { default as scheduler16 } from "./scheduler16-min.png";
+export { default as kodak16 } from "./kodak16-min.png";
 export { default as settings24 } from "./settings24-min.png";
 export { default as settingsPrinters16 } from "./settingsPrinters16-min.png";
 export { default as settingsTaskbar16 } from "./settingsTaskbar16-min.png";

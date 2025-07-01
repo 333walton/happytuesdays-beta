@@ -4,7 +4,7 @@ import rollin from "./textFiles/rollin";
 import allStarTabs from "./textFiles/allStarTabs";
 import commits from "./textFiles/commits"; // Added import for commits
 import faq from "./textFiles/faq"; // Moved to programs.js
-// import clippyFaq from "./textFiles/clippyFaq"; // Uncomment when file is available
+import clippyFaq from "./textFiles/clippyFaq"; // Uncomment when file is available
 
 // Utility function to detect mobile devices
 const isMobile = () =>
@@ -30,11 +30,14 @@ const aiAssistants = [
   {
     title: "What Are These?",
     icon: icons.faq16,
-    component: "",
-    isDisabled: true,
-    // data: {
-    //   content: clippyFaq, // Link to clippyFaq.js when available
-    // },
+    component: "Notepad",
+    isDisabled: false,
+    data: {
+      content: clippyFaq,
+      wrap: true,
+      readOnly: true,
+      enableHtml: true, // ADD THIS LINE
+    },
   },
   {
     title: "Clippy GPT",
@@ -697,6 +700,22 @@ const pixelArt = [
     component: "",
     isDisabled: true,
   },
+  // Add more pixel art items here as needed
+];
+
+const stillFrames = [
+  {
+    title: "Pixel Art",
+    icon: icons.folder16, // or another icon if you prefer
+    options: pixelArt,
+  },
+  // ...other still frame items...
+  {
+    title: "See More...",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
 ];
 
 const interactive = [
@@ -750,7 +769,7 @@ const interactive = [
   //},
   {
     title: "Randomize",
-    icon: icons.vid16,
+    icon: icons.kodak16,
     component: "",
     isDisabled: true,
   },
@@ -811,14 +830,19 @@ const artifacts = [
     options: interactive,
   },
   {
-    title: "ASCII Art",
+    title: "Still Frames",
     icon: icons.folder16,
-    options: asciiArt,
+    options: stillFrames,
   },
   {
     title: "Pixel Art",
     icon: icons.folder16,
     options: pixelArt,
+  },
+  {
+    title: "ASCII Art",
+    icon: icons.folder16,
+    options: asciiArt,
   },
   {
     title: "Demoscenes",

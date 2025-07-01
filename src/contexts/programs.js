@@ -183,7 +183,7 @@ class ProgramProvider extends Component {
                 },
                 {
                   title: "Contact",
-                  icon: icons.rebelcommand16,
+                  icon: icons.outlook16,
                   component: "",
                   multiInstance: true,
                 },

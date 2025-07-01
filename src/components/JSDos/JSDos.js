@@ -6,12 +6,12 @@ import { command16 } from "../../icons";
 import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
-const lineStart = "C:\\HYDRA>";
+const lineStart = "C:\\TUESDAYS>";
 
 class JSDos extends Component {
   state = {
     value: "",
-    content: []
+    content: [],
   };
   input = React.createRef();
 
@@ -23,7 +23,7 @@ class JSDos extends Component {
     console.log("Input blurred");
   };
 
-  onInputChange = e => {
+  onInputChange = (e) => {
     this.setState({ value: e.target.value });
   };
 
@@ -42,24 +42,25 @@ class JSDos extends Component {
         return new Date().toLocaleString();
 
       case "about":
-        return "Hydra98 simulated terminal. Created by hydraburn-007.";
+        return "Happy Tuesdays simulated terminal. Created by based dev.";
 
       default:
         return `Unknown command: "${command}". Try 'help'`;
     }
   };
 
-  processEntry = e => {
+  processEntry = (e) => {
     e.preventDefault();
 
     const input = this.state.value;
     const output = this.handleCommand(input);
 
-    this.setState(state => ({
+    this.setState((state) => ({
       value: "",
-      content: output !== null
-        ? [...state.content, `${lineStart}${input}`, output]
-        : state.content // If output is null (e.g. for 'clear')
+      content:
+        output !== null
+          ? [...state.content, `${lineStart}${input}`, output]
+          : state.content, // If output is null (e.g. for 'clear')
     }));
   };
 
@@ -92,9 +93,9 @@ class JSDos extends Component {
           />
         </form>
         <div className="terminal" onClick={this.focusInput}>
-          <div>Hydra(R) 98</div>
+          <div>Happy Tuesdays</div>
           <div style={{ marginLeft: "12px", marginBottom: "6px" }}>
-            (C)Copyright Hydra Corp 1991–2025.
+            (C)Copyright Tuesdays Media Corp 1991–2025.
           </div>
           <div className="terminal__content">
             {this.state.content.map((entry, i) => (
