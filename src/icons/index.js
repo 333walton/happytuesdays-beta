@@ -120,3 +120,4 @@ export { default as groupbox3 } from "./groupbox3.png";
 export { default as groupbox4 } from "./groupbox4.png";
 export { default as textchat32 } from "./textchat32-min.png";
 export { default as rss32 } from "./rss32-min.png";
+export { default as blog32 } from "./blog32-min.png";

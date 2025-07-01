@@ -57,9 +57,12 @@ const desktopData = [
     },
   },
   {
-    title: "DOOM",
-    icon: icons.doom32,
-    component: "Doom",
+    title: "Feeds",
+    icon: icons.blog32,
+    component: "InternetExplorer",
+    data: {
+      __html: readme,
+    },
   },
   {
     title: "Paint",

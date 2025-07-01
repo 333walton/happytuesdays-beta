@@ -43,11 +43,11 @@ const settings = (injectedData = []) => [
     //  isDisabled: true
     //}
   ],
-  {
-    title: "Hydra Update...",
-    icon: icons.windowsUpdate16,
-    isDisabled: true,
-  },
+  //{
+  //  title: "Hydra Update...",
+  //  icon: icons.windowsUpdate16,
+  //  isDisabled: true,
+  //},
 ];
 
 const startMenu = (injectedData = [], set, shutDown) => [

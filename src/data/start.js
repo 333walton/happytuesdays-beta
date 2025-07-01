@@ -631,18 +631,6 @@ const games = [
     icon: icons.folder16,
     options: miscGames,
   },
-  // Commented out old structure
-  // {
-  //   title: "Doom Wads",
-  //   icon: icons.folder16,
-  //   options: [
-  //     {
-  //       title: "coming soon...",
-  //       icon: icons.loaderbat16,
-  //       isDisabled: true,
-  //     },
-  //   ],
-  // },
 ];
 
 const asciiArt = [
