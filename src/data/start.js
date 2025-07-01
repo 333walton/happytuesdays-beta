@@ -166,12 +166,12 @@ const communityFavorites = [
 
 const favorites = [
   {
-    title: "My Favorites (members only)",
+    title: "My Favorites",
     icon: icons.folderFavorites24,
     options: myFavorites,
   },
   {
-    title: "Community Favorites (beta)",
+    title: "Community Favorites",
     icon: icons.folderFavorites24,
     options: communityFavorites,
   },
@@ -479,16 +479,10 @@ const builderDocs = [
 
 const artDesignDocs = [
   {
-    title: "User Doodle Submissions",
+    title: "Color Theory",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
-  },
-  {
-    title: "Submit Here",
-    icon: icons.prompt16,
-    component: "DoodleSubmission",
-    isDisabled: false,
   },
 ];
 
@@ -551,7 +545,7 @@ const dosGames = [
     multiInstance: true,
   },
   {
-    title: "DOS Mods (soon)",
+    title: "DOS Mods",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
@@ -579,7 +573,7 @@ const classicGames = [
     isDisabled: true,
   },
   {
-    title: "Space Cadet Pinball (soon)",
+    title: "Space Cadet Pinball",
     icon: icons.spacecadet16,
     component: "",
     multiInstance: true,
@@ -717,39 +711,57 @@ const pixelArt = [
   },
 ];
 
-const experiential = [
+const interactive = [
   {
-    title: "Rain Physics",
-    icon: icons.webglwindow32,
-    component: "TestExplorer",
+    title: "ASCII Art",
+    icon: icons.folder16,
     data: {
-      src: "https://loklok-volume.vercel.app/gpu",
-      title: "Internet Explorer",
+      src: "",
+      title: "",
     },
     multiInstance: false,
   },
   {
-    title: "Instance Points",
-    icon: icons.webglwindow32,
-    component: "TestExplorer",
+    title: "WebGL Experiments",
+    icon: icons.folder16,
     data: {
-      src: "https://threejs.org/examples/webgpu_instance_points.html",
-      title: "Internet Explorer",
+      src: "",
+      title: "",
     },
     multiInstance: false,
   },
+  //{
+  //title: "Rain Physics",
+  //icon: icons.webglwindow32,
+  //component: "TestExplorer",
+  //data: {
+  //src: "https://loklok-volume.vercel.app/gpu",
+  //title: "Internet Explorer",
+  //},
+  //multiInstance: false,
+  //},
+  //{
+  //title: "Instance Points",
+  //icon: icons.webglwindow32,
+  //component: "TestExplorer",
+  //data: {
+  //src: "https://threejs.org/examples/webgpu_instance_points.html",
+  //title: "Internet Explorer",
+  //},
+  //multiInstance: false,
+  //},
+  //{
+  //title: "Minecraft Sim",
+  //icon: icons.webglwindow32,
+  //component: "TestExplorer",
+  //data: {
+  //src: "https://threejs.org/examples/webgl_geometry_minecraft.html",
+  //title: "Internet Explorer",
+  //},
+  //multiInstance: false,
+  //},
   {
-    title: "Minecraft Sim",
-    icon: icons.webglwindow32,
-    component: "TestExplorer",
-    data: {
-      src: "https://threejs.org/examples/webgl_geometry_minecraft.html",
-      title: "Internet Explorer",
-    },
-    multiInstance: false,
-  },
-  {
-    title: "See More...",
+    title: "Randomize",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
@@ -774,6 +786,12 @@ const gallery = [
     icon: icons.vid16,
     component: "",
     isDisabled: true,
+  },
+  {
+    title: "Submit Your Art",
+    icon: icons.prompt16,
+    component: "DoodleSubmission",
+    isDisabled: false,
   },
   // Moved from old Doodle Gallery
   // {
@@ -810,9 +828,9 @@ const artifacts = [
     options: pixelArt,
   },
   {
-    title: "Experiential (WebGL)",
+    title: "Interactive",
     icon: icons.folder16,
-    options: experiential,
+    options: interactive,
   },
   {
     title: "Gallery",

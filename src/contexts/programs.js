@@ -175,6 +175,24 @@ class ProgramProvider extends Component {
                   component: "",
                   multiInstance: true,
                 },
+                {
+                  title: "Demo",
+                  icon: icons.rebelcommand16,
+                  component: "",
+                  multiInstance: true,
+                },
+                {
+                  title: "Contact",
+                  icon: icons.rebelcommand16,
+                  component: "",
+                  multiInstance: true,
+                },
+                {
+                  title: "Change Log",
+                  icon: icons.rebelcommand16,
+                  component: "",
+                  multiInstance: true,
+                },
               ],
             },
             {
@@ -192,15 +210,15 @@ class ProgramProvider extends Component {
               //],
             },
             {
+              title: "Task Manager",
+              onClick: () => this.toggleTaskManager(),
+              icon: icons.folderProgram16,
+            },
+            {
               title: "Account Settings",
               icon: icons.command16,
               component: "",
               multiInstance: false,
-            },
-            {
-              title: "Task Manager",
-              onClick: () => this.toggleTaskManager(),
-              icon: icons.folderProgram16,
             },
           ],
           () => this.toggleShutDownMenu()
