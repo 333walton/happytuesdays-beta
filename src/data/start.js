@@ -4,6 +4,7 @@ import rollin from "./textFiles/rollin";
 import allStarTabs from "./textFiles/allStarTabs";
 import commits from "./textFiles/commits";
 import faq from "./textFiles/faq";
+// import clippyFaq from "./textFiles/clippyFaq"; // Uncomment when file is available
 
 // Utility function to detect mobile devices
 const isMobile = () =>
@@ -17,7 +18,6 @@ const accessories = [
     multiInstance: true,
     isDisabled: false,
   },
-
   {
     title: "Notepad",
     icon: icons.notepad16,
@@ -26,7 +26,54 @@ const accessories = [
   },
 ];
 
+const aiAssistants = [
+  {
+    title: "What Are These?",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+    // data: {
+    //   content: clippyFaq, // Link to clippyFaq.js when available
+    // },
+  },
+  {
+    title: "Clippy GPT (Site Guide)",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "F1 GPT (Tech Workshop)",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Genius GPT (Motivation Station)",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Merlin GPT (Art Gallery)",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Bonzi GPT (Gaming Hub)",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
 const programs = [
+  {
+    title: "AI Assistants",
+    icon: icons.folderProgram16,
+    options: aiAssistants,
+  },
   {
     title: "Accessories",
     icon: icons.folderProgram16,
@@ -76,300 +123,437 @@ const programs = [
     ],
   },
   {
-    title: "Doodle",
-    icon: icons.folder16,
-    isDisabled: false,
-    options: [
-      {
-        title: "Paint Doodles",
-        icon: icons.paint16,
-        component: "IframeWindow",
-        data: {
-          src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
-          disableAlert: true, // Disable the alert for this iframe
-          style: {
-            width: "100%",
-            height: "100%",
-          },
-        },
-      },
-      {
-        title: "Pixel Doodles",
-        icon: icons.wangimg32,
-        component: "IframeWindow",
-        isDisabled: false,
-        data: {
-          src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
-          disableAlert: true,
-          style: {
-            width: "100%",
-            height: "100%",
-          },
-        },
-      },
-      {
-        title: "ASCII Banners",
-        icon: icons.asciibanner16,
-        component: "ASCIIText",
-        isDisabled: false,
-        data: {},
-      },
-      // Only show these options for desktop users
-      ...(!isMobile()
-        ? [
-            {
-              title: "ASCII Doodles",
-              icon: icons.loaderbat16,
-              component: "IframeWindow",
-              isDisabled: true,
-              data: {
-                src: "https://example.com/ascii-doodes", // Replace with a valid URL
-                creator: "https://github.com/example", // Replace with a valid creator
-              },
-            },
-          ]
-        : []),
-    ],
-  },
-  {
     title: "Internet Explorer",
     icon: icons.internetExplorer16,
     component: "TestExplorer",
     data: {
       src: "https://myspace.windows93.net/",
-      title: "Internet Explorer", // Title for the window
+      title: "Internet Explorer",
     },
     multiInstance: true,
   },
 ];
 
+const myFavorites = [
+  {
+    title: "Start Menu Builder™",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Chat Bot Preferences",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Newsletter Preferences",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
+const communityFavorites = [
+  // Placeholder for community favorites
+];
+
 const favorites = [
   {
-    title: "WebGL",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "Rain Physics",
-        icon: icons.webglwindow32,
-        component: "TestExplorer",
-        data: {
-          src: "https://loklok-volume.vercel.app/gpu", // URL to load in the iframe
-          title: "Internet Explorer", // Title for the window
-        },
-        multiInstance: false,
-      },
-      {
-        title: "Instance Points",
-        icon: icons.webglwindow32,
-        component: "TestExplorer",
-        data: {
-          src: "https://threejs.org/examples/webgpu_instance_points.html", // URL to load in the iframe
-          title: "Internet Explorer", // Title for the window
-        },
-        multiInstance: false,
-      },
-      // Only show these options for desktop users
-      ...(!isMobile()
-        ? [
-            {
-              title: "Minecraft Sim",
-              icon: icons.webglwindow32,
-              component: "TestExplorer",
-              data: {
-                src: "https://threejs.org/examples/webgl_geometry_minecraft.html", // URL to load in the iframe
-                title: "Internet Explorer", // Title for the window
-              },
-              multiInstance: false,
-            },
-          ]
-        : []),
-    ],
+    title: "My Favorites (members only)",
+    icon: icons.folderFavorites24,
+    options: myFavorites,
   },
   {
-    title: "Doodle Gallery",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "Enter Gallery",
-        icon: icons.doodlegallery32,
-        component: "",
-        isDisabled: true,
-      },
-      {
-        title: "Submit Here",
-        icon: icons.prompt16,
-        component: "DoodleSubmission",
-        isDisabled: false,
-      },
-      {
-        title: "All Doodles",
-        icon: icons.folderOpen24,
-        component: "ExplorerWindow",
-        isDisabled: false,
-        data: {
-          content: [
-            {
-              title: "Doodle 1",
-              icon: "paint16",
-              onDoubleClick: () =>
-                window.ProgramContext.onOpen({
-                  component: "ImageWindow",
-                  multiInstance: true,
-                  title: "Doodle Viewer",
-                  icon: "paint16",
-                  data: {
-                    src: "/static/test1.png",
-                    doodleName: "Test Doodle",
-                    doodler: "cs",
-                    dateSubmitted: "3/31/25",
-                    doodleStatement:
-                      "This is the first doodle submitted to the gallery",
-                  },
-                }),
-            },
-            {
-              title: "Doodle 2",
-              icon: "paint16",
-              multiInstance: true,
-              onDoubleClick: () =>
-                window.ProgramContext.onOpen({
-                  component: "ImageWindow",
-                  title: "Doodle Viewer",
-                  icon: "paint16",
-                  multiInstance: true,
-                  data: {
-                    src: "/static/hydradoodle.png",
-                    doodleName: "Kindled Hydra",
-                    doodler: "js",
-                    dateSubmitted: "4/4/25",
-                    doodleStatement: "fuel the burn before the blaze begins",
-                  },
-                }),
-            },
-          ],
-        },
-      },
-    ],
-  },
-  {
-    title: "Media",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "Good Music",
-        type: "ExternalLink",
-        icon: icons.mediacd16,
-        isDisabled: true,
-        href: "https://soundcloud.com/southbound_music/sets/best-techno?utm_source=good_techno&utm_medium=startmenu&utm_campaign=hydra98",
-      },
-      {
-        title: "Good Movies",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href: "https://boxd.it/9UyaN",
-      },
-      {
-        title: "Warpcast",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href: "https://warpcast.com/333walton",
-      },
-    ],
+    title: "Community Favorites (beta)",
+    icon: icons.folderFavorites24,
+    options: communityFavorites,
   },
 ];
 
-export const find = [
+// Moved WebGL items to Artifacts > Experiential
+// const webGLOptions = [
+//   {
+//     title: "Rain Physics",
+//     icon: icons.webglwindow32,
+//     component: "TestExplorer",
+//     data: {
+//       src: "https://loklok-volume.vercel.app/gpu",
+//       title: "Internet Explorer",
+//     },
+//     multiInstance: false,
+//   },
+//   {
+//     title: "Instance Points",
+//     icon: icons.webglwindow32,
+//     component: "TestExplorer",
+//     data: {
+//       src: "https://threejs.org/examples/webgpu_instance_points.html",
+//       title: "Internet Explorer",
+//     },
+//     multiInstance: false,
+//   },
+//   ...(!isMobile()
+//     ? [
+//         {
+//           title: "Minecraft Sim",
+//           icon: icons.webglwindow32,
+//           component: "TestExplorer",
+//           data: {
+//             src: "https://threejs.org/examples/webgl_geometry_minecraft.html",
+//             title: "Internet Explorer",
+//           },
+//           multiInstance: false,
+//         },
+//       ]
+//     : []),
+// ];
+
+// Commented out old Media options
+// const mediaOptions = [
+//   {
+//     title: "Good Music",
+//     type: "ExternalLink",
+//     icon: icons.mediacd16,
+//     isDisabled: true,
+//     href: "https://soundcloud.com/southbound_music/sets/best-techno?utm_source=good_techno&utm_medium=startmenu&utm_campaign=hydra98",
+//   },
+//   {
+//     title: "Good Movies",
+//     type: "ExternalLink",
+//     icon: icons.htmlFile16,
+//     href: "https://boxd.it/9UyaN",
+//   },
+//   {
+//     title: "Warpcast",
+//     type: "ExternalLink",
+//     icon: icons.htmlFile16,
+//     href: "https://warpcast.com/333walton",
+//   },
+// ];
+
+const newsFeeds = [
   {
-    title: "Files or Folders...",
-    icon: icons.findFiles16,
+    title: "Tech Feed",
+    icon: icons.vid16,
+    component: "",
     isDisabled: true,
   },
   {
-    title: "Computer...",
-    icon: icons.findComputer16,
+    title: "Builders Feed",
+    icon: icons.vid16,
+    component: "",
     isDisabled: true,
   },
   {
-    title: "On the Internet...",
-    icon: icons.findOnline16,
-    type: "ExternalLink",
-    href: "https://google.com",
+    title: "Art/Design Feed",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
   },
   {
-    title: "People...",
-    icon: icons.findPeople16,
-    type: "ExternalLink",
-    href: "https://facebook.com",
+    title: "Gaming Feed",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
   },
 ];
 
-const games = [
+const marketingTools = [
   {
-    title: "DOS Games",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "DOOM",
-        icon: icons.doom16,
-        component: "Doom",
-        multiInstance: true,
-      },
-    ],
+    title: "UTM Tracker",
+    icon: icons.logOff24,
+    isDisabled: false,
+    component: "UTMTool",
   },
   {
-    title: "Doom Wads",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "coming soon...",
-        icon: icons.loaderbat16,
-        isDisabled: true,
-      },
-    ],
+    title: "Pre-roll Toolkit",
+    icon: icons.vid16,
+    component: "VideoPlayerMobile",
+    multiInstance: true,
+    isDisabled: false,
+    data: {
+      src: "",
+    },
   },
   {
-    title: "Misc.",
-    icon: icons.folder16,
-    options: [
-      {
-        title: "HydraBurn",
-        icon: icons.burn16,
-        component: "Burn",
-        multiInstance: true,
-      },
-      {
-        title: "ASCII Maze",
-        icon: icons.maze16,
-        component: "ASCIIMaze",
-        multiInstance: true,
-      },
-      // Only show these options for desktop users
-      ...(!isMobile()
-        ? [
-            {
-              title: "GliderPro",
-              icon: icons.glider16,
-              component: "Glider",
-              multiInstance: true,
-            },
-            {
-              title: "Retro City",
-              icon: icons.retrocity32,
-              component: "",
-              isDisabled: true,
-              multiInstance: true,
-            },
-            {
-              title: "Rampage World Tour",
-              icon: icons.rampage16,
-              component: "",
-              isDisabled: true,
-              multiInstance: false,
-            },
-          ]
-        : []),
-    ],
+    title: "Newsletter Prompt",
+    icon: icons.newsletter16,
+    href: "",
+    isDisabled: true,
   },
+  // Commented out from Ad Tools
+  // {
+  //   title: "Cookie Consent",
+  //   icon: icons.cookie16,
+  //   href: "",
+  //   isDisabled: true,
+  // },
+  // {
+  //   title: "Hookscore Heatmap",
+  //   icon: icons.vid16,
+  //   component: "HookScoreHeatmap",
+  //   multiInstance: true,
+  //   isDisabled: true,
+  //   data: {
+  //     src: "",
+  //   },
+  // },
+];
+
+const aiUtilities = [
+  {
+    title: "Open Router Ranks",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Should I automate it?",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
+const builderTools = [
+  {
+    title: "Project Management",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "AI Utilities",
+    icon: icons.folder16,
+    options: aiUtilities,
+  },
+];
+
+const doodleOptions = [
+  {
+    title: "Paint Doodles",
+    icon: icons.paint16,
+    component: "IframeWindow",
+    data: {
+      src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
+      disableAlert: true,
+      style: {
+        width: "100%",
+        height: "100%",
+      },
+    },
+  },
+  {
+    title: "Pixel Doodles",
+    icon: icons.wangimg32,
+    component: "IframeWindow",
+    isDisabled: false,
+    data: {
+      src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
+      disableAlert: true,
+      style: {
+        width: "100%",
+        height: "100%",
+      },
+    },
+  },
+  {
+    title: "ASCII Banners",
+    icon: icons.asciibanner16,
+    component: "ASCIIText",
+    isDisabled: false,
+    data: {},
+  },
+  ...(!isMobile()
+    ? [
+        {
+          title: "ASCII Doodles",
+          icon: icons.loaderbat16,
+          component: "IframeWindow",
+          isDisabled: true,
+          data: {
+            src: "https://example.com/ascii-doodes",
+            creator: "https://github.com/example",
+          },
+        },
+      ]
+    : []),
+];
+
+const artDesignTools = [
+  {
+    title: "Art Gallery Finder",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Doodles",
+    icon: icons.folder16,
+    options: doodleOptions,
+  },
+  {
+    title: "Design Trends Tracker",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
+const tools = [
+  {
+    title: "News Feeds",
+    icon: icons.folder16,
+    options: newsFeeds,
+  },
+  {
+    title: "Marketing Tools",
+    icon: icons.folder16,
+    options: marketingTools,
+  },
+  {
+    title: "Builder Tools",
+    icon: icons.folder16,
+    options: builderTools,
+  },
+  {
+    title: "Art/Design Tools",
+    icon: icons.folder16,
+    options: artDesignTools,
+  },
+];
+
+const myDocs = [
+  {
+    title: "My Videos",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "My Music",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
+const techDocs = [
+  {
+    title: "Trend Reports",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
+const motivation = [
+  {
+    title: "Jack Butcher",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
+const builderDocs = [
+  {
+    title: "Entrepreneurship Resources",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Motivation",
+    icon: icons.folder16,
+    options: motivation,
+  },
+];
+
+const artDesignDocs = [
+  {
+    title: "User Doodle Submissions",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Submit Here",
+    icon: icons.prompt16,
+    component: "DoodleSubmission",
+    isDisabled: false,
+  },
+];
+
+const documents = [
+  {
+    title: "My Docs",
+    icon: icons.folderOpen24,
+    options: myDocs,
+  },
+  {
+    title: "Tech Docs",
+    icon: icons.folderOpen24,
+    options: techDocs,
+  },
+  {
+    title: "Builder Docs",
+    icon: icons.folderOpen24,
+    options: builderDocs,
+  },
+  {
+    title: "Art/Design Docs",
+    icon: icons.folderOpen24,
+    options: artDesignDocs,
+  },
+  // Commented out old documents structure
+  // {
+  //   title: "Ad Tools",
+  //   icon: icons.faq32,
+  //   options: [...],
+  // },
+  // {
+  //   title: "Guitar Tabs",
+  //   options: [
+  //     {
+  //       title: "Rollin",
+  //       icon: icons.notepadFile16,
+  //       component: "Notepad",
+  //       data: {
+  //         content: rollin,
+  //       },
+  //     },
+  //     {
+  //       title: "All Star",
+  //       icon: icons.notepadFile16,
+  //       component: "Notepad",
+  //       data: {
+  //         content: allStarTabs,
+  //       },
+  //     },
+  //   ],
+  //   icon: icons.folder16,
+  // },
+];
+
+const dosGames = [
+  {
+    title: "DOOM",
+    icon: icons.doom16,
+    component: "Doom",
+    multiInstance: true,
+  },
+  {
+    title: "DOS Mods (soon)",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
+const classicGames = [
   {
     title: "Minesweeper",
     icon: icons.minesweeper16,
@@ -389,15 +573,8 @@ const games = [
     multiInstance: true,
     isDisabled: true,
   },
-  //{
-  //title: "SkiFree",
-  //icon: icons.skifree,
-  //component: "",
-  //multiInstance: true,
-  //isDisabled: true
-  //},
   {
-    title: "Space Cadet Pinball",
+    title: "Space Cadet Pinball (soon)",
     icon: icons.spacecadet16,
     component: "",
     multiInstance: true,
@@ -405,70 +582,282 @@ const games = [
   },
 ];
 
-const ASCII = [
+const miscGames = [
+  // Moved HydraBurn to ASCII Art section
+  {
+    title: "ASCII Maze",
+    icon: icons.maze16,
+    component: "ASCIIMaze",
+    multiInstance: true,
+  },
+  ...(!isMobile()
+    ? [
+        {
+          title: "GliderPro",
+          icon: icons.glider16,
+          component: "Glider",
+          multiInstance: true,
+        },
+        {
+          title: "Retro City",
+          icon: icons.retrocity32,
+          component: "",
+          isDisabled: true,
+          multiInstance: true,
+        },
+        {
+          title: "Rampage World Tour",
+          icon: icons.rampage16,
+          component: "",
+          isDisabled: true,
+          multiInstance: false,
+        },
+      ]
+    : []),
+];
+
+const games = [
+  {
+    title: "DOS Games",
+    icon: icons.folder16,
+    options: dosGames,
+  },
+  {
+    title: "Classic Games",
+    icon: icons.folder16,
+    options: classicGames,
+  },
+  {
+    title: "Misc.",
+    icon: icons.folder16,
+    options: miscGames,
+  },
+  // Commented out old structure
+  // {
+  //   title: "Doom Wads",
+  //   icon: icons.folder16,
+  //   options: [
+  //     {
+  //       title: "coming soon...",
+  //       icon: icons.loaderbat16,
+  //       isDisabled: true,
+  //     },
+  //   ],
+  // },
+];
+
+const asciiArt = [
+  {
+    title: "Flames",
+    icon: icons.burn16,
+    component: "Burn",
+    multiInstance: true,
+  },
+  {
+    title: "Pipes",
+    icon: icons.pipes16,
+    component: "Pipes",
+    multiInstance: true,
+  },
+  {
+    title: "Hourglass",
+    icon: icons.sand16,
+    component: "Sand",
+    multiInstance: true,
+  },
+  {
+    title: "See More...",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  // Moved Squirtel to "See More..."
+  // {
+  //   title: "Squirtel",
+  //   icon: icons.notepad16,
+  //   component: "Notepad",
+  //   data: {
+  //     content: squirtel,
+  //   },
+  // },
+];
+
+const demoscenes = [
+  {
+    title: "GleEst",
+    type: "ExternalLink",
+    icon: icons.htmlFile16,
+    href: "https://demozoo.org/productions/288839/",
+  },
+  {
+    title: "Micro1k",
+    type: "ExternalLink",
+    icon: icons.htmlFile16,
+    href: "https://demozoo.org/productions/128900/",
+  },
+  {
+    title: "Kishkoid",
+    type: "ExternalLink",
+    icon: icons.htmlFile16,
+    href: "https://demozoo.org/productions/13245/",
+  },
+];
+
+const pixelArt = [
+  {
+    title: "See More...",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
+const experiential = [
+  {
+    title: "Rain Physics",
+    icon: icons.webglwindow32,
+    component: "TestExplorer",
+    data: {
+      src: "https://loklok-volume.vercel.app/gpu",
+      title: "Internet Explorer",
+    },
+    multiInstance: false,
+  },
+  {
+    title: "Instance Points",
+    icon: icons.webglwindow32,
+    component: "TestExplorer",
+    data: {
+      src: "https://threejs.org/examples/webgpu_instance_points.html",
+      title: "Internet Explorer",
+    },
+    multiInstance: false,
+  },
+  {
+    title: "Minecraft Sim",
+    icon: icons.webglwindow32,
+    component: "TestExplorer",
+    data: {
+      src: "https://threejs.org/examples/webgl_geometry_minecraft.html",
+      title: "Internet Explorer",
+    },
+    multiInstance: false,
+  },
+  {
+    title: "See More...",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
+const gallery = [
+  {
+    title: "What is this?",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Main Gallery",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Community Gallery",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  // Moved from old Doodle Gallery
+  // {
+  //   title: "Enter Gallery",
+  //   icon: icons.doodlegallery32,
+  //   component: "",
+  //   isDisabled: true,
+  // },
+  // {
+  //   title: "All Doodles",
+  //   icon: icons.folderOpen24,
+  //   component: "ExplorerWindow",
+  //   isDisabled: false,
+  //   data: {
+  //     content: [...],
+  //   },
+  // },
+];
+
+const artifacts = [
   {
     title: "ASCII Art",
     icon: icons.folder16,
-    options: [
-      {
-        title: "Flames",
-        icon: icons.burn16,
-        component: "Burn",
-        multiInstance: true,
-      },
-      {
-        title: "Pipes",
-        icon: icons.pipes16,
-        component: "Pipes",
-        multiInstance: true,
-      },
-      {
-        title: "Hourglass",
-        icon: icons.sand16,
-        component: "Sand",
-        multiInstance: true,
-      },
-      {
-        title: "Squirtel",
-        icon: icons.notepad16,
-        component: "Notepad",
-        data: {
-          content: squirtel,
-        },
-      },
-    ],
+    options: asciiArt,
   },
   {
     title: "Demoscenes",
     icon: icons.folder16,
-    options: [
-      {
-        title: "GleEst",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href: "https://demozoo.org/productions/288839/",
-      },
-      {
-        title: "Micro1k",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href: "https://demozoo.org/productions/128900/",
-      },
-      {
-        title: "Kishkoid",
-        type: "ExternalLink",
-        icon: icons.htmlFile16,
-        href: "https://demozoo.org/productions/13245/",
-      },
-    ],
+    options: demoscenes,
   },
   {
     title: "Pixel Art",
     icon: icons.folder16,
-    options: [],
+    options: pixelArt,
+  },
+  {
+    title: "Experiential (WebGL)",
+    icon: icons.folder16,
+    options: experiential,
+  },
+  {
+    title: "Gallery",
+    icon: icons.folder16,
+    options: gallery,
   },
 ];
 
+const helpOptions = [
+  {
+    title: "FAQ",
+    icon: icons.faq32,
+    component: "Notepad",
+    multiInstance: true,
+    data: {
+      content: faq.content,
+      enableHtml: faq.enableHtml,
+      readOnly: true,
+    },
+  },
+  {
+    title: "Demo",
+    icon: icons.camera16,
+    component: isMobile ? "VideoPlayerMobile" : "VideoPlayerMobile",
+    multiInstance: true,
+    isDisabled: true,
+    data: {},
+  },
+  {
+    title: "Contact",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Change Log",
+    icon: icons.notepadFile16,
+    component: "Notepad",
+    data: {
+      content: commits,
+    },
+  },
+  // Commented out Office Assistant
+  // {
+  //   title: "Office Assistant",
+  //   icon: icons.textchat32,
+  //   component: "Clippy",
+  //   id: "clippy-assistant",
+  // },
+];
 const startMenuData = [
   {
     title: "Programs",
@@ -476,122 +865,19 @@ const startMenuData = [
     options: programs,
   },
   {
-    title: "Favorites",
+    title: "Favorites (Try to add)",
     icon: icons.folderFavorites24,
     options: favorites,
   },
   {
+    title: "Tools",
+    icon: icons.folderProgram24,
+    options: tools,
+  },
+  {
     title: "Documents",
     icon: icons.folderOpen24,
-    options: [
-      {
-        title: "Ad Tools",
-        icon: icons.faq32,
-        //isDisabled: true,
-        options: [
-          {
-            title: "UTM Tracker",
-            icon: icons.logOff24,
-            isDisabled: false,
-            component: "UTMTool",
-          },
-          {
-            title: "Pre-roll Toolkit",
-            icon: icons.vid16,
-            component: "VideoPlayerMobile",
-            //isMobile ? "VideoPlayerMobile" : "VideoPlayerDesktop", //replace the left one with "VideoPlayerDesktop" after done testing
-            multiInstance: true,
-            isDisabled: false,
-            data: {
-              src: "",
-            },
-          },
-          {
-            title: "Cookie Consent",
-            icon: icons.cookie16,
-            href: "",
-            isDisabled: true,
-          },
-          {
-            title: "Hookscore Heatmap",
-            icon: icons.vid16,
-            component: "HookScoreHeatmap",
-            multiInstance: true,
-            isDisabled: true,
-            data: {
-              src: "",
-            },
-          },
-          {
-            title: "Newsletter Prompt",
-            icon: icons.newsletter16,
-            href: "",
-            isDisabled: true,
-          },
-        ],
-      },
-      {
-        title: "Help",
-        icon: icons.help16,
-        options: [
-          {
-            title: "FAQ",
-            icon: icons.faq32,
-            component: "Notepad",
-            multiInstance: true,
-            data: {
-              content: faq.content,
-              enableHtml: faq.enableHtml,
-              readOnly: true,
-            },
-          },
-          {
-            title: "Change Log",
-            icon: icons.notepadFile16,
-            component: "Notepad",
-            data: {
-              content: commits,
-            },
-          },
-          {
-            title: "Office Assistant",
-            icon: icons.textchat32,
-            component: "Clippy",
-            id: "clippy-assistant",
-          },
-          {
-            title: "Demo",
-            icon: icons.camera16,
-            component: isMobile ? "VideoPlayerMobile" : "VideoPlayerMobile", //replace the left one with "VideoPlayerDesktop" after done testing
-            multiInstance: true,
-            isDisabled: true,
-            data: {},
-          },
-        ],
-      },
-      {
-        title: "Guitar Tabs",
-        options: [
-          {
-            title: "Rollin",
-            icon: icons.notepadFile16,
-            component: "Notepad",
-            data: {
-              content: rollin,
-            },
-          },
-          {
-            title: "All Star",
-            icon: icons.notepadFile16,
-            component: "Notepad",
-            data: {
-              content: allStarTabs,
-            },
-          },
-        ],
-        icon: icons.folder16,
-      },
-    ],
+    options: documents,
   },
   {
     title: "Games",
@@ -601,7 +887,7 @@ const startMenuData = [
   {
     title: "Artifacts",
     icon: icons.ascii24,
-    options: ASCII,
+    options: artifacts,
   },
 ];
 

@@ -86,7 +86,7 @@ const desktopData = [
     ? [
         {
           id: "graph-explorer",
-          title: "Knowledge Graph",
+          title: "Codebase",
           icon: icons.folderProgram24,
           component: "GraphExplorer",
         },

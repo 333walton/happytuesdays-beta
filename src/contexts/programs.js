@@ -8,6 +8,14 @@ import { ProgramContext } from ".";
 
 // Utility function to detect mobile devices
 // const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+// Add this function at the top of programs.js
+function detectCycles(obj, seen = new WeakSet()) {
+  if (obj && typeof obj === "object") {
+    if (seen.has(obj)) throw new Error("Circular reference detected!");
+    seen.add(obj);
+    Object.values(obj).forEach((val) => detectCycles(val, seen));
+  }
+}
 
 const transformLinks = (option) => ({
   ...option,
@@ -63,19 +71,21 @@ const startMenu = (injectedData = [], set, shutDown) => [
   },
 ];
 
-export const addIdsToData = (data) =>
-  Array.isArray(data)
+export const addIdsToData = (data, depth = 0) => {
+  if (depth > 50) throw new Error("Max recursion depth exceeded");
+  return Array.isArray(data)
     ? data.map((d) => {
         if (Array.isArray(d)) {
-          return addIdsToData(d);
+          return addIdsToData(d, depth + 1);
         }
         return {
           ...transformLinks(d),
           id: d.id || nanoid(),
-          options: addIdsToData(d.options),
+          options: addIdsToData(d.options, depth + 1),
         };
       })
     : undefined;
+};
 
 const desktopWithIds = (desktopData = []) =>
   addIdsToData(desktopData).map((entry) => {
@@ -187,37 +197,53 @@ class ProgramProvider extends Component {
       {
         onClick: () => {
           // Check if device is mobile
-          const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-          
+          const isMobile =
+            window.innerWidth <= 768 ||
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+              navigator.userAgent
+            );
+
           if (isMobile) {
             // Click mobile controls button on mobile devices
-            const mobileControlsButton = document.querySelector('.mobile-controls-button');
+            const mobileControlsButton = document.querySelector(
+              ".mobile-controls-button"
+            );
             if (mobileControlsButton) {
               mobileControlsButton.click();
             }
           } else {
             // Click desktop controls button on desktop
-            const desktopControlsButton = document.querySelector('.desktop-controls-button');
+            const desktopControlsButton = document.querySelector(
+              ".desktop-controls-button"
+            );
             if (desktopControlsButton) {
               desktopControlsButton.click();
             }
           }
-          
+
           // Toggle the state and border style
-          this.setState(prevState => {
+          this.setState((prevState) => {
             const isWhiteBorder = !prevState.isWhiteBorder;
             return {
               isWhiteBorder,
-              quickLaunch: prevState.quickLaunch.map(item => 
+              quickLaunch: prevState.quickLaunch.map((item) =>
                 item.title === "Show Clippy" || item.title === "Hide Clippy"
-                  ? { 
-                      ...item, 
-                      title: item.title === "Hide Clippy" ? "Show Clippy" : "Hide Clippy",
-                      className: `quick-launch-button-clippy btn ButtonIconSmall ${isWhiteBorder ? 'white-border' : ''}`,
-                      tooltip: item.title === "Hide Clippy" ? "Show Clippy" : "Hide Clippy"
+                  ? {
+                      ...item,
+                      title:
+                        item.title === "Hide Clippy"
+                          ? "Show Clippy"
+                          : "Hide Clippy",
+                      className: `quick-launch-button-clippy btn ButtonIconSmall ${
+                        isWhiteBorder ? "white-border" : ""
+                      }`,
+                      tooltip:
+                        item.title === "Hide Clippy"
+                          ? "Show Clippy"
+                          : "Hide Clippy",
                     }
                   : item
-              )
+              ),
             };
           });
         },
@@ -237,6 +263,7 @@ class ProgramProvider extends Component {
 
   componentDidMount() {
     const desktopSaved = JSON.parse(window.localStorage.getItem("desktop"));
+    detectCycles(startMenuData); // Add this before processing
     if (desktopSaved) {
       this.setState(() => ({
         desktop: buildDesktop(desktopSaved, () => this.open),
@@ -343,16 +370,20 @@ class ProgramProvider extends Component {
           let message;
           switch (program.title) {
             case "Read Me":
-              message = "I see you're checking out the Read Me! Let me know if you need any help understanding Hydra98!";
+              message =
+                "I see you're checking out the Read Me! Let me know if you need any help understanding Hydra98!";
               break;
             case "FAQ":
-              message = "Reading the FAQ is smart! I'm here if you have any other questions not covered there.";
+              message =
+                "Reading the FAQ is smart! I'm here if you have any other questions not covered there.";
               break;
             case "Change Log":
-              message = "Checking out the latest changes? That's what I call staying informed! 📋";
+              message =
+                "Checking out the latest changes? That's what I call staying informed! 📋";
               break;
             default:
-              message = "Good choice reading the documentation! Knowledge is power! 📚";
+              message =
+                "Good choice reading the documentation! Knowledge is power! 📚";
           }
           window.showClippyCustomBalloon(message, 6000);
         }
