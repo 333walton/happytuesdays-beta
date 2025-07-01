@@ -46,8 +46,9 @@ export { default as shutDown24 } from "./shutDown24-min.png";
 export { default as windowsExplorer16 } from "./windowsExplorer16-min.png";
 export { default as windowsUpdate16 } from "./windowsUpdate16-min.png";
 export { default as windowsUpdate24 } from "./windowsUpdate24-min.png";
+export { default as utm24 } from "./utm24-min.png";
 export { default as wordpad16 } from "./wordpad16-min.png";
-
+export { default as chart32 } from "./chart32-min.png";
 export { default as back } from "./back-min.png";
 export { default as forward } from "./forward-min.png";
 export { default as cut } from "./cut-min.png";
@@ -58,7 +59,7 @@ export { default as properties } from "./properties-min.png";
 export { default as undo } from "./undo-min.png";
 export { default as upDir } from "./upDir-min.png";
 export { default as views } from "./views-min.png";
-
+export { default as chart16 } from "./chart16-min.png";
 export { default as ieFavorites } from "./ie-favorites-min.png";
 export { default as ieGo } from "./ie-go-min.png";
 export { default as ieHistory } from "./ie-history-min.png";

@@ -5,6 +5,8 @@ import * as Applications from "../components/Applications";
 import startMenuData from "../data/start";
 import desktopData from "../data/desktop";
 import { ProgramContext } from ".";
+import faq from "../data/textFiles/faq";
+import commits from "../data/textFiles/commits";
 
 // Utility function to detect mobile devices
 // const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -159,21 +161,19 @@ class ProgramProvider extends Component {
           this.props.startMenuData,
           [
             {
-              title: "Control Panel",
-              onClick: () => this.toggleSettings(),
-              icon: icons.controlPanel16,
-            },
-            {
               title: "Help",
               icon: icons.help16,
-              component: "JSDos",
-              multiInstance: true,
               options: [
                 {
                   title: "FAQ",
                   icon: icons.faq32,
-                  component: "",
+                  component: "Notepad",
                   multiInstance: true,
+                  data: {
+                    content: faq.content,
+                    enableHtml: faq.enableHtml,
+                    readOnly: true,
+                  },
                 },
                 {
                   title: "Demo",
@@ -182,18 +182,25 @@ class ProgramProvider extends Component {
                   multiInstance: true,
                 },
                 {
+                  title: "Change Log",
+                  icon: icons.notepadFile16,
+                  component: "Notepad",
+                  data: {
+                    content: commits,
+                  },
+                },
+                {
                   title: "Contact",
                   icon: icons.outlook16,
                   component: "",
                   multiInstance: true,
                 },
-                {
-                  title: "Change Log",
-                  icon: icons.notepadFile16,
-                  component: "",
-                  multiInstance: true,
-                },
               ],
+            },
+            {
+              title: "Control Panel",
+              onClick: () => this.toggleSettings(),
+              icon: icons.controlPanel16,
             },
             {
               title: "CMD.exe",

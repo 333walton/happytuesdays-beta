@@ -271,7 +271,7 @@ const newsFeeds = [
 const marketingTools = [
   {
     title: "UTM Tracker",
-    icon: icons.logOff24,
+    icon: icons.utm24,
     isDisabled: false,
     component: "UTMTool",
   },
@@ -404,7 +404,7 @@ const artDesignTools = [
   },
   {
     title: "Design Trends Tracker",
-    icon: icons.vid16,
+    icon: icons.chart16,
     component: "",
     isDisabled: true,
   },
@@ -451,7 +451,7 @@ const myDocs = [
 const techDocs = [
   {
     title: "Trend Reports",
-    icon: icons.vid16,
+    icon: icons.chart16,
     component: "",
     isDisabled: true,
   },
@@ -636,98 +636,98 @@ const games = [
   },
 ];
 
-const asciiArt = [
+//const asciiArt = [];
+//{
+// title: "Flames",
+// icon: icons.burn16,
+//component: "Burn",
+//multiInstance: true,
+//},
+// {
+//  title: "Pipes",
+// icon: icons.pipes16,
+//component: "Pipes",
+// multiInstance: true,
+// },
+//{
+// title: "Hourglass",
+// icon: icons.sand16,
+// component: "Sand",
+// multiInstance: true,
+//},
+// {
+//  title: "See More...",
+// icon: icons.vid16,
+// component: "",
+// isDisabled: true,
+//},
+// Moved Squirtel to "See More..."
+// {
+//   title: "Squirtel",
+//   icon: icons.notepad16,
+//   component: "Notepad",
+//   data: {
+//     content: squirtel,
+//   },
+//};
+
+//const demoscenes = [
+//{
+//title: "GleEst",
+//type: "ExternalLink",
+//icon: icons.htmlFile16,
+//href: "https://demozoo.org/productions/288839/",
+//},
+//{
+// title: "Micro1k",
+//type: "ExternalLink",
+//icon: icons.htmlFile16,
+//href: "https://demozoo.org/productions/128900/",
+//},
+//{
+// title: "Kishkoid",
+//type: "ExternalLink",
+//icon: icons.htmlFile16,
+//href: "https://demozoo.org/productions/13245/",
+//},
+//];
+
+const animated = [
   {
-    title: "Flames",
-    icon: icons.burn16,
-    component: "Burn",
-    multiInstance: true,
-  },
-  {
-    title: "Pipes",
-    icon: icons.pipes16,
-    component: "Pipes",
-    multiInstance: true,
-  },
-  {
-    title: "Hourglass",
-    icon: icons.sand16,
-    component: "Sand",
-    multiInstance: true,
-  },
-  {
-    title: "See More...",
+    title: "Pixel Art",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
   },
-  // Moved Squirtel to "See More..."
-  // {
-  //   title: "Squirtel",
-  //   icon: icons.notepad16,
-  //   component: "Notepad",
-  //   data: {
-  //     content: squirtel,
-  //   },
-  // },
-];
-
-const demoscenes = [
+  // ...other still frame items...
   {
-    title: "GleEst",
-    type: "ExternalLink",
-    icon: icons.htmlFile16,
-    href: "https://demozoo.org/productions/288839/",
-  },
-  {
-    title: "Micro1k",
-    type: "ExternalLink",
-    icon: icons.htmlFile16,
-    href: "https://demozoo.org/productions/128900/",
-  },
-  {
-    title: "Kishkoid",
-    type: "ExternalLink",
-    icon: icons.htmlFile16,
-    href: "https://demozoo.org/productions/13245/",
-  },
-];
-
-const pixelArt = [
-  {
-    title: "See More...",
+    title: "Demoscenes",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
   },
-  // Add more pixel art items here as needed
 ];
 
 const stillFrames = [
   {
     title: "Pixel Art",
-    icon: icons.folder16, // or another icon if you prefer
-    options: pixelArt,
-  },
-  // ...other still frame items...
-  {
-    title: "See More...",
-    icon: icons.vid16,
-    component: "",
+    icon: icons.folder16, // or another icon if you prefer,
     isDisabled: true,
   },
+  {
+    title: "ASCII Art",
+    icon: icons.folder16, // or another icon if you prefer,
+    isDisabled: true,
+  },
+  {
+    title: "3D Rendered",
+    icon: icons.folder16, // or another icon if you prefer,
+    isDisabled: true,
+  },
+  // ...other still frame items...
 ];
 
 const interactive = [
-  {
-    title: "ASCII Art",
-    icon: icons.folder16,
-    data: {
-      src: "",
-      title: "",
-    },
-    multiInstance: false,
-  },
   {
     title: "WebGL Experiments",
     icon: icons.folder16,
@@ -737,6 +737,16 @@ const interactive = [
     },
     multiInstance: false,
   },
+  {
+    title: "ASCII Art",
+    icon: icons.folder16,
+    data: {
+      src: "",
+      title: "",
+    },
+    multiInstance: false,
+  },
+
   //{
   //title: "Rain Physics",
   //icon: icons.webglwindow32,
@@ -830,25 +840,25 @@ const artifacts = [
     options: interactive,
   },
   {
+    title: "Animated",
+    icon: icons.folder16,
+    options: animated,
+  },
+  {
     title: "Still Frames",
     icon: icons.folder16,
     options: stillFrames,
   },
-  {
-    title: "Pixel Art",
-    icon: icons.folder16,
-    options: pixelArt,
-  },
-  {
-    title: "ASCII Art",
-    icon: icons.folder16,
-    options: asciiArt,
-  },
-  {
-    title: "Demoscenes",
-    icon: icons.folder16,
-    options: demoscenes,
-  },
+  //{
+  // title: "ASCII Art",
+  // icon: icons.folder16,
+  // options: asciiArt,
+  //},
+  //{
+  //  title: "Demoscenes",
+  /// icon: icons.folder16,
+  // options: demoscenes,
+  //},
 ];
 
 const helpOptions = [
