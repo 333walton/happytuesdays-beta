@@ -10,6 +10,7 @@ import "./_styles.scss";
 class CuboneFileExplorer extends Component {
   constructor(props) {
     super(props);
+    this.viewsButtonRef = React.createRef();
 
     const fileSystem = props.data?.fileSystem || this.getDefaultFileSystem();
     const initialPath = props.data?.initialPath || "C:/My Documents";
@@ -203,17 +204,26 @@ class CuboneFileExplorer extends Component {
 
   // NEW: Handle views button with dropdown menu
   handleViewsClick = (e) => {
-    // Find the actual button element
-    const button = e.currentTarget;
-    const rect = button.getBoundingClientRect();
+    // Prevent event bubbling
+    e.stopPropagation();
 
-    this.setState({
-      showViewsMenu: true,
-      viewsMenuPosition: {
-        top: rect.bottom + 2, // Add small gap
-        left: rect.left,
-      },
-    });
+    // Get button position from the toolbar
+    const toolbar = document.querySelector(
+      ".CuboneFileExplorer .StandardToolbar"
+    );
+    const buttons = toolbar?.querySelectorAll("button");
+    const viewsButton = buttons?.[buttons.length - 1]; // Views is last button
+
+    if (viewsButton) {
+      const rect = viewsButton.getBoundingClientRect();
+      this.setState({
+        showViewsMenu: true,
+        viewsMenuPosition: {
+          top: rect.bottom + 2,
+          left: rect.left,
+        },
+      });
+    }
   };
 
   // NEW: Change view mode
@@ -427,10 +437,12 @@ class CuboneFileExplorer extends Component {
         <Window
           {...props}
           title={`${state.currentPath} - File Explorer`}
-          icon={icons.windowsExplorer16 || icons.folder16} // Fallback icon
+          icon={icons.windowsExplorer16 || icons.folder16}
           Component={WindowExplorer}
-          initialWidth={Math.min(700, window.innerWidth - 100)} // Proper responsive width
-          initialHeight={Math.min(500, window.innerHeight - 150)} // Proper responsive height
+          initialWidth={Math.min(500, window.innerWidth * 0.8)} // 80% of viewport width
+          initialHeight={Math.min(350, window.innerHeight * 0.7)} // 70% of viewport height
+          initialX={20} // Position 20px from left
+          initialY={40} // Position 40px from top (below desktop icons)
           className="CuboneFileExplorer"
           resizable={true}
           address={state.currentPath.replace(/\//g, "\\")}
