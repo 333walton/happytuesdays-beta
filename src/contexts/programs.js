@@ -29,7 +29,7 @@ const transformLinks = (option) => ({
       : option.onClick,
 });
 
-const settings = (injectedData = []) => [
+const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
   [
     ...injectedData,
     {
@@ -51,6 +51,7 @@ const settings = (injectedData = []) => [
           title: "Demo",
           icon: icons.mediavid16,
           component: "",
+          isDisabled: true,
           multiInstance: true,
         },
         {
@@ -65,13 +66,14 @@ const settings = (injectedData = []) => [
           title: "Contact",
           icon: icons.outlook16,
           component: "",
+          isDisabled: true,
           multiInstance: true,
         },
       ],
     },
     {
       title: "Control Panel",
-      onClick: () => this.toggleSettings(),
+      onClick: toggleSettings,
       icon: icons.controlPanel16,
     },
     {
@@ -79,48 +81,40 @@ const settings = (injectedData = []) => [
       icon: icons.command16,
       component: "JSDos",
       multiInstance: true,
-      //options: [
-      //{
-      //title: "Rebel CMD.exe",
-      //icon: icons.rebelcommand16,
-      //component: "StarWars",
-      //multiInstance: false,
-      //},
-      //],
     },
     {
       title: "Task Manager",
-      onClick: () => this.toggleTaskManager(),
+      onClick: toggleTaskManager, // Use the handler directly
       icon: icons.folderProgram16,
     },
     {
       title: "Account Settings",
       icon: icons.account32,
       component: "",
+      isDisabled: true,
       multiInstance: false,
     },
-    //{
-    //  title: "Active Desktop",
-    //  icon: icons.activeDesktop16,
-    //  isDisabled: true
-    //}
   ],
 ];
 
-const startMenu = (injectedData = [], set, shutDown) => [
+const startMenu = (
+  injectedData = [],
+  toggleSettings,
+  toggleTaskManager,
+  shutDown
+) => [
   [
     ...injectedData,
     {
       title: "Settings",
       icon: icons.settings24,
-      options: settings(set),
+      options: settings([], toggleSettings, toggleTaskManager),
     },
   ],
   {
     title: "Sign Up / Sign In",
     icon: icons.logOff24,
     isDisabled: true,
-    // Note: "Connect Wallet" is an option within the overlay
   },
   {
     title: "Shut Down...",
@@ -208,16 +202,6 @@ class ProgramProvider extends Component {
       {}
     ),
     recycleEmpty: true,
-    startMenu: initialize(
-      (p) => this.open(p),
-      addIdsToData(
-        startMenu(
-          this.props.getStartMenuData(), // Call function to get current data
-          [],
-          () => this.toggleShutDownMenu()
-        )
-      )
-    ),
     desktop: buildDesktop(this.props.desktopData, () => this.open),
     quickLaunch: [
       {
@@ -294,6 +278,23 @@ class ProgramProvider extends Component {
 
   componentDidMount() {
     window.addEventListener("agentChanged", this.refreshStartMenu);
+
+    // Set initial startMenu with correct method binding
+    this.setState({
+      startMenu: initialize(
+        (p) => this.open(p),
+        addIdsToData(
+          // In componentDidMount and refreshStartMenu:
+          startMenu(
+            this.props.getStartMenuData(),
+            this.toggleSettings,
+            this.toggleTaskManager,
+            this.toggleShutDownMenu
+          )
+        )
+      ),
+    });
+
     const desktopSaved = JSON.parse(window.localStorage.getItem("desktop"));
     if (desktopSaved) {
       this.setState(() => ({
@@ -313,15 +314,16 @@ class ProgramProvider extends Component {
   }
 
   refreshStartMenu = () => {
-    console.log("🔄 Refreshing start menu after agent change");
     this.setState({
       startMenu: initialize(
         (p) => this.open(p),
         addIdsToData(
+          // In componentDidMount and refreshStartMenu:
           startMenu(
-            this.props.getStartMenuData(), // Get fresh data
-            [], // Use empty array instead of hardcoded settings
-            () => this.toggleShutDownMenu()
+            this.props.getStartMenuData(),
+            this.toggleSettings,
+            this.toggleTaskManager,
+            this.toggleShutDownMenu
           )
         )
       ),
