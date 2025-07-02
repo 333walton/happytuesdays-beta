@@ -1,10 +1,9 @@
-
-import React from 'react';
-import VideoPlayer from './VideoPlayer';
+import React from "react";
+import VideoPlayerDesktop from "./VideoPlayerDesktop";
 
 export default {
-  title: 'Components/VideoPlayer',
-  component: VideoPlayer,
+  title: "Components/VideoPlayer",
+  component: VideoPlayerDesktop,
 };
 
-export const Default = () => <VideoPlayer />;
+export const Default = () => <VideoPlayerDesktop />;

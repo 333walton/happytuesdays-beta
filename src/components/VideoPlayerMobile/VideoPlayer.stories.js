@@ -1,10 +1,9 @@
-
-import React from 'react';
-import VideoPlayer from './VideoPlayer';
+import React from "react";
+import VideoPlayerMobile from "./VideoPlayerMobile";
 
 export default {
-  title: 'Components/VideoPlayer',
-  component: VideoPlayer,
+  title: "Components/VideoPlayerMobile",
+  component: VideoPlayerMobile,
 };
 
-export const Default = () => <VideoPlayer />;
+export const Default = () => <VideoPlayerMobile />;

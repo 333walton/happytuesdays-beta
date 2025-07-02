@@ -7,6 +7,7 @@
     "@babel/traverse": "^7.27.7",
     "@botpress/webchat": "^3.0.0",
     "@botpress/webchat-generator": "^0.2.15",
+    "@cubone/react-file-manager": "^1.24.0",
     "@react95/clippy": "^2.0.2",
     "@react95/core": "^9.2.1",
     "@react95/icons": "^2.1.1",

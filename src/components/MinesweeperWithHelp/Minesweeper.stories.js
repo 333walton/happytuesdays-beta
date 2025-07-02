@@ -1,10 +1,10 @@
+import React from "react";
 
-import React from 'react';
-import Minesweeper from './Minesweeper';
+import MinesweeperWithHelp from "./MinesweeperWithHelp";
 
 export default {
-  title: 'Components/Minesweeper',
-  component: Minesweeper,
+  title: "Components/Minesweeper",
+  component: MinesweeperWithHelp,
 };
 
-export const Default = () => <Minesweeper />;
+export const Default = () => <MinesweeperWithHelp />;

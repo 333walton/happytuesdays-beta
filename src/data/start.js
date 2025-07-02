@@ -1,11 +1,9 @@
 import * as icons from "../icons";
-import squirtel from "./textFiles/squirtel";
-import rollin from "./textFiles/rollin";
-import allStarTabs from "./textFiles/allStarTabs";
 // Remove these imports to avoid circular dependencies
 // import commits from "./textFiles/commits";
 // import faq from "./textFiles/faq";
 import clippyFaq from "./textFiles/clippyFaq";
+import FileBrowser from "../components/FileBrowser/FileBrowser";
 
 // At the top of the file, add the agent change handler
 window.onAgentChange = (newAgent) => {
@@ -430,6 +428,108 @@ const tools = [
 
 const myDocs = [
   {
+    title: "File Manager",
+    icon: icons.computer32,
+    component: "CuboneFileExplorer",
+    multiInstance: true,
+    data: {
+      initialPath: "C:/My Documents",
+      fileSystem: {
+        "/": {
+          "C:": {
+            type: "folder",
+            icon: "hardDrive",
+            children: {
+              Windows: {
+                type: "folder",
+                icon: "folderWindows",
+                children: {
+                  System32: {
+                    type: "folder",
+                    icon: "folderProgram",
+                    children: {
+                      "notepad.exe": {
+                        type: "file",
+                        icon: "notepadFile",
+                        size: "64 KB",
+                        component: "Notepad",
+                      },
+                    },
+                  },
+                },
+              },
+              "Program Files": {
+                type: "folder",
+                icon: "folderProgram",
+                children: {
+                  Hydra98: {
+                    type: "folder",
+                    icon: "folderProgram",
+                    children: {
+                      "readme.txt": {
+                        type: "file",
+                        icon: "notepadFile",
+                        content:
+                          "Welcome to Hydra98 File Manager!\n\nThis is a demonstration of the integrated file management system.",
+                        size: "2 KB",
+                      },
+                    },
+                  },
+                },
+              },
+              "My Documents": {
+                type: "folder",
+                icon: "myDocuments",
+                children: {
+                  "ASCII Art": {
+                    type: "folder",
+                    icon: "folder32",
+                    children: {
+                      "flames.txt": {
+                        type: "file",
+                        icon: "notepadFile",
+                        size: "1 KB",
+                        component: "Burn",
+                        content: "Double-click to see ASCII flames animation",
+                      },
+                      "pipes.txt": {
+                        type: "file",
+                        icon: "notepadFile",
+                        size: "1 KB",
+                        component: "Pipes",
+                        content: "Double-click to see ASCII pipes animation",
+                      },
+                      "hourglass.txt": {
+                        type: "file",
+                        icon: "notepadFile",
+                        size: "1 KB",
+                        component: "Sand",
+                        content:
+                          "Double-click to see ASCII hourglass animation",
+                      },
+                    },
+                  },
+                  "sample.txt": {
+                    type: "file",
+                    icon: "notepadFile",
+                    content:
+                      "This is a sample text file in the Hydra98 file system.",
+                    size: "1 KB",
+                  },
+                  "image.jpg": {
+                    type: "file",
+                    icon: "paint16",
+                    size: "256 KB",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  {
     title: "My Videos",
     icon: icons.vid16,
     component: "",
@@ -687,7 +787,8 @@ const interactive = [
   {
     title: "WebGL Experiments",
     icon: icons.folder16,
-    options: [
+    component: "FileBrowser",
+    /* options: [
       {
         title: "Rain Physics",
         icon: icons.webglwindow32,
@@ -724,7 +825,7 @@ const interactive = [
         component: "",
         isDisabled: true,
       },
-    ],
+    ],*/
   },
   {
     title: "ASCII Art",
@@ -736,6 +837,105 @@ const interactive = [
     icon: icons.kodak16,
     component: "",
     isDisabled: true,
+  },
+];
+
+const fileManagement = [
+  {
+    title: "File Manager",
+    icon: icons.computer32,
+    component: "CuboneFileExplorer",
+    multiInstance: true,
+    data: {
+      initialPath: "/C:/My Documents",
+      fileSystem: {
+        "/": {
+          "C:": {
+            type: "folder",
+            icon: "hardDrive",
+            children: {
+              Windows: {
+                type: "folder",
+                icon: "folderWindows",
+                children: {
+                  System32: {
+                    type: "folder",
+                    icon: "folderProgram",
+                    children: {
+                      "notepad.exe": {
+                        type: "file",
+                        icon: "notepadFile",
+                        size: "64 KB",
+                        component: "Notepad",
+                      },
+                    },
+                  },
+                },
+              },
+              "Program Files": {
+                type: "folder",
+                icon: "folderProgram",
+                children: {
+                  Hydra98: {
+                    type: "folder",
+                    icon: "folderProgram",
+                    children: {
+                      "readme.txt": {
+                        type: "file",
+                        icon: "notepadFile",
+                        content:
+                          "Welcome to Hydra98 File Manager!\n\nThis is a demonstration of the integrated file management system.",
+                        size: "2 KB",
+                      },
+                    },
+                  },
+                },
+              },
+              "My Documents": {
+                type: "folder",
+                icon: "myDocuments",
+                children: {
+                  "sample.txt": {
+                    type: "file",
+                    icon: "notepadFile",
+                    content:
+                      "This is a sample text file in the Hydra98 file system.",
+                    size: "1 KB",
+                  },
+                  "image.jpg": {
+                    type: "file",
+                    icon: "paint16",
+                    size: "256 KB",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  {
+    title: "My Computer",
+    icon: icons.windowsExplorer16,
+    component: "ExplorerWindow",
+    data: {
+      content: [
+        {
+          title: "C: Drive",
+          icon: "hardDrive",
+          onDoubleClick: () => console.log("Opening C: Drive"),
+        },
+        {
+          title: "Floppy (A:)",
+          icon: "floppy16",
+          failState: {
+            message: "Please insert a disk into drive A:",
+            loadTime: 1500,
+          },
+        },
+      ],
+    },
   },
 ];
 

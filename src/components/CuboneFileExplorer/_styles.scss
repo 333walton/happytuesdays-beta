@@ -1,0 +1,245 @@
+// Windows 95 File Explorer styles
+.CuboneFileExplorer {
+  // Split panel layout
+  .file-explorer-split {
+    display: flex;
+    height: 100%;
+    background: #c0c0c0;
+  }
+
+  // Tree view panel
+  .tree-panel {
+    width: 200px;
+    min-width: 150px;
+    background: #ffffff;
+    border: 2px inset #c0c0c0;
+    margin: 4px 0 4px 4px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+
+    .tree-header {
+      background: #c0c0c0;
+      padding: 2px 4px;
+      font-family: "MS Sans Serif", sans-serif;
+      font-size: 11px;
+      font-weight: bold;
+      border-bottom: 1px solid #808080;
+    }
+
+    .tree-view {
+      flex: 1;
+      padding: 2px;
+      font-family: "MS Sans Serif", sans-serif;
+      font-size: 11px;
+    }
+
+    .tree-node {
+      user-select: none;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      padding: 1px 2px;
+      cursor: pointer;
+      white-space: nowrap;
+
+      &:hover {
+        background: rgba(0, 0, 128, 0.1);
+      }
+
+      &.selected {
+        background: #000080;
+        color: #ffffff;
+      }
+
+      .tree-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+        vertical-align: middle;
+      }
+
+      .tree-label {
+        flex: 1;
+      }
+    }
+
+    .tree-children {
+      margin-left: 16px;
+    }
+  }
+
+  // File panel
+  .file-panel {
+    flex: 1;
+    overflow: auto;
+    background: #ffffff;
+    border: 2px inset #c0c0c0;
+    margin: 4px;
+
+    // Icons view
+    &.icons {
+      .icon-grid {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 8px;
+        gap: 16px;
+      }
+    }
+
+    // List view
+    &.list {
+      .file-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: "MS Sans Serif", sans-serif;
+        font-size: 11px;
+
+        thead {
+          background: #c0c0c0;
+          border-bottom: 1px solid #808080;
+
+          th {
+            text-align: left;
+            padding: 2px 8px;
+            border-right: 1px solid #808080;
+            font-weight: normal;
+            user-select: none;
+
+            &:last-child {
+              border-right: none;
+            }
+          }
+        }
+
+        tbody {
+          tr {
+            cursor: default;
+
+            &:hover {
+              background: rgba(0, 0, 128, 0.1);
+            }
+
+            &:active {
+              background: #000080;
+              color: #ffffff;
+            }
+
+            td {
+              padding: 2px 8px;
+              border-bottom: 1px solid #f0f0f0;
+
+              .file-icon {
+                width: 16px;
+                height: 16px;
+                margin-right: 4px;
+                vertical-align: middle;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Explorer icon styling (for icon view)
+  .pb-explorer-icon {
+    width: 64px;
+    text-align: center;
+    cursor: default;
+
+    &:hover {
+      .pb-explorer-icon__title {
+        background: rgba(0, 0, 128, 0.1);
+        outline: 1px dotted #000080;
+      }
+    }
+
+    &:active {
+      .pb-explorer-icon__title {
+        background: #000080;
+        color: #ffffff;
+      }
+    }
+
+    .pb-explorer-icon__icon {
+      margin-bottom: 4px;
+    }
+
+    .pb-explorer-icon__title {
+      font-family: "MS Sans Serif", sans-serif;
+      font-size: 11px;
+      padding: 2px 4px;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+  }
+
+  // Scrollbar styling
+  .file-list {
+    &::-webkit-scrollbar {
+      width: 16px;
+      height: 16px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #c0c0c0;
+      border: 1px solid #808080;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #c0c0c0;
+      border: 2px solid;
+      border-color: #ffffff #808080 #808080 #ffffff;
+
+      &:hover {
+        background: #dfdfdf;
+      }
+
+      &:active {
+        border-color: #808080 #ffffff #ffffff #808080;
+      }
+    }
+
+    &::-webkit-scrollbar-button {
+      background: #c0c0c0;
+      border: 2px solid;
+      border-color: #ffffff #808080 #808080 #ffffff;
+      width: 16px;
+      height: 16px;
+
+      &:hover {
+        background: #dfdfdf;
+      }
+
+      &:active {
+        border-color: #808080 #ffffff #ffffff #808080;
+      }
+    }
+  }
+}
+
+// Mobile responsive
+@media (max-width: 600px) {
+  .CuboneFileExplorer {
+    .address-bar {
+      .address-label {
+        display: none;
+      }
+    }
+
+    .file-list.icons .icon-grid {
+      gap: 8px;
+    }
+
+    .pb-explorer-icon {
+      width: 56px;
+
+      .pb-explorer-icon__title {
+        font-size: 10px;
+      }
+    }
+  }
+}
