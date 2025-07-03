@@ -1,18 +1,29 @@
-export default `About Clippy & AI Assistants
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+export default `
+Welcome to Happy Tuesdays' AI Assistant System!
+══════════════════════════════════════
 
-Welcome to Hydra98's Enhanced AI Assistant System!
+Each AI assistant has been carefully crafted with
+unique personalities and specialized knowledge
+aligned with our four content pillars, providing
+you with engaging and helpful support as you
+explore everything Happy Tuesdays has to offer.
 
 ╔════════════════════════════════════════╗
 ║               AVAILABLE AI AGENTS              ║
 ╚════════════════════════════════════════╝
 
-• Clippy GPT - The classic Office Assistant with
-  enhanced AI capabilities
-• Links - A friendly and helpful cat companion  
-• Bonzi - The playful and entertaining purple 
-  gorilla
-• Merlin - The wise wizard with ancient knowledge
+• Clippy GPT - The classic Office Assistant
+  as your helpful site guide
+• F1 GPT - Marketing and advertising
+  troubleshooting specialist for all your
+  martech needs
+• Genius GPT - Business insights and
+  investment guidance expert with AI trends
+  expertise
+• Merlin GPT - Digital art inspiration and
+  philosophy mentor for creative endeavors
+• Bonzi GPT - Gaming news curator and
+  entertainment companion
 
 ╔════════════════════════════════════════╗
 ║              DESKTOP INTERACTIONS              ║
@@ -21,77 +32,74 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 • Single Click: Random animation (75%) or helpful
   tip (25%)
 • Double Click: Open interactive chat window
-• Right Click: Access context menu with all 
-  options
-• Drag: Move assistant around the desktop (when
-  unlocked)
+• Right Click: Access context menu with all options
 
 ╔════════════════════════════════════════╗
 ║              MOBILE INTERACTIONS               ║
 ╚════════════════════════════════════════╝
 
-• Single Tap: Random animation (75%) or helpful
-  tip (25%)
+• Single Tap: Random animation (75%) or
+  helpful tip (25%)
 • Double Tap: Open context menu
 • Long Press: Start interactive chat session
-• Drag: Move assistant (requires unlocking 
-  position first)
 
 ╔════════════════════════════════════════╗
 ║              CONTEXT MENU FEATURES             ║
 ╚════════════════════════════════════════╝
 
-• About Clippy: View this detailed information
-• Select AI Agent: Switch between all 6 available
+• About AI Assistants: View this detailed
+  information
+• Select AI Agent: Switch between all 5 specialized
   assistants
-• Play Animation: Choose from 50+ different 
+• Play Animation: Choose from various character
   animations
 • Chat: Start an interactive conversation with AI
 • Say Hello: Receive a personalized greeting
 
 ╔════════════════════════════════════════╗
-║               ADVANCED FEATURES                ║
+║               SPECIALIZED FEATURES             ║
 ╚════════════════════════════════════════╝
 
-• Smart Positioning: Automatically adjusts to 
-  screen size and zoom
-• Balloon System: Receives helpful tips and 
-  context-aware suggestions
-• App Integration: Provides guidance when you open
-  applications
-• Animation Variety: Over 50 unique animations per
-  character
-• Persistent Chat: Chat sessions remain open until
-  manually closed
-• AI-Powered Responses: Each agent uses advanced 
-  AI for conversations
+• Marketing Support: F1 GPT provides advanced
+  marketing troubleshooting and campaign
+  optimization
+• Business Guidance: Genius GPT offers strategic
+  insights and professional growth advice
+• Creative Assistance: Merlin GPT inspires digital
+  art creation and provides technical tutorials
+• Gaming Companion: Bonzi GPT curates retro gaming
+  content and community discussions
+• Platform Navigation: Clippy GPT helps you explore
+  Happy Tuesdays' features and tools
 
 ╔════════════════════════════════════════╗
 ║             ASSISTANT BEHAVIORS                ║
 ╚════════════════════════════════════════╝
 
-• Each agent has unique personality traits and 
-  responses
+• Each assistant aligns with Happy Tuesdays' four
+  content pillars: Tech Workshop, Motivation
+  Station, Art Gallery, and Gaming Hub
 • Assistants provide context-aware help based on
-  your activities
+  your current activities
 • Speech balloons auto-close after 6 seconds
-• Chat becomes persistent once you start 
+• Chat becomes persistent once you start
   interacting
-• 3-second cooldown prevents accidental rapid 
+• 3-second cooldown prevents accidental rapid
   interactions
-• Intelligent responses tailored to each 
-  character's personality
+• Intelligent responses tailored to each
+  character's specialized expertise
 
 ╔════════════════════════════════════════╗
 ║             MOBILE OPTIMIZATIONS               ║
 ╚════════════════════════════════════════╝
 
-• Touch-friendly 32px minimum button sizes
-• Visual viewport handling for keyboard 
+• Touch-friendly interface designed for the
+  Windows 98 desktop experience
+• Visual viewport handling for keyboard
   interactions
-• Responsive positioning that adapts to device 
+• Responsive positioning that adapts to device
   orientation
-• Improved double-tap detection matching desktop 
+• Improved double-tap detection matching desktop
   precision
 • Optimized performance for mobile devices
 
@@ -99,17 +107,17 @@ Welcome to Hydra98's Enhanced AI Assistant System!
 ║              TECHNICAL FEATURES                ║
 ╚════════════════════════════════════════╝
 
-• Built with modern React and enhanced Microsoft 
-  Agent technology
-• Fully responsive design supporting desktop and 
+• Built with modern React within the authentic
+  Windows 98 environment
+• Fully responsive design supporting desktop and
   mobile devices
 • Real-time positioning with zoom-aware scaling
-• Accessibility features including ARIA labels 
-  and keyboard navigation
-• Advanced AI integration for intelligent 
-  conversations
-• Modern web technologies ensuring smooth 
-  performance
+• Accessibility features including ARIA labels and
+  keyboard navigation
+• Advanced AI integration providing 24/7
+  personalized support
+• Seamless integration with Happy Tuesdays'
+  productivity tools and content
 
 ╔════════════════════════════════════════╗
 ║                 TROUBLESHOOTING                ║
@@ -121,28 +129,29 @@ Welcome to Hydra98's Enhanced AI Assistant System!
   the context menu
 • Chat balloons can be closed using the × button
   in the top-right
-• Assistant position can be reset via the 
+• Assistant position can be reset via the
   mobile/desktop controls
 • Try switching agents if one becomes unresponsive
-• Refresh the page if you encounter persistent 
+• Refresh the page if you encounter persistent
   issues
 
 ╔════════════════════════════════════════╗
 ║               ABOUT THIS SYSTEM                ║
 ╚════════════════════════════════════════╝
 
-This is a modernized recreation of Microsoft Agent
-technology, bringing Windows 98 nostalgia into the
-modern web with enhanced AI capabilities and 
-responsive design.
+
+This is Happy Tuesdays' modernized recreation of
+Microsoft Agent technology, bringing Windows 98
+nostalgia into the modern web with enhanced AI
+capabilities and specialized expertise.
 
 Each AI assistant has been carefully crafted with
-unique personalities and specialized knowledge to
-provide you with an engaging and helpful experience
-as you explore Hydra98.
+unique personalities and specialized knowledge
+aligned with our four content pillars, providing
+you with engaging and helpful support as you
+explore everything Happy Tuesdays has to offer.
 
-Enjoy your nostalgic computing experience with 
-AI-powered assistance!
+
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `;
