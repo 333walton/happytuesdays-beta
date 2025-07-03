@@ -9,7 +9,7 @@ const commits = `
 [2025-07-01]  9625425  - start menu
 [2025-07-01]  c686eee  - test
 [2025-07-01]  c2dec8d  - more start menu
-[2025-07-01]  5c2ea09  - feeds
+[2025-07-01]  5c2ea09  - feeeds
 [2025-07-01]  3d58985  - start menu
 [2025-07-01]  6e51f99  - start menu refresh and cycle detection safeguards
 [2025-06-29]  c06e676  - neo4j mcp
