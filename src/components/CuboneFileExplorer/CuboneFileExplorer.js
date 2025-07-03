@@ -1,4 +1,4 @@
-// Final working version of CuboneFileExplorer.js with toolbar fixes
+// Fixed CuboneFileExplorer.js with mobile and desktop improvements
 
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
@@ -28,6 +28,7 @@ class CuboneFileExplorer extends Component {
       draggedFile: null,
       showViewsMenu: false,
       viewsMenuPosition: null,
+      isMobile: window.innerWidth <= 600,
     };
 
     // Store button handlers for easy access
@@ -42,18 +43,30 @@ class CuboneFileExplorer extends Component {
       7: this.handleViewsClick,
     };
 
+    // Mobile button handlers (without cut/copy/paste)
+    this.mobileButtonHandlers = {
+      0: this.handleBack,
+      1: this.handleForward,
+      2: this.handleUp,
+      3: () => console.log("Properties clicked"),
+      4: this.handleViewsClick,
+    };
+
     // Observer to watch for toolbar rendering
     this.toolbarObserver = null;
   }
 
   componentDidMount() {
-    console.log("CuboneFileExplorer mounted");
+    console.log("CuboneFileExplorer mounted, isMobile:", this.state.isMobile);
 
     // Set up MutationObserver to watch for toolbar
     this.setupToolbarObserver();
 
     // Add global click handler
     document.addEventListener("click", this.handleGlobalClick);
+
+    // Add resize listener for mobile detection
+    window.addEventListener("resize", this.handleResize);
 
     // Try to attach handlers after a delay
     setTimeout(() => this.attachToolbarHandlers(), 100);
@@ -62,11 +75,22 @@ class CuboneFileExplorer extends Component {
 
   componentWillUnmount() {
     document.removeEventListener("click", this.handleGlobalClick);
+    window.removeEventListener("resize", this.handleResize);
 
     if (this.toolbarObserver) {
       this.toolbarObserver.disconnect();
     }
   }
+
+  handleResize = () => {
+    const isMobile = window.innerWidth <= 600;
+    if (isMobile !== this.state.isMobile) {
+      this.setState({ isMobile }, () => {
+        // Re-attach handlers after state update
+        setTimeout(() => this.attachToolbarHandlers(), 100);
+      });
+    }
+  };
 
   // Set up MutationObserver to watch for toolbar
   setupToolbarObserver = () => {
@@ -111,18 +135,28 @@ class CuboneFileExplorer extends Component {
       return;
     }
 
-    console.log("Attaching toolbar handlers");
+    console.log("Attaching toolbar handlers, mobile:", this.state.isMobile);
     toolbar._handlersAttached = true;
 
     // Get all buttons
     const buttons = toolbar.querySelectorAll("button");
     console.log(`Found ${buttons.length} toolbar buttons`);
 
+    // Choose handlers based on mobile/desktop
+    const handlers = this.state.isMobile
+      ? this.mobileButtonHandlers
+      : this.buttonHandlers;
+
     // Attach click handlers to each button
     buttons.forEach((button, index) => {
       // Clone the button to remove existing event listeners
       const newButton = button.cloneNode(true);
       button.parentNode.replaceChild(newButton, button);
+
+      // Debug: Log button info
+      console.log(
+        `Button ${index}: ${newButton.title || newButton.textContent}`
+      );
 
       // Add our click handler
       newButton.addEventListener("click", (e) => {
@@ -138,15 +172,25 @@ class CuboneFileExplorer extends Component {
         }
 
         // Call the appropriate handler
-        const handler = this.buttonHandlers[index];
+        const handler = handlers[index];
         if (handler) {
           handler.call(this, e);
         }
       });
 
       // Special handling for Views button
-      if (index === 7) {
+      const isViewsButton = this.state.isMobile ? index === 4 : index === 7;
+      if (isViewsButton) {
         newButton.classList.add("views-button-with-dropdown");
+        newButton.classList.add("views-button");
+        console.log("Views button found at index:", index);
+
+        // Additional mobile debug
+        if (this.state.isMobile) {
+          console.log("Mobile Views button setup complete");
+          console.log("Button classes:", newButton.className);
+          console.log("Button title:", newButton.title);
+        }
       }
     });
 
@@ -179,12 +223,22 @@ class CuboneFileExplorer extends Component {
       this.updateButtonStates();
     }
 
-    // Re-attach handlers if needed
-    if (
-      !document.querySelector(
+    // Re-attach handlers if mobile state changed
+    if (prevState.isMobile !== this.state.isMobile) {
+      const toolbar = document.querySelector(
         ".WindowExplorer__options .OptionsList__large-icons"
-      )._handlersAttached
-    ) {
+      );
+      if (toolbar) {
+        toolbar._handlersAttached = false;
+      }
+      this.attachToolbarHandlers();
+    }
+
+    // Re-attach handlers if needed
+    const toolbar = document.querySelector(
+      ".WindowExplorer__options .OptionsList__large-icons"
+    );
+    if (toolbar && !toolbar._handlersAttached) {
       this.attachToolbarHandlers();
     }
   }
@@ -308,7 +362,7 @@ class CuboneFileExplorer extends Component {
     return current || {};
   }
 
-  // Handle back navigation
+  // Handle back navigation - Fixed for mobile
   handleBack = () => {
     console.log("handleBack called", {
       historyIndex: this.state.historyIndex,
@@ -330,7 +384,7 @@ class CuboneFileExplorer extends Component {
     }
   };
 
-  // Handle forward navigation
+  // Handle forward navigation - Fixed for mobile
   handleForward = () => {
     console.log("handleForward called");
 
@@ -380,23 +434,33 @@ class CuboneFileExplorer extends Component {
     });
   };
 
-  // Handle views button click
+  // Handle views button click - Fixed for mobile
   handleViewsClick = (e) => {
     console.log("handleViewsClick called");
 
-    // Get button position
-    const button = e.currentTarget || e.target;
-    const rect = button.getBoundingClientRect();
+    // Prevent default to avoid mobile issues
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
-    this.setState((prevState) => ({
-      showViewsMenu: !prevState.showViewsMenu,
-      viewsMenuPosition: !prevState.showViewsMenu
-        ? {
-            top: rect.bottom + 2,
-            left: rect.left,
-          }
-        : null,
-    }));
+    // Get button position
+    const button = e
+      ? e.currentTarget || e.target
+      : document.querySelector(".views-button-with-dropdown");
+    if (button) {
+      const rect = button.getBoundingClientRect();
+
+      this.setState((prevState) => ({
+        showViewsMenu: !prevState.showViewsMenu,
+        viewsMenuPosition: !prevState.showViewsMenu
+          ? {
+              top: rect.bottom + 2,
+              left: rect.left,
+            }
+          : null,
+      }));
+    }
   };
 
   // Change view mode
@@ -583,52 +647,83 @@ class CuboneFileExplorer extends Component {
   render() {
     const { props, state } = this;
 
-    // Build explorer options (even though they might not work with packard-belle)
-    const explorerOptions = [
-      {
-        icon: icons.back,
-        title: "Back",
-        onClick: this.handleBack,
-        disabled: state.historyIndex === 0,
-      },
-      {
-        icon: icons.forward,
-        title: "Forward",
-        onClick: this.handleForward,
-        disabled: state.historyIndex >= state.history.length - 1,
-      },
-      {
-        icon: icons.upDir,
-        title: "Up",
-        onClick: this.handleUp,
-      },
-      {
-        icon: icons.cut,
-        title: "Cut",
-        onClick: () => console.log("Cut clicked"),
-      },
-      {
-        icon: icons.copy,
-        title: "Copy",
-        onClick: () => console.log("Copy clicked"),
-      },
-      {
-        icon: icons.paste,
-        title: "Paste",
-        onClick: () => console.log("Paste clicked"),
-      },
-      {
-        icon: icons.properties,
-        title: "Properties",
-        onClick: () => console.log("Properties clicked"),
-      },
-      {
-        icon: icons.views || icons.folder16,
-        title: "Views",
-        onClick: this.handleViewsClick,
-        className: "views-button-with-dropdown",
-      },
-    ];
+    // Build explorer options based on mobile/desktop
+    const explorerOptions = state.isMobile
+      ? [
+          {
+            icon: icons.back,
+            title: "Back",
+            onClick: this.handleBack,
+            disabled: state.historyIndex === 0,
+          },
+          {
+            icon: icons.forward,
+            title: "Forward",
+            onClick: this.handleForward,
+            disabled: state.historyIndex >= state.history.length - 1,
+          },
+          {
+            icon: icons.upDir,
+            title: "Up",
+            onClick: this.handleUp,
+          },
+          {
+            icon: icons.properties,
+            title: "Properties",
+            onClick: () => console.log("Properties clicked"),
+          },
+          {
+            icon: icons.views || icons.folder16,
+            title: "Views",
+            onClick: this.handleViewsClick,
+            className: "views-button-with-dropdown views-button",
+          },
+        ]
+      : [
+          {
+            icon: icons.back,
+            title: "Back",
+            onClick: this.handleBack,
+            disabled: state.historyIndex === 0,
+          },
+          {
+            icon: icons.forward,
+            title: "Forward",
+            onClick: this.handleForward,
+            disabled: state.historyIndex >= state.history.length - 1,
+          },
+          {
+            icon: icons.upDir,
+            title: "Up",
+            onClick: this.handleUp,
+          },
+          {
+            icon: icons.cut,
+            title: "Cut",
+            onClick: () => console.log("Cut clicked"),
+          },
+          {
+            icon: icons.copy,
+            title: "Copy",
+            onClick: () => console.log("Copy clicked"),
+          },
+          {
+            icon: icons.paste,
+            title: "Paste",
+            onClick: () => console.log("Paste clicked"),
+          },
+          {
+            icon: icons.properties,
+            title: "Properties",
+            onClick: () => console.log("Properties clicked"),
+          },
+          {
+            icon: icons.views || icons.folder16,
+            title: "Views",
+            onClick: this.handleViewsClick,
+            className: "views-button-with-dropdown views-button",
+          },
+        ];
 
     return (
       <>
@@ -637,12 +732,22 @@ class CuboneFileExplorer extends Component {
           title={`${state.currentPath} - File Explorer`}
           icon={icons.windowsExplorer16 || icons.folder16}
           Component={WindowExplorer}
-          initialWidth={Math.min(500, window.innerWidth * 0.8)}
-          initialHeight={Math.min(350, window.innerHeight * 0.7)}
-          initialX={20}
-          initialY={40}
+          initialWidth={
+            state.isMobile
+              ? Math.min(450, window.innerWidth * 0.95)
+              : Math.min(500, window.innerWidth * 0.8)
+          }
+          initialHeight={
+            state.isMobile
+              ? Math.min(300, window.innerHeight * 0.6)
+              : Math.min(350, window.innerHeight * 0.7)
+          }
+          initialX={state.isMobile ? 10 : 20}
+          initialY={state.isMobile ? 30 : 40}
           className="CuboneFileExplorer"
           resizable={true}
+          minWidth={state.isMobile ? 350 : 162}
+          forceNoMobileMax={true} // Prevent auto-maximize on mobile
           address={state.currentPath.replace(/\//g, "\\")}
           explorerOptions={explorerOptions}
           menuOptions={buildMenu(

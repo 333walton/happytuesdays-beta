@@ -1,4 +1,4 @@
-// Final _styles.scss for CuboneFileExplorer with all fixes
+// Fixed _styles.scss for CuboneFileExplorer with mobile and desktop improvements
 
 .CuboneFileExplorer {
   // Fix: Hide the third panel that WindowExplorer creates
@@ -123,6 +123,11 @@
           }
         }
       }
+    }
+
+    // Hide the overflow dropdown completely on mobile
+    .OptionsList__dropdown {
+      display: none !important;
     }
 
     // Small icons view
@@ -311,19 +316,19 @@
       visibility: visible !important;
       display: inline-flex !important;
 
-      // Target the Views button specifically
+      // Target the Views button specifically - FIX SEPARATOR POSITION
       &.views-button-with-dropdown,
       &.views-button,
       &:last-child {
         position: relative;
-        padding-right: 18px !important;
-        min-width: 58px !important;
+        padding-right: 24px !important;
+        min-width: 64px !important;
 
-        // Add dropdown arrow with proper sectioning
+        // Add dropdown arrow
         &::after {
           content: "";
           position: absolute;
-          right: 8px;
+          right: 6px;
           top: 50%;
           transform: translateY(-50%);
           width: 0;
@@ -332,19 +337,21 @@
           border-right: 4px solid transparent;
           border-top: 5px solid #000;
           pointer-events: none;
+          z-index: 2;
         }
 
-        // Add separator line before arrow
+        // Add separator line before arrow - FIXED POSITION
         &::before {
           content: "";
           position: absolute;
-          right: 8px !important;
-          top: 2px;
-          bottom: 6px;
+          right: 18px;
+          top: 4px;
+          bottom: 4px;
           width: 1px;
           background: #808080;
           box-shadow: 1px 0 0 #ffffff;
           pointer-events: none;
+          z-index: 1;
         }
       }
     }
@@ -386,6 +393,145 @@
   // Hide the overflow dropdown completely
   .OptionsList__dropdown {
     display: none !important;
+  }
+
+  // Hide native dropdown arrows that packard-belle might add
+  .OptionsList__large-icons {
+    button {
+      // Remove any native dropdown indicators
+      &.views-button-with-dropdown,
+      &.views-button,
+      &:last-child {
+        // Hide any child dropdown arrows that packard-belle adds
+        .dropdown-arrow,
+        .arrow,
+        svg {
+          display: none !important;
+        }
+      }
+    }
+  }
+
+  // Additional fix for minimized windows
+  &.Window--minimized {
+    .WindowExplorer,
+    .WindowExplorer__options,
+    .WindowExplorer__toolbar,
+    .StandardToolbar,
+    .OptionsList__large-icons,
+    .OptionsList {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      height: 0 !important;
+      overflow: hidden !important;
+    }
+  }
+}
+
+// Additional mobile fixes to ensure toolbar visibility
+@media (max-width: 600px) {
+  // Remove any max-width constraints on toolbar containers
+  .WindowExplorer,
+  .WindowExplorer__header,
+  .WindowExplorer__toolbar,
+  .WindowExplorer__options,
+  .StandardToolbar,
+  .OptionsList {
+    max-width: none !important;
+  }
+
+  // Ensure the window content doesn't hide overflow
+  .WindowExplorer__content {
+    overflow-x: visible !important;
+  }
+
+  // Ensure toolbar scrolls to show all buttons
+  .CuboneFileExplorer {
+    .WindowExplorer__options,
+    .OptionsList__large-icons {
+      scroll-behavior: smooth;
+
+      // Show scrollbar on mobile for clarity
+      &::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: #f0f0f0;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+      }
+    }
+  }
+}
+
+// High specificity rule to ensure Views button is visible on mobile
+@media (max-width: 600px) {
+  .CuboneFileExplorer
+    .WindowExplorer__options
+    .OptionsList__large-icons
+    button.views-button,
+  .CuboneFileExplorer
+    .WindowExplorer__options
+    .OptionsList__large-icons
+    button.views-button-with-dropdown,
+  .CuboneFileExplorer
+    .WindowExplorer__options
+    .OptionsList__large-icons
+    button:last-child {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-width: 64px !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+}
+
+// For very small screens, make buttons slightly smaller
+@media (max-width: 380px) {
+  .CuboneFileExplorer {
+    .WindowExplorer__options {
+      .OptionsList__large-icons {
+        button {
+          min-width: 40px !important;
+
+          &:last-child,
+          &.views-button-with-dropdown,
+          &.views-button {
+            min-width: 56px !important;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Add visual indicator for scrollable toolbar on mobile
+@media (max-width: 600px) {
+  .CuboneFileExplorer .WindowExplorer__options {
+    position: relative;
+
+    // Add gradient to indicate more content
+    &::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 20px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(192, 192, 192, 0.8)
+      );
+      pointer-events: none;
+      z-index: 2;
+    }
   }
 }
 
@@ -443,18 +589,169 @@
   position: relative;
 }
 
-// Mobile responsive
+// Global fix for minimized windows
+.react-draggable-dragging.Window--minimized,
+.Window--minimized {
+  .WindowExplorer {
+    display: none !important;
+
+    * {
+      display: none !important;
+      visibility: hidden !important;
+    }
+  }
+}
+
+// Mobile responsive - UPDATED TO SHOW TREE PANEL AND FIX ISSUES
+// Mobile responsive - UPDATED TO SHOW TREE PANEL AND FIX ISSUES
 @media (max-width: 600px) {
   .CuboneFileExplorer {
+    // Ensure toolbar has enough space and is scrollable
+    .WindowExplorer__toolbar,
+    .StandardToolbar {
+      min-width: 100%;
+      overflow-x: auto !important;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
+      scrollbar-width: thin; // Thinner scrollbar on supported browsers
+    }
+
+    // Fix toolbar wrapper overflow
+    .WindowExplorer__header,
+    .WindowExplorer__top {
+      overflow: visible !important;
+    }
+
+    // Fix toolbar container width
+    .WindowExplorer__container,
+    .WindowExplorer__toolbar-container {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    // Ensure toolbar buttons container has minimum width
+    .OptionsList {
+      min-width: 260px !important;
+      width: 100% !important;
+    }
+
+    // Fix overflow on mobile
+    .WindowExplorer__options {
+      width: 100%;
+      min-width: 260px; // Ensure minimum width for all buttons
+      overflow-x: auto !important; // Allow horizontal scrolling
+      overflow-y: hidden !important;
+      -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
+
+      .OptionsList__large-icons {
+        overflow-x: auto !important; // Changed from visible to auto for scrolling
+        overflow-y: hidden !important;
+        flex-wrap: nowrap !important;
+        width: auto !important; // Let it size to content
+        min-width: 260px; // Match parent min-width
+        display: flex !important;
+        justify-content: flex-start !important;
+        padding-right: 10px; // Add some padding for the last button
+        gap: 2px; // Small gap between buttons
+        -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
+
+        // Don't hide any buttons on mobile - they're already filtered in JS
+        // All 5 mobile buttons should be visible
+
+        // Ensure all buttons fit
+        button {
+          flex-shrink: 0;
+          flex-grow: 0;
+          min-width: 48px !important;
+          max-width: none !important; // Remove any max-width constraints
+          visibility: visible !important;
+          display: inline-flex !important;
+          opacity: 1 !important;
+          box-sizing: border-box;
+
+          // Ensure last button (Views) is always visible
+          &:last-child,
+          &.views-button-with-dropdown,
+          &.views-button,
+          &[title="Views"] {
+            min-width: 64px !important;
+            max-width: none !important;
+            margin-right: 10px !important; // More margin to ensure visibility
+            display: inline-flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+        }
+      }
+    }
+
+    // Tree panel - keep visible but adjust size
     .tree-panel {
-      display: none;
+      width: 120px;
+      min-width: 100px;
+      font-size: 10px;
+
+      .tree-header {
+        font-size: 10px;
+      }
+
+      .tree-view {
+        font-size: 10px;
+      }
+
+      .tree-icon {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    // Ensure Views button dropdown styling works on mobile
+    .OptionsList__large-icons {
+      button {
+        // Target the Views button on mobile (last button)
+        &:last-child,
+        &.views-button-with-dropdown {
+          position: relative;
+          padding-right: 24px !important;
+          min-width: 64px !important;
+
+          // Add dropdown arrow
+          &::after {
+            content: "";
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 5px solid #000;
+            pointer-events: none;
+            z-index: 2;
+          }
+
+          // Add separator line
+          &::before {
+            content: "";
+            position: absolute;
+            right: 18px;
+            top: 4px;
+            bottom: 4px;
+            width: 1px;
+            background: #808080;
+            box-shadow: 1px 0 0 #ffffff;
+            pointer-events: none;
+            z-index: 1;
+          }
+        }
+      }
     }
 
     .file-panel {
-      margin-left: 4px !important;
-
       &.icons .icon-grid {
         gap: 8px;
+        padding: 4px;
 
         .pb-explorer-icon {
           width: 56px;
@@ -469,80 +766,75 @@
           }
         }
       }
-    }
-  }
 
-  .views-dropdown {
-    font-size: 12px;
+      &.smallIcons .icon-grid {
+        .pb-explorer-icon {
+          width: 100px;
 
-    .view-option {
-      padding: 6px 16px;
-    }
-  }
-}
-
-// Add these additional CSS rules to your _styles.scss file
-
-.CuboneFileExplorer {
-  // Hide the native dropdown arrow that packard-belle might add
-  .OptionsList__large-icons {
-    button {
-      // Remove any native dropdown indicators
-      &.views-button-with-dropdown,
-      &.views-button,
-      &:last-child {
-        // Hide any child dropdown arrows that packard-belle adds
-        .dropdown-arrow,
-        .arrow,
-        svg {
-          display: none !important;
+          .pb-explorer-icon__title {
+            font-size: 10px;
+          }
         }
+      }
 
-        // Ensure our custom arrow is the only one
-        &::after {
-          content: "";
-          position: absolute;
-          right: 8px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 0;
-          height: 0;
-          border-left: 4px solid transparent;
-          border-right: 4px solid transparent;
-          border-top: 5px solid #000;
-          pointer-events: none;
-          z-index: 1;
+      &.list,
+      &.details {
+        .file-table {
+          font-size: 10px;
+
+          th,
+          td {
+            padding: 1px 4px;
+          }
         }
       }
     }
   }
 
-  // Additional fix for minimized windows
-  &.Window--minimized {
-    .WindowExplorer,
-    .WindowExplorer__options,
-    .WindowExplorer__toolbar,
-    .StandardToolbar,
-    .OptionsList__large-icons,
-    .OptionsList {
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
-      height: 0 !important;
-      overflow: hidden !important;
+  .views-dropdown {
+    font-size: 11px;
+
+    .view-option {
+      padding: 4px 12px;
     }
   }
 }
 
-// Global fix for minimized windows
-.react-draggable-dragging.Window--minimized,
-.Window--minimized {
-  .WindowExplorer {
-    display: none !important;
+// Prevent green screen on mobile by ensuring content stays visible
+@media (max-width: 600px) {
+  .CuboneFileExplorer {
+    .file-explorer-content {
+      background: #c0c0c0 !important;
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
 
-    * {
-      display: none !important;
-      visibility: hidden !important;
+    .tree-panel,
+    .file-panel {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      background: #ffffff !important;
+    }
+
+    // Force all toolbar buttons to be visible
+    .ButtonIconLarge {
+      display: inline-flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+
+      &:nth-child(n) {
+        display: inline-flex !important;
+      }
+    }
+
+    // Ensure no clipping of toolbar
+    .WindowExplorer__options,
+    .WindowExplorer__toolbar,
+    .StandardToolbar {
+      clip: unset !important;
+      clip-path: none !important;
     }
   }
 }
