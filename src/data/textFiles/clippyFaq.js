@@ -152,6 +152,5 @@ you with engaging and helpful support as you
 explore everything Happy Tuesdays has to offer.
 
 
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `;
