@@ -9,6 +9,18 @@ import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
 class CuboneFileExplorer extends Component {
+  // Handle row click/tap for mobile (first tap selects, second tap opens)
+  handleRowClick = (name, item, e) => {
+    if (this.state.isMobile) {
+      // If not selected, select only
+      if (!this.state.selectedFiles.includes(name)) {
+        this.setState({ selectedFiles: [name] });
+      } else {
+        // Already selected, open
+        this.handleDoubleClick(name, item);
+      }
+    }
+  };
   constructor(props) {
     super(props);
 
@@ -466,10 +478,16 @@ class CuboneFileExplorer extends Component {
   // Change view mode
   changeViewMode = (mode) => {
     console.log("Changing view mode to:", mode);
-    this.setState({
-      viewMode: mode,
-      showViewsMenu: false,
-    });
+    // Only update if different
+    if (this.state.viewMode !== mode) {
+      this.setState({
+        viewMode: mode,
+        showViewsMenu: false,
+      });
+    } else {
+      // Always close the menu even if the same option is clicked
+      this.setState({ showViewsMenu: false });
+    }
   };
 
   // Toggle folder expansion
@@ -586,9 +604,11 @@ class CuboneFileExplorer extends Component {
     ];
 
     // Render as a portal to ensure it's on top
+    // Add a key to force re-render when viewMode changes
     return ReactDOM.createPortal(
       <div
         className="views-dropdown"
+        key={this.state.viewMode}
         style={{
           position: "fixed",
           top: this.state.viewsMenuPosition.top,
@@ -597,18 +617,21 @@ class CuboneFileExplorer extends Component {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {viewOptions.map((option) => (
-          <div
-            key={option.mode}
-            className={`view-option ${
-              this.state.viewMode === option.mode ? "selected" : ""
-            }`}
-            onClick={() => this.changeViewMode(option.mode)}
-          >
-            {this.state.viewMode === option.mode && "• "}
-            {option.label}
-          </div>
-        ))}
+        {viewOptions.map((option) => {
+          const isSelected = this.state.viewMode === option.mode;
+          if (isSelected) {
+            console.log("Selected view option:", option.mode);
+          }
+          return (
+            <div
+              key={option.mode}
+              className={`view-option${isSelected ? " selected" : ""}`}
+              onClick={() => this.changeViewMode(option.mode)}
+            >
+              {option.label}
+            </div>
+          );
+        })}
       </div>,
       document.body
     );
@@ -729,7 +752,7 @@ class CuboneFileExplorer extends Component {
       <>
         <Window
           {...props}
-          title={`${state.currentPath} - File Explorer`}
+          title={state.currentPath}
           icon={icons.windowsExplorer16 || icons.folder16}
           Component={WindowExplorer}
           initialWidth={
@@ -812,7 +835,11 @@ class CuboneFileExplorer extends Component {
                         onDragStart={(e) => this.handleDragStart(e, name, item)}
                         onDragEnd={this.handleDragEnd}
                         onDoubleClick={() => this.handleDoubleClick(name, item)}
-                        className="file-row"
+                        onClick={(e) => this.handleRowClick(name, item, e)}
+                        onTouchEnd={(e) => this.handleRowClick(name, item, e)}
+                        className={`file-row${
+                          state.selectedFiles.includes(name) ? " selected" : ""
+                        }`}
                       >
                         <td>
                           <img

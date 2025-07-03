@@ -564,13 +564,17 @@
     white-space: nowrap;
     user-select: none;
     line-height: 1; // Fix: Ensure consistent line height
+    background: transparent !important;
+    color: #000 !important;
 
     &:hover {
-      background: #000080;
-      color: #ffffff;
+      background: #000080 !important;
+      color: #ffffff !important;
     }
 
     &.selected {
+      background: #000080 !important;
+      color: #ffffff !important;
       font-weight: bold;
       line-height: 1; // Fix: Same line height for selected items
     }
@@ -806,9 +810,9 @@
   .CuboneFileExplorer {
     .file-explorer-content {
       background: #c0c0c0 !important;
-      display: flex !important;
       visibility: visible !important;
       opacity: 1 !important;
+      /* Do NOT set display:flex on mobile, to avoid breaking table layouts */
     }
 
     // Only apply display:flex to .tree-panel and .file-panel when NOT in list/details view
@@ -826,7 +830,10 @@
     }
     .file-panel.list,
     .file-panel.details {
-      display: block !important;
+      flex: 1 1 0% !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      flex-direction: unset !important;
       visibility: visible !important;
       opacity: 1 !important;
       background: #ffffff !important;
