@@ -316,8 +316,8 @@
       &.views-button,
       &:last-child {
         position: relative;
-        padding-right: 28px !important;
-        min-width: 64px !important;
+        padding-right: 18px !important;
+        min-width: 58px !important;
 
         // Add dropdown arrow with proper sectioning
         &::after {
@@ -338,8 +338,8 @@
         &::before {
           content: "";
           position: absolute;
-          right: 20px;
-          top: 6px;
+          right: 8px !important;
+          top: 2px;
           bottom: 6px;
           width: 1px;
           background: #808080;

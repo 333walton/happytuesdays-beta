@@ -21,7 +21,7 @@ class CuboneFileExplorer extends Component {
       currentFolder: currentFolder,
       fileSystem: fileSystem,
       selectedFiles: [],
-      viewMode: "icons",
+      viewMode: "smallIcons",
       history: [initialPath],
       historyIndex: 0,
       expandedFolders: { "/": true, "/C:": true },
