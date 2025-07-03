@@ -1,4 +1,4 @@
-// Proper _styles.scss for CuboneFileExplorer
+// Final _styles.scss for CuboneFileExplorer with all fixes
 
 .CuboneFileExplorer {
   // Fix: Hide the third panel that WindowExplorer creates
@@ -287,41 +287,6 @@
     }
   }
 
-  // Views dropdown menu
-  .views-dropdown {
-    background: #c0c0c0;
-    border: 2px solid;
-    border-color: #ffffff #808080 #808080 #ffffff;
-    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
-    font-family: "MS Sans Serif", sans-serif;
-    font-size: 11px;
-    min-width: 120px;
-
-    .view-option {
-      padding: 4px 16px;
-      cursor: pointer;
-
-      &:hover {
-        background: #000080;
-        color: #ffffff;
-      }
-
-      &.selected {
-        font-weight: bold;
-      }
-    }
-  }
-
-  // Menu overlay
-  .menu-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 999;
-  }
-
   // Dragging styles
   .dragging {
     opacity: 0.5;
@@ -337,6 +302,145 @@
       }
     }
   }
+
+  // Fix for Views button visibility and dropdown arrow
+  .OptionsList__large-icons {
+    // Force all buttons to be visible
+    button {
+      opacity: 1 !important;
+      visibility: visible !important;
+      display: inline-flex !important;
+
+      // Target the Views button specifically
+      &.views-button-with-dropdown,
+      &.views-button,
+      &:last-child {
+        position: relative;
+        padding-right: 28px !important;
+        min-width: 64px !important;
+
+        // Add dropdown arrow with proper sectioning
+        &::after {
+          content: "";
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 0;
+          height: 0;
+          border-left: 4px solid transparent;
+          border-right: 4px solid transparent;
+          border-top: 5px solid #000;
+          pointer-events: none;
+        }
+
+        // Add separator line before arrow
+        &::before {
+          content: "";
+          position: absolute;
+          right: 20px;
+          top: 6px;
+          bottom: 6px;
+          width: 1px;
+          background: #808080;
+          box-shadow: 1px 0 0 #ffffff;
+          pointer-events: none;
+        }
+      }
+    }
+  }
+
+  // Ensure Views button is always visible
+  .WindowExplorer__options {
+    // Force the toolbar to show all buttons
+    .OptionsList__large-icons {
+      flex-wrap: nowrap !important;
+      overflow: visible !important;
+    }
+
+    .ButtonIconLarge {
+      opacity: 1 !important;
+      visibility: visible !important;
+      display: inline-flex !important;
+
+      // Ensure icon is visible
+      img {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: block !important;
+        filter: none !important;
+      }
+
+      .ButtonIconLarge__icon {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+
+      .ButtonIconLarge__text {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+    }
+  }
+
+  // Hide the overflow dropdown completely
+  .OptionsList__dropdown {
+    display: none !important;
+  }
+}
+
+// Fix for minimized window - hide toolbar when minimized
+.Window--minimized {
+  .WindowExplorer__options,
+  .WindowExplorer__toolbar,
+  .StandardToolbar,
+  .OptionsList__large-icons {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
+
+// Views dropdown menu - OUTSIDE the main component for proper z-index
+.views-dropdown {
+  position: fixed !important;
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-family: "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  min-width: 120px;
+  z-index: 10000 !important;
+
+  .view-option {
+    padding: 4px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    line-height: 1; // Fix: Ensure consistent line height
+
+    &:hover {
+      background: #000080;
+      color: #ffffff;
+    }
+
+    &.selected {
+      font-weight: bold;
+      line-height: 1; // Fix: Same line height for selected items
+    }
+  }
+}
+
+// Fix WindowExplorer content display
+.WindowExplorer__content {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.WindowExplorer__view {
+  height: 100%;
+  position: relative;
 }
 
 // Mobile responsive
@@ -366,25 +470,79 @@
         }
       }
     }
+  }
 
-    .views-dropdown {
-      font-size: 12px;
+  .views-dropdown {
+    font-size: 12px;
 
-      .view-option {
-        padding: 6px 16px;
-      }
+    .view-option {
+      padding: 6px 16px;
     }
   }
 }
 
-// Fix WindowExplorer content display
-.WindowExplorer__content {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
+// Add these additional CSS rules to your _styles.scss file
+
+.CuboneFileExplorer {
+  // Hide the native dropdown arrow that packard-belle might add
+  .OptionsList__large-icons {
+    button {
+      // Remove any native dropdown indicators
+      &.views-button-with-dropdown,
+      &.views-button,
+      &:last-child {
+        // Hide any child dropdown arrows that packard-belle adds
+        .dropdown-arrow,
+        .arrow,
+        svg {
+          display: none !important;
+        }
+
+        // Ensure our custom arrow is the only one
+        &::after {
+          content: "";
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 0;
+          height: 0;
+          border-left: 4px solid transparent;
+          border-right: 4px solid transparent;
+          border-top: 5px solid #000;
+          pointer-events: none;
+          z-index: 1;
+        }
+      }
+    }
+  }
+
+  // Additional fix for minimized windows
+  &.Window--minimized {
+    .WindowExplorer,
+    .WindowExplorer__options,
+    .WindowExplorer__toolbar,
+    .StandardToolbar,
+    .OptionsList__large-icons,
+    .OptionsList {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      height: 0 !important;
+      overflow: hidden !important;
+    }
+  }
 }
 
-.WindowExplorer__view {
-  height: 100%;
-  position: relative;
+// Global fix for minimized windows
+.react-draggable-dragging.Window--minimized,
+.Window--minimized {
+  .WindowExplorer {
+    display: none !important;
+
+    * {
+      display: none !important;
+      visibility: hidden !important;
+    }
+  }
 }

@@ -1,6 +1,7 @@
-// Updated CuboneFileExplorer.js with fixes
+// Final working version of CuboneFileExplorer.js with toolbar fixes
 
 import React, { Component } from "react";
+import ReactDOM from "react-dom";
 import { WindowExplorer, ExplorerIcon } from "packard-belle";
 import Window from "../tools/Window";
 import * as icons from "../../icons";
@@ -10,7 +11,6 @@ import "./_styles.scss";
 class CuboneFileExplorer extends Component {
   constructor(props) {
     super(props);
-    this.viewsButtonRef = React.createRef();
 
     const fileSystem = props.data?.fileSystem || this.getDefaultFileSystem();
     const initialPath = props.data?.initialPath || "C:/My Documents";
@@ -21,15 +21,186 @@ class CuboneFileExplorer extends Component {
       currentFolder: currentFolder,
       fileSystem: fileSystem,
       selectedFiles: [],
-      viewMode: "icons", // icons, list, details, smallIcons, tiles
+      viewMode: "icons",
       history: [initialPath],
       historyIndex: 0,
       expandedFolders: { "/": true, "/C:": true },
       draggedFile: null,
+      showViewsMenu: false,
+      viewsMenuPosition: null,
     };
+
+    // Store button handlers for easy access
+    this.buttonHandlers = {
+      0: this.handleBack,
+      1: this.handleForward,
+      2: this.handleUp,
+      3: () => console.log("Cut clicked"),
+      4: () => console.log("Copy clicked"),
+      5: () => console.log("Paste clicked"),
+      6: () => console.log("Properties clicked"),
+      7: this.handleViewsClick,
+    };
+
+    // Observer to watch for toolbar rendering
+    this.toolbarObserver = null;
   }
 
-  // Default file system (same as before)
+  componentDidMount() {
+    console.log("CuboneFileExplorer mounted");
+
+    // Set up MutationObserver to watch for toolbar
+    this.setupToolbarObserver();
+
+    // Add global click handler
+    document.addEventListener("click", this.handleGlobalClick);
+
+    // Try to attach handlers after a delay
+    setTimeout(() => this.attachToolbarHandlers(), 100);
+    setTimeout(() => this.attachToolbarHandlers(), 500);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("click", this.handleGlobalClick);
+
+    if (this.toolbarObserver) {
+      this.toolbarObserver.disconnect();
+    }
+  }
+
+  // Set up MutationObserver to watch for toolbar
+  setupToolbarObserver = () => {
+    this.toolbarObserver = new MutationObserver((mutations) => {
+      // Check if toolbar was added
+      for (const mutation of mutations) {
+        if (mutation.type === "childList") {
+          const toolbar = document.querySelector(
+            ".WindowExplorer__options .OptionsList__large-icons"
+          );
+          if (toolbar) {
+            console.log("Toolbar detected by MutationObserver");
+            this.attachToolbarHandlers();
+          }
+        }
+      }
+    });
+
+    // Start observing the entire window for changes
+    const windowElement = document.querySelector(".CuboneFileExplorer");
+    if (windowElement) {
+      this.toolbarObserver.observe(windowElement, {
+        childList: true,
+        subtree: true,
+      });
+    }
+  };
+
+  // Attach event handlers directly to toolbar buttons
+  attachToolbarHandlers = () => {
+    const toolbar = document.querySelector(
+      ".CuboneFileExplorer .WindowExplorer__options .OptionsList__large-icons"
+    );
+
+    if (!toolbar) {
+      console.log("Toolbar not found");
+      return;
+    }
+
+    // Remove any existing delegation
+    if (toolbar._handlersAttached) {
+      return;
+    }
+
+    console.log("Attaching toolbar handlers");
+    toolbar._handlersAttached = true;
+
+    // Get all buttons
+    const buttons = toolbar.querySelectorAll("button");
+    console.log(`Found ${buttons.length} toolbar buttons`);
+
+    // Attach click handlers to each button
+    buttons.forEach((button, index) => {
+      // Clone the button to remove existing event listeners
+      const newButton = button.cloneNode(true);
+      button.parentNode.replaceChild(newButton, button);
+
+      // Add our click handler
+      newButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log(`Toolbar button ${index} clicked`);
+
+        // Check if button is disabled
+        if (newButton.disabled) {
+          console.log(`Button ${index} is disabled`);
+          return;
+        }
+
+        // Call the appropriate handler
+        const handler = this.buttonHandlers[index];
+        if (handler) {
+          handler.call(this, e);
+        }
+      });
+
+      // Special handling for Views button
+      if (index === 7) {
+        newButton.classList.add("views-button-with-dropdown");
+      }
+    });
+
+    // Update disabled states
+    this.updateButtonStates();
+  };
+
+  // Update button disabled states
+  updateButtonStates = () => {
+    const buttons = document.querySelectorAll(
+      ".CuboneFileExplorer .WindowExplorer__options .OptionsList__large-icons button"
+    );
+
+    if (buttons.length > 0) {
+      // Back button
+      buttons[0].disabled = this.state.historyIndex === 0;
+
+      // Forward button
+      buttons[1].disabled =
+        this.state.historyIndex >= this.state.history.length - 1;
+    }
+  };
+
+  componentDidUpdate(prevProps, prevState) {
+    // Update button states when history changes
+    if (
+      prevState.historyIndex !== this.state.historyIndex ||
+      prevState.history.length !== this.state.history.length
+    ) {
+      this.updateButtonStates();
+    }
+
+    // Re-attach handlers if needed
+    if (
+      !document.querySelector(
+        ".WindowExplorer__options .OptionsList__large-icons"
+      )._handlersAttached
+    ) {
+      this.attachToolbarHandlers();
+    }
+  }
+
+  handleGlobalClick = (e) => {
+    // Close views menu if clicking outside
+    if (
+      this.state.showViewsMenu &&
+      !e.target.closest(".views-dropdown") &&
+      !e.target.closest(".views-button-with-dropdown")
+    ) {
+      this.setState({ showViewsMenu: false });
+    }
+  };
+
+  // Default file system
   getDefaultFileSystem() {
     return {
       "/": {
@@ -111,7 +282,7 @@ class CuboneFileExplorer extends Component {
     };
   }
 
-  // Navigate to path (same as before)
+  // Navigate to path
   navigateToPath(fileSystem, path) {
     if (path === "/" || path === "") {
       return fileSystem["/"] || {};
@@ -137,13 +308,20 @@ class CuboneFileExplorer extends Component {
     return current || {};
   }
 
-  // FIXED: Handle navigation with proper history management
+  // Handle back navigation
   handleBack = () => {
+    console.log("handleBack called", {
+      historyIndex: this.state.historyIndex,
+      history: this.state.history,
+    });
+
     if (this.state.historyIndex > 0) {
       const newIndex = this.state.historyIndex - 1;
       const newPath = this.state.history[newIndex];
       const newFolder = this.navigateToPath(this.state.fileSystem, newPath);
 
+      console.log("Navigating back to:", newPath);
+
       this.setState({
         historyIndex: newIndex,
         currentPath: newPath,
@@ -152,12 +330,17 @@ class CuboneFileExplorer extends Component {
     }
   };
 
+  // Handle forward navigation
   handleForward = () => {
+    console.log("handleForward called");
+
     if (this.state.historyIndex < this.state.history.length - 1) {
       const newIndex = this.state.historyIndex + 1;
       const newPath = this.state.history[newIndex];
       const newFolder = this.navigateToPath(this.state.fileSystem, newPath);
 
+      console.log("Navigating forward to:", newPath);
+
       this.setState({
         historyIndex: newIndex,
         currentPath: newPath,
@@ -166,7 +349,9 @@ class CuboneFileExplorer extends Component {
     }
   };
 
+  // Handle up navigation
   handleUp = () => {
+    console.log("handleUp called");
     const pathParts = this.state.currentPath.split("/").filter(Boolean);
     if (pathParts.length > 1) {
       pathParts.pop();
@@ -177,7 +362,10 @@ class CuboneFileExplorer extends Component {
     }
   };
 
+  // Navigate to a specific path
   navigateTo = (newPath) => {
+    console.log("NavigateTo called with path:", newPath);
+
     const newFolder = this.navigateToPath(this.state.fileSystem, newPath);
     const newHistory = [
       ...this.state.history.slice(0, this.state.historyIndex + 1),
@@ -192,6 +380,34 @@ class CuboneFileExplorer extends Component {
     });
   };
 
+  // Handle views button click
+  handleViewsClick = (e) => {
+    console.log("handleViewsClick called");
+
+    // Get button position
+    const button = e.currentTarget || e.target;
+    const rect = button.getBoundingClientRect();
+
+    this.setState((prevState) => ({
+      showViewsMenu: !prevState.showViewsMenu,
+      viewsMenuPosition: !prevState.showViewsMenu
+        ? {
+            top: rect.bottom + 2,
+            left: rect.left,
+          }
+        : null,
+    }));
+  };
+
+  // Change view mode
+  changeViewMode = (mode) => {
+    console.log("Changing view mode to:", mode);
+    this.setState({
+      viewMode: mode,
+      showViewsMenu: false,
+    });
+  };
+
   // Toggle folder expansion
   toggleFolder = (path) => {
     this.setState((prevState) => ({
@@ -202,78 +418,7 @@ class CuboneFileExplorer extends Component {
     }));
   };
 
-  // NEW: Handle views button with dropdown menu
-  handleViewsClick = (e) => {
-    // Prevent event bubbling
-    e.stopPropagation();
-
-    // Get button position from the toolbar
-    const toolbar = document.querySelector(
-      ".CuboneFileExplorer .StandardToolbar"
-    );
-    const buttons = toolbar?.querySelectorAll("button");
-    const viewsButton = buttons?.[buttons.length - 1]; // Views is last button
-
-    if (viewsButton) {
-      const rect = viewsButton.getBoundingClientRect();
-      this.setState({
-        showViewsMenu: true,
-        viewsMenuPosition: {
-          top: rect.bottom + 2,
-          left: rect.left,
-        },
-      });
-    }
-  };
-
-  // NEW: Change view mode
-  changeViewMode = (mode) => {
-    this.setState({
-      viewMode: mode,
-      showViewsMenu: false,
-    });
-  };
-
-  // NEW: Drag and drop handlers
-  handleDragStart = (e, fileName, fileData) => {
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", fileName);
-
-    this.setState({
-      draggedFile: {
-        name: fileName,
-        data: fileData,
-        sourcePath: this.state.currentPath,
-      },
-    });
-
-    // Create drag image
-    const dragImage = new Image();
-    dragImage.src = icons[fileData.icon] || icons.notepadFile16;
-    e.dataTransfer.setDragImage(dragImage, 16, 16);
-  };
-
-  handleDragEnd = () => {
-    this.setState({ draggedFile: null });
-  };
-
-  handleDragOver = (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  };
-
-  handleDrop = (e, targetName, targetData) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (targetData.type === "folder" && this.state.draggedFile) {
-      // Move file to folder
-      console.log(`Moving ${this.state.draggedFile.name} to ${targetName}`);
-      // Implement actual file move logic here
-    }
-  };
-
-  // Render tree node (same as before with minor adjustments)
+  // Render tree node
   renderTreeNode = (name, item, path) => {
     const isExpanded = this.state.expandedFolders[path];
     const isCurrentPath = path === this.state.currentPath;
@@ -281,11 +426,11 @@ class CuboneFileExplorer extends Component {
     if (item.type === "folder") {
       let folderIcon;
       if (name === "C:") {
-        folderIcon = icons.hdd32 || icons.hdd32 || icons.folder32; // Multiple fallbacks
+        folderIcon = icons.hdd32 || icons.folder32;
       } else {
         folderIcon = isExpanded
-          ? icons.folder16 || icons.folderOpen24 || icons.folder16
-          : icons.folder16 || icons.folder16;
+          ? icons.folderOpen24 || icons.folder16
+          : icons.folder16;
       }
 
       return (
@@ -364,9 +509,9 @@ class CuboneFileExplorer extends Component {
     }
   };
 
-  // NEW: Render views dropdown menu
+  // Render views dropdown menu
   renderViewsMenu = () => {
-    if (!this.state.showViewsMenu) return null;
+    if (!this.state.showViewsMenu || !this.state.viewsMenuPosition) return null;
 
     const viewOptions = [
       { mode: "icons", label: "Large Icons" },
@@ -376,15 +521,17 @@ class CuboneFileExplorer extends Component {
       { mode: "tiles", label: "Tiles" },
     ];
 
-    return (
+    // Render as a portal to ensure it's on top
+    return ReactDOM.createPortal(
       <div
         className="views-dropdown"
         style={{
           position: "fixed",
-          top: this.state.viewsMenuPosition?.top || 0,
-          left: this.state.viewsMenuPosition?.left || 0,
-          zIndex: 1000,
+          top: this.state.viewsMenuPosition.top,
+          left: this.state.viewsMenuPosition.left,
+          zIndex: 10000,
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         {viewOptions.map((option) => (
           <div
@@ -398,14 +545,45 @@ class CuboneFileExplorer extends Component {
             {option.label}
           </div>
         ))}
-      </div>
+      </div>,
+      document.body
     );
+  };
+
+  // Drag handlers
+  handleDragStart = (e, fileName, fileData) => {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", fileName);
+    this.setState({
+      draggedFile: {
+        name: fileName,
+        data: fileData,
+        sourcePath: this.state.currentPath,
+      },
+    });
+  };
+
+  handleDragEnd = () => {
+    this.setState({ draggedFile: null });
+  };
+
+  handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  handleDrop = (e, targetName, targetData) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (targetData.type === "folder" && this.state.draggedFile) {
+      console.log(`Moving ${this.state.draggedFile.name} to ${targetName}`);
+    }
   };
 
   render() {
     const { props, state } = this;
 
-    // FIXED: Build explorer options with Views button
+    // Build explorer options (even though they might not work with packard-belle)
     const explorerOptions = [
       {
         icon: icons.back,
@@ -419,16 +597,36 @@ class CuboneFileExplorer extends Component {
         onClick: this.handleForward,
         disabled: state.historyIndex >= state.history.length - 1,
       },
-      { icon: icons.upDir, title: "Up", onClick: this.handleUp },
-      { icon: icons.cut, title: "Cut", onClick: () => {} },
-      { icon: icons.copy, title: "Copy", onClick: () => {} },
-      { icon: icons.paste, title: "Paste", onClick: () => {} },
-      { icon: icons.delete, title: "Delete", onClick: () => {} },
-      { icon: icons.properties, title: "Properties", onClick: () => {} },
       {
-        icon: icons.views || icons.views || icons.folder16, // Try multiple icon names
+        icon: icons.upDir,
+        title: "Up",
+        onClick: this.handleUp,
+      },
+      {
+        icon: icons.cut,
+        title: "Cut",
+        onClick: () => console.log("Cut clicked"),
+      },
+      {
+        icon: icons.copy,
+        title: "Copy",
+        onClick: () => console.log("Copy clicked"),
+      },
+      {
+        icon: icons.paste,
+        title: "Paste",
+        onClick: () => console.log("Paste clicked"),
+      },
+      {
+        icon: icons.properties,
+        title: "Properties",
+        onClick: () => console.log("Properties clicked"),
+      },
+      {
+        icon: icons.views || icons.folder16,
         title: "Views",
         onClick: this.handleViewsClick,
+        className: "views-button-with-dropdown",
       },
     ];
 
@@ -439,10 +637,10 @@ class CuboneFileExplorer extends Component {
           title={`${state.currentPath} - File Explorer`}
           icon={icons.windowsExplorer16 || icons.folder16}
           Component={WindowExplorer}
-          initialWidth={Math.min(500, window.innerWidth * 0.8)} // 80% of viewport width
-          initialHeight={Math.min(350, window.innerHeight * 0.7)} // 70% of viewport height
-          initialX={20} // Position 20px from left
-          initialY={40} // Position 40px from top (below desktop icons)
+          initialWidth={Math.min(500, window.innerWidth * 0.8)}
+          initialHeight={Math.min(350, window.innerHeight * 0.7)}
+          initialX={20}
+          initialY={40}
           className="CuboneFileExplorer"
           resizable={true}
           address={state.currentPath.replace(/\//g, "\\")}
@@ -585,14 +783,6 @@ class CuboneFileExplorer extends Component {
 
         {/* Views dropdown menu */}
         {this.renderViewsMenu()}
-
-        {/* Click outside to close views menu */}
-        {state.showViewsMenu && (
-          <div
-            className="menu-overlay"
-            onClick={() => this.setState({ showViewsMenu: false })}
-          />
-        )}
       </>
     );
   }
