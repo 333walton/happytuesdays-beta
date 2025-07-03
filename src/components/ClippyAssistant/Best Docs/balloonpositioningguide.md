@@ -1,5 +1,7 @@
 # Clippy Balloon Positioning System
 
+## Updated: 7/3/25
+
 ## Overview
 
 The Clippy Assistant uses two types of balloons:
@@ -13,9 +15,9 @@ Both balloon types use sophisticated positioning algorithms to ensure optimal pl
 
 ### Core Files
 
-- `CustomBalloon.js` - Handles speech balloons and interactive message balloons
-- `ChatBalloon.js` - Handles interactive chat balloons with resize functionality
-- `ClippyPositioning.js` - Provides positioning utilities and viewport detection
+- `chat/balloons/CustomBalloon.js` - Handles speech balloons and interactive message balloons
+- `chat/legacy/ChatBalloon.js` - Handles interactive chat balloons with resize functionality
+- `core/ClippyPositioning.js` - Provides positioning utilities and viewport detection
 
 ### Key Classes
 
@@ -29,15 +31,16 @@ Both balloon types use sophisticated positioning algorithms to ensure optimal pl
 #### Custom Balloons (Speech)
 
 ```javascript
-// Base dimensions
-const balloonWidth = 252; // Reduced from 280 by 10%
-const balloonHeight = 108; // Reduced from 120 by 10%
-const safeMargin = 18; // Reduced from 20 by 10%
-const clippyMargin = 45; // Reduced from 50 by 10%
+// Base dimensions (10% reduction applied)
+const balloonWidth = 252; // Reduced from 280
+const balloonHeight = 108; // Reduced from 120
+const safeMargin = 18; // Reduced from 20
+const clippyMargin = 45; // Reduced from 50
 
-// Primary position: Above Clippy
+// Primary position: 1px above Clippy overlay
+const tailHeight = 12; // Height of ::after pseudo-element
 let left = clippyRect.left + clippyRect.width / 2 - dynamicWidth / 2;
-let top = effectiveTop - balloonHeight - clippyMargin;
+let top = overlayRect.top - balloonHeight - tailHeight - 1;
 
 // Fallback positions if above doesn't fit:
 // 1. Left side: left = clippyRect.left - dynamicWidth - 30
@@ -48,23 +51,20 @@ let top = effectiveTop - balloonHeight - clippyMargin;
 #### Chat Balloons
 
 ```javascript
-// Base dimensions
-const chatWidth = Math.min(
-  maxWidth,
-  Math.max(minWidth, viewportWidth - safeMargin * 2)
-);
-const chatHeight = Math.min(
-  maxHeight,
-  Math.max(minHeight, viewportHeight - 200)
-);
+// Base dimensions (10% increase applied)
+const maxWidth = 330; // Increased from 300
+const minWidth = 260;
+const maxHeight = 200;
+const minHeight = 140; // Reduced from 200 to eliminate empty space
 
-// Primary position: Above and centered on Clippy
+// Primary position: 1px above Clippy overlay
 let left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2;
-let top = overlayRect.top - chatHeight - 1; // 1px above overlay
+let top = overlayRect.top - chatHeight - 1;
 
-// Enhanced message balloon gets special positioning:
-left = clippyRect.left + clippyRect.width / 2 - chatWidth / 2 + 140; // Shift 140px right
-top = effectiveTop - chatHeight - (chatMargin + 80); // Move higher above
+// Mobile: Right-aligned
+if (isMobile) {
+  left = viewportLeft + viewportWidth - chatWidth - 14; // 14px from right edge
+}
 ```
 
 ### Mobile Positioning
@@ -81,22 +81,19 @@ const safeMargin = 15;
 let left = clippyRect.left + clippyRect.width / 2 - balloonWidth / 2;
 let top = effectiveClippyTop - balloonHeight - 30;
 
-// Constrain to viewport
-left = Math.max(
-  safeMargin,
-  Math.min(left, viewportWidth - balloonWidth - safeMargin)
-);
-
-// Fallback positions:
-// 1. Side placement if top doesn't fit
-// 2. Center screen as last resort
+// Welcome balloon gets special mobile positioning
+if (isMobile && isWelcomeBalloon) {
+  // Place balloon above and to the right of Clippy's head
+  left = rect.left + rect.width * 0.7; // 70% to the right
+  top = rect.top - 90; // 90px above Clippy
+}
 ```
 
 #### Chat Balloons
 
 ```javascript
 // Mobile-specific dimensions
-const chatWidth = Math.min(330, viewportWidth - safeMargin * 2); // 10% increase
+const chatWidth = Math.min(330, viewportWidth - safeMargin * 2);
 const chatHeight = Math.min(200, viewportHeight - 150);
 
 // Mobile positioning rules:
@@ -289,10 +286,12 @@ const startResize = (e) => {
   const currentY = e.clientY || e.touches[0].clientY;
   const deltaY = startY - currentY; // Positive when dragging up
 
-  // Mobile: Bottom-anchored resize (bottom stays fixed)
-  if (isMobile) {
-    const originalBottom = parseInt(container.dataset.originalBottom);
-    let newTop = originalBottom - constrainedHeight;
+  // Bottom-anchored resize (bottom stays fixed)
+  const overlayEl = document.getElementById("clippy-clickable-overlay");
+  if (overlayEl) {
+    const overlayRect = overlayEl.getBoundingClientRect();
+    const fixedBottom = overlayRect.top - 1; // Always 1px above Clippy
+    let newTop = fixedBottom - constrainedHeight;
 
     // Prevent viewport boundary violations
     if (newTop < minTop) {
@@ -358,6 +357,46 @@ if (existingBalloons.length > 0) {
 }
 ```
 
+## Special Positioning Cases
+
+### Welcome Balloon
+
+The welcome balloon receives special positioning on mobile to ensure visibility:
+
+```javascript
+if (isMobile) {
+  const clippyEl = document.querySelector(".clippy");
+  if (clippyEl) {
+    const rect = clippyEl.getBoundingClientRect();
+    // Place balloon above and to the right of Clippy's head
+    mobilePosition = {
+      left: rect.left + rect.width * 0.7, // 70% to the right of Clippy
+      top: rect.top - 90, // 90px above Clippy
+    };
+  }
+}
+```
+
+### Agent Change Positioning
+
+When switching agents, balloons wait for the new agent to stabilize:
+
+```javascript
+// Wait for overlay to stabilize after agent changes
+await this.waitForStableOverlay(800);
+
+// Different agents have different heights
+const checkStability = () => {
+  const currentHeight = overlayEl.getBoundingClientRect().height;
+  if (Math.abs(currentHeight - lastHeight) < 1) {
+    stableCount++;
+    if (stableCount >= requiredStableCount) {
+      resolve(true); // Agent has stabilized
+    }
+  }
+};
+```
+
 ## Error Handling
 
 ### Safe Positioning
@@ -396,6 +435,7 @@ const CUSTOM_BALLOON = {
   height: 108, // was 120
   safeMargin: 18, // was 20
   clippyMargin: 45, // was 50
+  tailHeight: 12, // Height of ::after pseudo-element
 };
 
 // Chat Balloon (10% increase applied)
@@ -418,21 +458,62 @@ const MOBILE_CONFIG = {
 };
 ```
 
+## Positioning Priority
+
+1. **Primary**: 1px above Clippy overlay (both balloon types)
+2. **Fallback 1**: Left side of Clippy
+3. **Fallback 2**: Right side of Clippy
+4. **Fallback 3**: Top center of viewport
+
+## Performance Considerations
+
+- Position calculations are cached during resize operations
+- RequestAnimationFrame used for smooth repositioning
+- DOM operations minimized by using direct style manipulation
+- Balloon reuse instead of recreation where possible
+
+## Testing Balloon Positioning
+
+```javascript
+// Test balloon positioning at different viewport sizes
+const testPositions = () => {
+  // Test speech balloon
+  window.showClippyCustomBalloon("Test speech balloon");
+
+  // Test chat balloon
+  setTimeout(() => {
+    window.showClippyChatBalloon("Test chat balloon");
+  }, 2000);
+
+  // Test with window resize
+  setTimeout(() => {
+    window.dispatchEvent(new Event("resize"));
+  }, 3000);
+};
+
+// Validate balloon position
+const validateBalloonPosition = () => {
+  const balloon = document.querySelector(
+    ".custom-clippy-balloon, .custom-clippy-chat-balloon"
+  );
+  const clippy = document.querySelector(".clippy");
+
+  if (balloon && clippy) {
+    const balloonRect = balloon.getBoundingClientRect();
+    const clippyRect = clippy.getBoundingClientRect();
+
+    console.log("Balloon bottom:", balloonRect.bottom);
+    console.log("Clippy top:", clippyRect.top);
+    console.log("Gap:", clippyRect.top - balloonRect.bottom);
+  }
+};
+```
+
 ## Future Enhancement Areas
 
-1. **Adaptive Positioning**: Balloons could learn user preferences for positioning
-2. **Multi-Monitor Support**: Better handling of multi-monitor desktop setups
-3. **Accessibility**: Enhanced positioning for screen readers and high contrast modes
-4. **Animation Easing**: Smooth position transitions during window resize
-5. **Content-Based Sizing**: Dynamic balloon sizing based on content length
-6. **Collision Detection**: Advanced algorithm to avoid overlapping with other UI elements
-
-## Testing Considerations
-
-- Test on various screen sizes (320px to 4K+)
-- Verify behavior with browser zoom (50% to 500%)
-- Test with mobile keyboards (iOS Safari, Chrome, etc.)
-- Validate positioning in embedded iframes
-- Check behavior during window resize events
-- Test with multiple monitor configurations
-- Verify accessibility with screen readers
+1. **Smart Positioning**: Learn from user preferences and adjust default positions
+2. **Multi-Balloon Support**: Allow multiple balloons with intelligent stacking
+3. **Animation Transitions**: Smooth transitions when repositioning
+4. **Collision Detection**: Avoid overlapping with other UI elements
+5. **Responsive Sizing**: Dynamic balloon sizing based on content length
+6. **Accessibility**: Enhanced positioning for screen readers and high contrast modes
