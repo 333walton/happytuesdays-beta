@@ -1,77 +1,110 @@
 const commits = `
 ======================================================
->>HYDRA98 CHANGELOG.TXT
+>>HAPPY TUESDAYS CHANGELOG.TXT
 ======================================================
-[2025-06-08]  a65f4a8  - .
+[2025-07-02]  efbe12d  - file explorer
+[2025-07-02]  2119bbc  - file explorer cubone
+[2025-07-01]  fa569d8  - settings fix
+[2025-07-01]  7f84644  - agent select start menu
+[2025-07-01]  9625425  - start menu
+[2025-07-01]  c686eee  - test
+[2025-07-01]  c2dec8d  - more start menu
+[2025-07-01]  5c2ea09  - feeds
+[2025-07-01]  3d58985  - start menu
+[2025-07-01]  6e51f99  - start menu refresh and cycle detection safeguards
+[2025-06-29]  c06e676  - neo4j mcp
+[2025-06-29]  3aa4915  - queries added
+[2025-06-29]  6542c6b  - neo4j improvements
+[2025-06-29]  06c2a3d  - neo4j setup
+[2025-06-24]  af09921  - rss
+[2025-06-24]  b81f59b  - WindowsLaund pos dt
+[2025-06-24]  8c72fda  - starfield2 debug
+[2025-06-24]  bd48568  - controls panel bug fix
+[2025-06-24]  938fd49  - context menu
+[2025-06-24]  2b57e57  - genie removed
+[2025-06-21]  843baf8  - crt mobile
+[2025-06-21]  df4ed8d  - crt task mngr
+[2025-06-20]  555cd5f  - more css
+[2025-06-20]  00008dd  - css
+[2025-06-20]  7f96448  - clippyfaq
+[2025-06-20]  484d7e6  - chatbot v1
+[2025-06-20]  6581ac3  - this got the webchat working again
+[2025-06-18]  6010aca  - botpress progress
+[2025-06-18]  1adecd9  - (testing)
+[2025-06-17]  d75c7a4  - botpress prog
+[2025-06-17]  6a92f3e  - mobile pressbot
+[2025-06-16]  10f3a43  - pressbot v2
+[2025-06-16]  e5988d5  - pressbot
+[2025-06-15]  db2b5b9  - chat resize fix
+[2025-06-15]  056d0df  - submenu pos
+[2025-06-15]  6355d68  - refactor fixes
+[2025-06-15]  4ccecd9  - Post-refactoring state - balloon positioning changed, botpress chat missing
+[2025-06-14]  1c1a40f  - botpress chat
+[2025-06-13]  a1552e9  - agent swapping logic
+[2025-06-12]  8e37af1  - agent-aware positioning v1
+[2025-06-12]  43adf0c  - provider and positioning fixes
+[2025-06-12]  8fbfdfd  - positioning file modulate
+[2025-06-12]  e8d9582  - revert
+[2025-06-11]  57fd94f  - clippy agent bugs
+[2025-06-10]  5e19141  - dt agents styling
+[2025-06-10]  813b4fe  - positioning fixes for new agents
+[2025-06-10]  eb1f439  - universal agent rules
+[2025-06-10]  892d49a  - more agent changes
+[2025-06-10]  5accb51  - agent changes (tricky)
+[2025-06-09]  bef1d6a  - mobile clippyqpt
+[2025-06-09]  ee7c457  - vertical chat balloon drag
+[2025-06-09]  a568b52  - txt css
+[2025-06-09]  66812f6  - txt files
+[2025-06-09]  1f6de10  - notepad content updates
+[2025-06-09]  m16817f  - m/dt menu arrows
+[2025-06-08]  d769849  - webkit
+[2025-06-08]  f327297  - webkit icons
+[2025-06-08]  84c796f  - context menu dt/m css
+[2025-06-08]  2e3aec2  - dynamic positioning
+[2025-06-08]  636f2a8  - submenus
+[2025-06-08]  2d86887  - submenu fixes
+[2025-06-08]  4f5808e  - mobile double tap detection
+[2025-06-08]  a8bb857  - interaction rules
+[2025-06-08]  cbbabef  - interaction rule refining
 [2025-06-08]  c582932  - txt css
 [2025-06-08]  a081474  - txt files
 [2025-06-08]  1f62d1b  - notepad content updates
 [2025-06-08]  e31e137  - nvdt menu arrows
-[2025-06-08]  c15204f  - .
-[2025-06-08]  77e2b57  - .
 [2025-06-08]  47de6db  - webkit
 [2025-06-08]  f827297  - webkit icons
-[2025-06-08]  3e8aa05  - .
-[2025-06-08]  a42520d  - .
 [2025-06-08]  6471b9f  - context menu dt/m css
-[2025-06-08]  2192f67  - .
-[2025-06-08]  7762e47  - .
 [2025-06-08]  d30f7a3  - dynamic positioning
 [2025-06-08]  2d80a97  - submenus
 [2025-06-08]  9f79d8f  - submenu fixes
 [2025-06-08]  a8b8a07  - double double tap detection
 [2025-06-08]  c89a6ef  - interaction rules
 [2025-06-08]  f4d61a5  - interaction rule refining
-[2025-06-08]  8c414db  - .
-[2025-06-07]  3ad8ce5  - .
 [2025-06-07]  2111e12  - chatballon
-[2025-06-07]  1c6ba02  - .
 [2025-06-07]  5c119ff  - selectors and debugs
 [2025-06-07]  3b0f35f  - rip button balloons
-[2025-06-07]  cb93162  - .
-[2025-06-07]  f8816c5  - .
 [2025-06-07]  6a18264  - Improved Taskbar-Anchored Logic
-[2025-06-07]  274974c  - .
-[2025-06-06]  95db8d8  - .
 [2025-06-06]  7cd8ca2  - ios google app
-[2025-06-06]  354fe41  - .
-[2025-06-06]  55ab555  - .
 [2025-06-06]  2fce5c1  - mobile qa
 [2025-06-06]  e5e53cc  - google app/Chrome
-[2025-06-06]  c3ace3e  - .
 [2025-06-06]  414eb88  - mobile qa
 [2025-06-06]  80f4207  - qa
 [2025-06-06]  30c68ab  - ios
 [2025-06-06]  1193762  - more bugs
-[2025-06-06]  4ac47a7  - .
-[2025-06-06]  cc626af  - .
 [2025-06-06]  9ac407e  - qa
 [2025-06-06]  a211d9c  - qa
-[2025-06-06]  3ca80ac  - .
 [2025-06-06]  0e8e5c6  - qa
-[2025-06-06]  dce73c2  - .
-[2025-06-06]  8fac165  - .
 [2025-06-06]  97ba3e3  - clippy pos
-[2025-06-06]  dc346f5  - .
 [2025-06-06]  bb8b56f  - mobile
-[2025-06-06]  ab79b92  - .
-[2025-06-06]  5bc8f7e  - .
 [2025-06-06]  f861ba4  - taskbar pos logic
 [2025-06-06]  1607ba1  - mobile browser positionings
 [2025-06-06]  6fabe5b  - scale bugs
-[2025-06-06]  1e5aa37  - .
 [2025-06-06]  ce55bb8  - custom tooltips
 [2025-06-06]  8ea53ba  - mobile quickstart
-[2025-06-05]  8e333e2  - .
 [2025-06-05]  7e8f426  - quicklaunch shortcut
 [2025-06-05]  a8e53c4  - hide/show
 [2025-06-05]  4b8de2f  - double-tap
 [2025-06-05]  c415397  - webkit keyboard
-[2025-06-05]  24577c8  - .
-[2025-06-05]  9e424eb  - .
 [2025-06-05]  8d8bb4c  - more menu css
-[2025-06-05]  c356476  - .
-[2025-06-05]  f5db472  - .
 [2025-06-05]  f8f4373  - menu css
 [2025-06-04]  82e2314  - menu css
 [2025-06-04]  4becf86  - context menu scss
@@ -79,157 +112,111 @@ const commits = `
 [2025-06-04]  773b3a2  - scss balloons
 [2025-06-04]  5a22aff  - mobile balloon scss
 [2025-06-04]  7ae6cd8  - balloon sizing mobile/dt
-[2025-06-04]  d10fe11  - .
 [2025-06-04]  c186972  - mobile css
 [2025-06-04]  c591e3b  - clippy v10000
 [2025-06-04]  bce1447  - clippy css
 [2025-06-02]  617fe4b  - pos2
 [2025-06-02]  e180b85  - balloon pos
 [2025-05-31]  3ce6d36  - css
-[2025-05-31]  eba125   - .
 [2025-05-30]  3e058fe  - css
 [2025-05-30]  7ffb413  - clippy menu css
 [2025-05-30]  6b4de8d  - Fix context menu with React Portal approach
-[2025-05-30]  4da277f  - .
 [2025-05-30]  7085e04  - some clippy balloon resizing and dt interaction fixes
 [2025-05-29]  1d7861f  - clippy chat edits
 [2025-05-29]  e776eb7  - prog
 [2025-05-28]  de77e42  - bin icons
-[2025-05-28]  8cd345c  - .
-[2025-05-28]  7251518  - .
 [2025-05-28]  1b8f0af  - clippy drag safari
 [2025-05-28]  4d5e938  - lockfunlock
 [2025-05-28]  c501e4d  - randomizer v1
-[2025-05-28]  fc1191a  - .
 [2025-05-28]  be13dc9  - css
 [2025-05-28]  7e42f78  - visibilityAmp v1
-[2025-05-27]  3dfbc35  - .
-[2025-05-27]  23eeffe  - .
 [2025-05-27]  146f7d2  - btns
 [2025-05-27]  5af8b63  - lock/hide buttons v1
 [2025-05-27]  35ad647  - md files update
-[2025-05-27]  5d1fb6   - .
 [2025-05-27]  74de738  - css
 [2025-05-27]  742e178  - visibilityAmp v1
-[2025-05-26]  6f8716e  - .
-[2025-05-26]  7708576  - .
 [2025-05-26]  106f732  - btns
 [2025-05-26]  5af8b63  - lock/hide buttons v1
 [2025-05-26]  534647c  - md files update
 [2025-05-25]  671ed6c  - clippy v2
 [2025-05-25]  4a79bd7  - Merge branch 'main' of https://github.com/hydraburn-007/hydraOS
-[2025-05-25]  f9ac1bd  - .
 [2025-05-25]  1bc1b18  - revert
-[2025-05-24]  d85f404  - .
 [2025-05-24]  7e590bb  - bad clippy
 [2025-05-24]  1078d4f  - Fix to clippy position drift during window resize
 [2025-05-24]  c579e0b  - clippy css
 [2025-05-24]  4f980c4  - startupShutdown sequence clippy
-[2025-05-24]  ff4b162  - .
 [2025-05-24]  fee757e  - bad clippy
 [2025-05-24]  c518808  - Fix ClippyAssistant test file errors and React warnings
 [2025-05-24]  0cc38af  - markdowns added and fix ESLint errors in ClippyAssistant test files
 [2025-05-24]  2361673  - centralize Clippy positioning and fix mobile interaction issues
-[2025-05-24]  714fd0f  - .
 [2025-05-24]  798b57f  - clippy v1000
 [2025-05-24]  2588e25  - centralized position controls
 [2025-05-24]  1a07736  - clippy mobile
-[2025-05-24]  8e9307f  - .
-[2025-05-24]  3391e16  - .
 [2025-05-24]  13968cf  - based clippy
 [2025-05-24]  1374b59  - clippy
-[2025-05-24]  4893dd2  - .
-[2025-05-24]  1818a4f - Complete ClippyAssistant migration with performance improvements
-[2025-05-24]  6dc1cbf - clippy
-[2025-05-23]  6a9c276 - backup before ClippyAssistant migration
-[2025-05-23]  ae3bb22 - .
-[2025-05-21]  814de9f - readme
-[2025-05-21]  c67b8e4 - gits
-[2025-05-21]  2c7ba95 - .
-[2025-05-21]  6b0499f - .
-[2025-05-21]  b851c47 - clippy fix v1
-[2025-05-20]  8ea9331 - .
-[2025-05-20]  157367d - menulist
-[2025-05-20]  5863a9e - clippy fix
-[2025-05-20]  d347e9f - clippy
-[2025-05-20]  1086ba6 - readme
-[2025-05-20]  ace5153 - readme and debugs
-[2025-05-19]  b2d844d - clippy
-[2025-05-19]  21c379c - .
-[2025-05-19]  c6d6fd3 - .
-[2025-05-19]  4ded0c8 - clippy
-[2025-05-18]  74d8a71 - more clippy
-[2025-05-18]  171b2a4 - headache
-[2025-05-18]  7ab843a - css
+[2025-05-24]  1818a4f  - Complete ClippyAssistant migration with performance improvements
+[2025-05-24]  6dc1cbf  - clippy
+[2025-05-23]  6a9c276  - backup before ClippyAssistant migration
+[2025-05-21]  814de9f  - readme
+[2025-05-21]  c67b8e4  - gits
+[2025-05-21]  b851c47  - clippy fix v1
+[2025-05-20]  157367d  - menulist
+[2025-05-20]  5863a9e  - clippy fix
+[2025-05-20]  d347e9f  - clippy
+[2025-05-20]  1086ba6  - readme
+[2025-05-20]  ace5153  - readme and debugs
+[2025-05-19]  b2d844d  - clippy
+[2025-05-19]  4ded0c8  - clippy
+[2025-05-18]  74d8a71  - more clippy
+[2025-05-18]  171b2a4  - headache
+[2025-05-18]  7ab843a  - css
 [2025-05-18]  6a18623  - clippy
 [2025-05-16]  333ec4b  - clippy
-[2025-05-16]  95d45b3  - .
 [2025-05-16]  8bd8b55  - clippy
-[2025-05-16]  5db45fa  - .
 [2025-05-16]  38d7319  - utm refresh
-[2025-05-16]  8db5d4c  - .
-[2025-05-16]  cc6899a  - .
 [2025-05-16]  f659af6  - revert to db8e3d8
 [2025-05-15]  db8e3d8  - more css
 [2025-05-15]  6f9a39b  - css
 [2025-05-14]  66d22dc  - css
 [2025-05-14]  4d71b53  - UTM Tool
-[2025-05-14]  63adbf4  - .
 [2025-05-14]  6c4377e  - welcome msg
 [2025-05-13]  7c819dd  - small bios
 [2025-05-13]  77883a8  - bios update
-[2025-05-13]  1acfa81  - .
 [2025-05-13]  936ccab  - pipes
 [2025-05-13]  421323b  - debug and monitorpanel styles
 [2025-05-13]  c010b02  - monitorcontrols refresh big
 [2025-05-09]  75b83e4  - Remove Maze and fix BouncyBallsScreensaver
 [2025-05-09]  9777fd2  - bouncyballs
-[2025-05-08]  182f41a  - .
 [2025-05-08]  a7c4a1b  - monitor controls big
-[2025-05-07]  772bd6d  - .
 [2025-05-07]  615dfc2  - css
 [2025-05-07]  db4b619  - monitor css
 [2025-05-07]  1f0913b  - monitorview and videotest big
 [2025-05-06]  db5bb0d  - hookscore
 [2025-05-06]  26b734f  - starfield2
 [2025-05-06]  10667d7  - ss mode
-[2025-05-06]  cef8a7e  - .
-[2025-05-06]  fede4bf  - .
 [2025-05-06]  ef6efb1  - monitor css
 [2025-05-06]  c1cf716  - monitor power btn
-[2025-05-06]  3f81b0c  - .
 [2025-05-05]  b4849f6  - global fixes and monitorview
 [2025-05-05]  dedb3d4  - monitorview updates
 [2025-05-05]  be7d8be  - monitor mode
 [2025-05-05]  3edb5eb  - fix case sensitivity for MonitorView/index.js
 [2025-05-05]  8ad13d2  - small
 [2025-05-05]  c874e7b  - small
-[2025-05-05]  5138dbd  - .
-[2025-05-05]  8a133bf  - .
 [2025-05-05]  d0adeec  - new components
 [2025-05-05]  2799fa7  - doodle submit
 [2025-05-05]  3edefd1  - doodle submit
 [2025-05-04]  638bba5  - ascii banners options/css
-[2025-05-04]  5aad2bf  - .
-[2025-05-03]  162bfc7  - .
 [2025-05-03]  4f32d1b  - vid players
-[2025-05-03]  3489ce8  - .
 [2025-05-03]  a58de71  - css
 [2025-05-03]  788c659  - ascii css
 [2025-05-03]  93a88bd  - ascii banners
 [2025-05-03]  667621c  - ascii
 [2025-05-02]  278a65b  - pre-roll player
-[2025-05-02]  973acd7  - .
-[2025-05-02]  1d9bd42  - .
 [2025-05-02]  35d04a2  - m compat
-[2025-05-02]  28c1c87  - .
-[2025-05-02]  ac2f436  - .
 [2025-05-02]  6d15d8e  - ismobile
 [2025-05-02]  2b70e22  - winamp stubborn css
 [2025-05-02]  e3155fc  - ismobile
 [2025-05-02]  85fa448  - winamp stubborn css
-[2025-05-02]  7b78803  - .
-[2025-05-01]  ea673f1  - .
 [2025-05-01]  78c665f  - winamp
 [2025-05-01]  78c665f  - winamp
 [2025-05-01]  26f4079  - winamp visualizer
@@ -237,7 +224,6 @@ const commits = `
 [2025-04-30]  7674be9  - small
 [2025-04-30]  61f4495  - webamp
 [2025-04-29]  b518440  - vast rough
-[2025-04-29]  a795e4c  - .
 [2025-04-29]  95729fb  - small
 [2025-04-29]  8659abb  - webkit stuff
 [2025-04-28]  e2a4c5f  - wmp update
@@ -246,8 +232,6 @@ const commits = `
 [2025-04-25]  9d7d58a  - vid player and calc big
 [2025-04-24]  b9edcaf  - playwright & mediachrome
 [2025-04-24]  4c5dab8  - mediachrome player configs
-[2025-04-23]  d508df9  - .
-[2025-04-23]  d508df9  - .
 [2025-04-23]  bd7d5c4  - v mobile test
 [2025-04-23]  9a612c9  - video player mobile
 [2025-04-23]  054828c  - vid players
@@ -272,8 +256,6 @@ const commits = `
 [2025-04-17]  fa6e5b6  - jsdos
 [2025-04-17]  f8f3893  - small
 [2025-04-17]  f8f3893  - small
-[2025-04-17]  6617b20  - .
-[2025-04-17]  6617b20  - .
 [2025-04-16]  1524077  - css
 [2025-04-16]  7d1629c  - ascii maze dt
 [2025-04-15]  43691f0  - rebel command
