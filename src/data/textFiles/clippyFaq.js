@@ -1,6 +1,13 @@
 export default `
 Welcome to Happy Tuesdays' AI Assistant System!
-══════════════════════════════════════
+╔════════════════════════════════════════╗
+║               ABOUT THIS SYSTEM                ║
+╚════════════════════════════════════════╝
+
+This is Happy Tuesdays' modernized recreation of
+Microsoft Agent technology, bringing Windows 98
+nostalgia into the modern web with enhanced AI
+capabilities and specialized expertise.
 
 Each AI assistant has been carefully crafted with
 unique personalities and specialized knowledge
@@ -134,22 +141,6 @@ explore everything Happy Tuesdays has to offer.
 • Try switching agents if one becomes unresponsive
 • Refresh the page if you encounter persistent
   issues
-
-╔════════════════════════════════════════╗
-║               ABOUT THIS SYSTEM                ║
-╚════════════════════════════════════════╝
-
-
-This is Happy Tuesdays' modernized recreation of
-Microsoft Agent technology, bringing Windows 98
-nostalgia into the modern web with enhanced AI
-capabilities and specialized expertise.
-
-Each AI assistant has been carefully crafted with
-unique personalities and specialized knowledge
-aligned with our four content pillars, providing
-you with engaging and helpful support as you
-explore everything Happy Tuesdays has to offer.
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
