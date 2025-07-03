@@ -632,12 +632,12 @@
     // Ensure toolbar buttons container has minimum width
     .OptionsList {
       min-width: 260px !important;
-      width: 100% !important;
+      //width: 98% !important;
     }
 
     // Fix overflow on mobile
     .WindowExplorer__options {
-      width: 100%;
+      //width: 100%;
       min-width: 260px; // Ensure minimum width for all buttons
       overflow-x: auto !important; // Allow horizontal scrolling
       overflow-y: hidden !important;
@@ -649,6 +649,7 @@
         flex-wrap: nowrap !important;
         width: auto !important; // Let it size to content
         min-width: 260px; // Match parent min-width
+        max-height: 37px; // Ensure it doesn't grow too tall
         display: flex !important;
         justify-content: flex-start !important;
         padding-right: 10px; // Add some padding for the last button
@@ -810,9 +811,22 @@
       opacity: 1 !important;
     }
 
-    .tree-panel,
-    .file-panel {
+    // Only apply display:flex to .tree-panel and .file-panel when NOT in list/details view
+    .tree-panel {
       display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      background: #ffffff !important;
+    }
+    .file-panel:not(.list):not(.details) {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      background: #ffffff !important;
+    }
+    .file-panel.list,
+    .file-panel.details {
+      display: block !important;
       visibility: visible !important;
       opacity: 1 !important;
       background: #ffffff !important;
