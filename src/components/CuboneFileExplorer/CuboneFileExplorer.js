@@ -9,17 +9,27 @@ import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
 class CuboneFileExplorer extends Component {
-  // Handle row click/tap for mobile (first tap selects, second tap opens)
+  // Handle row click/tap: always select on first click/tap, open on double tap (mobile) or double click (desktop)
   handleRowClick = (name, item, e) => {
-    if (this.state.isMobile) {
-      // If not selected, select only
-      if (!this.state.selectedFiles.includes(name)) {
-        this.setState({ selectedFiles: [name] });
-      } else {
-        // Already selected, open
-        this.handleDoubleClick(name, item);
-      }
+    console.log("handleRowClick called:", {
+      name,
+      item,
+      event: e,
+      isMobile: this.state.isMobile,
+    });
+    if (e && typeof e.stopPropagation === "function") {
+      e.stopPropagation();
     }
+    // Always select on first click/tap
+    if (!this.state.selectedFiles.includes(name)) {
+      this.setState({ selectedFiles: [name] });
+      return;
+    }
+    // On mobile, second tap opens
+    if (this.state.isMobile) {
+      this.handleDoubleClick(name, item);
+    }
+    // On desktop, do nothing (double click will open)
   };
   constructor(props) {
     super(props);
@@ -828,85 +838,112 @@ class CuboneFileExplorer extends Component {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(state.currentFolder).map(([name, item]) => (
-                      <tr
-                        key={name}
-                        draggable
-                        onDragStart={(e) => this.handleDragStart(e, name, item)}
-                        onDragEnd={this.handleDragEnd}
-                        onDoubleClick={() => this.handleDoubleClick(name, item)}
-                        onClick={(e) => this.handleRowClick(name, item, e)}
-                        onTouchEnd={(e) => this.handleRowClick(name, item, e)}
-                        className={`file-row${
+                    {Object.entries(state.currentFolder).map(([name, item]) => {
+                      // Attach only onClick for desktop, only onTouchEnd for mobile
+                      const rowProps = {
+                        key: name,
+                        draggable: true,
+                        onDragStart: (e) => this.handleDragStart(e, name, item),
+                        onDragEnd: this.handleDragEnd,
+                        onDoubleClick: () => this.handleDoubleClick(name, item),
+                        className: `file-row${
                           state.selectedFiles.includes(name) ? " selected" : ""
-                        }`}
-                      >
-                        <td>
-                          <img
-                            src={
-                              icons[item.icon] ||
-                              (item.type === "folder"
-                                ? icons.folder16
-                                : icons.notepadFile16)
-                            }
-                            alt=""
-                            className="file-icon"
-                          />
-                          {name}
-                        </td>
-                        <td>
-                          {item.size || (item.type === "folder" ? "" : "0 KB")}
-                        </td>
-                        <td>
-                          {item.type === "folder" ? "File Folder" : "File"}
-                        </td>
-                        {state.viewMode === "details" && (
-                          <td>{item.modified || "12/25/2024"}</td>
-                        )}
-                      </tr>
-                    ))}
+                        }`,
+                      };
+                      if (state.isMobile) {
+                        rowProps.onTouchEnd = (e) =>
+                          this.handleRowClick(name, item, e);
+                      } else {
+                        rowProps.onClick = (e) =>
+                          this.handleRowClick(name, item, e);
+                      }
+                      return (
+                        <tr {...rowProps}>
+                          <td>
+                            <img
+                              src={
+                                icons[item.icon] ||
+                                (item.type === "folder"
+                                  ? icons.folder16
+                                  : icons.notepadFile16)
+                              }
+                              alt=""
+                              className="file-icon"
+                            />
+                            {name}
+                          </td>
+                          <td>
+                            {item.size ||
+                              (item.type === "folder" ? "" : "0 KB")}
+                          </td>
+                          <td>
+                            {item.type === "folder" ? "File Folder" : "File"}
+                          </td>
+                          {state.viewMode === "details" && (
+                            <td>{item.modified || "12/25/2024"}</td>
+                          )}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               ) : (
                 <div className="icon-grid">
-                  {Object.entries(state.currentFolder).map(([name, item]) => (
-                    <div
-                      key={name}
-                      draggable
-                      onDragStart={(e) => this.handleDragStart(e, name, item)}
-                      onDragEnd={this.handleDragEnd}
-                      onDragOver={(e) => {
+                  {Object.entries(state.currentFolder).map(([name, item]) => {
+                    const iconWrapperProps = {
+                      key: name,
+                      draggable: true,
+                      onDragStart: (e) => this.handleDragStart(e, name, item),
+                      onDragEnd: this.handleDragEnd,
+                      onDragOver: (e) => {
                         if (item.type === "folder") {
                           this.handleDragOver(e);
                           e.currentTarget.classList.add("drag-over");
                         }
-                      }}
-                      onDragLeave={(e) => {
+                      },
+                      onDragLeave: (e) => {
                         e.currentTarget.classList.remove("drag-over");
-                      }}
-                      onDrop={(e) => {
+                      },
+                      onDrop: (e) => {
                         e.currentTarget.classList.remove("drag-over");
                         if (item.type === "folder") {
                           this.handleDrop(e, name, item);
                         }
-                      }}
-                      className={`file-item-wrapper ${
-                        item.type === "folder" ? "drop-target" : ""
-                      }`}
-                    >
-                      <ExplorerIcon
-                        title={name}
-                        icon={
-                          icons[item.icon] ||
-                          (item.type === "folder"
-                            ? icons.folder32
-                            : icons.notepadFile32)
-                        }
-                        onDoubleClick={() => this.handleDoubleClick(name, item)}
-                        className={state.viewMode}
-                      />
-                    </div>
-                  ))}
+                      },
+                      className: `file-item-wrapper${
+                        item.type === "folder" ? " drop-target" : ""
+                      }${
+                        state.selectedFiles.includes(name) ? " selected" : ""
+                      }`,
+                    };
+                    // Attach handlers to both wrapper and icon for reliability
+                    const explorerIconProps = {
+                      title: name,
+                      icon:
+                        icons[item.icon] ||
+                        (item.type === "folder"
+                          ? icons.folder32
+                          : icons.notepadFile32),
+                      onDoubleClick: () => this.handleDoubleClick(name, item),
+                      className: state.viewMode,
+                    };
+                    if (state.isMobile) {
+                      iconWrapperProps.onTouchEnd = (e) =>
+                        this.handleRowClick(name, item, e);
+                      explorerIconProps.onTouchEnd = (e) =>
+                        this.handleRowClick(name, item, e);
+                    } else {
+                      iconWrapperProps.onClick = (e) =>
+                        this.handleRowClick(name, item, e);
+                      explorerIconProps.onClick = (e) =>
+                        this.handleRowClick(name, item, e);
+                    }
+                    return (
+                      <div {...iconWrapperProps}>
+                        <ExplorerIcon {...explorerIconProps} />
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
