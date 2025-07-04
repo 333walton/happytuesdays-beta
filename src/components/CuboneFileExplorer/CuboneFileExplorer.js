@@ -449,6 +449,430 @@ class CuboneFileExplorer extends Component {
                     },
                   },
                 },
+                "Builder Docs": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    Motivation: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "daily_quotes.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          content: "Daily motivational quotes for builders...",
+                          size: "5 KB",
+                          component: "Notepad",
+                        },
+                        "success_stories.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          content:
+                            "Inspiring success stories from the community...",
+                          size: "12 KB",
+                          component: "Notepad",
+                        },
+                      },
+                    },
+                    Resources: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "starter_templates.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          size: "8 KB",
+                          component: "Notepad",
+                        },
+                        "tools_list.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          size: "6 KB",
+                          component: "Notepad",
+                        },
+                      },
+                    },
+                  },
+                },
+                "Art Design Docs": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    "Color Theory": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "color_basics.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          size: "10 KB",
+                          component: "Notepad",
+                        },
+                        "palette_generator.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          size: "4 KB",
+                          component: "Notepad",
+                        },
+                      },
+                    },
+                    Typography: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "font_pairing.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          size: "7 KB",
+                          component: "Notepad",
+                        },
+                        "readability_guide.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          size: "5 KB",
+                          component: "Notepad",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            Tools: {
+              type: "folder",
+              icon: "folderProgram",
+              children: {
+                "Creative Tools": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    Native: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "svg_trace.exe": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "2.5 MB",
+                        },
+                        "pixel_doodles.exe": {
+                          type: "file",
+                          icon: "wangimg32",
+                          size: "1.8 MB",
+                          component: "IframeWindow",
+                          data: {
+                            src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
+                          },
+                        },
+                        "paint_doodles.exe": {
+                          type: "file",
+                          icon: "paint16",
+                          size: "1.5 MB",
+                          component: "IframeWindow",
+                          data: {
+                            src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
+                          },
+                        },
+                      },
+                    },
+                    "3rd Party": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "photoshop_link.url": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                        "figma_link.url": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                      },
+                    },
+                  },
+                },
+                "Marketing Tools": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    Native: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "utm_tracker.exe": {
+                          type: "file",
+                          icon: "utm24",
+                          size: "856 KB",
+                          component: "UTMTool",
+                        },
+                        "preroll_toolkit.exe": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "3.2 MB",
+                          component: "VideoPlayerMobile",
+                        },
+                        "newsletter_prompt.exe": {
+                          type: "file",
+                          icon: "newsletter16",
+                          size: "512 KB",
+                        },
+                      },
+                    },
+                    "3rd Party": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "mailchimp_link.url": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                        "hubspot_link.url": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                      },
+                    },
+                  },
+                },
+                "Builder Tools": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    Native: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "project_manager.exe": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "2.1 MB",
+                        },
+                        "openrouter_ranks.exe": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "1.5 MB",
+                        },
+                        "automation_checker.exe": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "980 KB",
+                        },
+                      },
+                    },
+                    "3rd Party": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "github_link.url": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                        "vercel_link.url": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                      },
+                    },
+                  },
+                },
+                "Art Design Tools": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    Native: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "gallery_finder.exe": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "1.2 MB",
+                        },
+                        "ascii_banners.exe": {
+                          type: "file",
+                          icon: "asciibanner16",
+                          size: "456 KB",
+                          component: "ASCIIText",
+                        },
+                        "trends_tracker.exe": {
+                          type: "file",
+                          icon: "chart16",
+                          size: "1.8 MB",
+                        },
+                      },
+                    },
+                    "3rd Party": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "behance_link.url": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                        "dribbble_link.url": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            Artifacts: {
+              type: "folder",
+              icon: "ascii24",
+              children: {
+                "Still Frames": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    "Pixel Art": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "retro_sprite.png": {
+                          type: "file",
+                          icon: "wangimg32",
+                          size: "24 KB",
+                        },
+                        "8bit_landscape.png": {
+                          type: "file",
+                          icon: "wangimg32",
+                          size: "32 KB",
+                        },
+                      },
+                    },
+                    "ASCII Art": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "dragon.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          content: "ASCII art dragon...",
+                          size: "8 KB",
+                          component: "Notepad",
+                        },
+                        "castle.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          content: "ASCII art castle...",
+                          size: "12 KB",
+                          component: "Notepad",
+                        },
+                      },
+                    },
+                    "3D Rendered": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "cube_render.png": {
+                          type: "file",
+                          icon: "wangimg32",
+                          size: "156 KB",
+                        },
+                        "sphere_demo.png": {
+                          type: "file",
+                          icon: "wangimg32",
+                          size: "178 KB",
+                        },
+                      },
+                    },
+                  },
+                },
+                Animated: {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    "Pixel Art": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "walking_sprite.gif": {
+                          type: "file",
+                          icon: "wangimg32",
+                          size: "45 KB",
+                        },
+                        "fire_animation.gif": {
+                          type: "file",
+                          icon: "wangimg32",
+                          size: "38 KB",
+                        },
+                      },
+                    },
+                    Demoscenes: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "tunnel_effect.exe": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "256 KB",
+                        },
+                        "plasma_demo.exe": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "312 KB",
+                        },
+                      },
+                    },
+                  },
+                },
+                Interactive: {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    "WebGL Experiments": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "particle_system.html": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "45 KB",
+                        },
+                        "3d_visualizer.html": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "62 KB",
+                        },
+                      },
+                    },
+                    "ASCII Art": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "flames.exe": {
+                          type: "file",
+                          icon: "burn16",
+                          size: "128 KB",
+                          component: "Burn",
+                        },
+                        "pipes.exe": {
+                          type: "file",
+                          icon: "pipes16",
+                          size: "96 KB",
+                          component: "Pipes",
+                        },
+                        "hourglass.exe": {
+                          type: "file",
+                          icon: "sand16",
+                          size: "112 KB",
+                          component: "Sand",
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
           },
