@@ -1,28 +1,20 @@
 import * as icons from "../icons";
-// Remove these imports to avoid circular dependencies
-// import commits from "./textFiles/commits";
-// import faq from "./textFiles/faq";
 import clippyFaq from "./textFiles/clippyFaq";
-import FileBrowser from "../components/FileBrowser/FileBrowser";
 
-// At the top of the file, add the agent change handler
+// Agent change handler
 window.onAgentChange = (newAgent) => {
   console.log(`🎯 Start Menu: Changing agent to ${newAgent}`);
 
-  // Use the same logic as ClippyContextMenu
   if (window.setCurrentAgent) {
     window.setCurrentAgent(newAgent);
   }
 
-  // Update global state
   window.currentAgent = newAgent;
 
-  // Trigger menu refresh
   window.dispatchEvent(
     new CustomEvent("agentChanged", { detail: { agent: newAgent } })
   );
 
-  // Hide any open balloons during transition
   if (window.hideClippyCustomBalloon) {
     window.hideClippyCustomBalloon();
   }
@@ -30,7 +22,6 @@ window.onAgentChange = (newAgent) => {
     window.hideChatBalloon();
   }
 
-  // Play welcome animation
   if (window.clippy?.play) {
     setTimeout(() => {
       window.clippy.play("Wave");
@@ -44,30 +35,26 @@ window.onAgentChange = (newAgent) => {
     }, 200);
   }
 
-  // Special handling for Genius
   if (newAgent === "Genius") {
     window.geniusShouldAutoOpenChat = true;
   }
 };
 
-// Utility function to detect mobile devices
+// Utility functions
 const isMobile = () =>
   /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-// Function to get current agent from global state
 const getCurrentAgent = () => {
   return window.currentAgent || "Clippy";
 };
 
-// Function to create AI Assistants menu with dynamic checkmarks
+// AI Assistants menu with dynamic checkmarks
 const createAIAssistants = () => {
   const currentAgent = getCurrentAgent();
 
-  // Helper to generate onClick for each agent
   const selectAgent = (agentName) => () => {
     window.currentAgent = agentName;
     if (window.onAgentChange) window.onAgentChange(agentName);
-    // Dispatch event to trigger start menu refresh
     window.dispatchEvent(new Event("agentChanged"));
   };
 
@@ -127,9 +114,9 @@ const createAIAssistants = () => {
   ];
 };
 
-// Use a function to get aiAssistants dynamically
 const getAIAssistants = () => createAIAssistants();
 
+// Programs section
 const accessories = [
   {
     title: "Calculator",
@@ -146,12 +133,11 @@ const accessories = [
   },
 ];
 
-// Modify programs to use dynamic AI assistants
 const getPrograms = () => [
   {
     title: "AI Assistants",
     icon: icons.folderProgram16,
-    options: getAIAssistants(), // Call function to get current state
+    options: getAIAssistants(),
   },
   {
     title: "Accessories",
@@ -213,6 +199,7 @@ const getPrograms = () => [
   },
 ];
 
+// Favorites section
 const myFavorites = [
   {
     title: "Start Menu Builder™",
@@ -234,9 +221,7 @@ const myFavorites = [
   },
 ];
 
-const communityFavorites = [
-  // Placeholder for community favorites
-];
+const communityFavorites = [];
 
 const favorites = [
   {
@@ -251,6 +236,7 @@ const favorites = [
   },
 ];
 
+// Tools section - Updated structure
 const newsFeeds = [
   {
     title: "Tech Feed",
@@ -278,6 +264,66 @@ const newsFeeds = [
   },
 ];
 
+// Creative Tools - showing 3 tools + View Catalogue
+const creativeTools = [
+  {
+    title: "SVG Trace",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "Pixel Doodles",
+    icon: icons.wangimg32,
+    component: "IframeWindow",
+    isDisabled: false,
+    data: {
+      src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
+      disableAlert: true,
+      style: {
+        width: "100%",
+        height: "100%",
+      },
+    },
+  },
+  {
+    title: "Paint Doodles",
+    icon: icons.paint16,
+    component: "IframeWindow",
+    data: {
+      src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
+      disableAlert: true,
+      style: {
+        width: "100%",
+        height: "100%",
+      },
+    },
+  },
+  {
+    title: "View Catalogue",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "Native",
+        icon: icons.folder16,
+        component: "CuboneFileExplorer",
+        data: {
+          initialPath: "C:/Tools/Creative Tools/Native",
+        },
+      },
+      {
+        title: "3rd Party",
+        icon: icons.folder16,
+        component: "CuboneFileExplorer",
+        data: {
+          initialPath: "C:/Tools/Creative Tools/3rd Party",
+        },
+      },
+    ],
+  },
+];
+
+// Marketing Tools - showing 3 tools + View Catalogue
 const marketingTools = [
   {
     title: "UTM Tracker",
@@ -301,9 +347,38 @@ const marketingTools = [
     href: "",
     isDisabled: true,
   },
+  {
+    title: "View Catalogue",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "Native",
+        icon: icons.folder16,
+        component: "CuboneFileExplorer",
+        data: {
+          initialPath: "C:/Tools/Marketing Tools/Native",
+        },
+      },
+      {
+        title: "3rd Party",
+        icon: icons.folder16,
+        component: "CuboneFileExplorer",
+        data: {
+          initialPath: "C:/Tools/Marketing Tools/3rd Party",
+        },
+      },
+    ],
+  },
 ];
 
-const aiUtilities = [
+// Builder Tools - showing 3 tools + View Catalogue
+const builderTools = [
+  {
+    title: "Project Management",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
   {
     title: "Open Router Ranks",
     icon: icons.vid16,
@@ -316,73 +391,31 @@ const aiUtilities = [
     component: "",
     isDisabled: true,
   },
-];
-
-const builderTools = [
   {
-    title: "Project Management",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-  {
-    title: "AI Utilities",
+    title: "View Catalogue",
     icon: icons.folder16,
-    options: aiUtilities,
-  },
-];
-
-const doodleOptions = [
-  {
-    title: "Paint Doodles",
-    icon: icons.paint16,
-    component: "IframeWindow",
-    data: {
-      src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
-      disableAlert: true,
-      style: {
-        width: "100%",
-        height: "100%",
-      },
-    },
-  },
-  {
-    title: "Pixel Doodles",
-    icon: icons.wangimg32,
-    component: "IframeWindow",
-    isDisabled: false,
-    data: {
-      src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
-      disableAlert: true,
-      style: {
-        width: "100%",
-        height: "100%",
-      },
-    },
-  },
-  {
-    title: "ASCII Banners",
-    icon: icons.asciibanner16,
-    component: "ASCIIText",
-    isDisabled: false,
-    data: {},
-  },
-  ...(!isMobile()
-    ? [
-        {
-          title: "ASCII Doodles",
-          icon: icons.loaderbat16,
-          component: "IframeWindow",
-          isDisabled: true,
-          data: {
-            src: "https://example.com/ascii-doodes",
-            creator: "https://github.com/example",
-          },
+    options: [
+      {
+        title: "Native",
+        icon: icons.folder16,
+        component: "CuboneFileExplorer",
+        data: {
+          initialPath: "C:/Tools/Builder Tools/Native",
         },
-      ]
-    : []),
+      },
+      {
+        title: "3rd Party",
+        icon: icons.folder16,
+        component: "CuboneFileExplorer",
+        data: {
+          initialPath: "C:/Tools/Builder Tools/3rd Party",
+        },
+      },
+    ],
+  },
 ];
 
+// Art/Design Tools - showing 3 tools + View Catalogue
 const artDesignTools = [
   {
     title: "Art Gallery Finder",
@@ -391,15 +424,39 @@ const artDesignTools = [
     isDisabled: true,
   },
   {
-    title: "Doodles",
-    icon: icons.folder16,
-    options: doodleOptions,
+    title: "ASCII Banners",
+    icon: icons.asciibanner16,
+    component: "ASCIIText",
+    isDisabled: false,
+    data: {},
   },
   {
     title: "Design Trends Tracker",
     icon: icons.chart16,
     component: "",
     isDisabled: true,
+  },
+  {
+    title: "View Catalogue",
+    icon: icons.folder16,
+    options: [
+      {
+        title: "Native",
+        icon: icons.folder16,
+        component: "CuboneFileExplorer",
+        data: {
+          initialPath: "C:/Tools/Art Design Tools/Native",
+        },
+      },
+      {
+        title: "3rd Party",
+        icon: icons.folder16,
+        component: "CuboneFileExplorer",
+        data: {
+          initialPath: "C:/Tools/Art Design Tools/3rd Party",
+        },
+      },
+    ],
   },
 ];
 
@@ -408,6 +465,11 @@ const tools = [
     title: "News Feeds",
     icon: icons.folder16,
     options: newsFeeds,
+  },
+  {
+    title: "Creative Tools",
+    icon: icons.folder16,
+    options: creativeTools,
   },
   {
     title: "Marketing Tools",
@@ -426,161 +488,128 @@ const tools = [
   },
 ];
 
+// Documents section - Updated structure
 const myDocs = [
   {
-    title: "File Manager",
-    icon: icons.computer32,
+    title: "My Videos",
+    icon: icons.folder16,
     component: "CuboneFileExplorer",
-    multiInstance: true,
     data: {
-      initialPath: "C:/My Documents",
-      fileSystem: {
-        "/": {
-          "C:": {
-            type: "folder",
-            icon: "hardDrive",
-            children: {
-              Windows: {
-                type: "folder",
-                icon: "folderWindows",
-                children: {
-                  System32: {
-                    type: "folder",
-                    icon: "folderProgram",
-                    children: {
-                      "notepad.exe": {
-                        type: "file",
-                        icon: "notepadFile",
-                        size: "64 KB",
-                        component: "Notepad",
-                      },
-                    },
-                  },
-                },
-              },
-              "Program Files": {
-                type: "folder",
-                icon: "folderProgram",
-                children: {
-                  Hydra98: {
-                    type: "folder",
-                    icon: "folderProgram",
-                    children: {
-                      "readme.txt": {
-                        type: "file",
-                        icon: "notepadFile",
-                        content:
-                          "Welcome to Hydra98 File Manager!\n\nThis is a demonstration of the integrated file management system.",
-                        size: "2 KB",
-                      },
-                    },
-                  },
-                },
-              },
-              "My Documents": {
-                type: "folder",
-                icon: "myDocuments",
-                children: {
-                  "ASCII Art": {
-                    type: "folder",
-                    icon: "folder32",
-                    children: {
-                      "flames.txt": {
-                        type: "file",
-                        icon: "notepadFile",
-                        size: "1 KB",
-                        component: "Burn",
-                        content: "Double-click to see ASCII flames animation",
-                      },
-                      "pipes.txt": {
-                        type: "file",
-                        icon: "notepadFile",
-                        size: "1 KB",
-                        component: "Pipes",
-                        content: "Double-click to see ASCII pipes animation",
-                      },
-                      "hourglass.txt": {
-                        type: "file",
-                        icon: "notepadFile",
-                        size: "1 KB",
-                        component: "Sand",
-                        content:
-                          "Double-click to see ASCII hourglass animation",
-                      },
-                    },
-                  },
-                  "sample.txt": {
-                    type: "file",
-                    icon: "notepadFile",
-                    content:
-                      "This is a sample text file in the Hydra98 file system.",
-                    size: "1 KB",
-                  },
-                  "image.jpg": {
-                    type: "file",
-                    icon: "paint16",
-                    size: "256 KB",
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
+      initialPath: "C:/My Documents/My Videos",
     },
   },
   {
-    title: "My Videos",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
+    title: "My Music",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/My Documents/My Music",
+    },
   },
   {
-    title: "My Music",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
+    title: "My Notes",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/My Documents/My Notes",
+    },
+  },
+  {
+    title: "Saved Games",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/My Documents/Saved Games",
+    },
+  },
+  {
+    title: "View All",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/My Documents",
+    },
   },
 ];
 
 const techDocs = [
   {
-    title: "Trend Reports",
-    icon: icons.chart16,
-    component: "",
-    isDisabled: true,
+    title: "APIs",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Documents/Tech Docs/APIs",
+    },
   },
-];
-
-const motivation = [
   {
-    title: "Jack Butcher",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
+    title: "Trend Reports",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Documents/Tech Docs/Trend Reports",
+    },
+  },
+  {
+    title: "View All",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Documents/Tech Docs",
+    },
   },
 ];
 
 const builderDocs = [
   {
-    title: "Builder Resources",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-  {
     title: "Motivation",
     icon: icons.folder16,
-    options: motivation,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Documents/Builder Docs/Motivation",
+    },
+  },
+  {
+    title: "Resources",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Documents/Builder Docs/Resources",
+    },
+  },
+  {
+    title: "View All",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Documents/Builder Docs",
+    },
   },
 ];
 
 const artDesignDocs = [
   {
     title: "Color Theory",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Documents/Art Design Docs/Color Theory",
+    },
+  },
+  {
+    title: "Typography",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Documents/Art Design Docs/Typography",
+    },
+  },
+  {
+    title: "View All",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Documents/Art Design Docs",
+    },
   },
 ];
 
@@ -607,6 +636,7 @@ const documents = [
   },
 ];
 
+// Games section
 const dosGames = [
   {
     title: "DOOM",
@@ -702,243 +732,7 @@ const games = [
   },
 ];
 
-const asciiArt = [
-  {
-    title: "Flames",
-    icon: icons.burn16,
-    component: "Burn",
-    multiInstance: true,
-  },
-  {
-    title: "Pipes",
-    icon: icons.pipes16,
-    component: "Pipes",
-    multiInstance: true,
-  },
-  {
-    title: "Hourglass",
-    icon: icons.sand16,
-    component: "Sand",
-    multiInstance: true,
-  },
-  {
-    title: "See More...",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-];
-
-const demoscenes = [
-  {
-    title: "GleEst",
-    type: "ExternalLink",
-    icon: icons.htmlFile16,
-    href: "https://demozoo.org/productions/288839/",
-  },
-  {
-    title: "Micro1k",
-    type: "ExternalLink",
-    icon: icons.htmlFile16,
-    href: "https://demozoo.org/productions/128900/",
-  },
-  {
-    title: "Kishkoid",
-    type: "ExternalLink",
-    icon: icons.htmlFile16,
-    href: "https://demozoo.org/productions/13245/",
-  },
-];
-
-const animated = [
-  {
-    title: "Pixel Art",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-  {
-    title: "Demoscenes",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-];
-
-const stillFrames = [
-  {
-    title: "Pixel Art",
-    icon: icons.folder16,
-    isDisabled: true,
-  },
-  {
-    title: "ASCII Art",
-    icon: icons.folder16,
-    isDisabled: true,
-  },
-  {
-    title: "3D Rendered",
-    icon: icons.folder16,
-    isDisabled: true,
-  },
-];
-
-const interactive = [
-  {
-    title: "WebGL Experiments",
-    icon: icons.folder16,
-    component: "FileBrowser",
-    /* options: [
-      {
-        title: "Rain Physics",
-        icon: icons.webglwindow32,
-        component: "TestExplorer",
-        data: {
-          src: "https://loklok-volume.vercel.app/gpu",
-          title: "Internet Explorer",
-        },
-        multiInstance: false,
-      },
-      {
-        title: "Instance Points",
-        icon: icons.webglwindow32,
-        component: "TestExplorer",
-        data: {
-          src: "https://threejs.org/examples/webgpu_instance_points.html",
-          title: "Internet Explorer",
-        },
-        multiInstance: false,
-      },
-      {
-        title: "Minecraft Sim",
-        icon: icons.webglwindow32,
-        component: "TestExplorer",
-        data: {
-          src: "https://threejs.org/examples/webgl_geometry_minecraft.html",
-          title: "Internet Explorer",
-        },
-        multiInstance: false,
-      },
-      {
-        title: "See More...",
-        icon: icons.vid16,
-        component: "",
-        isDisabled: true,
-      },
-    ],*/
-  },
-  {
-    title: "ASCII Art",
-    icon: icons.folder16,
-    options: asciiArt,
-  },
-  {
-    title: "Randomize",
-    icon: icons.kodak16,
-    component: "",
-    isDisabled: true,
-  },
-];
-
-const fileManagement = [
-  {
-    title: "File Manager",
-    icon: icons.computer32,
-    component: "CuboneFileExplorer",
-    multiInstance: true,
-    data: {
-      initialPath: "/C:/My Documents",
-      fileSystem: {
-        "/": {
-          "C:": {
-            type: "folder",
-            icon: "hardDrive",
-            children: {
-              Windows: {
-                type: "folder",
-                icon: "folderWindows",
-                children: {
-                  System32: {
-                    type: "folder",
-                    icon: "folderProgram",
-                    children: {
-                      "notepad.exe": {
-                        type: "file",
-                        icon: "notepadFile",
-                        size: "64 KB",
-                        component: "Notepad",
-                      },
-                    },
-                  },
-                },
-              },
-              "Program Files": {
-                type: "folder",
-                icon: "folderProgram",
-                children: {
-                  Hydra98: {
-                    type: "folder",
-                    icon: "folderProgram",
-                    children: {
-                      "readme.txt": {
-                        type: "file",
-                        icon: "notepadFile",
-                        content:
-                          "Welcome to Hydra98 File Manager!\n\nThis is a demonstration of the integrated file management system.",
-                        size: "2 KB",
-                      },
-                    },
-                  },
-                },
-              },
-              "My Documents": {
-                type: "folder",
-                icon: "myDocuments",
-                children: {
-                  "sample.txt": {
-                    type: "file",
-                    icon: "notepadFile",
-                    content:
-                      "This is a sample text file in the Hydra98 file system.",
-                    size: "1 KB",
-                  },
-                  "image.jpg": {
-                    type: "file",
-                    icon: "paint16",
-                    size: "256 KB",
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-  {
-    title: "My Computer",
-    icon: icons.windowsExplorer16,
-    component: "ExplorerWindow",
-    data: {
-      content: [
-        {
-          title: "C: Drive",
-          icon: "hardDrive",
-          onDoubleClick: () => console.log("Opening C: Drive"),
-        },
-        {
-          title: "Floppy (A:)",
-          icon: "floppy16",
-          failState: {
-            message: "Please insert a disk into drive A:",
-            loadTime: 1500,
-          },
-        },
-      ],
-    },
-  },
-];
-
+// Artifacts section - Updated structure
 const gallery = [
   {
     title: "What is this?",
@@ -966,6 +760,122 @@ const gallery = [
   },
 ];
 
+// Still Frames - converted to folders
+const stillFrames = [
+  {
+    title: "Pixel Art",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Still Frames/Pixel Art",
+    },
+  },
+  {
+    title: "ASCII Art",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Still Frames/ASCII Art",
+    },
+  },
+  {
+    title: "3D Rendered",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Still Frames/3D Rendered",
+    },
+  },
+  {
+    title: "View All",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Still Frames",
+    },
+  },
+];
+
+// Animated - converted to folders
+const animated = [
+  {
+    title: "Pixel Art",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Animated/Pixel Art",
+    },
+  },
+  {
+    title: "Demoscenes",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Animated/Demoscenes",
+    },
+  },
+  {
+    title: "View All",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Animated",
+    },
+  },
+];
+
+// Interactive - ASCII Art updated
+const asciiArt = [
+  {
+    title: "Flames",
+    icon: icons.burn16,
+    component: "Burn",
+    multiInstance: true,
+  },
+  {
+    title: "Pipes",
+    icon: icons.pipes16,
+    component: "Pipes",
+    multiInstance: true,
+  },
+  {
+    title: "Hourglass",
+    icon: icons.sand16,
+    component: "Sand",
+    multiInstance: true,
+  },
+  {
+    title: "View All",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Interactive/ASCII Art",
+    },
+  },
+];
+
+const interactive = [
+  {
+    title: "WebGL Experiments",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Interactive/WebGL Experiments",
+    },
+  },
+  {
+    title: "ASCII Art",
+    icon: icons.folder16,
+    options: asciiArt,
+  },
+  {
+    title: "Randomize",
+    icon: icons.kodak16,
+    component: "",
+    isDisabled: true,
+  },
+];
+
 const artifacts = [
   {
     title: "Gallery",
@@ -989,6 +899,7 @@ const artifacts = [
   },
 ];
 
+// Find section
 export const find = [
   {
     title: "Files or Folders...",
@@ -1019,7 +930,7 @@ const getStartMenuData = () => [
   {
     title: "Programs",
     icon: icons.folderProgram24,
-    options: getPrograms(), // Use dynamic programs
+    options: getPrograms(),
   },
   {
     title: "Favorites",
@@ -1048,5 +959,4 @@ const getStartMenuData = () => [
   },
 ];
 
-// Export as a function instead of static data
 export default getStartMenuData;

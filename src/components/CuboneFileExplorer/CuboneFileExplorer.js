@@ -286,11 +286,11 @@ class CuboneFileExplorer extends Component {
           children: {
             Windows: {
               type: "folder",
-              icon: "folder32",
+              icon: "folderWindows",
               children: {
                 System32: {
                   type: "folder",
-                  icon: "folder32",
+                  icon: "folderProgram",
                   children: {
                     "notepad.exe": {
                       type: "file",
@@ -304,16 +304,17 @@ class CuboneFileExplorer extends Component {
             },
             "Program Files": {
               type: "folder",
-              icon: "folder32",
+              icon: "folderProgram",
               children: {
                 Hydra98: {
                   type: "folder",
-                  icon: "folder32",
+                  icon: "folderProgram",
                   children: {
                     "readme.txt": {
                       type: "file",
                       icon: "notepadFile16",
-                      content: "Welcome to Hydra98 File Manager!",
+                      content:
+                        "Welcome to Hydra98 File Manager!\n\nThis is a demonstration of the integrated file management system.",
                       size: "2 KB",
                       component: "Notepad",
                     },
@@ -323,32 +324,130 @@ class CuboneFileExplorer extends Component {
             },
             "My Documents": {
               type: "folder",
-              icon: "folderOpen32",
+              icon: "myDocuments",
               children: {
-                "ASCII Art": {
+                "My Videos": {
                   type: "folder",
-                  icon: "folder32",
+                  icon: "folder16",
                   children: {
-                    "flames.txt": {
+                    "sample_video.mp4": {
                       type: "file",
-                      icon: "notepadFile16",
-                      size: "1 KB",
-                      component: "Burn",
+                      icon: "vid16",
+                      size: "15 MB",
                     },
-                    "pipes.txt": {
+                    "tutorial.mp4": {
+                      type: "file",
+                      icon: "vid16",
+                      size: "8 MB",
+                    },
+                  },
+                },
+                "My Music": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    "sample_song.mp3": {
+                      type: "file",
+                      icon: "mediacd16",
+                      size: "3.5 MB",
+                    },
+                    "playlist.m3u": {
                       type: "file",
                       icon: "notepadFile16",
                       size: "1 KB",
-                      component: "Pipes",
+                    },
+                  },
+                },
+                "My Notes": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    "meeting_notes.txt": {
+                      type: "file",
+                      icon: "notepadFile16",
+                      content: "Meeting notes go here...",
+                      size: "2 KB",
+                      component: "Notepad",
+                    },
+                    "ideas.txt": {
+                      type: "file",
+                      icon: "notepadFile16",
+                      content: "Project ideas and brainstorming...",
+                      size: "1 KB",
+                      component: "Notepad",
+                    },
+                  },
+                },
+                "Saved Games": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    "doom_savegame.sav": {
+                      type: "file",
+                      icon: "doom16",
+                      size: "256 KB",
+                    },
+                    "minesweeper_scores.dat": {
+                      type: "file",
+                      icon: "minesweeper16",
+                      size: "4 KB",
                     },
                   },
                 },
                 "sample.txt": {
                   type: "file",
                   icon: "notepadFile16",
-                  content: "Sample text file",
+                  content:
+                    "This is a sample text file in the Hydra98 file system.",
                   size: "1 KB",
                   component: "Notepad",
+                },
+              },
+            },
+            Documents: {
+              type: "folder",
+              icon: "folderOpen32",
+              children: {
+                "Tech Docs": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    APIs: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "rest_api_guide.pdf": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          size: "450 KB",
+                        },
+                        "graphql_tutorial.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          size: "25 KB",
+                          component: "Notepad",
+                        },
+                      },
+                    },
+                    "Trend Reports": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "ai_trends_2024.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          size: "15 KB",
+                          component: "Notepad",
+                        },
+                        "web3_report.txt": {
+                          type: "file",
+                          icon: "notepadFile16",
+                          size: "20 KB",
+                          component: "Notepad",
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
