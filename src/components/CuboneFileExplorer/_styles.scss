@@ -311,6 +311,15 @@
     cursor: move !important;
   }
 
+  // Selected file highlighting
+  .file-item-wrapper.selected {
+    .pb-explorer-icon__title {
+      background: #000080;
+      color: #ffffff;
+      outline: none;
+    }
+  }
+
   // Toolbar button states
   .StandardToolbar {
     button {
@@ -544,6 +553,26 @@
       );
       pointer-events: none;
       z-index: 2;
+    }
+  }
+
+  // CRITICAL FIX: Prevent ExplorerIcon from handling its own events on mobile
+  .CuboneFileExplorer .file-panel {
+    &.icons,
+    &.smallIcons,
+    &.tiles {
+      .icon-grid {
+        .file-item-wrapper {
+          // Block pointer events on child elements to ensure parent handles all events
+          .pb-explorer-icon {
+            pointer-events: none !important;
+
+            * {
+              pointer-events: none !important;
+            }
+          }
+        }
+      }
     }
   }
 }
