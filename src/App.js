@@ -16,6 +16,7 @@ import Background from "./components/tools/Background";
 import MonitorView from "./components/MonitorView/MonitorView";
 import { ClippyProvider } from "./components/ClippyAssistant/index";
 import BIOSPixelEffect from "./components/BIOSPixelEffect/BIOSPixelEffect";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 
 class Desktop extends Component {
   static contextType = SettingsContext;
@@ -24,8 +25,6 @@ class Desktop extends Component {
     if (window.innerWidth < 800) {
       this.context.toggleMobile(true);
     }
-
-    // No Clippy initialization here - ClippyProvider handles everything
     console.log(
       "Desktop mounted, Clippy will be initialized by ClippyProvider"
     );
@@ -53,10 +52,7 @@ class Desktop extends Component {
             <TaskManager />
             <Settings />
             <ShutDown />
-
-            {/* ClippyProvider now handles all initialization and positioning */}
             <ClippyProvider defaultAgent="Clippy" />
-
             {context.crt && <CRTOverlay />}
           </Theme>
         </MonitorView>
@@ -65,12 +61,21 @@ class Desktop extends Component {
   }
 }
 
-const App = () => (
-  <SettingsProvider>
-    {/* BIOSPixelEffect at root level, outside of Desktop */}
-    <BIOSPixelEffect />
-    <Desktop />
-  </SettingsProvider>
-);
+const App = () => {
+  const isBeta = process.env.REACT_APP_IS_BETA === "true";
+
+  return (
+    <HelmetProvider>
+      <Helmet>
+        {isBeta && <meta name="robots" content="noindex, nofollow" />}
+      </Helmet>
+
+      <SettingsProvider>
+        <BIOSPixelEffect />
+        <Desktop />
+      </SettingsProvider>
+    </HelmetProvider>
+  );
+};
 
 export default App;
