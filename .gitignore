@@ -17,6 +17,8 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.env.beta
+.env.beta.local
 .env
 .env.production
 [.env.example](http://_vscodecontentref_/7)
