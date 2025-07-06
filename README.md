@@ -1,10 +1,10 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-# 💾 Hydra98: A Web-Based Windows 98 Sandbox
+# 💾 Happy Tuesdays: A Web-Based Windows 98 Sandbox
 
-Hydra98 is a web-based Windows 98-style desktop, built with React and modern web technologies. It blends classic computing nostalgia with modern interactivity, featuring apps, customization, and DOS-style gaming, including DOOM.
+Happy Tuesdays is a web-based Windows 98-style desktop, built with React and modern web technologies. It blends classic computing nostalgia with modern interactivity, featuring apps, customization, and DOS-style gaming, including DOOM.
 
-## 🖥️ What Can Hydra98 Do?
+## 🖥️ What Can Happy Tuesdays Do?
 
 → **Windows 98 UI recreation** with resizable, draggable windows<br>
 → **Emulates classic Windows** 'Start' & 'Shutdown' sequences<br>
@@ -43,7 +43,7 @@ Hydra98 is a web-based Windows 98-style desktop, built with React and modern web
 
 ### 🧪 Proof of Concepts & Experimental Features
 
-- [ ] Hydra98 as **an exportable, customizable React component**
+- [ ] Happy Tuesdays as **an exportable, customizable React component**
 - [ ] Background apps (AIM?) that **run persistently**
 - [ ] **Basic user accounts & server-side file storage**
 
@@ -61,8 +61,6 @@ _This project wouldn’t be possible without:_
 
 ## 📢 Final Note
 
-Hydra98 is an **ongoing experiment**, mixing old-school computing with modern web tech. Expect **bugs, weird quirks, and plenty of updates.**
+Happy Tuesdays is an **ongoing experiment**, mixing old-school computing with modern web tech. Expect **bugs, weird quirks, and plenty of updates.**
 
 Stay tuned...
-
-![Launch Screen iPhone SE](repoImages/launch.gif)
