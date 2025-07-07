@@ -22,7 +22,7 @@ export const AGENT_PERSONALITIES = {
     emoji: "📘",
     color: "#0066cc",
     description:
-      "Your helpful site guide for navigating Hydra98's features and learning about the developer",
+      "Your helpful site guide for navigating Happy Tuesdays's features and learning about the developer",
     capabilities: [
       "Site navigation assistance",
       "Developer Q&A sessions",

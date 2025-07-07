@@ -139,7 +139,7 @@ const commits = `
 [2025-05-26]  5af8b63  - lock/hide buttons v1
 [2025-05-26]  534647c  - md files update
 [2025-05-25]  671ed6c  - clippy v2
-[2025-05-25]  4a79bd7  - Merge branch 'main' of https://github.com/hydraburn-007/hydraOS
+[2025-05-25]  4a79bd7  - Merge branch 
 [2025-05-25]  1bc1b18  - revert
 [2025-05-24]  7e590bb  - bad clippy
 [2025-05-24]  1078d4f  - Fix to clippy position drift during window resize

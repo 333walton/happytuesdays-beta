@@ -814,7 +814,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                   "Hi there! Having a good day?",
                   "Click me again for another surprise!",
                   "I'm here if you need any help!",
-                  "Enjoying Hydra98 so far?",
+                  "Enjoying Happy Tuesdays so far?",
                   "Try right-clicking me for more options!",
                   "Double-click me to open my menu!",
                   "Need help? Just let me know!",

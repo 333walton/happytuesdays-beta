@@ -424,7 +424,7 @@ class ProgramProvider extends Component {
           switch (program.title) {
             case "Read Me":
               message =
-                "I see you're checking out the Read Me! Let me know if you need any help understanding Hydra98!";
+                "I see you're checking out the Read Me! Let me know if you need any help understanding Happy Tuesdays!";
               break;
             case "FAQ":
               message =

@@ -302,24 +302,10 @@ const creativeTools = [
   {
     title: "View Catalogue",
     icon: icons.folder16,
-    options: [
-      {
-        title: "Native",
-        icon: icons.folder16,
-        component: "CuboneFileExplorer",
-        data: {
-          initialPath: "C:/Tools/Creative Tools/Native",
-        },
-      },
-      {
-        title: "3rd Party",
-        icon: icons.folder16,
-        component: "CuboneFileExplorer",
-        data: {
-          initialPath: "C:/Tools/Creative Tools/3rd Party",
-        },
-      },
-    ],
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Creative Tools",
+    },
   },
 ];
 
@@ -350,24 +336,10 @@ const marketingTools = [
   {
     title: "View Catalogue",
     icon: icons.folder16,
-    options: [
-      {
-        title: "Native",
-        icon: icons.folder16,
-        component: "CuboneFileExplorer",
-        data: {
-          initialPath: "C:/Tools/Marketing Tools/Native",
-        },
-      },
-      {
-        title: "3rd Party",
-        icon: icons.folder16,
-        component: "CuboneFileExplorer",
-        data: {
-          initialPath: "C:/Tools/Marketing Tools/3rd Party",
-        },
-      },
-    ],
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Marketing Tools",
+    },
   },
 ];
 
@@ -394,24 +366,10 @@ const builderTools = [
   {
     title: "View Catalogue",
     icon: icons.folder16,
-    options: [
-      {
-        title: "Native",
-        icon: icons.folder16,
-        component: "CuboneFileExplorer",
-        data: {
-          initialPath: "C:/Tools/Builder Tools/Native",
-        },
-      },
-      {
-        title: "3rd Party",
-        icon: icons.folder16,
-        component: "CuboneFileExplorer",
-        data: {
-          initialPath: "C:/Tools/Builder Tools/3rd Party",
-        },
-      },
-    ],
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Builder Tools",
+    },
   },
 ];
 
@@ -439,24 +397,10 @@ const artDesignTools = [
   {
     title: "View Catalogue",
     icon: icons.folder16,
-    options: [
-      {
-        title: "Native",
-        icon: icons.folder16,
-        component: "CuboneFileExplorer",
-        data: {
-          initialPath: "C:/Tools/Art Design Tools/Native",
-        },
-      },
-      {
-        title: "3rd Party",
-        icon: icons.folder16,
-        component: "CuboneFileExplorer",
-        data: {
-          initialPath: "C:/Tools/Art Design Tools/3rd Party",
-        },
-      },
-    ],
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Art Design Tools",
+    },
   },
 ];
 
@@ -824,36 +768,6 @@ const animated = [
   },
 ];
 
-// Interactive - ASCII Art updated
-const asciiArt = [
-  {
-    title: "Flames",
-    icon: icons.burn16,
-    component: "Burn",
-    multiInstance: true,
-  },
-  {
-    title: "Pipes",
-    icon: icons.pipes16,
-    component: "Pipes",
-    multiInstance: true,
-  },
-  {
-    title: "Hourglass",
-    icon: icons.sand16,
-    component: "Sand",
-    multiInstance: true,
-  },
-  {
-    title: "View All",
-    icon: icons.folder16,
-    component: "CuboneFileExplorer",
-    data: {
-      initialPath: "C:/Artifacts/Interactive/ASCII Art",
-    },
-  },
-];
-
 const interactive = [
   {
     title: "WebGL Experiments",
@@ -866,13 +780,18 @@ const interactive = [
   {
     title: "ASCII Art",
     icon: icons.folder16,
-    options: asciiArt,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Interactive/ASCII Art",
+    },
   },
   {
-    title: "Randomize",
-    icon: icons.kodak16,
-    component: "",
-    isDisabled: true,
+    title: "View All",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Artifacts/Interactive",
+    },
   },
 ];
 

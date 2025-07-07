@@ -10,7 +10,7 @@ const readmeContent = {
         "//appstickers-cdn.appadvice.com/1164831016/819286823/18ab4614722102b2a0def24dda1ea4bd-1.gif",
       content: `
         <div class="intro-paragraph">
-          Hydra98 is a React-based application that faithfully recreates the nostalgic Windows 98 desktop experience for the modern web. It's a fun experiment blending classic computing aesthetics with modern interactivity, featuring interactive windows, authentic styling, and retro applications.
+          Happy Tuesdays is a React-based application that faithfully recreates the nostalgic Windows 98 desktop experience for the modern web. It's a fun experiment blending classic computing aesthetics with modern interactivity, featuring interactive windows, authentic styling, and retro applications.
           <br><br>
           This digital time capsule delivers an immersive computing experience that's both nostalgic and accessible across different devices. More features coming soon!
         </div>

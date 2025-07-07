@@ -866,7 +866,7 @@ const VideoPlayerMobile = (props) => {
               fontSize: "9px",
             }}
           >
-            ©Hydra98
+            ©Happy Tuesdays
           </span>
         </div>
       </div>

@@ -84,7 +84,7 @@ export const handleMobileSingleTap = ({
     devLog("Mobile tap - showing balloon (25% chance)");
     const messages = [
       "Tap me again for more!",
-      "Having fun with Hydra98?",
+      "Having fun with Happy Tuesdays?",
       "Try a long press!",
       "Double-tap for options!",
       "I'm here to help!",

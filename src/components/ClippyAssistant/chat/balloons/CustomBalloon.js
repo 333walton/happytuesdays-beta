@@ -528,7 +528,7 @@ class CustomBalloonManager {
         // Check if this was a welcome balloon and mark as completed
         const balloonContent = this.currentBalloon.textContent || "";
         if (
-          balloonContent.includes("Welcome to Hydra98") &&
+          balloonContent.includes("Welcome to Happy Tuesdays") &&
           window.markWelcomeBalloonCompleted
         ) {
           window.markWelcomeBalloonCompleted();
@@ -836,7 +836,7 @@ export const showHelpBalloon = () => {
             "You can double-click me for a quick greeting, or right-click for more options! On mobile, just tap me or long-press for chat.",
         },
         {
-          text: "🎮 What can I do in Hydra98?",
+          text: "🎮 What can I do in Happy Tuesdays?",
           message:
             "You can explore the desktop, run classic programs like Notepad and Paint, play games like Minesweeper, and even browse the web! Try clicking the Start button.",
         },
@@ -885,7 +885,7 @@ export const showErrorBalloon = (errorMessage) => {
 export const showTipsBalloon = () => {
   return showCustomBalloon(
     {
-      message: "Here are some helpful tips for using Hydra98!",
+      message: "Here are some helpful tips for using Happy Tuesdays!",
       buttons: [
         {
           text: "🖱️ Mouse tips",
@@ -941,13 +941,14 @@ export const showObservationBalloon = (observationType) => {
       message = "The Start menu is your gateway to all programs.";
       break;
     case "openedSettings":
-      message = "Tweak your settings to make Hydra98 your own.";
+      message = "Tweak your settings to make Happy Tuesdays your own.";
       break;
     case "openedChat":
       message = "I'm always here if you want to chat!";
       break;
     default:
-      message = "Exploring Hydra98 is fun! Let me know if you need a tip.";
+      message =
+        "Exploring Happy Tuesdays is fun! Let me know if you need a tip.";
       break;
   }
   return showCustomBalloon(message, 6000);
@@ -989,7 +990,7 @@ export const showTipBalloon = (tipType) => {
 
 // Add more close-ended speech balloons (statements only, no buttons)
 export const showStatementBalloon1 = () => {
-  return showCustomBalloon("Welcome to Hydra98! Enjoy your stay.", 5000);
+  return showCustomBalloon("Welcome to Happy Tuesdays! Enjoy your stay.", 5000);
 };
 
 export const showStatementBalloon2 = () => {

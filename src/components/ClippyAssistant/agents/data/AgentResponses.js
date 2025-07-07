@@ -2,7 +2,7 @@
  * Single Source of Truth: Agent Responses, Messages, and Interactions
  *
  * This file contains all the placeholder messages, fallback responses, quick replies,
- * and conversation starters for each AI agent in the Hydra98 platform.
+ * and conversation starters for each AI agent in the Happy Tuesdays platform.
  */
 
 /**
@@ -11,10 +11,10 @@
  */
 export const PLACEHOLDER_MESSAGES = {
   clippy: [
-    "👋 Hi there! I'm Clippy GPT, your helpful site guide! I'm currently learning all about Hydra98's features and will be ready to help you navigate everything soon. In the meantime, feel free to explore the retro desktop!",
-    "🔧 I'm busy indexing all the cool features of Hydra98 right now! Once I'm done, I'll be your go-to assistant for site navigation, developer info, and helping with any questions about this nostalgic Windows 98 experience.",
-    "📚 Currently updating my knowledge base with everything about Hydra98... Soon I'll be able to help you with site features, provide developer insights, and assist with any technical questions you might have!",
-    "⚡ Loading my expertise on Hydra98's retro goodness... Give me just a moment and I'll be ready to guide you through all the desktop apps, games, and features this site has to offer!",
+    "👋 Hi there! I'm Clippy GPT, your helpful site guide! I'm currently learning all about Happy Tuesdays' features and will be ready to help you navigate everything soon. In the meantime, feel free to explore the retro desktop!",
+    "🔧 I'm busy indexing all the cool features of Happy Tuesdays right now! Once I'm done, I'll be your go-to assistant for site navigation, developer info, and helping with any questions about this nostalgic Windows 98 experience.",
+    "📚 Currently updating my knowledge base with everything about Happy Tuesdays... Soon I'll be able to help you with site features, provide developer insights, and assist with any technical questions you might have!",
+    "⚡ Loading my expertise on Happy Tuesdays' retro goodness... Give me just a moment and I'll be ready to guide you through all the desktop apps, games, and features this site has to offer!",
   ],
   //genie: [
   //"🧞♂️ Greetings! I'm Genie GPT, your AI and entrepreneurship oracle! I'm currently absorbing the latest AI news and startup wisdom. Once ready, I'll share cutting-edge insights and entrepreneurial guidance!",
@@ -54,7 +54,7 @@ export const PLACEHOLDER_MESSAGES = {
  */
 export const PROGRESS_PLACEHOLDERS = {
   clippy: {
-    stage1: "🔄 Initializing Hydra98 knowledge base... 25%",
+    stage1: "🔄 Initializing Happy Tuesdays knowledge base... 25%",
     stage2: "📚 Learning site features and developer info... 50%",
     stage3: "⚡ Optimizing help responses... 75%",
     stage4: "💻 Almost ready to assist you! 95%",
@@ -97,7 +97,7 @@ export const PROGRESS_PLACEHOLDERS = {
  */
 export const FALLBACK_MESSAGES = {
   clippy:
-    "I'm having trouble connecting right now, but I'm here to help with any questions about Hydra98! Try asking me about site features or the developer.",
+    "I'm having trouble connecting right now, but I'm here to help with any questions about Happy Tuesdays! Try asking me about site features or the developer.",
   //genie:
   //"My AI news feed is temporarily down, but I can still chat about entrepreneurship and product management! What startup challenge are you facing?",
   genius:
@@ -115,7 +115,7 @@ export const FALLBACK_MESSAGES = {
  */
 export const QUICK_REPLIES = {
   clippy: [
-    "Tell me about Hydra98",
+    "Tell me about Happy Tuesdays",
     "Help with site features",
     "Developer info",
     "Mock interview",
@@ -170,10 +170,10 @@ export const QUICK_REPLIES = {
  */
 export const CONVERSATION_STARTERS = {
   clippy: {
-    morning: "Good morning! Ready to explore Hydra98?",
+    morning: "Good morning! Ready to explore Happy Tuesdays?",
     afternoon: "Need help navigating the site?",
     evening: "Evening! Questions about the developer?",
-    newUser: "Welcome to Hydra98! I'm Clippy, your site guide 📘",
+    newUser: "Welcome to Happy Tuesdays! I'm Clippy, your site guide 📘",
     returning: "Welcome back! What would you like to explore today?",
   },
   bonzi: {

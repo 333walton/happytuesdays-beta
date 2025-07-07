@@ -314,7 +314,7 @@ class CuboneFileExplorer extends Component {
                       type: "file",
                       icon: "notepadFile16",
                       content:
-                        "Welcome to Hydra98 File Manager!\n\nThis is a demonstration of the integrated file management system.",
+                        "Welcome to Happy Tuesdays File Manager!\n\nThis is a demonstration of the integrated file management system.",
                       size: "2 KB",
                       component: "Notepad",
                     },
@@ -398,7 +398,7 @@ class CuboneFileExplorer extends Component {
                   type: "file",
                   icon: "notepadFile16",
                   content:
-                    "This is a sample text file in the Hydra98 file system.",
+                    "This is a sample text file in the Happy Tuesdays file system.",
                   size: "1 KB",
                   component: "Notepad",
                 },
@@ -751,7 +751,7 @@ class CuboneFileExplorer extends Component {
                         },
                       },
                     },
-                    "ASCII Art": {
+                    "Generative Art": {
                       type: "folder",
                       icon: "folder16",
                       children: {

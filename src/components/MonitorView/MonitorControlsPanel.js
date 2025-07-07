@@ -1243,8 +1243,10 @@ const MonitorControlsPanel = ({
                             fontSize: "11px",
                           }}
                         >
-                          <span style={{ fontWeight: "bold" }}>Hydra98</span> is
-                          a Windows 98 desktop
+                          <span style={{ fontWeight: "bold" }}>
+                            Happy Tuesdays
+                          </span>{" "}
+                          is a Windows 98 desktop
                         </span>
                       </div>
 

@@ -12,7 +12,7 @@ class ShutDown extends Component {
   static contextType = ProgramContext;
   state = {
     selected: OPTIONS[0],
-    display: this.context.shutDownMenu
+    display: this.context.shutDownMenu,
   };
   componentDidUpdate() {
     if (
@@ -40,12 +40,12 @@ class ShutDown extends Component {
     return context.shutDownMenu ? (
       <div
         className={cx("ShutDown", props.className, {
-          animation: this.state.display
+          animation: this.state.display,
         })}
       >
         <Window
           className="ShutDown__window Window--active"
-          title="Shut Down Hydra"
+          title="Shut Down System"
           onClose={context.toggleShutDownMenu}
           resizable={false}
           isActive
@@ -54,7 +54,7 @@ class ShutDown extends Component {
             <img src={shutDown24} alt="shut down" />
             <div>
               What do you want your computer to do?
-              {OPTIONS.map(option => (
+              {OPTIONS.map((option) => (
                 <Radio
                   key={option}
                   value={option}

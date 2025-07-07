@@ -1089,14 +1089,14 @@ class ChatBalloonManager {
         "Hello! What can I help you with?",
       ],
       help: [
-        "I can help with many things! Try asking me about Hydra98 or just chat with me.",
+        "I can help with many things! Try asking me about Happy Tuesdays or just chat with me.",
         "I'm here to help! What do you need assistance with?",
         "Happy to help! What would you like to know?",
       ],
       hydra: [
-        "Hydra98 is an amazing Windows 98 desktop emulator! What do you think of it?",
-        "Hydra98 brings back the nostalgic Windows 98 experience! Are you enjoying it?",
-        "I love helping people navigate Hydra98! It's just like the good old days.",
+        "Happy Tuesdays is an amazing Windows 98 desktop emulator! What do you think of it?",
+        "Happy Tuesdays brings back the nostalgic Windows 98 experience! Are you enjoying it?",
+        "I love helping people navigate Happy Tuesdays! It's just like the good old days.",
       ],
       thanks: [
         "You're very welcome! Is there anything else I can help you with?",

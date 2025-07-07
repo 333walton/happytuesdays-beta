@@ -945,7 +945,7 @@ const ClippyContextMenu = ({
           if (window.showClippyCustomBalloon) {
             setTimeout(() => {
               window.showClippyCustomBalloon(
-                "Well hello there! It's great to see you. Feel free to explore Hydra98!"
+                "Well hello there! It's great to see you. Feel free to explore Happy Tuesdays!"
               );
             }, 800);
           }
