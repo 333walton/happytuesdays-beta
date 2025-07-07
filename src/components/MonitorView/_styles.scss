@@ -215,6 +215,7 @@
   /* Specific styling for monitor controls container */
   .monitor-controls-container {
     pointer-events: auto !important; /* Block all click-through on the container */
+    width: 245px !important;
 
     /* Ensure all child elements are also clickable */
     * {

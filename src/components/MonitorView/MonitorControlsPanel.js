@@ -409,6 +409,7 @@ const MonitorControlsPanel = ({
         /* Explicit exception for the controls container */
         .monitor-controls-container {
           cursor: default !important;
+          width: 245px !important;
         }
         
         .monitor-controls-container * {
@@ -789,7 +790,8 @@ const MonitorControlsPanel = ({
           color: "white",
           display: "flex",
           justifyContent: "space-between",
-          padding: "0px 3px",
+          padding: "1px 3px",
+          alignItems: "center",
           fontSize: "11px",
           fontWeight: "bold",
           cursor: "pointer",
@@ -813,6 +815,7 @@ const MonitorControlsPanel = ({
             borderRightColor: "#404040",
             borderBottomColor: "#404040",
             padding: 0,
+            //marginTop: "2px",
             marginLeft: "4px",
             display: "flex",
             alignItems: "center",
@@ -1337,7 +1340,7 @@ const MonitorControlsPanel = ({
                         fontSize: "11px",
                       }}
                     >
-                      Version 0.9.5 beta
+                      Version 0.9.8 beta
                     </span>
                   </div>
                   <div
