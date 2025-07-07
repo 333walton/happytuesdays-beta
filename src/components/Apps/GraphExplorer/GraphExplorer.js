@@ -252,8 +252,8 @@ class GraphExplorer extends Component {
                 <div className="help-content">
                   <h3>🎯 Purpose</h3>
                   <p>
-                    This Knowledge Graph Explorer helps analyze the Hydra98
-                    codebase structure, component relationships, and
+                    This Knowledge Graph Explorer helps analyze the Happy
+                    Tuesdays codebase structure, component relationships, and
                     dependencies.
                   </p>
 

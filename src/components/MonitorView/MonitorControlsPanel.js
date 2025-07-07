@@ -1246,7 +1246,7 @@ const MonitorControlsPanel = ({
                           <span style={{ fontWeight: "bold" }}>
                             Happy Tuesdays
                           </span>{" "}
-                          is a Windows 98 desktop
+                          is a retro desktop
                         </span>
                       </div>
 
@@ -1337,7 +1337,7 @@ const MonitorControlsPanel = ({
                         fontSize: "11px",
                       }}
                     >
-                      Version 0.9.1 beta
+                      Version 0.9.5 beta
                     </span>
                   </div>
                   <div

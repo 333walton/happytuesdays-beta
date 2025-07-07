@@ -117,7 +117,7 @@ const GraphVisualizer = ({ windowProps = {} }) => {
           Component: {
             ...commonStyle,
             color: function (node) {
-              // Color code different types of Hydra98 apps
+              // Color code different types of Happy Tuesdays apps
               const name = node.properties.name;
               if (name.includes("Notepad")) return "#ffffff";
               if (name.includes("Paint")) return "#ff0000";
@@ -284,7 +284,7 @@ const GraphVisualizer = ({ windowProps = {} }) => {
       {/* Windows 98 style header */}
       <div className="win98-header">
         <div className="win98-title">
-          📊 Hydra98 Knowledge Graph -{" "}
+          📊 Happy Tuesdays Knowledge Graph -{" "}
           {viewMode.charAt(0).toUpperCase() + viewMode.slice(1)}
         </div>
         <div className="win98-controls">
@@ -322,7 +322,7 @@ const GraphVisualizer = ({ windowProps = {} }) => {
       {/* Loading indicator */}
       {loading && (
         <div className="win98-loading">
-          ⏳ Loading Hydra98 knowledge graph...
+          ⏳ Loading Happy Tuesdays knowledge graph...
         </div>
       )}
 
@@ -349,5 +349,5 @@ const GraphVisualizer = ({ windowProps = {} }) => {
 };
 
 export default GraphVisualizer;
-// Note: This component is specifically for visualizing the Hydra98 knowledge graph
+// Note: This component is specifically for visualizing the Happy Tuesdays knowledge graph
 // using NeoVis.js with a Windows 98 theme. It allows users to switch between different view modes (components, files, apps, all) and interact with the graph.

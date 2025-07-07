@@ -46,7 +46,9 @@ class Neo4jSetup {
       console.error("❌ Failed to connect to Neo4j:", error.message);
       console.log("\n🔧 Setup Instructions:");
       console.log("1. Download Neo4j Desktop from https://neo4j.com/download/");
-      console.log('2. Create a new database called "hydra98-knowledge-graph"');
+      console.log(
+        '2. Create a new database called "happy-tuesdays-knowledge-graph"'
+      );
       console.log("3. Start the database");
       console.log("4. Update your .env file with the correct credentials");
       return false;
@@ -154,10 +156,10 @@ class Neo4jSetup {
   async createSampleQueries() {
     console.log("📝 Creating sample queries file...");
 
-    const sampleQueries = `// Hydra98 Knowledge Graph - Sample Queries
+    const sampleQueries = `// Happy Tuesdays Knowledge Graph - Sample Queries
 // Copy these into Neo4j Browser or VS Code Neo4j extension
 
-// 1. Get all React components in Hydra98
+// 1. Get all React components in Happy Tuesdays
 MATCH (c:Component)
 RETURN c.name, c.file, c.props, c.hooks
 ORDER BY c.name;
@@ -232,7 +234,7 @@ LIMIT 100;
 }
 
 async function main() {
-  console.log("🚀 Setting up Neo4j for Hydra98...\n");
+  console.log("🚀 Setting up Neo4j for Happy Tuesdays...\n");
 
   const setup = new Neo4jSetup();
 
@@ -252,7 +254,9 @@ async function main() {
     console.log('1. Run "npm run build-graph" to analyze your codebase');
     console.log("2. Open Neo4j Browser or VS Code Neo4j extension");
     console.log("3. Use the sample queries in neo4j-sample-queries.cypher");
-    console.log("4. Add the GraphVisualizer component to your Hydra98 desktop");
+    console.log(
+      "4. Add the GraphVisualizer component to your Happy Tuesdays desktop"
+    );
   } catch (error) {
     console.error("❌ Setup failed:", error);
     process.exit(1);

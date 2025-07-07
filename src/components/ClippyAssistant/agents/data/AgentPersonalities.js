@@ -1,7 +1,7 @@
 /**
  * Single Source of Truth: Agent Personalities and Configurations
  *
- * This file defines all 6 AI agents for the Hydra98 platform with their personalities,
+ * This file defines all 6 AI agents for the Happy Tuesdays platform with their personalities,
  * specialties, chat systems, and visual characteristics.
  */
 

@@ -304,7 +304,7 @@ class Hydra98GraphBuilderV2 {
   }
 
   async buildGraph() {
-    console.log("🚀 Building Hydra98 Knowledge Graph V2...\n");
+    console.log("🚀 Building Happy Tuesdays Knowledge Graph V2...\n");
 
     await this.clearDatabase();
     await this.setupConstraintsAndIndexes();

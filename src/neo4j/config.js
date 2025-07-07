@@ -1,6 +1,6 @@
 import neo4j from "neo4j-driver";
 
-// Neo4j connection configuration for Hydra98
+// Neo4j connection configuration for Happy Tuesdays
 const NEO4J_CONFIG = {
   uri: process.env.REACT_APP_NEO4J_URI || "bolt://localhost:7687",
   username: process.env.REACT_APP_NEO4J_USERNAME || "neo4j",
@@ -12,7 +12,7 @@ const driver = neo4j.driver(
   NEO4J_CONFIG.uri,
   neo4j.auth.basic(NEO4J_CONFIG.username, NEO4J_CONFIG.password),
   {
-    // Additional configuration for Hydra98
+    // Additional configuration for Happy Tuesdays
     maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
     maxConnectionPoolSize: 50,
     connectionTimeout: 20 * 1000, // 20 seconds
@@ -20,7 +20,7 @@ const driver = neo4j.driver(
   }
 );
 
-// Hydra98-specific queries
+// Happy Tuesdays-specific queries
 export const HYDRA98_QUERIES = {
   // Get all Windows/Components in the desktop
   getAllWindows: `
@@ -67,7 +67,7 @@ export const HYDRA98_QUERIES = {
   `,
 };
 
-// Helper class for Hydra98-specific database operations
+// Helper class for Happy Tuesdays-specific database operations
 export class Hydra98Database {
   constructor() {
     this.driver = driver;
@@ -87,7 +87,7 @@ export class Hydra98Database {
     }
   }
 
-  // Get all Hydra98 desktop components
+  // Get all Happy Tuesdays desktop components
   async getDesktopComponents() {
     return await this.runQuery(HYDRA98_QUERIES.getAllWindows);
   }

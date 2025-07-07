@@ -411,10 +411,10 @@ const ConversationStarters = ({ agent, lastInteraction }) => {
 
     const starters = {
       clippy: {
-        morning: "Good morning! Ready to explore Hydra98?",
+        morning: "Good morning! Ready to explore Happy Tuesdays?",
         afternoon: "Need help navigating the site?",
         evening: "Evening! Questions about the developer?",
-        newUser: "Welcome to Hydra98! I'm Clippy, your site guide 📘",
+        newUser: "Welcome to Happy Tuesdays! I'm Clippy, your site guide 📘",
       },
       bonzi: {
         morning: "Morning! Want to start with a joke? ☀️",
@@ -586,4 +586,4 @@ const MessageThread = ({ messages, threadId }) => {
 
 Each agent uses persona-specific placeholder messages and fallback responses to maintain engagement and reinforce their unique character, even when data is loading or temporarily unavailable.
 
-The provided code snippets above should be used to implement dynamic messaging and progress indicators for each AI agent window in the Hydra98 UI.
+The provided code snippets above should be used to implement dynamic messaging and progress indicators for each AI agent window in the Happy Tuesdays UI.
