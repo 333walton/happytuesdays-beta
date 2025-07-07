@@ -86,6 +86,9 @@ const ControlPanelStyles = createGlobalStyle`
     .sc-hAzKxj.fPIiUC {
       width: 235px !important;
     }
+    .sc-hldWLq.kwmnYd {
+      width: 234px !important;
+    }
     .sc-gnqCJb.fUjaVy.sc-fdnRgs.kQkTQC {
       width: 220px !important;
     }
