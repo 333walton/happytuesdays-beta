@@ -351,8 +351,9 @@ class CustomBalloonManager {
       color: #000000 !important;
       -webkit-text-fill-color: #000000 !important;
       font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important;
-      font-size: 12.6px !important; /* 14px -> 12.6px */
-      line-height: 1.3 !important;   /* 1.4 -> 1.3 */
+      font-size: ${
+        this.isMobile() ? "12.6px" : "12.5px"
+      } !important; /* mobile : desktop */
       margin-bottom: ${
         buttons.length > 0 ? "10px" : "0"
       } !important; /* 12px -> 10px */
@@ -812,11 +813,19 @@ export const showWelcomeBalloon = () => {
     }
   }
 
+  // Get current day of week (0=Sunday, 1=Monday, 2=Tuesday, ...)
+  const today = new Date();
+  const isTuesday = today.getDay() === 2; // 2 = Tuesday
+
+  // Set greeting based on day
+  const greeting = isTuesday ? "Happy Tuesday!" : "Welcome!";
+
+  // Use the greeting in your message, with a line break after it
   return showCustomBalloon(
     {
       message: isMobile
-        ? `<span style="font-weight: 600;">Welcome!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Double-tap me to view menu.</span></i>`
-        : `<span style="font-weight: 600;">Welcome!</span> Please enjoy and don't break anything.<br><i><span style="font-size: 12px;">Right-click me to view menu.</span></i>`,
+        ? `<span style="font-weight: 600;">${greeting}</span><br>Please enjoy and don't break anything.<br><i><span style="font-size: 11.4px;">Double-tap me to view menu.</span></i>`
+        : `<span style="font-weight: 600;">${greeting}</span><br>Please enjoy and don't break anything.<br><i><span style="font-size: 11.5px;">Right-click me to view menu.</span></i>`,
       animation: "Wave",
       buttons: isMobile ? [] : [],
     },
