@@ -304,7 +304,15 @@ const creativeTools = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Tools/Creative Tools",
+      initialPath: "C:/Tools/Creative Tools/3rd Party",
+    },
+  },
+  {
+    title: "Native Tools",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Creative Tools/Native",
     },
   },
 ];
@@ -338,7 +346,15 @@ const marketingTools = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Tools/Marketing Tools",
+      initialPath: "C:/Tools/Marketing Tools/3rd Party",
+    },
+  },
+  {
+    title: "Native Tools",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Marketing Tools/Native",
     },
   },
 ];
@@ -368,7 +384,15 @@ const builderTools = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Tools/Builder Tools",
+      initialPath: "C:/Tools/Builder Tools/3rd Party",
+    },
+  },
+  {
+    title: "Native Tools",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Builder Tools/Native",
     },
   },
 ];
@@ -399,7 +423,15 @@ const artDesignTools = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Tools/Art Design Tools",
+      initialPath: "C:/Tools/Art Design Tools/3rd Party",
+    },
+  },
+  {
+    title: "Native Tools",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Art Design Tools/Native",
     },
   },
 ];
