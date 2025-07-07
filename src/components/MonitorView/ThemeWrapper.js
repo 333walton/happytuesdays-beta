@@ -77,7 +77,7 @@ const ControlPanelStyles = createGlobalStyle`
     z-index: 9999;
     width: 248px !important;
     pointer-events: auto !important; /* Ensure container blocks all click-through */
-    
+
     /* This ensures styles are only applied within the container */
     &, & * {
       font-family: 'ms_sans_serif_controls', sans-serif;
@@ -87,7 +87,7 @@ const ControlPanelStyles = createGlobalStyle`
       width: 235px !important;
     }
     .sc-hldWLq.kwmnYd {
-      width: 234px !important;
+      width: 236px !important; /* Updated width */
     }
     .sc-gnqCJb.fUjaVy.sc-fdnRgs.kQkTQC {
       width: 220px !important;
@@ -104,6 +104,7 @@ const ControlPanelStyles = createGlobalStyle`
     .win98-select-container {
       text-indent: 2px !important;
     }
+  }
 
     /* All interactive elements should be clickable */
     button, select, input, .react95__window-header {
