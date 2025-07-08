@@ -39,7 +39,7 @@ explore everything Happy Tuesdays has to offer.
 • Single Click: Random animation (75%) or helpful
   tip (25%)
 • Double Click: Open interactive chat window
-• Right Click: Access context menu with all options
+• Right Click: Open context menu
 
 ╔════════════════════════════════════════╗
 ║              MOBILE INTERACTIONS               ║
@@ -48,7 +48,7 @@ explore everything Happy Tuesdays has to offer.
 • Single Tap: Random animation (75%) or
   helpful tip (25%)
 • Double Tap: Open context menu
-• Long Press: Start interactive chat session
+• Long Press: Open interactive chat window
 
 ╔════════════════════════════════════════╗
 ║              CONTEXT MENU FEATURES             ║
@@ -56,7 +56,7 @@ explore everything Happy Tuesdays has to offer.
 
 • About AI Assistants: View this detailed
   information
-• Select AI Agent: Switch between all 5 specialized
+• Select AI Agent: Switch between 5 specialized
   assistants
 • Play Animation: Choose from various character
   animations
@@ -74,9 +74,9 @@ explore everything Happy Tuesdays has to offer.
   insights and professional growth advice
 • Creative Assistance: Merlin GPT inspires digital
   art creation and provides technical tutorials
-• Gaming Companion: Bonzi GPT curates retro gaming
+• Gaming Companion: Bonzi GPT curates gaming
   content and community discussions
-• Platform Navigation: Clippy GPT helps you explore
+• Platform Navigation: Clippy GPT helps you learn
   Happy Tuesdays' features and tools
 
 ╔════════════════════════════════════════╗
@@ -119,8 +119,8 @@ explore everything Happy Tuesdays has to offer.
 • Fully responsive design supporting desktop and
   mobile devices
 • Real-time positioning with zoom-aware scaling
-• Accessibility features including ARIA labels and
-  keyboard navigation
+• Accessibility features including ARIA labels
+  and keyboard navigation
 • Advanced AI integration providing 24/7
   personalized support
 • Seamless integration with Happy Tuesdays'

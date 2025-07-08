@@ -105,6 +105,7 @@ class Notepad extends Component {
                 style={{
                   fontFamily: "FixedSys, Courier New, Courier, monospace",
                   fontSize:
+                    props.title === "Change Log" ||
                     props.title === "FAQ" ||
                     props.title === "About Clippy" ||
                     props.title === "AI Agent Guide" ||

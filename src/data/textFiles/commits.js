@@ -11,7 +11,7 @@ const commits = `
 [2025-07-01]  c2dec8d  - more start menu
 [2025-07-01]  5c2ea09  - feeeds
 [2025-07-01]  3d58985  - start menu
-[2025-07-01]  6e51f99  - start menu refresh and cycle detection safeguards
+[2025-07-01]  6e51f99  - start m refresh w cycle detection safeguard
 [2025-06-29]  c06e676  - neo4j mcp
 [2025-06-29]  3aa4915  - queries added
 [2025-06-29]  6542c6b  - neo4j improvements
@@ -120,8 +120,8 @@ const commits = `
 [2025-05-31]  3ce6d36  - css
 [2025-05-30]  3e058fe  - css
 [2025-05-30]  7ffb413  - clippy menu css
-[2025-05-30]  6b4de8d  - Fix context menu with React Portal approach
-[2025-05-30]  7085e04  - some clippy balloon resizing and dt interaction fixes
+[2025-05-30]  6b4de8d  - Fix context menu w Portal approach
+[2025-05-30]  7085e04  - balloon resizing/dt interaction fixes
 [2025-05-29]  1d7861f  - clippy chat edits
 [2025-05-29]  e776eb7  - prog
 [2025-05-28]  de77e42  - bin icons
@@ -142,19 +142,19 @@ const commits = `
 [2025-05-25]  4a79bd7  - Merge branch 
 [2025-05-25]  1bc1b18  - revert
 [2025-05-24]  7e590bb  - bad clippy
-[2025-05-24]  1078d4f  - Fix to clippy position drift during window resize
+[2025-05-24]  1078d4f  - Fix to clippy pos drift during window resize
 [2025-05-24]  c579e0b  - clippy css
 [2025-05-24]  4f980c4  - startupShutdown sequence clippy
 [2025-05-24]  fee757e  - bad clippy
-[2025-05-24]  c518808  - Fix ClippyAssistant test file errors and React warnings
-[2025-05-24]  0cc38af  - markdowns added and fix ESLint errors in ClippyAssistant test files
-[2025-05-24]  2361673  - centralize Clippy positioning and fix mobile interaction issues
+[2025-05-24]  c518808  - Fix ClippyAssistant test file errors/warnings
+[2025-05-24]  0cc38af  - markdowns and lint errors in ClippyAssistant
+[2025-05-24]  2361673  - centralize pos and fix m interaction issues
 [2025-05-24]  798b57f  - clippy v1000
 [2025-05-24]  2588e25  - centralized position controls
 [2025-05-24]  1a07736  - clippy mobile
 [2025-05-24]  13968cf  - based clippy
 [2025-05-24]  1374b59  - clippy
-[2025-05-24]  1818a4f  - Complete ClippyAssistant migration with performance improvements
+[2025-05-24]  1818a4f  - Complete ClippyAssistant migration w performance imp
 [2025-05-24]  6dc1cbf  - clippy
 [2025-05-23]  6a9c276  - backup before ClippyAssistant migration
 [2025-05-21]  814de9f  - readme
@@ -185,7 +185,7 @@ const commits = `
 [2025-05-13]  936ccab  - pipes
 [2025-05-13]  421323b  - debug and monitorpanel styles
 [2025-05-13]  c010b02  - monitorcontrols refresh big
-[2025-05-09]  75b83e4  - Remove Maze and fix BouncyBallsScreensaver
+[2025-05-09]  75b83e4  - Remove Maze / fix BouncyBallsScreensaver
 [2025-05-09]  9777fd2  - bouncyballs
 [2025-05-08]  a7c4a1b  - monitor controls big
 [2025-05-07]  615dfc2  - css
@@ -199,7 +199,7 @@ const commits = `
 [2025-05-05]  b4849f6  - global fixes and monitorview
 [2025-05-05]  dedb3d4  - monitorview updates
 [2025-05-05]  be7d8be  - monitor mode
-[2025-05-05]  3edb5eb  - fix case sensitivity for MonitorView/index.js
+[2025-05-05]  3edb5eb  - case sensitivity in MonitorView/index
 [2025-05-05]  8ad13d2  - small
 [2025-05-05]  c874e7b  - small
 [2025-05-05]  d0adeec  - new components
@@ -396,8 +396,8 @@ const commits = `
 [2025-03-13]  2b69809  - Added Google Tag Manager  
 [2025-03-12]  094e6e8  - Favicon2  
 [2025-03-12]  572cafd  - Favicon  
-[2025-03-12]  3cf3c04  - Updated meta tags for Twitter and Discord previews  
-[2025-03-12]  eec766b  - Saving my local changes before pulling updates  
+[2025-03-12]  3cf3c04  - new meta tags for Twitter and Discord previews  
+[2025-03-12]  eec766b  - Save local changes before pulling updates  
 [2025-03-12]  70fb2ea  - Update WindowManager.js for open in URL  
 [2025-03-08]  cd504a6  - Readme  
 [2025-03-08]  1210b74  - CSS edits  
