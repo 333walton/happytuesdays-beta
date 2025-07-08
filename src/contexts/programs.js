@@ -359,26 +359,18 @@ class ProgramProvider extends Component {
   isProgramActive = (programId) => this.state.activePrograms[programId];
 
   moveToTop = (windowId) => {
-    this.setState((prevState) => {
-      if (prevState.activeId === windowId) {
-        // No change needed if already active
-        return null;
-      }
-      return {
-        activePrograms: {
-          ...prevState.activePrograms,
-          [windowId]: {
-            ...prevState.activePrograms[windowId],
-            minimized: false,
-          },
+    this.setState((prevState) => ({
+      activePrograms: {
+        ...prevState.activePrograms,
+        [windowId]: {
+          ...prevState.activePrograms[windowId],
+          minimized: false,
         },
-        activeId: windowId,
-        zIndexes: [
-          ...prevState.zIndexes.filter((v) => v !== windowId),
-          windowId,
-        ],
-      };
-    });
+      },
+      activeId: windowId,
+      zIndexes: [...prevState.zIndexes.filter((v) => v !== windowId), windowId],
+      activationNonce: (prevState.activationNonce || 0) + 1, // <- NEW
+    }));
   };
 
   open = (program, options = {}) => {

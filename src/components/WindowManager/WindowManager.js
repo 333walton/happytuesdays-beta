@@ -65,6 +65,14 @@ class WindowManager extends Component {
     }
     if (progProps && progProps.parentExplorerId) {
       setTimeout(() => {
+        // Simulate a click in the parent CuboneFileExplorer's file-panel to visually "wake up" the window
+        const parentPanel = document.querySelector(
+          `.CuboneFileExplorer[data-window-id="${progProps.parentExplorerId}"] .file-panel`
+        );
+        if (parentPanel) {
+          parentPanel.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        }
+        // Optionally, also bring the parent window to the top (if not already active)
         if (this.context.moveToTop) {
           this.context.moveToTop(progProps.parentExplorerId);
         }
@@ -89,6 +97,7 @@ class WindowManager extends Component {
               onMinimize={this.context.onMinimize}
               moveToTop={this.context.moveToTop}
               isActive={prog.id === this.context.activeId}
+              activationNonce={this.context.activationNonce}
               program={prog}
               zIndex={this.context.zIndexes.indexOf(progId) + 5}
             />

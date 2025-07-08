@@ -307,22 +307,17 @@ class CuboneFileExplorer extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    // Check if this window became active
-    //if (!prevProps.isActive && this.props.isActive) {
-    // Remove grayscale filter when becoming active
-    //const explorerWindow = document.querySelector(
-    //  `.CuboneFileExplorer[data-window-id="${this.props.id}"]`
-    //);
-    //if (explorerWindow) {
-    //explorerWindow.style.filter = "none";
-    //const windowWrapper = explorerWindow.closest(".Window");
-    //if (windowWrapper) {
-    //  windowWrapper.style.filter = "none";
-    //}
-    //}
-    //}
+    // When this window becomes active and the activationNonce changes
+    if (
+      this.props.isActive &&
+      prevProps.activationNonce !== this.props.activationNonce
+    ) {
+      // Optionally, you can trigger focus or other effects here.
+      // Do NOT manually manipulate grayscale filter here!
+      // Let your CSS `.Window--active` handle the filter.
+    }
 
-    // Update button states when history changes
+    // Update toolbar button states if navigation history changes
     if (
       prevState.historyIndex !== this.state.historyIndex ||
       prevState.history.length !== this.state.history.length
@@ -330,7 +325,7 @@ class CuboneFileExplorer extends Component {
       this.updateButtonStates();
     }
 
-    // Re-attach handlers if mobile state changed
+    // Re-attach toolbar handlers if mobile state changed
     if (prevState.isMobile !== this.state.isMobile) {
       const toolbar = document.querySelector(
         ".WindowExplorer__options .OptionsList__large-icons"
@@ -341,7 +336,7 @@ class CuboneFileExplorer extends Component {
       this.attachToolbarHandlers();
     }
 
-    // Re-attach handlers if needed
+    // Ensure handlers are always attached
     const toolbar = document.querySelector(
       ".WindowExplorer__options .OptionsList__large-icons"
     );
