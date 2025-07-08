@@ -21,6 +21,8 @@ class Notepad extends Component {
     newFilename: "",
   };
 
+  isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
   toggleWrap = () => this.setState((state) => ({ wrap: !state.wrap }));
   setText = (e) => {
     e.persist();

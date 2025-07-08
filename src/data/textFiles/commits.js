@@ -2,6 +2,7 @@ const commits = `
 ======================================================
 >>HAPPY TUESDAYS CHANGELOG.TXT
 ======================================================
+
 [2025-07-02]  efbe12d  - file explorer
 [2025-07-02]  2119bbc  - file explorer cubone
 [2025-07-01]  fa569d8  - settings fix
