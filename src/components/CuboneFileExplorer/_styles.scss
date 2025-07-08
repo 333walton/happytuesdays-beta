@@ -65,6 +65,14 @@
       &.selected {
         background: #000080;
         color: #ffffff;
+
+        // Webkit-specific fix for iOS Safari
+        -webkit-text-fill-color: #ffffff;
+
+        .tree-label {
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+        }
       }
 
       .tree-icon {
