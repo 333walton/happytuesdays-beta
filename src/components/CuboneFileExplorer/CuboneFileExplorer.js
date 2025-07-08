@@ -9,28 +9,6 @@ import buildMenu from "../../helpers/menuBuilder";
 import "./_styles.scss";
 
 class CuboneFileExplorer extends Component {
-  // Handle row click/tap: always select on first click/tap, open on double tap (mobile) or double click (desktop)
-  handleRowClick = (name, item, e) => {
-    console.log("handleRowClick called:", {
-      name,
-      item,
-      event: e,
-      isMobile: this.state.isMobile,
-    });
-    if (e && typeof e.stopPropagation === "function") {
-      e.stopPropagation();
-    }
-    // Always select on first click/tap
-    if (!this.state.selectedFiles.includes(name)) {
-      this.setState({ selectedFiles: [name] });
-      return;
-    }
-    // On mobile, second tap opens
-    if (this.state.isMobile) {
-      this.handleDoubleClick(name, item);
-    }
-    // On desktop, do nothing (double click will open)
-  };
   constructor(props) {
     super(props);
 
@@ -51,6 +29,8 @@ class CuboneFileExplorer extends Component {
       showViewsMenu: false,
       viewsMenuPosition: null,
       isMobile: window.innerWidth <= 600,
+      lastTapTime: 0, // For double-tap detection
+      lastTappedItem: null, // Track last tapped item
     };
 
     // Store button handlers for easy access
@@ -111,6 +91,62 @@ class CuboneFileExplorer extends Component {
         // Re-attach handlers after state update
         setTimeout(() => this.attachToolbarHandlers(), 100);
       });
+    }
+  };
+
+  // Handle clicks on empty areas to deselect files
+  handleFilePanelClick = (e) => {
+    // Only clear selection if clicking directly on the file-panel (not on a file)
+    if (
+      e.target === e.currentTarget ||
+      e.target.classList.contains("icon-grid") ||
+      e.target.classList.contains("file-panel") ||
+      e.target.classList.contains("empty-folder")
+    ) {
+      this.setState({ selectedFiles: [] });
+    }
+  };
+
+  // Handle row click/tap with improved double-tap detection
+  handleRowClick = (name, item, e) => {
+    console.log("handleRowClick called:", {
+      name,
+      item,
+      event: e,
+      isMobile: this.state.isMobile,
+    });
+
+    if (e && typeof e.stopPropagation === "function") {
+      e.stopPropagation();
+    }
+
+    const currentTime = Date.now();
+    const tapDelta = currentTime - this.state.lastTapTime;
+
+    if (this.state.isMobile) {
+      // Mobile double-tap detection
+      if (this.state.lastTappedItem === name && tapDelta < 500) {
+        // Double tap detected
+        console.log("Double tap detected on:", name);
+        this.handleDoubleClick(name, item);
+        // Reset tap tracking
+        this.setState({
+          lastTapTime: 0,
+          lastTappedItem: null,
+          selectedFiles: [name], // Keep selected
+        });
+      } else {
+        // Single tap - select the item
+        console.log("Single tap on:", name);
+        this.setState({
+          selectedFiles: [name],
+          lastTapTime: currentTime,
+          lastTappedItem: name,
+        });
+      }
+    } else {
+      // Desktop behavior - just select on click
+      this.setState({ selectedFiles: [name] });
     }
   };
 
@@ -1119,7 +1155,7 @@ class CuboneFileExplorer extends Component {
         data:
           fileData.component === "Notepad"
             ? { content: fileData.content || "" }
-            : {},
+            : fileData.data || {},
       });
     }
   };
@@ -1344,8 +1380,11 @@ class CuboneFileExplorer extends Component {
               {this.renderTreeView()}
             </div>
 
-            {/* File list panel */}
-            <div className={`file-panel ${state.viewMode}`}>
+            {/* File list panel - Add click handler for deselection */}
+            <div
+              className={`file-panel ${state.viewMode}`}
+              onClick={this.handleFilePanelClick}
+            >
               {Object.keys(state.currentFolder).length === 0 ? (
                 <div className="empty-folder">
                   <p>This folder is empty</p>
@@ -1368,7 +1407,9 @@ class CuboneFileExplorer extends Component {
                         draggable: true,
                         onDragStart: (e) => this.handleDragStart(e, name, item),
                         onDragEnd: this.handleDragEnd,
-                        onDoubleClick: () => this.handleDoubleClick(name, item),
+                        onDoubleClick: state.isMobile
+                          ? undefined
+                          : () => this.handleDoubleClick(name, item),
                         className: `file-row${
                           state.selectedFiles.includes(name) ? " selected" : ""
                         }`,
@@ -1433,13 +1474,16 @@ class CuboneFileExplorer extends Component {
                           this.handleDrop(e, name, item);
                         }
                       },
+                      onDoubleClick: state.isMobile
+                        ? undefined
+                        : () => this.handleDoubleClick(name, item),
                       className: `file-item-wrapper${
                         item.type === "folder" ? " drop-target" : ""
                       }${
                         state.selectedFiles.includes(name) ? " selected" : ""
                       }`,
                     };
-                    // Attach handlers to both wrapper and icon for reliability
+                    // Attach handlers to wrapper only
                     const explorerIconProps = {
                       title: name,
                       icon:
@@ -1447,18 +1491,13 @@ class CuboneFileExplorer extends Component {
                         (item.type === "folder"
                           ? icons.folder32
                           : icons.notepadFile32),
-                      onDoubleClick: () => this.handleDoubleClick(name, item),
                       className: state.viewMode,
                     };
                     if (state.isMobile) {
                       iconWrapperProps.onTouchEnd = (e) =>
                         this.handleRowClick(name, item, e);
-                      explorerIconProps.onTouchEnd = (e) =>
-                        this.handleRowClick(name, item, e);
                     } else {
                       iconWrapperProps.onClick = (e) =>
-                        this.handleRowClick(name, item, e);
-                      explorerIconProps.onClick = (e) =>
                         this.handleRowClick(name, item, e);
                     }
                     return (

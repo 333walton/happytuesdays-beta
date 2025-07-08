@@ -172,7 +172,7 @@
       }
     }
 
-    // List and details view
+    // List and details view - FIXED WEBKIT TEXT COLOR
     &.list,
     &.details {
       .file-table {
@@ -214,6 +214,19 @@
             &.selected {
               background: #000080;
               color: #ffffff;
+
+              // Webkit-specific fix for iOS Safari
+              -webkit-text-fill-color: #ffffff;
+
+              td {
+                color: #ffffff !important;
+                -webkit-text-fill-color: #ffffff !important;
+
+                * {
+                  color: #ffffff !important;
+                  -webkit-text-fill-color: #ffffff !important;
+                }
+              }
             }
 
             td {
@@ -311,11 +324,12 @@
     cursor: move !important;
   }
 
-  // Selected file highlighting
+  // Selected file highlighting with webkit fix
   .file-item-wrapper.selected {
     .pb-explorer-icon__title {
       background: #000080;
       color: #ffffff;
+      -webkit-text-fill-color: #ffffff;
       outline: none;
     }
   }
@@ -649,7 +663,6 @@
 }
 
 // Mobile responsive - UPDATED TO SHOW TREE PANEL AND FIX ISSUES
-// Mobile responsive - UPDATED TO SHOW TREE PANEL AND FIX ISSUES
 @media (max-width: 600px) {
   .CuboneFileExplorer {
     // Ensure toolbar has enough space and is scrollable
@@ -796,6 +809,26 @@
     }
 
     .file-panel {
+      // WEBKIT FIX: Ensure selected items show white text on mobile
+      &.list,
+      &.details {
+        .file-table tbody tr.selected {
+          background: #000080 !important;
+          color: #ffffff !important;
+          -webkit-text-fill-color: #ffffff !important;
+
+          td {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+
+            * {
+              color: #ffffff !important;
+              -webkit-text-fill-color: #ffffff !important;
+            }
+          }
+        }
+      }
+
       &.icons .icon-grid {
         gap: 8px;
         padding: 4px;
