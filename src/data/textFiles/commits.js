@@ -29,7 +29,7 @@ HAPPY TUESDAYS CHANGELOG
 [2025-06-20]  00008dd  - css
 [2025-06-20]  7f96448  - clippyfaq
 [2025-06-20]  484d7e6  - chatbot v1
-[2025-06-20]  6581ac3  - this got webchat working again
+[2025-06-20]  6581ac3  - this got webchat working
 [2025-06-18]  6010aca  - botpress progress
 [2025-06-18]  1adecd9  - (testing)
 [2025-06-17]  d75c7a4  - botpress prog
