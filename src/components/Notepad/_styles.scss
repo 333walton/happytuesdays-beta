@@ -122,6 +122,12 @@
       &.Notepad--clippyfaq textarea {
         font-size: 18px !important; // Even larger for FAQ content
       }
+
+      // If the content is marked as aboutClippy
+      &[data-content-type="aboutClippy"] textarea,
+      &.Notepad--clippyfaq textarea {
+        font-size: 18px !important; // Even larger for FAQ content
+      }
     }
 
     // iOS-specific targeting

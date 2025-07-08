@@ -105,7 +105,10 @@ class Notepad extends Component {
                 style={{
                   fontFamily: "FixedSys, Courier New, Courier, monospace",
                   fontSize:
-                    props.title === "FAQ" || props.title === "About Clippy"
+                    props.title === "FAQ" ||
+                    props.title === "About Clippy" ||
+                    props.title === "AI Agent Guide" ||
+                    props.title === `About ${window.currentAgent || "Clippy"}`
                       ? "110%"
                       : undefined,
                   whiteSpace: "pre-wrap",

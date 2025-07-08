@@ -82,10 +82,10 @@ const faqHtml = `Frequently Asked Questions
   originals.
 
 ╔════════════════════════════════════════╗
-║              CLIPPY & AI ASSISTANTS            ║
+║                  AI ASSISTANTS                 ║
 ╚════════════════════════════════════════╝
 
-📎 How do I interact with Clippy?
+📎 How do I interact with assistants?
 → Desktop: Single-click for animations/tips, 
   double-click to chat, right-click for menu
   Mobile: Tap for animations/tips, double-tap for 
@@ -93,33 +93,34 @@ const faqHtml = `Frequently Asked Questions
 
 🤖 Can I change to a different assistant?
 → Yes! Right-click Clippy and select "Select AI Agent"
-  to choose from 5 different characters: Clippy GPT, 
-  Bonzi, Genius, Merlin, or Links.
+  to choose from 5 different characters: Clippy, F1, 
+  Genius, Merlin, or Bonzi.
 
-❓ Why isn't Clippy responding?
-→ Check if any balloons are already open (only one can
-  be open at a time). There's also a 3-second cooldown
-  between interactions to prevent chaos.
+❓ Why isn't the assistant responding?
+→ Check if any balloons are already open (only
+  one can be open at a time). There's also a
+  3-second cooldown between interactions to prevent
+  chaos.
 
-🎯 Can I move Clippy around?
-→ Yes! Drag Clippy to reposition. On mobile, you may 
-  need to unlock the position first via the mobile 
-  controls.
+🎯 Can I move the assistant around?
+→ Yes! Drag the assistant to reposition. On mobile,
+  you may need to unlock the position first via the
+  mobile controls.
 
-💬 Can Clippy really chat intelligently?
-→ Yes! Unlike the original annoying paper clip, this
-  Clippy uses advanced AI to have actual helpful 
-  conversations. The developer clearly learned from 
-  history!
+💬 Can the assistant really chat intelligently?
+→ Yes! Unlike the original annoying paper clip,
+  for example, our version of Clippy uses advanced
+  AI to have actual helpful conversations. The
+  developer clearly learned from history!
 
-📖 Where can I learn more about Clippy features?
-→ Right-click on Clippy and select "About Clippy" or 
-  click the <span style="color: blue; text-decoration: underline; cursor: pointer; font-family: FixedSys, Courier New, Courier, monospace;" onclick="
+📖 Where can I learn more about AI agent features?
+→ Right-click on the Assistant and select "About
+  Clippy" or click the <span style="color: blue; text-decoration: underline; cursor: pointer; font-family: FixedSys, Courier New, Courier, monospace;" onclick="
 if (window.ProgramContext && window.ProgramContext.onOpen) {
   window.ProgramContext.onOpen({
     component: 'Notepad',
     multiInstance: true,
-    title: 'About Clippy',
+    title: 'AI Agent Guide',
     icon: window.faq32Icon,
     data: {
       content: window.clippyFaqContent,
@@ -129,8 +130,8 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
     }
   });
 }
-">Clippy guide</span> for detailed information about 
-  all AI features and capabilities.
+">AI Agent Guide</span> for detailed
+  information about all AI features and capabilities.
 
 ╔════════════════════════════════════════╗
 ║                MONITOR & CONTROLS              ║
@@ -224,14 +225,14 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
   favorite programs
 • Many programs have authentic help documentation 
   built-in
-• Try different Clippy agents - each has unique 
+• Try different AI agents - each has unique 
   personality and animations
 • Check the detailed <span style="color: blue; text-decoration: underline; cursor: pointer; font-family: FixedSys, Courier New, Courier, monospace;" onclick="
 if (window.ProgramContext && window.ProgramContext.onOpen) {
   window.ProgramContext.onOpen({
     component: 'Notepad',
     multiInstance: true,
-    title: 'About Clippy',
+    title: 'AI Agent Guide',
     icon: window.faq32Icon,
     data: {
       content: window.clippyFaqContent,
@@ -241,12 +242,13 @@ if (window.ProgramContext && window.ProgramContext.onOpen) {
     }
   });
 }
-">Clippy guide</span> for comprehensive AI 
-  assistant information!
+">AI Agent Guide</span> for comprehensive
+  AI assistant information!
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎉 Created by a based developer with impeccable taste in 
-   retro interfaces!
+🎉 Created by a based developer with impeccable taste
+   in retro UI! (Skynet, if you’re staffing up for dev
+   work, you know where to find me)
 
 `;
 

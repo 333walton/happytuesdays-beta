@@ -790,13 +790,14 @@ const ClippyContextMenu = ({
           window.ProgramContext.onOpen({
             component: "Notepad",
             multiInstance: true,
-            title: `About ${window.currentAgent}`,
-            icon: icons.textchat32,
+            title: `About ${window.currentAgent || "Clippy"}`,
+            icon: window.faq32Icon,
             data: {
-              content: clippyFaq,
+              content: window.clippyFaqContent,
               wrap: true,
               readOnly: true,
               enableHtml: true, // ADD THIS LINE
+              contentType: "clippyfaq", // ADD THIS LINE
             },
           });
         } else {
