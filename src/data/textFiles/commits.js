@@ -1,6 +1,6 @@
 const commits = `
 ======================================================
->>HAPPY TUESDAYS CHANGELOG.TXT
+HAPPY TUESDAYS CHANGELOG
 ======================================================
 
 [2025-07-02]  efbe12d  - file explorer
@@ -10,9 +10,9 @@ const commits = `
 [2025-07-01]  9625425  - start menu
 [2025-07-01]  c686eee  - test
 [2025-07-01]  c2dec8d  - more start menu
-[2025-07-01]  5c2ea09  - feeeds
+[2025-07-01]  5c2ea09  - feeds
 [2025-07-01]  3d58985  - start menu
-[2025-07-01]  6e51f99  - start m refresh w cycle detection safeguard
+[2025-07-01]  6e51f99  - smenu refresh w cycle detect
 [2025-06-29]  c06e676  - neo4j mcp
 [2025-06-29]  3aa4915  - queries added
 [2025-06-29]  6542c6b  - neo4j improvements
@@ -29,7 +29,7 @@ const commits = `
 [2025-06-20]  00008dd  - css
 [2025-06-20]  7f96448  - clippyfaq
 [2025-06-20]  484d7e6  - chatbot v1
-[2025-06-20]  6581ac3  - this got the webchat working again
+[2025-06-20]  6581ac3  - this got webchat working again
 [2025-06-18]  6010aca  - botpress progress
 [2025-06-18]  1adecd9  - (testing)
 [2025-06-17]  d75c7a4  - botpress prog
@@ -43,7 +43,7 @@ const commits = `
 [2025-06-14]  1c1a40f  - botpress chat
 [2025-06-13]  a1552e9  - agent swapping logic
 [2025-06-12]  8e37af1  - agent-aware positioning v1
-[2025-06-12]  43adf0c  - provider and positioning fixes
+[2025-06-12]  43adf0c  - provider / positioning fixes
 [2025-06-12]  8fbfdfd  - positioning file modulate
 [2025-06-12]  e8d9582  - revert
 [2025-06-11]  57fd94f  - clippy agent bugs
