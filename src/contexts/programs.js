@@ -359,18 +359,47 @@ class ProgramProvider extends Component {
   isProgramActive = (programId) => this.state.activePrograms[programId];
 
   moveToTop = (windowId) => {
-    this.setState((prevState) => ({
-      activePrograms: {
-        ...prevState.activePrograms,
-        [windowId]: {
-          ...prevState.activePrograms[windowId],
-          minimized: false,
-        },
+    this.setState(
+      (prevState) => {
+        const isAlreadyActive = prevState.activeId === windowId;
+
+        // Always update the state to ensure re-render
+        return {
+          activePrograms: {
+            ...prevState.activePrograms,
+            [windowId]: {
+              ...prevState.activePrograms[windowId],
+              minimized: false,
+            },
+          },
+          activeId: windowId,
+          zIndexes: [
+            ...prevState.zIndexes.filter((v) => v !== windowId),
+            windowId,
+          ],
+          // Force a re-render by incrementing activation nonce
+          activationNonce: (prevState.activationNonce || 0) + 1,
+        };
       },
-      activeId: windowId,
-      zIndexes: [...prevState.zIndexes.filter((v) => v !== windowId), windowId],
-      activationNonce: (prevState.activationNonce || 0) + 1, // <- NEW
-    }));
+      () => {
+        // After state update, ensure the window gets focus
+        // This helps trigger any focus-based CSS updates
+        setTimeout(() => {
+          const windowElement = document.querySelector(
+            `.Window[data-window-id="${windowId}"]`
+          );
+          if (windowElement) {
+            // Find a focusable element within the window
+            const focusableElement = windowElement.querySelector(
+              'button, [tabindex="0"], input, select, textarea'
+            );
+            if (focusableElement) {
+              focusableElement.focus();
+            }
+          }
+        }, 0);
+      }
+    );
   };
 
   open = (program, options = {}) => {

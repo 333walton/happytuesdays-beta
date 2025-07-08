@@ -951,3 +951,62 @@
     }
   }
 }
+
+// Ensure active windows never have grayscale
+.Window {
+  transition: filter 0.15s ease-in-out;
+
+  &--active {
+    filter: none !important;
+
+    // Remove the transform that was causing transparency issues
+    // transform: translateZ(0);
+    // -webkit-transform: translateZ(0);
+  }
+
+  // Non-active windows get grayscale
+  &:not(.Window--active) {
+    filter: grayscale(1);
+  }
+}
+
+// Special handling for CuboneFileExplorer to ensure proper activation
+.CuboneFileExplorer {
+  // When the parent window is active, ensure no grayscale
+  .Window--active & {
+    filter: none !important;
+
+    // Force all internal elements to be visible
+    .file-explorer-content,
+    .tree-panel,
+    .file-panel {
+      filter: none !important;
+      opacity: 1 !important;
+    }
+  }
+}
+
+// Fix for dragging - ensure dragging windows maintain opacity
+.react-draggable-dragging {
+  opacity: 1 !important;
+
+  // Ensure the window content stays visible during drag
+  &.Window--active {
+    filter: none !important;
+  }
+}
+
+// Force webkit to respect the active state without breaking dragging
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .Window--active:not(.react-draggable-dragging) {
+    -webkit-filter: none !important;
+    filter: none !important;
+  }
+
+  // During dragging, ensure full opacity
+  .react-draggable-dragging {
+    -webkit-filter: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+}

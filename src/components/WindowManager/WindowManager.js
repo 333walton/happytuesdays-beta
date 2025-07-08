@@ -16,8 +16,39 @@ class WindowManager extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps !== this.props) {
-      this.checkSpecialURLs();
+    // When window becomes active, ensure CSS class is properly applied
+    if (!prevProps.isActive && this.props.isActive) {
+      // Force a reflow to ensure CSS updates
+      const windowElement = this.windowRef.current;
+      if (windowElement) {
+        // Read a property to force reflow
+        void windowElement.offsetHeight;
+
+        // Ensure the active class is applied
+        windowElement.classList.add("Window--active");
+
+        // Remove any inline filter styles that might override CSS
+        windowElement.style.filter = "";
+        windowElement.style.webkitFilter = "";
+      }
+    }
+
+    // Handle activation nonce changes
+    if (
+      this.props.activationNonce !== prevProps.activationNonce &&
+      this.props.isActive
+    ) {
+      // Force re-render when activation nonce changes
+      this.forceUpdate(() => {
+        const windowElement = this.windowRef.current;
+        if (windowElement) {
+          // Trigger reflow without transform effects
+          void windowElement.offsetHeight;
+
+          // Ensure active class is applied
+          windowElement.classList.add("Window--active");
+        }
+      });
     }
   }
 
@@ -59,24 +90,21 @@ class WindowManager extends Component {
     }
   }
 
-  handleProgramClose = (progId, progProps) => {
+  handleProgramClose = (prog) => {
+    // Call the standard close handler
     if (this.context.onClose) {
-      this.context.onClose(progId, progProps);
+      this.context.onClose(prog);
     }
-    if (progProps && progProps.parentExplorerId) {
-      setTimeout(() => {
-        // Simulate a click in the parent CuboneFileExplorer's file-panel to visually "wake up" the window
-        const parentPanel = document.querySelector(
-          `.CuboneFileExplorer[data-window-id="${progProps.parentExplorerId}"] .file-panel`
-        );
-        if (parentPanel) {
-          parentPanel.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-        }
-        // Optionally, also bring the parent window to the top (if not already active)
+
+    // Check if this program has a parent explorer
+    if (prog && prog.parentExplorerId) {
+      // Use a micro-task to ensure the close operation completes first
+      Promise.resolve().then(() => {
+        // Force the parent explorer to re-activate
         if (this.context.moveToTop) {
-          this.context.moveToTop(progProps.parentExplorerId);
+          this.context.moveToTop(prog.parentExplorerId);
         }
-      }, 0);
+      });
     }
   };
 
@@ -87,16 +115,19 @@ class WindowManager extends Component {
           const prog = this.context.activePrograms[progId];
           const Application = Applications[prog.component];
           if (!Application) return null;
+
+          const isActive = prog.id === this.context.activeId;
+
           return (
             <Application
               {...prog}
               save={this.context.save}
               key={progId}
-              onClose={(...args) => this.handleProgramClose(...args)}
+              onClose={() => this.handleProgramClose(prog)}
               onOpen={this.context.onOpen}
               onMinimize={this.context.onMinimize}
               moveToTop={this.context.moveToTop}
-              isActive={prog.id === this.context.activeId}
+              isActive={isActive}
               activationNonce={this.context.activationNonce}
               program={prog}
               zIndex={this.context.zIndexes.indexOf(progId) + 5}
