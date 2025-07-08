@@ -56,7 +56,25 @@ class CuboneFileExplorer extends Component {
 
     // Observer to watch for toolbar rendering
     this.toolbarObserver = null;
+
+    // Ref for file panel
+    this.filePanelRef = React.createRef();
   }
+
+  // Handle window focus/click to remove grayscale
+  //handleWindowFocus = () => {
+  // Remove grayscale filter when window is focused/clicked
+  //const explorerWindow = document.querySelector(
+  //`.CuboneFileExplorer[data-window-id="${this.props.id}"]`
+  //);
+  //if (explorerWindow) {
+  //explorerWindow.style.filter = "none";
+  //const windowWrapper = explorerWindow.closest(".Window");
+  //if (windowWrapper) {
+  //  windowWrapper.style.filter = "none";
+  //}
+  //}
+  //};
 
   componentDidMount() {
     console.log("CuboneFileExplorer mounted, isMobile:", this.state.isMobile);
@@ -70,6 +88,14 @@ class CuboneFileExplorer extends Component {
     // Add resize listener for mobile detection
     window.addEventListener("resize", this.handleResize);
 
+    // Add focus handler to window
+    //const explorerWindow = document.querySelector(
+    //  `.CuboneFileExplorer[data-window-id="${this.props.id}"]`
+    //);
+    //if (explorerWindow) {
+    //  explorerWindow.addEventListener("click", this.handleWindowFocus);
+    //}
+
     // Try to attach handlers after a delay
     setTimeout(() => this.attachToolbarHandlers(), 100);
     setTimeout(() => this.attachToolbarHandlers(), 500);
@@ -78,6 +104,14 @@ class CuboneFileExplorer extends Component {
   componentWillUnmount() {
     document.removeEventListener("click", this.handleGlobalClick);
     window.removeEventListener("resize", this.handleResize);
+
+    // Remove focus handler
+    //const explorerWindow = document.querySelector(
+    //  `.CuboneFileExplorer[data-window-id="${this.props.id}"]`
+    //);
+    //if (explorerWindow) {
+    //  explorerWindow.removeEventListener("click", this.handleWindowFocus);
+    //}
 
     if (this.toolbarObserver) {
       this.toolbarObserver.disconnect();
@@ -273,6 +307,21 @@ class CuboneFileExplorer extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
+    // Check if this window became active
+    //if (!prevProps.isActive && this.props.isActive) {
+    // Remove grayscale filter when becoming active
+    //const explorerWindow = document.querySelector(
+    //  `.CuboneFileExplorer[data-window-id="${this.props.id}"]`
+    //);
+    //if (explorerWindow) {
+    //explorerWindow.style.filter = "none";
+    //const windowWrapper = explorerWindow.closest(".Window");
+    //if (windowWrapper) {
+    //  windowWrapper.style.filter = "none";
+    //}
+    //}
+    //}
+
     // Update button states when history changes
     if (
       prevState.historyIndex !== this.state.historyIndex ||
@@ -1145,7 +1194,14 @@ class CuboneFileExplorer extends Component {
         Pipes: icons.pipes16,
         Sand: icons.sand16,
         ImageWindow: icons.paint16,
+        IframeWindow: icons.internetExplorer16,
+        UTMTool: icons.utm24,
+        VideoPlayerMobile: icons.vid16,
+        ASCIIText: icons.asciibanner16,
       };
+
+      // Store reference to this explorer's ID for the callback
+      const explorerWindowId = this.props.id;
 
       this.props.onOpen({
         component: fileData.component,
@@ -1156,6 +1212,8 @@ class CuboneFileExplorer extends Component {
           fileData.component === "Notepad"
             ? { content: fileData.content || "" }
             : fileData.data || {},
+        // Add metadata to help identify the parent explorer
+        parentExplorerId: explorerWindowId,
       });
     }
   };
@@ -1337,11 +1395,14 @@ class CuboneFileExplorer extends Component {
           initialX={state.isMobile ? 10 : 20}
           initialY={state.isMobile ? 30 : 40}
           className="CuboneFileExplorer"
+          data-window-id={props.id}
           resizable={true}
           minWidth={state.isMobile ? 350 : 162}
           forceNoMobileMax={true} // Prevent auto-maximize on mobile
           address={state.currentPath.replace(/\//g, "\\")}
           explorerOptions={explorerOptions}
+          //onClick={this.handleWindowFocus}
+          //onFocus={this.handleWindowFocus}
           menuOptions={buildMenu(
             {
               ...props,
@@ -1382,6 +1443,7 @@ class CuboneFileExplorer extends Component {
 
             {/* File list panel - Add click handler for deselection */}
             <div
+              ref={this.filePanelRef}
               className={`file-panel ${state.viewMode}`}
               onClick={this.handleFilePanelClick}
             >

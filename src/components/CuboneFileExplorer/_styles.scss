@@ -610,6 +610,15 @@
   }
 }
 
+// Ensure active windows never have grayscale
+.Window--active {
+  filter: none !important;
+
+  .CuboneFileExplorer {
+    filter: none !important;
+  }
+}
+
 // Views dropdown menu - OUTSIDE the main component for proper z-index
 .views-dropdown {
   position: fixed !important;
