@@ -162,19 +162,34 @@ const TaskBar = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!taskbarRef.current) return;
+    const startBtn = taskbarRef.current.querySelector('.StartButton');
+    if (startBtn) {
+      startButtonRef.current = startBtn;
+      startBtn.onclick = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        openMenu();
+      };
+      startBtn.onmousedown = (e) => e.preventDefault();
+      startBtn.onmouseup = (e) => e.preventDefault();
+    }
+  }, [taskbarRef, openMenu]);
+
   return (
     <ProgramContext.Consumer>
       {(context) => (
         <div ref={taskbarRef} style={{ position: "relative" }}>
           {/* Start Button */}
-          <button
+          {/* <button
             ref={startButtonRef}
             className="TaskBar__start-button"
             onClick={openMenu}
           >
             <img src="/path/to/start-icon.png" alt="Start" />
             Start
-          </button>
+          </button> */}
           {/* ...other TaskBar content, e.g., quick launch, open windows, etc. ... */}
           <TaskBarComponent
             options={context.startMenu}
@@ -220,39 +235,21 @@ const TaskBar = () => {
           {/* Start Menu (portal on mobile, normal on desktop) */}
           {menuOpen && (
             <StartMenuPortal>
-              {isMobile ? (
-                <div
-                  className="StartMenuPortal"
-                  style={{
-                    position: "absolute",
-                    left: menuPosition.left,
-                    top: menuPosition.top,
-                    zIndex: 2000,
-                  }}
-                >
-                  <StartMenu
-                    className="TaskBar__start"
-                    options={context.startMenu}
-                    onClose={() => setMenuOpen(false)}
-                  />
-                </div>
-              ) : (
-                <div
-                  className="TaskBar__start-menu"
-                  style={{
-                    position: "absolute",
-                    left: menuPosition.left,
-                    top: menuPosition.top,
-                    zIndex: 2000,
-                  }}
-                >
-                  <StartMenu
-                    className="TaskBar__start"
-                    options={context.startMenu}
-                    onClose={() => setMenuOpen(false)}
-                  />
-                </div>
-              )}
+              <div
+                className="StartMenuPortal"
+                style={{
+                  position: "absolute",
+                  left: menuPosition.left,
+                  top: menuPosition.top,
+                  zIndex: 2000,
+                }}
+              >
+                <StartMenu
+                  className="TaskBar__start"
+                  options={context.startMenu}
+                  onClose={() => setMenuOpen(false)}
+                />
+              </div>
             </StartMenuPortal>
           )}
         </div>
