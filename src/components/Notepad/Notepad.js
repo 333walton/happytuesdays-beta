@@ -109,7 +109,8 @@ class Notepad extends Component {
                   fontSize:
                     props.title === "Change Log" ||
                     props.title === "FAQ" ||
-                    props.title === "About Clippy" ||
+                      props.title === "About Clippy" ||
+                      props.title === "What Are These?" ||
                     props.title === "AI Agent Guide" ||
                     props.title === `About ${window.currentAgent || "Clippy"}`
                       ? "110%"

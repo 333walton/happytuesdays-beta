@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { TaskBar as TaskBarComponent } from "packard-belle";
+import StartMenuPortal from "../StartMenuPortal";
+import { StartMenu } from "packard-belle";
 import { ProgramContext } from "../../contexts";
 
 // Custom tooltip component
 const CustomTooltip = ({ text, visible }) => {
   if (!visible) return null;
-
   return (
     <div
       style={{
@@ -32,6 +33,15 @@ const TaskBar = () => {
   const taskbarRef = useRef(null);
   const [tooltipText, setTooltipText] = useState("");
   const clippyButtonRef = useRef(null);
+  const startButtonRef = useRef();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0 });
+
+  // Mobile detection
+  const isMobile =
+    typeof window !== "undefined" &&
+    (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      window.innerWidth <= 768);
 
   const handleMouseEnter = () => {
     if (tooltipTimeout) {
@@ -47,11 +57,25 @@ const TaskBar = () => {
     setTooltipTimeout(timeout);
   };
 
+  // Open menu and set position
+  const openMenu = () => {
+    if (startButtonRef.current) {
+      const rect = startButtonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        left: rect.left,
+        top: rect.bottom,
+      });
+      setMenuOpen(true);
+    }
+  };
+
+  // Close menu handler
+  const closeMenu = () => setMenuOpen(false);
+
   // Find and modify the Clippy button after render
   useEffect(() => {
     const findClippyButton = () => {
       if (!taskbarRef.current) return;
-
       const buttons = taskbarRef.current.querySelectorAll("button");
       const clippyButton = Array.from(buttons).find((button) => {
         const hasClippyIcon = button.innerHTML.includes("textchat32");
@@ -59,18 +83,14 @@ const TaskBar = () => {
           button.title === "Show Clippy" || button.title === "Hide Clippy";
         return hasClippyIcon || hasClippyTitle;
       });
-
       if (clippyButton) {
         clippyButtonRef.current = clippyButton;
         const buttonTitle = clippyButton.title;
         setTooltipText(buttonTitle);
-
         clippyButton.addEventListener("mouseenter", handleMouseEnter);
         clippyButton.addEventListener("mouseleave", handleMouseLeave);
-
         clippyButton.removeAttribute("title");
         clippyButton.removeAttribute("data-tooltip");
-
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
             if (
@@ -85,12 +105,10 @@ const TaskBar = () => {
             }
           });
         });
-
         observer.observe(clippyButton, {
           attributes: true,
           attributeFilter: ["title"],
         });
-
         return () => {
           clippyButton.removeEventListener("mouseenter", handleMouseEnter);
           clippyButton.removeEventListener("mouseleave", handleMouseLeave);
@@ -98,10 +116,8 @@ const TaskBar = () => {
         };
       }
     };
-
     const cleanup = findClippyButton();
     const timeoutId = setTimeout(findClippyButton, 1000);
-
     return () => {
       if (cleanup) cleanup();
       clearTimeout(timeoutId);
@@ -112,20 +128,14 @@ const TaskBar = () => {
   useEffect(() => {
     const addRSSIcon = () => {
       if (!taskbarRef.current) return;
-
-      // Find the notifications area (system tray)
       const notificationsArea = taskbarRef.current.querySelector(
         ".TaskBar__notifications"
       );
-
       if (notificationsArea && !notificationsArea.querySelector(".rss-icon")) {
-        // Find the time element
         const timeElement = notificationsArea.querySelector(
           ".TaskBar__notifications__time"
         );
-
         if (timeElement) {
-          // Create RSS icon
           const rssIcon = document.createElement("img");
           rssIcon.src = require("../../icons/rss32-min.png");
           rssIcon.alt = "RSS";
@@ -135,25 +145,18 @@ const TaskBar = () => {
           rssIcon.style.marginRight = "1px";
           rssIcon.style.verticalAlign = "middle";
           rssIcon.style.cursor = "pointer";
-
-          // Add click handler if needed
           rssIcon.addEventListener("click", () => {
             console.log("RSS icon clicked");
             // Add your RSS functionality here
           });
-
-          // Insert before the time element
           timeElement.parentNode.insertBefore(rssIcon, timeElement);
         }
       }
     };
-
-    // Try multiple times as the TaskBar might render asynchronously
     addRSSIcon();
     const timeouts = [100, 500, 1000].map((delay) =>
       setTimeout(addRSSIcon, delay)
     );
-
     return () => {
       timeouts.forEach((timeout) => clearTimeout(timeout));
     };
@@ -163,6 +166,16 @@ const TaskBar = () => {
     <ProgramContext.Consumer>
       {(context) => (
         <div ref={taskbarRef} style={{ position: "relative" }}>
+          {/* Start Button */}
+          <button
+            ref={startButtonRef}
+            className="TaskBar__start-button"
+            onClick={openMenu}
+          >
+            <img src="/path/to/start-icon.png" alt="Start" />
+            Start
+          </button>
+          {/* ...other TaskBar content, e.g., quick launch, open windows, etc. ... */}
           <TaskBarComponent
             options={context.startMenu}
             quickLaunch={context.quickLaunch.map((item) => {
@@ -204,6 +217,44 @@ const TaskBar = () => {
             })}
           />
           <CustomTooltip text={tooltipText} visible={tooltipVisible} />
+          {/* Start Menu (portal on mobile, normal on desktop) */}
+          {menuOpen && (
+            <StartMenuPortal>
+              {isMobile ? (
+                <div
+                  className="StartMenuPortal"
+                  style={{
+                    position: "absolute",
+                    left: menuPosition.left,
+                    top: menuPosition.top,
+                    zIndex: 2000,
+                  }}
+                >
+                  <StartMenu
+                    className="TaskBar__start"
+                    options={context.startMenu}
+                    onClose={() => setMenuOpen(false)}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="TaskBar__start-menu"
+                  style={{
+                    position: "absolute",
+                    left: menuPosition.left,
+                    top: menuPosition.top,
+                    zIndex: 2000,
+                  }}
+                >
+                  <StartMenu
+                    className="TaskBar__start"
+                    options={context.startMenu}
+                    onClose={() => setMenuOpen(false)}
+                  />
+                </div>
+              )}
+            </StartMenuPortal>
+          )}
         </div>
       )}
     </ProgramContext.Consumer>

@@ -302,6 +302,7 @@ const creativeTools = [
   {
     type: "divider",
     className: "divider divider--group-0-end",
+    title: "",
   },
   {
     title: "View Catalogue",
@@ -347,6 +348,7 @@ const marketingTools = [
   },
   {
     type: "divider",
+    title: "",
   },
   {
     title: "View Catalogue",
@@ -389,6 +391,7 @@ const builderTools = [
   {
     type: "divider",
     className: "divider divider--group-0-end",
+    title: "",
   },
   {
     title: "View Catalogue",
@@ -432,6 +435,7 @@ const artDesignTools = [
   {
     type: "divider",
     className: "divider divider--group-0-end",
+    title: "",
   },
   {
     title: "View Catalogue",
@@ -460,6 +464,7 @@ const tools = [
   {
     type: "divider",
     className: "divider divider--group-0-end",
+    title: "",
   },
   {
     title: "Creative Tools",

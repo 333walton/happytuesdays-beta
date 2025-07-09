@@ -193,3 +193,16 @@ body {
   bottom: 0 !important;
   left: calc(100% - 3px) !important;
 }
+
+/* Ensure the Start Menu is always above Clippy and its overlay on mobile */
+@media (max-width: 768px), (pointer: coarse) {
+  .StartMenuPortal,
+  .TaskBar__start,
+  .StandardMenuWrapper,
+  .Frame.StandardMenu,
+  .StandardMenu,
+  .StandardMenuItem__child {
+    z-index: 9999 !important;
+    position: absolute !important; /* or absolute, as needed */
+  }
+}

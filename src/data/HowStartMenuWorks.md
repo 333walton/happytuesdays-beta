@@ -560,3 +560,96 @@ node_modules/packard-belle/src/
 ---
 
 _This document provides a comprehensive overview of the start menu system. For specific implementation details, refer to the individual component files and the packard-belle library documentation._
+
+## Customizing Individual Submenu Positioning
+
+### Overview
+
+You can now precisely control the positioning of any individual submenu in the Start Menu (or any other menu) by assigning a custom class to the relevant menu item in your menu data and targeting it with CSS. This approach is robust, maintainable, and does not require editing any node_modules or library code.
+
+### Step-by-Step Example: Aligning Tools Submenus to the Bottom
+
+Suppose you want the submenus for "Creative Tools", "Marketing Tools", "Builder Tools", and "Art/Design Tools" (all under the Tools menu) to align their bottom edge with the bottom of the Tools menu, rather than the default top alignment.
+
+#### 1. Assign a Custom Class in the Menu Data
+
+In your `src/data/start.js`, add a unique `className` property to each relevant menu item:
+
+```js
+const tools = [
+  {
+    title: "Creative Tools",
+    icon: icons.folder16,
+    options: creativeTools,
+    className: "submenu-align-bottom-creative",
+  },
+  {
+    title: "Marketing Tools",
+    icon: icons.folder16,
+    options: marketingTools,
+    className: "submenu-align-bottom-marketing",
+  },
+  {
+    title: "Builder Tools",
+    icon: icons.folder16,
+    options: builderTools,
+    className: "submenu-align-bottom-builder",
+  },
+  {
+    title: "Art/Design Tools",
+    icon: icons.folder16,
+    options: artDesignTools,
+    className: "submenu-align-bottom-artdesign",
+  },
+  // ... other items ...
+];
+```
+
+#### 2. Add Targeted CSS for Each Submenu
+
+In your `src/App.css`, add rules to:
+
+- Remove `position: relative` from the parent menu item (so the submenu aligns to the Tools menu container)
+- Set the submenu frame to align its bottom edge
+
+```css
+/* Remove position: relative for these specific menu items */
+.submenu-align-bottom-creative,
+.submenu-align-bottom-marketing,
+.submenu-align-bottom-builder,
+.submenu-align-bottom-artdesign {
+  position: static !important;
+}
+
+/* Align the submenu frame for each */
+.submenu-align-bottom-creative > .Frame.StandardMenu.StandardMenuItem__child,
+.submenu-align-bottom-marketing > .Frame.StandardMenu.StandardMenuItem__child,
+.submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
+.submenu-align-bottom-artdesign > .Frame.StandardMenu.StandardMenuItem__child {
+  top: auto !important;
+  bottom: 0 !important;
+  left: calc(100% - 3px) !important;
+}
+```
+
+#### 3. Test and Adjust
+
+- Reload your app and open the relevant submenus.
+- The bottom edge of each targeted submenu should now align with the bottom of the parent menu (e.g., the Tools menu).
+- You can use this pattern for any other submenu by assigning a unique class and targeting it in your CSS.
+
+### Why This Works
+
+- The custom class is only applied to the specific parent menu item you want to affect.
+- The submenu container is always a direct child, so the selector is robust and easy to maintain.
+- No fragile attribute selectors or browser compatibility issues.
+
+### General Pattern for Custom Submenu Positioning
+
+1. **Assign a unique `className` to the menu item in your menu data.**
+2. **Target the parent and/or submenu container in your CSS using that class.**
+3. **Adjust positioning, styling, or behavior as needed.**
+
+---
+
+_This method allows for precise, maintainable customization of any submenu in the Start Menu or elsewhere in your app._
