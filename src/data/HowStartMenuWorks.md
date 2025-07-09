@@ -1,4 +1,4 @@
-Last Update: 7/8/25
+Last Update: 12/19/24
 
 # How the Start Menu Works
 
@@ -6,19 +6,187 @@ This document explains how the start menu system works in the Hydra98 Windows 98
 
 ## Overview
 
-The start menu is a hierarchical menu system that displays programs, documents, and system options. It's built using the **packard-belle** library and integrates with the project's program management system.
+The start menu is a hierarchical menu system that displays programs, documents, and system options. It's built using the **packard-belle** library and integrates with the project's program management system. The menu features dynamic AI assistant selection, categorized tools, and a comprehensive file system integration.
+
+## Current Start Menu Structure
+
+### Main Menu Categories
+
+```
+┌─ Start Menu ──────────────────────────────────┐
+│ Programs                                      │
+│ Favorites                                     │
+│ Tools                                         │
+│ Documents                                     │
+│ Games                                         │
+│ Artifacts                                     │
+└───────────────────────────────────────────────┘
+```
+
+### Detailed Menu Wireframe
+
+```
+┌─ Start Menu ──────────────────────────────────┐
+│ ┌─ Programs ─────────────────────────────────┐ │
+│ │ ┌─ AI Assistants ─────────────────────────┐ │ │
+│ │ │ ✓ Clippy GPT (Site Guide)              │ │ │
+│ │ │   F1 GPT (Tech Workshop)               │ │ │
+│ │ │   Genius GPT (Motivation Station)      │ │ │
+│ │ │   Merlin GPT (Art Gallery)             │ │ │
+│ │ │   Bonzi GPT (Gaming Hub)               │ │ │
+│ │ │ What Are These?                        │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Accessories ───────────────────────────┐ │ │
+│ │ │ Calculator                             │ │ │
+│ │ │ Notepad                                │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Online Services ───────────────────────┐ │ │
+│ │ │ AOL (disabled)                         │ │ │
+│ │ │ Outlook98 (soon)                       │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Entertainment ─────────────────────────┐ │ │
+│ │ │ Movie Player                           │ │ │
+│ │ │ Music Player                           │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ Internet Explorer                         │ │
+│ └────────────────────────────────────────────┘ │
+│ ┌─ Favorites ────────────────────────────────┐ │
+│ │ ┌─ My Favorites ─────────────────────────┐ │ │
+│ │ │ Start Menu Builder™ (disabled)         │ │ │
+│ │ │ Chat Bot Preferences (disabled)        │ │ │
+│ │ │ Newsletter Preferences (disabled)      │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Community Favorites ───────────────────┐ │ │
+│ │ │ (empty)                                │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ └────────────────────────────────────────────┘ │
+│ ┌─ Tools ─────────────────────────────────────┐ │
+│ │ ┌─ News Feeds ────────────────────────────┐ │ │
+│ │ │ Tech Feed (disabled)                   │ │ │
+│ │ │ Builders Feed (disabled)               │ │ │
+│ │ │ Art/Design Feed (disabled)             │ │ │
+│ │ │ Gaming Feed (disabled)                 │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Creative Tools ────────────────────────┐ │ │
+│ │ │ SVG Trace (disabled)                   │ │ │
+│ │ │ Pixel Doodles                          │ │ │
+│ │ │ Paint Doodles                          │ │ │
+│ │ │ ─────────────────────────────────────── │ │
+│ │ │ View Catalogue                          │ │ │
+│ │ │ Native Tools                            │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Marketing Tools ───────────────────────┐ │ │
+│ │ │ UTM Tracker                             │ │ │
+│ │ │ Pre-roll Toolkit                        │ │ │
+│ │ │ Newsletter Prompt (disabled)            │ │ │
+│ │ │ ─────────────────────────────────────── │ │
+│ │ │ View Catalogue                          │ │ │
+│ │ │ Native Tools                            │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Builder Tools ─────────────────────────┐ │ │
+│ │ │ Project Management (disabled)           │ │ │
+│ │ │ Open Router Ranks (disabled)            │ │ │
+│ │ │ Should I automate it? (disabled)        │ │ │
+│ │ │ ─────────────────────────────────────── │ │
+│ │ │ View Catalogue                          │ │ │
+│ │ │ Native Tools                            │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Art/Design Tools ──────────────────────┐ │ │
+│ │ │ Art Gallery Finder (disabled)           │ │ │
+│ │ │ ASCII Banners                           │ │ │
+│ │ │ Design Trends Tracker (disabled)        │ │ │
+│ │ │ ─────────────────────────────────────── │ │
+│ │ │ View Catalogue                          │ │ │
+│ │ │ Native Tools                            │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ └────────────────────────────────────────────┘ │
+│ ┌─ Documents ─────────────────────────────────┐ │
+│ │ ┌─ My Docs ───────────────────────────────┐ │ │
+│ │ │ My Videos                               │ │ │
+│ │ │ My Music                                │ │ │
+│ │ │ My Notes                                │ │ │
+│ │ │ Saved Games                             │ │ │
+│ │ │ View All                                │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Tech Docs ─────────────────────────────┐ │ │
+│ │ │ APIs                                    │ │ │
+│ │ │ Trend Reports                           │ │ │
+│ │ │ View All                                │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Builder Docs ──────────────────────────┐ │ │
+│ │ │ Motivation                              │ │ │
+│ │ │ Resources                               │ │ │
+│ │ │ View All                                │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Art/Design Docs ───────────────────────┐ │ │
+│ │ │ Color Theory                            │ │ │
+│ │ │ Typography                              │ │ │
+│ │ │ View All                                │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ └────────────────────────────────────────────┘ │
+│ ┌─ Games ─────────────────────────────────────┐ │
+│ │ ┌─ DOS Games ─────────────────────────────┐ │ │
+│ │ │ DOOM                                    │ │ │
+│ │ │ DOS Mods (disabled)                     │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Classic Games ─────────────────────────┐ │ │
+│ │ │ Minesweeper                             │ │ │
+│ │ │ Minesweeper2                            │ │ │
+│ │ │ Solitaire (disabled)                    │ │ │
+│ │ │ Space Cadet Pinball (disabled)          │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Misc. ─────────────────────────────────┐ │ │
+│ │ │ ASCII Maze                              │ │ │
+│ │ │ GliderPro (desktop only)                │ │ │
+│ │ │ Retro City (disabled)                   │ │ │
+│ │ │ Rampage World Tour (disabled)           │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ └────────────────────────────────────────────┘ │
+│ ┌─ Artifacts ─────────────────────────────────┐ │
+│ │ ┌─ Gallery ───────────────────────────────┐ │ │
+│ │ │ What is this? (disabled)                │ │ │
+│ │ │ Main Gallery (disabled)                 │ │ │
+│ │ │ Community Gallery (disabled)            │ │ │
+│ │ │ Submit Your Art                         │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Interactive ───────────────────────────┐ │ │
+│ │ │ WebGL Experiments                       │ │ │
+│ │ │ ASCII Art                               │ │ │
+│ │ │ View All                                │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Animated ──────────────────────────────┐ │ │
+│ │ │ Pixel Art                              │ │ │
+│ │ │ Demoscenes                             │ │ │
+│ │ │ View All                               │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ │ ┌─ Still Frames ──────────────────────────┐ │ │
+│ │ │ Pixel Art                              │ │ │
+│ │ │ ASCII Art                              │ │ │
+│ │ │ 3D Rendered                            │ │ │
+│ │ │ View All                               │ │ │
+│ │ └────────────────────────────────────────┘ │ │
+│ └────────────────────────────────────────────┘ │
+│ ┌─ System ────────────────────────────────────┐ │
+│ │ Settings                                   │ │
+│ │ Sign Up / Sign In (disabled)               │ │
+│ │ Shut Down...                               │ │
+│ └────────────────────────────────────────────┘ │
+└───────────────────────────────────────────────┘
+```
 
 ## Architecture
 
 ### 1. Data Structure (`src/data/start.js`)
 
-The start menu data is defined in `src/data/start.js` and exported as `startMenuData`. This file contains:
+The start menu data is defined in `src/data/start.js` and exported as `getStartMenuData()`. This file contains:
 
-- **Main menu categories**: Programs, Favorites, Documents, Games, Artifacts
+- **Dynamic AI Assistant Management**: Real-time agent switching with checkmarks
+- **Main menu categories**: Programs, Favorites, Tools, Documents, Games, Artifacts
 - **Menu items**: Individual applications and options
-- **Submenus**: Nested menu structures
-- **Icons**: References to icon files
+- **Submenus**: Nested menu structures with dividers
+- **Icons**: References to icon files from `src/icons/`
 - **Component mappings**: Links to React components
+- **Mobile detection**: Conditional menu items based on device type
 
 #### Menu Item Structure
 
@@ -32,8 +200,36 @@ The start menu data is defined in `src/data/start.js` and exported as `startMenu
   options: [], // For submenus
   data: {}, // Additional data for components
   href: "", // For external links
-  type: "ExternalLink" // For special link types
+  type: "ExternalLink", // For special link types
+  onClick: () => {}, // Custom click handlers
+  tooltip: "Description" // Tooltip text
 }
+```
+
+#### AI Assistant Integration
+
+The menu includes dynamic AI assistant selection with real-time state management:
+
+```javascript
+const createAIAssistants = () => {
+  const currentAgent = getCurrentAgent();
+
+  const selectAgent = (agentName) => () => {
+    window.currentAgent = agentName;
+    if (window.onAgentChange) window.onAgentChange(agentName);
+    window.dispatchEvent(new Event("agentChanged"));
+  };
+
+  return [
+    {
+      title: currentAgent === "Clippy" ? "✓ Clippy GPT" : "Clippy GPT",
+      tooltip: "Site Guide",
+      icon: icons.vid16,
+      onClick: selectAgent("Clippy"),
+    },
+    // ... other agents
+  ];
+};
 ```
 
 ### 2. Program Context (`src/contexts/programs.js`)
@@ -44,6 +240,26 @@ The `ProgramProvider` class manages the start menu state and integrates it with 
 - **Handles** menu item clicks and program launching
 - **Manages** program instances and window states
 - **Integrates** with the desktop and taskbar
+- **Refreshes** menu on agent changes
+- **Manages** quick launch buttons and open windows
+
+#### Key Methods
+
+```javascript
+class ProgramProvider extends Component {
+  refreshStartMenu = () => {
+    // Refreshes menu when AI agent changes
+  };
+
+  open = (program) => {
+    // Opens programs and manages window states
+  };
+
+  close = (program) => {
+    // Closes programs and updates state
+  };
+}
+```
 
 ### 3. TaskBar Component (`src/components/TaskBar/TaskBar.js`)
 
@@ -58,6 +274,13 @@ import { TaskBar as TaskBarComponent } from "packard-belle";
   openWindows={context.openOrder}
 />;
 ```
+
+#### Custom Features
+
+- **Clippy Integration**: Custom tooltip and button handling
+- **RSS Icon**: Added to notification area
+- **Mobile Controls**: Responsive design considerations
+- **Custom Styling**: Windows 98 button styling
 
 ## Packard-Belle Library Components
 
@@ -132,6 +355,7 @@ The `@mixin onDisplay` function supports four directions:
 - Menu items without submenus trigger `onClick` handlers
 - Submenu items don't trigger clicks (they expand on hover)
 - External links open in new tabs with confirmation
+- AI assistant selection updates global state
 
 ### Blur Handling
 
@@ -147,6 +371,47 @@ The `@mixin onDisplay` function supports four directions:
 4. **Library Processing** → packard-belle components
 5. **User Interaction** → Event handlers and state updates
 
+## Available Applications
+
+The start menu integrates with these applications (from `src/components/Applications.js`):
+
+### Core Applications
+
+- **ExplorerWindow** - File system explorer
+- **Calculator** - Windows 98 calculator
+- **Notepad** - Text editor
+- **InternetExplorer** - Web browser
+- **TestExplorer** - Alternative browser
+
+### Games
+
+- **Doom** - Classic DOOM game
+- **Minesweeper** - Classic minesweeper
+- **MinesweeperWithHelp** - Minesweeper with help
+- **ASCIIMaze** - ASCII maze game
+- **Glider** - GliderPro game (desktop only)
+
+### Creative Tools
+
+- **ASCIIText** - ASCII banner generator
+- **DoodleSubmission** - Art submission tool
+- **VideoPlayer** - Video player
+- **MusicPlayer** - Music player
+- **W95MediaPlayer** - Windows 95 style media player
+
+### Development Tools
+
+- **JSDos** - DOS emulator
+- **GraphExplorer** - Codebase explorer (dev only)
+- **UTMTool** - UTM tracking tool
+
+### Special Components
+
+- **ClippyAssistant** - AI assistant system
+- **HamsterCreator** - Hamster creation tool
+- **MonitorView** - Monitor display component
+- **StartMessage** - Welcome message
+
 ## Customization Options
 
 ### 1. Modify Menu Data
@@ -157,6 +422,7 @@ Edit `src/data/start.js` to:
 - Change icons and titles
 - Modify submenu structures
 - Add new categories
+- Implement dynamic content
 
 ### 2. Override CSS Styling
 
@@ -184,9 +450,10 @@ const isMobile = () =>
   /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 ```
 
-- Some menu items are hidden on mobile
+- Some menu items are hidden on mobile (e.g., GliderPro)
 - Touch interactions are handled differently
 - Responsive design considerations
+- Mobile-specific window management
 
 ## Troubleshooting
 
@@ -196,6 +463,7 @@ const isMobile = () =>
 2. **Menu items not responding** - Verify onClick handlers
 3. **Icons not displaying** - Check icon import paths
 4. **Mobile issues** - Review mobile-specific logic
+5. **AI assistant not switching** - Check agent change event handlers
 
 ### Debugging
 
@@ -203,29 +471,50 @@ const isMobile = () =>
 - Inspect CSS classes and positioning
 - Verify data structure in `start.js`
 - Test hover and click interactions
+- Monitor agent change events
 
-## File Structure
+## Complete File Structure
 
 ```
 src/
 ├── data/
-│   └── start.js                 # Menu data definition
+│   ├── start.js                    # Menu data definition
+│   ├── desktop.js                  # Desktop icons data
+│   └── textFiles/                  # Text content for menu items
+│       └── clippyFaq.js           # AI assistant FAQ
 ├── contexts/
-│   └── programs.js              # Program management
+│   ├── programs.js                 # Program management
+│   ├── settings.js                 # Settings management
+│   └── index.js                    # Context exports
 ├── components/
-│   └── TaskBar/
-│       ├── TaskBar.js           # Main component
-│       └── _styles.scss         # Custom styling
-└── icons/                       # Icon definitions
+│   ├── TaskBar/
+│   │   ├── TaskBar.js              # Main taskbar component
+│   │   ├── _styles.scss            # Custom styling
+│   │   ├── index.js                # Component export
+│   │   └── TaskBar.stories.js      # Storybook stories
+│   ├── Applications.js             # All application exports
+│   ├── DesktopView/                # Desktop view component
+│   ├── WindowManager/              # Window management
+│   ├── Settings/                   # Settings component
+│   ├── TaskManager/                # Task manager component
+│   ├── ShutDown/                   # Shutdown component
+│   └── [Individual App Components] # All application components
+├── icons/                          # Icon definitions
+│   ├── index.js                    # Icon exports
+│   └── icons.scss                  # Icon styles
+├── helpers/
+│   └── menuBuilder.js              # Menu building utilities
+└── utils/
+    └── isMobileDevice.js           # Mobile detection utility
 
 node_modules/packard-belle/src/
 ├── components/
-│   ├── TaskBar/                 # Library taskbar
-│   ├── StartMenu/               # Library start menu
-│   ├── StandardMenu/            # Menu rendering
-│   └── StandardMenuHOC/         # Menu logic
+│   ├── TaskBar/                    # Library taskbar
+│   ├── StartMenu/                  # Library start menu
+│   ├── StandardMenu/               # Menu rendering
+│   └── StandardMenuHOC/            # Menu logic
 └── _scss/w98/
-    └── _menu.scss               # Menu styling
+    └── _menu.scss                  # Menu styling
 ```
 
 ## Related Components
@@ -234,6 +523,39 @@ node_modules/packard-belle/src/
 - **WindowManager** - Window management system
 - **ProgramProvider** - Program lifecycle management
 - **Settings** - System configuration
+- **ClippyAssistant** - AI assistant integration
+- **TaskManager** - Process management
+- **ShutDown** - System shutdown dialog
+
+## Key Features
+
+### AI Assistant Integration
+
+- Dynamic agent switching with visual feedback
+- Real-time menu updates on agent changes
+- Global state management for current agent
+- Event-driven architecture for agent changes
+
+### File System Integration
+
+- Virtual file system with CuboneFileExplorer
+- Organized document structure
+- Tool categorization with catalogues
+- Native and third-party tool separation
+
+### Mobile Responsiveness
+
+- Conditional menu items based on device type
+- Touch-friendly interactions
+- Responsive window management
+- Mobile-specific styling
+
+### Extensibility
+
+- Modular component architecture
+- Easy addition of new applications
+- Configurable menu structure
+- Custom styling support
 
 ---
 
