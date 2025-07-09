@@ -787,12 +787,12 @@ class CuboneFileExplorer extends Component {
                       type: "folder",
                       icon: "folder16",
                       children: {
-                        "Gallery Finder": {
+                        "Art Gallery Finder": {
                           type: "file",
                           icon: "vid16",
                           size: "1.2 MB",
                         },
-                        "Ascii Banners": {
+                        "ASCII Banners": {
                           type: "file",
                           icon: "asciibanner16",
                           size: "456 KB",
