@@ -126,3 +126,4 @@ export { default as blog32 } from "./blog32-min.png";
 export { default as faq16 } from "./faq16-min.png";
 export { default as chart24 } from "./chart24-min.png";
 export { default as account32 } from "./account32-min.png";
+export { default as floppy16 } from "./floppy16-min.png";

@@ -154,7 +154,7 @@ const getPrograms = () => [
         isDisabled: true,
       },
       {
-        title: "Outlook98 (soon)",
+        title: "Outlook98 (soon™)",
         icon: icons.outlook16,
         isDisabled: false,
         component: "Outlook98",
@@ -202,7 +202,7 @@ const getPrograms = () => [
 // Favorites section
 const myFavorites = [
   {
-    title: "Start Menu Builder™",
+    title: "Start Menu Builder",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
@@ -221,7 +221,28 @@ const myFavorites = [
   },
 ];
 
-const communityFavorites = [];
+const communityFavorites = [
+  {
+    title: (
+      <span
+        style={{
+          //fontFamily: '"Perfect DOS VGA 437", "MS Sans Serif", monospace',
+          //fontSize: '12px',
+          color: '#808080',
+          //fontStyle: 'italic',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          display: 'inline-block',
+          //opacity: '2',
+        }}
+      >
+        Soon™
+      </span>
+    ),
+    isDisabled: true
+  }
+];
+
 
 const favorites = [
   {
@@ -264,8 +285,65 @@ const newsFeeds = [
   },
 ];
 
+const productivityTools = [
+  {
+    title: "Enhanced Notepad",
+    icon: icons.vid16,
+    component: "",
+    isDisabled: true,
+  },
+  {
+    title: "To-do List",
+    icon: icons.wangimg32,
+    component: "IframeWindow",
+    isDisabled: false,
+    data: {
+      src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
+      disableAlert: true,
+      style: {
+        width: "100%",
+        height: "100%",
+      },
+    },
+  },
+  {
+    title: "Visual Habit Tracker",
+    icon: icons.paint16,
+    component: "IframeWindow",
+    data: {
+      src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
+      disableAlert: true,
+      style: {
+        width: "100%",
+        height: "100%",
+      },
+    },
+  },
+  {
+    type: "divider",
+    className: "divider divider--group-0-end",
+    title: "",
+  },
+  {
+    title: "View Catalogue",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Productivity Tools/3rd Party",
+    },
+  },
+  {
+    title: "Native Tools",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Creative Tools/Native",
+    },
+  },
+];
+
 // Creative Tools - showing 3 tools + View Catalogue
-const creativeTools = [
+/*const creativeTools = [
   {
     title: "SVG Trace",
     icon: icons.vid16,
@@ -320,7 +398,7 @@ const creativeTools = [
       initialPath: "C:/Tools/Creative Tools/Native",
     },
   },
-];
+];*/
 
 // Marketing Tools - showing 3 tools + View Catalogue
 const marketingTools = [
@@ -371,19 +449,19 @@ const marketingTools = [
 // Builder Tools - showing 3 tools + View Catalogue
 const builderTools = [
   {
-    title: "Project Management",
+    title: "Kanban Boards",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
   },
   {
-    title: "Open Router Ranks",
+    title: "Openrouter Ranks",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
   },
   {
-    title: "Should I automate it?",
+    title: "Automation Checker",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
@@ -467,16 +545,10 @@ const tools = [
     title: "",
   },
   {
-    title: "Creative Tools",
+    title: "Productivity Tools",
     icon: icons.folder16,
-    options: creativeTools,
+    options: productivityTools,
     className: "submenu-align-bottom-creative",
-  },
-  {
-    title: "Marketing Tools",
-    icon: icons.folder16,
-    options: marketingTools,
-    className: "submenu-align-bottom-marketing",
   },
   {
     title: "Builder Tools",
@@ -490,6 +562,12 @@ const tools = [
     options: artDesignTools,
     className: "submenu-align-bottom-artdesign",
   },
+  {
+    title: "Marketing Tools",
+    icon: icons.folder16,
+    options: marketingTools,
+    className: "submenu-align-bottom-marketing",
+  },
 ];
 
 tools.className = "tools-menu";
@@ -497,27 +575,19 @@ tools.className = "tools-menu";
 // Documents section - Updated structure
 const myDocs = [
   {
-    title: "My Videos",
-    icon: icons.folder16,
-    component: "CuboneFileExplorer",
-    data: {
-      initialPath: "C:/My Documents/My Videos",
-    },
-  },
-  {
-    title: "My Music",
-    icon: icons.folder16,
-    component: "CuboneFileExplorer",
-    data: {
-      initialPath: "C:/My Documents/My Music",
-    },
-  },
-  {
     title: "My Notes",
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
       initialPath: "C:/My Documents/My Notes",
+    },
+  },
+  {
+    title: "My Doodles",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/My Documents/My Doodles",
     },
   },
   {
@@ -544,7 +614,7 @@ const techDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Documents/Tech Docs/APIs",
+      initialPath: "C:/Member Documents/Tech Docs/APIs",
     },
   },
   {
@@ -552,7 +622,7 @@ const techDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Documents/Tech Docs/Trend Reports",
+      initialPath: "C:/Member Documents/Tech Docs/Trend Reports",
     },
   },
   {
@@ -560,7 +630,7 @@ const techDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Documents/Tech Docs",
+      initialPath: "C:/Member Documents/Tech Docs",
     },
   },
 ];
@@ -571,7 +641,7 @@ const builderDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Documents/Builder Docs/Motivation",
+      initialPath: "C:/Member Documents/Builder Docs/Motivation",
     },
   },
   {
@@ -579,7 +649,7 @@ const builderDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Documents/Builder Docs/Resources",
+      initialPath: "C:/Member Documents/Builder Docs/Resources",
     },
   },
   {
@@ -587,7 +657,7 @@ const builderDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Documents/Builder Docs",
+      initialPath: "C:/Member Documents/Builder Docs",
     },
   },
 ];
@@ -598,7 +668,7 @@ const artDesignDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Documents/Art Design Docs/Color Theory",
+      initialPath: "C:/Member Documents/Art Design Docs/Color Theory",
     },
   },
   {
@@ -606,7 +676,7 @@ const artDesignDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Documents/Art Design Docs/Typography",
+      initialPath: "C:/Member Documents/Art Design Docs/Typography",
     },
   },
   {
@@ -614,7 +684,7 @@ const artDesignDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Documents/Art Design Docs",
+      initialPath: "C:/Member Documents/Art Design Docs",
     },
   },
 ];
@@ -929,14 +999,14 @@ const getStartMenuData = () => [
     options: documents,
   },
   {
-    title: "Games",
-    icon: icons.joystick24,
-    options: games,
-  },
-  {
     title: "Artifacts",
     icon: icons.ascii24,
     options: artifacts,
+  },
+  {
+    title: "Games",
+    icon: icons.joystick24,
+    options: games,
   },
 ];
 

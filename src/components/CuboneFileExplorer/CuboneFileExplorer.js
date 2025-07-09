@@ -406,38 +406,6 @@ class CuboneFileExplorer extends Component {
               type: "folder",
               icon: "myDocuments",
               children: {
-                "My Videos": {
-                  type: "folder",
-                  icon: "folder16",
-                  children: {
-                    "sample_video.mp4": {
-                      type: "file",
-                      icon: "vid16",
-                      size: "15 MB",
-                    },
-                    "tutorial.mp4": {
-                      type: "file",
-                      icon: "vid16",
-                      size: "8 MB",
-                    },
-                  },
-                },
-                "My Music": {
-                  type: "folder",
-                  icon: "folder16",
-                  children: {
-                    "sample_song.mp3": {
-                      type: "file",
-                      icon: "mediacd16",
-                      size: "3.5 MB",
-                    },
-                    "playlist.m3u": {
-                      type: "file",
-                      icon: "notepadFile16",
-                      size: "1 KB",
-                    },
-                  },
-                },
                 "My Notes": {
                   type: "folder",
                   icon: "folder16",
@@ -458,6 +426,22 @@ class CuboneFileExplorer extends Component {
                     },
                   },
                 },
+                "My Doodles": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    "A Clumsy Kitty": {
+                      type: "file",
+                      icon: "vid16",
+                      size: "15 MB",
+                    },
+                    "Rainbow Sketch": {
+                      type: "file",
+                      icon: "vid16",
+                      size: "8 MB",
+                    },
+                  },
+                },
                 "Saved Games": {
                   type: "folder",
                   icon: "folder16",
@@ -474,6 +458,33 @@ class CuboneFileExplorer extends Component {
                     },
                   },
                 },
+                "My Music": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    "Vaporwave Playlist.mp3": {
+                      type: "file",
+                      icon: "mediacd16",
+                      component: "MusicPlayer",
+                      size: "3.5 MB",
+                    },
+                    "Weird Al – All Star (Shrek Theme) [Rare!!!] (Not Fake).mp3": {
+                      type: "file",
+                      icon: "mediacd16",
+                      size: "1 KB",
+                    },
+                    "Linkin Park – In the End (Real)(High Quality)(No Virus)(Limewire Rip).mp3": {
+                      type: "file",
+                      icon: "mediacd16",
+                      size: "1 KB",
+                    },
+                    "Rick Astley – Never Gonna Give You Up.mp3": {
+                      type: "file",
+                      icon: "mediacd16",
+                      size: "1 KB",
+                    },
+                  },
+                },
                 "sample.txt": {
                   type: "file",
                   icon: "notepadFile16",
@@ -484,7 +495,7 @@ class CuboneFileExplorer extends Component {
                 },
               },
             },
-            Documents: {
+            "Member Documents": {
               type: "folder",
               icon: "folderOpen32",
               children: {
@@ -621,8 +632,60 @@ class CuboneFileExplorer extends Component {
             Tools: {
               type: "folder",
               icon: "folderProgram",
-              children: {
-                "Creative Tools": {
+              children:  
+              {
+                "Productivity Tools": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    Native: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "Enhanced Notepad": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "2.5 MB",
+                        },
+                        "To-do List": {
+                          type: "file",
+                          icon: "wangimg32",
+                          size: "1.8 MB",
+                          component: "IframeWindow",
+                          data: {
+                            src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
+                          },
+                        },
+                        "Visual Habit Tracker": {
+                          type: "file",
+                          icon: "paint16",
+                          size: "1.5 MB",
+                          component: "IframeWindow",
+                          data: {
+                            src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
+                          },
+                        },
+                      },
+                    },
+                    "3rd Party": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "Evernote": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                        "Toggl Track": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                      },
+                    },
+                  },
+                },
+                /*"Creative Tools": {
                   type: "folder",
                   icon: "folder16",
                   children: {
@@ -672,52 +735,7 @@ class CuboneFileExplorer extends Component {
                       },
                     },
                   },
-                },
-                "Marketing Tools": {
-                  type: "folder",
-                  icon: "folder16",
-                  children: {
-                    Native: {
-                      type: "folder",
-                      icon: "folder16",
-                      children: {
-                        "utm_tracker.exe": {
-                          type: "file",
-                          icon: "utm24",
-                          size: "856 KB",
-                          component: "UTMTool",
-                        },
-                        "preroll_toolkit.exe": {
-                          type: "file",
-                          icon: "vid16",
-                          size: "3.2 MB",
-                          component: "VideoPlayerMobile",
-                        },
-                        "newsletter_prompt.exe": {
-                          type: "file",
-                          icon: "newsletter16",
-                          size: "512 KB",
-                        },
-                      },
-                    },
-                    "3rd Party": {
-                      type: "folder",
-                      icon: "folder16",
-                      children: {
-                        "mailchimp_link.url": {
-                          type: "file",
-                          icon: "internetExplorer16",
-                          size: "1 KB",
-                        },
-                        "hubspot_link.url": {
-                          type: "file",
-                          icon: "internetExplorer16",
-                          size: "1 KB",
-                        },
-                      },
-                    },
-                  },
-                },
+                },*/
                 "Builder Tools": {
                   type: "folder",
                   icon: "folder16",
@@ -726,17 +744,17 @@ class CuboneFileExplorer extends Component {
                       type: "folder",
                       icon: "folder16",
                       children: {
-                        "project_manager.exe": {
+                        "Kanban Boards": {
                           type: "file",
                           icon: "vid16",
                           size: "2.1 MB",
                         },
-                        "openrouter_ranks.exe": {
+                        "Openrouter Ranks": {
                           type: "file",
                           icon: "vid16",
                           size: "1.5 MB",
                         },
-                        "automation_checker.exe": {
+                        "Automation Checker": {
                           type: "file",
                           icon: "vid16",
                           size: "980 KB",
@@ -747,12 +765,12 @@ class CuboneFileExplorer extends Component {
                       type: "folder",
                       icon: "folder16",
                       children: {
-                        "github_link.url": {
+                        "Trello": {
                           type: "file",
                           icon: "internetExplorer16",
                           size: "1 KB",
                         },
-                        "vercel_link.url": {
+                        "Zapier": {
                           type: "file",
                           icon: "internetExplorer16",
                           size: "1 KB",
@@ -769,18 +787,18 @@ class CuboneFileExplorer extends Component {
                       type: "folder",
                       icon: "folder16",
                       children: {
-                        "gallery_finder.exe": {
+                        "Gallery Finder": {
                           type: "file",
                           icon: "vid16",
                           size: "1.2 MB",
                         },
-                        "ascii_banners.exe": {
+                        "Ascii Banners": {
                           type: "file",
                           icon: "asciibanner16",
                           size: "456 KB",
                           component: "ASCIIText",
                         },
-                        "trends_tracker.exe": {
+                        "Design Trends Tracker": {
                           type: "file",
                           icon: "chart16",
                           size: "1.8 MB",
@@ -791,12 +809,57 @@ class CuboneFileExplorer extends Component {
                       type: "folder",
                       icon: "folder16",
                       children: {
-                        "behance_link.url": {
+                        "Figma": {
                           type: "file",
                           icon: "internetExplorer16",
                           size: "1 KB",
                         },
-                        "dribbble_link.url": {
+                        "Designs.ai": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                      },
+                    },
+                  },
+                },
+                "Marketing Tools": {
+                  type: "folder",
+                  icon: "folder16",
+                  children: {
+                    Native: {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "UTM Tracker": {
+                          type: "file",
+                          icon: "utm24",
+                          size: "856 KB",
+                          component: "UTMTool",
+                        },
+                        "Pre-roll Toolkit": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "3.2 MB",
+                          component: "VideoPlayerMobile",
+                        },
+                        "Newsletter Prompt": {
+                          type: "file",
+                          icon: "newsletter16",
+                          size: "512 KB",
+                        },
+                      },
+                    },
+                    "3rd Party": {
+                      type: "folder",
+                      icon: "folder16",
+                      children: {
+                        "Mailchimp": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                        "Hubspot": {
                           type: "file",
                           icon: "internetExplorer16",
                           size: "1 KB",

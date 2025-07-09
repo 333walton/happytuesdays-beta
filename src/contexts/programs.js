@@ -72,20 +72,20 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
       ],
     },
     {
-      title: "Control Panel",
-      onClick: toggleSettings,
-      icon: icons.controlPanel16,
-    },
-    {
-      title: "CMD.exe",
+      title: "Command Prompt",
       icon: icons.command16,
       component: "JSDos",
       multiInstance: true,
     },
     {
-      title: "Task Manager",
-      onClick: toggleTaskManager, // Use the handler directly
-      icon: icons.folderProgram16,
+      title: "Control Panel",
+      onClick: toggleSettings,
+      icon: icons.controlPanel16,
+    },
+    {
+      title: "Cache Manager",
+      //onClick: toggleTaskManager, // Use the handler directly
+      icon: icons.floppy16,
     },
     {
       title: "Account Settings",
@@ -112,7 +112,7 @@ const startMenu = (
     },
   ],
   {
-    title: "Sign Up / Sign In",
+    title: "Join / Sign In",
     icon: icons.logOff24,
     isDisabled: true,
   },
