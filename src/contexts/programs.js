@@ -112,7 +112,8 @@ const startMenu = (
     },
   ],
   {
-    title: "Join / Sign In",
+    //title: "Log In / Join",
+    title: "Log In • Join",
     icon: icons.logOff24,
     isDisabled: true,
   },
