@@ -208,9 +208,16 @@ body {
 
   .StartMenuPortal .btn.StartButton {
     display: none !important;
+    background-size: auto !important;
   }
-}
 
-.portaled-start-btn {
-  display: none !important;
+
+  .portaled-start-btn {
+    display: none !important;
+    background-size: auto !important;
+  }
+
+  .TaskBar__quick-launch {
+    margin-left: 62px !important;
+  }
 }

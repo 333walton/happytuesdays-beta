@@ -268,10 +268,11 @@ const TaskBar = () => {
           {menuOpen && isMobile && (
             <StartMenuPortal>
               <div
+                className="StartMenuPortalContainer"
                 style={{
                   position: "fixed",
-                  left: `${menuPosition.left}px`,
-                  bottom: `${menuPosition.bottom}px`,
+                  left: `${Math.round(menuPosition.left)}px`,
+                  bottom: `${Math.round(menuPosition.bottom)}px`,
                   zIndex: 10000,
                 }}
               >
