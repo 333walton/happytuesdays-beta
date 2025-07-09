@@ -60,10 +60,9 @@ const TaskBar = () => {
   const openMenu = (startButton) => {
     if (startButton) {
       const rect = startButton.getBoundingClientRect();
-      // Position menu above the start button
       setMenuPosition({
         left: rect.left,
-        bottom: window.innerHeight - rect.top, // Distance from bottom of viewport
+        bottom: window.innerHeight - rect.top,
       });
       setMenuOpen(true);
     }
@@ -72,59 +71,47 @@ const TaskBar = () => {
   // Close menu handler
   const closeMenu = () => setMenuOpen(false);
 
-  // Override Start button behavior ONLY on mobile
+  // On mobile, override the Start button's handler to open only the custom menu
   useEffect(() => {
     if (!taskbarRef.current || !isMobile) return;
-    
-    // Function to attach handlers to start button
-    const attachStartHandlers = () => {
+
+    let lastStartBtn = null;
+
+    const attachHandler = () => {
       const startBtn = taskbarRef.current.querySelector('.StartButton');
-      if (!startBtn) {
-        console.log('Start button not found');
-        return;
-      }
-      
-      console.log('Attaching custom Start button handler for mobile');
-      
-      // Store original onclick handler
-      const originalOnClick = startBtn.onclick;
-      
-      // Override click handler for mobile only
-      startBtn.onclick = (e) => {
-        e.stopPropagation();
+      if (!startBtn || startBtn === lastStartBtn) return;
+      lastStartBtn = startBtn;
+
+      // Remove all previous handlers
+      startBtn.onclick = null;
+      startBtn.ontouchstart = null;
+
+      const handler = (e) => {
         e.preventDefault();
-        console.log('Mobile Start button clicked');
+        e.stopPropagation();
         openMenu(startBtn);
         return false;
       };
-      
-      // Also add touch handler for mobile
-      startBtn.addEventListener('touchstart', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log('Mobile Start button touched');
-        openMenu(startBtn);
-      }, { passive: false });
-      
-      // Return cleanup function
-      return () => {
-        startBtn.onclick = originalOnClick;
-      };
+
+      startBtn.onclick = handler;
+      startBtn.ontouchstart = handler;
     };
-    
-    // Try immediately and after delays to ensure the button is rendered
-    let cleanup = attachStartHandlers();
-    const timeouts = [100, 500, 1000].map(delay => 
-      setTimeout(() => {
-        cleanup = attachStartHandlers();
-      }, delay)
-    );
-    
+
+    // Attach initially
+    attachHandler();
+
+    // Observe for changes to re-attach if the button is replaced
+    const observer = new MutationObserver(attachHandler);
+    observer.observe(taskbarRef.current, { childList: true, subtree: true });
+
+    // Also re-attach on every render
+    const interval = setInterval(attachHandler, 200);
+
     return () => {
-      timeouts.forEach(timeout => clearTimeout(timeout));
-      if (cleanup) cleanup();
+      observer.disconnect();
+      clearInterval(interval);
     };
-  }, [isMobile]);
+  }, [isMobile, menuOpen]);
 
   // Find and modify the Clippy button after render
   useEffect(() => {
@@ -219,16 +206,11 @@ const TaskBar = () => {
   // Click outside to close menu (mobile only)
   useEffect(() => {
     if (!menuOpen || !isMobile) return;
-    
     const handleClickOutside = (e) => {
-      // Don't close if clicking the start button
       if (e.target.closest('.StartButton')) return;
-      // Don't close if clicking inside the menu
       if (e.target.closest('.TaskBar__start')) return;
-      
       closeMenu();
     };
-    
     document.addEventListener('click', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
     return () => {
@@ -242,7 +224,7 @@ const TaskBar = () => {
       {(context) => (
         <div ref={taskbarRef} style={{ position: "relative" }}>
           <TaskBarComponent
-            options={context.startMenu} // Pass the actual menu options for desktop
+            options={context.startMenu}
             quickLaunch={context.quickLaunch.map((item) => {
               if (
                 item.title === "Show Clippy" ||
@@ -282,7 +264,6 @@ const TaskBar = () => {
             })}
           />
           <CustomTooltip text={tooltipText} visible={tooltipVisible} />
-          
           {/* Start Menu Portal - Mobile Only */}
           {menuOpen && isMobile && (
             <StartMenuPortal>
@@ -291,7 +272,7 @@ const TaskBar = () => {
                   position: "fixed",
                   left: `${menuPosition.left}px`,
                   bottom: `${menuPosition.bottom}px`,
-                  zIndex: 10000, // Ensure it's above everything
+                  zIndex: 10000,
                 }}
               >
                 <StartMenu

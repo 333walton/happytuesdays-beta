@@ -203,7 +203,12 @@ class ProgramProvider extends Component {
     ),
     recycleEmpty: true,
     desktop: buildDesktop(this.props.desktopData, () => this.open),
-    startMenu: [], // Add this to prevent undefined error
+    startMenu: initialize(
+      (p) => this.open(p),
+      addIdsToData(
+        getStartMenuData()
+      )
+    ),
     quickLaunch: [
       {
         onClick: () => this.minimizeAll(),

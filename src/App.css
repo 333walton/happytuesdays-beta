@@ -205,4 +205,12 @@ body {
     z-index: 9999 !important;
     position: absolute !important; /* or absolute, as needed */
   }
+
+  .StartMenuPortal .btn.StartButton {
+    display: none !important;
+  }
+}
+
+.portaled-start-btn {
+  display: none !important;
 }
