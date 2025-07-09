@@ -69,6 +69,14 @@ body {
   color: black;
 }
 
+.divider {
+  height: 1px;
+  background-color: #808080;
+  margin-top: 1px;
+  margin-bottom: 1px;
+  border: none;
+}
+
 .TaskBar {
   z-index: 75;
   /*height: 26px;*/

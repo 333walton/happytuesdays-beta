@@ -300,6 +300,10 @@ const creativeTools = [
     },
   },
   {
+    type: "divider",
+    className: "divider divider--group-0-end",
+  },
+  {
     title: "View Catalogue",
     icon: icons.folder16,
     component: "CuboneFileExplorer",
@@ -342,6 +346,9 @@ const marketingTools = [
     isDisabled: true,
   },
   {
+    type: "divider",
+  },
+  {
     title: "View Catalogue",
     icon: icons.folder16,
     component: "CuboneFileExplorer",
@@ -378,6 +385,10 @@ const builderTools = [
     icon: icons.vid16,
     component: "",
     isDisabled: true,
+  },
+  {
+    type: "divider",
+    className: "divider divider--group-0-end",
   },
   {
     title: "View Catalogue",
@@ -417,6 +428,10 @@ const artDesignTools = [
     icon: icons.chart16,
     component: "",
     isDisabled: true,
+  },
+  {
+    type: "divider",
+    className: "divider divider--group-0-end",
   },
   {
     title: "View Catalogue",
