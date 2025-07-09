@@ -458,26 +458,36 @@ const tools = [
     options: newsFeeds,
   },
   {
+    type: "divider",
+    className: "divider divider--group-0-end",
+  },
+  {
     title: "Creative Tools",
     icon: icons.folder16,
     options: creativeTools,
+    className: "submenu-align-bottom-creative",
   },
   {
     title: "Marketing Tools",
     icon: icons.folder16,
     options: marketingTools,
+    className: "submenu-align-bottom-marketing",
   },
   {
     title: "Builder Tools",
     icon: icons.folder16,
     options: builderTools,
+    className: "submenu-align-bottom-builder",
   },
   {
     title: "Art/Design Tools",
     icon: icons.folder16,
     options: artDesignTools,
+    className: "submenu-align-bottom-artdesign",
   },
 ];
+
+tools.className = "tools-menu";
 
 // Documents section - Updated structure
 const myDocs = [

@@ -169,3 +169,27 @@ body {
     padding: 2px 0; /* Slightly larger tap target */
   }
 }
+
+/* Remove position: relative for these specific menu items */
+.submenu-align-bottom-creative {
+  position: static !important;
+}
+.submenu-align-bottom-marketing {
+  position: static !important;
+}
+.submenu-align-bottom-builder {
+  position: static !important;
+}
+.submenu-align-bottom-artdesign {
+  position: static !important;
+}
+
+/* Align the submenu frame for each */
+.submenu-align-bottom-creative > .Frame.StandardMenu.StandardMenuItem__child,
+.submenu-align-bottom-marketing > .Frame.StandardMenu.StandardMenuItem__child,
+.submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
+.submenu-align-bottom-artdesign > .Frame.StandardMenu.StandardMenuItem__child {
+  top: auto !important;
+  bottom: 0 !important;
+  left: calc(100% - 3px) !important;
+}
