@@ -172,7 +172,6 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
 
 /* Mobile Safari specific fix for text colors */
 @media screen and (max-width: 768px) {
-
   /* Target all text that might be blue in IE components */
   .WindowExplorer,
   .WindowExplorer * {
@@ -203,13 +202,12 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
     -webkit-text-fill-color: #000000 !important;
   }
 
-// Ensure window title text is white
-.Window__title,
-.Window__title-text {
-  color: rgb(255, 255, 255) !important;
-  -webkit-text-fill-color: rgb(255, 255, 255) !important;
-}
-
+  // Ensure window title text is white
+  .Window__title,
+  .Window__title-text {
+    color: rgb(255, 255, 255) !important;
+    -webkit-text-fill-color: rgb(255, 255, 255) !important;
+  }
 
   /* Override any blue links or active indicators */
   a,
@@ -223,19 +221,18 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
 
 /* iOS Safari specific hack (if needed) */
 @supports (-webkit-touch-callout: none) {
-
   /* iOS Safari only CSS */
   .WindowExplorer * {
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
   }
-// Ensure window title text is white
-.Window__title,
-.Window__title-text {
-  color: rgb(255, 255, 255) !important;
-  -webkit-text-fill-color: rgb(255, 255, 255) !important;
-}}
-
+  // Ensure window title text is white
+  .Window__title,
+  .Window__title-text {
+    color: rgb(255, 255, 255) !important;
+    -webkit-text-fill-color: rgb(255, 255, 255) !important;
+  }
+}
 
 /* Add only this to your CSS (either global or _styles.scss) */
 

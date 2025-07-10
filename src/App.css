@@ -198,8 +198,6 @@ body {
 @media (max-width: 768px), (pointer: coarse) {
   .StartMenuPortal,
   .TaskBar__start,
-  .StandardMenuWrapper,
-  .Frame.StandardMenu,
   .StandardMenu,
   .StandardMenuItem__child {
     z-index: 9999 !important;
@@ -210,7 +208,6 @@ body {
     display: none !important;
     background-size: auto !important;
   }
-
 
   .portaled-start-btn {
     display: none !important;
