@@ -134,24 +134,14 @@ const ClippyContextMenu = ({
     //Show: "Show",
     //},
     Bonzi: {
-      Wave: "Wave",
-      "Good Bye": "GoodBye",
-      Greeting: "Greeting",
-      "Get Attention": "GetAttention",
-      Alert: "Alert",
-      Thinking: "Thinking",
-      Processing: "Processing",
-      "Look Left": "LookLeft",
-      "Look Right": "LookRight",
-      "Look Up": "LookUp",
-      "Look Down": "LookDown",
-      "Gesture Up": "GestureUp",
-      "Gesture Down": "GestureDown",
-      "Gesture Left": "GestureLeft",
-      "Gesture Right": "GestureRight",
-      "Rest Pose": "RestPose",
-      Show: "Show",
-      Explain: "Explain",
+      Wave: "Wave", //good
+      Greeting: "Greeting", //good
+      "Get Attention": "GetAttention", //good
+      "Look Down": "LookDown", //good
+      "Gesture Up": "GestureUp", //good
+      "Gesture Down": "GestureDown", //good
+      Show: "Show", //great
+      Explain: "Explain", //good
     },
   };
 
