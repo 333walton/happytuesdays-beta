@@ -10,7 +10,7 @@ import { devLog, errorLog } from "../../core/ClippyPositioning";
 const getAgentNickname = (agentName) => {
   const nicknames = {
     Clippy: "Clippy",
-    Links: "Links",
+    //Links: "Links",
     Bonzi: "Bonzi",
     //Genie: "Genie",
     Genius: "Genius",

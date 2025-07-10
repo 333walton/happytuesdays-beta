@@ -14,9 +14,9 @@ const helpMessages = {
   },
   minesweeper: {
     text: "Looking for mines? Remember to check the numbers carefully!",
-    animation: "Alert",
+    animation: "Explain",
   },
-  calc: { text: "Need help with calculations?", animation: "Thinking" },
+  calc: { text: "Need help with calculations?", animation: "Explain" },
   cmd: {
     text: "Working with the command prompt? Try typing 'help' to see available commands.",
     animation: "Explain",

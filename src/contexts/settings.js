@@ -18,7 +18,7 @@ const detectMobile = () => {
 class SettingsProvider extends Component {
   state = {
     scale: 1,
-    crt: detectMobile() ? false : true, // Default OFF for mobile, ON for desktop
+    crt: false, // Default OFF for everyone
     fullScreen: false,
     isMobile: false,
     bgImg:

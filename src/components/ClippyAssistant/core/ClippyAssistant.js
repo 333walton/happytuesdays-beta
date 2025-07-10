@@ -48,7 +48,7 @@ const ClippyAssistant = memo((props) => {
     // Use 7 agents available in React95 library
     const allAgents = [
       "Clippy", // Classic paperclip
-      "Links", // Cat
+      //"Links", // Cat
       "Genius", // Einstein-like character
       "Merlin", // Wizard
       "F1", // Robot assistant

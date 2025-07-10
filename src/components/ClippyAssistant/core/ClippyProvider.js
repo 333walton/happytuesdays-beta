@@ -355,7 +355,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         "F1",
         "Genius",
         "Merlin",
-        "Links",
+        //"Links",
         "Bonzi",
       ];
 
@@ -1944,7 +1944,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             y={contextMenuPosition.y}
             onClose={hideContextMenu}
             currentAgent={currentAgent}
-            agents={["Clippy", "F1", "Genius", "Merlin", "Links", "Bonzi"]}
+            agents={["Clippy", "F1", "Genius", "Merlin", "Bonzi"]}
             onAction={(action, data) => {
               devLog(`Context menu action: ${action}`, data);
 

@@ -143,15 +143,15 @@ const AGENT_DIMENSIONS = {
       desktop: { rightOffset: 120, bottomOffset: 100 },
     },
   },
-  Links: {
-    width: 132, // Slightly wider than Clippy
-    height: 98, // Slightly taller than Clippy
-    scale: { mobile: 1.0, desktop: 0.95 }, // 🔧 Standardized from 0.95/0.9
-    positioning: {
-      mobile: { rightOffset: 8, bottomOffset: 125 }, // Adjusted for size
-      desktop: { rightOffset: 125, bottomOffset: 105 },
-    },
-  },
+  //Links: {
+  //width: 132, // Slightly wider than Clippy
+  //height: 98, // Slightly taller than Clippy
+  //scale: { mobile: 1.0, desktop: 0.95 }, // 🔧 Standardized from 0.95/0.9
+  //positioning: {
+  //mobile: { rightOffset: 8, bottomOffset: 125 }, // Adjusted for size
+  //desktop: { rightOffset: 125, bottomOffset: 105 },
+  //},
+  //},
   Bonzi: {
     width: 140, // Wider character
     height: 110, // Taller character
