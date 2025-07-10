@@ -629,11 +629,36 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
           // Show welcome message after new agent loads and positions
           setTimeout(() => {
-            if (mountedRef.current && !isAnyBalloonOpen()) {
-              showCustomBalloon(
-                `Hello! I'm ${newAgent} now. How can I help you?`,
-                6000
-              );
+            if (mountedRef.current && clippyInstanceRef.current?.play) {
+              // Special greeting animation for Genius
+              if (newAgent === "Genius") {
+                logAnimation("Greeting", `agent switch to ${newAgent}`);
+                clippyInstanceRef.current.play("Greeting");
+
+                // Show welcome message after Greeting animation completes (2.5 seconds)
+                setTimeout(() => {
+                  if (mountedRef.current && !isAnyBalloonOpen()) {
+                    showCustomBalloon(
+                      `Hello! I'm ${newAgent} now. How can I help you?`,
+                      6000
+                    );
+                  }
+                }, 2500); // Wait for Greeting animation to complete
+              } else {
+                // Standard Wave animation for other agents
+                logAnimation("Wave", `agent switch to ${newAgent}`);
+                clippyInstanceRef.current.play("Wave");
+
+                // Show welcome message after Wave animation starts
+                setTimeout(() => {
+                  if (mountedRef.current && !isAnyBalloonOpen()) {
+                    showCustomBalloon(
+                      `Hello! I'm ${newAgent} now. How can I help you?`,
+                      6000
+                    );
+                  }
+                }, 500); // Small delay for Wave animation
+              }
             }
           }, 1500); // Give time for new agent to load and position
 
@@ -1561,6 +1586,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               overlayRef.current
             );
             devLog(`Re-positioned new agent: ${currentAgent}`);
+            // Play special greeting for Genius after repositioning
           }, 100); // Small delay to ensure DOM is updated
         }
       }
