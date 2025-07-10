@@ -113,7 +113,12 @@ const startMenu = (
   ],
   {
     //title: "Log In / Join",
-    title: "Log In • Join",
+    title: (
+      <span>
+        <span style={{ fontSize: "11px" }}>Log In</span> •{" "}
+        <span style={{ fontSize: "12px" }}>Join</span>
+      </span>
+    ),
     icon: icons.logOff24,
     isDisabled: true,
   },
@@ -206,9 +211,7 @@ class ProgramProvider extends Component {
     desktop: buildDesktop(this.props.desktopData, () => this.open),
     startMenu: initialize(
       (p) => this.open(p),
-      addIdsToData(
-        getStartMenuData()
-      )
+      addIdsToData(getStartMenuData())
     ),
     quickLaunch: [
       {
