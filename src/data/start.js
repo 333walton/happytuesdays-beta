@@ -293,7 +293,7 @@ const productivityTools = [
   },
   {
     title: "To-do List",
-    icon: icons.wangimg32,
+    icon: icons.list32,
     component: "IframeWindow",
     isDisabled: false,
     data: {

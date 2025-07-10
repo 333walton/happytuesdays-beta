@@ -129,3 +129,4 @@ export { default as account32 } from "./account32-min.png";
 export { default as floppy16 } from "./floppy16-min.png";
 export { default as HandPointer16 } from "./HandPointer16-min.png";
 export { default as directoryFolderOptions16 } from "./directory_folder_options16-min.png";
+export { default as list32 } from "./list32-min.png";

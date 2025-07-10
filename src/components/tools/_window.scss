@@ -58,3 +58,69 @@
     transition: none;
   }
 }
+
+@media (max-width: 768px) {
+  /* Ensure menu bar is horizontal */
+  .window__menu.MenuBar,
+  .MenuBar {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  /* Ensure menu sections are horizontal */
+  .StandardMenuWrapper.MenuBar__section,
+  .MenuBar__section,
+  .WindowProgram__menu {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    width: auto !important;
+  }
+
+  /* Style individual menu items */
+  .MenuBar__section > *,
+  .StandardMenuWrapper > *,
+  .window__menu button,
+  .window__menu .menu-item {
+    display: inline-block !important;
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 4px 8px !important;
+    margin: 0 !important;
+  }
+
+  /* Remove any vertical stacking */
+  .window__menu > *,
+  .MenuBar > * {
+    display: inline-flex !important;
+    vertical-align: middle !important;
+  }
+
+  /* Handle scrolling if menu is too wide */
+  .window__menu.MenuBar::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .window__menu.MenuBar::-webkit-scrollbar-track {
+    background: #dfdfdf;
+  }
+
+  .window__menu.MenuBar::-webkit-scrollbar-thumb {
+    background: #888;
+  }
+}
+
+/* Additional fix for very small screens */
+@media (max-width: 480px) {
+  .MenuBar__section > *,
+  .StandardMenuWrapper > * {
+    font-size: 12px !important;
+    padding: 2px 6px !important;
+  }
+}

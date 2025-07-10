@@ -1010,3 +1010,109 @@
     opacity: 1 !important;
   }
 }
+
+/* Mobile MenuBar Fix - More specific selectors */
+
+/* First, let's debug what's happening */
+@media (max-width: 768px) {
+  /* Force all menu-related elements to show borders for debugging */
+  .window__menu,
+  .MenuBar,
+  .StandardMenuWrapper,
+  .MenuBar__section,
+  .WindowProgram__menu {
+    border: 1px solid red !important; /* Remove this after debugging */
+  }
+}
+
+/* More specific fix for React95 window menus on mobile */
+@media (max-width: 768px) {
+  /* Target the window menu container */
+  .window .window__menu,
+  .Window95 .window__menu,
+  [class*="Window"] .MenuBar,
+  [class*="window"] [class*="menu"] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 24px !important;
+    max-height: 40px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
+  /* Target menu sections and wrappers */
+  .window .StandardMenuWrapper,
+  .window .MenuBar__section,
+  .Window95 .StandardMenuWrapper,
+  .Window95 .MenuBar__section,
+  [class*="MenuBar"] > div,
+  [class*="menu"] > [class*="section"] {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    flex: 0 0 auto !important;
+    height: 100% !important;
+    vertical-align: top !important;
+  }
+
+  /* Target individual menu items (File, Edit, View, etc.) */
+  .window button[class*="menu"],
+  .window .menu-item,
+  .window [role="menuitem"],
+  .StandardMenuWrapper > button,
+  .StandardMenuWrapper > div,
+  .MenuBar__section > button,
+  .MenuBar__section > div,
+  .MenuBar button,
+  .MenuBar > * > button {
+    display: inline-block !important;
+    position: relative !important;
+    float: none !important;
+    clear: none !important;
+    width: auto !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 4px 12px !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+  }
+
+  /* Reset any grid or column layouts */
+  .window__menu,
+  .MenuBar,
+  .StandardMenuWrapper {
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    grid-auto-flow: row !important;
+    column-count: initial !important;
+    flex-direction: row !important;
+  }
+
+  /* Ensure no breaking or stacking */
+  .window__menu * {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+
+/* If the above doesn't work, try this nuclear option */
+@media (max-width: 768px) {
+  /* Force everything in menu bars to be inline */
+  [class*="menu" i] > * {
+    display: inline-block !important;
+    vertical-align: middle !important;
+  }
+
+  /* Remove any transforms or absolute positioning */
+  .window__menu *,
+  .MenuBar * {
+    position: relative !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+  }
+}
