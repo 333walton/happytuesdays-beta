@@ -468,16 +468,18 @@ class CuboneFileExplorer extends Component {
                       component: "MusicPlayer",
                       size: "3.5 MB",
                     },
-                    "Weird Al – All Star (Shrek Theme) [Rare!!!] (Not Fake).mp3": {
-                      type: "file",
-                      icon: "mediacd16",
-                      size: "1 KB",
-                    },
-                    "Linkin Park – In the End (Real)(High Quality)(No Virus)(Limewire Rip).mp3": {
-                      type: "file",
-                      icon: "mediacd16",
-                      size: "1 KB",
-                    },
+                    "Weird Al – All Star (Shrek Theme) [Rare!!!] (Not Fake).mp3":
+                      {
+                        type: "file",
+                        icon: "mediacd16",
+                        size: "1 KB",
+                      },
+                    "Linkin Park – In the End (Real)(High Quality)(No Virus)(Limewire Rip).mp3":
+                      {
+                        type: "file",
+                        icon: "mediacd16",
+                        size: "1 KB",
+                      },
                     "Rick Astley – Never Gonna Give You Up.mp3": {
                       type: "file",
                       icon: "mediacd16",
@@ -495,7 +497,7 @@ class CuboneFileExplorer extends Component {
                 },
               },
             },
-            "Member Documents": {
+            "Member Docs": {
               type: "folder",
               icon: "folderOpen32",
               children: {
@@ -632,8 +634,7 @@ class CuboneFileExplorer extends Component {
             Tools: {
               type: "folder",
               icon: "folderProgram",
-              children:  
-              {
+              children: {
                 "Productivity Tools": {
                   type: "folder",
                   icon: "folder16",
@@ -671,7 +672,7 @@ class CuboneFileExplorer extends Component {
                       type: "folder",
                       icon: "folder16",
                       children: {
-                        "Evernote": {
+                        Evernote: {
                           type: "file",
                           icon: "internetExplorer16",
                           size: "1 KB",
@@ -765,12 +766,12 @@ class CuboneFileExplorer extends Component {
                       type: "folder",
                       icon: "folder16",
                       children: {
-                        "Trello": {
+                        Trello: {
                           type: "file",
                           icon: "internetExplorer16",
                           size: "1 KB",
                         },
-                        "Zapier": {
+                        Zapier: {
                           type: "file",
                           icon: "internetExplorer16",
                           size: "1 KB",
@@ -809,7 +810,7 @@ class CuboneFileExplorer extends Component {
                       type: "folder",
                       icon: "folder16",
                       children: {
-                        "Figma": {
+                        Figma: {
                           type: "file",
                           icon: "internetExplorer16",
                           size: "1 KB",
@@ -854,12 +855,12 @@ class CuboneFileExplorer extends Component {
                       type: "folder",
                       icon: "folder16",
                       children: {
-                        "Mailchimp": {
+                        Mailchimp: {
                           type: "file",
                           icon: "internetExplorer16",
                           size: "1 KB",
                         },
-                        "Hubspot": {
+                        Hubspot: {
                           type: "file",
                           icon: "internetExplorer16",
                           size: "1 KB",

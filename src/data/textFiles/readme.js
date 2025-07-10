@@ -49,7 +49,7 @@ const readmeContent = {
         </div>
       `,
     },
-    {
+    /*{
       title: "FAQ",
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRX6w3EFRXeOcn6IvxIHNU8S7NU-HNKLtJd8CBYvAiuWZzbu0xNDvBFubV",
@@ -63,7 +63,7 @@ const readmeContent = {
         </ul>
         </div>
       `,
-    },
+    },*/
     {
       title: "About",
       image: "/static/goals.png",

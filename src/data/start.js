@@ -613,7 +613,7 @@ const techDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Member Documents/Tech Docs/APIs",
+      initialPath: "C:/Member Docs/Tech Docs/APIs",
     },
   },
   {
@@ -621,7 +621,7 @@ const techDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Member Documents/Tech Docs/Trend Reports",
+      initialPath: "C:/Member Docs/Tech Docs/Trend Reports",
     },
   },
   {
@@ -629,7 +629,7 @@ const techDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Member Documents/Tech Docs",
+      initialPath: "C:/Member Docs/Tech Docs",
     },
   },
 ];
@@ -640,7 +640,7 @@ const builderDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Member Documents/Builder Docs/Motivation",
+      initialPath: "C:/Member Docs/Builder Docs/Motivation",
     },
   },
   {
@@ -648,7 +648,7 @@ const builderDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Member Documents/Builder Docs/Resources",
+      initialPath: "C:/Member Docs/Builder Docs/Resources",
     },
   },
   {
@@ -656,7 +656,7 @@ const builderDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Member Documents/Builder Docs",
+      initialPath: "C:/Member Docs/Builder Docs",
     },
   },
 ];
@@ -667,7 +667,7 @@ const artDesignDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Member Documents/Art Design Docs/Color Theory",
+      initialPath: "C:/Member Docs/Art Design Docs/Color Theory",
     },
   },
   {
@@ -675,7 +675,7 @@ const artDesignDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Member Documents/Art Design Docs/Typography",
+      initialPath: "C:/Member Docs/Art Design Docs/Typography",
     },
   },
   {
@@ -683,7 +683,7 @@ const artDesignDocs = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Member Documents/Art Design Docs",
+      initialPath: "C:/Member Docs/Art Design Docs",
     },
   },
 ];
