@@ -228,21 +228,20 @@ const communityFavorites = [
         style={{
           //fontFamily: '"Perfect DOS VGA 437", "MS Sans Serif", monospace',
           //fontSize: '12px',
-          color: '#808080',
+          color: "#808080",
           //fontStyle: 'italic',
-          pointerEvents: 'none',
-          userSelect: 'none',
-          display: 'inline-block',
+          pointerEvents: "none",
+          userSelect: "none",
+          display: "inline-block",
           //opacity: '2',
         }}
       >
         Soon™
       </span>
     ),
-    isDisabled: true
-  }
+    isDisabled: true,
+  },
 ];
-
 
 const favorites = [
   {
@@ -990,7 +989,7 @@ const getStartMenuData = () => [
   },
   {
     title: "Tools",
-    icon: icons.folderProgram24,
+    icon: icons.directoryFolderOptions16,
     options: tools,
   },
   {

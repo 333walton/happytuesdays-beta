@@ -39,6 +39,7 @@ import ClippyPositioning from "./ClippyPositioning";
 import ClippyService from "../ClippyService";
 import MobileControls from "../interactions/MobileControls";
 import DesktopControls from "../interactions/DesktopControls";
+import FloatingHandPointer from "../interactions/FloatingHandPointer";
 
 // NEW: Import interaction manager for smart cooldowns and iOS Safari support
 import {
@@ -142,6 +143,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
   const [isScreenPoweredOn, setIsScreenPoweredOn] = useState(true);
   const [positionLocked, setPositionLocked] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
+  const hideButtonTipShownRef = useRef(false);
+  const [showHandPointer, setShowHandPointer] = useState(false);
 
   // Context menu state
   const [contextMenuVisible, setContextMenuVisible] = useState(false);
@@ -677,6 +680,44 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       showCustomBalloon,
       // REMOVED: hideGeniusChat from dependencies
     ]
+  );
+
+  const handleProgramOpen = useCallback(
+    (programName) => {
+      // Only show the tip once per session
+      if (hideButtonTipShownRef.current || !mountedRef.current) {
+        return;
+      }
+
+      // Don't show if any balloon is already open
+      if (isAnyBalloonOpen()) {
+        return;
+      }
+
+      // Mark as shown
+      hideButtonTipShownRef.current = true;
+
+      devLog(`First program opened: ${programName} - showing hide button tip`);
+
+      // Show the tip after a short delay
+      setTimeout(() => {
+        if (mountedRef.current && !isAnyBalloonOpen()) {
+          showCustomBalloon(
+            "💡 Tip: You can hide me anytime by clicking the 'Hide Clippy' button in the taskbar!",
+            8000 // Show for 8 seconds to give user time to read
+          );
+
+          // Show the floating hand pointer
+          setShowHandPointer(true);
+
+          // Hide the pointer after 8 seconds (matching balloon duration)
+          setTimeout(() => {
+            setShowHandPointer(false);
+          }, 8000);
+        }
+      }, 1000); // 1 second delay after program opens
+    },
+    [isAnyBalloonOpen, showCustomBalloon, setShowHandPointer]
   );
 
   // FIXED: Enhanced initial message with welcome balloon completion tracking
@@ -1508,6 +1549,19 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       devLog("All enhanced global functions initialized successfully");
     }
+    window.showHideButtonTip = createSafeGlobalFunction(() => {
+      if (!hideButtonTipShownRef.current && !isAnyBalloonOpen()) {
+        hideButtonTipShownRef.current = true;
+        showCustomBalloon(
+          "💡 Tip: You can hide me anytime by clicking the 'Hide Clippy' button in the taskbar!",
+          8000
+        );
+        setShowHandPointer(true);
+        setTimeout(() => setShowHandPointer(false), 8000);
+        return true;
+      }
+      return false;
+    }, "showHideButtonTip");
 
     return () => {
       if (typeof window !== "undefined" && window._clippyGlobalsInitialized) {
@@ -1523,6 +1577,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         delete window.showClippyInitialMessage;
         delete window.hideClippyContextMenu;
         delete window._clippyGlobalsInitialized;
+        delete window.showHideButtonTip;
       }
     };
   }, [
@@ -1896,6 +1951,190 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!mountedRef.current) return;
+
+    let windowOpenObserver = null;
+    let processedWindows = new Set();
+
+    const checkForNewWindows = () => {
+      // Log all possible window-like elements for debugging
+      const allPossibleWindows = document.querySelectorAll(
+        '[class*="window" i], [class*="Window" i], [role="dialog"], [class*="modal" i], [class*="dialog" i]'
+      );
+      devLog(
+        `Found ${allPossibleWindows.length} potential window elements:`,
+        Array.from(allPossibleWindows).map((el) => ({
+          className: el.className,
+          id: el.id,
+          role: el.getAttribute("role"),
+          tagName: el.tagName,
+        }))
+      );
+
+      // Mark existing windows as processed
+      allPossibleWindows.forEach((window) => {
+        processedWindows.add(window);
+      });
+
+      // Monitor for new elements being added
+      windowOpenObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType !== 1) return;
+
+            // Debug log every element with certain attributes
+            if (node.className && typeof node.className === "string") {
+              const className = node.className.toLowerCase();
+              if (
+                className.includes("window") ||
+                className.includes("modal") ||
+                className.includes("dialog") ||
+                className.includes("app") ||
+                className.includes("program")
+              ) {
+                devLog(`Potential window element added:`, {
+                  className: node.className,
+                  id: node.id,
+                  innerHTML: node.innerHTML?.substring(0, 100) + "...",
+                });
+              }
+            }
+
+            // Check the node and all its children for windows
+            const checkNode = (element) => {
+              if (!element || processedWindows.has(element)) return;
+
+              const className = (element.className || "")
+                .toString()
+                .toLowerCase();
+              const role = (element.getAttribute?.("role") || "").toLowerCase();
+              const id = (element.id || "").toLowerCase();
+
+              // Very broad detection
+              const isWindow =
+                className.includes("window") ||
+                className.includes("modal") ||
+                className.includes("dialog") ||
+                className.includes("app-window") ||
+                className.includes("program") ||
+                role === "dialog" ||
+                role === "window" ||
+                role === "application" ||
+                id.includes("window") ||
+                element.tagName === "DIALOG";
+
+              if (isWindow && !processedWindows.has(element)) {
+                processedWindows.add(element);
+
+                // Try multiple selectors for title
+                const titleElement =
+                  element.querySelector(
+                    '[class*="title" i], [class*="header" i], h1, h2, header'
+                  ) ||
+                  element.querySelector('[role="heading"]') ||
+                  element.firstElementChild;
+
+                const programName =
+                  titleElement?.textContent?.trim() ||
+                  element.getAttribute("title") ||
+                  element.getAttribute("aria-label") ||
+                  "a program";
+
+                devLog(`🎉 NEW WINDOW DETECTED: ${programName}`, {
+                  element,
+                  className: element.className,
+                  role: element.getAttribute("role"),
+                });
+
+                handleProgramOpen(programName);
+              }
+
+              // Check all children
+              if (element.children) {
+                Array.from(element.children).forEach((child) =>
+                  checkNode(child)
+                );
+              }
+            };
+
+            checkNode(node);
+          });
+        });
+      });
+
+      // Observe the entire document with aggressive settings
+      windowOpenObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class", "role", "style"],
+      });
+
+      devLog("Enhanced window monitoring started");
+    };
+
+    // Start monitoring immediately and after a delay
+    checkForNewWindows();
+
+    return () => {
+      if (windowOpenObserver) {
+        windowOpenObserver.disconnect();
+      }
+    };
+  }, [handleProgramOpen]);
+
+  window.testWindowDetection = () => {
+    const allElements = document.querySelectorAll("*");
+    const windowLikeElements = Array.from(allElements).filter((el) => {
+      const className = (el.className || "").toString().toLowerCase();
+      return (
+        className.includes("window") ||
+        className.includes("modal") ||
+        className.includes("dialog") ||
+        className.includes("app")
+      );
+    });
+
+    console.log("🔍 Window Detection Test Results:");
+    console.log("Total elements:", allElements.length);
+    console.log("Window-like elements found:", windowLikeElements.length);
+    windowLikeElements.forEach((el, i) => {
+      console.log(`${i + 1}. ${el.tagName} - ${el.className}`, el);
+    });
+
+    return windowLikeElements;
+  };
+
+  useEffect(() => {
+    if (!mountedRef.current) return;
+
+    let lastFocusedWindow = null;
+
+    const handleFocusIn = (e) => {
+      const window = e.target.closest('.window, .Window95, [role="dialog"]');
+      if (window && window !== lastFocusedWindow) {
+        // Check if this window is newly created (not in DOM before)
+        if (!window.hasAttribute("data-clippy-seen")) {
+          window.setAttribute("data-clippy-seen", "true");
+          const titleBar = window.querySelector(
+            ".title-bar-text, .TitleBar__Text, header"
+          );
+          const programName = titleBar?.textContent?.trim() || "a program";
+          devLog(`Window focused for first time: ${programName}`);
+          handleProgramOpen(programName);
+        }
+        lastFocusedWindow = window;
+      }
+    };
+
+    document.addEventListener("focusin", handleFocusIn, true);
+
+    return () => {
+      document.removeEventListener("focusin", handleFocusIn, true);
+    };
+  }, [handleProgramOpen]);
+
   const contextValue = {
     // State
     assistantVisible,
@@ -1911,6 +2150,8 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     interactionCount,
     isInCooldown,
     isAnimationPlaying,
+    showHandPointer,
+    setShowHandPointer,
 
     // Actions
     setAssistantVisible,
@@ -1963,7 +2204,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         {assistantVisible && shouldRenderClippy && (
           <ClippyController key={`controller-${currentAgent}`} />
         )}
-
         {contextMenuVisible && (
           <ClippyContextMenu
             x={contextMenuPosition.x}
@@ -1995,7 +2235,13 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             }}
           />
         )}
-
+        {showHandPointer && (
+          <FloatingHandPointer
+            targetSelector=".TaskBar__quick-launch button[title*='Hide'], .TaskBar__quick-launch button[aria-label*='Hide']"
+            duration={8000}
+            onComplete={() => setShowHandPointer(false)}
+          />
+        )}
         {isMobile && shouldRenderClippy && (
           <MobileControls
             positionLocked={positionLocked}
@@ -2003,9 +2249,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             onHide={() => setAssistantVisible(false)}
           />
         )}
-
         {!isMobile && shouldRenderClippy && <DesktopControls />}
-
         {currentAgent === "Genius" && (
           <GeniusChat
             visible={false} // Not used anymore, FAB handles visibility
@@ -2014,7 +2258,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             chatSystem="botpress"
           />
         )}
-
         {children}
       </ReactClippyProvider>
     </ClippyContext.Provider>

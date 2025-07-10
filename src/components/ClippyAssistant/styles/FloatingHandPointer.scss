@@ -1,0 +1,27 @@
+.floating-hand-pointer {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  animation: floating 2s ease-in-out infinite;
+
+  // Default position - adjust these values as needed
+  bottom: 33px; // Adjust this to position above taskbar
+  left: 77px; // Adjust this to position horizontally
+
+  img {
+    display: block;
+    width: 32px;
+    height: 32px;
+    transform: rotate(180deg); // Point downward
+  }
+}
+
+@keyframes floating {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
