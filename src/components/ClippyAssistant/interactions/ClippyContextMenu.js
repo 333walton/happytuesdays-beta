@@ -60,23 +60,13 @@ const ClippyContextMenu = ({
       "Rest Pose": "RestPose",
     },
     F1: {
-      Wave: "Wave",
-      "Good Bye": "GoodBye",
-      Greeting: "Greeting",
-      "Get Attention": "GetAttention",
-      Alert: "Alert",
-      Thinking: "Thinking",
-      Processing: "Processing",
-      "Look Left": "LookLeft",
-      "Look Right": "LookRight",
-      "Look Up": "LookUp",
-      "Look Down": "LookDown",
-      "Gesture Up": "GestureUp",
-      "Gesture Down": "GestureDown",
-      "Gesture Left": "GestureLeft",
-      "Gesture Right": "GestureRight",
-      "Rest Pose": "RestPose",
-      Show: "Show",
+      Wave: "Wave", //good
+      Greeting: "Greeting", //great
+      "Get Attention": "GetAttention", //good
+      Alert: "Alert", //good
+      Thinking: "Thinking", //good
+      Processing: "Processing", //good
+      "Get Techy": "GetTechy", //good
     },
     Genius: {
       Wave: "Wave", //good
@@ -91,24 +81,16 @@ const ClippyContextMenu = ({
       "Gesture Down": "GestureDown", //good
     },
     Merlin: {
-      Wave: "Wave",
-      "Good Bye": "GoodBye",
-      Greeting: "Greeting",
-      "Get Attention": "GetAttention",
-      Alert: "Alert",
-      Thinking: "Thinking",
-      Processing: "Processing",
-      "Get Wizardy": "GetWizardy",
-      "Look Left": "LookLeft",
-      "Look Right": "LookRight",
-      "Look Up": "LookUp",
-      "Look Down": "LookDown",
-      "Gesture Up": "GestureUp",
-      "Gesture Down": "GestureDown",
-      "Gesture Left": "GestureLeft",
-      "Gesture Right": "GestureRight",
-      "Rest Pose": "RestPose",
-      Show: "Show",
+      Wave: "Wave", //good
+      "Get Attention": "GetAttention", //good
+      Alert: "Alert", //good
+      Thinking: "Thinking", //good
+      Processing: "Processing", //great
+      "Look Down": "LookDown", //good
+      "Gesture Up": "GestureUp", //good
+      "Rest Pose": "RestPose", //good
+      Show: "Show", //great
+      Explain: "Explain", //good
     },
     //Genie: {
     //Wave: "Wave",
