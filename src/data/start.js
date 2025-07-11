@@ -566,6 +566,7 @@ const tools = [
     type: "divider",
     className: "divider divider--group-0-end",
     title: "",
+    isDisabled: true,
   },
   {
     title: "Productivity Tools",
