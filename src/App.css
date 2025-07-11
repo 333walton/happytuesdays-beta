@@ -194,6 +194,32 @@ body {
   left: calc(100% - 3px) !important;
 }
 
+/* Move Start Menu up by 1px and left by 4px */
+.StartMenuPortal .StandardMenu,
+.Frame.StandardMenu.renderedMenu {
+  transform: translateY(-2px) translateX(-1px);
+}
+
+/* Apply the same transform to all submenus - 1st and 2nd level */
+.StandardMenuItem__child,
+.Frame.StandardMenu.StandardMenuItem__child,
+.submenu-align-bottom-creative > .Frame.StandardMenu.StandardMenuItem__child,
+.submenu-align-bottom-marketing > .Frame.StandardMenu.StandardMenuItem__child,
+.submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
+.submenu-align-bottom-artdesign > .Frame.StandardMenu.StandardMenuItem__child {
+  transform: translateY(0px) translateX(3px);
+}
+
+/* 3rd level submenus - try these different selectors */
+.StandardMenuItem__child .StandardMenuItem__child,
+.StandardMenuItem__child .Frame.StandardMenu,
+.StandardMenuItem__child .StandardMenu,
+.Frame.StandardMenu .Frame.StandardMenu .Frame.StandardMenu,
+.StandardMenuItem__child .StandardMenuItem__child .StandardMenu,
+.StandardMenu .StandardMenu .StandardMenu {
+  transform: translateY(0px) translateX(3px);
+}
+
 /* Ensure the Start Menu is always above Clippy and its overlay on mobile */
 @media (max-width: 768px), (pointer: coarse) {
   .StartMenuPortal,
@@ -216,5 +242,32 @@ body {
 
   .TaskBar__quick-launch {
     margin-left: 62px !important;
+  }
+
+  /* Move Start Menu up by 1px and left by 4px */
+  .StartMenuPortal .StandardMenu,
+  .Frame.StandardMenu.renderedMenu {
+    transform: translateY(-1px) translateX(-4px);
+  }
+
+  /* Apply the same transform to all submenus - 1st and 2nd level */
+  .StandardMenuItem__child,
+  .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-creative > .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-marketing > .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-artdesign
+    > .Frame.StandardMenu.StandardMenuItem__child {
+    transform: translateY(1px) translateX(2px);
+  }
+
+  /* 3rd level submenus - try these different selectors */
+  .StandardMenuItem__child .StandardMenuItem__child,
+  .StandardMenuItem__child .Frame.StandardMenu,
+  .StandardMenuItem__child .StandardMenu,
+  .Frame.StandardMenu .Frame.StandardMenu .Frame.StandardMenu,
+  .StandardMenuItem__child .StandardMenuItem__child .StandardMenu,
+  .StandardMenu .StandardMenu .StandardMenu {
+    transform: translateY(0px) translateX(-1px);
   }
 }
