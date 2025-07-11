@@ -261,26 +261,50 @@ const newsFeeds = [
   {
     title: "Tech Feed",
     icon: icons.newsletter16,
-    component: "",
-    isDisabled: true,
+    component: "InternetExplorer",
+    isDisabled: false,
+    data: {
+      component: "HappyTuesdayNewsFeed",
+      type: "happy-tuesday-feed",
+      tab: "tech", // <-- This is important!
+      title: "News Feed",
+    },
   },
   {
     title: "Builders Feed",
     icon: icons.newsletter16,
-    component: "",
-    isDisabled: true,
+    component: "InternetExplorer",
+    isDisabled: false,
+    data: {
+      component: "HappyTuesdayNewsFeed",
+      type: "happy-tuesday-feed",
+      tab: "builder",
+      title: "News Feed",
+    },
   },
   {
     title: "Art/Design Feed",
     icon: icons.newsletter16,
-    component: "",
-    isDisabled: true,
+    component: "InternetExplorer",
+    isDisabled: false,
+    data: {
+      component: "HappyTuesdayNewsFeed",
+      type: "happy-tuesday-feed",
+      tab: "art",
+      title: "News Feed",
+    },
   },
   {
     title: "Gaming Feed",
     icon: icons.newsletter16,
-    component: "",
-    isDisabled: true,
+    component: "InternetExplorer",
+    isDisabled: false,
+    data: {
+      component: "HappyTuesdayNewsFeed",
+      type: "happy-tuesday-feed",
+      tab: "gaming",
+      title: "News Feed",
+    },
   },
 ];
 

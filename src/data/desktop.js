@@ -61,7 +61,8 @@ const desktopData = [
     icon: icons.blog32,
     component: "InternetExplorer",
     data: {
-      __html: readme,
+      component: "HappyTuesdayNewsFeed", // Pass the component directly
+      title: "News Feed",
     },
   },
   {
