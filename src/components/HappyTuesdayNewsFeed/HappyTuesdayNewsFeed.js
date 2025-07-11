@@ -407,7 +407,7 @@ const HappyTuesdayNewsFeed = ({ inIE = false, initialTab = "blog" }) => {
 
       {/* Header */}
       <header style={styles.header}>
-        <h1 style={styles.headerTitle}>HAPPY TUESDAY NEWS FEED</h1>
+        <h1 style={styles.headerTitle}>HAPPY TUESDAYS NEWS FEED</h1>
       </header>
 
       {/* Container */}
