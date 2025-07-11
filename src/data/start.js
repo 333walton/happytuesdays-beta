@@ -360,7 +360,7 @@ const productivityTools = [
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Tools/Creative Tools/Native",
+      initialPath: "C:/Tools/Productivity Tools/Native",
     },
   },
 ];
