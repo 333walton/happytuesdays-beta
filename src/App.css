@@ -60,8 +60,13 @@ body {
 
 .react-draggable > .Window {
   height: 100%;
-  /*height: calc(100% - 28) !important*/
+  /*height: calc(100% - 28) !important;*/
   width: 100%;
+}
+
+.Frame > .Window.Settings.Window--active {
+  top: -100px !important;
+  left: 0px;
 }
 
 .StandardMenuItem__button {

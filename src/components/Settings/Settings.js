@@ -15,6 +15,11 @@ import buildMenu from "../../helpers/menuBuilder";
 
 import "./_styles.scss";
 
+const isMobile =
+  typeof window !== "undefined" &&
+  (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    window.innerWidth <= 768);
+
 const backgroundStyleGenerator = (bgStyle) => {
   if (bgStyle === "tile") {
     return {
@@ -124,10 +129,10 @@ class Settings extends Component {
           program.settingsDisplay && (
             <Window
               {...props}
-              initialX={200}
-              initialY={100}
-              initialWidth={280}
-              initialHeight={360}
+              initialX={this.state.isMobileDevice ? "50" : "50"}
+              initialY={this.state.isMobileDevice ? "50" : "50"}
+              initialWidth={this.state.isMobileDevice ? "280" : "280"}
+              initialHeight={this.state.isMobileDevice ? "380" : "333"}
               Component={AbstractWindow}
               title="Control Panel"
               className="Settings"
