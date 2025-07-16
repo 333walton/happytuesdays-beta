@@ -337,6 +337,44 @@ body {
   transform: translateY(0px) translateX(3px);
 }
 
+.submenu-align-bottom-help-settings {
+}
+
+.submenu-align-bottom-help-settings
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
+.submenu-align-bottom-control-panel-settings {
+}
+
+.submenu-align-bottom-control-panel-settings
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
+.submenu-align-bottom-misc-games {
+}
+
+.submenu-align-bottom-misc-games > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
+.submenu-align-bottom-classic-games {
+}
+
+.submenu-align-bottom-classic-games
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
+.submenu-align-bottom-dos-games {
+}
+
+.submenu-align-bottom-dos-games > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
 .submenu-align-bottom-gallery-artifacts {
 }
 

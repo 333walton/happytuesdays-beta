@@ -847,16 +847,19 @@ const games = [
   {
     title: "DOS Games",
     icon: icons.folder16,
+    className: "submenu-align-bottom-dos-games",
     options: dosGames,
   },
   {
     title: "Classic Games",
     icon: icons.folder16,
+    className: "submenu-align-bottom-classic-games",
     options: classicGames,
   },
   {
     title: "Misc.",
     icon: icons.folder16,
+    className: "submenu-align-bottom-misc-games",
     options: miscGames,
   },
 ];

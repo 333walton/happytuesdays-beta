@@ -35,6 +35,7 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
     {
       title: "Help",
       icon: icons.help16,
+      className: "submenu-align-bottom-help-settings",
       options: [
         {
           title: "FAQ",
@@ -74,6 +75,7 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
     {
       title: "Control Panel",
       icon: icons.controlPanel16,
+      className: "submenu-align-bottom-control-panel-settings",
       options: [
         {
           title: "Cache Manager",
