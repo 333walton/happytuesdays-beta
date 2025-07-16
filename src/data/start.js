@@ -361,6 +361,7 @@ const productivityTools = [
     type: "divider",
     className: "divider divider--group-0-end",
     title: "",
+    isDisabled: true,
   },
   {
     title: "View Catalogue",
@@ -465,6 +466,7 @@ const marketingTools = [
   {
     type: "divider",
     title: "",
+    isDisabled: true,
   },
   {
     title: "View Catalogue",
@@ -508,6 +510,7 @@ const builderTools = [
     type: "divider",
     className: "divider divider--group-0-end",
     title: "",
+    isDisabled: true,
   },
   {
     title: "View Catalogue",
@@ -552,6 +555,7 @@ const artDesignTools = [
     type: "divider",
     className: "divider divider--group-0-end",
     title: "",
+    isDisabled: true,
   },
   {
     title: "View Catalogue",
