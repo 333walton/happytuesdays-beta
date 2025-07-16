@@ -837,9 +837,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
                 "Searching",
                 "Explain",
                 "Greeting",
-                "GestureRight",
-                "GestureLeft",
-                "GestureUp",
               ];
 
               const randomIndex = Math.floor(Math.random() * animations.length);
