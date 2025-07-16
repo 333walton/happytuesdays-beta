@@ -543,6 +543,18 @@ body {
     position: absolute !important; /* or absolute, as needed */
   }
 
+  .submenu-align-bottom-settings {
+  }
+
+  .submenu-align-bottom-settings {
+    > .Frame.StandardMenu.StandardMenuItem__child {
+      top: auto !important;
+      bottom: -71px !important;
+      /*left: calc(100% - 3px) !important;*/
+      /*transform: translateY(0px) translateX(3px);*/
+    }
+  }
+
   .StartMenuPortal .btn.StartButton {
     display: none !important;
     background-size: auto !important;

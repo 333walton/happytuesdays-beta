@@ -109,6 +109,7 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
       title: "Start Menu Builder",
       icon: icons.start_menu32,
       component: "",
+      tooltip: "Log in to access",
       isDisabled: true,
       multiInstance: true,
     },
