@@ -132,7 +132,7 @@ class Settings extends Component {
               initialX={this.state.isMobileDevice ? "50" : "50"}
               initialY={this.state.isMobileDevice ? "50" : "50"}
               initialWidth={this.state.isMobileDevice ? "280" : "280"}
-              initialHeight={this.state.isMobileDevice ? "380" : "380"}
+              initialHeight={this.state.isMobileDevice ? "360" : "380"}
               Component={AbstractWindow}
               title="Control Panel"
               className="Settings"
