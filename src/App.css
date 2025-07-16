@@ -573,7 +573,7 @@ body {
   .StartMenuPortal .StandardMenu,
   .Frame.StandardMenu.renderedMenu {
     transform: translateY(-4px) translateX(-4px);
-    padding: 2px 3px !important; /* top/bottom | left/right */
+    padding: 3px 3px !important; /* top/bottom | left/right */
   }
 
   /* Apply the same transform to all submenus - 1st and 2nd level */
