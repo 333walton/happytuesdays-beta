@@ -542,7 +542,7 @@ body {
   /* Move Start Menu up by 1px and left by 4px */
   .StartMenuPortal .StandardMenu,
   .Frame.StandardMenu.renderedMenu {
-    transform: translateY(-3px) translateX(-4px);
+    transform: translateY(-4px) translateX(-4px);
   }
 
   /* Apply the same transform to all submenus - 1st and 2nd level */
