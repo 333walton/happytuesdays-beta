@@ -75,40 +75,32 @@ const createAIAssistants = () => {
       title: currentAgent === "Clippy" ? "✓ Clippy GPT" : "Clippy GPT",
       tooltip: "Site Guide",
       icon: icons.vid16,
-      component: "",
-      isDisabled: false,
       onClick: selectAgent("Clippy"),
     },
     {
       title: currentAgent === "F1" ? "✓ F1 GPT" : "F1 GPT",
       tooltip: "Tech Workshop",
       icon: icons.vid16,
-      component: "",
-      isDisabled: false,
       onClick: selectAgent("F1"),
     },
     {
       title: currentAgent === "Genius" ? "✓ Genius GPT" : "Genius GPT",
       tooltip: "Motivation Station",
       icon: icons.vid16,
-      component: "",
-      isDisabled: false,
       onClick: selectAgent("Genius"),
     },
     {
       title: currentAgent === "Merlin" ? "✓ Merlin GPT" : "Merlin GPT",
       tooltip: "Art Gallery",
       icon: icons.vid16,
-      component: "",
-      isDisabled: false,
+
       onClick: selectAgent("Merlin"),
     },
     {
       title: currentAgent === "Bonzi" ? "✓ Bonzi GPT" : "Bonzi GPT",
       tooltip: "Gaming Hub",
       icon: icons.vid16,
-      component: "",
-      isDisabled: false,
+
       onClick: selectAgent("Bonzi"),
     },
   ];

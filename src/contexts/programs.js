@@ -74,12 +74,11 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
     {
       title: "Control Panel",
       icon: icons.controlPanel16,
-      //onClick: toggleSettings,
       options: [
         {
           title: "Cache Manager",
           icon: icons.floppy16,
-          onClick: toggleTaskManager, // Use the handler directly
+          onClick: toggleTaskManager,
           multiInstance: true,
         },
         {
@@ -106,7 +105,6 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
     {
       title: "Account",
       icon: icons.account32,
-      //onClick: toggleSettings,
       className: "submenu-align-bottom-account-settings",
       options: [
         {
@@ -126,7 +124,7 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
         {
           title: "Chatbots",
           icon: icons.textchat32,
-          onClick: toggleTaskManager, // Use the handler directly
+          onClick: toggleTaskManager,
           multiInstance: true,
         },
       ],
@@ -149,7 +147,6 @@ const startMenu = (
     },
   ],
   {
-    //title: "Log In / Join",
     title: (
       <span>
         <span style={{ fontSize: "11px" }}>Log In</span> •{" "}
@@ -176,6 +173,8 @@ export const addIdsToData = (data) =>
           ...transformLinks(d),
           id: d.id || nanoid(),
           options: addIdsToData(d.options),
+          // Preserve tooltip from original data
+          tooltip: d.tooltip,
         };
       })
     : undefined;
@@ -212,6 +211,8 @@ const mapActions = (open, doubleClick) => (entry) => {
     onClick: !doubleClick ? onClickAction : undefined,
     onDoubleClick: doubleClick ? onClick : undefined,
     options: initialize(open, entry.options),
+    // Preserve tooltip
+    tooltip: entry.tooltip,
   };
 };
 
@@ -331,7 +332,6 @@ class ProgramProvider extends Component {
       startMenu: initialize(
         (p) => this.open(p),
         addIdsToData(
-          // In componentDidMount and refreshStartMenu:
           startMenu(
             this.props.getStartMenuData(),
             this.toggleSettings,
@@ -365,7 +365,6 @@ class ProgramProvider extends Component {
       startMenu: initialize(
         (p) => this.open(p),
         addIdsToData(
-          // In componentDidMount and refreshStartMenu:
           startMenu(
             this.props.getStartMenuData(),
             this.toggleSettings,

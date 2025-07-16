@@ -105,6 +105,104 @@ body {
   background-repeat: no-repeat;
 }
 
+/* Start Menu Tooltip Styles */
+
+/* Base tooltip styles for menu items */
+.submenu-item[title]:hover::after,
+.menu-item[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffffe1;
+  border: 1px solid #000000;
+  padding: 2px 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 10000;
+  pointer-events: none;
+  margin-bottom: 5px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Alternative approach using data-tooltip attribute */
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffffe1;
+  border: 1px solid #000000;
+  padding: 2px 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 10000;
+  pointer-events: none;
+  margin-bottom: 5px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Position adjustment for submenu items */
+.submenu .submenu-item[title]:hover::after,
+.submenu [data-tooltip]:hover::after {
+  bottom: auto;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 5px;
+  margin-bottom: 0;
+}
+
+/* Quick launch tooltip styles */
+.quick-launch-button[title]:hover::after,
+.quick-launch-button[data-tooltip]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffffe1;
+  border: 1px solid #000000;
+  padding: 2px 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 10000;
+  pointer-events: none;
+  margin-bottom: 5px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure proper positioning context */
+.submenu-item,
+.menu-item,
+.quick-launch-button,
+[data-tooltip] {
+  position: relative;
+}
+
+/* Optional: Add delay to tooltip appearance */
+.submenu-item[title],
+.menu-item[title],
+[data-tooltip] {
+  position: relative;
+}
+
+.submenu-item[title]::after,
+.menu-item[title]::after,
+[data-tooltip]::after {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  transition-delay: 0.5s;
+}
+
+.submenu-item[title]:hover::after,
+.menu-item[title]:hover::after,
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
 @media (min-width: 640px) and (min-height: 480px) {
   .windowsShuttingDown {
     background-size: cover;

@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { TaskBar as TaskBarComponent } from "packard-belle";
-import StartMenuPortal from "../StartMenuPortal";
 import { StartMenu } from "packard-belle";
+import StartMenuPortal from "../StartMenuPortal";
 import { ProgramContext } from "../../contexts";
+import useStartMenuTooltipEnhancer from "../../helpers/useStartMenuTooltipEnhancer";
 
 // Custom tooltip component
 const CustomTooltip = ({ text, visible }) => {
@@ -28,35 +29,32 @@ const CustomTooltip = ({ text, visible }) => {
 };
 
 const TaskBar = () => {
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [tooltipTimeout, setTooltipTimeout] = useState(null);
+  const context = useContext(ProgramContext);
+  useStartMenuTooltipEnhancer(context.startMenu);
   const taskbarRef = useRef(null);
-  const [tooltipText, setTooltipText] = useState("");
   const clippyButtonRef = useRef(null);
+
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipText, setTooltipText] = useState("");
+  const [tooltipTimeout, setTooltipTimeout] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ left: 0, bottom: 0 });
 
-  // Mobile detection
   const isMobile =
     typeof window !== "undefined" &&
     (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
       window.innerWidth <= 768);
 
   const handleMouseEnter = () => {
-    if (tooltipTimeout) {
-      clearTimeout(tooltipTimeout);
-    }
+    if (tooltipTimeout) clearTimeout(tooltipTimeout);
     setTooltipVisible(true);
   };
 
   const handleMouseLeave = () => {
-    const timeout = setTimeout(() => {
-      setTooltipVisible(false);
-    }, 200);
+    const timeout = setTimeout(() => setTooltipVisible(false), 200);
     setTooltipTimeout(timeout);
   };
 
-  // Open menu and set position
   const openMenu = (startButton) => {
     if (startButton) {
       const rect = startButton.getBoundingClientRect();
@@ -68,21 +66,19 @@ const TaskBar = () => {
     }
   };
 
-  // Close menu handler
   const closeMenu = () => setMenuOpen(false);
 
-  // On mobile, override the Start button's handler to open only the custom menu
+  // Mobile: override Start button behavior
   useEffect(() => {
     if (!taskbarRef.current || !isMobile) return;
 
     let lastStartBtn = null;
 
     const attachHandler = () => {
-      const startBtn = taskbarRef.current.querySelector('.StartButton');
+      const startBtn = taskbarRef.current.querySelector(".StartButton");
       if (!startBtn || startBtn === lastStartBtn) return;
       lastStartBtn = startBtn;
 
-      // Remove all previous handlers
       startBtn.onclick = null;
       startBtn.ontouchstart = null;
 
@@ -97,14 +93,9 @@ const TaskBar = () => {
       startBtn.ontouchstart = handler;
     };
 
-    // Attach initially
     attachHandler();
-
-    // Observe for changes to re-attach if the button is replaced
     const observer = new MutationObserver(attachHandler);
     observer.observe(taskbarRef.current, { childList: true, subtree: true });
-
-    // Also re-attach on every render
     const interval = setInterval(attachHandler, 200);
 
     return () => {
@@ -113,7 +104,7 @@ const TaskBar = () => {
     };
   }, [isMobile, menuOpen]);
 
-  // Find and modify the Clippy button after render
+  // Clippy button tooltip detection
   useEffect(() => {
     const findClippyButton = () => {
       if (!taskbarRef.current) return;
@@ -124,14 +115,17 @@ const TaskBar = () => {
           button.title === "Show Clippy" || button.title === "Hide Clippy";
         return hasClippyIcon || hasClippyTitle;
       });
+
       if (clippyButton) {
         clippyButtonRef.current = clippyButton;
         const buttonTitle = clippyButton.title;
         setTooltipText(buttonTitle);
+
         clippyButton.addEventListener("mouseenter", handleMouseEnter);
         clippyButton.addEventListener("mouseleave", handleMouseLeave);
         clippyButton.removeAttribute("title");
         clippyButton.removeAttribute("data-tooltip");
+
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
             if (
@@ -146,10 +140,12 @@ const TaskBar = () => {
             }
           });
         });
+
         observer.observe(clippyButton, {
           attributes: true,
           attributeFilter: ["title"],
         });
+
         return () => {
           clippyButton.removeEventListener("mouseenter", handleMouseEnter);
           clippyButton.removeEventListener("mouseleave", handleMouseLeave);
@@ -157,6 +153,7 @@ const TaskBar = () => {
         };
       }
     };
+
     const cleanup = findClippyButton();
     const timeoutId = setTimeout(findClippyButton, 1000);
     return () => {
@@ -188,12 +185,12 @@ const TaskBar = () => {
           rssIcon.style.cursor = "pointer";
           rssIcon.addEventListener("click", () => {
             console.log("RSS icon clicked");
-            // Add your RSS functionality here
           });
           timeElement.parentNode.insertBefore(rssIcon, timeElement);
         }
       }
     };
+
     addRSSIcon();
     const timeouts = [100, 500, 1000].map((delay) =>
       setTimeout(addRSSIcon, delay)
@@ -203,90 +200,80 @@ const TaskBar = () => {
     };
   }, []);
 
-  // Click outside to close menu (mobile only)
   useEffect(() => {
     if (!menuOpen || !isMobile) return;
+
     const handleClickOutside = (e) => {
-      if (e.target.closest('.StartButton')) return;
-      if (e.target.closest('.TaskBar__start')) return;
+      if (e.target.closest(".StartButton")) return;
+      if (e.target.closest(".TaskBar__start")) return;
       closeMenu();
     };
-    document.addEventListener('click', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
+
+    document.addEventListener("click", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
     return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [menuOpen, isMobile]);
 
   return (
-    <ProgramContext.Consumer>
-      {(context) => (
-        <div ref={taskbarRef} style={{ position: "relative" }}>
-          <TaskBarComponent
-            options={context.startMenu}
-            quickLaunch={context.quickLaunch.map((item) => {
-              if (
-                item.title === "Show Clippy" ||
-                item.title === "Hide Clippy"
-              ) {
-                return {
-                  ...item,
-                  isActive: item.active,
-                  dataActive: item.active ? "true" : "false",
-                  title: item.title,
-                  className: `quick-launch-button-clippy btn ButtonIconSmall ${
-                    item.className || ""
-                  }`,
-                  style: {
-                    position: "relative",
-                  },
-                };
-              }
-              return {
-                ...item,
-                isActive: item.active,
-                dataActive: item.active ? "true" : "false",
-              };
-            })}
-            openWindows={context.openOrder.map((windowId) => {
-              const { activePrograms } = context;
-              const isActive = windowId === context.activeId;
-              const onClick = isActive ? context.onMinimize : context.moveToTop;
-              const { title, icon } = activePrograms[windowId];
-              return {
-                id: windowId,
-                title,
-                icon,
-                isActive,
-                onClick: () => onClick(windowId),
-              };
-            })}
-          />
-          <CustomTooltip text={tooltipText} visible={tooltipVisible} />
-          {/* Start Menu Portal - Mobile Only */}
-          {menuOpen && isMobile && (
-            <StartMenuPortal>
-              <div
-                className="StartMenuPortalContainer"
-                style={{
-                  position: "fixed",
-                  left: `${Math.round(menuPosition.left)}px`,
-                  bottom: `${Math.round(menuPosition.bottom)}px`,
-                  zIndex: 10000,
-                }}
-              >
-                <StartMenu
-                  className="TaskBar__start"
-                  options={context.startMenu}
-                  onClose={closeMenu}
-                />
-              </div>
-            </StartMenuPortal>
-          )}
-        </div>
+    <div ref={taskbarRef} style={{ position: "relative" }}>
+      <TaskBarComponent
+        options={context.startMenu}
+        quickLaunch={context.quickLaunch.map((item) => {
+          const isClippy =
+            item.title === "Show Clippy" || item.title === "Hide Clippy";
+          return {
+            ...item,
+            isActive: item.active,
+            dataActive: item.active ? "true" : "false",
+            title: item.tooltip || item.title,
+            className: isClippy
+              ? `quick-launch-button-clippy btn ButtonIconSmall ${
+                  item.className || ""
+                }`
+              : item.className || "",
+            style: isClippy ? { position: "relative" } : item.style || {},
+          };
+        })}
+        openWindows={context.openOrder.map((windowId) => {
+          const { activePrograms } = context;
+          const isActive = windowId === context.activeId;
+          const onClick = isActive ? context.onMinimize : context.moveToTop;
+          const { title, icon } = activePrograms[windowId];
+          return {
+            id: windowId,
+            title,
+            icon,
+            isActive,
+            onClick: () => onClick(windowId),
+          };
+        })}
+      />
+
+      <CustomTooltip text={tooltipText} visible={tooltipVisible} />
+
+      {menuOpen && isMobile && (
+        <StartMenuPortal>
+          <div
+            className="StartMenuPortalContainer"
+            style={{
+              position: "fixed",
+              left: `${Math.round(menuPosition.left)}px`,
+              bottom: `${Math.round(menuPosition.bottom)}px`,
+              zIndex: 10000,
+            }}
+          >
+            <StartMenu
+              className="TaskBar__start"
+              options={context.startMenu}
+              onClose={closeMenu}
+            />
+          </div>
+        </StartMenuPortal>
       )}
-    </ProgramContext.Consumer>
+    </div>
   );
 };
 
