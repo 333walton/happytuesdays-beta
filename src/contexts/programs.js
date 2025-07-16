@@ -83,7 +83,7 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
           multiInstance: true,
         },
         {
-          title: "Screen/Background",
+          title: "Display",
           icon: icons.display_properties16,
           onClick: toggleSettings,
           multiInstance: true,
