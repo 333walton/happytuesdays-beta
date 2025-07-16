@@ -736,21 +736,25 @@ const documents = [
   {
     title: "My Docs",
     icon: icons.folderOpen24,
+    className: "submenu-align-bottom-my-docs",
     options: myDocs,
   },
   {
     title: "Tech Docs",
     icon: icons.folderOpen24,
+    className: "submenu-align-bottom-tech-docs",
     options: techDocs,
   },
   {
     title: "Builder Docs",
     icon: icons.folderOpen24,
+    className: "submenu-align-bottom-builder-docs",
     options: builderDocs,
   },
   {
     title: "Art/Design Docs",
     icon: icons.folderOpen24,
+    className: "submenu-align-bottom-art-design-docs",
     options: artDesignDocs,
   },
 ];

@@ -337,6 +337,52 @@ body {
   transform: translateY(0px) translateX(3px);
 }
 
+.submenu-align-bottom-my-docs {
+  position: static !important;
+}
+
+.submenu-align-bottom-my-docs > .Frame.StandardMenu.StandardMenuItem__child {
+  top: auto !important;
+  bottom: 0 !important;
+  left: calc(100% - 3px) !important;
+  transform: translateY(0px) translateX(3px);
+}
+
+.submenu-align-bottom-tech-docs {
+  position: static !important;
+}
+
+.submenu-align-bottom-tech-docs > .Frame.StandardMenu.StandardMenuItem__child {
+  top: auto !important;
+  bottom: 0 !important;
+  left: calc(100% - 3px) !important;
+  transform: translateY(0px) translateX(3px);
+}
+
+.submenu-align-bottom-builder-docs {
+  position: static !important;
+}
+
+.submenu-align-bottom-builder-docs
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  top: auto !important;
+  bottom: 0 !important;
+  left: calc(100% - 3px) !important;
+  transform: translateY(0px) translateX(3px);
+}
+
+.submenu-align-bottom-art-design-docs {
+  position: static !important;
+}
+
+.submenu-align-bottom-art-design-docs
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  top: auto !important;
+  bottom: 0 !important;
+  left: calc(100% - 3px) !important;
+  transform: translateY(0px) translateX(3px);
+}
+
 /* Responsive/mobile alignment */
 @media (max-width: 768px), (pointer: coarse) {
   .submenu-align-bottom-account-settings
