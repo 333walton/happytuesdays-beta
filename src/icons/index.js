@@ -132,3 +132,6 @@ export { default as directoryFolderOptions16 } from "./directory_folder_options1
 export { default as list32 } from "./list32-min.png";
 export { default as start_menu32 } from "./start_menu32-min.png";
 export { default as display_properties16 } from "./display_properties16-min.png";
+export { default as postit16 } from "./postit16-min.png";
+export { default as mailbox32 } from "./mailbox32-min.png";
+export { default as bricks32 } from "./bricks32-min.png";

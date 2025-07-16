@@ -300,57 +300,75 @@ body {
 /* Move Start Menu up by 1px and left by 4px */
 .StartMenuPortal .StandardMenu,
 .Frame.StandardMenu.renderedMenu {
-  transform: translateY(-2px) translateX(-1px);
+  transform: translateY(-2px) translateX(-2px);
 }
 
 /* Apply the same transform to all submenus - 1st and 2nd level */
-.StandardMenuItem__child,
-.Frame.StandardMenu.StandardMenuItem__child,
-.submenu-align-bottom-creative > .Frame.StandardMenu.StandardMenuItem__child,
-.submenu-align-bottom-marketing > .Frame.StandardMenu.StandardMenuItem__child,
-.submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
-.submenu-align-bottom-artdesign > .Frame.StandardMenu.StandardMenuItem__child {
-  transform: translateY(0px) translateX(3px);
+@media (min-width: 768px), (pointer: coarse) {
+  .StandardMenuItem__child,
+  .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-creative > .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-marketing > .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-artdesign
+    > .Frame.StandardMenu.StandardMenuItem__child {
+    transform: translateY(0px) translateX(3px);
+  }
 }
 
 /* 3rd level submenus - try these different selectors */
-.StandardMenuItem__child .StandardMenuItem__child,
-.StandardMenuItem__child .Frame.StandardMenu,
-.StandardMenuItem__child .StandardMenu,
-.Frame.StandardMenu .Frame.StandardMenu .Frame.StandardMenu,
-.StandardMenuItem__child .StandardMenuItem__child .StandardMenu,
-.StandardMenu .StandardMenu .StandardMenu {
-  transform: translateY(0px) translateX(3px);
-}
+@media (min-width: 768px), (pointer: coarse) {
+  .StandardMenuItem__child .StandardMenuItem__child,
+  .StandardMenuItem__child .Frame.StandardMenu,
+  .StandardMenuItem__child .StandardMenu,
+  .Frame.StandardMenu .Frame.StandardMenu .Frame.StandardMenu,
+  .StandardMenuItem__child .StandardMenuItem__child .StandardMenu,
+  .StandardMenu .StandardMenu .StandardMenu {
+    transform: translateY(0px) translateX(3px);
+  }
 
-/* Reset position */
-.submenu-align-bottom-account-settings {
-  position: static !important;
-}
+  /* Reset position */
 
-/* Align submenu frame */
-.submenu-align-bottom-account-settings
-  > .Frame.StandardMenu.StandardMenuItem__child {
-  top: auto !important;
-  bottom: 0 !important;
-  left: calc(100% - 3px) !important;
-  transform: translateY(0px) translateX(3px);
-}
+  .submenu-align-bottom-settings {
+  }
 
-.submenu-align-bottom-help-settings {
-}
+  .submenu-align-bottom-settings {
+    > .Frame.StandardMenu.StandardMenuItem__child {
+      top: auto !important;
+      bottom: -73px !important;
+      /*left: calc(100% - 3px) !important;*/
+      /*transform: translateY(0px) translateX(3px);*/
+    }
+  }
 
-.submenu-align-bottom-help-settings
-  > .Frame.StandardMenu.StandardMenuItem__child {
-  left: calc(100%) !important;
-}
+  .submenu-align-bottom-account-settings {
+    position: static !important;
+  }
 
-.submenu-align-bottom-control-panel-settings {
-}
+  /* Align submenu frame */
+  .submenu-align-bottom-account-settings
+    > .Frame.StandardMenu.StandardMenuItem__child {
+    top: auto !important;
+    bottom: 0 !important;
+    left: calc(100% - 3px) !important;
+    transform: translateY(-1px) translateX(3px);
+  }
 
-.submenu-align-bottom-control-panel-settings
-  > .Frame.StandardMenu.StandardMenuItem__child {
-  left: calc(100%) !important;
+  .submenu-align-bottom-help-settings {
+  }
+
+  .submenu-align-bottom-help-settings
+    > .Frame.StandardMenu.StandardMenuItem__child {
+    left: calc(100%) !important;
+  }
+
+  .submenu-align-bottom-control-panel-settings {
+  }
+
+  .submenu-align-bottom-control-panel-settings
+    > .Frame.StandardMenu.StandardMenuItem__child {
+    left: calc(100%) !important;
+  }
 }
 
 .submenu-align-bottom-misc-games {

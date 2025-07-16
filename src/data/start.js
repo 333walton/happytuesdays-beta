@@ -495,19 +495,19 @@ const marketingTools = [
 const builderTools = [
   {
     title: "Kanban Boards",
-    icon: icons.vid16,
+    icon: icons.bricks32,
     component: "",
     isDisabled: true,
   },
   {
     title: "Openrouter Ranks",
-    icon: icons.vid16,
+    icon: icons.bricks32,
     component: "",
     isDisabled: true,
   },
   {
     title: "Automation Audit",
-    icon: icons.vid16,
+    icon: icons.bricks32,
     component: "",
     isDisabled: true,
   },

@@ -64,8 +64,16 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
           },
         },
         {
+          title: "Release Notes",
+          icon: icons.postit16,
+          component: "Notepad",
+          //data: {
+          //content: ,
+          //},
+        },
+        {
           title: "Contact",
-          icon: icons.outlook16,
+          icon: icons.mailbox32,
           component: "",
           isDisabled: true,
           multiInstance: true,
@@ -145,6 +153,7 @@ const startMenu = (
     {
       title: "Settings",
       icon: icons.settings24,
+      className: "submenu-align-bottom-settings",
       options: settings([], toggleSettings, toggleTaskManager),
     },
   ],
