@@ -149,7 +149,7 @@ class Settings extends Component {
               isActive
             >
               <DetailsSection>
-                Best avoid all these other than CRT on mobile
+                Customize your display settings here...
               </DetailsSection>
               <DetailsSection title="Customize">
                 <Checkbox
