@@ -84,7 +84,7 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
         },
         {
           title: "Screen/Background",
-          icon: icons.controlPanel16,
+          icon: icons.display_properties16,
           onClick: toggleSettings,
           multiInstance: true,
         },
@@ -98,7 +98,7 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
     },
     {
       title: "Start Menu Builder",
-      icon: icons.controlPanel16,
+      icon: icons.start_menu32,
       component: "",
       isDisabled: true,
       multiInstance: true,
@@ -119,13 +119,13 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
         },
         {
           title: "Newsletter/Feed",
-          icon: icons.controlPanel16,
-          //onClick: toggleSettings,
+          icon: icons.newsletter16,
+          onClick: toggleSettings,
           multiInstance: true,
         },
         {
           title: "Chatbots",
-          icon: icons.floppy16,
+          icon: icons.textchat32,
           onClick: toggleTaskManager, // Use the handler directly
           multiInstance: true,
         },
