@@ -509,7 +509,7 @@ const ClippyContextMenu = ({
     // Position submenu horizontally with slight overlap
     const OVERLAP = 2;
     const HORIZONTAL_OFFSET = 19; // Desktop offset
-    const MOBILE_EXTRA_OFFSET = isMobile ? 19 : 0; // Additional 10px for mobile
+    const MOBILE_EXTRA_OFFSET = isMobile ? 19 : 0; // Additional 19px for mobile
 
     let submenuX;
     if (wouldOverflowRight) {
@@ -537,23 +537,25 @@ const ClippyContextMenu = ({
       // Plus 4px for the submenu borders (2px top + 2px bottom)
       actualSubmenuHeight = agents.length * 25 + 6;
 
-      // Mobile-specific adjustment
-      if (isMobile && submenuType === "agents") {
-        actualSubmenuHeight += 9; // Comment out or remove this line
-      }
+      // Mobile-specific adjustment - REMOVED the +9 that was adding extra height
+      // if (isMobile && submenuType === "agents") {
+      //   actualSubmenuHeight += 9; // This line is commented out/removed
+      // }
     } else {
       actualSubmenuHeight = 200; // Default
     }
 
     // CRITICAL: Account for border differences between main menu and submenu
-    // Main menu has 2px outset border, submenu has 2px outset border
-    // But they render slightly differently, so we need a small adjustment
-    // CRITICAL: Account for border differences between main menu and submenu
     const borderAdjustment = 2;
 
     // Position submenu so its bottom aligns with main menu bottom
-    const submenuTop =
+    let submenuTop =
       mainMenuRect.bottom - actualSubmenuHeight + borderAdjustment;
+
+    // NEW: Apply mobile-specific offset for agents submenu
+    if (isMobile && submenuType === "agents") {
+      submenuTop -= 5; // Move up by 7px for mobile agents submenu
+    }
 
     // Ensure submenu doesn't go above viewport
     const constrainedTop = Math.max(viewport.top + 5, submenuTop);
@@ -567,7 +569,7 @@ const ClippyContextMenu = ({
     setSubmenuOpen(submenuType);
 
     console.log(
-      `🎯 Submenu positioned: type=${submenuType}, main bottom=${mainMenuRect.bottom}px, submenu top=${constrainedTop}px, height=${actualSubmenuHeight}px`
+      `🎯 Submenu positioned: type=${submenuType}, main bottom=${mainMenuRect.bottom}px, submenu top=${constrainedTop}px, height=${actualSubmenuHeight}px, mobile=${isMobile}`
     );
   };
 
