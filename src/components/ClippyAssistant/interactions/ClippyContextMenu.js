@@ -554,7 +554,7 @@ const ClippyContextMenu = ({
 
     // NEW: Apply mobile-specific offset for agents submenu
     if (isMobile && submenuType === "agents") {
-      submenuTop -= 25; // Move up by 7px for mobile agents submenu
+      submenuTop -= 28; // Move up by 7px for mobile agents submenu
     }
 
     // Ensure submenu doesn't go above viewport

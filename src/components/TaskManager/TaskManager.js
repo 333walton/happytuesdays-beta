@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { ProgramContext } from "../../contexts";
 import { WindowProgram, SelectBox, ButtonForm } from "packard-belle";
 import Window from "../tools/Window";
+import * as icons from "../../icons";
 
 import "./_task-manager.scss";
 import buildMenu from "../../helpers/menuBuilder";
@@ -9,15 +10,15 @@ import buildMenu from "../../helpers/menuBuilder";
 class TaskManager extends Component {
   static contextType = ProgramContext;
   state = {
-    selected: null
+    selected: null,
   };
 
-  onSelect = selected => this.setState({ selected });
+  onSelect = (selected) => this.setState({ selected });
 
   exit = () => {
     if (this.state.selected) {
       const prog = this.context.activePrograms.find(
-        p => p.id === this.state.selected
+        (p) => p.id === this.state.selected
       );
       this.context.onClose(prog, true);
     }
@@ -40,22 +41,23 @@ class TaskManager extends Component {
         initialWidth={240}
         initialHeight={200}
         Component={WindowProgram}
-        title="Task Manager"
+        title="Cache Manager"
+        icon={icons.floppy16}
         className="TaskManager  Window--active"
         onHelp={() => {}} // @todo
         onClose={context.toggleTaskManager}
         menuOptions={buildMenu({
           ...props,
-          onClose: context.toggleTaskManager
+          onClose: context.toggleTaskManager,
         })}
       >
         <SelectBox
           onClick={this.onSelect}
-          options={context.openOrder.map(pid => {
-            const prog = context.activePrograms.find(p => p.id === pid);
+          options={context.openOrder.map((pid) => {
+            const prog = context.activePrograms.find((p) => p.id === pid);
             return {
               title: prog.title,
-              value: prog.id // key is based on value
+              value: prog.id, // key is based on value
             };
           })}
           selected={[this.state.selected]}

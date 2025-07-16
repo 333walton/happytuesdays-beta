@@ -50,6 +50,7 @@ class Settings extends Component {
     bgImg: this.context.bgImg,
     bgStyle: this.context.bgStyle,
     bgColor: this.context.bgColor,
+    isMobile: isMobile,
   };
   timeout;
   fileReader;
@@ -129,10 +130,10 @@ class Settings extends Component {
           program.settingsDisplay && (
             <Window
               {...props}
-              initialX={this.state.isMobileDevice ? "50" : "50"}
-              initialY={this.state.isMobileDevice ? "50" : "50"}
-              initialWidth={this.state.isMobileDevice ? "280" : "280"}
-              initialHeight={this.state.isMobileDevice ? "360" : "380"}
+              initialX={this.state.isMobile ? "50" : "50"}
+              initialY={this.state.isMobile ? "50" : "50"}
+              initialWidth={this.state.isMobile ? "280" : "280"}
+              initialHeight={this.state.isMobile ? "330" : "380"} // mobile : desktop
               Component={AbstractWindow}
               title="Control Panel"
               className="Settings"

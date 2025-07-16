@@ -1,5 +1,11 @@
 .TaskManager {
   padding: 3px;
+  //icon: icons.floppy16
+
+  @media (max-width: 768px) {
+    position: relative;
+    left: -100px !important; // Shift left by 50px
+  }
 
   .SelectBox {
     height: 100px;
@@ -17,18 +23,11 @@
     .btn:first-child {
       margin-left: auto;
     }
+
     .btn {
       margin-left: 4px;
       margin-bottom: 8px;
       width: 60px;
     }
   }
-}
-
-.TaskBar__notifications__time {
-  font-weight: normal !important;
-  font-family: "MS Sans Serif", "Segoe UI", sans-serif !important;
-  font-size: 12px !important;
-  -webkit-font-smoothing: none !important;
-  -moz-osx-font-smoothing: grayscale !important;
 }
