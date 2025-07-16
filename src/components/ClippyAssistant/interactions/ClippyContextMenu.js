@@ -20,7 +20,8 @@ const ClippyContextMenu = ({
   y,
   onClose,
   onAction,
-  agents, // Remove default value, rely on prop from parent
+  agents,
+  toggleSettings,
   currentAgent,
 }) => {
   const [portalContainer, setPortalContainer] = useState(null);
@@ -879,10 +880,16 @@ const ClippyContextMenu = ({
         break;
 
       case "greet":
-        // FIXED: Play greeting animation with message and logging
         if (window.clippy?.play) {
-          logAnimation("Greeting", "context menu greet action");
-          window.clippy.play("Greeting");
+          let animationName;
+          if (currentAgent === "Clippy") {
+            animationName = "GetAttention"; // Or use "GetAttention", "Congratulate", etc.
+          } else {
+            animationName = "Wave";
+          }
+          logAnimation(animationName, "context menu greet action");
+          window.clippy.play(animationName);
+
           if (window.showClippyCustomBalloon) {
             setTimeout(() => {
               window.showClippyCustomBalloon(
@@ -891,7 +898,19 @@ const ClippyContextMenu = ({
             }, 800);
           }
         }
-        onAction("greet");
+        onAction("wave");
+        break;
+
+      case "settings":
+        if (typeof toggleSettings === "function") {
+          toggleSettings(true); // ✅ Make sure to explicitly open with `true`
+        } else {
+          console.warn("toggleSettings function not found.");
+          if (window.showClippyCustomBalloon) {
+            window.showClippyCustomBalloon("Settings function unavailable.");
+          }
+        }
+        onAction("settings");
         break;
 
       default:
@@ -1311,22 +1330,22 @@ javascript      /* Enlarge touch targets on mobile without changing visual appea
           style={menuStyle}
           onContextMenu={(e) => e.preventDefault()}
         >
-          {/* Hide Clippy - Emoji on Right */}
+          {/* Chat - Emoji on Right */}
           <MenuItem
-            onClick={() => handleMenuAction("hide")}
-            rightIcon="↔️"
-            currentSubmenuOpen={submenuOpen}
-            disabled={true}
-          >
-            Drag {currentAgent}
-          </MenuItem>
-          {/* Wave - Emoji on Right */}
-          <MenuItem
-            onClick={() => handleMenuAction("about")}
-            rightIcon="👋"
+            onClick={() => handleMenuAction("chat")}
+            rightIcon="💬"
             currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
           >
-            About {currentAgent} {/* Changed text from Wave */}
+            Chat with {currentAgent}
+          </MenuItem>
+
+          {/* Greet - Emoji on Right */}
+          <MenuItem
+            onClick={() => handleMenuAction("greet")}
+            rightIcon="😊"
+            currentSubmenuOpen={submenuOpen}
+          >
+            Say Hello
           </MenuItem>
           {/* Separator */}
           <div style={separatorStyle} />
@@ -1358,22 +1377,23 @@ javascript      /* Enlarge touch targets on mobile without changing visual appea
           {/* Separator */}
           <div style={separatorStyle} />
 
+          {/* Wave - Emoji on Right */}
+          <MenuItem
+            onClick={() => handleMenuAction("about")}
+            rightIcon="👋"
+            currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
+          >
+            About {currentAgent} {/* Changed text from Wave */}
+          </MenuItem>
+          {/* Separator */}
+
           {/* Chat - Emoji on Right */}
           <MenuItem
-            onClick={() => handleMenuAction("chat")}
-            rightIcon="💬"
-            currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
+            onClick={() => handleMenuAction("settings")}
+            rightIcon="⚙️"
+            currentSubmenuOpen={submenuOpen}
           >
-            Chat with {currentAgent}
-          </MenuItem>
-
-          {/* Greet - Emoji on Right */}
-          <MenuItem
-            onClick={() => handleMenuAction("greet")}
-            rightIcon="😊"
-            currentSubmenuOpen={submenuOpen} // Pass submenuOpen state
-          >
-            Say Hello
+            Settings
           </MenuItem>
         </div>
 

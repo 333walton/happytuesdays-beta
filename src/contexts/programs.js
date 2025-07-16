@@ -72,27 +72,64 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
       ],
     },
     {
+      title: "Control Panel",
+      icon: icons.controlPanel16,
+      //onClick: toggleSettings,
+      options: [
+        {
+          title: "Cache Manager",
+          icon: icons.floppy16,
+          onClick: toggleTaskManager, // Use the handler directly
+          multiInstance: true,
+        },
+        {
+          title: "Screen/Background",
+          icon: icons.controlPanel16,
+          onClick: toggleSettings,
+          multiInstance: true,
+        },
+      ],
+    },
+    {
       title: "Command Prompt",
       icon: icons.command16,
       component: "JSDos",
       multiInstance: true,
     },
     {
-      title: "Control Panel",
-      onClick: toggleSettings,
+      title: "Start Menu Builder",
       icon: icons.controlPanel16,
-    },
-    {
-      title: "Cache Manager",
-      //onClick: toggleTaskManager, // Use the handler directly
-      icon: icons.floppy16,
-    },
-    {
-      title: "Account Settings",
-      icon: icons.account32,
       component: "",
       isDisabled: true,
-      multiInstance: false,
+      multiInstance: true,
+    },
+    {
+      title: "Account",
+      icon: icons.account32,
+      //onClick: toggleSettings,
+      className: "submenu-align-bottom-account-settings",
+      options: [
+        {
+          title: "General",
+          icon: icons.account32,
+          onClick: toggleSettings,
+          component: "",
+          isDisabled: true,
+          multiInstance: true,
+        },
+        {
+          title: "Newsletter/Feed",
+          icon: icons.controlPanel16,
+          //onClick: toggleSettings,
+          multiInstance: true,
+        },
+        {
+          title: "Chatbots",
+          icon: icons.floppy16,
+          onClick: toggleTaskManager, // Use the handler directly
+          multiInstance: true,
+        },
+      ],
     },
   ],
 ];

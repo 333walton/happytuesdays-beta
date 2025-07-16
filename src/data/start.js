@@ -247,7 +247,11 @@ const favorites = [
   {
     title: "My Favorites",
     icon: icons.folderFavorites24,
-    options: myFavorites,
+    //options: myFavorites,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/My Favorites",
+    },
   },
   {
     title: "Community Favorites",
@@ -259,6 +263,25 @@ const favorites = [
 // Tools section - Updated structure
 const newsFeeds = [
   {
+    title: "My Feed",
+    icon: icons.newsletter16,
+    component: "InternetExplorer",
+    tooltip: "Log in to view",
+    isDisabled: true,
+    data: {
+      component: "HappyTuesdayNewsFeed",
+      type: "happy-tuesday-feed",
+      tab: "",
+      title: "News Feed",
+    },
+  },
+  {
+    type: "divider",
+    className: "divider divider--group-0-end",
+    title: "",
+    isDisabled: true,
+  },
+  {
     title: "Tech Feed",
     icon: icons.newsletter16,
     component: "InternetExplorer",
@@ -266,7 +289,7 @@ const newsFeeds = [
     data: {
       component: "HappyTuesdayNewsFeed",
       type: "happy-tuesday-feed",
-      tab: "tech", // <-- This is important!
+      tab: "tech",
       title: "News Feed",
     },
   },

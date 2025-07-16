@@ -220,6 +220,28 @@ body {
   transform: translateY(0px) translateX(3px);
 }
 
+/* Reset position */
+.submenu-align-bottom-account-settings {
+  position: static !important;
+}
+
+/* Align submenu frame */
+.submenu-align-bottom-account-settings
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  top: auto !important;
+  bottom: 0 !important;
+  left: calc(100% - 3px) !important;
+  transform: translateY(0px) translateX(3px);
+}
+
+/* Responsive/mobile alignment */
+@media (max-width: 768px), (pointer: coarse) {
+  .submenu-align-bottom-account-settings
+    > .Frame.StandardMenu.StandardMenuItem__child {
+    transform: translateY(1px) translateX(2px);
+  }
+}
+
 /* Ensure the Start Menu is always above Clippy and its overlay on mobile */
 @media (max-width: 768px), (pointer: coarse) {
   .StartMenuPortal,
