@@ -129,16 +129,19 @@ const getPrograms = () => [
   {
     title: "AI Assistants",
     icon: icons.folderProgram16,
+    className: "submenu-align-bottom-ai-assistants-programs",
     options: getAIAssistants(),
   },
   {
     title: "Accessories",
     icon: icons.folderProgram16,
+    className: "submenu-align-bottom-accessories-programs",
     options: accessories,
   },
   {
     title: "Online Services",
     icon: icons.folderProgram16,
+    className: "submenu-align-bottom-online-services-programs",
     options: [
       {
         title: "AOL",
@@ -156,6 +159,7 @@ const getPrograms = () => [
   {
     title: "Entertainment",
     icon: icons.folderProgram16,
+    className: "submenu-align-bottom-entertainment-programs",
     options: [
       {
         title: "Movie Player",
@@ -248,6 +252,7 @@ const favorites = [
   {
     title: "Community Favorites",
     icon: icons.folder16,
+    className: "submenu-align-bottom-community-favorites",
     options: communityFavorites,
   },
 ];
@@ -579,6 +584,7 @@ const tools = [
   {
     title: "News Feeds",
     icon: icons.folder16,
+    className: "submenu-align-bottom-news-feeds-tools",
     options: newsFeeds,
   },
   {
@@ -978,21 +984,25 @@ const artifacts = [
   {
     title: "Gallery",
     icon: icons.folder16,
+    className: "submenu-align-bottom-gallery-artifacts",
     options: gallery,
   },
   {
     title: "Interactive",
     icon: icons.folder16,
+    className: "submenu-align-bottom-interactive-artifacts",
     options: interactive,
   },
   {
     title: "Animated",
     icon: icons.folder16,
+    className: "submenu-align-bottom-animated-artifacts",
     options: animated,
   },
   {
     title: "Still Frames",
     icon: icons.folder16,
+    className: "submenu-align-bottom-still-frame-artifacts",
     options: stillFrames,
   },
 ];

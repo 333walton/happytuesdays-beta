@@ -337,6 +337,100 @@ body {
   transform: translateY(0px) translateX(3px);
 }
 
+.submenu-align-bottom-gallery-artifacts {
+}
+
+.submenu-align-bottom-gallery-artifacts
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
+.submenu-align-bottom-interactive-artifacts {
+}
+
+.submenu-align-bottom-interactive-artifacts
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
+.submenu-align-bottom-animated-artifacts {
+  position: static !important;
+}
+
+.submenu-align-bottom-animated-artifacts
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  top: auto !important;
+  bottom: 0 !important;
+  left: calc(100% - 3px) !important;
+  transform: translateY(0px) translateX(3px);
+}
+
+.submenu-align-bottom-still-frame-artifacts {
+  position: static !important;
+}
+
+.submenu-align-bottom-still-frame-artifacts
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  top: auto !important;
+  bottom: 0 !important;
+  left: calc(100% - 3px) !important;
+  transform: translateY(0px) translateX(3px);
+}
+
+.submenu-align-bottom-community-favorites {
+}
+
+.submenu-align-bottom-community-favorites
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
+.submenu-align-bottom-entertainment-programs {
+}
+
+.submenu-align-bottom-entertainment-programs
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
+.submenu-align-bottom-online-services-programs {
+}
+
+.submenu-align-bottom-online-services-programs
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
+.submenu-align-bottom-accessories-programs {
+}
+
+.submenu-align-bottom-accessories-programs
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100%) !important;
+}
+
+.submenu-align-bottom-ai-assistants-programs {
+  position: static !important;
+}
+
+.submenu-align-bottom-ai-assistants-programs
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  left: calc(100% - 3px) !important;
+  top: calc(100% - 106px) !important;
+}
+
+.submenu-align-bottom-news-feeds-tools {
+  position: static !important;
+}
+
+.submenu-align-bottom-news-feeds-tools
+  > .Frame.StandardMenu.StandardMenuItem__child {
+  top: auto !important;
+  bottom: 0 !important;
+  left: calc(100% - 3px) !important;
+  transform: translateY(0px) translateX(3px);
+}
+
 .submenu-align-bottom-my-docs {
   position: static !important;
 }
