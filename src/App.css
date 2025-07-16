@@ -542,7 +542,7 @@ body {
   /* Move Start Menu up by 1px and left by 4px */
   .StartMenuPortal .StandardMenu,
   .Frame.StandardMenu.renderedMenu {
-    transform: translateY(-1px) translateX(-4px);
+    transform: translateY(-3px) translateX(-4px);
   }
 
   /* Apply the same transform to all submenus - 1st and 2nd level */
@@ -553,7 +553,7 @@ body {
   .submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
   .submenu-align-bottom-artdesign
     > .Frame.StandardMenu.StandardMenuItem__child {
-    transform: translateY(-2px) translateX(2px);
+    transform: translateY(1px) translateX(2px);
   }
 
   /* 3rd level submenus - try these different selectors */
