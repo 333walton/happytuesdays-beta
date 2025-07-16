@@ -333,7 +333,7 @@ const newsFeeds = [
 
 const productivityTools = [
   {
-    title: "Enhanced Notepad",
+    title: "Enhanced Notes",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
@@ -551,7 +551,7 @@ const artDesignTools = [
     data: {},
   },
   {
-    title: "Design Trend Radar",
+    title: "Design Trends",
     icon: icons.chart16,
     component: "",
     isDisabled: true,
