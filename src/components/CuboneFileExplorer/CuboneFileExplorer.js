@@ -386,7 +386,7 @@ class CuboneFileExplorer extends Component {
               type: "folder",
               icon: "folderProgram",
               children: {
-                Hydra98: {
+                "Happy Tuesdays": {
                   type: "folder",
                   icon: "folderProgram",
                   children: {
@@ -638,6 +638,7 @@ class CuboneFileExplorer extends Component {
                 "Productivity Tools": {
                   type: "folder",
                   icon: "folder16",
+                  viewMode: "list",
                   children: {
                     Catalogue: {
                       type: "folder",
