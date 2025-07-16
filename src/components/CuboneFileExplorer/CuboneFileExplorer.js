@@ -639,11 +639,29 @@ class CuboneFileExplorer extends Component {
                   type: "folder",
                   icon: "folder16",
                   children: {
+                    Catalogue: {
+                      type: "folder",
+                      icon: "folder16",
+                      viewMode: "details",
+                      children: {
+                        Evernote: {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                        "Toggl Track": {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                      },
+                    },
                     Native: {
                       type: "folder",
                       icon: "folder16",
+                      viewMode: "list",
                       children: {
-                        "Enhanced Notepad": {
+                        "Enhanced Notes": {
                           type: "file",
                           icon: "vid16",
                           size: "2.5 MB",
@@ -657,7 +675,7 @@ class CuboneFileExplorer extends Component {
                             src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
                           },
                         },
-                        "Visual Habit Tracker": {
+                        "Routine Tracker": {
                           type: "file",
                           icon: "paint16",
                           size: "1.5 MB",
@@ -665,22 +683,6 @@ class CuboneFileExplorer extends Component {
                           data: {
                             src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
                           },
-                        },
-                      },
-                    },
-                    "3rd Party": {
-                      type: "folder",
-                      icon: "folder16",
-                      children: {
-                        Evernote: {
-                          type: "file",
-                          icon: "internetExplorer16",
-                          size: "1 KB",
-                        },
-                        "Toggl Track": {
-                          type: "file",
-                          icon: "internetExplorer16",
-                          size: "1 KB",
                         },
                       },
                     },
@@ -719,7 +721,7 @@ class CuboneFileExplorer extends Component {
                         },
                       },
                     },
-                    "3rd Party": {
+                    "Catalogue": {
                       type: "folder",
                       icon: "folder16",
                       children: {
@@ -740,31 +742,12 @@ class CuboneFileExplorer extends Component {
                 "Builder Tools": {
                   type: "folder",
                   icon: "folder16",
+                  viewMode: "list",
                   children: {
-                    Native: {
+                    Catalogue: {
                       type: "folder",
                       icon: "folder16",
-                      children: {
-                        "Kanban Boards": {
-                          type: "file",
-                          icon: "vid16",
-                          size: "2.1 MB",
-                        },
-                        "Openrouter Ranks": {
-                          type: "file",
-                          icon: "vid16",
-                          size: "1.5 MB",
-                        },
-                        "Automation Checker": {
-                          type: "file",
-                          icon: "vid16",
-                          size: "980 KB",
-                        },
-                      },
-                    },
-                    "3rd Party": {
-                      type: "folder",
-                      icon: "folder16",
+                      viewMode: "details",
                       children: {
                         Trello: {
                           type: "file",
@@ -778,37 +761,39 @@ class CuboneFileExplorer extends Component {
                         },
                       },
                     },
+                    Native: {
+                      type: "folder",
+                      icon: "folder16",
+                      viewMode: "list",
+                      children: {
+                        "Kanban Boards": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "2.1 MB",
+                        },
+                        "Openrouter Ranks": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "1.5 MB",
+                        },
+                        "Automation Audit": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "980 KB",
+                        },
+                      },
+                    },
                   },
                 },
                 "Art Design Tools": {
                   type: "folder",
                   icon: "folder16",
+                  viewMode: "list",
                   children: {
-                    Native: {
+                    Catalogue: {
                       type: "folder",
                       icon: "folder16",
-                      children: {
-                        "Art Gallery Finder": {
-                          type: "file",
-                          icon: "vid16",
-                          size: "1.2 MB",
-                        },
-                        "ASCII Banners": {
-                          type: "file",
-                          icon: "asciibanner16",
-                          size: "456 KB",
-                          component: "ASCIIText",
-                        },
-                        "Design Trends Tracker": {
-                          type: "file",
-                          icon: "chart16",
-                          size: "1.8 MB",
-                        },
-                      },
-                    },
-                    "3rd Party": {
-                      type: "folder",
-                      icon: "folder16",
+                      viewMode: "details",
                       children: {
                         Figma: {
                           type: "file",
@@ -822,15 +807,57 @@ class CuboneFileExplorer extends Component {
                         },
                       },
                     },
+                    Native: {
+                      type: "folder",
+                      icon: "folder16",
+                      viewMode: "list",
+                      children: {
+                        "Art Gallery Finder": {
+                          type: "file",
+                          icon: "vid16",
+                          size: "1.2 MB",
+                        },
+                        "ASCII Banners": {
+                          type: "file",
+                          icon: "asciibanner16",
+                          size: "456 KB",
+                          component: "ASCIIText",
+                        },
+                        "Design Trends": {
+                          type: "file",
+                          icon: "chart16",
+                          size: "1.8 MB",
+                        },
+                      },
+                    },
                   },
                 },
                 "Marketing Tools": {
                   type: "folder",
                   icon: "folder16",
+                  viewMode: "list",
                   children: {
+                    Catalogue: {
+                      type: "folder",
+                      icon: "folder16",
+                      viewMode: "details",
+                      children: {
+                        Mailchimp: {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                        Hubspot: {
+                          type: "file",
+                          icon: "internetExplorer16",
+                          size: "1 KB",
+                        },
+                      },
+                    },
                     Native: {
                       type: "folder",
                       icon: "folder16",
+                      viewMode: "list",
                       children: {
                         "UTM Tracker": {
                           type: "file",
@@ -851,22 +878,6 @@ class CuboneFileExplorer extends Component {
                         },
                       },
                     },
-                    "3rd Party": {
-                      type: "folder",
-                      icon: "folder16",
-                      children: {
-                        Mailchimp: {
-                          type: "file",
-                          icon: "internetExplorer16",
-                          size: "1 KB",
-                        },
-                        Hubspot: {
-                          type: "file",
-                          icon: "internetExplorer16",
-                          size: "1 KB",
-                        },
-                      },
-                    },
                   },
                 },
               },
@@ -874,14 +885,17 @@ class CuboneFileExplorer extends Component {
             Artifacts: {
               type: "folder",
               icon: "ascii24",
+              viewMode: "list",
               children: {
                 "Still Frames": {
                   type: "folder",
                   icon: "folder16",
+                  viewMode: "list",
                   children: {
                     "Pixel Art": {
                       type: "folder",
                       icon: "folder16",
+                      viewMode: "list",
                       children: {
                         "retro_sprite.png": {
                           type: "file",
@@ -898,6 +912,7 @@ class CuboneFileExplorer extends Component {
                     "Generative Art": {
                       type: "folder",
                       icon: "folder16",
+                      viewMode: "list",
                       children: {
                         "dragon.txt": {
                           type: "file",
@@ -918,6 +933,7 @@ class CuboneFileExplorer extends Component {
                     "3D Rendered": {
                       type: "folder",
                       icon: "folder16",
+                      viewMode: "list",
                       children: {
                         "cube_render.png": {
                           type: "file",
@@ -936,10 +952,12 @@ class CuboneFileExplorer extends Component {
                 Animated: {
                   type: "folder",
                   icon: "folder16",
+                  viewMode: "list",
                   children: {
                     "Pixel Art": {
                       type: "folder",
                       icon: "folder16",
+                      viewMode: "list",
                       children: {
                         "walking_sprite.gif": {
                           type: "file",
@@ -956,6 +974,7 @@ class CuboneFileExplorer extends Component {
                     Demoscenes: {
                       type: "folder",
                       icon: "folder16",
+                      viewMode: "list",
                       children: {
                         "tunnel_effect.exe": {
                           type: "file",
@@ -974,10 +993,12 @@ class CuboneFileExplorer extends Component {
                 Interactive: {
                   type: "folder",
                   icon: "folder16",
+                  viewMode: "list",
                   children: {
                     "WebGL Experiments": {
                       type: "folder",
                       icon: "folder16",
+                      viewMode: "list",
                       children: {
                         "particle_system.html": {
                           type: "file",
@@ -994,6 +1015,7 @@ class CuboneFileExplorer extends Component {
                     "ASCII Art": {
                       type: "folder",
                       icon: "folder16",
+                      viewMode: "list",
                       children: {
                         "flames.exe": {
                           type: "file",
@@ -1115,12 +1137,67 @@ class CuboneFileExplorer extends Component {
       newPath,
     ];
 
+    // Check if the new folder has a specific viewMode
+    const pathParts = newPath.split("/").filter(Boolean);
+    let current = this.state.fileSystem["/"];
+    let folderViewMode = null;
+
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      if (current && current[part]) {
+        if (i === pathParts.length - 1) {
+          // This is the target folder, check for viewMode
+          if (current[part].viewMode) {
+            folderViewMode = current[part].viewMode;
+          }
+        }
+        if (current[part].children) {
+          current = current[part].children;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
     this.setState({
       currentPath: newPath,
       currentFolder: newFolder,
       history: newHistory,
       historyIndex: newHistory.length - 1,
+      // Set viewMode to folder-specific mode if it exists, otherwise keep current
+      viewMode: folderViewMode || this.state.viewMode,
     });
+  };
+
+  getEffectiveViewMode = () => {
+    // Check if the current folder has a specific viewMode setting
+    const pathParts = this.state.currentPath.split("/").filter(Boolean);
+    let current = this.state.fileSystem["/"];
+
+    // Navigate to the current folder to check for viewMode property
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      if (current && current[part]) {
+        if (i === pathParts.length - 1) {
+          // This is the target folder, check for viewMode
+          if (current[part].viewMode) {
+            return current[part].viewMode;
+          }
+        }
+        if (current[part].children) {
+          current = current[part].children;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    // Fall back to the component's global viewMode
+    return this.state.viewMode;
   };
 
   // Handle views button click - Fixed for mobile
@@ -1281,6 +1358,8 @@ class CuboneFileExplorer extends Component {
   renderViewsMenu = () => {
     if (!this.state.showViewsMenu || !this.state.viewsMenuPosition) return null;
 
+    const effectiveViewMode = this.getEffectiveViewMode();
+
     const viewOptions = [
       { mode: "icons", label: "Large Icons" },
       { mode: "smallIcons", label: "Small Icons" },
@@ -1289,12 +1368,10 @@ class CuboneFileExplorer extends Component {
       { mode: "tiles", label: "Tiles" },
     ];
 
-    // Render as a portal to ensure it's on top
-    // Add a key to force re-render when viewMode changes
     return ReactDOM.createPortal(
       <div
         className="views-dropdown"
-        key={this.state.viewMode}
+        key={effectiveViewMode}
         style={{
           position: "fixed",
           top: this.state.viewsMenuPosition.top,
@@ -1304,7 +1381,7 @@ class CuboneFileExplorer extends Component {
         onClick={(e) => e.stopPropagation()}
       >
         {viewOptions.map((option) => {
-          const isSelected = this.state.viewMode === option.mode;
+          const isSelected = effectiveViewMode === option.mode;
           if (isSelected) {
             console.log("Selected view option:", option.mode);
           }
@@ -1355,6 +1432,7 @@ class CuboneFileExplorer extends Component {
 
   render() {
     const { props, state } = this;
+    const effectiveViewMode = this.getEffectiveViewMode();
 
     // Build explorer options based on mobile/desktop
     const explorerOptions = state.isMobile
@@ -1457,11 +1535,9 @@ class CuboneFileExplorer extends Component {
           data-window-id={props.id}
           resizable={true}
           minWidth={state.isMobile ? 350 : 162}
-          forceNoMobileMax={true} // Prevent auto-maximize on mobile
+          forceNoMobileMax={true}
           address={state.currentPath.replace(/\//g, "\\")}
           explorerOptions={explorerOptions}
-          //onClick={this.handleWindowFocus}
-          //onFocus={this.handleWindowFocus}
           menuOptions={buildMenu(
             {
               ...props,
@@ -1503,21 +1579,22 @@ class CuboneFileExplorer extends Component {
             {/* File list panel - Add click handler for deselection */}
             <div
               ref={this.filePanelRef}
-              className={`file-panel ${state.viewMode}`}
+              className={`file-panel ${effectiveViewMode}`}
               onClick={this.handleFilePanelClick}
             >
               {Object.keys(state.currentFolder).length === 0 ? (
                 <div className="empty-folder">
                   <p>This folder is empty</p>
                 </div>
-              ) : state.viewMode === "list" || state.viewMode === "details" ? (
+              ) : effectiveViewMode === "list" ||
+                effectiveViewMode === "details" ? (
                 <table className="file-table">
                   <thead>
                     <tr>
                       <th>Name</th>
                       <th>Size</th>
                       <th>Type</th>
-                      {state.viewMode === "details" && <th>Modified</th>}
+                      {effectiveViewMode === "details" && <th>Date Added</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -1564,8 +1641,8 @@ class CuboneFileExplorer extends Component {
                           <td>
                             {item.type === "folder" ? "File Folder" : "File"}
                           </td>
-                          {state.viewMode === "details" && (
-                            <td>{item.modified || "12/25/2024"}</td>
+                          {effectiveViewMode === "details" && (
+                            <td>{item.modified || "7/1/2025"}</td>
                           )}
                         </tr>
                       );
@@ -1604,7 +1681,6 @@ class CuboneFileExplorer extends Component {
                         state.selectedFiles.includes(name) ? " selected" : ""
                       }`,
                     };
-                    // Attach handlers to wrapper only
                     const explorerIconProps = {
                       title: name,
                       icon:
@@ -1612,7 +1688,7 @@ class CuboneFileExplorer extends Component {
                         (item.type === "folder"
                           ? icons.folder32
                           : icons.notepadFile32),
-                      className: state.viewMode,
+                      className: effectiveViewMode,
                     };
                     if (state.isMobile) {
                       iconWrapperProps.onTouchEnd = (e) =>

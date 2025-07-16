@@ -255,25 +255,6 @@ const favorites = [
 // Tools section - Updated structure
 const newsFeeds = [
   {
-    title: "My Feed",
-    icon: icons.newsletter16,
-    component: "InternetExplorer",
-    tooltip: "Log in to access",
-    isDisabled: true,
-    data: {
-      component: "HappyTuesdayNewsFeed",
-      type: "happy-tuesday-feed",
-      tab: "",
-      title: "News Feed",
-    },
-  },
-  {
-    type: "divider",
-    className: "divider divider--group-0-end",
-    title: "",
-    isDisabled: true,
-  },
-  {
     title: "Tech Feed",
     icon: icons.newsletter16,
     component: "InternetExplorer",
@@ -321,6 +302,25 @@ const newsFeeds = [
       title: "News Feed",
     },
   },
+  {
+    type: "divider",
+    className: "divider divider--group-0-end",
+    title: "",
+    isDisabled: true,
+  },
+  {
+    title: "My Feed",
+    icon: icons.newsletter16,
+    component: "InternetExplorer",
+    tooltip: "Log in to access",
+    isDisabled: true,
+    data: {
+      component: "HappyTuesdayNewsFeed",
+      type: "happy-tuesday-feed",
+      tab: "",
+      title: "News Feed",
+    },
+  },
 ];
 
 const productivityTools = [
@@ -358,18 +358,18 @@ const productivityTools = [
     },
   },
   {
-    type: "divider",
-    className: "divider divider--group-0-end",
-    title: "",
-    isDisabled: true,
-  },
-  {
     title: "View Catalogue",
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Tools/Productivity Tools/3rd Party",
+      initialPath: "C:/Tools/Productivity Tools/Catalogue",
     },
+  },
+  {
+    type: "divider",
+    className: "divider divider--group-0-end",
+    title: "",
+    isDisabled: true,
   },
   {
     title: "Native Tools",
@@ -422,21 +422,21 @@ const productivityTools = [
     title: "",
   },
   {
-    title: "View Catalogue",
-    icon: icons.folder16,
-    component: "CuboneFileExplorer",
-    data: {
-      initialPath: "C:/Tools/Creative Tools/3rd Party",
-    },
-  },
-  {
     title: "Native Tools",
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Tools/Creative Tools/Native",
+      initialPath: "C:/Tools/Productivity Tools/Native",
     },
   },
+  {
+    title: "View Catalogue",
+    icon: icons.folder16,
+    component: "CuboneFileExplorer",
+    data: {
+      initialPath: "C:/Tools/Productivity Tools/Catalogue",
+    },
+  }
 ];*/
 
 // Marketing Tools - showing 3 tools + View Catalogue
@@ -464,17 +464,17 @@ const marketingTools = [
     isDisabled: true,
   },
   {
-    type: "divider",
-    title: "",
-    isDisabled: true,
-  },
-  {
     title: "View Catalogue",
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Tools/Marketing Tools/3rd Party",
+      initialPath: "C:/Tools/Marketing Tools/Catalogue",
     },
+  },
+  {
+    type: "divider",
+    title: "",
+    isDisabled: true,
   },
   {
     title: "Native Tools",
@@ -507,18 +507,18 @@ const builderTools = [
     isDisabled: true,
   },
   {
-    type: "divider",
-    className: "divider divider--group-0-end",
-    title: "",
-    isDisabled: true,
-  },
-  {
     title: "View Catalogue",
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Tools/Builder Tools/3rd Party",
+      initialPath: "C:/Tools/Builder Tools/Catalogue",
     },
+  },
+  {
+    type: "divider",
+    className: "divider divider--group-0-end",
+    title: "",
+    isDisabled: true,
   },
   {
     title: "Native Tools",
@@ -552,18 +552,18 @@ const artDesignTools = [
     isDisabled: true,
   },
   {
-    type: "divider",
-    className: "divider divider--group-0-end",
-    title: "",
-    isDisabled: true,
-  },
-  {
     title: "View Catalogue",
     icon: icons.folder16,
     component: "CuboneFileExplorer",
     data: {
-      initialPath: "C:/Tools/Art Design Tools/3rd Party",
+      initialPath: "C:/Tools/Art Design Tools/Catalogue",
     },
+  },
+  {
+    type: "divider",
+    className: "divider divider--group-0-end",
+    title: "",
+    isDisabled: true,
   },
   {
     title: "Native Tools",
