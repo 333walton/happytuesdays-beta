@@ -353,7 +353,7 @@ const productivityTools = [
     },
   },
   {
-    title: "Visual Habit Tracker",
+    title: "Routine Tracker",
     icon: icons.paint16,
     component: "IframeWindow",
     data: {
@@ -507,7 +507,7 @@ const builderTools = [
     isDisabled: true,
   },
   {
-    title: "Automation Checker",
+    title: "Automation Audit",
     icon: icons.vid16,
     component: "",
     isDisabled: true,
@@ -551,7 +551,7 @@ const artDesignTools = [
     data: {},
   },
   {
-    title: "Design Trends Tracker",
+    title: "Design Trend Radar",
     icon: icons.chart16,
     component: "",
     isDisabled: true,
