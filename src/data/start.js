@@ -258,7 +258,7 @@ const newsFeeds = [
     title: "My Feed",
     icon: icons.newsletter16,
     component: "InternetExplorer",
-    tooltip: "Log in to view",
+    tooltip: "Log in to access",
     isDisabled: true,
     data: {
       component: "HappyTuesdayNewsFeed",
