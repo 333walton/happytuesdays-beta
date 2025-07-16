@@ -549,7 +549,7 @@ body {
   .submenu-align-bottom-settings {
     > .Frame.StandardMenu.StandardMenuItem__child {
       top: auto !important;
-      bottom: -71px !important;
+      bottom: -73px !important;
       /*left: calc(100% - 3px) !important;*/
       /*transform: translateY(0px) translateX(3px);*/
     }
@@ -584,7 +584,7 @@ body {
   .submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
   .submenu-align-bottom-artdesign
     > .Frame.StandardMenu.StandardMenuItem__child {
-    transform: translateY(1px) translateX(2px);
+    transform: translateY(0px) translateX(2px);
   }
 
   /* 3rd level submenus - try these different selectors */
