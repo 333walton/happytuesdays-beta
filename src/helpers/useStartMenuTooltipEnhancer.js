@@ -39,16 +39,6 @@ const useStartMenuTooltipEnhancer = (menuData) => {
 
         const tooltip = tooltipMap[norm];
 
-        // Debugging: log everything you're touching
-        console.log(
-          "[Tooltip Enhancer] Matching:",
-          label,
-          "→",
-          norm,
-          "→",
-          tooltip || "NO MATCH"
-        );
-
         if (tooltip) {
           node.setAttribute("title", tooltip);
           node.setAttribute("data-tooltip-applied", "true");
