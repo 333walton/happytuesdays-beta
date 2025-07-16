@@ -515,14 +515,6 @@ body {
   transform: translateY(0px) translateX(3px);
 }
 
-/* Responsive/mobile alignment */
-@media (max-width: 768px), (pointer: coarse) {
-  .submenu-align-bottom-account-settings
-    > .Frame.StandardMenu.StandardMenuItem__child {
-    transform: translateY(1px) translateX(2px);
-  }
-}
-
 /* Ensure the Start Menu is always above Clippy and its overlay on mobile */
 @media (max-width: 768px), (pointer: coarse) {
   .StartMenuPortal,
@@ -561,7 +553,7 @@ body {
   .submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
   .submenu-align-bottom-artdesign
     > .Frame.StandardMenu.StandardMenuItem__child {
-    transform: translateY(1px) translateX(2px);
+    transform: translateY(-2px) translateX(2px);
   }
 
   /* 3rd level submenus - try these different selectors */
@@ -571,6 +563,6 @@ body {
   .Frame.StandardMenu .Frame.StandardMenu .Frame.StandardMenu,
   .StandardMenuItem__child .StandardMenuItem__child .StandardMenu,
   .StandardMenu .StandardMenu .StandardMenu {
-    transform: translateY(0px) translateX(-1px);
+    transform: translateY(0px) translateX(3px);
   }
 }
