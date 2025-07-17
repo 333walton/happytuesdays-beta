@@ -365,6 +365,7 @@ class ProgramProvider extends Component {
       onOpen: this.open,
       onClose: this.close,
       setRecycleBinFull: this.setRecycleBinFull,
+      toggleSettings: this.toggleSettings, // Add this line
     };
   }
 

@@ -2208,6 +2208,9 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             onClose={hideContextMenu}
             currentAgent={currentAgent}
             agents={["Clippy", "F1", "Genius", "Merlin", "Bonzi"]}
+            toggleSettings={
+              window.program?.toggleSettings || window.toggleSettings
+            } // <-- ADD THIS LINE HERE
             onAction={(action, data) => {
               devLog(`Context menu action: ${action}`, data);
 
