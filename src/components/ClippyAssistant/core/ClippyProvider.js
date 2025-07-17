@@ -809,53 +809,103 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       // NEW RULE: 75% chance for animation, 25% chance for balloon
       const shouldShowAnimation = Math.random() < 0.75;
 
-      devLog(`Desktop single click pattern:`, {
+      devLog(`${isMobile ? "Mobile" : "Desktop"} single click pattern:`, {
         shouldShowAnimation,
         percentage: shouldShowAnimation ? "75% - Animation" : "25% - Balloon",
       });
 
       return safeExecute(
         () => {
+          const animationsMobile = [
+            "Wave",
+            "Congratulate",
+            "GetAttention",
+            "Thinking",
+            "Writing",
+            "GoodBye",
+            "Processing",
+            "Alert",
+            "GetArtsy",
+            "Searching",
+            "Explain",
+            "Greeting",
+          ];
+
+          const animationsDesktop = [
+            "Wave",
+            "Congratulate",
+            "GetAttention",
+            "Thinking",
+            "Writing",
+            "GoodBye",
+            "Processing",
+            "Alert",
+            "GetArtsy",
+            "Searching",
+            "Explain",
+            "Greeting",
+          ];
+
+          const balloonMessagesMobile = [
+            "Hi there! Having a good day?",
+            "I'm here if you need any help!",
+            "Enjoying Happy Tuesdays so far?",
+            "Try double-tapping me for more options!",
+            "Welcome to Happy Tuesdays mobile!",
+            "Need help? Just tap me!",
+            "Swipe around and explore!",
+            "Clippy goes mobile!",
+            "Feeling productive today?",
+            "Don't forget to save your work!",
+          ];
+
+          const balloonMessagesDesktop = [
+            "Hi there! Having a good day?",
+            "I'm here if you need any help!",
+            "Enjoying Happy Tuesdays so far?",
+            "Try right-clicking me for more options!",
+            "Double-click me to open my menu!",
+            "Need help? Just let me know!",
+            "Welcome to the nostalgic world of Happy Tuesdays!",
+            "Feeling productive today?",
+            "Don't forget to save your work!",
+          ];
+
+          const selectedAnimations = isMobile
+            ? animationsMobile
+            : animationsDesktop;
+          const selectedMessages = isMobile
+            ? balloonMessagesMobile
+            : balloonMessagesDesktop;
+
           if (shouldShowAnimation) {
-            // 75% case: Play random animation only
-            devLog("Desktop single click - playing random animation (75%)");
+            devLog(
+              `${
+                isMobile ? "Mobile" : "Desktop"
+              } single click - playing random animation (75%)`
+            );
 
             if (clippyInstanceRef.current.play) {
               setIsAnimationPlaying(true);
 
-              // Available animations for random selection
-              const animations = [
-                "Wave",
-                "Congratulate",
-                "GetAttention",
-                "Thinking",
-                "Writing",
-                "GoodBye",
-                "Processing",
-                "Alert",
-                "GetArtsy",
-                "Searching",
-                "Explain",
-                "Greeting",
-              ];
-
-              const randomIndex = Math.floor(Math.random() * animations.length);
-              const animationName = animations[randomIndex];
+              const randomIndex = Math.floor(
+                Math.random() * selectedAnimations.length
+              );
+              const animationName = selectedAnimations[randomIndex];
 
               logAnimation(
                 animationName,
-                `desktop single click (75% animation)`
+                `${
+                  isMobile ? "mobile" : "desktop"
+                } single click (75% animation)`
               );
               clippyInstanceRef.current.play(animationName);
 
-              // Special handling for Hide animation (handled in context menu)
               if (animationName === "Hide") {
-                // Hide animation handling is done in context menu
                 setTimeout(() => {
                   setIsAnimationPlaying(false);
-                }, 2000); // Just the animation duration
+                }, 2000);
               } else {
-                // Add extra delay for GoodBye animation
                 const animationDelay =
                   animationName === "GoodBye" ? 3000 : 2000;
                 setTimeout(() => {
@@ -867,28 +917,17 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
               }
             }
           } else {
-            // 25% case: Show custom balloon message
-            devLog("Desktop single click - showing custom balloon (25%)");
+            devLog(
+              `${
+                isMobile ? "Mobile" : "Desktop"
+              } single click - showing custom balloon (25%)`
+            );
 
             setTimeout(() => {
               if (mountedRef.current && !isAnyBalloonOpen()) {
-                // Random balloon messages
-                const balloonMessages = [
-                  "Hi there! Having a good day?",
-                  "Click me again for another surprise!",
-                  "I'm here if you need any help!",
-                  "Enjoying Happy Tuesdays so far?",
-                  "Try right-clicking me for more options!",
-                  "Double-click me to open my menu!",
-                  "Need help? Just let me know!",
-                  "Welcome to the nostalgic world of Windows 98!",
-                  "Feeling productive today?",
-                  "Don't forget to save your work!",
-                ];
-
                 const randomMessage =
-                  balloonMessages[
-                    Math.floor(Math.random() * balloonMessages.length)
+                  selectedMessages[
+                    Math.floor(Math.random() * selectedMessages.length)
                   ];
                 showCustomBalloon(randomMessage, 4000);
                 devLog(`Custom balloon shown: "${randomMessage}"`);
@@ -899,7 +938,7 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
           return true;
         },
         false,
-        "desktop single click"
+        `${isMobile ? "mobile" : "desktop"} single click`
       );
     },
     [
