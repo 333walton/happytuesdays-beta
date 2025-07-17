@@ -98,7 +98,7 @@ body {
   text-align: center;
   color: orange;
   margin: auto;
-  font-size: 22px;
+  font-size: 19px;
   font-family: AMIBios, "Courier New", Courier, monospace;
 }
 
@@ -273,9 +273,21 @@ body {
   }
 }
 
+/* Mobile Overrides */
+@media (max-width: 768px) {
+  .BIOS__bootHeader {
+    top: -60px;
+  }
+
+  .BIOS__bootMessage4 {
+    margin-top: 80px;
+  }
+}
+
 .BIOS__bootHeader {
   margin-top: -55px;
 }
+
 /* Remove position: relative for these specific menu items */
 .submenu-align-bottom-creative {
   position: static !important;
