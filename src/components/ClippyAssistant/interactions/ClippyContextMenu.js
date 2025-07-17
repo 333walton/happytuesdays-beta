@@ -1403,7 +1403,7 @@ javascript      /* Enlarge touch targets on mobile without changing visual appea
             rightIcon="⚙️"
             currentSubmenuOpen={submenuOpen}
           >
-            Settings
+            Preferences
           </MenuItem>
         </div>
 

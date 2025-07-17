@@ -297,6 +297,71 @@
   </style>
 
   <script>
+    // --- Utility: System Environment BIOS Fields as in screenshot ---
+    function getSystemFields() {
+      const nav = window.navigator;
+      const loc = window.location;
+      return [
+        `protocol.............................${loc.protocol}`,
+        `host.................................${loc.host}`,
+        `hostname.............................${loc.hostname}`,
+        `pathname.............................${loc.pathname}`,
+        `search...............................${loc.search}`,
+        `origin...............................${loc.origin}`,
+        "",
+        `appCodeName..........................${nav.appCodeName}`,
+        `appName..............................${nav.appName}`,
+        `appVersion...........................${nav.appVersion}`,
+        `platform.............................${nav.platform}`,
+        `product..............................${nav.product}`,
+        `productSub...........................${nav.productSub}`,
+        `userAgent............................${nav.userAgent}`,
+        `vendor...............................${nav.vendor}`,
+        `vendorSub............................${nav.vendorSub || ""}`,
+        `language.............................${nav.language}`,
+        `online...............................${nav.onLine}`,
+        `hardwareConcurrency..................${nav.hardwareConcurrency || ""}`,
+        `maxTouchPoints.......................${nav.maxTouchPoints || ""}`,
+        `cookieEnabled........................${nav.cookieEnabled}`,
+        `webdriver............................${nav.webdriver || ""}`,
+        `date.................................${new Date().toString()}`,
+        `standalone...........................${window.matchMedia('(display-mode: standalone)').matches || nav.standalone || false}`,
+        `pdfViewerEnabled.....................${!!(Array.from(nav.plugins || []).some(p => /pdf/i.test(p.name)))}`,
+        "",
+        // List all plugins with PDF in their name (may be incomplete on some browsers)
+        ...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
+          `plugin.................................${p.name}`
+        ))
+      ];
+    }
+
+    function typewriterEffectSysinfo(element, lines, speedPerChar = 8, perLineDelay = 15, callback) {
+      let currentLine = 0;
+      function typeLine() {
+        if (currentLine >= lines.length) {
+          if (callback) callback();
+          return;
+        }
+        let chars = lines[currentLine].split('');
+        let span = document.createElement('span');
+        element.appendChild(span);
+
+        let charIndex = 0;
+        function typeChar() {
+          if (charIndex < chars.length) {
+            span.textContent += chars[charIndex++];
+            setTimeout(typeChar, speedPerChar);
+          } else {
+            element.appendChild(document.createElement('br'));
+            currentLine++;
+            setTimeout(typeLine, perLineDelay);
+          }
+        }
+        typeChar();
+      }
+      typeLine();
+    }
+
     // Global shutdown detection
     window.isShutdownSequenceActive = false;
 
@@ -362,12 +427,40 @@
 
     function staggerElements(elems, entry) {
       if (!elems[entry]) {
+        // Add system information display before moving to Windows logo
         setTimeout(() => {
-          document.querySelector(".BIOS").classList.add("hidden");
-          // Dispatch event to notify that BIOS sequence has completed
-          console.log("BIOS sequence completed, dispatching event");
-          window.dispatchEvent(new Event('biosSequenceCompleted'));
-          windowsLogo();
+          var sysinfoContainer = document.createElement('pre');
+          sysinfoContainer.className = "bios-sysinfo";
+          sysinfoContainer.style.color = "#d4fe6b";
+          sysinfoContainer.style.fontFamily = "AMIBios, pixelmix, monospace";
+          sysinfoContainer.style.fontSize = "11px";
+          sysinfoContainer.style.marginTop = "12px";
+          sysinfoContainer.style.letterSpacing = "1px";
+          sysinfoContainer.style.whiteSpace = "pre";
+          sysinfoContainer.style.visibility = "visible";
+
+          var refNode = document.querySelector('.BIOS__bootMessage4');
+          if (refNode && refNode.parentNode) {
+            refNode.parentNode.insertBefore(sysinfoContainer, refNode.nextSibling);
+          }
+
+          // Animate the system info with faster speeds
+          typewriterEffectSysinfo(
+            sysinfoContainer,
+            getSystemFields(),
+            8, /* char speed ms - reduced from 20 to 8 */
+            15, /* line delay ms - reduced from 20 to 15 */
+            () => {
+              // After system info completes, proceed to Windows logo
+              setTimeout(() => {
+                document.querySelector(".BIOS").classList.add("hidden");
+                // Dispatch event to notify that BIOS sequence has completed
+                console.log("BIOS sequence completed, dispatching event");
+                window.dispatchEvent(new Event('biosSequenceCompleted'));
+                windowsLogo();
+              }, 1000);
+            }
+          );
         }, 500);
         return;
       }
@@ -626,18 +719,9 @@
         <p>AMII BIOS (C) 1992-2025</p>
         <p>BIOS Version 18.3.1 REACT</p>
       </div>
-      <div class="BIOS__bootMessage1">Press &lt;?&gt; key if you want to run setup</div>
-      <div class="BIOS__bootMessage2">Keyboard... <span>detected</span></div>
-      <div class="BIOS__bootMessage3">Mouse/digitizer... <span>detected</span></div>
       <div class="BIOS__bootMessage4">
-        <img src="//i.imgur.com/PcmaUvV.png" alt="Author avatar" style="width: 65px;" />
-        <p>This project is by <a href="https://bit.ly/3FsgmPt"><strong>CS</a></strong></p>
-        <p>Philadelphia based, contactable via <a href="https://bit.ly/3FEdIG8"><strong>LinkedIn</strong></a></p>
-        <p><a href="https://soundcloud.com/southbound_music/sets/best-techno"><strong>Builds</strong></a> things,
-          <u><strong>markets</strong></u> things, likes <a href="https://bit.ly/3Foun0t"><strong>chess</strong></a>
-        </p>
-        <p>Open for work</p>
       </div>
+      <!-- System fields will be dynamically inserted here by JS: <pre class="bios-sysinfo">...</pre> -->
       <img src="%PUBLIC_URL%/static/bios3.png" alt="BIOS Logo" class="BIOS__corner-image" />
     </div>
   </div>
