@@ -67,6 +67,17 @@
       src: url("./assets/ami_bios1.woff2") format("woff2");
     }
 
+    @font-face {
+      font-family: pixelmix;
+      src: url("./assets/pixelmix.woff2") format("woff2");
+      font-weight: normal;
+    }
+
+    @font-face {
+      font-family: FixedSys;
+      src: url("./assets/FixedsysStripped.woff2") format("woff2");
+    }
+
     #root {
       display: flex;
       align-content: center;
@@ -123,7 +134,7 @@
     .BIOS,
     .WindowsLaunch {
       color: white;
-      font-family: AMIBios !important;
+      font-family: pixelmix, FixedSys, AMIBios, MSSansSerif, "Courier New", Courier, monospace !important;
       z-index: 1;
       width: 642px;
       height: 481px;
@@ -133,6 +144,9 @@
 
     .BIOS {
       background-color: #000000;
+      font-size: 8px;
+      letter-spacing: 1px;
+      line-height: 1.5em;
     }
 
     .BIOSWrapper {
@@ -167,7 +181,8 @@
       background-image: url("./static/windowsLaunch.png");
       background-size: cover;
       background-repeat: no-repeat;
-      background-position: center; /* to fix the slightly off position */
+      background-position: center;
+      /* to fix the slightly off position */
     }
 
     .BIOS>div {
@@ -177,6 +192,30 @@
 
     .BIOS>div.visible {
       visibility: visible;
+    }
+
+    /* Typewriter cursor effect */
+    .typewriter-cursor::after {
+      content: "_";
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      50% {
+        opacity: 1;
+      }
+
+      51%,
+      100% {
+        opacity: 0;
+      }
+    }
+
+    /* Style for typed text */
+    .typed-text {
+      display: inline;
     }
 
     .BIOS__logo {
@@ -232,7 +271,8 @@
 
       .WindowsLaunch {
         background-size: contain;
-        background-position: center; /* to fix the slightly off position */
+        background-position: center;
+        /* to fix the slightly off position */
       }
 
       .BIOS__logo {
@@ -287,15 +327,65 @@
       }, 5000);
     }
 
+    // Typewriter effect function
+    function typewriterEffect(element, text, speed, callback) {
+      let i = 0;
+      element.innerHTML = '<span class="typed-text"></span><span class="typewriter-cursor"></span>';
+      const typedSpan = element.querySelector('.typed-text');
+      const cursorSpan = element.querySelector('.typewriter-cursor');
+
+      function type() {
+        if (i < text.length) {
+          // Handle HTML tags
+          if (text.charAt(i) === '<') {
+            let tagEnd = text.indexOf('>', i);
+            if (tagEnd !== -1) {
+              typedSpan.innerHTML += text.substring(i, tagEnd + 1);
+              i = tagEnd + 1;
+            } else {
+              typedSpan.innerHTML += text.charAt(i);
+              i++;
+            }
+          } else {
+            typedSpan.innerHTML += text.charAt(i);
+            i++;
+          }
+          setTimeout(type, speed);
+        } else {
+          cursorSpan.style.display = 'none';
+          if (callback) callback();
+        }
+      }
+
+      type();
+    }
+
     function staggerElements(elems, entry) {
       if (!elems[entry]) {
-        document.querySelector(".BIOS").classList.add("hidden");
-        windowsLogo();
+        setTimeout(() => {
+          document.querySelector(".BIOS").classList.add("hidden");
+          // Dispatch event to notify that BIOS sequence has completed
+          console.log("BIOS sequence completed, dispatching event");
+          window.dispatchEvent(new Event('biosSequenceCompleted'));
+          windowsLogo();
+        }, 500);
         return;
       }
 
-      elems[entry].classList.add("visible");
-      setTimeout(() => staggerElements(elems, entry + 1), 1000);
+      const currentElem = elems[entry];
+      currentElem.classList.add("visible");
+
+      // Skip typewriter effect for logo div
+      if (currentElem.classList.contains('BIOS__logo')) {
+        setTimeout(() => staggerElements(elems, entry + 1), 500);
+        return;
+      }
+
+      // Apply typewriter effect to text content
+      const originalHTML = currentElem.innerHTML;
+      typewriterEffect(currentElem, originalHTML, 30, () => {
+        setTimeout(() => staggerElements(elems, entry + 1), 300);
+      });
     }
 
     function loadScreen() {
@@ -315,22 +405,6 @@
       }
 
       staggerElements(biosElem.getElementsByTagName("div"), 0);
-      function staggerElements(elems, entry) {
-        if (!elems[entry]) {
-          document.querySelector(".BIOS").classList.add("hidden");
-
-          // Dispatch event to notify that BIOS sequence has completed
-          console.log("BIOS sequence completed, dispatching event");
-          window.dispatchEvent(new Event('biosSequenceCompleted'));
-
-          windowsLogo();
-          return;
-        }
-
-        elems[entry].classList.add("visible");
-        setTimeout(() => staggerElements(elems, entry + 1), 1000);
-      }
-      window.dispatchEvent(new Event('biosSequenceCompleted'));//triggers the welcome message
     }
 
     // Enhanced shutdown detection system
@@ -564,6 +638,7 @@
         </p>
         <p>Open for work</p>
       </div>
+      <img src="%PUBLIC_URL%/static/bios3.png" alt="BIOS Logo" class="BIOS__corner-image" />
     </div>
   </div>
 

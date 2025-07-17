@@ -80,6 +80,7 @@ class Explorer extends Component {
           maximizeOnOpen={false}
           forceNoMobileMax={true}
           resizable={true}
+          //disableMaximize={props.title === "Computer"}
           Component={WindowExplorer}
           className={cx(state.loading && "wait wait2", "Explorer", {
             "Explorer--computer": props.title === "Computer",

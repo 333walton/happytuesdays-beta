@@ -597,3 +597,8 @@ body {
     transform: translateY(0px) translateX(3px);
   }
 }
+
+.BIOS__corner-image {
+  width: 100px; /* or whatever is 50% of your original width*/
+  height: auto;
+}
