@@ -255,3 +255,14 @@ button.icon.ExplorerIcon.floppy32 .icon__text {
 .Window:hover .react-resizable-handle {
   background-color: rgba(255, 255, 255, 0.2) !important;
 }
+
+@media screen and (min-width: 768px) {
+  .Explorer--my-computer {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+    width: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+  }
+}

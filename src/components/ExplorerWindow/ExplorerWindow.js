@@ -57,8 +57,8 @@ class Explorer extends Component {
             : { initialWidth: 381, initialHeight: 252 }; // Desktop size
         case "My Computer":
           return isMobile
-            ? { initialWidth: 271, initialHeight: 229 } // Mobile size
-            : { initialWidth: 262, initialHeight: 230 }; // Desktop size
+            ? { initialWidth: 180, initialHeight: 229 } // Mobile size, optional even smaller
+            : { initialWidth: 200, initialHeight: 230 }; // Desktop size, reduced width!
         default:
           return isMobile
             ? { initialWidth: 271, initialHeight: 229 } // Mobile size
@@ -66,27 +66,35 @@ class Explorer extends Component {
       }
     })();
 
+    // Use style prop conditionally
+    const windowStyle =
+      props.title === "Computer"
+        ? {
+            border: "none",
+            width: dimensions.initialWidth,
+            height: dimensions.initialHeight,
+          }
+        : { width: "100%", height: "100%", border: "none" };
+
     return (
       <>
         <Window
           {...props}
-          title={props.title || "Explorer"} // Dynamically set the title based on props.title
-          initialWidth={dimensions.initialWidth} // Dynamically set width
-          initialHeight={dimensions.initialHeight} // Dynamically set height
-          minWidth={200}  // Add explicit min constraints
-          minHeight={150} 
-          maxHeight={window.innerHeight - 50} // Allow resizing to almost full screen height
-          maxWidth={window.innerWidth - 50} // Allow resizing to almost full screen width
-          maximizeOnOpen={false} // Ensure the window does not open maximized
-          forceNoMobileMax={true} // Prevent maximization on mobile devices
-          resizable={true} // Explicitly set resizable to true
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-          }}
+          title={props.title || "Explorer"}
+          initialWidth={dimensions.initialWidth}
+          initialHeight={dimensions.initialHeight}
+          minWidth={200}
+          minHeight={150}
+          maxHeight={window.innerHeight - 50}
+          maxWidth={window.innerWidth - 50}
+          maximizeOnOpen={false}
+          forceNoMobileMax={true}
+          resizable={true}
+          style={windowStyle}
           Component={WindowExplorer}
-          className={cx(state.loading && "wait wait2", "Explorer")} // Added "Explorer" class
+          className={cx(state.loading && "wait wait2", "Explorer", {
+            "Explorer--my-computer": props.title === "Computer",
+          })}
           explorerOptions={[
             { icon: icons.back, title: "Back", onClick: noop },
             { icon: icons.forward, title: "Forward", onClick: noop },
@@ -114,7 +122,11 @@ class Explorer extends Component {
           <div className="explorer-options">
             {/* Render explorer options here */}
           </div>
-          <div className={`doodle-container ${state.viewMode === "icons" ? "icons-view" : "list-view"}`}>
+          <div
+            className={`doodle-container ${
+              state.viewMode === "icons" ? "icons-view" : "list-view"
+            }`}
+          >
             {props.data?.content &&
               (state.viewMode === "list" ? (
                 <ul className="doodle-listing">
@@ -122,10 +134,16 @@ class Explorer extends Component {
                     <li
                       key={entry.title}
                       className="doodle-row"
-                      onDoubleClick={!state.loading ? () => this.handleClick(entry) : undefined}
+                      onDoubleClick={
+                        !state.loading
+                          ? () => this.handleClick(entry)
+                          : undefined
+                      }
                     >
                       <span className="file-icon">
-                        {icons[entry.icon] && <img src={icons[entry.icon]} alt="" />}
+                        {icons[entry.icon] && (
+                          <img src={icons[entry.icon]} alt="" />
+                        )}
                       </span>
                       <span className="file-name">{entry.title}</span>
                     </li>
@@ -138,7 +156,9 @@ class Explorer extends Component {
                     title={entry.title}
                     icon={icons[entry.icon]}
                     className={entry.icon}
-                    onDoubleClick={!state.loading ? () => this.handleClick(entry) : undefined}
+                    onDoubleClick={
+                      !state.loading ? () => this.handleClick(entry) : undefined
+                    }
                   />
                 ))
               ))}
