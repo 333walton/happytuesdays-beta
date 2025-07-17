@@ -904,112 +904,22 @@ const ClippyContextMenu = ({
         break;
 
       case "settings":
-        console.log("🎯 Context menu action: Open Settings (Control Panel)");
-
-        // The Settings component uses a toggleSettings function that's not exposed on window.ProgramContext
-        // but is available in the React context. Since we can't access React context directly,
-        // we need to find and click the Control Panel > Display button which calls toggleSettings
-
-        // Method 1: Try to programmatically click the Control Panel > Display menu item
-        console.log(
-          "🔄 Attempting to open Settings by simulating menu navigation"
-        );
-
-        // First, open the Start menu
-        const startButton = document.querySelector(
-          '.TaskBar__start button, .start-button, button[aria-label*="Start"]'
-        );
-        if (startButton) {
-          console.log("📂 Opening Start menu");
-          startButton.click();
-
-          // Wait for Start menu to open
-          setTimeout(() => {
-            // Find and hover over Settings to open submenu
-            const settingsMenuItem = Array.from(
-              document.querySelectorAll(".StartMenu__item, .start-menu-item")
-            ).find((el) => el.textContent.includes("Settings"));
-
-            if (settingsMenuItem) {
-              console.log("📂 Found Settings menu item");
-
-              // Trigger hover to open submenu
-              const hoverEvent = new MouseEvent("mouseenter", {
-                bubbles: true,
-                cancelable: true,
-                view: window,
-              });
-              settingsMenuItem.dispatchEvent(hoverEvent);
-
-              // Wait for submenu to open
-              setTimeout(() => {
-                // Find Control Panel in submenu
-                const controlPanelItem = Array.from(
-                  document.querySelectorAll(
-                    ".StartMenu__item, .start-menu-item"
-                  )
-                ).find((el) => el.textContent === "Control Panel");
-
-                if (controlPanelItem) {
-                  console.log("📂 Found Control Panel item");
-
-                  // Hover over Control Panel to open its submenu
-                  controlPanelItem.dispatchEvent(
-                    new MouseEvent("mouseenter", {
-                      bubbles: true,
-                      cancelable: true,
-                      view: window,
-                    })
-                  );
-
-                  // Wait for Control Panel submenu
-                  setTimeout(() => {
-                    // Find and click Display option
-                    const displayOption = Array.from(
-                      document.querySelectorAll(
-                        '.StartMenu__item, .start-menu-item, [role="menuitem"]'
-                      )
-                    ).find((el) => el.textContent === "Display");
-
-                    if (displayOption) {
-                      console.log("✅ Found Display option, clicking it");
-                      displayOption.click();
-
-                      // Close the Start menu
-                      setTimeout(() => {
-                        const startMenu = document.querySelector(
-                          ".StartMenu, .start-menu"
-                        );
-                        if (startMenu) {
-                          startMenu.style.display = "none";
-                        }
-                      }, 100);
-                    } else {
-                      console.error("❌ Could not find Display option");
-                    }
-                  }, 200);
-                } else {
-                  console.error("❌ Could not find Control Panel in submenu");
-                }
-              }, 200);
-            } else {
-              console.error("❌ Could not find Settings in Start menu");
-            }
-          }, 200);
+        // Prefer passed-in prop
+        if (typeof toggleSettings === "function") {
+          toggleSettings(true);
+        } else if (
+          window.ProgramContext &&
+          typeof window.ProgramContext.toggleSettings === "function"
+        ) {
+          window.ProgramContext.toggleSettings(true);
         } else {
-          console.error("❌ Could not find Start button");
-
-          // Fallback: Try to call toggleSettings if it exists anywhere
-          if (typeof toggleSettings === "function") {
-            console.log("✅ Found toggleSettings function as prop");
-            toggleSettings(true);
-          } else if (window.showClippyCustomBalloon) {
+          // Fallbacks as last resort, e.g. custom warning balloon
+          if (window.showClippyCustomBalloon) {
             window.showClippyCustomBalloon(
-              "Sorry, I couldn't open the Settings. Please go to Start Menu → Settings → Control Panel → Display."
+              "Sorry, I couldn't open the Settings. The Settings component might not be properly registered."
             );
           }
         }
-
         onAction("settings");
         break;
 
