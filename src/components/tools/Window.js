@@ -159,7 +159,7 @@ class Window extends React.PureComponent {
         resizeHandleClasses={handleClasses}
         onDragStart={this.toggleDrag(true)}
         onDragStop={!this.state.maximized && this.updateLocation}
-        bounds={this.props.title === "Cache Manager" ? undefined : ".w98"}
+        bounds=".w98"
         minWidth={this.props.minWidth}
         minHeight={this.props.minHeight}
         scale={context.scale}
