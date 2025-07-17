@@ -385,7 +385,7 @@
         }
 
         return [
-          "==================================================",
+          "================================================",
           formatLine("protocol", loc.protocol),
           formatLine("host", loc.host),
           formatLine("hostname", loc.hostname),
@@ -394,7 +394,7 @@
           formatLine("search", loc.search),
           formatLine("hash", loc.hash),
           formatLine("origin", loc.origin),
-          "==================================================",
+          "================================================",
           formatLine("appCodeName", nav.appCodeName),
           formatLine("appName", nav.appName),
           formatLine("appVersion", shortenAppVersion(nav.appVersion)),  // Shortened
@@ -413,12 +413,12 @@
           formatLine("date", shortenDate(new Date())),                 // Shortened
           formatLine("standalone", window.matchMedia('(display-mode: standalone)').matches || nav.standalone || false),
           formatLine("pdfViewerEnabled", !!(Array.from(nav.plugins || []).some(p => /pdf/i.test(p.name)))),
-          "==================================================",
+          "================================================",
           // List all plugins with PDF in their name (shortened)
           ...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
             formatLine("plugin", p.name.substring(0, 25))  // Limit plugin names
           )),
-          "=================================================="
+          "================================================"
         ];
       }
 
