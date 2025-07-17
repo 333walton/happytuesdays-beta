@@ -568,121 +568,127 @@
           let bootContainer = document.getElementById("BIOS__bootContainer");
           bootContainer.appendChild(separatorLine);
 
-          // Memory test line
-          const fakeBootLine = document.createElement('div');
-          fakeBootLine.innerHTML = `
+          // Apply typewriter effect to the separator line
+          typewriterEffect(separatorLine, '='.repeat(64), 15, function () {
+            // Continue with memory test after separator is complete
+
+            // Memory test line
+            const fakeBootLine = document.createElement('div');
+            fakeBootLine.innerHTML = `
   <span>Memory Test:</span>
   <span style="color: #d4fe6b;">65536K OK</span>
   <span class="typewriter-cursor"></span>
 `;
-          function countUpMemoryTest(parentElem, options = {}, onDone) {
-            // RAM, extended, and cache options
-            const RAM_OPTIONS = [640, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288];
-            const targetKB = options.targetKB || RAM_OPTIONS[Math.floor(Math.random() * RAM_OPTIONS.length)];
-            const pauseAt = options.pauseAt || (0.4 + Math.random() * 0.3);
-            const pauseMs = options.pauseMs || 500 + Math.random() * 400;
-            const minStep = options.minStep || 256;
-            const maxStep = options.maxStep || 4096;
-            const fps = options.fps || 60;
-            const duration = options.duration || 1800 + Math.floor(Math.random() * 700);
-            const extendedRAM = targetKB > 65536 ? targetKB - 1024 : 0;
-            const cacheSRAM = [128, 256, 512][Math.floor(Math.random() * 3)];
-            const TOTAL_WIDTH = 64; // Match the main TOTAL_WIDTH
-            const SEP = '='.repeat(64);
+            // Continue with memory test after separator is complete
+            function countUpMemoryTest(parentElem, options = {}, onDone) {
+              // RAM, extended, and cache options
+              const RAM_OPTIONS = [640, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288];
+              const targetKB = options.targetKB || RAM_OPTIONS[Math.floor(Math.random() * RAM_OPTIONS.length)];
+              const pauseAt = options.pauseAt || (0.4 + Math.random() * 0.3);
+              const pauseMs = options.pauseMs || 500 + Math.random() * 400;
+              const minStep = options.minStep || 256;
+              const maxStep = options.maxStep || 4096;
+              const fps = options.fps || 60;
+              const duration = options.duration || 1800 + Math.floor(Math.random() * 700);
+              const extendedRAM = targetKB > 65536 ? targetKB - 1024 : 0;
+              const cacheSRAM = [128, 256, 512][Math.floor(Math.random() * 3)];
+              const TOTAL_WIDTH = 64; // Match the main TOTAL_WIDTH
+              const SEP = '='.repeat(64);
 
-            // Helper: Dotted style, right-aligned value with perfect alignment
-            function infoLine(label, value, suffix = "K OK") {
-              label = label + '';
-              value = value + '';
-              const totalContentLength = label.length + 1 + value.length + 1 + suffix.length; // +1 for colon, +1 for space
-              let dotsLen = Math.max(1, TOTAL_WIDTH - totalContentLength);
-              let dots = '.'.repeat(dotsLen);
-              const result = `<span>${label}:${dots}${value} ${suffix}</span>`;
-              return result;
-            }
-
-            function getLocalStorageSizeKB() {
-              let total = 0;
-              for (let key in localStorage) {
-                if (!localStorage.hasOwnProperty(key)) continue;
-                let value = localStorage.getItem(key);
-                total += key.length + (value ? value.length : 0);
-              }
-              return Math.round(total / 1024);
-            }
-
-            const memoryLine = document.createElement('div');
-            memoryLine.style.fontFamily = "AMIBios, 'Fira Mono', 'Courier New', Courier, monospace";
-            memoryLine.style.color = "#d4fe6b";
-            memoryLine.style.fontSize = "11px";
-            memoryLine.style.letterSpacing = ".86px";
-            memoryLine.style.lineHeight = ".89em";
-            memoryLine.style.marginBottom = "4px";
-            parentElem.appendChild(memoryLine);
-
-            let current = 0;
-            let hasPaused = false;
-            const midwayK = Math.floor(targetKB * pauseAt);
-
-            function update() {
-              if (current >= targetKB) {
-                memoryLine.innerHTML = infoLine('Memory Test', targetKB.toString().padStart(6, '0'), 'K OK');
-                // Extra dotted lines (Cache SRAM, localStorage, Extended RAM)
-                setTimeout(() => {
-                  if (extendedRAM) {
-                    let ext = document.createElement('div');
-                    ext.style.cssText = memoryLine.style.cssText;
-                    ext.innerHTML = infoLine('Extended RAM', extendedRAM.toString(), 'K OK');
-                    parentElem.appendChild(ext);
-                  }
-                  let cache = document.createElement('div');
-                  cache.style.cssText = memoryLine.style.cssText;
-                  cache.innerHTML = infoLine('Cache SRAM', cacheSRAM.toString(), 'K OK');
-                  parentElem.appendChild(cache);
-
-                  let localKB = getLocalStorageSizeKB();
-                  let localDiv = document.createElement('div');
-                  localDiv.style.cssText = memoryLine.style.cssText;
-                  localDiv.innerHTML = infoLine('localStorage', localKB.toString(), 'K used');
-                  parentElem.appendChild(localDiv);
-
-                  if (onDone) setTimeout(onDone, 600);
-                }, 350);
-                return;
+              // Helper: Dotted style, right-aligned value with perfect alignment
+              function infoLine(label, value, suffix = "K OK") {
+                label = label + '';
+                value = value + '';
+                const totalContentLength = label.length + 1 + value.length + 1 + suffix.length; // +1 for colon, +1 for space
+                let dotsLen = Math.max(1, TOTAL_WIDTH - totalContentLength);
+                let dots = '.'.repeat(dotsLen);
+                const result = `<span>${label}:${dots}${value} ${suffix}</span>`;
+                return result;
               }
 
-              let step = Math.floor(Math.random() * (maxStep - minStep + 1)) + minStep;
-              if (current + step > targetKB) step = targetKB - current;
-              current += step;
-              memoryLine.innerHTML = infoLine('Memory Test', current.toString().padStart(6, '0'), 'K') +
-                `<span class="typewriter-cursor"></span>`;
-
-              if (!hasPaused && current >= midwayK) {
-                hasPaused = true;
-                setTimeout(update, pauseMs);
-              } else {
-                setTimeout(update, 1000 / fps);
+              function getLocalStorageSizeKB() {
+                let total = 0;
+                for (let key in localStorage) {
+                  if (!localStorage.hasOwnProperty(key)) continue;
+                  let value = localStorage.getItem(key);
+                  total += key.length + (value ? value.length : 0);
+                }
+                return Math.round(total / 1024);
               }
+
+              const memoryLine = document.createElement('div');
+              memoryLine.style.fontFamily = "AMIBios, 'Fira Mono', 'Courier New', Courier, monospace";
+              memoryLine.style.color = "#d4fe6b";
+              memoryLine.style.fontSize = "11px";
+              memoryLine.style.letterSpacing = ".86px";
+              memoryLine.style.lineHeight = ".89em";
+              memoryLine.style.marginBottom = "4px";
+              parentElem.appendChild(memoryLine);
+
+              let current = 0;
+              let hasPaused = false;
+              const midwayK = Math.floor(targetKB * pauseAt);
+
+              function update() {
+                if (current >= targetKB) {
+                  memoryLine.innerHTML = infoLine('Memory Test', targetKB.toString().padStart(6, '0'), 'K OK');
+                  // Extra dotted lines (Cache SRAM, localStorage, Extended RAM)
+                  setTimeout(() => {
+                    if (extendedRAM) {
+                      let ext = document.createElement('div');
+                      ext.style.cssText = memoryLine.style.cssText;
+                      ext.innerHTML = infoLine('Extended RAM', extendedRAM.toString(), 'K OK');
+                      parentElem.appendChild(ext);
+                    }
+                    let cache = document.createElement('div');
+                    cache.style.cssText = memoryLine.style.cssText;
+                    cache.innerHTML = infoLine('Cache SRAM', cacheSRAM.toString(), 'K OK');
+                    parentElem.appendChild(cache);
+
+                    let localKB = getLocalStorageSizeKB();
+                    let localDiv = document.createElement('div');
+                    localDiv.style.cssText = memoryLine.style.cssText;
+                    localDiv.innerHTML = infoLine('localStorage', localKB.toString(), 'K used');
+                    parentElem.appendChild(localDiv);
+
+                    if (onDone) setTimeout(onDone, 600);
+                  }, 350);
+                  return;
+                }
+
+                let step = Math.floor(Math.random() * (maxStep - minStep + 1)) + minStep;
+                if (current + step > targetKB) step = targetKB - current;
+                current += step;
+                memoryLine.innerHTML = infoLine('Memory Test', current.toString().padStart(6, '0'), 'K') +
+                  `<span class="typewriter-cursor"></span>`;
+
+                if (!hasPaused && current >= midwayK) {
+                  hasPaused = true;
+                  setTimeout(update, pauseMs);
+                } else {
+                  setTimeout(update, 1000 / fps);
+                }
+              }
+              update();
             }
-            update();
-          }
 
 
-          fakeBootLine.style.fontFamily = "AMIBios, pixelmix, monospace";
-          fakeBootLine.style.color = "#d4fe6b";
-          fakeBootLine.style.fontSize = "10.5px";
-          fakeBootLine.style.letterSpacing = ".86px";
-          fakeBootLine.style.lineHeight = ".89em";
-          fakeBootLine.style.marginBottom = "10px";
-          countUpMemoryTest(bootContainer, {}, function () {
-            // Continue after all lines are animated
-            const sysinfoContainer = document.createElement('pre');
-            sysinfoContainer.className = "bios-sysinfo";
-            bootContainer.appendChild(sysinfoContainer);
+            fakeBootLine.style.fontFamily = "AMIBios, pixelmix, monospace";
+            fakeBootLine.style.color = "#d4fe6b";
+            fakeBootLine.style.fontSize = "10.5px";
+            fakeBootLine.style.letterSpacing = ".86px";
+            fakeBootLine.style.lineHeight = ".89em";
+            fakeBootLine.style.marginBottom = "10px";
+            countUpMemoryTest(bootContainer, {}, function () {
+              // Continue after all lines are animated
+              const sysinfoContainer = document.createElement('pre');
+              sysinfoContainer.className = "bios-sysinfo";
+              bootContainer.appendChild(sysinfoContainer);
 
-            const infoLines = getSystemFields();
-            typewriterEffectSysinfo(sysinfoContainer, infoLines, 8, 50, windowsLogo);
-          });
+              const infoLines = getSystemFields();
+              typewriterEffectSysinfo(sysinfoContainer, infoLines, 8, 50, windowsLogo);
+            });
+          }); // Close the typewriter effect callback
         }, 500);
         return;
       }
