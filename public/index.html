@@ -144,10 +144,17 @@
 
     .BIOS {
       background-color: #000000;
-      font-size: 12px;
-      letter-spacing: 1px;
-      line-height: 1.2em;
+      font-size: 10.5px;
+      letter-spacing: .86px;
+      line-height: .89em;
     }
+
+    .BIOS__bootHeader {
+      background-color: #000000;
+      font-size: 12px;
+      letter-spacing: .9px;
+      line-height: .95em;
+}
 
     .BIOSWrapper {
       position: fixed;
@@ -226,13 +233,17 @@
     }
 
     .left-image {
-      width: 69px;
-      height: 69px;
-      margin-right: 0px;
+      width: 84px;
+      height: 56px;
+      margin-bottom: 18px; /*higher number means higher img */
+      margin-right: -130px; /*more neg means more right */
+      transform: rotate(11deg); /* Slight upward tilt */
     }
 
     .right-image {
-      width: 150px;
+      width: 162px;
+      margin-top: 47px; /*lower number means higher img */
+      margin-right: 1px;
       height: auto;
       background-repeat: no-repeat;
       background-position: right;
@@ -712,8 +723,8 @@
   <div class="BIOSWrapper initial">
     <div class="BIOS">
       <div class="BIOS__logo">
-        <img src="%PUBLIC_URL%/static/windows98 flag.gif" alt="Windows98 flag" class="left-image" />
-        <img src="%PUBLIC_URL%/static/hydrabios2.png" alt="Hydra98 Logo" class="right-image" />
+        <img src="%PUBLIC_URL%/static/tuesdays_pixel.gif" alt="Tuesdays Cal" class="left-image" />
+        <img src="%PUBLIC_URL%/static/tuesdays.png" alt="Tuesdays Logo" class="right-image" />
       </div>
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
@@ -722,7 +733,6 @@
       <div class="BIOS__bootMessage4">
       </div>
       <!-- System fields will be dynamically inserted here by JS: <pre class="bios-sysinfo">...</pre> -->
-      <img src="%PUBLIC_URL%/static/bios3.png" alt="BIOS Logo" class="BIOS__corner-image" />
     </div>
   </div>
 

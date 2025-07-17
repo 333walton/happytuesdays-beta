@@ -273,6 +273,9 @@ body {
   }
 }
 
+.BIOS__bootHeader {
+  margin-top: -55px;
+}
 /* Remove position: relative for these specific menu items */
 .submenu-align-bottom-creative {
   position: static !important;
