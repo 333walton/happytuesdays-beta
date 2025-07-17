@@ -66,16 +66,6 @@ class Explorer extends Component {
       }
     })();
 
-    // Use style prop conditionally
-    const windowStyle =
-      props.title === "Computer"
-        ? {
-            border: "none",
-            width: dimensions.initialWidth,
-            height: dimensions.initialHeight,
-          }
-        : { width: "100%", height: "100%", border: "none" };
-
     return (
       <>
         <Window
@@ -90,10 +80,9 @@ class Explorer extends Component {
           maximizeOnOpen={false}
           forceNoMobileMax={true}
           resizable={true}
-          style={windowStyle}
           Component={WindowExplorer}
           className={cx(state.loading && "wait wait2", "Explorer", {
-            "Explorer--my-computer": props.title === "Computer",
+            "Explorer--computer": props.title === "Computer",
           })}
           explorerOptions={[
             { icon: icons.back, title: "Back", onClick: noop },
