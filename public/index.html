@@ -240,7 +240,7 @@
       transform: rotate(11deg); /* Slight upward tilt */
     }
 
-    .right-image {
+  .right-image {
       width: 162px;
       margin-top: 47px; /*lower number means higher img */
       margin-right: 1px;
@@ -248,7 +248,8 @@
       background-repeat: no-repeat;
       background-position: right;
       background-size: contain;
-    }
+  }
+  
 
     @media (max-width: 600px) {
       .BIOS__logo {
@@ -257,14 +258,19 @@
       }
 
       .left-image {
-        width: 60px;
-        height: 60px;
-        margin-right: 5px;
+        width: 84px;
+        height: 56px;
+        margin-bottom: 18px; /*higher number means higher img */
+        margin-right: -130px; /*more neg means more right */
       }
 
       .right-image {
-        width: 150px;
+        width: 162px;
+        margin-top: 47px; /*lower number means higher img */
+        margin-right: 1px;
         height: auto;
+        background-repeat: no-repeat;
+        background-position: right;
         background-size: contain;
       }
     }
