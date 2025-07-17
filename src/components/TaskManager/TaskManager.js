@@ -7,6 +7,14 @@ import * as icons from "../../icons";
 import "./_task-manager.scss";
 import buildMenu from "../../helpers/menuBuilder";
 
+// Helper to check mobile (could use your SettingsContext/isMobile if available)
+function isMobile() {
+  if (typeof window !== "undefined") {
+    return window.innerWidth <= 768;
+  }
+  return false;
+}
+
 class TaskManager extends Component {
   static contextType = ProgramContext;
   state = {
@@ -32,18 +40,23 @@ class TaskManager extends Component {
 
   render() {
     const { context, props } = this;
+
+    // Determine initialX based on screen size (left-shift by 100px on mobile)
+    const initialX = isMobile() ? 100 : 200;
+    const initialY = 150;
+
     return context.taskManager ? (
       <Window
         {...props}
         resizable={false}
-        initialX={200}
-        initialY={150}
+        initialX={initialX}
+        initialY={initialY}
         initialWidth={240}
         initialHeight={200}
         Component={WindowProgram}
         title="Cache Manager"
         icon={icons.floppy16}
-        className="TaskManager  Window--active"
+        className="TaskManager Window--active"
         onHelp={() => {}} // @todo
         onClose={context.toggleTaskManager}
         menuOptions={buildMenu({
@@ -51,13 +64,14 @@ class TaskManager extends Component {
           onClose: context.toggleTaskManager,
         })}
       >
+        {/* No more shifting or margin tricks! */}
         <SelectBox
           onClick={this.onSelect}
           options={context.openOrder.map((pid) => {
             const prog = context.activePrograms.find((p) => p.id === pid);
             return {
               title: prog.title,
-              value: prog.id, // key is based on value
+              value: prog.id,
             };
           })}
           selected={[this.state.selected]}

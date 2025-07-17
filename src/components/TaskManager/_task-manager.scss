@@ -1,11 +1,5 @@
 .TaskManager {
   padding: 3px;
-  //icon: icons.floppy16
-
-  @media (max-width: 768px) {
-    position: relative;
-    left: -100px !important; // Shift left by 50px
-  }
 
   .SelectBox {
     height: 100px;
