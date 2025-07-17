@@ -600,5 +600,8 @@ body {
 
 .BIOS__corner-image {
   width: 100px; /* or whatever is 50% of your original width*/
+  bottom: 0;
+  right: 0;
   height: auto;
+  position: absolute;
 }
