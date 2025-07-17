@@ -310,68 +310,155 @@
   <script>
     // --- Utility: System Environment BIOS Fields as in screenshot ---
     function getSystemFields() {
-      const nav = window.navigator;
-      const loc = window.location;
-      return [
-        `protocol.............................${loc.protocol}`,
-        `host.................................${loc.host}`,
-        `hostname.............................${loc.hostname}`,
-        `pathname.............................${loc.pathname}`,
-        `search...............................${loc.search}`,
-        `origin...............................${loc.origin}`,
-        "",
-        `appCodeName..........................${nav.appCodeName}`,
-        `appName..............................${nav.appName}`,
-        `appVersion...........................${nav.appVersion}`,
-        `platform.............................${nav.platform}`,
-        `product..............................${nav.product}`,
-        `productSub...........................${nav.productSub}`,
-        `userAgent............................${nav.userAgent}`,
-        `vendor...............................${nav.vendor}`,
-        `vendorSub............................${nav.vendorSub || ""}`,
-        `language.............................${nav.language}`,
-        `online...............................${nav.onLine}`,
-        `hardwareConcurrency..................${nav.hardwareConcurrency || ""}`,
-        `maxTouchPoints.......................${nav.maxTouchPoints || ""}`,
-        `cookieEnabled........................${nav.cookieEnabled}`,
-        `webdriver............................${nav.webdriver || ""}`,
-        `date.................................${new Date().toString()}`,
-        `standalone...........................${window.matchMedia('(display-mode: standalone)').matches || nav.standalone || false}`,
-        `pdfViewerEnabled.....................${!!(Array.from(nav.plugins || []).some(p => /pdf/i.test(p.name)))}`,
-        "",
-        // List all plugins with PDF in their name (may be incomplete on some browsers)
-        ...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
-          `plugin.................................${p.name}`
-        ))
-      ];
-    }
+        const nav = window.navigator;
+        const loc = window.location;
 
-    function typewriterEffectSysinfo(element, lines, speedPerChar = 8, perLineDelay = 15, callback) {
-      let currentLine = 0;
-      function typeLine() {
-        if (currentLine >= lines.length) {
-          if (callback) callback();
-          return;
+        // Helper function to create properly formatted lines with consistent width
+        function formatLine(label, value, totalWidth = 65) {
+          const valueStr = value.toString();
+          const maxValueLength = totalWidth - label.length - 3; // 3 dots minimum
+          const truncatedValue = valueStr.length > maxValueLength ?
+            valueStr.substring(0, maxValueLength) : valueStr;
+
+          const dotsNeeded = totalWidth - label.length - truncatedValue.length;
+          const dots = '.'.repeat(Math.max(3, dotsNeeded));
+
+          const line = `${label}${dots}${truncatedValue}`;
+
+          // Ensure exact length by padding or trimming
+          if (line.length < totalWidth) {
+            return line + ' '.repeat(totalWidth - line.length);
+          } else if (line.length > totalWidth) {
+            return line.substring(0, totalWidth);
+          }
+
+          return line;
         }
-        let chars = lines[currentLine].split('');
-        let span = document.createElement('span');
-        element.appendChild(span);
 
-        let charIndex = 0;
-        function typeChar() {
-          if (charIndex < chars.length) {
-            span.textContent += chars[charIndex++];
-            setTimeout(typeChar, speedPerChar);
-          } else {
+        // Helper functions for shortening values
+        function shortenDate(dateString) {
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: '2-digit'
+          }) + ' ' + date.toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        }
+
+        function shortenAppVersion(version) {
+          // Extract version, OS, and architecture details
+          const match = version.match(/(\d+\.\d+).*?(Windows NT \d+\.\d+|Mac OS X|Linux|iPhone OS|iPad OS).*?(Win64|x64|Intel|ARM)?/i);
+          if (match) {
+            const arch = match[3] ? ` ${match[3]}` : '';
+            return `${match[1]} ${match[2]}${arch}`;
+          }
+          // Fallback: take first 40 characters
+          return version.substring(0, 40);
+        }
+
+        function shortenUserAgent(userAgent) {
+          // Extract browser, version, and key details
+          const chromeMatch = userAgent.match(/Chrome\/(\d+\.\d+\.\d+)/);
+          const safariMatch = userAgent.match(/Safari\/(\d+\.\d+)/);
+          const firefoxMatch = userAgent.match(/Firefox\/(\d+\.\d+)/);
+          const webkitMatch = userAgent.match(/AppleWebKit\/(\d+\.\d+)/);
+
+          if (chromeMatch) {
+            const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
+            return `Chrome ${chromeMatch[1]}${webkit}`;
+          }
+          if (firefoxMatch) {
+            const gecko = userAgent.includes('Gecko') ? ' Gecko' : '';
+            return `Firefox ${firefoxMatch[1]}${gecko}`;
+          }
+          if (safariMatch) {
+            const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
+            return `Safari ${safariMatch[1]}${webkit}`;
+          }
+
+          // Fallback: take first 45 characters
+          return userAgent.substring(0, 45);
+        }
+
+        return [
+          "==================================================",
+          formatLine("protocol", loc.protocol),
+          formatLine("host", loc.host),
+          formatLine("hostname", loc.hostname),
+          formatLine("port", loc.port || ""),
+          formatLine("pathname", loc.pathname),
+          formatLine("search", loc.search),
+          formatLine("hash", loc.hash),
+          formatLine("origin", loc.origin),
+          "==================================================",
+          formatLine("appCodeName", nav.appCodeName),
+          formatLine("appName", nav.appName),
+          formatLine("appVersion", shortenAppVersion(nav.appVersion)),  // Shortened
+          formatLine("platform", nav.platform),
+          formatLine("product", nav.product),
+          formatLine("productSub", nav.productSub),
+          formatLine("userAgent", shortenUserAgent(nav.userAgent)),    // Shortened
+          formatLine("vendor", nav.vendor),
+          formatLine("vendorSub", nav.vendorSub || ""),
+          formatLine("language", nav.language),
+          formatLine("online", nav.onLine),
+          formatLine("hardwareConcurrency", nav.hardwareConcurrency || ""),
+          formatLine("maxTouchPoints", nav.maxTouchPoints || ""),
+          formatLine("cookieEnabled", nav.cookieEnabled),
+          formatLine("webdriver", nav.webdriver || "false"),
+          formatLine("date", shortenDate(new Date())),                 // Shortened
+          formatLine("standalone", window.matchMedia('(display-mode: standalone)').matches || nav.standalone || false),
+          formatLine("pdfViewerEnabled", !!(Array.from(nav.plugins || []).some(p => /pdf/i.test(p.name)))),
+          "==================================================",
+          // List all plugins with PDF in their name (shortened)
+          ...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
+            formatLine("plugin", p.name.substring(0, 25))  // Limit plugin names
+          )),
+          "=================================================="
+        ];
+      }
+
+      // Also update the typewriterEffectSysinfo function to handle the spacing better:
+
+      function typewriterEffectSysinfo(element, lines, speedPerChar = 4, perLineDelay = 8, callback) {
+        let currentLine = 0;
+        function typeLine() {
+          if (currentLine >= lines.length) {
+            if (callback) callback();
+            return;
+          }
+
+          // Handle empty lines
+          if (lines[currentLine] === "") {
             element.appendChild(document.createElement('br'));
             currentLine++;
             setTimeout(typeLine, perLineDelay);
+            return;
           }
+
+          let chars = lines[currentLine].split('');
+          let span = document.createElement('span');
+          element.appendChild(span);
+
+          let charIndex = 0;
+          function typeChar() {
+            if (charIndex < chars.length) {
+              span.textContent += chars[charIndex++];
+              setTimeout(typeChar, speedPerChar);
+            } else {
+              element.appendChild(document.createElement('br'));
+              currentLine++;
+              setTimeout(typeLine, perLineDelay);
+            }
+          }
+          typeChar();
         }
-        typeChar();
+        typeLine();
       }
-      typeLine();
-    }
 
     // Global shutdown detection
     window.isShutdownSequenceActive = false;
@@ -442,13 +529,16 @@
         setTimeout(() => {
           var sysinfoContainer = document.createElement('pre');
           sysinfoContainer.className = "bios-sysinfo";
-          sysinfoContainer.style.color = "#d4fe6b";
+          sysinfoContainer.style.color = "#d4fe6b";  // Keep the green color
           sysinfoContainer.style.fontFamily = "AMIBios, pixelmix, monospace";
-          sysinfoContainer.style.fontSize = "11px";
+          sysinfoContainer.style.fontSize = "10.5px";  // Match BIOS font size
           sysinfoContainer.style.marginTop = "12px";
-          sysinfoContainer.style.letterSpacing = "1px";
+          sysinfoContainer.style.letterSpacing = ".86px";  // Match BIOS letter spacing
+          sysinfoContainer.style.lineHeight = ".89em";  // Match BIOS line height
           sysinfoContainer.style.whiteSpace = "pre";
           sysinfoContainer.style.visibility = "visible";
+          sysinfoContainer.style.fontWeight = "normal";
+          sysinfoContainer.style.textAlign = "left";
 
           var refNode = document.querySelector('.BIOS__bootMessage4');
           if (refNode && refNode.parentNode) {
