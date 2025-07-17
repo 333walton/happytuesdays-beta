@@ -202,10 +202,16 @@
     }
 
     /* Typewriter cursor effect */
-    .typewriter-cursor::after {
+    /*.typewriter-cursor::after {
       content: "_";
       animation: blink 1s infinite;
-    }
+    }*/
+
+    .typewriter-cursor::after {
+  content: "_";
+  animation: blink 1s steps(1) infinite;
+}
+
 
     @keyframes blink {
 
@@ -250,6 +256,21 @@
       background-size: contain;
   }
   
+.bios-sysinfo {
+  font-family: 'Fira Mono', 'IBM Plex Mono', 'Courier New', Courier, monospace;
+  font-size: 11px;                /* Try 13-15px for tall grid */
+  color: #d4fe6b;                 /* Or #b7ff56 for "phosphor" look */
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  letter-spacing: .86px;
+  line-height: .89em;
+  display: block; /*changed from grid*/
+  /*grid-template-columns: max-content auto;
+  gap: 2px 12px;
+  white-space: pre-wrap;*/
+}
+
 
     @media (max-width: 600px) {
       .BIOS__logo {
@@ -318,30 +339,26 @@
     function getSystemFields() {
         const nav = window.navigator;
         const loc = window.location;
+        const TOTAL_WIDTH = 64;  // match your desired rectangle width
 
-        // Helper function to create properly formatted lines with consistent width
-        function formatLine(label, value, totalWidth = 65) {
-          const valueStr = value.toString();
-          const maxValueLength = totalWidth - label.length - 3; // 3 dots minimum
-          const truncatedValue = valueStr.length > maxValueLength ?
-            valueStr.substring(0, maxValueLength) : valueStr;
+        // ❗ Declare SEP at the top level of getSystemFields, before formatLine
+        const SEP = '='.repeat(TOTAL_WIDTH);
 
-          const dotsNeeded = totalWidth - label.length - truncatedValue.length;
-          const dots = '.'.repeat(Math.max(3, dotsNeeded));
+        function formatLine(label, value, totalWidth = TOTAL_WIDTH) {
+          label = label ?? '';
+          value = value == null ? '' : String(value);
 
-          const line = `${label}${dots}${truncatedValue}`;
+          // Truncate value if too long to fit
+          if (value.length > totalWidth - label.length - 3) value = value.slice(0, totalWidth - label.length - 3);
 
-          // Ensure exact length by padding or trimming
-          if (line.length < totalWidth) {
-            return line + ' '.repeat(totalWidth - line.length);
-          } else if (line.length > totalWidth) {
-            return line.substring(0, totalWidth);
-          }
+          // Dots fill
+          const dotsCount = totalWidth - label.length - value.length;
+          const dots = '.'.repeat(Math.max(1, dotsCount));
 
-          return line;
+          return (label + dots + value).slice(0, totalWidth);
         }
 
-        // Helper functions for shortening values
+
         function shortenDate(dateString) {
           const date = new Date(dateString);
           return date.toLocaleDateString('en-US', {
@@ -391,80 +408,69 @@
         }
 
         return [
-          "================================================",
-          formatLine("protocol", loc.protocol),
-          formatLine("host", loc.host),
-          formatLine("hostname", loc.hostname),
-          formatLine("port", loc.port || ""),
-          formatLine("pathname", loc.pathname),
-          formatLine("search", loc.search),
-          formatLine("hash", loc.hash),
-          formatLine("origin", loc.origin),
-          "================================================",
-          formatLine("appCodeName", nav.appCodeName),
-          formatLine("appName", nav.appName),
-          formatLine("appVersion", shortenAppVersion(nav.appVersion)),  // Shortened
-          formatLine("platform", nav.platform),
-          formatLine("product", nav.product),
-          formatLine("productSub", nav.productSub),
-          formatLine("userAgent", shortenUserAgent(nav.userAgent)),    // Shortened
-          formatLine("vendor", nav.vendor),
-          formatLine("vendorSub", nav.vendorSub || ""),
-          formatLine("language", nav.language),
-          formatLine("online", nav.onLine),
-          formatLine("hardwareConcurrency", nav.hardwareConcurrency || ""),
-          formatLine("maxTouchPoints", nav.maxTouchPoints || ""),
-          formatLine("cookieEnabled", nav.cookieEnabled),
-          formatLine("webdriver", nav.webdriver || "false"),
-          formatLine("date", shortenDate(new Date())),                 // Shortened
-          formatLine("standalone", window.matchMedia('(display-mode: standalone)').matches || nav.standalone || false),
-          formatLine("pdfViewerEnabled", !!(Array.from(nav.plugins || []).some(p => /pdf/i.test(p.name)))),
-          "================================================",
-          // List all plugins with PDF in their name (shortened)
-          ...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
-            formatLine("plugin", p.name.substring(0, 25))  // Limit plugin names
-          )),
-          "================================================"
-        ];
-      }
+        SEP,
+        formatLine("protocol", loc.protocol),
+        formatLine("host", loc.host),
+        formatLine("hostname", loc.hostname),
+        formatLine("port", loc.port || ""),
+        formatLine("pathname", loc.pathname),
+        formatLine("search", loc.search),
+        formatLine("hash", loc.hash),
+        formatLine("origin", loc.origin),
+        SEP,
+        formatLine("appCodeName", nav.appCodeName),
+        formatLine("appName", nav.appName),
+        formatLine("appVersion", shortenAppVersion(nav.appVersion)),  // Shortened
+        formatLine("platform", nav.platform),
+        formatLine("product", nav.product),
+        formatLine("productSub", nav.productSub),
+        formatLine("userAgent", shortenUserAgent(nav.userAgent)),    // Shortened
+        formatLine("vendor", nav.vendor),
+        formatLine("vendorSub", nav.vendorSub || ""),
+        formatLine("language", nav.language),
+        formatLine("online", nav.onLine),
+        formatLine("hardwareConcurrency", nav.hardwareConcurrency || ""),
+        formatLine("maxTouchPoints", nav.maxTouchPoints || ""),
+        formatLine("cookieEnabled", nav.cookieEnabled),
+        formatLine("webdriver", nav.webdriver || "false"),
+        formatLine("date", shortenDate(new Date())),
+        formatLine("standalone", window.matchMedia('(display-mode: standalone)').matches || nav.standalone || false),
+        formatLine("pdfViewerEnabled", !!(Array.from(nav.plugins || []).some(p => /pdf/i.test(p.name)))),
+        SEP,
+        ...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
+          formatLine("plugin", p.name.slice(0, 22), TOTAL_WIDTH)
+        )),
+        SEP
+      ];
+    }
 
       // Also update the typewriterEffectSysinfo function to handle the spacing better:
 
       function typewriterEffectSysinfo(element, lines, speedPerChar = 4, perLineDelay = 8, callback) {
-        let currentLine = 0;
-        function typeLine() {
-          if (currentLine >= lines.length) {
-            if (callback) callback();
-            return;
-          }
-
-          // Handle empty lines
-          if (lines[currentLine] === "") {
-            element.appendChild(document.createElement('br'));
-            currentLine++;
-            setTimeout(typeLine, perLineDelay);
-            return;
-          }
-
-          let chars = lines[currentLine].split('');
-          let span = document.createElement('span');
-          element.appendChild(span);
-
-          let charIndex = 0;
-          function typeChar() {
-            if (charIndex < chars.length) {
-              span.textContent += chars[charIndex++];
-              setTimeout(typeChar, speedPerChar);
-            } else {
-              element.appendChild(document.createElement('br'));
-              currentLine++;
-              setTimeout(typeLine, perLineDelay);
+          let currentLine = 0;
+          function typeLine() {
+            if (currentLine >= lines.length) {
+              if (callback) callback();
+              return;
             }
+            let line = lines[currentLine];
+            let span = document.createElement('span');
+            element.appendChild(span);
+            let i = 0;
+            function typeChar() {
+              if (i < line.length) {
+                span.textContent += line[i++];
+                setTimeout(typeChar, speedPerChar);
+              } else {
+                element.appendChild(document.createTextNode('\n'));
+                currentLine++;
+                setTimeout(typeLine, perLineDelay);
+              }
+            }
+            typeChar();
           }
-          typeChar();
+          typeLine();
         }
-        typeLine();
-      }
 
     // Global shutdown detection
     window.isShutdownSequenceActive = false;
@@ -531,43 +537,134 @@
 
     function staggerElements(elems, entry) {
       if (!elems[entry]) {
-        // Add system information display before moving to Windows logo
         setTimeout(() => {
-          var sysinfoContainer = document.createElement('pre');
-          sysinfoContainer.className = "bios-sysinfo";
-          sysinfoContainer.style.color = "#d4fe6b";  // Keep the green color
-          sysinfoContainer.style.fontFamily = "AMIBios, pixelmix, monospace";
-          sysinfoContainer.style.fontSize = "10.5px";  // Match BIOS font size
-          sysinfoContainer.style.marginTop = "12px";
-          sysinfoContainer.style.letterSpacing = ".86px";  // Match BIOS letter spacing
-          sysinfoContainer.style.lineHeight = ".89em";  // Match BIOS line height
-          sysinfoContainer.style.whiteSpace = "pre";
-          sysinfoContainer.style.visibility = "visible";
-          sysinfoContainer.style.fontWeight = "normal";
-          sysinfoContainer.style.textAlign = "left";
+          // Memory test line
+          const fakeBootLine = document.createElement('div');
+          fakeBootLine.innerHTML = `
+  <span>Memory Test:</span>
+  <span style="color: #d4fe6b;">65536K OK</span>
+  <span class="typewriter-cursor"></span>
+`;
+          function countUpMemoryTest(parentElem, options = {}, onDone) {
+            // RAM, extended, and cache options
+            const RAM_OPTIONS = [640, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288];
+            const targetKB = options.targetKB || RAM_OPTIONS[Math.floor(Math.random() * RAM_OPTIONS.length)];
+            const pauseAt = options.pauseAt || (0.4 + Math.random() * 0.3);
+            const pauseMs = options.pauseMs || 500 + Math.random() * 400;
+            const minStep = options.minStep || 256;
+            const maxStep = options.maxStep || 4096;
+            const fps = options.fps || 60;
+            const duration = options.duration || 1800 + Math.floor(Math.random() * 700);
+            const extendedRAM = targetKB > 65536 ? targetKB - 1024 : 0;
+            const cacheSRAM = [128, 256, 512][Math.floor(Math.random() * 3)];
+            const TOTAL_WIDTH = 48; // Adjust to match your sysinfo box
+            const SEP = '='.repeat(45);
 
-          var refNode = document.querySelector('.BIOS__bootMessage4');
-          if (refNode && refNode.parentNode) {
-            refNode.parentNode.insertBefore(sysinfoContainer, refNode.nextSibling);
+            // Helper: Dotted style, right-aligned value
+            function infoLine(label, value, suffix = "K OK") {
+              // pad value (right-aligned, with dots)
+              label = label + '';
+              value = value + '';
+              let dotsLen = Math.max(1, TOTAL_WIDTH - label.length - value.length - suffix.length - 2);
+              let dots = '.'.repeat(dotsLen);
+              return `<span>${label}:${dots}${value} ${suffix}</span>`;
+            }
+
+            function getLocalStorageSizeKB() {
+              let total = 0;
+              for (let key in localStorage) {
+                if (!localStorage.hasOwnProperty(key)) continue;
+                let value = localStorage.getItem(key);
+                total += key.length + (value ? value.length : 0);
+              }
+              return Math.round(total / 1024);
+            }
+
+            /*function createSepLine() {
+              const sepDiv = document.createElement('div');
+              sepDiv.textContent = SEP;
+              sepDiv.style.fontFamily = "AMIBios, 'Fira Mono', 'Courier New', Courier, monospace";
+              sepDiv.style.color = "#d4fe6b";
+              sepDiv.style.fontSize = "11px";
+              sepDiv.style.letterSpacing = ".86px";
+              sepDiv.style.lineHeight = ".89em";
+              sepDiv.style.marginBottom = "4px";
+              return sepDiv;
+            }*/
+
+            const memoryLine = document.createElement('div');
+            memoryLine.style.fontFamily = "AMIBios, 'Fira Mono', 'Courier New', Courier, monospace";
+            memoryLine.style.color = "#d4fe6b";
+            memoryLine.style.fontSize = "11px";
+            memoryLine.style.letterSpacing = ".86px";
+            memoryLine.style.lineHeight = ".89em";
+            memoryLine.style.marginBottom = "4px";
+            parentElem.appendChild(memoryLine);
+
+            let current = 0;
+            let hasPaused = false;
+            const midwayK = Math.floor(targetKB * pauseAt);
+
+            function update() {
+              if (current >= targetKB) {
+                memoryLine.innerHTML = infoLine('Memory Test', targetKB.toString().padStart(6, '0'), 'K OK');
+                // Extra dotted lines (Cache SRAM, localStorage, Extended RAM)
+                setTimeout(() => {
+                  if (extendedRAM) {
+                    let ext = document.createElement('div');
+                    ext.style.cssText = memoryLine.style.cssText;
+                    ext.innerHTML = infoLine('Extended RAM', extendedRAM.toString(), 'K OK');
+                    parentElem.appendChild(ext);
+                  }
+                  let cache = document.createElement('div');
+                  cache.style.cssText = memoryLine.style.cssText;
+                  cache.innerHTML = infoLine('Cache SRAM', cacheSRAM.toString(), 'K OK');
+                  parentElem.appendChild(cache);
+
+                  let localKB = getLocalStorageSizeKB();
+                  let localDiv = document.createElement('div');
+                  localDiv.style.cssText = memoryLine.style.cssText;
+                  localDiv.innerHTML = infoLine('localStorage', localKB.toString(), 'K used');
+                  parentElem.appendChild(localDiv);
+
+                  if (onDone) setTimeout(onDone, 600);
+                }, 350);
+                return;
+              }
+
+              let step = Math.floor(Math.random() * (maxStep - minStep + 1)) + minStep;
+              if (current + step > targetKB) step = targetKB - current;
+              current += step;
+              memoryLine.innerHTML = infoLine('Memory Test', current.toString().padStart(6, '0'), 'K') +
+                `<span class="typewriter-cursor"></span>`;
+
+              if (!hasPaused && current >= midwayK) {
+                hasPaused = true;
+                setTimeout(update, pauseMs);
+              } else {
+                setTimeout(update, 1000 / fps);
+              }
+            }
+            update();
           }
 
-          // Animate the system info with faster speeds
-          typewriterEffectSysinfo(
-            sysinfoContainer,
-            getSystemFields(),
-            8, /* char speed ms - reduced from 20 to 8 */
-            15, /* line delay ms - reduced from 20 to 15 */
-            () => {
-              // After system info completes, proceed to Windows logo
-              setTimeout(() => {
-                document.querySelector(".BIOS").classList.add("hidden");
-                // Dispatch event to notify that BIOS sequence has completed
-                console.log("BIOS sequence completed, dispatching event");
-                window.dispatchEvent(new Event('biosSequenceCompleted'));
-                windowsLogo();
-              }, 1000);
-            }
-          );
+
+          fakeBootLine.style.fontFamily = "AMIBios, pixelmix, monospace";
+          fakeBootLine.style.color = "#d4fe6b";
+          fakeBootLine.style.fontSize = "10.5px";
+          fakeBootLine.style.letterSpacing = ".86px";
+          fakeBootLine.style.lineHeight = ".89em";
+          fakeBootLine.style.marginBottom = "10px";
+          let bootContainer = document.getElementById("BIOS__bootContainer");
+          countUpMemoryTest(bootContainer, {}, function () {
+            // Continue after all lines are animated
+            const sysinfoContainer = document.createElement('pre');
+            sysinfoContainer.className = "bios-sysinfo";
+            bootContainer.appendChild(sysinfoContainer);
+
+            const infoLines = getSystemFields();
+            typewriterEffectSysinfo(sysinfoContainer, infoLines, 8, 50, windowsLogo);
+          });
         }, 500);
         return;
       }
@@ -825,9 +922,11 @@
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
         <p>BIOS Version 18.3.1 REACT</p>
-        <p>0.9.8 beta</p>
+        <p>Happy Tuesdays v0.9.8 beta</p>
       </div>
       <div class="BIOS__bootMessage4">
+        <div id="BIOS__bootContainer"></div>
+        </div>
       </div>
       <!-- System fields will be dynamically inserted here by JS: <pre class="bios-sysinfo">...</pre> -->
     </div>
