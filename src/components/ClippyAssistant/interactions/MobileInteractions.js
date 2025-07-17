@@ -19,6 +19,118 @@ const logAnimation = (animationName, context = "mobile interaction") => {
   );
 };
 
+// Agent-specific animations
+const AGENT_ANIMATIONS = {
+  Clippy: {
+    Congratulate: "Congratulate",
+    "Send Mail": "SendMail",
+    Print: "Print",
+    "Get Attention": "GetAttention",
+    Save: "Save",
+    "Get Techy": "GetTechy",
+    Writing: "Writing",
+    Processing: "Processing",
+    "Good Bye": "GoodBye",
+    Checking: "CheckingSomething",
+    Hearing: "Hearing_1",
+    "Idle Snooze": "IdleSnooze",
+    "Get Artsy": "GetArtsy",
+    Searching: "Searching",
+    "Empty Trash": "EmptyTrash",
+    "Rest Pose": "RestPose",
+  },
+  F1: {
+    Wave: "Wave",
+    Greeting: "Greeting",
+    "Get Attention": "GetAttention",
+    Alert: "Alert",
+    Thinking: "Thinking",
+    Processing: "Processing",
+    "Get Techy": "GetTechy",
+  },
+  Genius: {
+    Wave: "Wave",
+    "Good Bye": "GoodBye",
+    Greeting: "Greeting",
+    "Get Attention": "GetAttention",
+    Thinking: "Thinking",
+    Processing: "Processing",
+    "Get Techy": "GetTechy",
+    "Look Up": "LookUp",
+    "Gesture Up": "GestureUp",
+    "Gesture Down": "GestureDown",
+  },
+  Merlin: {
+    Wave: "Wave",
+    "Get Attention": "GetAttention",
+    Alert: "Alert",
+    Thinking: "Thinking",
+    Processing: "Processing",
+    "Look Down": "LookDown",
+    "Gesture Up": "GestureUp",
+    "Rest Pose": "RestPose",
+    Show: "Show",
+    Explain: "Explain",
+  },
+  Bonzi: {
+    Wave: "Wave",
+    Greeting: "Greeting",
+    "Get Attention": "GetAttention",
+    "Look Down": "LookDown",
+    "Gesture Up": "GestureUp",
+    "Gesture Down": "GestureDown",
+    Show: "Show",
+    Explain: "Explain",
+  },
+};
+
+// Get agent-specific animations array
+const getAgentAnimations = (agent) => {
+  const animations = AGENT_ANIMATIONS[agent] || AGENT_ANIMATIONS.Clippy;
+  return Object.values(animations);
+};
+
+// Agent-specific balloon messages
+const getAgentMessages = (agent) => {
+  const messageMap = {
+    Clippy: [
+      "It looks like you're having fun!",
+      "Need help with anything?",
+      "Lets build something!",
+      "Try a long press for chat!",
+      "Double-tap for my menu!",
+      "I'm here to assist you!",
+    ],
+    F1: [
+      "Racing to help you!",
+      "Need some assistance?",
+      "Try a long press for turbo chat!",
+      "Double-tap for menu options!",
+    ],
+    Genius: [
+      "Need some assistance?",
+      "Try a long press for chat!",
+      "Double-tap for smart options!",
+      "I'm here with big brain energy!",
+    ],
+    Merlin: [
+      "Need some assistance?",
+      "Lets build something!",
+      "Long press for mystical chat!",
+      "Double-tap for menu options!",
+    ],
+    Bonzi: [
+      "Hey there, buddy!",
+      "Bonzi's here to help!",
+      "Long press for a chat, pal!",
+      "Double-tap for more options!",
+      "I'm your friendly desktop companion!",
+    ],
+  };
+
+  return messageMap[agent] || messageMap.Clippy;
+};
+
 export const handleMobileSingleTap = ({
   clippyInstance,
   showCustomBalloon,
@@ -27,8 +139,9 @@ export const handleMobileSingleTap = ({
   greetingPlayedRef,
   initialMessageShownRef,
   showWelcomeBalloon,
+  currentAgent = "Clippy", // Default to Clippy if not provided
 }) => {
-  devLog("Single tap handler called", { isInitialInteraction });
+  devLog("Single tap handler called", { isInitialInteraction, currentAgent });
 
   // Handle initial interaction
   if (isInitialInteraction && !greetingPlayedRef.current) {
@@ -59,22 +172,15 @@ export const handleMobileSingleTap = ({
     devLog("Mobile tap - showing animation (75% chance)");
     setIsAnimationPlaying(true);
 
-    const animations = [
-      "Wave",
-      "GetAttention",
-      "Thinking",
-      "Writing",
-      "Alert",
-      "Searching",
-      "Explain",
-      "GestureRight",
-      "GestureLeft",
-    ];
-
+    // Get agent-specific animations
+    const animations = getAgentAnimations(currentAgent);
     const randomIndex = Math.floor(Math.random() * animations.length);
     const animationName = animations[randomIndex];
 
-    logAnimation(animationName, "mobile single tap (75% animation)");
+    logAnimation(
+      animationName,
+      `mobile single tap (75% animation) - ${currentAgent}`
+    );
     clippyInstance.play(animationName);
 
     setTimeout(() => {
@@ -82,15 +188,11 @@ export const handleMobileSingleTap = ({
     }, 2000);
   } else {
     devLog("Mobile tap - showing balloon (25% chance)");
-    const messages = [
-      "Tap me again for more!",
-      "Having fun with Happy Tuesdays?",
-      "Try a long press!",
-      "Double-tap for options!",
-      "I'm here to help!",
-    ];
 
+    // Get agent-specific messages
+    const messages = getAgentMessages(currentAgent);
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
     showCustomBalloon(randomMessage, 3000);
   }
 };
