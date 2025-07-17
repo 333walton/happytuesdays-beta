@@ -154,7 +154,7 @@
       font-size: 10px;
       letter-spacing: .88px;
       line-height: .89em;
-}
+    }
 
     .BIOSWrapper {
       position: fixed;
@@ -208,9 +208,9 @@
     }*/
 
     .typewriter-cursor::after {
-  content: "_";
-  animation: blink 1s steps(1) infinite;
-}
+      content: "_";
+      animation: blink 1s steps(1) infinite;
+    }
 
 
     @keyframes blink {
@@ -241,35 +241,42 @@
     .left-image {
       width: 84px;
       height: 56px;
-      margin-bottom: 18px; /*higher number means higher img */
-      margin-right: -130px; /*more neg means more right */
-      transform: rotate(11deg); /* Slight upward tilt */
+      margin-bottom: 18px;
+      /*higher number means higher img */
+      margin-right: -130px;
+      /*more neg means more right */
+      transform: rotate(11deg);
+      /* Slight upward tilt */
     }
 
-  .right-image {
+    .right-image {
       width: 162px;
-      margin-top: 47px; /*lower number means higher img */
+      margin-top: 47px;
+      /*lower number means higher img */
       margin-right: 1px;
       height: auto;
       background-repeat: no-repeat;
       background-position: right;
       background-size: contain;
-  }
-  
-.bios-sysinfo {
-  font-family: 'Fira Mono', 'IBM Plex Mono', 'Courier New', Courier, monospace;
-  font-size: 11px;                /* Try 13-15px for tall grid */
-  color: #d4fe6b;                 /* Or #b7ff56 for "phosphor" look */
-  margin: 0;
-  padding: 0;
-  white-space: pre;
-  letter-spacing: .86px;
-  line-height: .89em;
-  display: block; /*changed from grid*/
-  /*grid-template-columns: max-content auto;
+    }
+
+    .bios-sysinfo {
+      font-family: 'Fira Mono', 'IBM Plex Mono', 'Courier New', Courier, monospace;
+      font-size: 11px;
+      /* Try 13-15px for tall grid */
+      color: #d4fe6b;
+      /* Or #b7ff56 for "phosphor" look */
+      margin: 0;
+      padding: 0;
+      white-space: pre;
+      letter-spacing: .86px;
+      line-height: .89em;
+      display: block;
+      /*changed from grid*/
+      /*grid-template-columns: max-content auto;
   gap: 2px 12px;
   white-space: pre-wrap;*/
-}
+    }
 
 
     @media (max-width: 600px) {
@@ -281,13 +288,16 @@
       .left-image {
         width: 84px;
         height: 56px;
-        margin-bottom: 18px; /*higher number means higher img */
-        margin-right: -130px; /*more neg means more right */
+        margin-bottom: 18px;
+        /*higher number means higher img */
+        margin-right: -130px;
+        /*more neg means more right */
       }
 
       .right-image {
         width: 162px;
-        margin-top: 47px; /*lower number means higher img */
+        margin-top: 47px;
+        /*lower number means higher img */
         margin-right: 1px;
         height: auto;
         background-repeat: no-repeat;
@@ -337,77 +347,84 @@
   <script>
     // --- Utility: System Environment BIOS Fields as in screenshot ---
     function getSystemFields() {
-        const nav = window.navigator;
-        const loc = window.location;
-        const TOTAL_WIDTH = 64;  // match your desired rectangle width
+      const nav = window.navigator;
+      const loc = window.location;
+      const TOTAL_WIDTH = 64;  // match your desired rectangle width
 
-        // ❗ Declare SEP at the top level of getSystemFields, before formatLine
-        const SEP = '='.repeat(TOTAL_WIDTH);
+      // ❗ Declare SEP at the top level of getSystemFields, before formatLine
+      const SEP = '='.repeat(TOTAL_WIDTH);
 
-        function formatLine(label, value, totalWidth = TOTAL_WIDTH) {
-          label = label ?? '';
-          value = value == null ? '' : String(value);
+      function formatLine(label, value, totalWidth = TOTAL_WIDTH) {
+        label = label ?? '';
+        value = value == null ? '' : String(value);
 
-          // Truncate value if too long to fit
-          if (value.length > totalWidth - label.length - 3) value = value.slice(0, totalWidth - label.length - 3);
-
-          // Dots fill
-          const dotsCount = totalWidth - label.length - value.length;
-          const dots = '.'.repeat(Math.max(1, dotsCount));
-
-          return (label + dots + value).slice(0, totalWidth);
+        // Truncate value if too long to fit
+        const maxValueLength = totalWidth - label.length - 3; // 3 = minimum dots + colon
+        if (value.length > maxValueLength) {
+          value = value.slice(0, maxValueLength);
         }
 
+        // Calculate exact dots needed for perfect right alignment
+        const dotsCount = totalWidth - label.length - value.length;
+        const dots = '.'.repeat(Math.max(1, dotsCount));
 
-        function shortenDate(dateString) {
-          const date = new Date(dateString);
-          return date.toLocaleDateString('en-US', {
-            month: '2-digit',
-            day: '2-digit',
-            year: '2-digit'
-          }) + ' ' + date.toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit'
-          });
+        // Ensure the final line is exactly totalWidth characters
+        const result = (label + dots + value).slice(0, totalWidth);
+
+        // Pad with spaces if somehow shorter (safety measure)
+        return result.padEnd(totalWidth, ' ');
+      }
+
+
+      function shortenDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+          month: '2-digit',
+          day: '2-digit',
+          year: '2-digit'
+        }) + ' ' + date.toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+
+      function shortenAppVersion(version) {
+        // Extract version, OS, and architecture details
+        const match = version.match(/(\d+\.\d+).*?(Windows NT \d+\.\d+|Mac OS X|Linux|iPhone OS|iPad OS).*?(Win64|x64|Intel|ARM)?/i);
+        if (match) {
+          const arch = match[3] ? ` ${match[3]}` : '';
+          return `${match[1]} ${match[2]}${arch}`;
+        }
+        // Fallback: take first 40 characters
+        return version.substring(0, 40);
+      }
+
+      function shortenUserAgent(userAgent) {
+        // Extract browser, version, and key details
+        const chromeMatch = userAgent.match(/Chrome\/(\d+\.\d+\.\d+)/);
+        const safariMatch = userAgent.match(/Safari\/(\d+\.\d+)/);
+        const firefoxMatch = userAgent.match(/Firefox\/(\d+\.\d+)/);
+        const webkitMatch = userAgent.match(/AppleWebKit\/(\d+\.\d+)/);
+
+        if (chromeMatch) {
+          const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
+          return `Chrome ${chromeMatch[1]}${webkit}`;
+        }
+        if (firefoxMatch) {
+          const gecko = userAgent.includes('Gecko') ? ' Gecko' : '';
+          return `Firefox ${firefoxMatch[1]}${gecko}`;
+        }
+        if (safariMatch) {
+          const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
+          return `Safari ${safariMatch[1]}${webkit}`;
         }
 
-        function shortenAppVersion(version) {
-          // Extract version, OS, and architecture details
-          const match = version.match(/(\d+\.\d+).*?(Windows NT \d+\.\d+|Mac OS X|Linux|iPhone OS|iPad OS).*?(Win64|x64|Intel|ARM)?/i);
-          if (match) {
-            const arch = match[3] ? ` ${match[3]}` : '';
-            return `${match[1]} ${match[2]}${arch}`;
-          }
-          // Fallback: take first 40 characters
-          return version.substring(0, 40);
-        }
+        // Fallback: take first 45 characters
+        return userAgent.substring(0, 45);
+      }
 
-        function shortenUserAgent(userAgent) {
-          // Extract browser, version, and key details
-          const chromeMatch = userAgent.match(/Chrome\/(\d+\.\d+\.\d+)/);
-          const safariMatch = userAgent.match(/Safari\/(\d+\.\d+)/);
-          const firefoxMatch = userAgent.match(/Firefox\/(\d+\.\d+)/);
-          const webkitMatch = userAgent.match(/AppleWebKit\/(\d+\.\d+)/);
-
-          if (chromeMatch) {
-            const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
-            return `Chrome ${chromeMatch[1]}${webkit}`;
-          }
-          if (firefoxMatch) {
-            const gecko = userAgent.includes('Gecko') ? ' Gecko' : '';
-            return `Firefox ${firefoxMatch[1]}${gecko}`;
-          }
-          if (safariMatch) {
-            const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
-            return `Safari ${safariMatch[1]}${webkit}`;
-          }
-
-          // Fallback: take first 45 characters
-          return userAgent.substring(0, 45);
-        }
-
-        return [
+      return [
         SEP,
         formatLine("protocol", loc.protocol),
         formatLine("host", loc.host),
@@ -444,33 +461,33 @@
       ];
     }
 
-      // Also update the typewriterEffectSysinfo function to handle the spacing better:
+    // Also update the typewriterEffectSysinfo function to handle the spacing better:
 
-      function typewriterEffectSysinfo(element, lines, speedPerChar = 4, perLineDelay = 8, callback) {
-          let currentLine = 0;
-          function typeLine() {
-            if (currentLine >= lines.length) {
-              if (callback) callback();
-              return;
-            }
-            let line = lines[currentLine];
-            let span = document.createElement('span');
-            element.appendChild(span);
-            let i = 0;
-            function typeChar() {
-              if (i < line.length) {
-                span.textContent += line[i++];
-                setTimeout(typeChar, speedPerChar);
-              } else {
-                element.appendChild(document.createTextNode('\n'));
-                currentLine++;
-                setTimeout(typeLine, perLineDelay);
-              }
-            }
-            typeChar();
-          }
-          typeLine();
+    function typewriterEffectSysinfo(element, lines, speedPerChar = 4, perLineDelay = 8, callback) {
+      let currentLine = 0;
+      function typeLine() {
+        if (currentLine >= lines.length) {
+          if (callback) callback();
+          return;
         }
+        let line = lines[currentLine];
+        let span = document.createElement('span');
+        element.appendChild(span);
+        let i = 0;
+        function typeChar() {
+          if (i < line.length) {
+            span.textContent += line[i++];
+            setTimeout(typeChar, speedPerChar);
+          } else {
+            element.appendChild(document.createTextNode('\n'));
+            currentLine++;
+            setTimeout(typeLine, perLineDelay);
+          }
+        }
+        typeChar();
+      }
+      typeLine();
+    }
 
     // Global shutdown detection
     window.isShutdownSequenceActive = false;
@@ -538,6 +555,19 @@
     function staggerElements(elems, entry) {
       if (!elems[entry]) {
         setTimeout(() => {
+          // Add separator line before Memory Test
+          const separatorLine = document.createElement('div');
+          separatorLine.style.fontFamily = 'MS Sans Serif', 'Fira Mono', 'IBM Plex Mono', 'Courier New';
+          separatorLine.style.color = "#d4fe6b";
+          separatorLine.style.fontSize = "11px";
+          separatorLine.style.letterSpacing = ".86px";
+          separatorLine.style.lineHeight = ".89em";
+          separatorLine.style.marginBottom = "0px";
+          separatorLine.textContent = '='.repeat(64);
+
+          let bootContainer = document.getElementById("BIOS__bootContainer");
+          bootContainer.appendChild(separatorLine);
+
           // Memory test line
           const fakeBootLine = document.createElement('div');
           fakeBootLine.innerHTML = `
@@ -557,17 +587,18 @@
             const duration = options.duration || 1800 + Math.floor(Math.random() * 700);
             const extendedRAM = targetKB > 65536 ? targetKB - 1024 : 0;
             const cacheSRAM = [128, 256, 512][Math.floor(Math.random() * 3)];
-            const TOTAL_WIDTH = 48; // Adjust to match your sysinfo box
-            const SEP = '='.repeat(45);
+            const TOTAL_WIDTH = 64; // Match the main TOTAL_WIDTH
+            const SEP = '='.repeat(64);
 
-            // Helper: Dotted style, right-aligned value
+            // Helper: Dotted style, right-aligned value with perfect alignment
             function infoLine(label, value, suffix = "K OK") {
-              // pad value (right-aligned, with dots)
               label = label + '';
               value = value + '';
-              let dotsLen = Math.max(1, TOTAL_WIDTH - label.length - value.length - suffix.length - 2);
+              const totalContentLength = label.length + 1 + value.length + 1 + suffix.length; // +1 for colon, +1 for space
+              let dotsLen = Math.max(1, TOTAL_WIDTH - totalContentLength);
               let dots = '.'.repeat(dotsLen);
-              return `<span>${label}:${dots}${value} ${suffix}</span>`;
+              const result = `<span>${label}:${dots}${value} ${suffix}</span>`;
+              return result;
             }
 
             function getLocalStorageSizeKB() {
@@ -579,18 +610,6 @@
               }
               return Math.round(total / 1024);
             }
-
-            /*function createSepLine() {
-              const sepDiv = document.createElement('div');
-              sepDiv.textContent = SEP;
-              sepDiv.style.fontFamily = "AMIBios, 'Fira Mono', 'Courier New', Courier, monospace";
-              sepDiv.style.color = "#d4fe6b";
-              sepDiv.style.fontSize = "11px";
-              sepDiv.style.letterSpacing = ".86px";
-              sepDiv.style.lineHeight = ".89em";
-              sepDiv.style.marginBottom = "4px";
-              return sepDiv;
-            }*/
 
             const memoryLine = document.createElement('div');
             memoryLine.style.fontFamily = "AMIBios, 'Fira Mono', 'Courier New', Courier, monospace";
@@ -655,7 +674,6 @@
           fakeBootLine.style.letterSpacing = ".86px";
           fakeBootLine.style.lineHeight = ".89em";
           fakeBootLine.style.marginBottom = "10px";
-          let bootContainer = document.getElementById("BIOS__bootContainer");
           countUpMemoryTest(bootContainer, {}, function () {
             // Continue after all lines are animated
             const sysinfoContainer = document.createElement('pre');
@@ -922,14 +940,14 @@
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
         <p>BIOS Version 18.3.1 REACT</p>
-        <p>Happy Tuesdays v0.9.8 beta</p>
+        <p>v0.9.8 beta</p>
       </div>
       <div class="BIOS__bootMessage4">
         <div id="BIOS__bootContainer"></div>
-        </div>
       </div>
-      <!-- System fields will be dynamically inserted here by JS: <pre class="bios-sysinfo">...</pre> -->
     </div>
+    <!-- System fields will be dynamically inserted here by JS: <pre class="bios-sysinfo">...</pre> -->
+  </div>
   </div>
 
   <div class="WindowsLaunchWrapper hidden">
