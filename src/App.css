@@ -622,6 +622,7 @@ body {
   position: absolute;
 }
 
+/* Force monospace font ONLY on BIOS-related elements */
 .BIOS,
 .BIOS *,
 .BIOSWrapper,
@@ -641,7 +642,7 @@ pre.bios-sysinfo * {
   letter-spacing: 0px !important;
 }
 
-/* Override 98.css specifically for BIOS elements */
+/* Override 98.css specifically for BIOS elements only */
 .BIOS div,
 .BIOS span,
 .BIOS p,
@@ -651,13 +652,16 @@ pre.bios-sysinfo * {
   font-family: "Courier New", Courier, monospace !important;
 }
 
-/* Target dynamically created elements */
-div[style*="font-family"] {
+/* Target dynamically created elements ONLY within BIOS containers */
+.BIOS div[style*="font-family"],
+.BIOSWrapper div[style*="font-family"],
+.BIOS__bootContainer div[style*="font-family"],
+#BIOS__bootContainer div[style*="font-family"] {
   font-family: "Courier New", Courier, monospace !important;
 }
 
 .version-label {
-  margin-top: 35px;
+  margin-top: 31px;
   margin-bottom: 0px; /* default for desktop */
 }
 
