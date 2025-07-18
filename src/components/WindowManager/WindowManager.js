@@ -16,9 +16,8 @@ class WindowManager extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    // When window becomes active, ensure CSS class is properly applied
     if (!prevProps.isActive && this.props.isActive) {
-      const windowElement = this.windowRef.current;
+      const windowElement = this.windowRef?.current;
       if (windowElement) {
         void windowElement.offsetHeight;
         windowElement.classList.add("Window--active");
@@ -27,13 +26,12 @@ class WindowManager extends Component {
       }
     }
 
-    // Handle activation nonce changes
     if (
       this.props.activationNonce !== prevProps.activationNonce &&
       this.props.isActive
     ) {
       this.forceUpdate(() => {
-        const windowElement = this.windowRef.current;
+        const windowElement = this.windowRef?.current;
         if (windowElement) {
           void windowElement.offsetHeight;
           windowElement.classList.add("Window--active");
@@ -81,12 +79,12 @@ class WindowManager extends Component {
   }
 
   handleProgramClose = (prog) => {
-    // Close the program using context
+    // Always call the standard close handler
     if (this.context.onClose) {
       this.context.onClose(prog);
     }
 
-    // --- ROUTING LOGIC: When closing Feeds, go to homepage ---
+    // If closing the Feeds window, navigate home
     if (
       prog &&
       (prog.title === "Feeds" ||
@@ -102,7 +100,7 @@ class WindowManager extends Component {
       }
     }
 
-    // Check if this program has a parent explorer
+    // Handle parent explorer logic
     if (prog && prog.parentExplorerId) {
       Promise.resolve().then(() => {
         if (this.context.moveToTop) {

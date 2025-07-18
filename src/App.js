@@ -110,7 +110,7 @@ class Desktop extends Component {
             <Background />
             <DesktopView />
             <TaskBar />
-            <WindowManager />
+            <WindowManager navigate={this.props.navigate} />
             <TaskManager />
             <Settings />
             <ShutDown />
