@@ -319,8 +319,7 @@ body {
   transform: translateY(-2px) translateX(-2px);
 }
 
-/* Apply the same transform to all submenus - 1st and 2nd level */
-@media (min-width: 768px), (pointer: coarse) {
+@media (max-width: 768px), (pointer: coarse) {
   .StandardMenuItem__child,
   .Frame.StandardMenu.StandardMenuItem__child,
   .submenu-align-bottom-creative > .Frame.StandardMenu.StandardMenuItem__child,
@@ -328,7 +327,8 @@ body {
   .submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
   .submenu-align-bottom-artdesign
     > .Frame.StandardMenu.StandardMenuItem__child {
-    transform: translateY(0px) translateX(3px);
+    transform: translateY(0px) translateX(6px) !important;
+    max-width: 135px;
   }
 }
 
@@ -341,6 +341,18 @@ body {
   .StandardMenuItem__child .StandardMenuItem__child .StandardMenu,
   .StandardMenu .StandardMenu .StandardMenu {
     transform: translateY(0px) translateX(3px);
+  }
+
+  /* 3rd level submenus - try these different selectors */
+  @media (max-width: 768px), (pointer: coarse) {
+    .StandardMenuItem__child .StandardMenuItem__child,
+    .StandardMenuItem__child .Frame.StandardMenu,
+    .StandardMenuItem__child .StandardMenu,
+    .Frame.StandardMenu .Frame.StandardMenu .Frame.StandardMenu,
+    .StandardMenuItem__child .StandardMenuItem__child .StandardMenu,
+    .StandardMenu .StandardMenu .StandardMenu {
+      transform: translateY(0px) translateX(3px) !important;
+    }
   }
 
   /* Reset position */
@@ -611,6 +623,14 @@ body {
   .StandardMenuItem__child .StandardMenuItem__child .StandardMenu,
   .StandardMenu .StandardMenu .StandardMenu {
     transform: translateY(0px) translateX(3px);
+  }
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  /* Ensure this rule appears AFTER any global rules targeting this element */
+  .submenu-align-bottom-marketing
+    > .Frame.StandardMenu.StandardMenuItem__child {
+    transform: translateY(0px) translateX(-2px) !important;
   }
 }
 
