@@ -239,6 +239,23 @@ body {
 
 /* Add this to your CSS file or inside a <style> tag in your <head> section */
 
+.custom-tooltip {
+  pointer-events: none;
+  position: fixed;
+  background: #ffffe1;
+  color: #000;
+  border: 1px solid #c0c0c0;
+  padding: 3px 8px;
+  font: menu;
+  font-size: 12px;
+  border-radius: 2px;
+  z-index: 10000;
+  white-space: pre-line;
+  box-shadow: none;
+  line-height: 1.3;
+  opacity: 0.97;
+}
+
 .BIOS__bootMessage4 a {
   color: white;
   text-decoration: underline;

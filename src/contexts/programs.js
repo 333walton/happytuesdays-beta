@@ -108,11 +108,13 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
     {
       title: "Start Menu Builder",
       icon: icons.start_menu32,
-      component: "",
+      component: "Notepad",
       tooltip: "Log in to access",
       isDisabled: true,
       multiInstance: true,
+      //customTooltip: true, // new
     },
+
     {
       title: "Account",
       icon: icons.account32,
@@ -167,6 +169,7 @@ const startMenu = (
     ),
     icon: icons.logOff24,
     isDisabled: true,
+    tooltip: "soon",
   },
   {
     title: "Shut Down...",

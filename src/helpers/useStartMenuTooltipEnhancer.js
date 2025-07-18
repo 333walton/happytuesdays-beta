@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 
-// Normalize string to match tooltipMap keys
+// Normalize string for tooltipMap keys AND DOM matching
 const normalize = (str) =>
   (str || "")
     .replace(/^✓/, "") // Remove checkmark
     .replace(/[^\w\s]/g, "") // Remove symbols like ™, ®
+    .replace(/\s+/g, " ") // Collapse multiple spaces to one
     .trim()
     .toLowerCase();
 
@@ -14,11 +15,20 @@ const useStartMenuTooltipEnhancer = (menuData) => {
 
     const tooltipMap = {};
 
-    // Build normalized title => tooltip map
+    // Recursively build normalized title => tooltip mapping
     const buildMap = (items) => {
       items.forEach((item) => {
         if (item?.title && item?.tooltip) {
-          tooltipMap[normalize(item.title)] = item.tooltip;
+          // If title is a React node (e.g., <span>...</span>), try to get the string
+          const titleStr =
+            typeof item.title === "string"
+              ? item.title
+              : item.title?.props?.children
+              ? Array.isArray(item.title.props.children)
+                ? item.title.props.children.join(" ")
+                : item.title.props.children
+              : "";
+          tooltipMap[normalize(titleStr || item.title)] = item.tooltip;
         }
         if (Array.isArray(item.options)) {
           buildMap(item.options);
@@ -30,14 +40,25 @@ const useStartMenuTooltipEnhancer = (menuData) => {
     // Function to apply tooltips to menu items
     const enhanceTooltips = () => {
       const nodes = document.querySelectorAll(
-        ".StandardMenuItem:not([data-tooltip-applied])"
+        ".StandardMenuItem__button:not([data-tooltip-applied])"
       );
 
       nodes.forEach((node) => {
-        const label = node.textContent?.trim() || "";
+        let label = node.textContent || "";
+        label = label.replace(/\s+/g, " ").trim();
         const norm = normalize(label);
 
-        const tooltip = tooltipMap[norm];
+        let tooltip = tooltipMap[norm];
+
+        // Fallback: fuzzy match if exact match fails
+        if (!tooltip) {
+          for (const [key, value] of Object.entries(tooltipMap)) {
+            if (key === norm || key.includes(norm) || norm.includes(key)) {
+              tooltip = value;
+              break;
+            }
+          }
+        }
 
         if (tooltip) {
           node.setAttribute("title", tooltip);

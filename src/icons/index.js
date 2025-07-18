@@ -135,3 +135,6 @@ export { default as display_properties16 } from "./display_properties16-min.png"
 export { default as postit16 } from "./postit16-min.png";
 export { default as mailbox32 } from "./mailbox32-min.png";
 export { default as bricks32 } from "./bricks32-min.png";
+export { default as winrep16 } from "./winrep16-min.png";
+export { default as iesearch } from "./iesearch-min.png";
+export { default as desktop16 } from "./desktop16-min.png";

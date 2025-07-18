@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useEffect } from "react";
 import { Theme } from "packard-belle";
 import cx from "classnames";
 import "./App.css";
@@ -17,6 +17,7 @@ import MonitorView from "./components/MonitorView/MonitorView";
 import { ClippyProvider } from "./components/ClippyAssistant/index";
 import BIOSPixelEffect from "./components/BIOSPixelEffect/BIOSPixelEffect";
 import { Helmet, HelmetProvider } from "react-helmet-async";
+import { enableCustomMenuTooltips } from "./helpers/customTooltip";
 
 class Desktop extends Component {
   static contextType = SettingsContext;
@@ -63,6 +64,10 @@ class Desktop extends Component {
 
 const App = () => {
   const isBeta = process.env.REACT_APP_IS_BETA === "true";
+
+  useEffect(() => {
+    enableCustomMenuTooltips();
+  }, []);
 
   return (
     <HelmetProvider>

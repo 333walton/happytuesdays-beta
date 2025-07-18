@@ -331,7 +331,7 @@ const newsFeeds = [
 const productivityTools = [
   {
     title: "Enhanced Notes",
-    icon: icons.vid16,
+    icon: icons.winrep16,
     component: "",
     isDisabled: true,
   },
@@ -351,7 +351,7 @@ const productivityTools = [
   },
   {
     title: "Routine Tracker",
-    icon: icons.paint16,
+    icon: icons.desktop16,
     component: "IframeWindow",
     data: {
       src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
@@ -539,7 +539,7 @@ const builderTools = [
 const artDesignTools = [
   {
     title: "Art Gallery Finder",
-    icon: icons.vid16,
+    icon: icons.iesearch,
     component: "",
     isDisabled: true,
   },
