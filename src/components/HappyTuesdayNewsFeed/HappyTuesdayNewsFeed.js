@@ -1,11 +1,13 @@
 //This is ready for clean SPA routing and future Next.js migration
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const HappyTuesdayNewsFeed = ({
   inIE = false,
   initialTab = "blog",
   initialSubTab,
 }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab);
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
   const [feedItems, setFeedItems] = useState({});
@@ -70,7 +72,12 @@ const HappyTuesdayNewsFeed = ({
 
   const showTab = (tabName) => {
     setActiveTab(tabName);
-    // No need to call loadInitialFeed here; useEffect will handle it
+
+    if (tabName === "blog") {
+      navigate(`/feeds`);
+    } else {
+      navigate(`/feeds/${tabName}`);
+    }
   };
 
   // ... feedData, categories, styles (unchanged)
@@ -431,6 +438,7 @@ const HappyTuesdayNewsFeed = ({
       <div style={styles.content}>
         {/* Tabs */}
         <div style={styles.tabs}>
+          {/* Tabs */}
           {[
             { key: "blog", label: "Blog" },
             { key: "tech", label: "Tech Feed" },
@@ -505,23 +513,24 @@ const HappyTuesdayNewsFeed = ({
                   {activeTab.toUpperCase()} FEED
                 </h3>
                 <ul style={styles.subcategoryList}>
-                  {categories[activeTab]?.map((category, index) => (
-                    <li
-                      key={index}
-                      onClick={() =>
-                        loadFeed(
-                          category
-                            .toLowerCase()
-                            .replace(/\s+/g, "-")
-                            .replace(/&/g, "")
-                        )
-                      }
-                      style={styles.subcategoryItem}
-                      className="subcategory-item"
-                    >
-                      {category}
-                    </li>
-                  ))}
+                  {categories[activeTab]?.map((category, index) => {
+                    const subCatKebab = category
+                      .toLowerCase()
+                      .replace(/\s+/g, "-")
+                      .replace(/&/g, "");
+                    return (
+                      <li
+                        key={index}
+                        onClick={() =>
+                          navigate(`/feeds/${activeTab}/${subCatKebab}`)
+                        }
+                        style={styles.subcategoryItem}
+                        className="subcategory-item"
+                      >
+                        {category}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             </div>
