@@ -319,6 +319,18 @@ body {
   transform: translateY(-2px) translateX(-2px);
 }
 
+@media (min-width: 768px), (pointer: coarse) {
+  .StandardMenuItem__child,
+  .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-creative > .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-marketing > .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-builder > .Frame.StandardMenu.StandardMenuItem__child,
+  .submenu-align-bottom-artdesign
+    > .Frame.StandardMenu.StandardMenuItem__child {
+    transform: translateY(0px) translateX(6px) !important;
+  }
+}
+
 @media (max-width: 768px), (pointer: coarse) {
   .StandardMenuItem__child,
   .Frame.StandardMenu.StandardMenuItem__child,
@@ -340,7 +352,7 @@ body {
   .Frame.StandardMenu .Frame.StandardMenu .Frame.StandardMenu,
   .StandardMenuItem__child .StandardMenuItem__child .StandardMenu,
   .StandardMenu .StandardMenu .StandardMenu {
-    transform: translateY(0px) translateX(3px);
+    transform: translateY(0px) translateX(3px) !important;
   }
 
   /* 3rd level submenus - try these different selectors */
