@@ -269,6 +269,8 @@ const newsFeeds = [
       type: "happy-tuesday-feed",
       tab: "tech",
       title: "News Feed",
+      shouldNavigate: true,
+      navigateTo: "/feeds/tech",
     },
   },
   {
@@ -281,6 +283,8 @@ const newsFeeds = [
       type: "happy-tuesday-feed",
       tab: "builder",
       title: "News Feed",
+      shouldNavigate: true,
+      navigateTo: "/feeds/builder",
     },
   },
   {
@@ -293,6 +297,8 @@ const newsFeeds = [
       type: "happy-tuesday-feed",
       tab: "art",
       title: "News Feed",
+      shouldNavigate: true,
+      navigateTo: "/feeds/art",
     },
   },
   {
@@ -305,6 +311,8 @@ const newsFeeds = [
       type: "happy-tuesday-feed",
       tab: "gaming",
       title: "News Feed",
+      shouldNavigate: true,
+      navigateTo: "/feeds/gaming",
     },
   },
   {

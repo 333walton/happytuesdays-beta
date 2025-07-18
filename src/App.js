@@ -34,18 +34,25 @@ class Desktop extends Component {
 
   componentDidMount() {
     if (window.innerWidth < 800) this.context.toggleMobile(true);
-    this.autoOpenWindowFromRoute();
-  }
 
-  componentDidUpdate(prevProps) {
-    if (
-      this.props.defaultProgram &&
-      (prevProps.routerParams?.tab !== this.props.routerParams?.tab ||
-        prevProps.routerParams?.subtab !== this.props.routerParams?.subtab ||
-        prevProps.defaultProgram !== this.props.defaultProgram)
-    ) {
-      this.autoOpenWindowFromRoute();
+    // Override onOpen to handle navigation for News Feed items
+    const originalOnOpen = this.context.onOpen;
+    if (originalOnOpen) {
+      this.originalOnOpen = originalOnOpen;
+      this.context.onOpen = (programData) => {
+        // Check if this is a News Feed item that needs navigation
+        if (programData?.data?.shouldNavigate && programData.data.navigateTo) {
+          // Navigate first
+          this.props.navigate(programData.data.navigateTo);
+          // Then open the window (the route change will trigger autoOpenWindowFromRoute)
+        } else {
+          // Normal window opening
+          originalOnOpen(programData);
+        }
+      };
     }
+
+    this.autoOpenWindowFromRoute();
   }
 
   autoOpenWindowFromRoute() {

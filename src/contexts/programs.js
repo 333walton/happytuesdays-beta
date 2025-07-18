@@ -465,6 +465,22 @@ class ProgramProvider extends Component {
   };
 
   open = (program, options = {}) => {
+    // Check if this is a News Feed item that needs navigation
+    if (program?.data?.shouldNavigate && program.data.navigateTo) {
+      // Navigate to the route
+      if (window.location.pathname !== program.data.navigateTo) {
+        // Use React Router navigate if available through a global reference
+        if (window.__navigate) {
+          window.__navigate(program.data.navigateTo);
+        } else {
+          // Fallback to updating the URL (less ideal)
+          window.history.pushState({}, "", program.data.navigateTo);
+          window.dispatchEvent(new PopStateEvent("popstate"));
+        }
+      }
+      // Continue with normal window opening
+    }
+
     const isBlockingProgramRunning = Object.values(
       this.state.activePrograms
     ).some((prog) => ["Doom", "JSDos"].includes(prog.component));
