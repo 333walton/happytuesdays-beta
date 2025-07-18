@@ -36,6 +36,32 @@ export function enableCustomMenuTooltips() {
       tooltipTimer = null;
     }
 
+    document.addEventListener("DOMContentLoaded", () => {
+      const tooltip = document.createElement("div");
+      tooltip.className = "custom-tooltip";
+      document.body.appendChild(tooltip);
+      tooltip.style.display = "none";
+
+      document.querySelectorAll("[data-tooltip]").forEach((el) => {
+        el.addEventListener("mouseenter", (e) => {
+          const tooltipText = el.getAttribute("data-tooltip");
+          tooltip.textContent = tooltipText;
+
+          // Fixed offset from cursor
+          const offsetX = 10; // right
+          const offsetY = 50; // lower
+
+          tooltip.style.left = `${e.clientX + offsetX}px`;
+          tooltip.style.top = `${e.clientY + offsetY}px`;
+          tooltip.style.display = "block";
+        });
+
+        el.addEventListener("mouseleave", () => {
+          tooltip.style.display = "none";
+        });
+      });
+    });
+
     // Start a timer for standard tooltip delay (500ms)
     tooltipTimer = setTimeout(() => {
       tooltipEl = document.createElement("div");
@@ -67,7 +93,7 @@ export function enableCustomMenuTooltips() {
         window.removeEventListener("resize", positionTooltip, true);
         window.removeEventListener("scroll", positionTooltip, true);
       };
-    }, 800); // 800ms delay (matches browser tooltips)
+    }, 1000); // 1000ms delay (matches browser tooltips)
   }
 
   function hideTooltip(e) {

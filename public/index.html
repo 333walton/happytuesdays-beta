@@ -458,7 +458,7 @@
 
     // Also update the typewriterEffectSysinfo function to handle the spacing better:
 
-    function typewriterEffectSysinfo(element, lines, speedPerChar = 6, perLineDelay = 6, callback) {
+    function typewriterEffectSysinfo(element, lines, speedPerChar = 5, perLineDelay = 5, callback) {
       let currentLine = 0;
       function typeLine() {
         if (currentLine >= lines.length) {
