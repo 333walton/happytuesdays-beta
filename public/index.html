@@ -151,7 +151,7 @@
 
     .BIOS__bootHeader {
       background-color: #000000;
-      font-size: 10px;
+      font-size: 10.5px;
       letter-spacing: .88px;
       line-height: .89em;
     }
@@ -261,28 +261,23 @@
     }
 
     .bios-sysinfo {
-      font-family: 'Fira Mono', 'IBM Plex Mono', 'Courier New', Courier, monospace;
-      font-size: 11px;
-      /* Try 13-15px for tall grid */
+      font-family: 'Courier New', Courier, monospace, FixedSys, AMIBios;
+      font-size: 10.5px;
       color: #d4fe6b;
-      /* Or #b7ff56 for "phosphor" look */
       margin: 0;
       padding: 0;
       white-space: pre;
-      letter-spacing: .86px;
+      letter-spacing: 0px;
+      /* Remove letter spacing for true monospace */
       line-height: .89em;
       display: block;
-      /*changed from grid*/
-      /*grid-template-columns: max-content auto;
-  gap: 2px 12px;
-  white-space: pre-wrap;*/
     }
 
 
     @media (max-width: 600px) {
       .BIOS__logo {
         justify-content: flex-end;
-        padding-right: 10px;
+        padding-right: 10.5px;
       }
 
       .left-image {
@@ -349,7 +344,7 @@
     function getSystemFields() {
       const nav = window.navigator;
       const loc = window.location;
-      const TOTAL_WIDTH = 64;  // match your desired rectangle width
+      const TOTAL_WIDTH = 59;  // match your desired rectangle width
 
       // ❗ Declare SEP at the top level of getSystemFields, before formatLine
       const SEP = '='.repeat(TOTAL_WIDTH);
@@ -463,7 +458,7 @@
 
     // Also update the typewriterEffectSysinfo function to handle the spacing better:
 
-    function typewriterEffectSysinfo(element, lines, speedPerChar = 4, perLineDelay = 8, callback) {
+    function typewriterEffectSysinfo(element, lines, speedPerChar = 5, perLineDelay = 7, callback) {
       let currentLine = 0;
       function typeLine() {
         if (currentLine >= lines.length) {
@@ -555,21 +550,20 @@
     function staggerElements(elems, entry) {
       if (!elems[entry]) {
         setTimeout(() => {
-          // Add separator line before Memory Test
+          // Add separator line before Memory Test with typewriter effect
           const separatorLine = document.createElement('div');
-          separatorLine.style.fontFamily = 'MS Sans Serif', 'Fira Mono', 'IBM Plex Mono', 'Courier New';
+          separatorLine.style.fontFamily = "'Courier New', Courier, monospace";
           separatorLine.style.color = "#d4fe6b";
-          separatorLine.style.fontSize = "11px";
+          separatorLine.style.fontSize = "10.5px";
           separatorLine.style.letterSpacing = ".86px";
           separatorLine.style.lineHeight = ".89em";
-          separatorLine.style.marginBottom = "0px";
-          separatorLine.textContent = '='.repeat(64);
+          separatorLine.style.marginBottom = "4px";
 
           let bootContainer = document.getElementById("BIOS__bootContainer");
           bootContainer.appendChild(separatorLine);
 
           // Apply typewriter effect to the separator line
-          typewriterEffect(separatorLine, '='.repeat(64), 15, function () {
+          typewriterEffect(separatorLine, '='.repeat(59), 15, function () {
             // Continue with memory test after separator is complete
 
             // Memory test line
@@ -579,7 +573,7 @@
   <span style="color: #d4fe6b;">65536K OK</span>
   <span class="typewriter-cursor"></span>
 `;
-            // Continue with memory test after separator is complete
+
             function countUpMemoryTest(parentElem, options = {}, onDone) {
               // RAM, extended, and cache options
               const RAM_OPTIONS = [640, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288];
@@ -592,8 +586,8 @@
               const duration = options.duration || 1800 + Math.floor(Math.random() * 700);
               const extendedRAM = targetKB > 65536 ? targetKB - 1024 : 0;
               const cacheSRAM = [128, 256, 512][Math.floor(Math.random() * 3)];
-              const TOTAL_WIDTH = 64; // Match the main TOTAL_WIDTH
-              const SEP = '='.repeat(64);
+              const TOTAL_WIDTH = 59; // Match the main TOTAL_WIDTH
+              const SEP = '='.repeat(59);
 
               // Helper: Dotted style, right-aligned value with perfect alignment
               function infoLine(label, value, suffix = "K OK") {
@@ -617,9 +611,9 @@
               }
 
               const memoryLine = document.createElement('div');
-              memoryLine.style.fontFamily = "AMIBios, 'Fira Mono', 'Courier New', Courier, monospace";
+              memoryLine.style.fontFamily = "'Courier New', Courier, monospace";
               memoryLine.style.color = "#d4fe6b";
-              memoryLine.style.fontSize = "11px";
+              memoryLine.style.fontSize = "10.5px";
               memoryLine.style.letterSpacing = ".86px";
               memoryLine.style.lineHeight = ".89em";
               memoryLine.style.marginBottom = "4px";
@@ -678,7 +672,7 @@
             fakeBootLine.style.fontSize = "10.5px";
             fakeBootLine.style.letterSpacing = ".86px";
             fakeBootLine.style.lineHeight = ".89em";
-            fakeBootLine.style.marginBottom = "10px";
+            fakeBootLine.style.marginBottom = "4px";
             countUpMemoryTest(bootContainer, {}, function () {
               // Continue after all lines are animated
               const sysinfoContainer = document.createElement('pre');
@@ -946,6 +940,7 @@
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
         <p>BIOS Version 18.3.1 REACT</p>
+        <p> </p>
         <p>v0.9.8 beta</p>
       </div>
       <div class="BIOS__bootMessage4">

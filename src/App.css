@@ -277,6 +277,7 @@ body {
 @media (max-width: 768px) {
   .BIOS__bootHeader {
     top: -60px;
+    line-height: 0.9em;
   }
 
   .BIOS__bootMessage4 {
@@ -285,7 +286,7 @@ body {
 }
 
 .BIOS__bootHeader {
-  margin-top: -55px;
+  margin-top: -70px;
 }
 
 /* Remove position: relative for these specific menu items */
@@ -619,4 +620,38 @@ body {
   right: 0;
   height: auto;
   position: absolute;
+}
+
+.BIOS,
+.BIOS *,
+.BIOSWrapper,
+.BIOSWrapper *,
+.BIOS__bootContainer,
+.BIOS__bootContainer *,
+.BIOS__bootMessage4,
+.BIOS__bootMessage4 *,
+#BIOS__bootContainer,
+#BIOS__bootContainer *,
+.bios-sysinfo,
+.bios-sysinfo *,
+.bios-sysinfo span,
+pre.bios-sysinfo,
+pre.bios-sysinfo * {
+  font-family: "Courier New", Courier, monospace !important;
+  letter-spacing: 0px !important;
+}
+
+/* Override 98.css specifically for BIOS elements */
+.BIOS div,
+.BIOS span,
+.BIOS p,
+.BIOSWrapper div,
+.BIOSWrapper span,
+.BIOSWrapper p {
+  font-family: "Courier New", Courier, monospace !important;
+}
+
+/* Target dynamically created elements */
+div[style*="font-family"] {
+  font-family: "Courier New", Courier, monospace !important;
 }
