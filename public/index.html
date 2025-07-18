@@ -458,7 +458,7 @@
 
     // Also update the typewriterEffectSysinfo function to handle the spacing better:
 
-    function typewriterEffectSysinfo(element, lines, speedPerChar = 5, perLineDelay = 7, callback) {
+    function typewriterEffectSysinfo(element, lines, speedPerChar = 6, perLineDelay = 6, callback) {
       let currentLine = 0;
       function typeLine() {
         if (currentLine >= lines.length) {
@@ -558,6 +558,8 @@
           separatorLine.style.letterSpacing = ".86px";
           separatorLine.style.lineHeight = ".89em";
           separatorLine.style.marginBottom = "4px";
+          separatorLine.style.marginTop = "-8px";
+
 
           let bootContainer = document.getElementById("BIOS__bootContainer");
           bootContainer.appendChild(separatorLine);
@@ -570,7 +572,7 @@
             const fakeBootLine = document.createElement('div');
             fakeBootLine.innerHTML = `
   <span>Memory Test:</span>
-  <span style="color: #d4fe6b;">65536K OK</span>
+  <span style="color: #d4fe6b;">65536k OK</span>
   <span class="typewriter-cursor"></span>
 `;
 
@@ -590,13 +592,13 @@
               const SEP = '='.repeat(59);
 
               // Helper: Dotted style, right-aligned value with perfect alignment
-              function infoLine(label, value, suffix = "K OK") {
+              function infoLine(label, value, suffix = "k OK") {
                 label = label + '';
                 value = value + '';
                 const totalContentLength = label.length + 1 + value.length + 1 + suffix.length; // +1 for colon, +1 for space
                 let dotsLen = Math.max(1, TOTAL_WIDTH - totalContentLength);
                 let dots = '.'.repeat(dotsLen);
-                const result = `<span>${label}:${dots}${value} ${suffix}</span>`;
+                const result = `<span>${label}:${dots}${value}${suffix}</span>`;
                 return result;
               }
 
@@ -625,24 +627,24 @@
 
               function update() {
                 if (current >= targetKB) {
-                  memoryLine.innerHTML = infoLine('Memory Test', targetKB.toString().padStart(6, '0'), 'K OK');
+                  memoryLine.innerHTML = infoLine('Memory Test', targetKB.toString().padStart(6, '0'), 'k OK');
                   // Extra dotted lines (Cache SRAM, localStorage, Extended RAM)
                   setTimeout(() => {
                     if (extendedRAM) {
                       let ext = document.createElement('div');
                       ext.style.cssText = memoryLine.style.cssText;
-                      ext.innerHTML = infoLine('Extended RAM', extendedRAM.toString(), 'K OK');
+                      ext.innerHTML = infoLine('Extended RAM', extendedRAM.toString(), 'k OK');
                       parentElem.appendChild(ext);
                     }
                     let cache = document.createElement('div');
                     cache.style.cssText = memoryLine.style.cssText;
-                    cache.innerHTML = infoLine('Cache SRAM', cacheSRAM.toString(), 'K OK');
+                    cache.innerHTML = infoLine('Cache SRAM', cacheSRAM.toString(), 'k OK');
                     parentElem.appendChild(cache);
 
                     let localKB = getLocalStorageSizeKB();
                     let localDiv = document.createElement('div');
                     localDiv.style.cssText = memoryLine.style.cssText;
-                    localDiv.innerHTML = infoLine('localStorage', localKB.toString(), 'K used');
+                    localDiv.innerHTML = infoLine('localStorage', localKB.toString(), 'k used');
                     parentElem.appendChild(localDiv);
 
                     if (onDone) setTimeout(onDone, 600);
@@ -940,8 +942,7 @@
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
         <p>BIOS Version 18.3.1 REACT</p>
-        <p> </p>
-        <p>v0.9.8 beta</p>
+        <p style="margin-top: 35px; margin-bottom: 0px;">v0.9.8 beta</p>
       </div>
       <div class="BIOS__bootMessage4">
         <div id="BIOS__bootContainer"></div>
