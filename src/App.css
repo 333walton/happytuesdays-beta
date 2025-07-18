@@ -277,11 +277,11 @@ body {
 @media (max-width: 768px) {
   .BIOS__bootHeader {
     top: -60px;
-    line-height: 0.9em;
+    line-height: 0.4em;
   }
 
   .BIOS__bootMessage4 {
-    margin-top: 80px;
+    margin-top: 40px;
   }
 }
 
@@ -654,4 +654,16 @@ pre.bios-sysinfo * {
 /* Target dynamically created elements */
 div[style*="font-family"] {
   font-family: "Courier New", Courier, monospace !important;
+}
+
+.version-label {
+  margin-top: 35px;
+  margin-bottom: 0px; /* default for desktop */
+}
+
+/* Mobile-specific margin adjustments */
+@media (max-width: 768px) {
+  .version-label {
+    margin-top: 85px;
+  }
 }

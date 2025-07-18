@@ -558,7 +558,8 @@
           separatorLine.style.letterSpacing = ".86px";
           separatorLine.style.lineHeight = ".89em";
           separatorLine.style.marginBottom = "4px";
-          separatorLine.style.marginTop = "-8px";
+          separatorLine.style.marginTop = window.innerWidth <= 768 ? "-29px" : "-8px";
+
 
 
           let bootContainer = document.getElementById("BIOS__bootContainer");
@@ -942,7 +943,7 @@
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
         <p>BIOS Version 18.3.1 REACT</p>
-        <p style="margin-top: 35px; margin-bottom: 0px;">v0.9.8 beta</p>
+        <p class="version-label">v0.9.8 beta</p>
       </div>
       <div class="BIOS__bootMessage4">
         <div id="BIOS__bootContainer"></div>
