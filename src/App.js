@@ -51,37 +51,37 @@ class Desktop extends Component {
   autoOpenWindowFromRoute() {
     const { defaultProgram, routerParams } = this.props;
     if (!defaultProgram || !this.context.onOpen) return;
+
     if (defaultProgram === "feeds") {
       const { tab, subtab } = routerParams || {};
-
-      // Find a matching "programData" for the feeds category and subcategory
       let programData;
-
       if (tab) {
-        // Find by tab (category) in start menu data
         programData = startMenuData.find(
           (item) => item.data && item.data.tab === tab
         );
-        // If found, add the subtab info to data
         if (programData && subtab) {
           programData = {
             ...programData,
-            data: {
-              ...programData.data,
-              subtab,
-            },
+            data: { ...programData.data, subtab },
           };
         }
       } else {
-        // If just /feeds, open main Feeds from desktop icons
         programData = desktopData.find((item) => item.title === "Feeds");
       }
-
       if (programData) {
-        this.context.onOpen(programData);
+        // Always open or bring to front!
+        if (this.context.isProgramActive) {
+          const isActive = this.context.isProgramActive(programData.id);
+          if (!isActive) {
+            this.context.onOpen(programData); // Open if not open
+          } else if (this.context.moveToTop) {
+            this.context.moveToTop(programData.id); // Bring to front if open
+          }
+        } else {
+          this.context.onOpen(programData);
+        }
       }
     }
-    // You can expand with other defaultProgram logic for other site sections here
   }
 
   renderFeedsWindow(tab, subtab) {
