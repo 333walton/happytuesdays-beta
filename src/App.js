@@ -61,36 +61,50 @@ class Desktop extends Component {
 
     if (defaultProgram === "feeds") {
       const { tab, subtab } = routerParams || {};
-      let programData;
-      if (tab) {
-        programData = startMenuData.find(
-          (item) => item.data && item.data.tab === tab
-        );
-        if (programData && subtab) {
-          programData = {
-            ...programData,
-            data: { ...programData.data, subtab },
-          };
-        }
-      } else {
-        programData = desktopData.find((item) => item.title === "Feeds");
+
+      // Find the Feeds program data
+      let programData = desktopData.find((item) => item.title === "Feeds");
+
+      // If we don't find it in desktopData, create a basic one
+      if (!programData) {
+        programData = {
+          title: "Feeds",
+          component: "HappyTuesdayNewsFeed",
+          icon: "feeds32", // Use appropriate icon
+        };
       }
 
-      if (programData) {
-        // Try to find if the Feeds program is already active
-        const active = Object.values(this.context.activePrograms || {}).find(
-          (prog) =>
-            prog.title === "Feeds" ||
-            prog.component === "HappyTuesdayNewsFeed" ||
-            (prog.data && prog.data.component === "HappyTuesdayNewsFeed")
-        );
+      // Add the tab and subtab data
+      programData = {
+        ...programData,
+        data: {
+          ...programData.data,
+          initialTab: tab || "blog",
+          initialSubTab: subtab,
+        },
+      };
 
-        if (!active) {
-          // Open it if not already open
-          this.context.onOpen(programData);
-        } else if (this.context.moveToTop) {
-          // Bring it to front if already open
-          this.context.moveToTop(active.id);
+      // Try to find if the Feeds program is already active
+      const active = Object.values(this.context.activePrograms || {}).find(
+        (prog) =>
+          prog.title === "Feeds" ||
+          prog.component === "HappyTuesdayNewsFeed" ||
+          (prog.data && prog.data.component === "HappyTuesdayNewsFeed")
+      );
+
+      if (!active) {
+        // Open it if not already open
+        this.context.onOpen(programData);
+      } else if (this.context.moveToTop) {
+        // Bring it to front if already open
+        this.context.moveToTop(active.id);
+
+        // Update the active window with new tab/subtab data
+        if (this.context.updateProgramData) {
+          this.context.updateProgramData(active.id, {
+            initialTab: tab || "blog",
+            initialSubTab: subtab,
+          });
         }
       }
     }

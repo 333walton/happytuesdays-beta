@@ -1,6 +1,6 @@
 //This is ready for clean SPA routing and future Next.js migration
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const HappyTuesdayNewsFeed = ({
   inIE = false,
@@ -8,11 +8,26 @@ const HappyTuesdayNewsFeed = ({
   initialSubTab,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState(initialTab);
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
   const [feedItems, setFeedItems] = useState({});
   const [loading, setLoading] = useState({});
 
+  useEffect(() => {
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    if (pathParts[0] === "feeds") {
+      const newTab = pathParts[1] || "blog";
+      const newSubTab = pathParts[2];
+
+      if (newTab !== activeTab) {
+        setActiveTab(newTab);
+      }
+      if (newSubTab !== activeSubTab) {
+        setActiveSubTab(newSubTab);
+      }
+    }
+  }, [location.pathname]);
   // Update tab/subtab on prop change
   useEffect(() => {
     setActiveTab(initialTab);
