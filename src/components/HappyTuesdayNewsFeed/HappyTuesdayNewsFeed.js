@@ -1,24 +1,41 @@
+//This is ready for clean SPA routing and future Next.js migration
 import React, { useState, useEffect } from "react";
 
-const HappyTuesdayNewsFeed = ({ inIE = false, initialTab = "blog" }) => {
+const HappyTuesdayNewsFeed = ({
+  inIE = false,
+  initialTab = "blog",
+  initialSubTab,
+}) => {
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
   const [feedItems, setFeedItems] = useState({});
   const [loading, setLoading] = useState({});
 
-  // When activeTab changes (including initial mount), load feed items if not "blog"
+  // Update tab/subtab on prop change
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
+  useEffect(() => {
+    setActiveSubTab(initialSubTab);
+  }, [initialSubTab]);
+
+  // When tab (category) changes, load its items if not "blog"
   useEffect(() => {
     if (activeTab !== "blog" && !feedItems[activeTab]) {
       loadInitialFeed(activeTab);
     }
-    // eslint-disable-next-line
   }, [activeTab]);
 
-  // If initialTab prop changes, update activeTab
+  // When subtab (subcategory) changes, and not on blog, load corresponding feed
   useEffect(() => {
-    setActiveTab(initialTab);
-    // Optionally reset feedItems if you want a fresh reload on tab change:
-    // setFeedItems({});
-  }, [initialTab]);
+    if (activeSubTab && activeTab !== "blog") {
+      loadFeed(activeSubTab);
+    }
+    // Optionally, clear subcategory if changing to main blog
+    if (activeTab === "blog") {
+      setActiveSubTab(undefined);
+    }
+  }, [activeSubTab, activeTab]);
 
   const loadInitialFeed = (feedType) => {
     setLoading((prev) => ({ ...prev, [feedType]: true }));

@@ -2,6 +2,7 @@ import React, { Component, useEffect } from "react";
 import { Theme } from "packard-belle";
 import cx from "classnames";
 import "./App.css";
+// Components
 import TaskBar from "./components/TaskBar";
 import WindowManager from "./components/WindowManager";
 import ProgramProvider from "./contexts/programs";
@@ -18,32 +19,92 @@ import { ClippyProvider } from "./components/ClippyAssistant/index";
 import BIOSPixelEffect from "./components/BIOSPixelEffect/BIOSPixelEffect";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import { enableCustomMenuTooltips } from "./helpers/customTooltip";
+import { Routes, Route } from "react-router-dom";
+import { withRouterParams } from "./components/withRouterParams";
+import HappyTuesdayNewsFeed from "./components/HappyTuesdayNewsFeed/HappyTuesdayNewsFeed";
+// Program data
+import desktopData from "./data/desktop";
+import startMenuData from "./data/start";
 
+//
+// DESKTOP COMPONENT:
+//
 class Desktop extends Component {
   static contextType = SettingsContext;
 
   componentDidMount() {
-    if (window.innerWidth < 800) {
-      this.context.toggleMobile(true);
+    if (window.innerWidth < 800) this.context.toggleMobile(true);
+    this.autoOpenWindowFromRoute();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      this.props.defaultProgram &&
+      (prevProps.routerParams?.tab !== this.props.routerParams?.tab ||
+        prevProps.routerParams?.subtab !== this.props.routerParams?.subtab ||
+        prevProps.defaultProgram !== this.props.defaultProgram)
+    ) {
+      this.autoOpenWindowFromRoute();
     }
-    console.log(
-      "Desktop mounted, Clippy will be initialized by ClippyProvider"
+  }
+
+  autoOpenWindowFromRoute() {
+    const { defaultProgram, routerParams } = this.props;
+    if (!defaultProgram || !this.context.onOpen) return;
+    if (defaultProgram === "feeds") {
+      const { tab, subtab } = routerParams || {};
+
+      // Find a matching "programData" for the feeds category and subcategory
+      let programData;
+
+      if (tab) {
+        // Find by tab (category) in start menu data
+        programData = startMenuData.find(
+          (item) => item.data && item.data.tab === tab
+        );
+        // If found, add the subtab info to data
+        if (programData && subtab) {
+          programData = {
+            ...programData,
+            data: {
+              ...programData.data,
+              subtab,
+            },
+          };
+        }
+      } else {
+        // If just /feeds, open main Feeds from desktop icons
+        programData = desktopData.find((item) => item.title === "Feeds");
+      }
+
+      if (programData) {
+        this.context.onOpen(programData);
+      }
+    }
+    // You can expand with other defaultProgram logic for other site sections here
+  }
+
+  renderFeedsWindow(tab, subtab) {
+    return (
+      <HappyTuesdayNewsFeed initialTab={tab || "blog"} initialSubTab={subtab} />
     );
   }
 
   render() {
-    const { context } = this;
-    const isMobile = context.isMobile;
-
+    const isMobile = this.context.isMobile;
+    // ...your normal window and desktop rendering logic
+    // In your code, ProgramProvider and WindowManager should render program windows.
+    // In the place where you render window contents,
+    // you will render this.renderFeedsWindow(tab, subtab)
     return (
       <ProgramProvider>
         <MonitorView>
           <Theme
             className={cx("desktop screen", {
-              desktopX2: context.scale === 2,
-              desktopX1_5: context.scale === 1.5,
+              desktopX2: this.context.scale === 2,
+              desktopX1_5: this.context.scale === 1.5,
               notMobile: !isMobile,
-              fullScreen: context.fullScreen,
+              fullScreen: this.context.fullScreen,
             })}
           >
             <Background />
@@ -54,7 +115,7 @@ class Desktop extends Component {
             <Settings />
             <ShutDown />
             <ClippyProvider defaultAgent="Clippy" />
-            {context.crt && <CRTOverlay />}
+            {this.context.crt && <CRTOverlay />}
           </Theme>
         </MonitorView>
       </ProgramProvider>
@@ -62,22 +123,35 @@ class Desktop extends Component {
   }
 }
 
-const App = () => {
-  const isBeta = process.env.REACT_APP_IS_BETA === "true";
+//
+// WRAP Desktop so it receives route params as props
+//
+const DesktopWithParams = withRouterParams(Desktop);
 
+const App = () => {
   useEffect(() => {
     enableCustomMenuTooltips();
   }, []);
-
   return (
     <HelmetProvider>
-      <Helmet>
-        {isBeta && <meta name="robots" content="noindex, nofollow" />}
-      </Helmet>
-
+      <Helmet>{/*...*/}</Helmet>
       <SettingsProvider>
         <BIOSPixelEffect />
-        <Desktop />
+        <Routes>
+          <Route path="/" element={<DesktopWithParams />} />
+          <Route
+            path="/feeds"
+            element={<DesktopWithParams defaultProgram="feeds" />}
+          />
+          <Route
+            path="/feeds/:tab"
+            element={<DesktopWithParams defaultProgram="feeds" />}
+          />
+          <Route
+            path="/feeds/:tab/:subtab"
+            element={<DesktopWithParams defaultProgram="feeds" />}
+          />
+        </Routes>
       </SettingsProvider>
     </HelmetProvider>
   );
