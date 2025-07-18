@@ -57,16 +57,23 @@ class Desktop extends Component {
 
   autoOpenWindowFromRoute() {
     const { defaultProgram, routerParams } = this.props;
+    console.log("autoOpenWindowFromRoute called", {
+      defaultProgram,
+      routerParams,
+    });
+
     if (!defaultProgram || !this.context.onOpen) return;
 
     if (defaultProgram === "feeds") {
       const { tab, subtab } = routerParams || {};
+      console.log("Opening feeds with", { tab, subtab });
 
       // Find the Feeds program data
       let programData = desktopData.find((item) => item.title === "Feeds");
 
       // If we don't find it in desktopData, create a basic one
       if (!programData) {
+        console.log("Creating new programData for Feeds");
         programData = {
           title: "Feeds",
           component: "HappyTuesdayNewsFeed",
@@ -84,6 +91,8 @@ class Desktop extends Component {
         },
       };
 
+      console.log("Final programData:", programData);
+
       // Try to find if the Feeds program is already active
       const active = Object.values(this.context.activePrograms || {}).find(
         (prog) =>
@@ -94,9 +103,11 @@ class Desktop extends Component {
 
       if (!active) {
         // Open it if not already open
+        console.log("Opening new Feeds window");
         this.context.onOpen(programData);
       } else if (this.context.moveToTop) {
         // Bring it to front if already open
+        console.log("Moving existing Feeds window to top");
         this.context.moveToTop(active.id);
 
         // Update the active window with new tab/subtab data
