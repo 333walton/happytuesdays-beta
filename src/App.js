@@ -68,17 +68,22 @@ class Desktop extends Component {
       } else {
         programData = desktopData.find((item) => item.title === "Feeds");
       }
+
       if (programData) {
-        // Always open or bring to front!
-        if (this.context.isProgramActive) {
-          const isActive = this.context.isProgramActive(programData.id);
-          if (!isActive) {
-            this.context.onOpen(programData); // Open if not open
-          } else if (this.context.moveToTop) {
-            this.context.moveToTop(programData.id); // Bring to front if open
-          }
-        } else {
+        // Try to find if the Feeds program is already active
+        const active = Object.values(this.context.activePrograms || {}).find(
+          (prog) =>
+            prog.title === "Feeds" ||
+            prog.component === "HappyTuesdayNewsFeed" ||
+            (prog.data && prog.data.component === "HappyTuesdayNewsFeed")
+        );
+
+        if (!active) {
+          // Open it if not already open
           this.context.onOpen(programData);
+        } else if (this.context.moveToTop) {
+          // Bring it to front if already open
+          this.context.moveToTop(active.id);
         }
       }
     }

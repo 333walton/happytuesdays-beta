@@ -10,23 +10,27 @@ const DesktopView = () => {
   const { desktop, recycleEmpty = true, setRecycleBinFull } = programContext;
   const navigate = useNavigate();
 
+  // Single click does nothing (or highlight/select if you want)
   const handleClick = (option) => {
-    // Example: highlight/select icons, not open Feeds.
+    // Optional: handle selection/focus here, but do NOT open apps/windows
     if (option.title === "Recycle") {
       setRecycleBinFull(recycleEmpty);
     }
     if (option.onClick) {
       option.onClick(option);
     }
-    if (option.component === "Clippy" || option.title === "Office Assistant") {
-      tryOpenProgram(option);
+    // Intentionally do NOT open any windows/programs here!
+  };
+
+  // Double-click: always opens the window/program
+  const handleDoubleClick = (option) => {
+    if (option.title === "Feeds") {
+      navigate("/feeds");
     }
+    tryOpenProgram(option);
   };
 
-  const handleFeedsDoubleClick = (option) => {
-    navigate("/feeds");
-  };
-
+  // Typical "open" logic
   const tryOpenProgram = (option) => {
     if (programContext.onOpen) {
       programContext.onOpen(option);
@@ -44,17 +48,14 @@ const DesktopView = () => {
             ? icons.recycleempty32
             : icons.recyclefull32
           : option.icon;
+
         return (
           <ExplorerIcon
             key={option.id || option.title}
             {...option}
             icon={icon}
             onClick={() => handleClick(option)}
-            onDoubleClick={
-              option.title === "Feeds"
-                ? () => handleFeedsDoubleClick(option)
-                : undefined
-            }
+            onDoubleClick={() => handleDoubleClick(option)}
             className={`ExplorerIcon icon ${isRecycle ? "recycle-icon" : ""}`}
           />
         );
