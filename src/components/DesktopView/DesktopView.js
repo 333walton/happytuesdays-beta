@@ -3,25 +3,25 @@ import { ExplorerView, ExplorerIcon } from "packard-belle";
 import { ProgramContext } from "../../contexts";
 import * as icons from "../../icons";
 import "./_styles.scss";
+import { useNavigate } from "react-router-dom";
 
 const DesktopView = () => {
-  // Get all context values at once at the component level
   const programContext = useContext(ProgramContext);
   const { desktop, recycleEmpty = true, setRecycleBinFull } = programContext;
+  const navigate = useNavigate();
 
   const handleClick = (option) => {
-    if (option.title === "Recycle") {
-      setRecycleBinFull(recycleEmpty); // 🔄 Toggle full ⇄ empty
+    if (option.title === "Feeds") {
+      navigate("/feeds");
+      return; // Prevents duplicate window opening/actions for Feeds icon
     }
-
+    if (option.title === "Recycle") {
+      setRecycleBinFull(recycleEmpty);
+    }
     if (option.onClick) {
       option.onClick(option);
     }
-
-    // Try to handle opening programs directly
     if (option.component === "Clippy" || option.title === "Office Assistant") {
-      console.log("Clicked Office Assistant");
-      // Try different methods to open the program
       tryOpenProgram(option);
     }
   };
@@ -55,7 +55,6 @@ const DesktopView = () => {
 
   return (
     <ExplorerView>
-      {/* Render existing desktop icons */}
       {desktop.map((option) => {
         const isRecycle = option.title === "Recycle";
         const icon = isRecycle
@@ -63,7 +62,6 @@ const DesktopView = () => {
             ? icons.recycleempty32
             : icons.recyclefull32
           : option.icon;
-
         return (
           <ExplorerIcon
             key={option.id || option.title}

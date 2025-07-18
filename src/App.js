@@ -19,7 +19,7 @@ import { ClippyProvider } from "./components/ClippyAssistant/index";
 import BIOSPixelEffect from "./components/BIOSPixelEffect/BIOSPixelEffect";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import { enableCustomMenuTooltips } from "./helpers/customTooltip";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { withRouterParams } from "./components/withRouterParams";
 import HappyTuesdayNewsFeed from "./components/HappyTuesdayNewsFeed/HappyTuesdayNewsFeed";
 // Program data
@@ -126,7 +126,13 @@ class Desktop extends Component {
 //
 // WRAP Desktop so it receives route params as props
 //
-const DesktopWithParams = withRouterParams(Desktop);
+function DesktopWithRouter(props) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  return <Desktop {...props} navigate={navigate} location={location} />;
+}
+
+const DesktopWithParams = withRouterParams(DesktopWithRouter);
 
 const App = () => {
   useEffect(() => {
@@ -156,5 +162,4 @@ const App = () => {
     </HelmetProvider>
   );
 };
-
 export default App;

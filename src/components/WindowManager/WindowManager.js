@@ -18,16 +18,10 @@ class WindowManager extends Component {
   componentDidUpdate(prevProps) {
     // When window becomes active, ensure CSS class is properly applied
     if (!prevProps.isActive && this.props.isActive) {
-      // Force a reflow to ensure CSS updates
       const windowElement = this.windowRef.current;
       if (windowElement) {
-        // Read a property to force reflow
         void windowElement.offsetHeight;
-
-        // Ensure the active class is applied
         windowElement.classList.add("Window--active");
-
-        // Remove any inline filter styles that might override CSS
         windowElement.style.filter = "";
         windowElement.style.webkitFilter = "";
       }
@@ -38,14 +32,10 @@ class WindowManager extends Component {
       this.props.activationNonce !== prevProps.activationNonce &&
       this.props.isActive
     ) {
-      // Force re-render when activation nonce changes
       this.forceUpdate(() => {
         const windowElement = this.windowRef.current;
         if (windowElement) {
-          // Trigger reflow without transform effects
           void windowElement.offsetHeight;
-
-          // Ensure active class is applied
           windowElement.classList.add("Window--active");
         }
       });
@@ -91,16 +81,30 @@ class WindowManager extends Component {
   }
 
   handleProgramClose = (prog) => {
-    // Call the standard close handler
+    // Close the program using context
     if (this.context.onClose) {
       this.context.onClose(prog);
     }
 
+    // --- ROUTING LOGIC: When closing Feeds, go to homepage ---
+    if (
+      prog &&
+      (prog.title === "Feeds" ||
+        prog.component === "HappyTuesdayNewsFeed" ||
+        (prog.data &&
+          (prog.data.component === "HappyTuesdayNewsFeed" ||
+            prog.data.type === "happy-tuesday-feed" ||
+            (typeof prog.data.title === "string" &&
+              prog.data.title.toLowerCase().includes("happy tuesday")))))
+    ) {
+      if (this.props.navigate) {
+        this.props.navigate("/");
+      }
+    }
+
     // Check if this program has a parent explorer
     if (prog && prog.parentExplorerId) {
-      // Use a micro-task to ensure the close operation completes first
       Promise.resolve().then(() => {
-        // Force the parent explorer to re-activate
         if (this.context.moveToTop) {
           this.context.moveToTop(prog.parentExplorerId);
         }
@@ -115,7 +119,6 @@ class WindowManager extends Component {
           const prog = this.context.activePrograms[progId];
           const Application = Applications[prog.component];
           if (!Application) return null;
-
           const isActive = prog.id === this.context.activeId;
 
           return (
