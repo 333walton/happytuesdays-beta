@@ -37,6 +37,8 @@ class InternetExplorer extends Component {
       window.location.pathname +
       window.location.search +
       window.location.hash,
+    isRefreshing: false,
+    refreshKey: 0,
   };
 
   componentDidMount() {
@@ -141,6 +143,25 @@ class InternetExplorer extends Component {
     }
   };
 
+  handleRefresh = () => {
+    // Trigger refresh animation
+    this.setState({ isRefreshing: true });
+
+    // Simulate loading time with retro feel
+    setTimeout(() => {
+      this.setState((prevState) => ({
+        isRefreshing: false,
+        refreshKey: prevState.refreshKey + 1,
+      }));
+
+      // If there's an iframe, reload it
+      const iframe = document.querySelector(`.${this.id}`);
+      if (iframe && iframe.src) {
+        iframe.src = iframe.src;
+      }
+    }, 800 + Math.random() * 400); // Random delay between 800-1200ms for authenticity
+  };
+
   render() {
     const { props } = this;
 
@@ -184,7 +205,11 @@ class InternetExplorer extends Component {
           { icon: icons.back, title: "Back", onClick: noop },
           { icon: icons.forward, title: "Forward", onClick: noop },
           { icon: icons.ieStop, title: "Stop", onClick: noop },
-          { icon: icons.ieRefresh, title: "Refresh", onClick: noop },
+          {
+            icon: icons.ieRefresh,
+            title: "Refresh",
+            onClick: this.handleRefresh,
+          },
           { icon: icons.ieHome, title: "Home", onClick: noop },
           [
             { icon: icons.ieSearch, title: "Search", onClick: noop },
@@ -199,45 +224,78 @@ class InternetExplorer extends Component {
         <div
           className="ie-content-wrapper"
           style={{ width: "100%", height: "100%" }}
+          key={this.state.refreshKey}
         >
-          {isHappyTuesdayFeed && (
-            <div
-              style={{ width: "100%", height: "100%", position: "relative" }}
-            >
-              <HappyTuesdayNewsFeed
-                inIE={true}
-                initialTab={props.data.initialTab || "blog"}
-                initialSubTab={props.data.initialSubTab}
-              />
+          {this.state.isRefreshing && (
+            <div className="ie-refresh-overlay">
+              <div className="ie-refresh-content">
+                <div className="ie-refresh-spinner"></div>
+                <div className="ie-refresh-text">Loading...</div>
+                <div className="ie-refresh-progress">
+                  <div className="ie-refresh-progress-bar"></div>
+                </div>
+              </div>
             </div>
           )}
 
-          {!isHappyTuesdayFeed && props.data?.__html && (
-            <div
-              style={{
-                margin: "2px 1px 0px 2px",
-                minHeight: "calc(100% - 4px)",
-              }}
-              dangerouslySetInnerHTML={props.data}
-            />
-          )}
+          <div
+            style={{
+              opacity: this.state.isRefreshing ? 0.3 : 1,
+              transition: "opacity 0.2s",
+            }}
+          >
+            {isHappyTuesdayFeed && (
+              <div
+                style={{ width: "100%", height: "100%", position: "relative" }}
+              >
+                <HappyTuesdayNewsFeed
+                  inIE={true}
+                  initialTab={props.data.initialTab || "blog"}
+                  initialSubTab={props.data.initialSubTab}
+                />
+              </div>
+            )}
 
-          {isReadme && <HamsterCreator />}
-
-          {props.children}
-
-          {!isHappyTuesdayFeed &&
-            props.data &&
-            !props.data.html &&
-            props.data.src &&
-            (this.state.dimensions ? (
+            {!isHappyTuesdayFeed && props.data?.__html && (
               <div
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  position: "relative",
+                  margin: "2px 1px 0px 2px",
+                  minHeight: "calc(100% - 4px)",
                 }}
-              >
+                dangerouslySetInnerHTML={props.data}
+              />
+            )}
+
+            {isReadme && <HamsterCreator />}
+
+            {props.children}
+
+            {!isHappyTuesdayFeed &&
+              props.data &&
+              !props.data.html &&
+              props.data.src &&
+              (this.state.dimensions ? (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    position: "relative",
+                  }}
+                >
+                  <iframe
+                    className={this.id}
+                    frameBorder="0"
+                    src={props.data.src}
+                    title={props.data.src}
+                    importance="low"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      border: "none",
+                    }}
+                  />
+                </div>
+              ) : (
                 <iframe
                   className={this.id}
                   frameBorder="0"
@@ -250,21 +308,8 @@ class InternetExplorer extends Component {
                     border: "none",
                   }}
                 />
-              </div>
-            ) : (
-              <iframe
-                className={this.id}
-                frameBorder="0"
-                src={props.data.src}
-                title={props.data.src}
-                importance="low"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  border: "none",
-                }}
-              />
-            ))}
+              ))}
+          </div>
         </div>
       </Window>
     );
