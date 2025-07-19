@@ -681,7 +681,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
       // REMOVED: hideGeniusChat from dependencies
     ]
   );
-
   const handleProgramOpen = useCallback(
     (programName) => {
       // Only show the tip once per session
@@ -694,6 +693,27 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
         return;
       }
 
+      // Check if HappyTuesdayNewsFeed or InternetExplorer is currently active
+      const activePrograms = window.programContext?.activePrograms || {};
+      const isFeedsOrIEActive = Object.values(activePrograms).some(
+        (prog) =>
+          prog.component === "HappyTuesdayNewsFeed" ||
+          prog.component === "InternetExplorer" ||
+          prog.data?.component === "HappyTuesdayNewsFeed" ||
+          prog.title === "Feeds" ||
+          prog.title === "Internet Explorer"
+      );
+
+      // Also check DOM for ie-content-wrapper
+      const ieContentExists =
+        document.querySelector(".ie-content-wrapper") !== null;
+
+      // Don't show tip if Feeds window or IE is active
+      if (isFeedsOrIEActive || ieContentExists) {
+        devLog(`Feeds or IE window is active - skipping hide button tip`);
+        return;
+      }
+
       // Mark as shown
       hideButtonTipShownRef.current = true;
 
@@ -701,7 +721,27 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
 
       // Show the tip after a short delay
       setTimeout(() => {
-        if (mountedRef.current && !isAnyBalloonOpen()) {
+        // Double-check that Feeds/IE isn't active and no balloon is open
+        const activeProgramsCheck = window.programContext?.activePrograms || {};
+        const isFeedsOrIEActiveNow = Object.values(activeProgramsCheck).some(
+          (prog) =>
+            prog.component === "HappyTuesdayNewsFeed" ||
+            prog.component === "InternetExplorer" ||
+            prog.data?.component === "HappyTuesdayNewsFeed" ||
+            prog.title === "Feeds" ||
+            prog.title === "Internet Explorer"
+        );
+
+        // Check DOM again
+        const ieContentExistsNow =
+          document.querySelector(".ie-content-wrapper") !== null;
+
+        if (
+          mountedRef.current &&
+          !isAnyBalloonOpen() &&
+          !isFeedsOrIEActiveNow &&
+          !ieContentExistsNow
+        ) {
           showCustomBalloon(
             "💡 Tip: You can hide me anytime by clicking the 'Hide Clippy' button in the taskbar!",
             8000 // Show for 8 seconds to give user time to read
@@ -719,7 +759,6 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     },
     [isAnyBalloonOpen, showCustomBalloon, setShowHandPointer]
   );
-
   // FIXED: Enhanced initial message with welcome balloon completion tracking
   const showInitialMessage = useCallback(() => {
     if (initialMessageShownRef.current) {
@@ -1548,6 +1587,27 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
     }
     window.showHideButtonTip = createSafeGlobalFunction(() => {
       if (!hideButtonTipShownRef.current && !isAnyBalloonOpen()) {
+        // Check if HappyTuesdayNewsFeed or InternetExplorer is currently active
+        const activePrograms = window.programContext?.activePrograms || {};
+        const isFeedsOrIEActive = Object.values(activePrograms).some(
+          (prog) =>
+            prog.component === "HappyTuesdayNewsFeed" ||
+            prog.component === "InternetExplorer" ||
+            prog.data?.component === "HappyTuesdayNewsFeed" ||
+            prog.title === "Feeds" ||
+            prog.title === "Internet Explorer"
+        );
+
+        // Also check DOM for ie-content-wrapper
+        const ieContentExists =
+          document.querySelector(".ie-content-wrapper") !== null;
+
+        // Don't show tip if Feeds window or IE is active
+        if (isFeedsOrIEActive || ieContentExists) {
+          devLog(`Feeds or IE window is active - skipping hide button tip`);
+          return false;
+        }
+
         hideButtonTipShownRef.current = true;
         showCustomBalloon(
           "💡 Tip: You can hide me anytime by clicking the 'Hide Clippy' button in the taskbar!",
