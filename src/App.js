@@ -130,7 +130,12 @@ class DesktopInner extends Component {
     const { defaultProgram, routerParams } = this.props;
     if (defaultProgram === "feeds") {
       const { tab, subtab } = routerParams || {};
-      console.log("Opening feeds with tab:", tab, "subtab:", subtab);
+      console.log("autoOpenWindowFromRoute - routerParams:", routerParams);
+      console.log("autoOpenWindowFromRoute - tab:", tab, "subtab:", subtab);
+      console.log(
+        "autoOpenWindowFromRoute - pathname:",
+        window.location.pathname
+      );
 
       let programData = desktopData.find((item) => item.title === "Feeds");
 
@@ -142,15 +147,23 @@ class DesktopInner extends Component {
         };
       }
 
+      // Make sure we're setting the correct tab
+      const finalTab = tab || "blog";
+      console.log("autoOpenWindowFromRoute - finalTab:", finalTab);
+
       programData = {
         ...programData,
         data: {
           ...programData.data,
-          initialTab: tab || "blog",
+          initialTab: finalTab,
           initialSubTab: subtab,
         },
       };
 
+      console.log(
+        "Final programData being passed to onOpen:",
+        JSON.stringify(programData, null, 2)
+      );
       console.log("Opening new Feeds window with onOpen");
       this.context.onOpen(programData);
     }
@@ -204,6 +217,10 @@ function DesktopWithRouter(props) {
   const navigate = useNavigate();
   const location = useLocation();
   const context = useContext(SettingsContext);
+
+  console.log("DesktopWithRouter - props:", props);
+  console.log("DesktopWithRouter - routerParams:", props.routerParams);
+  console.log("DesktopWithRouter - location.pathname:", location.pathname);
 
   return <Desktop {...props} navigate={navigate} location={location} />;
 }

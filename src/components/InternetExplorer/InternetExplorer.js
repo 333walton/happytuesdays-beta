@@ -204,7 +204,11 @@ class InternetExplorer extends Component {
             <div
               style={{ width: "100%", height: "100%", position: "relative" }}
             >
-              <HappyTuesdayNewsFeed inIE={true} initialTab={tab || "blog"} />
+              <HappyTuesdayNewsFeed
+                inIE={true}
+                initialTab={props.data.initialTab || "blog"}
+                initialSubTab={props.data.initialSubTab}
+              />
             </div>
           )}
 
