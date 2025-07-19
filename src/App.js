@@ -6,6 +6,7 @@ import "./App.css";
 import TaskBar from "./components/TaskBar";
 import WindowManager from "./components/WindowManager";
 import ProgramProvider from "./contexts/programs";
+import { ProgramContext } from "././contexts";
 import SettingsProvider from "./contexts/settings";
 import { SettingsContext } from "./contexts";
 import TaskManager from "./components/TaskManager";
@@ -29,37 +30,72 @@ import startMenuData from "./data/start";
 //
 // DESKTOP COMPONENT:
 //
-class Desktop extends Component {
-  static contextType = SettingsContext;
+class DesktopInner extends Component {
+  static contextType = ProgramContext;
+
+  constructor(props) {
+    super(props);
+    this.hasAutoOpened = false;
+  }
 
   componentDidMount() {
-    if (window.innerWidth < 800) this.context.toggleMobile(true);
-
-    // Override onOpen to handle navigation for News Feed items
-    const originalOnOpen = this.context.onOpen;
-    if (originalOnOpen) {
-      this.originalOnOpen = originalOnOpen;
-      this.context.onOpen = (programData) => {
-        if (programData?.data?.shouldNavigate && programData.data.navigateTo) {
-          this.props.navigate(programData.data.navigateTo);
-        } else {
-          originalOnOpen(programData);
-        }
-      };
+    const { settings } = this.props;
+    if (window.innerWidth < 800 && settings.toggleMobile) {
+      settings.toggleMobile(true);
     }
 
+    console.log(
+      "DesktopInner componentDidMount - ProgramContext:",
+      this.context
+    );
+    console.log(
+      "DesktopInner componentDidMount - Context keys:",
+      Object.keys(this.context || {})
+    );
+
+    // Set up polling to check for context availability
+    let pollCount = 0;
+    this.contextCheckInterval = setInterval(() => {
+      pollCount++;
+
+      // Log context state periodically
+      if (pollCount % 10 === 0) {
+        console.log(
+          `Context check #${pollCount} - onOpen available:`,
+          !!this.context.onOpen
+        );
+      }
+
+      if (
+        this.context.onOpen &&
+        !this.hasAutoOpened &&
+        this.props.defaultProgram
+      ) {
+        console.log(
+          "Context onOpen now available via polling, attempting auto-open"
+        );
+        clearInterval(this.contextCheckInterval);
+
+        this.hasAutoOpened = true;
+        this.attemptAutoOpen();
+      }
+
+      // Stop after 5 seconds to prevent infinite polling
+      if (pollCount > 50) {
+        console.warn(
+          "Stopping context polling after 5 seconds - onOpen never became available"
+        );
+        clearInterval(this.contextCheckInterval);
+      }
+    }, 100);
+
+    // Also try immediately in case it's already available
     this.attemptAutoOpen();
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    // If we previously didn't have onOpen but now we do, try auto-opening
-    if (
-      !prevState?.contextReady &&
-      this.context.onOpen &&
-      this.props.defaultProgram
-    ) {
-      console.log("Context now ready, attempting auto-open");
-      this.attemptAutoOpen();
+  componentWillUnmount() {
+    if (this.contextCheckInterval) {
+      clearInterval(this.contextCheckInterval);
     }
   }
 
@@ -70,19 +106,24 @@ class Desktop extends Component {
       routerParams: routerParams,
       pathname: window.location.pathname,
       hasOnOpen: !!this.context.onOpen,
+      hasAutoOpened: this.hasAutoOpened,
     });
 
-    if (!defaultProgram) {
-      console.log("No defaultProgram specified");
+    if (!defaultProgram || this.hasAutoOpened) {
       return;
     }
 
     if (!this.context.onOpen) {
-      console.log("onOpen not available yet, will retry when context updates");
+      console.log("onOpen not available yet, will retry via polling");
       return;
     }
 
-    this.autoOpenWindowFromRoute();
+    this.hasAutoOpened = true;
+
+    // Small delay to ensure context is fully initialized
+    setTimeout(() => {
+      this.autoOpenWindowFromRoute();
+    }, 100);
   }
 
   autoOpenWindowFromRoute() {
@@ -94,16 +135,11 @@ class Desktop extends Component {
       let programData = desktopData.find((item) => item.title === "Feeds");
 
       if (!programData) {
-        console.log(
-          "Creating new programData for Feeds - not found in desktopData"
-        );
         programData = {
           title: "Feeds",
           component: "HappyTuesdayNewsFeed",
           icon: "feeds32",
         };
-      } else {
-        console.log("Found existing Feeds in desktopData:", programData);
       }
 
       programData = {
@@ -115,65 +151,47 @@ class Desktop extends Component {
         },
       };
 
-      console.log("Final programData:", JSON.stringify(programData, null, 2));
-
-      const activePrograms = this.context.activePrograms || {};
-      console.log("Active programs:", Object.keys(activePrograms));
-
-      const active = Object.values(activePrograms).find(
-        (prog) =>
-          prog.title === "Feeds" ||
-          prog.component === "HappyTuesdayNewsFeed" ||
-          (prog.data && prog.data.component === "HappyTuesdayNewsFeed")
-      );
-
-      if (!active) {
-        console.log("Opening new Feeds window with onOpen");
-        this.context.onOpen(programData);
-      } else {
-        console.log("Moving existing Feeds window to top", active);
-        this.context.moveToTop(active.id);
-
-        if (this.context.updateProgramData) {
-          this.context.updateProgramData(active.id, {
-            initialTab: tab || "blog",
-            initialSubTab: subtab,
-          });
-        }
-      }
+      console.log("Opening new Feeds window with onOpen");
+      this.context.onOpen(programData);
     }
   }
 
-  renderFeedsWindow(tab, subtab) {
+  render() {
+    const { settings, navigate } = this.props;
+    const isMobile = settings.isMobile;
+
     return (
-      <HappyTuesdayNewsFeed initialTab={tab || "blog"} initialSubTab={subtab} />
+      <MonitorView>
+        <Theme
+          className={cx("desktop screen", {
+            desktopX2: settings.scale === 2,
+            desktopX1_5: settings.scale === 1.5,
+            notMobile: !isMobile,
+            fullScreen: settings.fullScreen,
+          })}
+        >
+          <Background />
+          <DesktopView />
+          <TaskBar />
+          <WindowManager navigate={navigate} />
+          <TaskManager />
+          <Settings />
+          <ShutDown />
+          <ClippyProvider defaultAgent="Clippy" />
+          {settings.crt && <CRTOverlay />}
+        </Theme>
+      </MonitorView>
     );
   }
+}
+
+class Desktop extends Component {
+  static contextType = SettingsContext;
 
   render() {
-    const isMobile = this.context.isMobile;
     return (
       <ProgramProvider>
-        <MonitorView>
-          <Theme
-            className={cx("desktop screen", {
-              desktopX2: this.context.scale === 2,
-              desktopX1_5: this.context.scale === 1.5,
-              notMobile: !isMobile,
-              fullScreen: this.context.fullScreen,
-            })}
-          >
-            <Background />
-            <DesktopView />
-            <TaskBar />
-            <WindowManager navigate={this.props.navigate} />
-            <TaskManager />
-            <Settings />
-            <ShutDown />
-            <ClippyProvider defaultAgent="Clippy" />
-            {this.context.crt && <CRTOverlay />}
-          </Theme>
-        </MonitorView>
+        <DesktopInner {...this.props} settings={this.context} />
       </ProgramProvider>
     );
   }
@@ -185,50 +203,7 @@ class Desktop extends Component {
 function DesktopWithRouter(props) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [hasAttemptedAutoOpen, setHasAttemptedAutoOpen] = useState(false);
-
-  // Use useContext to access the settings context
   const context = useContext(SettingsContext);
-
-  useEffect(() => {
-    // Only attempt auto-open once when both conditions are met
-    if (context.onOpen && props.defaultProgram && !hasAttemptedAutoOpen) {
-      console.log("Auto-opening window from useEffect");
-      setHasAttemptedAutoOpen(true);
-
-      // Call the auto-open logic here
-      if (props.defaultProgram === "feeds") {
-        const routerParams = props.routerParams || {};
-        const { tab, subtab } = routerParams;
-
-        let programData = desktopData.find((item) => item.title === "Feeds");
-
-        if (!programData) {
-          programData = {
-            title: "Feeds",
-            component: "HappyTuesdayNewsFeed",
-            icon: "feeds32",
-          };
-        }
-
-        programData = {
-          ...programData,
-          data: {
-            ...programData.data,
-            initialTab: tab || "blog",
-            initialSubTab: subtab,
-          },
-        };
-
-        context.onOpen(programData);
-      }
-    }
-  }, [
-    context.onOpen,
-    props.defaultProgram,
-    hasAttemptedAutoOpen,
-    props.routerParams,
-  ]);
 
   return <Desktop {...props} navigate={navigate} location={location} />;
 }
