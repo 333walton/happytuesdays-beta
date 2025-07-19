@@ -1,4 +1,4 @@
-import React, { Component, useEffect } from "react";
+import React, { Component, useEffect, useState, useContext } from "react";
 import { Theme } from "packard-belle";
 import cx from "classnames";
 import "./App.css";
@@ -40,16 +40,46 @@ class Desktop extends Component {
     if (originalOnOpen) {
       this.originalOnOpen = originalOnOpen;
       this.context.onOpen = (programData) => {
-        // Check if this is a News Feed item that needs navigation
         if (programData?.data?.shouldNavigate && programData.data.navigateTo) {
-          // Navigate first
           this.props.navigate(programData.data.navigateTo);
-          // Then open the window (the route change will trigger autoOpenWindowFromRoute)
         } else {
-          // Normal window opening
           originalOnOpen(programData);
         }
       };
+    }
+
+    this.attemptAutoOpen();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // If we previously didn't have onOpen but now we do, try auto-opening
+    if (
+      !prevState?.contextReady &&
+      this.context.onOpen &&
+      this.props.defaultProgram
+    ) {
+      console.log("Context now ready, attempting auto-open");
+      this.attemptAutoOpen();
+    }
+  }
+
+  attemptAutoOpen() {
+    const { defaultProgram, routerParams } = this.props;
+    console.log("attemptAutoOpen called", {
+      defaultProgram: defaultProgram,
+      routerParams: routerParams,
+      pathname: window.location.pathname,
+      hasOnOpen: !!this.context.onOpen,
+    });
+
+    if (!defaultProgram) {
+      console.log("No defaultProgram specified");
+      return;
+    }
+
+    if (!this.context.onOpen) {
+      console.log("onOpen not available yet, will retry when context updates");
+      return;
     }
 
     this.autoOpenWindowFromRoute();
@@ -57,31 +87,25 @@ class Desktop extends Component {
 
   autoOpenWindowFromRoute() {
     const { defaultProgram, routerParams } = this.props;
-    console.log("autoOpenWindowFromRoute called", {
-      defaultProgram,
-      routerParams,
-    });
-
-    if (!defaultProgram || !this.context.onOpen) return;
-
     if (defaultProgram === "feeds") {
       const { tab, subtab } = routerParams || {};
-      console.log("Opening feeds with", { tab, subtab });
+      console.log("Opening feeds with tab:", tab, "subtab:", subtab);
 
-      // Find the Feeds program data
       let programData = desktopData.find((item) => item.title === "Feeds");
 
-      // If we don't find it in desktopData, create a basic one
       if (!programData) {
-        console.log("Creating new programData for Feeds");
+        console.log(
+          "Creating new programData for Feeds - not found in desktopData"
+        );
         programData = {
           title: "Feeds",
           component: "HappyTuesdayNewsFeed",
-          icon: "feeds32", // Use appropriate icon
+          icon: "feeds32",
         };
+      } else {
+        console.log("Found existing Feeds in desktopData:", programData);
       }
 
-      // Add the tab and subtab data
       programData = {
         ...programData,
         data: {
@@ -91,10 +115,12 @@ class Desktop extends Component {
         },
       };
 
-      console.log("Final programData:", programData);
+      console.log("Final programData:", JSON.stringify(programData, null, 2));
 
-      // Try to find if the Feeds program is already active
-      const active = Object.values(this.context.activePrograms || {}).find(
+      const activePrograms = this.context.activePrograms || {};
+      console.log("Active programs:", Object.keys(activePrograms));
+
+      const active = Object.values(activePrograms).find(
         (prog) =>
           prog.title === "Feeds" ||
           prog.component === "HappyTuesdayNewsFeed" ||
@@ -102,15 +128,12 @@ class Desktop extends Component {
       );
 
       if (!active) {
-        // Open it if not already open
-        console.log("Opening new Feeds window");
+        console.log("Opening new Feeds window with onOpen");
         this.context.onOpen(programData);
-      } else if (this.context.moveToTop) {
-        // Bring it to front if already open
-        console.log("Moving existing Feeds window to top");
+      } else {
+        console.log("Moving existing Feeds window to top", active);
         this.context.moveToTop(active.id);
 
-        // Update the active window with new tab/subtab data
         if (this.context.updateProgramData) {
           this.context.updateProgramData(active.id, {
             initialTab: tab || "blog",
@@ -129,10 +152,6 @@ class Desktop extends Component {
 
   render() {
     const isMobile = this.context.isMobile;
-    // ...your normal window and desktop rendering logic
-    // In your code, ProgramProvider and WindowManager should render program windows.
-    // In the place where you render window contents,
-    // you will render this.renderFeedsWindow(tab, subtab)
     return (
       <ProgramProvider>
         <MonitorView>
@@ -166,6 +185,51 @@ class Desktop extends Component {
 function DesktopWithRouter(props) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [hasAttemptedAutoOpen, setHasAttemptedAutoOpen] = useState(false);
+
+  // Use useContext to access the settings context
+  const context = useContext(SettingsContext);
+
+  useEffect(() => {
+    // Only attempt auto-open once when both conditions are met
+    if (context.onOpen && props.defaultProgram && !hasAttemptedAutoOpen) {
+      console.log("Auto-opening window from useEffect");
+      setHasAttemptedAutoOpen(true);
+
+      // Call the auto-open logic here
+      if (props.defaultProgram === "feeds") {
+        const routerParams = props.routerParams || {};
+        const { tab, subtab } = routerParams;
+
+        let programData = desktopData.find((item) => item.title === "Feeds");
+
+        if (!programData) {
+          programData = {
+            title: "Feeds",
+            component: "HappyTuesdayNewsFeed",
+            icon: "feeds32",
+          };
+        }
+
+        programData = {
+          ...programData,
+          data: {
+            ...programData.data,
+            initialTab: tab || "blog",
+            initialSubTab: subtab,
+          },
+        };
+
+        context.onOpen(programData);
+      }
+    }
+  }, [
+    context.onOpen,
+    props.defaultProgram,
+    hasAttemptedAutoOpen,
+    props.routerParams,
+  ]);
+
   return <Desktop {...props} navigate={navigate} location={location} />;
 }
 
@@ -199,4 +263,5 @@ const App = () => {
     </HelmetProvider>
   );
 };
+
 export default App;

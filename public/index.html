@@ -704,14 +704,26 @@
       typewriterEffect(currentElem, originalHTML, 30, () => {
         setTimeout(() => staggerElements(elems, entry + 1), 300);
       });
-    }
+    } 
 
-    function loadScreen() {
+  
+  function loadScreen() {
       var biosElem = document.querySelector(".BIOS");
       biosElem.classList.remove("initial");
 
-      if (window.localStorage.getItem("loggedIn")) {
+      // Skip BIOS if already logged in OR if accessing a subdirectory
+      const pathname = window.location.pathname;
+      const isSubdirectory = pathname !== '/' && pathname !== '/index.html' && pathname !== '';
+
+      if (window.localStorage.getItem("loggedIn") || isSubdirectory) {
         hideBios();
+        // Also hide Windows launch screen for subdirectories
+        if (isSubdirectory) {
+          const windowsLaunch = document.getElementsByClassName("WindowsLaunchWrapper")[0];
+          if (windowsLaunch) {
+            windowsLaunch.classList.add("hidden");
+          }
+        }
         return;
       }
 
