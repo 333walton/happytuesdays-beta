@@ -326,17 +326,193 @@ class InternetExplorer extends Component {
 
     // Simulate loading time with retro feel
     setTimeout(() => {
-      this.setState((prevState) => ({
-        isRefreshing: false,
-        refreshKey: prevState.refreshKey + 1,
-      }));
+      this.setState({ isRefreshing: false });
 
-      // If there's an iframe, reload it
-      const iframe = document.querySelector(`.${this.id}`);
-      if (iframe && iframe.src) {
-        iframe.src = iframe.src;
+      // Handle different content types
+      const isHappyTuesdayFeed =
+        this.props.data &&
+        (this.props.data.component === "HappyTuesdayNewsFeed" ||
+          this.props.data.type === "happy-tuesday-feed" ||
+          (this.props.data.title &&
+            this.props.data.title.toLowerCase().includes("happy tuesday")));
+
+      if (isHappyTuesdayFeed) {
+        // For Happy Tuesday feed, scroll to top without remounting
+        this.scrollToTopComprehensive();
+      } else if (this.props.data?.__html) {
+        // For HTML content, increment refreshKey to reload content
+        this.setState((prevState) => ({
+          refreshKey: prevState.refreshKey + 1,
+        }));
+
+        // Scroll to top after content reloads
+        setTimeout(() => this.scrollToTopComprehensive(), 100);
+        setTimeout(() => this.scrollToTopComprehensive(), 300);
+      } else {
+        // For iframe content, reload and scroll to top
+        const iframe = document.querySelector(`.${this.id}`);
+        if (iframe && iframe.src) {
+          const currentSrc = iframe.src;
+          iframe.src = "about:blank"; // Clear first
+          setTimeout(() => {
+            iframe.src = currentSrc; // Reload
+
+            // After iframe reloads, scroll to top
+            iframe.onload = () => {
+              this.scrollToTopComprehensive();
+
+              // Try to scroll iframe content if accessible
+              try {
+                if (iframe.contentWindow) {
+                  iframe.contentWindow.scrollTo(0, 0);
+                }
+                if (iframe.contentDocument) {
+                  iframe.contentDocument.documentElement.scrollTop = 0;
+                  iframe.contentDocument.body.scrollTop = 0;
+                }
+              } catch (e) {
+                // Cross-origin restrictions may prevent this
+                console.log(
+                  "Cannot scroll iframe content due to cross-origin restrictions"
+                );
+              }
+              iframe.onload = null; // Clean up
+            };
+          }, 50);
+        } else {
+          // Fallback scroll for non-iframe content
+          this.scrollToTopComprehensive();
+        }
       }
     }, 800 + Math.random() * 400); // Random delay between 800-1200ms for authenticity
+  };
+
+  // Comprehensive scroll to top function
+  scrollToTopComprehensive = () => {
+    // Function to perform comprehensive scrolling
+    const scrollToTop = () => {
+      // 1. Scroll the main IE content wrapper
+      const wrapper = document.querySelector(".ie-content-wrapper");
+      if (wrapper) {
+        wrapper.scrollTop = 0;
+        wrapper.scrollLeft = 0;
+      }
+
+      // 2. Scroll the Internet Explorer window itself
+      const ieWindow = document.querySelector(
+        ".InternetExplorer .WindowExplorer__view"
+      );
+      if (ieWindow) {
+        ieWindow.scrollTop = 0;
+        ieWindow.scrollLeft = 0;
+      }
+
+      // 3. Scroll any WindowExplorer view containers
+      const windowViews = document.querySelectorAll(".WindowExplorer__view");
+      windowViews.forEach((view) => {
+        view.scrollTop = 0;
+        view.scrollLeft = 0;
+      });
+
+      // 4. Scroll the HappyTuesdayNewsFeed container if present
+      const feedContent = document.querySelector(".HappyTuesdayNewsFeed");
+      if (feedContent) {
+        feedContent.scrollTop = 0;
+        feedContent.scrollLeft = 0;
+      }
+
+      // 5. Scroll any direct child containers of the feed
+      const feedChildren = document.querySelectorAll(
+        ".HappyTuesdayNewsFeed > div"
+      );
+      feedChildren.forEach((child) => {
+        if (typeof child.scrollTop === "number") {
+          child.scrollTop = 0;
+          child.scrollLeft = 0;
+        }
+      });
+
+      // 6. Find and scroll all potentially scrollable elements
+      const scrollableSelectors = [
+        // By style attributes
+        '[style*="overflow-y: auto"]',
+        '[style*="overflow: auto"]',
+        '[style*="overflow-y: scroll"]',
+        '[style*="overflow: scroll"]',
+        '[style*="max-height"]',
+        // By common class names and elements
+        ".scrollable",
+        ".scroll-container",
+        ".content-area",
+        ".feed-content",
+        ".tab-content",
+        ".main-content",
+        ".page-content",
+        ".article-content",
+        ".blog-content",
+        "main",
+        "section",
+        "article",
+        'div[role="main"]',
+        'div[role="region"]',
+        // Specific to your app
+        ".ie-content",
+        ".WindowExplorer__content",
+        "div[dangerouslySetInnerHTML]",
+      ];
+
+      // Apply scrolling to all matching elements within IE
+      scrollableSelectors.forEach((selector) => {
+        try {
+          const elements = document.querySelectorAll(
+            `.InternetExplorer ${selector}, .ie-content-wrapper ${selector}`
+          );
+          elements.forEach((el) => {
+            if (el && typeof el.scrollTop === "number") {
+              el.scrollTop = 0;
+              el.scrollLeft = 0;
+            }
+          });
+        } catch (e) {
+          // Continue if selector fails
+        }
+      });
+
+      // 7. Force scroll on the document itself if possible
+      try {
+        if (window && window.scrollTo) {
+          window.scrollTo(0, 0);
+        }
+        if (document && document.documentElement) {
+          document.documentElement.scrollTop = 0;
+          document.documentElement.scrollLeft = 0;
+        }
+        if (document && document.body) {
+          document.body.scrollTop = 0;
+          document.body.scrollLeft = 0;
+        }
+      } catch (e) {
+        // Ignore errors
+      }
+
+      // 8. Special handling for any React components that might maintain their own scroll state
+      // Dispatch a custom event that components can listen to
+      try {
+        const scrollResetEvent = new CustomEvent("ieRefreshScrollReset", {
+          detail: { timestamp: Date.now() },
+        });
+        window.dispatchEvent(scrollResetEvent);
+      } catch (e) {
+        // Ignore if CustomEvent is not supported
+      }
+    };
+
+    // Call scrollToTop immediately and with delays to catch all scenarios
+    scrollToTop();
+    setTimeout(() => scrollToTop(), 50);
+    setTimeout(() => scrollToTop(), 150);
+    setTimeout(() => scrollToTop(), 300);
+    setTimeout(() => scrollToTop(), 500);
   };
 
   render() {
@@ -378,19 +554,70 @@ class InternetExplorer extends Component {
         minWidth={300}
         maxHeight={window.innerHeight - 50}
         maxWidth={window.innerWidth - 50}
+        // Replace the explorerOptions array in your render method with this:
         explorerOptions={[
-          { icon: icons.back, title: "Back", onClick: noop },
-          { icon: icons.forward, title: "Forward", onClick: noop },
-          { icon: icons.ieStop, title: "Stop", onClick: noop },
-          { icon: icons.ieRefresh, title: "Refresh", onClick: noop },
-          { icon: icons.ieHome, title: "Home", onClick: noop },
+          {
+            icon: icons.back,
+            title: "Back",
+            onClick: noop,
+            closeOnClick: true,
+          },
+          {
+            icon: icons.forward,
+            title: "Forward",
+            onClick: noop,
+            closeOnClick: true,
+          },
+          {
+            icon: icons.ieStop,
+            title: "Stop",
+            onClick: noop,
+            closeOnClick: true,
+          },
+          {
+            icon: icons.ieRefresh,
+            title: "Refresh",
+            onClick: noop,
+            closeOnClick: true,
+          },
+          {
+            icon: icons.ieHome,
+            title: "Home",
+            onClick: noop,
+            closeOnClick: true,
+          },
           [
-            { icon: icons.ieSearch, title: "Search", onClick: noop },
-            { icon: icons.ieFavorites, title: "Favorites", onClick: noop },
-            { icon: icons.ieHistory, title: "History", onClick: noop },
+            {
+              icon: icons.ieSearch,
+              title: "Search",
+              onClick: noop,
+              closeOnClick: true,
+            },
+            {
+              icon: icons.ieFavorites,
+              title: "Favorites",
+              onClick: noop,
+              closeOnClick: true,
+            },
+            {
+              icon: icons.ieHistory,
+              title: "History",
+              onClick: noop,
+              closeOnClick: true,
+            },
           ],
-          { icon: icons.ieMail, title: "Mail", onClick: noop },
-          { icon: icons.iePrint, title: "Print", onClick: noop },
+          {
+            icon: icons.ieMail,
+            title: "Mail",
+            onClick: noop,
+            closeOnClick: true,
+          },
+          {
+            icon: icons.iePrint,
+            title: "Print",
+            onClick: noop,
+            closeOnClick: true,
+          },
         ]}
         maximizeOnOpen
       >
