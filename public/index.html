@@ -344,7 +344,7 @@
     function getSystemFields() {
       const nav = window.navigator;
       const loc = window.location;
-      const TOTAL_WIDTH = window.innerWidth <= 768 ? 49 : 59;  // mobile : desktop
+      const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 59;  // mobile : desktop
 
       // ❗ Declare SEP at the top level of getSystemFields, before formatLine
       const SEP = '='.repeat(TOTAL_WIDTH);
@@ -520,7 +520,7 @@
       element.innerHTML = '<span class="typed-text"></span><span class="typewriter-cursor"></span>';
       const typedSpan = element.querySelector('.typed-text');
       const cursorSpan = element.querySelector('.typewriter-cursor');
-      const TOTAL_WIDTH = window.innerWidth <= 768 ? 49 : 59;  // mobile : desktop
+      const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 59;  // mobile : desktop
       const SEP = '='.repeat(TOTAL_WIDTH)
 
       function type() {
@@ -568,7 +568,7 @@
           bootContainer.appendChild(separatorLine);
 
           // Apply typewriter effect to the separator line
-          typewriterEffect(separatorLine, '='.repeat(window.innerWidth <= 768 ? 49 : 59), 15, function () {
+          typewriterEffect(separatorLine, '='.repeat(window.innerWidth <= 768 ? 44 : 59), 15, function () {
             // Continue with memory test after separator is complete
 
             // Memory test line
@@ -591,7 +591,7 @@
               const duration = options.duration || 1800 + Math.floor(Math.random() * 700);
               const extendedRAM = targetKB > 65536 ? targetKB - 1024 : 0;
               const cacheSRAM = [128, 256, 512][Math.floor(Math.random() * 3)];
-              const TOTAL_WIDTH = window.innerWidth <= 768 ? 49 : 59; // Match the main TOTAL_WIDTH
+              const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 59; // Match the main TOTAL_WIDTH
               const SEP = '='.repeat(TOTAL_WIDTH);
 
               // Helper: Dotted style, right-aligned value with perfect alignment
