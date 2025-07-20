@@ -27,6 +27,10 @@ import HappyTuesdayNewsFeed from "./components/HappyTuesdayNewsFeed/HappyTuesday
 import desktopData from "./data/desktop";
 import startMenuData from "./data/start";
 
+// Debug flag - set to false in production to disable most logging
+const DEBUG_LOGGING = process.env.NODE_ENV === "development";
+const VERBOSE_LOGGING = false; // Set to true only when debugging specific issues
+
 //
 // DESKTOP COMPONENT:
 //
@@ -44,22 +48,26 @@ class DesktopInner extends Component {
       settings.toggleMobile(true);
     }
 
-    console.log(
-      "DesktopInner componentDidMount - ProgramContext:",
-      this.context
-    );
-    console.log(
-      "DesktopInner componentDidMount - Context keys:",
-      Object.keys(this.context || {})
-    );
+    if (VERBOSE_LOGGING) {
+      console.log(
+        "DesktopInner componentDidMount - ProgramContext:",
+        this.context
+      );
+      console.log(
+        "DesktopInner componentDidMount - Context keys:",
+        Object.keys(this.context || {})
+      );
+    }
 
     // Set up polling to check for context availability
     let pollCount = 0;
+    const maxPollAttempts = 50; // 5 seconds at 100ms intervals
+
     this.contextCheckInterval = setInterval(() => {
       pollCount++;
 
-      // Log context state periodically
-      if (pollCount % 10 === 0) {
+      // Only log context state for critical debugging, less frequently
+      if (VERBOSE_LOGGING && pollCount % 20 === 0) {
         console.log(
           `Context check #${pollCount} - onOpen available:`,
           !!this.context.onOpen
@@ -71,9 +79,9 @@ class DesktopInner extends Component {
         !this.hasAutoOpened &&
         this.props.defaultProgram
       ) {
-        console.log(
-          "Context onOpen now available via polling, attempting auto-open"
-        );
+        if (DEBUG_LOGGING) {
+          console.log("Context onOpen now available, attempting auto-open");
+        }
         clearInterval(this.contextCheckInterval);
 
         this.hasAutoOpened = true;
@@ -81,10 +89,12 @@ class DesktopInner extends Component {
       }
 
       // Stop after 5 seconds to prevent infinite polling
-      if (pollCount > 50) {
-        console.warn(
-          "Stopping context polling after 5 seconds - onOpen never became available"
-        );
+      if (pollCount > maxPollAttempts) {
+        if (DEBUG_LOGGING) {
+          console.warn(
+            "Stopping context polling after 5 seconds - onOpen never became available"
+          );
+        }
         clearInterval(this.contextCheckInterval);
       }
     }, 100);
@@ -101,20 +111,25 @@ class DesktopInner extends Component {
 
   attemptAutoOpen() {
     const { defaultProgram, routerParams } = this.props;
-    console.log("attemptAutoOpen called", {
-      defaultProgram: defaultProgram,
-      routerParams: routerParams,
-      pathname: window.location.pathname,
-      hasOnOpen: !!this.context.onOpen,
-      hasAutoOpened: this.hasAutoOpened,
-    });
+
+    if (VERBOSE_LOGGING) {
+      console.log("attemptAutoOpen called", {
+        defaultProgram: defaultProgram,
+        routerParams: routerParams,
+        pathname: window.location.pathname,
+        hasOnOpen: !!this.context.onOpen,
+        hasAutoOpened: this.hasAutoOpened,
+      });
+    }
 
     if (!defaultProgram || this.hasAutoOpened) {
       return;
     }
 
     if (!this.context.onOpen) {
-      console.log("onOpen not available yet, will retry via polling");
+      if (VERBOSE_LOGGING) {
+        console.log("onOpen not available yet, will retry via polling");
+      }
       return;
     }
 
@@ -130,12 +145,15 @@ class DesktopInner extends Component {
     const { defaultProgram, routerParams } = this.props;
     if (defaultProgram === "feeds") {
       const { tab, subtab } = routerParams || {};
-      console.log("autoOpenWindowFromRoute - routerParams:", routerParams);
-      console.log("autoOpenWindowFromRoute - tab:", tab, "subtab:", subtab);
-      console.log(
-        "autoOpenWindowFromRoute - pathname:",
-        window.location.pathname
-      );
+
+      if (VERBOSE_LOGGING) {
+        console.log("autoOpenWindowFromRoute - routerParams:", routerParams);
+        console.log("autoOpenWindowFromRoute - tab:", tab, "subtab:", subtab);
+        console.log(
+          "autoOpenWindowFromRoute - pathname:",
+          window.location.pathname
+        );
+      }
 
       let programData = desktopData.find((item) => item.title === "Feeds");
 
@@ -149,7 +167,10 @@ class DesktopInner extends Component {
 
       // Make sure we're setting the correct tab
       const finalTab = tab || "blog";
-      console.log("autoOpenWindowFromRoute - finalTab:", finalTab);
+
+      if (VERBOSE_LOGGING) {
+        console.log("autoOpenWindowFromRoute - finalTab:", finalTab);
+      }
 
       programData = {
         ...programData,
@@ -160,11 +181,17 @@ class DesktopInner extends Component {
         },
       };
 
-      console.log(
-        "Final programData being passed to onOpen:",
-        JSON.stringify(programData, null, 2)
-      );
-      console.log("Opening new Feeds window with onOpen");
+      if (VERBOSE_LOGGING) {
+        console.log(
+          "Final programData being passed to onOpen:",
+          JSON.stringify(programData, null, 2)
+        );
+      }
+
+      if (DEBUG_LOGGING) {
+        console.log("Opening Feeds window with tab:", finalTab);
+      }
+
       this.context.onOpen(programData);
     }
   }
@@ -218,9 +245,12 @@ function DesktopWithRouter(props) {
   const location = useLocation();
   const context = useContext(SettingsContext);
 
-  console.log("DesktopWithRouter - props:", props);
-  console.log("DesktopWithRouter - routerParams:", props.routerParams);
-  console.log("DesktopWithRouter - location.pathname:", location.pathname);
+  // Only log router information when debugging routing issues
+  if (VERBOSE_LOGGING) {
+    console.log("DesktopWithRouter - props:", props);
+    console.log("DesktopWithRouter - routerParams:", props.routerParams);
+    console.log("DesktopWithRouter - location.pathname:", location.pathname);
+  }
 
   return <Desktop {...props} navigate={navigate} location={location} />;
 }

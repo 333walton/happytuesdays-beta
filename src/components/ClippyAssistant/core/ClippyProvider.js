@@ -86,33 +86,89 @@ const detectMobile = () => {
 
 const isMobile = detectMobile();
 
-// Development logging
-const isDev = process.env.NODE_ENV === "development";
+// OPTIMIZED: Enhanced logging with rate limiting for both dev and production
+const ENABLE_VERBOSE_LOGGING = false; // Set to true only when debugging specific issues
+const LOG_RATE_LIMIT = 1000; // Minimum ms between identical log messages
+const logCache = new Map(); // Cache to prevent duplicate logs
+
 const devLog = (message, ...args) => {
-  if (isDev) {
-    console.log(`🎛️ ClippyProvider: ${message}`, ...args);
+  if (!ENABLE_VERBOSE_LOGGING) return;
+
+  const logKey = `${message}${JSON.stringify(args)}`;
+  const now = Date.now();
+  const lastLog = logCache.get(logKey);
+
+  // Rate limit identical messages
+  if (lastLog && now - lastLog < LOG_RATE_LIMIT) {
+    return;
+  }
+
+  logCache.set(logKey, now);
+  console.log(`🎛️ ClippyProvider: ${message}`, ...args);
+
+  // Clean old entries periodically
+  if (logCache.size > 100) {
+    const cutoff = now - LOG_RATE_LIMIT * 2;
+    for (const [key, timestamp] of logCache.entries()) {
+      if (timestamp < cutoff) {
+        logCache.delete(key);
+      }
+    }
   }
 };
 
-// FIXED: Enhanced animation logging with forced console output
+// OPTIMIZED: Error-only logging for production issues
+const errorLog = (message, ...args) => {
+  console.error(`❌ ClippyProvider Error: ${message}`, ...args);
+};
+
+// OPTIMIZED: Critical info logging (always shown but rate limited)
+const infoLog = (message, ...args) => {
+  const logKey = message;
+  const now = Date.now();
+  const lastLog = logCache.get(`info_${logKey}`);
+
+  if (lastLog && now - lastLog < LOG_RATE_LIMIT) {
+    return;
+  }
+
+  logCache.set(`info_${logKey}`, now);
+  console.log(`ℹ️ Clippy: ${message}`, ...args);
+};
+
+// OPTIMIZED: Animation logging with rate limiting
+const animationLogCache = new Map();
+const ANIMATION_LOG_RATE_LIMIT = 2000; // 2 seconds between same animation logs
+
 const logAnimation = (animationName, context = "unknown") => {
-  // Force log animation regardless of dev mode
-  console.log(`🎭 Animation Triggered: "${animationName}" from ${context}`);
+  const logKey = `${animationName}_${context}`;
+  const now = Date.now();
+  const lastLog = animationLogCache.get(logKey);
 
-  // Also log to dev console if in dev mode
-  if (isDev) {
-    devLog(`Animation: ${animationName} (${context})`);
+  if (lastLog && now - lastLog < ANIMATION_LOG_RATE_LIMIT) {
+    return; // Skip duplicate animation logs
+  }
+
+  animationLogCache.set(logKey, now);
+  console.log(`🎭 Animation: "${animationName}" (${context})`);
+
+  // Clean old entries
+  if (animationLogCache.size > 50) {
+    const cutoff = now - ANIMATION_LOG_RATE_LIMIT * 2;
+    for (const [key, timestamp] of animationLogCache.entries()) {
+      if (timestamp < cutoff) {
+        animationLogCache.delete(key);
+      }
+    }
   }
 };
 
-// Safe execution wrapper
+// Safe execution wrapper with minimal logging
 const safeExecute = (operation, fallback = null, context = "operation") => {
   try {
     return operation();
   } catch (error) {
-    if (isDev) {
-      console.warn(`ClippyProvider error in ${context}:`, error);
-    }
+    errorLog(`${context}:`, error);
     return fallback;
   }
 };
