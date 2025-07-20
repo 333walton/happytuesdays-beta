@@ -422,32 +422,24 @@
       return [
         SEP,
         formatLine("protocol", loc.protocol),
-        formatLine("host", loc.host),
-        formatLine("hostname", loc.hostname),
-        formatLine("port", loc.port || ""),
-        formatLine("pathname", loc.pathname),
-        formatLine("search", loc.search),
-        formatLine("hash", loc.hash),
-        formatLine("origin", loc.origin),
+        formatLine("Host", loc.host),
+        formatLine("Network Path", loc.pathname),
         SEP,
-        formatLine("appCodeName", nav.appCodeName),
-        formatLine("appName", nav.appName),
-        formatLine("appVersion", shortenAppVersion(nav.appVersion)),  // Shortened
+        formatLine("Core Engine", nav.appCodeName),
+        formatLine("Shell Environment", nav.appName),
+        formatLine("System ROM", shortenAppVersion(nav.appVersion)),  
         formatLine("platform", nav.platform),
         formatLine("product", nav.product),
-        formatLine("productSub", nav.productSub),
-        formatLine("userAgent", shortenUserAgent(nav.userAgent)),    // Shortened
-        formatLine("vendor", nav.vendor),
-        formatLine("vendorSub", nav.vendorSub || ""),
-        formatLine("language", nav.language),
-        formatLine("online", nav.onLine),
+        
+        formatLine("Boot Agent", shortenUserAgent(nav.userAgent)),
+        formatLine("Vendor", nav.vendor),
+        formatLine("Language", nav.language),
         formatLine("hardwareConcurrency", nav.hardwareConcurrency || ""),
-        formatLine("maxTouchPoints", nav.maxTouchPoints || ""),
-        formatLine("cookieEnabled", nav.cookieEnabled),
+        formatLine("Pointing Device Count", nav.maxTouchPoints || ""),
+        formatLine("Cookies", nav.cookieEnabled),
         formatLine("webdriver", nav.webdriver || "false"),
-        formatLine("date", shortenDate(new Date())),
-        formatLine("standalone", window.matchMedia('(display-mode: standalone)').matches || nav.standalone || false),
-        formatLine("pdfViewerEnabled", !!(Array.from(nav.plugins || []).some(p => /pdf/i.test(p.name)))),
+        formatLine("Local Time", shortenDate(new Date())),
+        formatLine("pdfViewerEnabled", !!(Array.from(nav.plugins || []).some(p => /pdf/i.test(p.name)))), //remove?
         SEP,
         ...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
           formatLine("plugin", p.name.slice(0, 22), TOTAL_WIDTH)
@@ -456,6 +448,15 @@
       ];
     }
 
+    /*formatLine("Host Name", loc.hostname), //remove
+          formatLine("port", loc.port || ""), //remove
+          formatLine("search", loc.search), //remove
+          formatLine("hash", loc.hash), //remove
+          formatLine("origin", loc.origin), //remove
+          formatLine("productSub", nav.productSub), //remove
+          formatLine("vendorSub", nav.vendorSub || ""), //remove
+          // formatLine("standalone", window.matchMedia('(display-mode: standalone)').matches || nav.standalone || false), //remove
+           */
     // Also update the typewriterEffectSysinfo function to handle the spacing better:
 
     function typewriterEffectSysinfo(element, lines, speedPerChar = 5, perLineDelay = 5, callback) {
@@ -574,7 +575,7 @@
             // Memory test line
             const fakeBootLine = document.createElement('div');
             fakeBootLine.innerHTML = `
-  <span>Memory Test:</span>
+  <span>Memory Status</span>
   <span style="color: #d4fe6b;">65536k OK</span>
   <span class="typewriter-cursor"></span>
 `;
@@ -630,7 +631,7 @@
 
               function update() {
                 if (current >= targetKB) {
-                  memoryLine.innerHTML = infoLine('Memory Test', targetKB.toString().padStart(6, '0'), 'k OK');
+                  memoryLine.innerHTML = infoLine('Memory Status', targetKB.toString().padStart(6, '0'), 'k OK');
                   // Extra dotted lines (Cache SRAM, localStorage, Extended RAM)
                   setTimeout(() => {
                     if (extendedRAM) {
@@ -647,7 +648,7 @@
                     let localKB = getLocalStorageSizeKB();
                     let localDiv = document.createElement('div');
                     localDiv.style.cssText = memoryLine.style.cssText;
-                    localDiv.innerHTML = infoLine('localStorage', localKB.toString(), 'k used');
+                    localDiv.innerHTML = infoLine('Storage', localKB.toString(), 'k used');
                     parentElem.appendChild(localDiv);
 
                     if (onDone) setTimeout(onDone, 600);
@@ -658,7 +659,7 @@
                 let step = Math.floor(Math.random() * (maxStep - minStep + 1)) + minStep;
                 if (current + step > targetKB) step = targetKB - current;
                 current += step;
-                memoryLine.innerHTML = infoLine('Memory Test', current.toString().padStart(6, '0'), 'K') +
+                memoryLine.innerHTML = infoLine('Memory Status', current.toString().padStart(6, '0'), 'K') +
                   `<span class="typewriter-cursor"></span>`;
 
                 if (!hasPaused && current >= midwayK) {
@@ -957,7 +958,8 @@
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
         <p>BIOS Version 18.3.1 REACT</p>
-        <p class="version-label">v0.9.8</p>
+        <p class="version-label">Initializing Boot Agent<span class="dots">...</span></p>
+
       </div>
       <div class="BIOS__bootMessage4">
         <div id="BIOS__bootContainer"></div>
