@@ -592,6 +592,8 @@ class InternetExplorer extends Component {
               title: "Search",
               onClick: noop,
               closeOnClick: true,
+              //isDisabled: true,
+              //isHidden: true,
             },
             {
               icon: icons.ieFavorites,

@@ -220,11 +220,11 @@ body {
   }
 }
 
-@media (max-width: 600px) {
+/*@media (max-width: 600px) {
   .btn.ButtonNav.Window__maximize {
     display: none !important;
   }
-}
+}*/
 
 /* Fix for blue text in Taskbar on iOS Safari */
 @supports (-webkit-touch-callout: none) {
