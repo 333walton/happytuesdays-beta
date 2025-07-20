@@ -41,6 +41,20 @@ class InternetExplorer extends Component {
     refreshKey: 0,
   };
 
+  // Store button handlers for easy access - accounting for grouped buttons
+  buttonHandlers = {
+    0: () => {}, // Back
+    1: () => {}, // Forward
+    2: () => {}, // Stop
+    3: this.handleRefresh,
+    4: () => {}, // Home
+    5: () => {}, // Mail
+    6: () => {}, // Print
+  };
+
+  // Observer to watch for toolbar rendering
+  toolbarObserver = null;
+
   componentDidMount() {
     setTimeout(this.getIframeDimension, 3000);
     window.addEventListener("popstate", this.handleUrlChange, false);
@@ -48,6 +62,12 @@ class InternetExplorer extends Component {
     this._patchHistory();
     this._injectOverlay();
     window.addEventListener("resize", this._injectOverlay);
+
+    // Set up MutationObserver to watch for toolbar
+    this.setupToolbarObserver();
+
+    // Try to attach handlers after a delay
+    setTimeout(() => this.attachToolbarHandlers(), 100);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -56,6 +76,14 @@ class InternetExplorer extends Component {
     } else {
       this._injectOverlay();
     }
+
+    // Ensure handlers are always attached
+    const toolbar = document.querySelector(
+      ".InternetExplorer .WindowExplorer__options .OptionsList__large-icons"
+    );
+    if (toolbar && !toolbar._handlersAttached) {
+      this.attachToolbarHandlers();
+    }
   }
 
   componentWillUnmount() {
@@ -63,8 +91,36 @@ class InternetExplorer extends Component {
     window.removeEventListener("hashchange", this.handleUrlChange, false);
     this._unpatchHistory();
     window.removeEventListener("resize", this._injectOverlay);
+
+    // Safely remove overlay node
     if (this.overlayNode && this.overlayNode.parentNode) {
-      this.overlayNode.parentNode.removeChild(this.overlayNode);
+      try {
+        this.overlayNode.parentNode.removeChild(this.overlayNode);
+      } catch (e) {
+        // Node might have already been removed
+      }
+    }
+
+    if (this.toolbarObserver) {
+      this.toolbarObserver.disconnect();
+    }
+
+    // Clean up button references
+    if (this._buttonReferences) {
+      // Remove event listeners
+      const toolbar = document.querySelector(
+        ".InternetExplorer .WindowExplorer__options .OptionsList__large-icons"
+      );
+      if (toolbar) {
+        const buttons = toolbar.querySelectorAll("button");
+        buttons.forEach((button) => {
+          const handler = this._buttonReferences.get(button);
+          if (handler) {
+            button.removeEventListener("click", handler);
+          }
+        });
+      }
+      this._buttonReferences = null;
     }
   }
 
@@ -87,6 +143,127 @@ class InternetExplorer extends Component {
     if (this._origPushState) window.history.pushState = this._origPushState;
     if (this._origReplaceState)
       window.history.replaceState = this._origReplaceState;
+  };
+
+  // Set up MutationObserver to watch for toolbar
+  setupToolbarObserver = () => {
+    this.toolbarObserver = new MutationObserver((mutations) => {
+      // Check if toolbar was added
+      for (const mutation of mutations) {
+        if (mutation.type === "childList") {
+          const toolbar = document.querySelector(
+            ".WindowExplorer__options .OptionsList__large-icons"
+          );
+          if (toolbar && !toolbar._handlersAttached) {
+            this.attachToolbarHandlers();
+          }
+        }
+      }
+    });
+
+    // Start observing the entire window for changes
+    const windowElement = document.querySelector(".InternetExplorer");
+    if (windowElement) {
+      this.toolbarObserver.observe(windowElement, {
+        childList: true,
+        subtree: true,
+      });
+    }
+  };
+
+  // Attach event handlers directly to toolbar buttons
+  attachToolbarHandlers = () => {
+    // Try multiple selectors to find the toolbar
+    let toolbar = document.querySelector(
+      ".InternetExplorer .WindowExplorer__options .OptionsList__large-icons"
+    );
+
+    if (!toolbar) {
+      toolbar = document.querySelector(
+        ".WindowExplorer__options .OptionsList__large-icons"
+      );
+    }
+
+    if (!toolbar) {
+      // Try to find it within the current component's DOM
+      const ieWindow = document.querySelector(".InternetExplorer");
+      if (ieWindow) {
+        toolbar = ieWindow.querySelector(".OptionsList__large-icons");
+      }
+    }
+
+    if (!toolbar) {
+      return;
+    }
+
+    // Remove any existing delegation
+    if (toolbar._handlersAttached) {
+      return;
+    }
+
+    toolbar._handlersAttached = true;
+
+    // Get all buttons
+    const buttons = toolbar.querySelectorAll("button");
+
+    // Map of button text to handlers
+    const buttonMap = {
+      Back: () => {},
+      Forward: () => {},
+      Stop: () => {},
+      Refresh: this.handleRefresh,
+      Home: () => {},
+      Search: () => {},
+      Favorites: () => {},
+      History: () => {},
+      Mail: () => {},
+      Print: () => {},
+    };
+
+    // Store references to cloned buttons to avoid removeChild errors
+    if (!this._buttonReferences) {
+      this._buttonReferences = new WeakMap();
+    }
+
+    // Attach click handlers to each button
+    buttons.forEach((button, index) => {
+      // Skip if we've already processed this button
+      if (this._buttonReferences.has(button)) {
+        return;
+      }
+
+      // Get button text from the nested structure
+      const textElement = button.querySelector(".ButtonIconLarge__text");
+      const buttonText = textElement ? textElement.textContent.trim() : "";
+
+      // Add our click handler without cloning to avoid removeChild errors
+      const clickHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Check if button is disabled
+        if (button.disabled) {
+          return;
+        }
+
+        // Find the handler by text
+        const handler = buttonMap[buttonText];
+        if (handler) {
+          handler.call(this, e);
+        } else {
+          // Also try by index as fallback
+          const indexHandler = this.buttonHandlers[index];
+          if (indexHandler) {
+            indexHandler.call(this, e);
+          }
+        }
+      };
+
+      button.addEventListener("click", clickHandler);
+
+      // Store reference to avoid reprocessing
+      this._buttonReferences.set(button, clickHandler);
+    });
   };
 
   handleUrlChange = () => {
@@ -205,11 +382,7 @@ class InternetExplorer extends Component {
           { icon: icons.back, title: "Back", onClick: noop },
           { icon: icons.forward, title: "Forward", onClick: noop },
           { icon: icons.ieStop, title: "Stop", onClick: noop },
-          {
-            icon: icons.ieRefresh,
-            title: "Refresh",
-            onClick: this.handleRefresh,
-          },
+          { icon: icons.ieRefresh, title: "Refresh", onClick: noop },
           { icon: icons.ieHome, title: "Home", onClick: noop },
           [
             { icon: icons.ieSearch, title: "Search", onClick: noop },
