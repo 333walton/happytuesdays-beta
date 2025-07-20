@@ -344,7 +344,7 @@
     function getSystemFields() {
       const nav = window.navigator;
       const loc = window.location;
-      const TOTAL_WIDTH = 59;  // match your desired rectangle width
+      const TOTAL_WIDTH = window.innerWidth <= 768 ? 49 : 59;  // mobile : desktop
 
       // ❗ Declare SEP at the top level of getSystemFields, before formatLine
       const SEP = '='.repeat(TOTAL_WIDTH);
@@ -520,6 +520,8 @@
       element.innerHTML = '<span class="typed-text"></span><span class="typewriter-cursor"></span>';
       const typedSpan = element.querySelector('.typed-text');
       const cursorSpan = element.querySelector('.typewriter-cursor');
+      const TOTAL_WIDTH = window.innerWidth <= 768 ? 49 : 59;  // mobile : desktop
+      const SEP = '='.repeat(TOTAL_WIDTH)
 
       function type() {
         if (i < text.length) {
@@ -566,7 +568,7 @@
           bootContainer.appendChild(separatorLine);
 
           // Apply typewriter effect to the separator line
-          typewriterEffect(separatorLine, '='.repeat(59), 15, function () {
+          typewriterEffect(separatorLine, '='.repeat(window.innerWidth <= 768 ? 49 : 59), 15, function () {
             // Continue with memory test after separator is complete
 
             // Memory test line
@@ -589,8 +591,8 @@
               const duration = options.duration || 1800 + Math.floor(Math.random() * 700);
               const extendedRAM = targetKB > 65536 ? targetKB - 1024 : 0;
               const cacheSRAM = [128, 256, 512][Math.floor(Math.random() * 3)];
-              const TOTAL_WIDTH = 59; // Match the main TOTAL_WIDTH
-              const SEP = '='.repeat(59);
+              const TOTAL_WIDTH = window.innerWidth <= 768 ? 49 : 59; // Match the main TOTAL_WIDTH
+              const SEP = '='.repeat(TOTAL_WIDTH);
 
               // Helper: Dotted style, right-aligned value with perfect alignment
               function infoLine(label, value, suffix = "k OK") {
@@ -955,7 +957,7 @@
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
         <p>BIOS Version 18.3.1 REACT</p>
-        <p class="version-label">v0.9.8 beta</p>
+        <p class="version-label">v0.9.8</p>
       </div>
       <div class="BIOS__bootMessage4">
         <div id="BIOS__bootContainer"></div>
