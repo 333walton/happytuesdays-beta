@@ -346,90 +346,157 @@
         return text.padStart(Math.floor((totalWidth + text.length) / 2)).padEnd(totalWidth);
       }
 
-    function getSystemFields() {
-      const nav = window.navigator;
-      const loc = window.location;
-      const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54;  // mobile : desktop
-
-      // ❗ Declare SEP at the top level of getSystemFields, before formatLine
-      const SEP = '='.repeat(TOTAL_WIDTH);
-
-      function formatLine(label, value, totalWidth = TOTAL_WIDTH) {
+    function formatLine(label, value, totalWidth = 54) {
         label = label ?? '';
         value = value == null ? '' : String(value);
-
-        // Truncate value if too long to fit
-        const maxValueLength = totalWidth - label.length - 3; // 3 = minimum dots + colon
+        const maxValueLength = totalWidth - label.length - 3;
         if (value.length > maxValueLength) {
           value = value.slice(0, maxValueLength);
         }
-
-        // Calculate exact dots needed for perfect right alignment
+        // Dotted alignment
         const dotsCount = totalWidth - label.length - value.length;
         const dots = '.'.repeat(Math.max(1, dotsCount));
-
-        // Ensure the final line is exactly totalWidth characters
         const result = (label + dots + value).slice(0, totalWidth);
-
-        // Pad with spaces if somehow shorter (safety measure)
         return result.padEnd(totalWidth, ' ');
       }
 
-
-      function shortenDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-          month: '2-digit',
-          day: '2-digit',
-          year: '2-digit'
-        }) + ' ' + date.toLocaleTimeString('en-US', {
-          hour12: false,
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      }
-
-      function shortenAppVersion(version) {
-        // Extract version, OS, and architecture details
-        const match = version.match(/(\d+\.\d+).*?(Windows NT \d+\.\d+|Mac OS X|Linux|iPhone OS|iPad OS).*?(Win64|x64|Intel|ARM)?/i);
-        if (match) {
-          const arch = match[3] ? ` ${match[3]}` : '';
-          return `${match[1]} ${match[2]}${arch}`;
-        }
-        // Fallback: take first 40 characters
-        return version.substring(0, 40);
-      }
-      function headerLine(text, totalWidth = TOTAL_WIDTH) {
-        // Centers the header, no dots, no value.
+      // define headerLine if needed
+      function headerLine(text, totalWidth = 54) {
         const pad = Math.floor((totalWidth - text.length) / 2);
         return " ".repeat(Math.max(0, pad)) + text;
       }
 
+  function shortenAppVersion(version) {
+    if (!version) return "";
+    // Sample: "5.0 (Windows NT 10.0; Win64; x64)"
+    // This regex tries to extract main version and OS info
+    const match = version.match(/(\d+\.\d+).*?(Windows NT \d+\.\d+|Mac OS X|Linux|iPhone OS|iPad OS).*?(Win64|x64|Intel|ARM)?/i);
+    if (match) {
+      const arch = match[3] ? ` ${match[3]}` : '';
+      return `${match[1]} ${match[2]}${arch}`;
+    }
+    // Fallback for odd cases: just cut string for safety
+    return version.substring(0, 40);
+  }
+
+
       function shortenUserAgent(userAgent) {
-        // Extract browser, version, and key details
-        const chromeMatch = userAgent.match(/Chrome\/(\d+\.\d+\.\d+)/);
-        const safariMatch = userAgent.match(/Safari\/(\d+\.\d+)/);
-        const firefoxMatch = userAgent.match(/Firefox\/(\d+\.\d+)/);
-        const webkitMatch = userAgent.match(/AppleWebKit\/(\d+\.\d+)/);
+          const chromeMatch = userAgent.match(/Chrome\/(\d+\.\d+\.\d+)/);
+          const safariMatch = userAgent.match(/Safari\/(\d+\.\d+)/);
+          const firefoxMatch = userAgent.match(/Firefox\/(\d+\.\d+)/);
+          const webkitMatch = userAgent.match(/AppleWebKit\/(\d+\.\d+)/);
 
-        if (chromeMatch) {
-          const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
-          return `Chrome ${chromeMatch[1]}${webkit}`;
-        }
-        if (firefoxMatch) {
-          const gecko = userAgent.includes('Gecko') ? ' Gecko' : '';
-          return `Firefox ${firefoxMatch[1]}${gecko}`;
-        }
-        if (safariMatch) {
-          const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
-          return `Safari ${safariMatch[1]}${webkit}`;
+          if (chromeMatch) {
+            const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
+            return `Chrome ${chromeMatch[1]}${webkit}`;
+          }
+          if (firefoxMatch) {
+            const gecko = userAgent.includes('Gecko') ? ' Gecko' : '';
+            return `Firefox ${firefoxMatch[1]}${gecko}`;
+          }
+          if (safariMatch) {
+            const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
+            return `Safari ${safariMatch[1]}${webkit}`;
+          }
+          return userAgent.substring(0, 45);
         }
 
-        // Fallback: take first 45 characters
-        return userAgent.substring(0, 45);
-      }
+    
+      function getSystemFields() {
+        const nav = window.navigator;
+        const loc = window.location;
+        const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54;
+        const SEP = '='.repeat(TOTAL_WIDTH);
+
+        // JS Feature Test (shows modern JS support, not version)
+        const jsEnabled = typeof Symbol === "function" ? "Enabled" : "Unknown";
+
+        // CSS Grid Support Test
+        const cssGridSupport = (window.CSS && CSS.supports("display", "grid")) ? "Grid: Yes" : "Grid: No";
+
+        // Battery status (async, so fallback for now)
+        let batteryStatus = "N/A";
+        if (navigator.getBattery) {
+          navigator.getBattery().then(battery => {
+            batteryStatus = `${Math.round(battery.level * 100)}% ` + (battery.charging ? "(Plugged In)" : "(On Battery)");
+            // After first render, optionally rerender to update battery status
+          });
+        }
+
+        // Input devices
+        function getInputPeripherals() {
+          let peripherals = [];
+          if ('ontouchstart' in window || nav.maxTouchPoints > 0) peripherals.push('Touch');
+          if (window.matchMedia('(pointer:fine)').matches) peripherals.push('Mouse');
+          return peripherals.length ? peripherals.join(", ") : "None";
+        }
+
+        // Link speed and connection type
+        let linkSpeed = "N/A";
+        let netType = "N/A";
+        if (nav.connection) {
+          linkSpeed = nav.connection.downlink ? `${nav.connection.downlink} Mbps` : "Unknown";
+          netType = nav.connection.effectiveType ? nav.connection.effectiveType.toUpperCase() : "Unknown";
+        }
+
+        // Graphics Adapter (WebGL hack)
+        let graphicsAdapter = "N/A";
+        try {
+          const canvas = document.createElement('canvas');
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (gl) {
+            const ext = gl.getExtension('WEBGL_debug_renderer_info');
+            if (ext) {
+              graphicsAdapter = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
+            }
+          }
+        } catch { }
+
+
+        // Sound device detection (browser API permission required, so fallback to "Check in app")
+        function getSoundDeviceStatus() {
+          if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+            navigator.mediaDevices.enumerateDevices().then(devices => {
+              return devices.some(d => d.kind === "audiooutput") ? "Yes" : "No";
+            });
+          }
+          return "Check";
+        }
 
       return [
+        SEP,
+        headerLine("*** SYSTEM & SESSION INFO ***"),
+        formatLine("App Version", "0.9.8 Beta"),
+        formatLine("Shell Environment", nav.appName),
+        formatLine("Core Engine", nav.appCodeName),
+        formatLine("Boot Agent", shortenUserAgent(nav.userAgent)),
+        formatLine("Cookies", nav.cookieEnabled ? "Enabled" : "Disabled"),
+        formatLine("Language", nav.language),
+        formatLine("JavaScript", jsEnabled), 
+        formatLine("CSS Engine Version", cssGridSupport), 
+        formatLine("Local Time", new Date().toLocaleString()), 
+        formatLine("Last Logon Time", "NA"), // placeholder - replace with dynamic value if tracked
+        SEP,
+        headerLine("*** HARDWARE & DEVICE ***"),
+        formatLine("Display Adapter", `${window.screen.width} x ${window.screen.height}px`), // dynamic
+        formatLine("Graphics Adapter", graphicsAdapter),
+        formatLine("Power Management Status", batteryStatus), // shows NA for desktop
+        formatLine("Processor Type", nav.platform),
+        formatLine("Hardware Concurrency", nav.hardwareConcurrency || ""),
+        formatLine("Pointing Device Count", nav.maxTouchPoints || ""), //showing nothing
+        formatLine("Input Peripheral List", getInputPeripherals()),
+        formatLine("Sound Device Detected", getSoundDeviceStatus()), // best-effort (may be async)
+        formatLine("Link Speed Estimate", linkSpeed),
+        formatLine("Network", netType),
+        formatLine("Vendor", nav.vendor),
+        formatLine("Platform", nav.platform),
+        formatLine("Product", nav.product),
+        formatLine("System ROM", shortenAppVersion(nav.appVersion)),
+        SEP,
+      ];
+    }
+
+      /*return [
         SEP,
         headerLine("*** SYSTEM & SESSION INFO ***"),
         formatLine("App Version", "0.9.8 Beta"),
@@ -460,7 +527,7 @@
         formatLine("System ROM", shortenAppVersion(nav.appVersion)), // Or whatever you want
         SEP,
       ];
-    }
+    }*/
 
         /*...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
           formatLine("plugin", p.name.slice(0, 22), TOTAL_WIDTH)
