@@ -668,16 +668,24 @@
               const SEP = '='.repeat(TOTAL_WIDTH);
 
               // Helper: Dotted style, right-aligned value with perfect alignment
-              function infoLine(label, value, suffix = "k", pass = true) {
-                label = label + '';
-                value = value + '';
-                const totalContentLength = label.length + 1 + value.length + 1 + suffix.length; // +1 for colon, +1 for space
-                let dotsLen = Math.max(1, TOTAL_WIDTH - totalContentLength);
-                let dots = '.'.repeat(dotsLen);
-                const dot = `<span class="bios-status-dot${pass ? '' : ' fail'}"></span>`;
-                const result = `<span>${label}:${dots}${value}${suffix === "k" ? '' : suffix}</span>${dot}`;
-                return result;
+              function infoLine(label, value, suffix = "", showPassDot = false, noDots = false) {
+                label = label ?? '';
+                value = value == null ? '' : String(value);
+                const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54;
+                // Only use dots if noDots is false
+                let dots = "";
+                if (!noDots) {
+                  const totalContentLength = label.length + 1 + value.length + (suffix ? 1 + suffix.length : 0);
+                  let dotsLen = Math.max(1, TOTAL_WIDTH - totalContentLength);
+                  dots = '.'.repeat(dotsLen);
+                }
+                let dot = showPassDot
+                  ? `<span class="bios-status-dot" aria-label="pass"></span>`
+                  : (suffix ? suffix : "");
+                // Only trailing dot. Don't print suffix if dot is present.
+                return `<span>${label}:${dots}${value}</span>${dot}`;
               }
+
 
               function getLocalStorageSizeKB() {
                 let total = 0;
@@ -706,22 +714,25 @@
                 if (current >= targetKB) {
                   memoryLine.innerHTML = infoLine('Memory Status', targetKB.toString().padStart(6, '0') + 'k', "", true);
                   setTimeout(() => {
+                                        let cache = document.createElement('div');
+                    cache.style.cssText = memoryLine.style.cssText;
+                    cache.innerHTML = infoLine('Cache SRAM', cacheSRAM.toString() + 'k', "", true);
+                    parentElem.appendChild(cache);
+
                     if (extendedRAM) {
                       let ext = document.createElement('div');
                       ext.style.cssText = memoryLine.style.cssText;
                       ext.innerHTML = infoLine('Extended RAM', extendedRAM.toString() + 'k', '', false);
                       parentElem.appendChild(ext);
                     }
-                    let cache = document.createElement('div');
-                    cache.style.cssText = memoryLine.style.cssText;
-                    cache.innerHTML = infoLine('Cache SRAM', cacheSRAM.toString() + 'k', "", true);
-                    parentElem.appendChild(cache);
 
                     let localKB = getLocalStorageSizeKB();
                     let localDiv = document.createElement('div');
                     localDiv.style.cssText = memoryLine.style.cssText;
-                    localDiv.innerHTML = infoLine('Storage', localKB.toString(), 'k used', false);
+                    localDiv.innerHTML = infoLine('Storage', localKB.toString(), '.2k used');
                     parentElem.appendChild(localDiv);
+
+
 
                     if (onDone) setTimeout(onDone, 600);
                   }, 350);
