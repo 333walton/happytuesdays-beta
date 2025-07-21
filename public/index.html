@@ -341,10 +341,15 @@
 
   <script>
     // --- Utility: System Environment BIOS Fields as in screenshot ---
+    function headerLine(text, totalWidth = window.innerWidth <= 768 ? 44 : 54) {
+        // No dots, just centered or left-aligned
+        return text.padStart(Math.floor((totalWidth + text.length) / 2)).padEnd(totalWidth);
+      }
+
     function getSystemFields() {
       const nav = window.navigator;
       const loc = window.location;
-      const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 59;  // mobile : desktop
+      const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54;  // mobile : desktop
 
       // ❗ Declare SEP at the top level of getSystemFields, before formatLine
       const SEP = '='.repeat(TOTAL_WIDTH);
@@ -394,6 +399,11 @@
         // Fallback: take first 40 characters
         return version.substring(0, 40);
       }
+      function headerLine(text, totalWidth = TOTAL_WIDTH) {
+        // Centers the header, no dots, no value.
+        const pad = Math.floor((totalWidth - text.length) / 2);
+        return " ".repeat(Math.max(0, pad)) + text;
+      }
 
       function shortenUserAgent(userAgent) {
         // Extract browser, version, and key details
@@ -421,32 +431,41 @@
 
       return [
         SEP,
-        formatLine("protocol", loc.protocol),
-        formatLine("Host", loc.host),
-        formatLine("Network Path", loc.pathname),
-        SEP,
-        formatLine("Core Engine", nav.appCodeName),
+        headerLine("*** SYSTEM & SESSION INFO ***"),
+        formatLine("App Version", "0.9.8 Beta"),
         formatLine("Shell Environment", nav.appName),
-        formatLine("System ROM", shortenAppVersion(nav.appVersion)),  
-        formatLine("platform", nav.platform),
-        formatLine("product", nav.product),
-        
+        formatLine("Core Engine", nav.appCodeName),
         formatLine("Boot Agent", shortenUserAgent(nav.userAgent)),
-        formatLine("Vendor", nav.vendor),
+        formatLine("Cookies", nav.cookieEnabled ? "Enabled" : "Disabled"),
         formatLine("Language", nav.language),
+        formatLine("JavaScript Version", "v1.5"), // placeholder - needs to populate
+        formatLine("CSS Engine Version", "Yes"), // placeholder - needs to populate
+        formatLine("Local Time", shortenDate(new Date())),
+        formatLine("Last Logon Time", "07/15/25 17:30"), // placeholder - Set this dynamically
+        SEP,
+        headerLine("*** HARDWARE & DEVICE ***"),
+        formatLine("Display Adapter", `${window.screen.width} x ${window.screen.height}px`),
+        formatLine("Graphics Adapter", "Intel Iris Xe Graphics"), // placeholder - needs to populate
+        formatLine("Power Management Status", "84% (Plugged In)"), // placeholder - needs to populate (battery api)
+        formatLine("Processor Type", "ARM64, x86_64"), // placeholder - needs to populate
         formatLine("hardwareConcurrency", nav.hardwareConcurrency || ""),
         formatLine("Pointing Device Count", nav.maxTouchPoints || ""),
-        formatLine("Cookies", nav.cookieEnabled),
-        formatLine("webdriver", nav.webdriver || "false"),
-        formatLine("Local Time", shortenDate(new Date())),
-        formatLine("pdfViewerEnabled", !!(Array.from(nav.plugins || []).some(p => /pdf/i.test(p.name)))), //remove?
+        formatLine("Input Peripheral List", "Mouse, Touch"), // placeholder - needs to populate
+        formatLine("Sound Device Detected", "No"), // placeholder - needs to populate
+        formatLine("Link Speed Estimate", "160 Mbps"), // placeholder - needs to populate
+        formatLine("Network", "WiFi (160 Mbps)"), // placeholder - needs to populate
+        formatLine("Vendor", nav.vendor),
+        formatLine("platform", nav.platform),
+        formatLine("product", nav.product),
+        formatLine("System ROM", shortenAppVersion(nav.appVersion)), // Or whatever you want
         SEP,
-        ...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
-          formatLine("plugin", p.name.slice(0, 22), TOTAL_WIDTH)
-        )),
-        SEP
       ];
     }
+
+        /*...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
+          formatLine("plugin", p.name.slice(0, 22), TOTAL_WIDTH)
+        )),
+        SEP*/
 
     /*formatLine("Host Name", loc.hostname), //remove
           formatLine("port", loc.port || ""), //remove
@@ -459,31 +478,84 @@
            */
     // Also update the typewriterEffectSysinfo function to handle the spacing better:
 
-    function typewriterEffectSysinfo(element, lines, speedPerChar = 5, perLineDelay = 5, callback) {
-      let currentLine = 0;
-      function typeLine() {
-        if (currentLine >= lines.length) {
-          if (callback) callback();
-          return;
-        }
-        let line = lines[currentLine];
-        let span = document.createElement('span');
-        element.appendChild(span);
-        let i = 0;
-        function typeChar() {
-          if (i < line.length) {
-            span.textContent += line[i++];
-            setTimeout(typeChar, speedPerChar);
-          } else {
-            element.appendChild(document.createTextNode('\n'));
-            currentLine++;
-            setTimeout(typeLine, perLineDelay);
+    function typewriterEffectSysinfo(element, lines, speedPerChar = 5.5, perLineDelay = 5, callback) {
+        let currentLine = 0;
+        function typeLine() {
+          if (currentLine >= lines.length) {
+            const promptLine = document.createElement('div');
+            promptLine.className = "bios-sysinfo";
+            promptLine.style.marginTop = "4px";
+            promptLine.style.color = "#fff";
+            // Center the prompt as with headers
+            const promptText = "F1 to Save BIOS   |   Ctrl+Shift+R to Restart";
+            const totalWidth = window.innerWidth <= 768 ? 44 : 54;
+            promptLine.textContent = headerLine(promptText, totalWidth);
+            element.appendChild(promptLine);
+
+            setTimeout(() => {
+              if (callback) callback();
+            }, 2000);
+            return;
           }
+
+          let line = lines[currentLine];
+          let span = document.createElement('span');
+          element.appendChild(span);
+          let i = 0;
+          function typeChar() {
+            if (i < line.length) {
+              span.textContent += line[i++];
+              setTimeout(typeChar, speedPerChar);
+            } else {
+              element.appendChild(document.createTextNode('\n'));
+              currentLine++;
+              setTimeout(typeLine, perLineDelay);
+            }
+          }
+          typeChar();
         }
-        typeChar();
+        typeLine();
       }
-      typeLine();
+    
+      let dotCount = 0;
+      let dotInterval;
+
+      function startDots() {
+        const dotsEl = document.querySelector('.dots');
+        if (!dotsEl) return;
+
+        dotInterval = setInterval(() => {
+          dotCount = (dotCount + 1) % 4;
+          dotsEl.textContent = '.'.repeat(dotCount);
+        }, 400);
+      }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F1') {
+      e.preventDefault(); // Prevent browser help panel
+
+      const biosContent = document.querySelector('.BIOS__bootHeader')?.innerText;
+      if (!biosContent) return;
+
+      const blob = new Blob([biosContent], { type: 'text/plain' });
+      const downloadUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = 'bios-log.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(downloadUrl);
     }
+  });
+
+      function stopDots() {
+        clearInterval(dotInterval);
+        const dotsEl = document.querySelector('.dots');
+        if (dotsEl) dotsEl.textContent = '...';
+      }
 
     // Global shutdown detection
     window.isShutdownSequenceActive = false;
@@ -521,7 +593,7 @@
       element.innerHTML = '<span class="typed-text"></span><span class="typewriter-cursor"></span>';
       const typedSpan = element.querySelector('.typed-text');
       const cursorSpan = element.querySelector('.typewriter-cursor');
-      const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 59;  // mobile : desktop
+      const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54;  // mobile : desktop
       const SEP = '='.repeat(TOTAL_WIDTH)
 
       function type() {
@@ -569,14 +641,14 @@
           bootContainer.appendChild(separatorLine);
 
           // Apply typewriter effect to the separator line
-          typewriterEffect(separatorLine, '='.repeat(window.innerWidth <= 768 ? 44 : 59), 15, function () {
+          typewriterEffect(separatorLine, '='.repeat(window.innerWidth <= 768 ? 44 : 54), 15, function () {
             // Continue with memory test after separator is complete
 
             // Memory test line
             const fakeBootLine = document.createElement('div');
             fakeBootLine.innerHTML = `
   <span>Memory Status</span>
-  <span style="color: #d4fe6b;">65536k OK</span>
+  <span style="color: #d4fe6b;">65536k</span>
   <span class="typewriter-cursor"></span>
 `;
 
@@ -592,17 +664,18 @@
               const duration = options.duration || 1800 + Math.floor(Math.random() * 700);
               const extendedRAM = targetKB > 65536 ? targetKB - 1024 : 0;
               const cacheSRAM = [128, 256, 512][Math.floor(Math.random() * 3)];
-              const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 59; // Match the main TOTAL_WIDTH
+              const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54; // Match the main TOTAL_WIDTH
               const SEP = '='.repeat(TOTAL_WIDTH);
 
               // Helper: Dotted style, right-aligned value with perfect alignment
-              function infoLine(label, value, suffix = "k OK") {
+              function infoLine(label, value, suffix = "k", pass = true) {
                 label = label + '';
                 value = value + '';
                 const totalContentLength = label.length + 1 + value.length + 1 + suffix.length; // +1 for colon, +1 for space
                 let dotsLen = Math.max(1, TOTAL_WIDTH - totalContentLength);
                 let dots = '.'.repeat(dotsLen);
-                const result = `<span>${label}:${dots}${value}${suffix}</span>`;
+                const dot = `<span class="bios-status-dot${pass ? '' : ' fail'}"></span>`;
+                const result = `<span>${label}:${dots}${value}${suffix === "k" ? '' : suffix}</span>${dot}`;
                 return result;
               }
 
@@ -631,30 +704,30 @@
 
               function update() {
                 if (current >= targetKB) {
-                  memoryLine.innerHTML = infoLine('Memory Status', targetKB.toString().padStart(6, '0'), 'k OK');
-                  // Extra dotted lines (Cache SRAM, localStorage, Extended RAM)
+                  memoryLine.innerHTML = infoLine('Memory Status', targetKB.toString().padStart(6, '0') + 'k', "", true);
                   setTimeout(() => {
                     if (extendedRAM) {
                       let ext = document.createElement('div');
                       ext.style.cssText = memoryLine.style.cssText;
-                      ext.innerHTML = infoLine('Extended RAM', extendedRAM.toString(), 'k OK');
+                      ext.innerHTML = infoLine('Extended RAM', extendedRAM.toString() + 'k', '', false);
                       parentElem.appendChild(ext);
                     }
                     let cache = document.createElement('div');
                     cache.style.cssText = memoryLine.style.cssText;
-                    cache.innerHTML = infoLine('Cache SRAM', cacheSRAM.toString(), 'k OK');
+                    cache.innerHTML = infoLine('Cache SRAM', cacheSRAM.toString() + 'k', "", true);
                     parentElem.appendChild(cache);
 
                     let localKB = getLocalStorageSizeKB();
                     let localDiv = document.createElement('div');
                     localDiv.style.cssText = memoryLine.style.cssText;
-                    localDiv.innerHTML = infoLine('Storage', localKB.toString(), 'k used');
+                    localDiv.innerHTML = infoLine('Storage', localKB.toString(), 'k used', false);
                     parentElem.appendChild(localDiv);
 
                     if (onDone) setTimeout(onDone, 600);
                   }, 350);
                   return;
                 }
+
 
                 let step = Math.floor(Math.random() * (maxStep - minStep + 1)) + minStep;
                 if (current + step > targetKB) step = targetKB - current;
@@ -941,6 +1014,7 @@
 
     // Longer delay to ensure React has time to initialize
     setTimeout(loadScreen, 1500);
+
   </script>
 </head>
 
@@ -958,7 +1032,10 @@
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
         <p>BIOS Version 18.3.1 REACT</p>
-        <p class="version-label">Initializing Boot Agent<span class="dots">...</span></p>
+        <p class="version-label">
+          Initializing Boot Agent<span class="dots"></span>
+        </p>
+
 
       </div>
       <div class="BIOS__bootMessage4">

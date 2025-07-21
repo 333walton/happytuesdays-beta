@@ -758,3 +758,37 @@ pre.bios-sysinfo * {
     content: "...";
   }
 }
+
+.bios-status-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  margin-left: 4px;
+  vertical-align: middle;
+  background-color: #40ff40; /* bright green for "pass" */
+  animation: pulseGreen 2s ease-in-out infinite;
+}
+@keyframes pulseGreen {
+  0%,
+  100% {
+    opacity: 0.33;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.bios-status-dot.fail {
+  background-color: #e34c4c;
+  animation-name: pulseRed;
+}
+@keyframes pulseRed {
+  0%,
+  100% {
+    opacity: 0.33;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
