@@ -764,7 +764,7 @@ pre.bios-sysinfo * {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  margin-left: 4px;
+  margin-left: 5px;
   vertical-align: middle;
   background-color: #40ff40; /* bright green for "pass" */
   animation: pulseGreen 2s ease-in-out infinite;

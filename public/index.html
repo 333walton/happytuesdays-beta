@@ -448,15 +448,15 @@
         formatLine("Graphics Adapter", "Intel Iris Xe Graphics"), // placeholder - needs to populate
         formatLine("Power Management Status", "84% (Plugged In)"), // placeholder - needs to populate (battery api)
         formatLine("Processor Type", "ARM64, x86_64"), // placeholder - needs to populate
-        formatLine("hardwareConcurrency", nav.hardwareConcurrency || ""),
+        formatLine("Hardware Concurrency", nav.hardwareConcurrency || ""),
         formatLine("Pointing Device Count", nav.maxTouchPoints || ""),
         formatLine("Input Peripheral List", "Mouse, Touch"), // placeholder - needs to populate
         formatLine("Sound Device Detected", "No"), // placeholder - needs to populate
         formatLine("Link Speed Estimate", "160 Mbps"), // placeholder - needs to populate
         formatLine("Network", "WiFi (160 Mbps)"), // placeholder - needs to populate
         formatLine("Vendor", nav.vendor),
-        formatLine("platform", nav.platform),
-        formatLine("product", nav.product),
+        formatLine("Platform", nav.platform),
+        formatLine("Product", nav.product),
         formatLine("System ROM", shortenAppVersion(nav.appVersion)), // Or whatever you want
         SEP,
       ];
