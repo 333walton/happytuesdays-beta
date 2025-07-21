@@ -152,7 +152,7 @@
     .BIOS__bootHeader {
       background-color: #000000;
       font-size: 10.5px;
-      letter-spacing: .88px;
+      /*letter-spacing: .88px;*/
       line-height: .89em;
     }
 
@@ -342,126 +342,126 @@
   <script>
     // --- Utility: System Environment BIOS Fields as in screenshot ---
     function headerLine(text, totalWidth = window.innerWidth <= 768 ? 44 : 54) {
-        // No dots, just centered or left-aligned
-        return text.padStart(Math.floor((totalWidth + text.length) / 2)).padEnd(totalWidth);
-      }
+      // No dots, just centered or left-aligned
+      return text.padStart(Math.floor((totalWidth + text.length) / 2)).padEnd(totalWidth);
+    }
 
     function formatLine(label, value, totalWidth = 54) {
-        label = label ?? '';
-        value = value == null ? '' : String(value);
-        const maxValueLength = totalWidth - label.length - 3;
-        if (value.length > maxValueLength) {
-          value = value.slice(0, maxValueLength);
-        }
-        // Dotted alignment
-        const dotsCount = totalWidth - label.length - value.length;
-        const dots = '.'.repeat(Math.max(1, dotsCount));
-        const result = (label + dots + value).slice(0, totalWidth);
-        return result.padEnd(totalWidth, ' ');
+      label = label ?? '';
+      value = value == null ? '' : String(value);
+      const maxValueLength = totalWidth - label.length - 3;
+      if (value.length > maxValueLength) {
+        value = value.slice(0, maxValueLength);
       }
-
-      // define headerLine if needed
-      function headerLine(text, totalWidth = 54) {
-        const pad = Math.floor((totalWidth - text.length) / 2);
-        return " ".repeat(Math.max(0, pad)) + text;
-      }
-
-  function shortenAppVersion(version) {
-    if (!version) return "";
-    // Sample: "5.0 (Windows NT 10.0; Win64; x64)"
-    // This regex tries to extract main version and OS info
-    const match = version.match(/(\d+\.\d+).*?(Windows NT \d+\.\d+|Mac OS X|Linux|iPhone OS|iPad OS).*?(Win64|x64|Intel|ARM)?/i);
-    if (match) {
-      const arch = match[3] ? ` ${match[3]}` : '';
-      return `${match[1]} ${match[2]}${arch}`;
+      // Dotted alignment
+      const dotsCount = totalWidth - label.length - value.length;
+      const dots = '.'.repeat(Math.max(1, dotsCount));
+      const result = (label + dots + value).slice(0, totalWidth);
+      return result.padEnd(totalWidth, ' ');
     }
-    // Fallback for odd cases: just cut string for safety
-    return version.substring(0, 40);
-  }
+
+    // define headerLine if needed
+    function headerLine(text, totalWidth = 54) {
+      const pad = Math.floor((totalWidth - text.length) / 2);
+      return " ".repeat(Math.max(0, pad)) + text;
+    }
+
+    function shortenAppVersion(version) {
+      if (!version) return "";
+      // Sample: "5.0 (Windows NT 10.0; Win64; x64)"
+      // This regex tries to extract main version and OS info
+      const match = version.match(/(\d+\.\d+).*?(Windows NT \d+\.\d+|Mac OS X|Linux|iPhone OS|iPad OS).*?(Win64|x64|Intel|ARM)?/i);
+      if (match) {
+        const arch = match[3] ? ` ${match[3]}` : '';
+        return `${match[1]} ${match[2]}${arch}`;
+      }
+      // Fallback for odd cases: just cut string for safety
+      return version.substring(0, 40);
+    }
 
 
-      function shortenUserAgent(userAgent) {
-          const chromeMatch = userAgent.match(/Chrome\/(\d+\.\d+\.\d+)/);
-          const safariMatch = userAgent.match(/Safari\/(\d+\.\d+)/);
-          const firefoxMatch = userAgent.match(/Firefox\/(\d+\.\d+)/);
-          const webkitMatch = userAgent.match(/AppleWebKit\/(\d+\.\d+)/);
+    function shortenUserAgent(userAgent) {
+      const chromeMatch = userAgent.match(/Chrome\/(\d+\.\d+\.\d+)/);
+      const safariMatch = userAgent.match(/Safari\/(\d+\.\d+)/);
+      const firefoxMatch = userAgent.match(/Firefox\/(\d+\.\d+)/);
+      const webkitMatch = userAgent.match(/AppleWebKit\/(\d+\.\d+)/);
 
-          if (chromeMatch) {
-            const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
-            return `Chrome ${chromeMatch[1]}${webkit}`;
+      if (chromeMatch) {
+        const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
+        return `Chrome ${chromeMatch[1]}${webkit}`;
+      }
+      if (firefoxMatch) {
+        const gecko = userAgent.includes('Gecko') ? ' Gecko' : '';
+        return `Firefox ${firefoxMatch[1]}${gecko}`;
+      }
+      if (safariMatch) {
+        const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
+        return `Safari ${safariMatch[1]}${webkit}`;
+      }
+      return userAgent.substring(0, 45);
+    }
+
+
+    function getSystemFields() {
+      const nav = window.navigator;
+      const loc = window.location;
+      const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54;
+      const SEP = '='.repeat(TOTAL_WIDTH);
+
+      // JS Feature Test (shows modern JS support, not version)
+      const jsEnabled = typeof Symbol === "function" ? "Enabled" : "Unknown";
+
+      // CSS Grid Support Test
+      const cssGridSupport = (window.CSS && CSS.supports("display", "grid")) ? "Grid: Yes" : "Grid: No";
+
+      // Battery status (async, so fallback for now)
+      let batteryStatus = "N/A";
+      if (navigator.getBattery) {
+        navigator.getBattery().then(battery => {
+          batteryStatus = `${Math.round(battery.level * 100)}% ` + (battery.charging ? "(Plugged In)" : "(On Battery)");
+          // After first render, optionally rerender to update battery status
+        });
+      }
+
+      // Input devices
+      function getInputPeripherals() {
+        let peripherals = [];
+        if ('ontouchstart' in window || nav.maxTouchPoints > 0) peripherals.push('Touch');
+        if (window.matchMedia('(pointer:fine)').matches) peripherals.push('Mouse');
+        return peripherals.length ? peripherals.join(", ") : "None";
+      }
+
+      // Link speed and connection type
+      let linkSpeed = "N/A";
+      let netType = "N/A";
+      if (nav.connection) {
+        linkSpeed = nav.connection.downlink ? `${nav.connection.downlink} Mbps` : "Unknown";
+        netType = nav.connection.effectiveType ? nav.connection.effectiveType.toUpperCase() : "Unknown";
+      }
+
+      // Graphics Adapter (WebGL hack)
+      let graphicsAdapter = "N/A";
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+          const ext = gl.getExtension('WEBGL_debug_renderer_info');
+          if (ext) {
+            graphicsAdapter = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
           }
-          if (firefoxMatch) {
-            const gecko = userAgent.includes('Gecko') ? ' Gecko' : '';
-            return `Firefox ${firefoxMatch[1]}${gecko}`;
-          }
-          if (safariMatch) {
-            const webkit = webkitMatch ? ` WebKit/${webkitMatch[1]}` : '';
-            return `Safari ${safariMatch[1]}${webkit}`;
-          }
-          return userAgent.substring(0, 45);
         }
+      } catch { }
 
-    
-      function getSystemFields() {
-        const nav = window.navigator;
-        const loc = window.location;
-        const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54;
-        const SEP = '='.repeat(TOTAL_WIDTH);
 
-        // JS Feature Test (shows modern JS support, not version)
-        const jsEnabled = typeof Symbol === "function" ? "Enabled" : "Unknown";
-
-        // CSS Grid Support Test
-        const cssGridSupport = (window.CSS && CSS.supports("display", "grid")) ? "Grid: Yes" : "Grid: No";
-
-        // Battery status (async, so fallback for now)
-        let batteryStatus = "N/A";
-        if (navigator.getBattery) {
-          navigator.getBattery().then(battery => {
-            batteryStatus = `${Math.round(battery.level * 100)}% ` + (battery.charging ? "(Plugged In)" : "(On Battery)");
-            // After first render, optionally rerender to update battery status
+      // Sound device detection (browser API permission required, so fallback to "Check in app")
+      function getSoundDeviceStatus() {
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+          navigator.mediaDevices.enumerateDevices().then(devices => {
+            return devices.some(d => d.kind === "audiooutput") ? "Yes" : "No";
           });
         }
-
-        // Input devices
-        function getInputPeripherals() {
-          let peripherals = [];
-          if ('ontouchstart' in window || nav.maxTouchPoints > 0) peripherals.push('Touch');
-          if (window.matchMedia('(pointer:fine)').matches) peripherals.push('Mouse');
-          return peripherals.length ? peripherals.join(", ") : "None";
-        }
-
-        // Link speed and connection type
-        let linkSpeed = "N/A";
-        let netType = "N/A";
-        if (nav.connection) {
-          linkSpeed = nav.connection.downlink ? `${nav.connection.downlink} Mbps` : "Unknown";
-          netType = nav.connection.effectiveType ? nav.connection.effectiveType.toUpperCase() : "Unknown";
-        }
-
-        // Graphics Adapter (WebGL hack)
-        let graphicsAdapter = "N/A";
-        try {
-          const canvas = document.createElement('canvas');
-          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-          if (gl) {
-            const ext = gl.getExtension('WEBGL_debug_renderer_info');
-            if (ext) {
-              graphicsAdapter = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
-            }
-          }
-        } catch { }
-
-
-        // Sound device detection (browser API permission required, so fallback to "Check in app")
-        function getSoundDeviceStatus() {
-          if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-            navigator.mediaDevices.enumerateDevices().then(devices => {
-              return devices.some(d => d.kind === "audiooutput") ? "Yes" : "No";
-            });
-          }
-          return "Check";
-        }
+        return "Check";
+      }
 
       return [
         SEP,
@@ -472,14 +472,13 @@
         formatLine("Boot Agent", shortenUserAgent(nav.userAgent)),
         formatLine("Cookies", nav.cookieEnabled ? "Enabled" : "Disabled"),
         formatLine("Language", nav.language),
-        formatLine("JavaScript", jsEnabled), 
-        formatLine("CSS Engine Version", cssGridSupport), 
-        formatLine("Local Time", new Date().toLocaleString()), 
-        formatLine("Last Logon Time", "NA"), // placeholder - replace with dynamic value if tracked
+        formatLine("JavaScript", jsEnabled),
+        formatLine("CSS Engine Version", cssGridSupport),
+        formatLine("Local Time", new Date().toLocaleString()),
         SEP,
         headerLine("*** HARDWARE & DEVICE ***"),
         formatLine("Display Adapter", `${window.screen.width} x ${window.screen.height}px`), // dynamic
-        formatLine("Graphics Adapter", graphicsAdapter),
+        formatLine("GPU", graphicsAdapter),
         formatLine("Power Management Status", batteryStatus), // shows NA for desktop
         formatLine("Processor Type", nav.platform),
         formatLine("Hardware Concurrency", nav.hardwareConcurrency || ""),
@@ -496,43 +495,43 @@
       ];
     }
 
-      /*return [
-        SEP,
-        headerLine("*** SYSTEM & SESSION INFO ***"),
-        formatLine("App Version", "0.9.8 Beta"),
-        formatLine("Shell Environment", nav.appName),
-        formatLine("Core Engine", nav.appCodeName),
-        formatLine("Boot Agent", shortenUserAgent(nav.userAgent)),
-        formatLine("Cookies", nav.cookieEnabled ? "Enabled" : "Disabled"),
-        formatLine("Language", nav.language),
-        formatLine("JavaScript Version", "v1.5"), // placeholder - needs to populate
-        formatLine("CSS Engine Version", "Yes"), // placeholder - needs to populate
-        formatLine("Local Time", shortenDate(new Date())),
-        formatLine("Last Logon Time", "07/15/25 17:30"), // placeholder - Set this dynamically
-        SEP,
-        headerLine("*** HARDWARE & DEVICE ***"),
-        formatLine("Display Adapter", `${window.screen.width} x ${window.screen.height}px`),
-        formatLine("Graphics Adapter", "Intel Iris Xe Graphics"), // placeholder - needs to populate
-        formatLine("Power Management Status", "84% (Plugged In)"), // placeholder - needs to populate (battery api)
-        formatLine("Processor Type", "ARM64, x86_64"), // placeholder - needs to populate
-        formatLine("Hardware Concurrency", nav.hardwareConcurrency || ""),
-        formatLine("Pointing Device Count", nav.maxTouchPoints || ""),
-        formatLine("Input Peripheral List", "Mouse, Touch"), // placeholder - needs to populate
-        formatLine("Sound Device Detected", "No"), // placeholder - needs to populate
-        formatLine("Link Speed Estimate", "160 Mbps"), // placeholder - needs to populate
-        formatLine("Network", "WiFi (160 Mbps)"), // placeholder - needs to populate
-        formatLine("Vendor", nav.vendor),
-        formatLine("Platform", nav.platform),
-        formatLine("Product", nav.product),
-        formatLine("System ROM", shortenAppVersion(nav.appVersion)), // Or whatever you want
-        SEP,
-      ];
-    }*/
+    /*return [
+      SEP,
+      headerLine("*** SYSTEM & SESSION INFO ***"),
+      formatLine("App Version", "0.9.8 Beta"),
+      formatLine("Shell Environment", nav.appName),
+      formatLine("Core Engine", nav.appCodeName),
+      formatLine("Boot Agent", shortenUserAgent(nav.userAgent)),
+      formatLine("Cookies", nav.cookieEnabled ? "Enabled" : "Disabled"),
+      formatLine("Language", nav.language),
+      formatLine("JavaScript Version", "v1.5"), // placeholder - needs to populate
+      formatLine("CSS Engine Version", "Yes"), // placeholder - needs to populate
+      formatLine("Local Time", shortenDate(new Date())),
+      formatLine("Last Logon Time", "07/15/25 17:30"), // placeholder - Set this dynamically
+      SEP,
+      headerLine("*** HARDWARE & DEVICE ***"),
+      formatLine("Display Adapter", `${window.screen.width} x ${window.screen.height}px`),
+      formatLine("Graphics Adapter", "Intel Iris Xe Graphics"), // placeholder - needs to populate
+      formatLine("Power Management Status", "84% (Plugged In)"), // placeholder - needs to populate (battery api)
+      formatLine("Processor Type", "ARM64, x86_64"), // placeholder - needs to populate
+      formatLine("Hardware Concurrency", nav.hardwareConcurrency || ""),
+      formatLine("Pointing Device Count", nav.maxTouchPoints || ""),
+      formatLine("Input Peripheral List", "Mouse, Touch"), // placeholder - needs to populate
+      formatLine("Sound Device Detected", "No"), // placeholder - needs to populate
+      formatLine("Link Speed Estimate", "160 Mbps"), // placeholder - needs to populate
+      formatLine("Network", "WiFi (160 Mbps)"), // placeholder - needs to populate
+      formatLine("Vendor", nav.vendor),
+      formatLine("Platform", nav.platform),
+      formatLine("Product", nav.product),
+      formatLine("System ROM", shortenAppVersion(nav.appVersion)), // Or whatever you want
+      SEP,
+    ];
+  }*/
 
-        /*...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
-          formatLine("plugin", p.name.slice(0, 22), TOTAL_WIDTH)
-        )),
-        SEP*/
+    /*...(Array.from(nav.plugins || []).filter(p => /pdf/i.test(p.name)).map(p =>
+      formatLine("plugin", p.name.slice(0, 22), TOTAL_WIDTH)
+    )),
+    SEP*/
 
     /*formatLine("Host Name", loc.hostname), //remove
           formatLine("port", loc.port || ""), //remove
@@ -546,83 +545,83 @@
     // Also update the typewriterEffectSysinfo function to handle the spacing better:
 
     function typewriterEffectSysinfo(element, lines, speedPerChar = 5.5, perLineDelay = 5, callback) {
-        let currentLine = 0;
-        function typeLine() {
-          if (currentLine >= lines.length) {
-            const promptLine = document.createElement('div');
-            promptLine.className = "bios-sysinfo";
-            promptLine.style.marginTop = "4px";
-            promptLine.style.color = "#fff";
-            // Center the prompt as with headers
-            const promptText = "F1 to Save BIOS   |   Ctrl+Shift+R to Restart";
-            const totalWidth = window.innerWidth <= 768 ? 44 : 54;
-            promptLine.textContent = headerLine(promptText, totalWidth);
-            element.appendChild(promptLine);
+      let currentLine = 0;
+      function typeLine() {
+        if (currentLine >= lines.length) {
+          const promptLine = document.createElement('div');
+          promptLine.className = "bios-sysinfo";
+          promptLine.style.marginTop = "4px";
+          promptLine.style.color = "#fff";
+          // Center the prompt as with headers
+          const promptText = "F1 to Save BIOS   |   Ctrl+Shift+R to Restart";
+          const totalWidth = window.innerWidth <= 768 ? 44 : 54;
+          promptLine.textContent = headerLine(promptText, totalWidth);
+          element.appendChild(promptLine);
 
-            setTimeout(() => {
-              if (callback) callback();
-            }, 2000);
-            return;
-          }
-
-          let line = lines[currentLine];
-          let span = document.createElement('span');
-          element.appendChild(span);
-          let i = 0;
-          function typeChar() {
-            if (i < line.length) {
-              span.textContent += line[i++];
-              setTimeout(typeChar, speedPerChar);
-            } else {
-              element.appendChild(document.createTextNode('\n'));
-              currentLine++;
-              setTimeout(typeLine, perLineDelay);
-            }
-          }
-          typeChar();
+          setTimeout(() => {
+            if (callback) callback();
+          }, 2000);
+          return;
         }
-        typeLine();
+
+        let line = lines[currentLine];
+        let span = document.createElement('span');
+        element.appendChild(span);
+        let i = 0;
+        function typeChar() {
+          if (i < line.length) {
+            span.textContent += line[i++];
+            setTimeout(typeChar, speedPerChar);
+          } else {
+            element.appendChild(document.createTextNode('\n'));
+            currentLine++;
+            setTimeout(typeLine, perLineDelay);
+          }
+        }
+        typeChar();
       }
-    
-      let dotCount = 0;
-      let dotInterval;
-
-      function startDots() {
-        const dotsEl = document.querySelector('.dots');
-        if (!dotsEl) return;
-
-        dotInterval = setInterval(() => {
-          dotCount = (dotCount + 1) % 4;
-          dotsEl.textContent = '.'.repeat(dotCount);
-        }, 400);
-      }
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'F1') {
-      e.preventDefault(); // Prevent browser help panel
-
-      const biosContent = document.querySelector('.BIOS__bootHeader')?.innerText;
-      if (!biosContent) return;
-
-      const blob = new Blob([biosContent], { type: 'text/plain' });
-      const downloadUrl = URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = 'bios-log.txt';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      URL.revokeObjectURL(downloadUrl);
+      typeLine();
     }
-  });
 
-      function stopDots() {
-        clearInterval(dotInterval);
-        const dotsEl = document.querySelector('.dots');
-        if (dotsEl) dotsEl.textContent = '...';
+    let dotCount = 0;
+    let dotInterval;
+
+    function startDots() {
+      const dotsEl = document.querySelector('.dots');
+      if (!dotsEl) return;
+
+      dotInterval = setInterval(() => {
+        dotCount = (dotCount + 1) % 4;
+        dotsEl.textContent = '.'.repeat(dotCount);
+      }, 400);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'F1') {
+        e.preventDefault(); // Prevent browser help panel
+
+        const biosContent = document.querySelector('.BIOS__bootHeader')?.innerText;
+        if (!biosContent) return;
+
+        const blob = new Blob([biosContent], { type: 'text/plain' });
+        const downloadUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = 'bios-log.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(downloadUrl);
       }
+    });
+
+    function stopDots() {
+      clearInterval(dotInterval);
+      const dotsEl = document.querySelector('.dots');
+      if (dotsEl) dotsEl.textContent = '...';
+    }
 
     // Global shutdown detection
     window.isShutdownSequenceActive = false;
@@ -720,19 +719,107 @@
 `;
 
             function countUpMemoryTest(parentElem, options = {}, onDone) {
-              // RAM, extended, and cache options
-              const RAM_OPTIONS = [640, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288];
-              const targetKB = options.targetKB || RAM_OPTIONS[Math.floor(Math.random() * RAM_OPTIONS.length)];
-              const pauseAt = options.pauseAt || (0.4 + Math.random() * 0.3);
-              const pauseMs = options.pauseMs || 500 + Math.random() * 400;
-              const minStep = options.minStep || 256;
-              const maxStep = options.maxStep || 4096;
-              const fps = options.fps || 60;
-              const duration = options.duration || 1800 + Math.floor(Math.random() * 700);
-              const extendedRAM = targetKB > 65536 ? targetKB - 1024 : 0;
-              const cacheSRAM = [128, 256, 512][Math.floor(Math.random() * 3)];
+              // Enhanced memory detection functions
+              function getSystemMemoryEstimate() {
+                if (navigator.deviceMemory) {
+                  return navigator.deviceMemory * 1024 * 1024; // Convert GB to KB
+                }
+
+                const cores = navigator.hardwareConcurrency || 4;
+                let estimatedGB = 4; // Default fallback
+
+                if (cores >= 8) estimatedGB = 16;
+                else if (cores >= 6) estimatedGB = 12;
+                else if (cores >= 4) estimatedGB = 8;
+                else if (cores >= 2) estimatedGB = 6;
+
+                // Mobile devices typically have less RAM
+                if (/mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
+                  estimatedGB = Math.max(2, estimatedGB / 2);
+                }
+
+                return estimatedGB * 1024 * 1024; // Convert to KB
+              }
+
+              function getCacheEstimate() {
+                const cores = navigator.hardwareConcurrency || 4;
+                let cachePerCore = 256; // KB, conservative estimate
+
+                // Better heuristics based on performance timing precision
+                const timingPrecision = performance.timeOrigin ? 0.1 : 1;
+                if (timingPrecision < 0.01) cachePerCore = 1024; // High-end
+                else if (timingPrecision < 0.1) cachePerCore = 512; // Mid-range
+
+                return Math.min(cores * cachePerCore, 32768); // Cap at 32MB
+              }
+
+              function getAccurateStorageUsage() {
+                let totalBytes = 0;
+
+                // localStorage
+                try {
+                  for (let key in localStorage) {
+                    if (localStorage.hasOwnProperty(key)) {
+                      const value = localStorage.getItem(key) || '';
+                      totalBytes += key.length + value.length;
+                    }
+                  }
+                } catch (e) { }
+
+                // sessionStorage  
+                try {
+                  for (let key in sessionStorage) {
+                    if (sessionStorage.hasOwnProperty(key)) {
+                      const value = sessionStorage.getItem(key) || '';
+                      totalBytes += key.length + value.length;
+                    }
+                  }
+                } catch (e) { }
+
+                return Math.round(totalBytes / 1024); // Convert to KB
+              }
+
+              function getGraphicsMemoryEstimate() {
+                try {
+                  const canvas = document.createElement('canvas');
+                  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+                  if (!gl) return 0;
+
+                  // Get max texture size as an indicator of VRAM
+                  const maxTexture = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+
+                  // Rough VRAM estimation based on max texture size (in MB)
+                  if (maxTexture >= 16384) return 8192; // High-end: 8GB
+                  if (maxTexture >= 8192) return 4096;  // Mid-high: 4GB
+                  if (maxTexture >= 4096) return 2048;  // Mid-range: 2GB
+                  if (maxTexture >= 2048) return 1024;  // Low-mid: 1GB
+                  return 512; // Integrated/low-end: 512MB
+
+                } catch (e) {
+                  return 0;
+                }
+              }
+
+              function getHeapMemoryInfo() {
+                if (performance.memory) {
+                  return {
+                    used: Math.round(performance.memory.usedJSHeapSize / 1024),
+                    total: Math.round(performance.memory.totalJSHeapSize / 1024),
+                    limit: Math.round(performance.memory.jsHeapSizeLimit / 1024)
+                  };
+                }
+                return { used: 0, total: 0, limit: 0 };
+              }
+
+              // Use dynamic values instead of hardcoded ones
+              const targetKB = getSystemMemoryEstimate();
+              const cacheSRAM = getCacheEstimate();
+              const actualStorageKB = getAccurateStorageUsage();
+              const graphicsMemoryMB = getGraphicsMemoryEstimate();
+              const heapInfo = getHeapMemoryInfo();
+
               const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54; // Match the main TOTAL_WIDTH
-              const SEP = '='.repeat(TOTAL_WIDTH);
 
               // Helper: Dotted style, right-aligned value with perfect alignment
               function infoLine(label, value, suffix = "", showPassDot = false, noDots = false) {
@@ -753,74 +840,66 @@
                 return `<span>${label}:${dots}${value}</span>${dot}`;
               }
 
+              // Helper function to animate counting with typewriter effect
+              function animateMemoryField(parentElem, label, targetValue, unit, showPassDot, callback) {
+                const div = document.createElement('div');
+                div.style.cssText = `font-family: 'Courier New', Courier, monospace; color: #d4fe6b; font-size: 10.5px; letter-spacing: .86px; line-height: .89em; margin-bottom: 0px;`;
+                parentElem.appendChild(div);
 
-              function getLocalStorageSizeKB() {
-                let total = 0;
-                for (let key in localStorage) {
-                  if (!localStorage.hasOwnProperty(key)) continue;
-                  let value = localStorage.getItem(key);
-                  total += key.length + (value ? value.length : 0);
+                let current = 0;
+                const steps = 15; // Quick animation in 15 steps
+                const increment = Math.ceil(targetValue / steps);
+
+                function updateValue() {
+                  current = Math.min(current + increment, targetValue);
+                  div.innerHTML = infoLine(label, current.toString() + unit, '', showPassDot && current === targetValue) +
+                    (current < targetValue ? '<span class="typewriter-cursor"></span>' : '');
+
+                  if (current < targetValue) {
+                    setTimeout(updateValue, 30); // Fast updates
+                  } else if (callback) {
+                    setTimeout(callback, 100);
+                  }
                 }
-                return Math.round(total / 1024);
+
+                // Start with typewriter effect for the label
+                div.innerHTML = infoLine(label, '0' + unit, '', false) + '<span class="typewriter-cursor"></span>';
+                setTimeout(updateValue, 200);
               }
 
-              const memoryLine = document.createElement('div');
-              memoryLine.style.fontFamily = "'Courier New', Courier, monospace";
-              memoryLine.style.color = "#d4fe6b";
-              memoryLine.style.fontSize = "10.5px";
-              memoryLine.style.letterSpacing = ".86px";
-              memoryLine.style.lineHeight = ".89em";
-              memoryLine.style.marginBottom = "4px";
-              parentElem.appendChild(memoryLine);
-
-              let current = 0;
-              let hasPaused = false;
-              const midwayK = Math.floor(targetKB * pauseAt);
-
-              function update() {
-                if (current >= targetKB) {
-                  memoryLine.innerHTML = infoLine('Memory Status', targetKB.toString().padStart(6, '0') + 'k', "", true);
-                  setTimeout(() => {
-                                        let cache = document.createElement('div');
-                    cache.style.cssText = memoryLine.style.cssText;
-                    cache.innerHTML = infoLine('Cache SRAM', cacheSRAM.toString() + 'k', "", true);
-                    parentElem.appendChild(cache);
-
-                    if (extendedRAM) {
-                      let ext = document.createElement('div');
-                      ext.style.cssText = memoryLine.style.cssText;
-                      ext.innerHTML = infoLine('Extended RAM', extendedRAM.toString() + 'k', '', false);
-                      parentElem.appendChild(ext);
+              // Animate each field sequentially
+              animateMemoryField(parentElem, 'System Memory', Math.round(targetKB / 1024), 'MB', true, () => {
+                animateMemoryField(parentElem, 'Cache SRAM', cacheSRAM, 'KB', true, () => {
+                  animateMemoryField(parentElem, 'Storage Used', actualStorageKB, 'KB', false, () => {
+                    if (graphicsMemoryMB > 0) {
+                      const graphicsGB = (graphicsMemoryMB / 1024).toFixed(1);
+                      animateMemoryField(parentElem, 'Graphics Memory', parseFloat(graphicsGB), 'GB', false, () => {
+                        if (heapInfo.used > 0) {
+                          animateMemoryField(parentElem, 'Heap Used', Math.round(heapInfo.used / 1024), 'MB', false, () => {
+                            animateMemoryField(parentElem, 'Heap Total', Math.round(heapInfo.total / 1024), 'MB', false, () => {
+                              animateMemoryField(parentElem, 'Heap Limit', Math.round(heapInfo.limit / 1024), 'MB', false, () => {
+                                if (onDone) setTimeout(onDone, 300);
+                              });
+                            });
+                          });
+                        } else if (onDone) {
+                          setTimeout(onDone, 300);
+                        }
+                      });
+                    } else if (heapInfo.used > 0) {
+                      animateMemoryField(parentElem, 'Heap Used', Math.round(heapInfo.used / 1024), 'MB', false, () => {
+                        animateMemoryField(parentElem, 'Heap Total', Math.round(heapInfo.total / 1024), 'MB', false, () => {
+                          animateMemoryField(parentElem, 'Heap Limit', Math.round(heapInfo.limit / 1024), 'MB', false, () => {
+                            if (onDone) setTimeout(onDone, 300);
+                          });
+                        });
+                      });
+                    } else if (onDone) {
+                      setTimeout(onDone, 300);
                     }
-
-                    let localKB = getLocalStorageSizeKB();
-                    let localDiv = document.createElement('div');
-                    localDiv.style.cssText = memoryLine.style.cssText;
-                    localDiv.innerHTML = infoLine('Storage', localKB.toString(), '.2k used');
-                    parentElem.appendChild(localDiv);
-
-
-
-                    if (onDone) setTimeout(onDone, 600);
-                  }, 350);
-                  return;
-                }
-
-
-                let step = Math.floor(Math.random() * (maxStep - minStep + 1)) + minStep;
-                if (current + step > targetKB) step = targetKB - current;
-                current += step;
-                memoryLine.innerHTML = infoLine('Memory Status', current.toString().padStart(6, '0'), 'K') +
-                  `<span class="typewriter-cursor"></span>`;
-
-                if (!hasPaused && current >= midwayK) {
-                  hasPaused = true;
-                  setTimeout(update, pauseMs);
-                } else {
-                  setTimeout(update, 1000 / fps);
-                }
-              }
-              update();
+                  });
+                });
+              });
             }
 
 
@@ -858,10 +937,10 @@
       typewriterEffect(currentElem, originalHTML, 30, () => {
         setTimeout(() => staggerElements(elems, entry + 1), 300);
       });
-    } 
+    }
 
-  
-  function loadScreen() {
+
+    function loadScreen() {
       var biosElem = document.querySelector(".BIOS");
       biosElem.classList.remove("initial");
 
