@@ -232,7 +232,7 @@ const ClippyContextMenu = ({
       width: 100% !important;
       height: 100% !important;
       pointer-events: none !important;
-      z-index: 2147483647 !important;
+      z-index: 999 !important;
       visibility: visible !important;
       opacity: 1 !important;
       display: block !important;
@@ -530,7 +530,7 @@ const ClippyContextMenu = ({
     let actualSubmenuHeight;
     if (submenuType === "animations") {
       // Animations submenu has many items, will hit max-height
-      actualSubmenuHeight = 166; // Based on CSS max-height
+      actualSubmenuHeight = 154; // Based on CSS max-height
     } else if (submenuType === "agents") {
       // Calculate based on actual number of agents
       // Each item is 25px height (including borders/padding)
@@ -980,8 +980,8 @@ const ClippyContextMenu = ({
   const separatorStyle = {
     height: "1px",
     backgroundColor: "#c0c0c0",
-    margin: "2px 0",
-    borderTop: "1px solid #808080",
+    margin: "-1px 0",
+    borderTop: "2px solid #808080",
   };
 
   const submenuStyle = {
@@ -1030,7 +1030,7 @@ const ClippyContextMenu = ({
         padding: 0;
         text-align: left;
         min-width: 120px !important;
-        max-height: 164px !important;
+        max-height: 154px !important;
       }
 
       .context-submenu .context-menu-item {
