@@ -1,6 +1,12 @@
-//This is ready for clean SPA routing and future Next.js migration
-import React, { useState, useEffect } from "react";
+// src/components/HappyTuesdayNewsFeed/HappyTuesdayNewsFeed.js
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import {
+  fetchAndCacheFeed,
+  prefetchFeeds,
+  clearCategoryCache,
+} from "../../utils/feedAggregator";
+import FeedSkeleton from "../FeedSkeleton/FeedSkeleton";
 
 const HappyTuesdayNewsFeed = ({
   inIE = false,
@@ -13,6 +19,45 @@ const HappyTuesdayNewsFeed = ({
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
   const [feedItems, setFeedItems] = useState({});
   const [loading, setLoading] = useState({});
+  const [error, setError] = useState({});
+  const [lastRefresh, setLastRefresh] = useState({});
+
+  // Category icons mapping
+  const categoryIcons = {
+    "ai-machine-learning": "🤖",
+    "martech-adtech": "📊",
+    "web-dev-devops": "💻",
+    "cybersecurity-privacy": "🔒",
+    "blockchain-web3": "⛓️",
+    "vintage-tech-spotlights": "🖥️",
+    "founder-stories": "🚀",
+    "productivity-hacks": "⚡",
+    "automation-no-code": "⚙️",
+    "funding-monetization": "💰",
+    "project-management": "📋",
+    "stoic-mindset": "🧘",
+    "generative-ai-art": "🎨",
+    "pixel-retro-art": "👾",
+    "ui-ux-trends": "🎯",
+    "color-typography": "🎨",
+    "animation-motion": "✨",
+    "tutorials-walkthroughs": "📚",
+    "retro-game-news": "🕹️",
+    "emulation-modding": "💾",
+    "collecting-hardware": "🎮",
+    "speedruns-events": "⏱️",
+    "indie-retro-releases": "🎲",
+    "dos-game-deep-dives": "💿",
+  };
+
+  // Default category icon
+  const getIcon = (subcategory, index) => {
+    if (subcategory && categoryIcons[subcategory]) {
+      return categoryIcons[subcategory];
+    }
+    const defaultIcons = ["📰", "📡", "📢", "📣", "📻"];
+    return defaultIcons[index % defaultIcons.length];
+  };
 
   useEffect(() => {
     const pathParts = location.pathname.split("/").filter(Boolean);
@@ -27,66 +72,103 @@ const HappyTuesdayNewsFeed = ({
         setActiveSubTab(newSubTab);
       }
     }
-  }, [location.pathname]);
-  // Update tab/subtab on prop change
+  }, [location.pathname, activeTab, activeSubTab]);
+
   useEffect(() => {
     setActiveTab(initialTab);
   }, [initialTab]);
+
   useEffect(() => {
     setActiveSubTab(initialSubTab);
   }, [initialSubTab]);
 
-  // When tab (category) changes, load its items if not "blog"
+  // Load feed data when tab/subtab changes
   useEffect(() => {
-    if (activeTab !== "blog" && !feedItems[activeTab]) {
+    if (activeTab !== "blog") {
+      if (activeSubTab) {
+        loadFeed(activeTab, activeSubTab);
+      } else {
+        loadInitialFeed(activeTab);
+      }
+
+      // Prefetch feeds for the category in background
+      prefetchFeeds(activeTab);
+    }
+  }, [activeTab, activeSubTab]); // Removed function dependencies to avoid circular reference
+
+  // Refresh current feed
+  const handleRefresh = () => {
+    if (activeTab === "blog") return;
+
+    // Clear cache for current category
+    clearCategoryCache(activeTab);
+
+    if (activeSubTab) {
+      loadFeed(activeTab, activeSubTab);
+    } else {
       loadInitialFeed(activeTab);
     }
-  }, [activeTab]);
-
-  // When subtab (subcategory) changes, and not on blog, load corresponding feed
-  useEffect(() => {
-    if (activeSubTab && activeTab !== "blog") {
-      loadFeed(activeSubTab);
-    }
-    // Optionally, clear subcategory if changing to main blog
-    if (activeTab === "blog") {
-      setActiveSubTab(undefined);
-    }
-  }, [activeSubTab, activeTab]);
-
-  const loadInitialFeed = (feedType) => {
-    setLoading((prev) => ({ ...prev, [feedType]: true }));
-    setTimeout(() => {
-      setFeedItems((prev) => ({
-        ...prev,
-        [feedType]: feedData[feedType] || [],
-      }));
-      setLoading((prev) => ({ ...prev, [feedType]: false }));
-    }, 500);
   };
 
-  const loadFeed = (subcategory) => {
-    const activeTabKey = activeTab;
-    setLoading((prev) => ({ ...prev, [activeTabKey]: true }));
+  // Define functions without useCallback first to avoid circular dependencies
+  const loadInitialFeed = async (feedType) => {
+    setLoading((prev) => ({ ...prev, [feedType]: true }));
+    setError((prev) => ({ ...prev, [feedType]: null }));
 
-    setTimeout(() => {
-      setFeedItems((prev) => ({
+    try {
+      const items = await fetchAndCacheFeed(feedType);
+
+      if (items.length === 0) {
+        setError((prev) => ({
+          ...prev,
+          [feedType]: "No items found. Please try again later.",
+        }));
+      } else {
+        setFeedItems((prev) => ({ ...prev, [feedType]: items }));
+        setLastRefresh((prev) => ({ ...prev, [feedType]: Date.now() }));
+      }
+    } catch (err) {
+      console.error("Error loading feed:", err);
+      setError((prev) => ({
         ...prev,
-        [activeTabKey]: [
-          {
-            icon: "📰",
-            title: `${subcategory.replace("-", " ").toUpperCase()} Update`,
-            desc: `Latest news and updates from the ${subcategory} category`,
-            time: "Just now",
-          },
-        ],
+        [feedType]: "Failed to load feed. Please try again.",
       }));
-      setLoading((prev) => ({ ...prev, [activeTabKey]: false }));
-    }, 1000);
+    } finally {
+      setLoading((prev) => ({ ...prev, [feedType]: false }));
+    }
+  };
+
+  const loadFeed = async (category, subcategory) => {
+    const feedKey = `${category}_${subcategory}`;
+    setLoading((prev) => ({ ...prev, [feedKey]: true }));
+    setError((prev) => ({ ...prev, [feedKey]: null }));
+
+    try {
+      const items = await fetchAndCacheFeed(category, subcategory);
+
+      if (items.length === 0) {
+        setError((prev) => ({
+          ...prev,
+          [feedKey]: "No items found for this category.",
+        }));
+      } else {
+        setFeedItems((prev) => ({ ...prev, [feedKey]: items }));
+        setLastRefresh((prev) => ({ ...prev, [feedKey]: Date.now() }));
+      }
+    } catch (err) {
+      console.error("Error loading subcategory feed:", err);
+      setError((prev) => ({
+        ...prev,
+        [feedKey]: "Failed to load feed. Please try again.",
+      }));
+    } finally {
+      setLoading((prev) => ({ ...prev, [feedKey]: false }));
+    }
   };
 
   const showTab = (tabName) => {
     setActiveTab(tabName);
+    setActiveSubTab(null);
 
     if (tabName === "blog") {
       navigate(`/feeds`);
@@ -95,88 +177,42 @@ const HappyTuesdayNewsFeed = ({
     }
   };
 
-  // ... feedData, categories, styles (unchanged)
-  const feedData = {
-    tech: [
-      {
-        icon: "🤖",
-        title: "OpenAI Announces GPT-5 Preview",
-        desc: "Next generation AI model shows unprecedented capabilities",
-        time: "2 hours ago",
-      },
-      {
-        icon: "🔒",
-        title: "Major Security Breach at Tech Giant",
-        desc: "Millions of user accounts potentially compromised",
-        time: "4 hours ago",
-      },
-      {
-        icon: "⚡",
-        title: "JavaScript Framework Wars Continue",
-        desc: "New contender enters the arena with blazing fast performance",
-        time: "6 hours ago",
-      },
-    ],
-    builder: [
-      {
-        icon: "🚀",
-        title: "Solo Founder Reaches $10k MRR",
-        desc: "From idea to profitability in just 6 months",
-        time: "1 hour ago",
-      },
-      {
-        icon: "⚙️",
-        title: "No-Code Revolution: Build Without Limits",
-        desc: "Top 10 automation tools every builder needs",
-        time: "3 hours ago",
-      },
-      {
-        icon: "🧘",
-        title: "The Stoic Builder's Morning Routine",
-        desc: "Ancient wisdom for modern productivity",
-        time: "5 hours ago",
-      },
-    ],
-    art: [
-      {
-        icon: "🎨",
-        title: "AI-Generated Pixel Art Goes Viral",
-        desc: "Artist combines Midjourney with retro aesthetics",
-        time: "30 minutes ago",
-      },
-      {
-        icon: "🎯",
-        title: "UI Trend Alert: Brutalist Design Returns",
-        desc: "Bold, raw interfaces making a comeback",
-        time: "2 hours ago",
-      },
-      {
-        icon: "✨",
-        title: "CSS Animation Masterclass Released",
-        desc: "Create smooth, performant web animations",
-        time: "4 hours ago",
-      },
-    ],
-    gaming: [
-      {
-        icon: "🕹️",
-        title: "Lost NES Prototype Discovered",
-        desc: "Unreleased game from 1989 found in storage unit",
-        time: "1 hour ago",
-      },
-      {
-        icon: "⚡",
-        title: "Speed Runner Breaks 20-Year Record",
-        desc: "Super Mario 64 completed in under 15 minutes",
-        time: "3 hours ago",
-      },
-      {
-        icon: "💾",
-        title: "DOS Gaming on Modern Hardware",
-        desc: "Complete guide to retro gaming in 2025",
-        time: "5 hours ago",
-      },
-    ],
+  // Get current feed items
+  const getCurrentFeedItems = () => {
+    if (activeTab === "blog") return null;
+
+    const feedKey = activeSubTab ? `${activeTab}_${activeSubTab}` : activeTab;
+    return feedItems[feedKey] || [];
+  };
+
+  // Check if currently loading
+  const isCurrentlyLoading = () => {
+    if (activeTab === "blog") return false;
+
+    const feedKey = activeSubTab ? `${activeTab}_${activeSubTab}` : activeTab;
+    return loading[feedKey] || false;
+  };
+
+  // Get current error
+  const getCurrentError = () => {
+    if (activeTab === "blog") return null;
+
+    const feedKey = activeSubTab ? `${activeTab}_${activeSubTab}` : activeTab;
+    return error[feedKey];
+  };
+
+  // Format time for last refresh
+  const getLastRefreshTime = () => {
+    const feedKey = activeSubTab ? `${activeTab}_${activeSubTab}` : activeTab;
+    const timestamp = lastRefresh[feedKey];
+    if (!timestamp) return null;
+
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   const categories = {
@@ -350,10 +386,13 @@ const HappyTuesdayNewsFeed = ({
       borderRadius: "8px",
       padding: "20px",
       display: "flex",
-      alignItems: "center",
+      alignItems: "flex-start",
       gap: "20px",
       transition: "all 0.3s ease",
       boxShadow: "4px 4px 0 #2c2416",
+      cursor: "pointer",
+      textDecoration: "none",
+      color: "inherit",
     },
     feedIcon: {
       width: "60px",
@@ -369,20 +408,46 @@ const HappyTuesdayNewsFeed = ({
     },
     feedContent: {
       flex: 1,
+      minWidth: 0,
     },
     feedTitle: {
       fontSize: "1.2em",
       marginBottom: "5px",
       color: "#2c2416",
+      fontWeight: "bold",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      display: "-webkit-box",
+      WebkitLineClamp: 2,
+      WebkitBoxOrient: "vertical",
     },
     feedDesc: {
       color: "#666",
       fontSize: "0.9em",
-      marginBottom: "5px",
+      marginBottom: "8px",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      display: "-webkit-box",
+      WebkitLineClamp: 3,
+      WebkitBoxOrient: "vertical",
+    },
+    feedMeta: {
+      fontSize: "0.8em",
+      color: "#999",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: "10px",
     },
     feedTime: {
       fontSize: "0.8em",
       color: "#999",
+    },
+    feedSource: {
+      fontSize: "0.8em",
+      color: "#e74c3c",
+      fontWeight: "bold",
     },
     loading: {
       textAlign: "center",
@@ -390,11 +455,82 @@ const HappyTuesdayNewsFeed = ({
       fontSize: "1.2em",
       color: "#e74c3c",
     },
+    error: {
+      backgroundColor: "#fee",
+      border: "2px solid #e74c3c",
+      borderRadius: "8px",
+      padding: "20px",
+      textAlign: "center",
+      color: "#e74c3c",
+      marginBottom: "20px",
+    },
+    retryButton: {
+      marginTop: "10px",
+      backgroundColor: "#e74c3c",
+      color: "#fff",
+      border: "none",
+      padding: "8px 16px",
+      borderRadius: "4px",
+      cursor: "pointer",
+      fontWeight: "bold",
+    },
+    refreshInfo: {
+      textAlign: "center",
+      fontSize: "0.9em",
+      color: "#666",
+      marginBottom: "20px",
+    },
+    refreshButton: {
+      backgroundColor: "#2c2416",
+      color: "#f5f2e8",
+      border: "none",
+      padding: "8px 16px",
+      borderRadius: "4px",
+      cursor: "pointer",
+      marginLeft: "10px",
+      fontWeight: "bold",
+      transition: "all 0.3s ease",
+    },
+    emptyState: {
+      textAlign: "center",
+      padding: "60px 20px",
+      color: "#666",
+    },
+    emptyStateIcon: {
+      fontSize: "48px",
+      marginBottom: "20px",
+      opacity: 0.5,
+    },
+    thumbnail: {
+      width: "60px",
+      height: "60px",
+      objectFit: "cover",
+      borderRadius: "8px",
+    },
   };
 
   const LoadingDots = () => (
     <div style={styles.loading}>
-      Loading<span>...</span>
+      Loading<span className="loading-dots">...</span>
+    </div>
+  );
+
+  const ErrorState = ({ message, onRetry }) => (
+    <div style={styles.error}>
+      <div>{message}</div>
+      {onRetry && (
+        <button style={styles.retryButton} onClick={onRetry}>
+          Try Again
+        </button>
+      )}
+    </div>
+  );
+
+  const EmptyState = () => (
+    <div style={styles.emptyState}>
+      <div style={styles.emptyStateIcon}>📭</div>
+      <h3>No News Items Available</h3>
+      <p>Check back later for fresh content!</p>
     </div>
   );
 
@@ -405,6 +541,24 @@ const HappyTuesdayNewsFeed = ({
           @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+          }
+          
+          .loading-dots {
+            display: inline-block;
+            width: 30px;
+            text-align: left;
+          }
+          
+          .loading-dots::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+          }
+          
+          @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
           }
           
           .feed-category:hover {
@@ -441,6 +595,10 @@ const HappyTuesdayNewsFeed = ({
             color: #e74c3c;
             font-weight: bold;
           }
+          
+          .refresh-button:hover {
+            background-color: #3c3420;
+          }
         `}
       </style>
 
@@ -453,7 +611,6 @@ const HappyTuesdayNewsFeed = ({
       <div style={styles.content}>
         {/* Tabs */}
         <div style={styles.tabs}>
-          {/* Tabs */}
           {[
             { key: "blog", label: "Blog" },
             { key: "tech", label: "Tech Feed" },
@@ -525,7 +682,7 @@ const HappyTuesdayNewsFeed = ({
             <div style={styles.feedCategories}>
               <div style={styles.feedCategory} className="feed-category">
                 <h3 style={styles.feedCategoryTitle}>
-                  {activeTab.toUpperCase()} FEED
+                  {activeTab.toUpperCase()} CATEGORIES
                 </h3>
                 <ul style={styles.subcategoryList}>
                   {categories[activeTab]?.map((category, index) => {
@@ -539,7 +696,15 @@ const HappyTuesdayNewsFeed = ({
                         onClick={() =>
                           navigate(`/feeds/${activeTab}/${subCatKebab}`)
                         }
-                        style={styles.subcategoryItem}
+                        style={{
+                          ...styles.subcategoryItem,
+                          fontWeight:
+                            activeSubTab === subCatKebab ? "bold" : "normal",
+                          color:
+                            activeSubTab === subCatKebab
+                              ? "#e74c3c"
+                              : "inherit",
+                        }}
                         className="subcategory-item"
                       >
                         {category}
@@ -550,25 +715,71 @@ const HappyTuesdayNewsFeed = ({
               </div>
             </div>
 
+            {/* Refresh Info */}
+            {getLastRefreshTime() && !isCurrentlyLoading() && (
+              <div style={styles.refreshInfo}>
+                Last updated: {getLastRefreshTime()}
+                <button
+                  style={styles.refreshButton}
+                  onClick={handleRefresh}
+                  className="refresh-button"
+                >
+                  Refresh
+                </button>
+              </div>
+            )}
+
             {/* Feed Items */}
             <div style={styles.feedItems}>
-              {loading[activeTab] ? (
-                <LoadingDots />
-              ) : (
-                feedItems[activeTab]?.map((item, index) => (
-                  <div
-                    key={index}
+              {isCurrentlyLoading() ? (
+                <FeedSkeleton count={5} />
+              ) : getCurrentError() ? (
+                <ErrorState
+                  message={getCurrentError()}
+                  onRetry={handleRefresh}
+                />
+              ) : getCurrentFeedItems().length > 0 ? (
+                getCurrentFeedItems().map((item, index) => (
+                  <a
+                    key={item.guid || index}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={styles.feedItem}
                     className="feed-item"
                   >
-                    <div style={styles.feedIcon}>{item.icon}</div>
+                    <div style={styles.feedIcon}>
+                      {item.thumbnail ? (
+                        <img
+                          src={item.thumbnail}
+                          alt=""
+                          style={styles.thumbnail}
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            e.target.parentElement.innerHTML = getIcon(
+                              activeSubTab,
+                              index
+                            );
+                          }}
+                        />
+                      ) : (
+                        getIcon(activeSubTab, index)
+                      )}
+                    </div>
                     <div style={styles.feedContent}>
                       <h4 style={styles.feedTitle}>{item.title}</h4>
-                      <p style={styles.feedDesc}>{item.desc}</p>
-                      <div style={styles.feedTime}>{item.time}</div>
+                      {item.description && (
+                        <p style={styles.feedDesc}>{item.description}</p>
+                      )}
+                      <div style={styles.feedMeta}>
+                        <span style={styles.feedSource}>{item.source}</span>
+                        <span style={styles.feedTime}>{item.time}</span>
+                      </div>
                     </div>
-                  </div>
+                  </a>
                 ))
+              ) : (
+                <EmptyState />
               )}
             </div>
           </div>
