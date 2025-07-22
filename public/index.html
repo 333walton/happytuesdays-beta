@@ -263,9 +263,9 @@
     .bios-sysinfo {
       font-family: 'Courier New', Courier, monospace, FixedSys, AMIBios;
       font-size: 10.5px;
-      color: #d4fe6b;
       margin: 0;
       padding: 0;
+      color: #d4fe6b;
       white-space: pre;
       letter-spacing: 0px;
       /* Remove letter spacing for true monospace */
@@ -341,12 +341,12 @@
 
   <script>
     // --- Utility: System Environment BIOS Fields as in screenshot ---
-    function headerLine(text, totalWidth = window.innerWidth <= 768 ? 44 : 54) {
+    function headerLine(text, totalWidth = window.innerWidth <= 768 ? 45 : 54) {
       // No dots, just centered or left-aligned
       return text.padStart(Math.floor((totalWidth + text.length) / 2)).padEnd(totalWidth);
     }
 
-    function formatLine(label, value, totalWidth = window.innerWidth <= 768 ? 44 : 54) {
+    function formatLine(label, value, totalWidth = window.innerWidth <= 768 ? 45 : 54) {
       label = label ?? '';
       value = value == null ? '' : String(value);
       const maxValueLength = totalWidth - label.length - 3;
@@ -361,7 +361,7 @@
     }
 
     // define headerLine if needed
-    function headerLine(text, totalWidth = window.innerWidth <= 768 ? 44 : 54) {
+    function headerLine(text, totalWidth = window.innerWidth <= 768 ? 45 : 54) {
       const pad = Math.floor((totalWidth - text.length) / 2);
       return " ".repeat(Math.max(0, pad)) + text;
     }
@@ -405,7 +405,7 @@
     function getSystemFields() {
       const nav = window.navigator;
       const loc = window.location;
-      const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54;
+      const TOTAL_WIDTH = window.innerWidth <= 768 ? 45 : 54;
       const SEP = '='.repeat(TOTAL_WIDTH);
 
       // JS Feature Test (shows modern JS support, not version)
@@ -549,12 +549,12 @@
       function typeLine() {
         if (currentLine >= lines.length) {
           const promptLine = document.createElement('div');
-          promptLine.className = "bios-sysinfo";
+          promptLine.className = "bios-sysinfoo";
           promptLine.style.marginTop = "4px";
           promptLine.style.color = "#fff";
           // Center the prompt as with headers
           const promptText = "F1 to Save BIOS   |   Ctrl+Shift+R to Restart";
-          const totalWidth = window.innerWidth <= 768 ? 44 : 54;
+          const totalWidth = window.innerWidth <= 768 ? 45 : 54;
           promptLine.textContent = headerLine(promptText, totalWidth);
           element.appendChild(promptLine);
 
@@ -659,7 +659,7 @@
       element.innerHTML = '<span class="typed-text"></span><span class="typewriter-cursor"></span>';
       const typedSpan = element.querySelector('.typed-text');
       const cursorSpan = element.querySelector('.typewriter-cursor');
-      const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54;  // mobile : desktop
+      const TOTAL_WIDTH = window.innerWidth <= 768 ? 45 : 54;  // mobile : desktop
       const SEP = '='.repeat(TOTAL_WIDTH)
 
       function type() {
@@ -707,7 +707,7 @@
           bootContainer.appendChild(separatorLine);
 
           // Apply typewriter effect to the separator line
-          typewriterEffect(separatorLine, '='.repeat(window.innerWidth <= 768 ? 44 : 54), 15, function () {
+          typewriterEffect(separatorLine, '='.repeat(window.innerWidth <= 768 ? 45 : 54), 15, function () {
             // Continue with memory test after separator is complete
 
             // Memory test line
@@ -819,13 +819,13 @@
               const graphicsMemoryMB = getGraphicsMemoryEstimate();
               const heapInfo = getHeapMemoryInfo();
 
-              const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54; // Match the main TOTAL_WIDTH
+              const TOTAL_WIDTH = window.innerWidth <= 768 ? 45 : 54; // Match the main TOTAL_WIDTH
 
               // Helper: Dotted style, right-aligned value with perfect alignment
               function infoLine(label, value, suffix = "", showPassDot = false, noDots = false) {
                 label = label ?? '';
                 value = value == null ? '' : String(value);
-                const TOTAL_WIDTH = window.innerWidth <= 768 ? 44 : 54;
+                const TOTAL_WIDTH = window.innerWidth <= 768 ? 45 : 54;
                 // Only use dots if noDots is false
                 let dots = "";
                 if (!noDots) {
@@ -843,7 +843,18 @@
               // Helper function to animate counting with typewriter effect
               function animateMemoryField(parentElem, label, targetValue, unit, showPassDot, callback) {
                 const div = document.createElement('div');
-                div.style.cssText = `font-family: 'Courier New', Courier, monospace; color: #d4fe6b; font-size: 10.5px; letter-spacing: .86px; line-height: .89em; margin-bottom: 4px;`;
+                div.style.cssText = `
+  font-family: 'Courier New', Courier, monospace, FixedSys, AMIBios;
+  font-size: 10.5px;
+  color: #d4fe6b;
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  letter-spacing: 0px;
+  line-height: .89em;
+  display: block;
+`;
+;
                 parentElem.appendChild(div);
 
                 let current = 0;
