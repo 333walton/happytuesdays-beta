@@ -436,7 +436,7 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
 .context-submenu {
   /* NUCLEAR VISIBILITY - HIGHEST Z-INDEX POSSIBLE */
   position: fixed !important;
-  z-index: 2147483647 !important;
+  z-index: 999 !important;
 
   /* Force visibility */
   visibility: visible !important;

@@ -74,14 +74,6 @@ body {
   color: black;
 }
 
-.divider {
-  /*height: 1px;*/
-  background-color: #808080;
-  margin-top: 1px;
-  margin-bottom: 1px;
-  border: none;
-}
-
 .TaskBar {
   z-index: 75;
   /*height: 26px;*/
@@ -813,4 +805,20 @@ pre.bios-sysinfo * {
   50% {
     opacity: 0.5;
   }
+}
+
+.divider.divider--group-0-end {
+  background-color: #808080;
+  margin-top: 1px;
+  margin-bottom: 1px;
+  border: none;
+  height: 1px !important;
+}
+
+.StandardMenuItem.divider {
+  background-color: #808080;
+  margin-top: 1px;
+  margin-bottom: 1px;
+  border: none;
+  height: 1px !important;
 }
