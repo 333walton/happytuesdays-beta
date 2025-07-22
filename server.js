@@ -276,6 +276,7 @@ const fetchSingleFeed = async (url, timeout = 5000) => {
 
 // API endpoint to fetch feeds
 app.post("/api/feeds", async (req, res) => {
+  console.log("📨 Received feed request:", req.body);
   const { category, subcategory } = req.body;
 
   if (!category) {

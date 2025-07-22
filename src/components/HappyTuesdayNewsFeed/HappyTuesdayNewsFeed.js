@@ -689,7 +689,8 @@ const HappyTuesdayNewsFeed = ({
                     const subCatKebab = category
                       .toLowerCase()
                       .replace(/\s+/g, "-")
-                      .replace(/&/g, "");
+                      .replace(/&/g, "and")
+                      .replace(/\//g, "-"); // Replace forward slashes with hyphens
                     return (
                       <li
                         key={index}
