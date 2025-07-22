@@ -528,9 +528,12 @@ const ClippyContextMenu = ({
 
     // FIXED: More accurate submenu height calculation
     let actualSubmenuHeight;
+
     if (submenuType === "animations") {
-      // Animations submenu has many items, will hit max-height
-      actualSubmenuHeight = 154; // Based on CSS max-height
+      // Use window.innerWidth to determine device type
+      const isMobile = window.innerWidth <= 768; // adjust threshold as needed
+
+      actualSubmenuHeight = isMobile ? 166 : 154; //mobile : desktop
     } else if (submenuType === "agents") {
       // Calculate based on actual number of agents
       // Each item is 25px height (including borders/padding)
@@ -993,7 +996,7 @@ const ClippyContextMenu = ({
     boxShadow: "4px 4px 8px rgba(0,0,0,0.3)",
     width: "140px",
     height: "auto",
-    maxHeight: "200px",
+    maxHeight: isMobile ? "178px" : "178px",
     minHeight: "25px",
     overflowY: "auto",
     overflowX: "hidden",
@@ -1030,7 +1033,13 @@ const ClippyContextMenu = ({
         padding: 0;
         text-align: left;
         min-width: 120px !important;
-        max-height: 154px !important;
+        max-height: 154px !important; /* Default for desktop */
+      }
+
+      @media (max-width: 768px) {
+        .context-submenu {
+          max-height: 164px !important; /* Override for mobile */
+        }
       }
 
       .context-submenu .context-menu-item {
@@ -1067,10 +1076,14 @@ const ClippyContextMenu = ({
         overflow-x: hidden;
       }
 
+      .context-submenu.animations-submenu {
+        bottom: 6px !important;
+      }
+
       .context-submenu.animations-submenu .context-menu-item {
         direction: ltr;
         margin-left: 0px;
-      }
+        }
 
       /* Remove mobile-specific sizing and font-size adjustments */
       @media (max-width: 768px) {
