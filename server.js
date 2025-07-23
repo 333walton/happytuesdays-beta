@@ -22,7 +22,12 @@ const parser = new Parser({
 });
 
 // CORS configuration
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // RSS Feed catalog (same as your rssCatalog.js)

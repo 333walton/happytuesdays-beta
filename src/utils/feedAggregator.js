@@ -18,6 +18,14 @@ const getCachedFeed = (cacheKey) => {
     return memoryCached.data;
   }
 
+  // In feedAggregator.js, make sure this change is saved:
+  const getApiEndpoint = () => {
+    if (process.env.NODE_ENV === "development") {
+      return "http://localhost:3001/api/feeds"; // Direct URL
+    }
+    return "/api/feeds";
+  };
+
   // Check localStorage as fallback
   try {
     const stored = localStorage.getItem(cacheKey);
