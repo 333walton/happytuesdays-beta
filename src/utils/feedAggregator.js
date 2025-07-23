@@ -1,4 +1,4 @@
-// src/utils/feedAggregator.js
+// src/utils/feedAggregator.js (Combined production/development version)
 import axios from "axios";
 
 // Cache configuration
@@ -6,6 +6,19 @@ const CACHE_DURATION =
   parseInt(process.env.REACT_APP_RSS_CACHE_DURATION) || 900000; // 15 minutes
 const MAX_ITEMS = parseInt(process.env.REACT_APP_MAX_FEED_ITEMS) || 20;
 const ENABLE_FALLBACK = process.env.REACT_APP_ENABLE_FALLBACK_DATA === "true";
+
+// Determine API endpoint based on environment
+const getApiEndpoint = () => {
+  // In development, use the direct URL to avoid proxy issues
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:3001/api/feeds";
+  }
+
+  // In production, use relative path - Vercel/Netlify will handle /api routes automatically
+  return "/api/feeds";
+};
+
+const API_ENDPOINT = getApiEndpoint();
 
 // In-memory cache as primary, localStorage as backup
 const memoryCache = new Map();
@@ -17,14 +30,6 @@ const getCachedFeed = (cacheKey) => {
   if (memoryCached && Date.now() - memoryCached.timestamp < CACHE_DURATION) {
     return memoryCached.data;
   }
-
-  // In feedAggregator.js, make sure this change is saved:
-  const getApiEndpoint = () => {
-    if (process.env.NODE_ENV === "development") {
-      return "http://localhost:3001/api/feeds"; // Direct URL
-    }
-    return "/api/feeds";
-  };
 
   // Check localStorage as fallback
   try {
@@ -138,15 +143,18 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
   }
 
   try {
-    // Call the backend API
+    // Make API call using the environment-appropriate endpoint
     const response = await axios.post(
-      "/api/feeds",
+      API_ENDPOINT,
       {
         category,
         subcategory,
       },
       {
         timeout: 10000, // 10 second timeout
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -209,7 +217,7 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
   }
 }
 
-// Prefetch feeds for better UX (simplified for API approach)
+// Prefetch feeds for better UX
 export async function prefetchFeeds(category) {
   // Just trigger a cache fill, don't block
   fetchAndCacheFeed(category).catch(() => {

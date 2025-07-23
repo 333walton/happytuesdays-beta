@@ -231,10 +231,6 @@ const parseFeedItem = (item, source) => {
     thumbnail = item["media:thumbnail"].$
       ? item["media:thumbnail"].$.url
       : item["media:thumbnail"];
-  } else if (item["media:content"] && item["media:content"][0]) {
-    thumbnail = item["media:content"][0].$
-      ? item["media:content"][0].$.url
-      : null;
   }
 
   let description =
@@ -277,6 +273,84 @@ const fetchSingleFeed = async (url, timeout = 5000) => {
       resolve([]);
     }
   });
+};
+
+// Vercel Serverless Function Handler
+module.exports = async (req, res) => {
+  // Enable CORS
+  res.setHeader("Access-Control-Allow-Credentials", true);
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,OPTIONS,PATCH,DELETE,POST,PUT"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+  );
+
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { category, subcategory } = req.body;
+
+  if (!category) {
+    return res.status(400).json({ error: "Category is required" });
+  }
+
+  try {
+    const feedUrls = subcategory
+      ? getFeedsForSubcategory(category, subcategory)
+      : getFeedsForCategory(category);
+
+    if (!feedUrls || feedUrls.length === 0) {
+      return res
+        .status(200)
+        .json({ items: [], message: "No feeds found for this category" });
+    }
+
+    // Fetch feeds in parallel
+    const feedPromises = feedUrls.map((url) => fetchSingleFeed(url));
+    const feedResults = await Promise.all(feedPromises);
+
+    // Process results
+    let allItems = feedResults.flat();
+
+    // Deduplicate
+    const seen = new Set();
+    allItems = allItems.filter((item) => {
+      const key = item.guid || item.link;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    // Sort by date
+    allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+    // Limit items
+    const maxItems = 20;
+    const finalItems = allItems.slice(0, maxItems);
+
+    res.status(200).json({
+      items: finalItems,
+      count: finalItems.length,
+      category,
+      subcategory,
+    });
+  } catch (error) {
+    console.error("Feed fetching error:", error);
+    res.status(500).json({
+      error: "Failed to fetch feeds",
+      message: error.message,
+    });
+  }
 };
 
 // API endpoint to fetch feeds

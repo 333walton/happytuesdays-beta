@@ -9,5 +9,16 @@
         }
       ]
     }
+  ],
+  "functions": {
+    "api/feeds.js": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
   ]
 }
