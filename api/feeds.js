@@ -1,128 +1,241 @@
 // api/feeds.js - Vercel Serverless Function
-import axios from "axios";
+import Parser from "rss-parser";
 
+const parser = new Parser({
+  customFields: {
+    item: [
+      ["media:content", "media:content", { keepArray: true }],
+      ["media:thumbnail", "media:thumbnail"],
+      ["dc:creator", "creator"],
+      ["author", "author"],
+      ["description", "description"],
+      ["content:encoded", "content"],
+    ],
+  },
+});
 // RSS feed URLs organized by category (expanded based on your app's needs)
 const RSS_FEEDS = {
-  technology: [
-    "https://feeds.feedburner.com/TechCrunch",
-    "https://www.wired.com/feed/rss",
-    "https://feeds.arstechnica.com/arstechnica/index",
-    "https://rss.cnn.com/rss/edition.rss",
-  ],
-  business: [
-    "https://feeds.bloomberg.com/politics/news.rss",
-    "https://feeds.reuters.com/reuters/businessNews",
-    "https://feeds.bloomberg.com/markets/news.rss",
-  ],
-  science: [
-    "https://feeds.nature.com/nature/rss/current",
-    "https://www.sciencedaily.com/rss/all.xml",
-    "https://feeds.feedburner.com/oreilly/radar",
-  ],
-  politics: [
-    "https://feeds.reuters.com/Reuters/PoliticsNews",
-    "https://rss.politico.com/politics-news.xml",
-  ],
-  health: [
-    "https://rss.cnn.com/rss/edition_health.rss",
-    "https://feeds.reuters.com/reuters/health",
-  ],
+  tech: {
+    "ai-machine-learning": [
+      "https://openai.com/news/rss/",
+      "https://cloud.google.com/blog/products/ai-machine-learning/rss/",
+      "https://news.mit.edu/topic/artificial-intelligence2/rss.xml",
+      "https://machinelearningmastery.com/feed/",
+      "https://www.marktechpost.com/feed/",
+      "https://hnrss.org/newest?q=AI+OR+machine+learning",
+    ],
+    "martech-adtech": [
+      "https://martech.org/feed/",
+      "https://adexchanger.com/feed/",
+      "https://adtechdaily.com/feed/",
+      "https://marketingland.com/feed/",
+    ],
+    "web-dev-devops": [
+      "https://css-tricks.com/feed/",
+      "https://www.smashingmagazine.com/feed/",
+      "https://dev.to/feed",
+      "https://scotch.io/feed",
+      "https://web.dev/feed.xml",
+    ],
+    "cybersecurity-privacy": [
+      "https://krebsonsecurity.com/feed/",
+      "https://feeds.feedburner.com/TheHackersNews",
+      "https://www.darkreading.com/rss.xml",
+      "https://www.schneier.com/feed/atom/",
+      "https://www.wired.com/feed/category/security/latest/rss",
+    ],
+    "blockchain-web3": [
+      "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "https://decrypt.co/feed",
+      "https://www.theblock.co/rss/",
+      "https://api.theblockbeats.news/v2/rss/all",
+    ],
+    "vintage-tech-spotlights": [
+      "https://tedium.co/feed/",
+      "https://paleotronic.com/feed/",
+      "https://www.theregister.com/headlines.atom",
+    ],
+  },
+  builder: {
+    "founder-stories": [
+      "https://review.firstround.com/rss/",
+      "https://blog.ycombinator.com/feed/",
+      "https://steveblank.com/feed/",
+      "https://techcrunch.com/category/startups/feed/",
+      "https://www.indiehackers.com/feed.xml",
+    ],
+    "productivity-hacks": [
+      "https://lifehacker.com/rss",
+      "https://gettingthingsdone.com/feed/",
+      "https://zenhabits.net/feed/",
+      "https://jamesclear.com/feed",
+    ],
+    "automation-no-code": [
+      "https://zapier.com/blog/feeds/latest/",
+      "https://nocodedevs.com/feed/",
+      "https://bubble.io/blog/rss",
+      "https://www.makerpad.co/feed",
+    ],
+    "funding-monetization": [
+      "https://bothsidesofthetable.com/feed",
+      "https://feld.com/feed",
+      "https://avc.com/feed/",
+      "https://saastr.com/feed/",
+    ],
+    "project-management": [
+      "https://blog.asana.com/feed/",
+      "https://blog.trello.com/rss",
+      "https://monday.com/blog/feed/",
+    ],
+    "stoic-mindset": [
+      "https://dailystoic.com/feed/",
+      "https://modernstoicism.com/feed/",
+      "https://www.artofmanliness.com/feed/",
+    ],
+  },
+  art: {
+    "generative-ai-art": [
+      "https://ml-art.co/feed",
+      "https://aiartists.org/feed",
+      "https://www.creativebloq.com/feeds/tag/ai-art",
+    ],
+    "pixel-retro-art": [
+      "https://retronator.com/feed/",
+      "https://indieretronews.com/feeds/posts/default?alt=rss",
+      "https://pixelartacademy.com/feed/",
+    ],
+    "ui-ux-trends": [
+      "https://www.smashingmagazine.com/feed/",
+      "https://uxplanet.org/feed",
+      "https://alistapart.com/main/feed",
+      "https://uxbooth.com/feed/",
+    ],
+    "color-typography": [
+      "https://www.typewolf.com/feed/",
+      "https://colorhunt.co/feed/",
+      "https://blog.adobe.com/en/publish/creative-cloud.xml",
+    ],
+    "animation-motion": [
+      "https://motionographer.com/feed/",
+      "https://www.animatedreview.com/feed/",
+      "https://greensock.com/blog/feed",
+    ],
+    "tutorials-walkthroughs": [
+      "https://tympanus.net/codrops/feed/",
+      "https://webdesign.tutsplus.com/posts.atom",
+      "https://designmodo.com/feed/",
+    ],
+  },
+  gaming: {
+    "retro-game-news": [
+      "https://www.timeextension.com/feed/",
+      "https://indieretronews.com/feeds/posts/default?alt=rss",
+      "https://retrododo.com/feed/",
+      "https://www.retrogamer.net/feed/",
+    ],
+    "emulation-modding": [
+      "https://retropie.org.uk/feed/",
+      "https://www.youtube.com/feeds/videos.xml?channel_id=UC_0CVCfC_3iuHqmyClu59Uw",
+      "https://emulation.gametechwiki.com/index.php?title=Special:RecentChanges&feed=rss",
+    ],
+    "collecting-hardware": [
+      "https://www.racketboy.com/feed/",
+      "https://consolevariations.com/feed/",
+      "https://retrogamecollecting.com/feed/",
+    ],
+    "speedruns-events": [
+      "https://www.speedrun.com/api/v1/posts.rss",
+      "https://gamesdonequick.com/feeds/blog",
+      "https://tasvideos.org/feed/publications",
+    ],
+    "indie-retro-releases": [
+      "https://itch.io/games/tag-retro.xml",
+      "https://indieretronews.com/feeds/posts/default?alt=rss",
+      "https://warpdoor.com/feed/",
+    ],
+    "dos-game-deep-dives": [
+      "https://dos.itch.io/feed/new.xml",
+      "https://dosgamer.com/feed/",
+      "https://www.dosgamesarchive.com/feed/",
+    ],
+  },
 };
 
-// Helper to parse RSS XML and format to match feedAggregator expectations
-const parseRSSItem = (item, feedSource = "RSS Feed") => {
-  const pubDate =
-    item.pubDate?.[0] || item.published?.[0] || new Date().toISOString();
-  const parsedDate = new Date(pubDate);
+// Helpers for category/subcategory resolution
 
-  return {
-    title: item.title?.[0] || "",
-    link: item.link?.[0] || item.guid?.[0]?._ || "",
-    description: item.description?.[0] || item.summary?.[0] || "",
-    thumbnail:
-      item["media:thumbnail"]?.[0]?.$.url || item.enclosure?.[0]?.$.url || null,
-    source: feedSource,
-    sourceUrl: item.link?.[0] || "",
-    creator: item["dc:creator"]?.[0] || item.author?.[0] || feedSource,
-    guid: item.guid?.[0]?._ || item.link?.[0] || Math.random().toString(36),
-    pubDate: pubDate,
-    time: `${parsedDate.toLocaleDateString()} at ${parsedDate.toLocaleTimeString()}`,
-  };
+const getFeedsForCategory = (category) => {
+  const categoryFeeds = RSS_FEEDS[category];
+  if (!categoryFeeds) return [];
+  return Object.values(categoryFeeds).flat();
 };
 
-// Fetch and parse RSS feed with better error handling
-const fetchRSSFeed = async (url) => {
+const getFeedsForSubcategory = (category, subcategory) => {
+  const categoryFeeds = RSS_FEEDS[category];
+  if (!categoryFeeds) return [];
+  return categoryFeeds[subcategory] || [];
+};
+
+const getFeedDisplayName = (url) => {
+  // Optionally, use a map here for pretty source names
   try {
-    const response = await axios.get(url, {
-      timeout: 8000,
-      headers: {
-        "User-Agent": "RSS-Aggregator/1.0",
-        Accept: "application/rss+xml, application/xml, text/xml",
-      },
-    });
-
-    const xml = response.data;
-    const items = [];
-
-    // Extract feed title for source attribution
-    const feedTitleMatch = xml.match(
-      /<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/i
-    );
-    const feedTitle = feedTitleMatch
-      ? feedTitleMatch[1] || feedTitleMatch[2]
-      : "RSS Feed";
-
-    // Parse RSS items
-    const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
-    let match;
-
-    while ((match = itemRegex.exec(xml)) !== null && items.length < 15) {
-      const itemXml = match[1];
-      const item = {};
-
-      // Extract fields with better regex patterns
-      const titleMatch = itemXml.match(
-        /<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/is
-      );
-      const linkMatch = itemXml.match(/<link>(.*?)<\/link>/i);
-      const descMatch = itemXml.match(
-        /<description><!\[CDATA\[(.*?)\]\]><\/description>|<description>(.*?)<\/description>/is
-      );
-      const dateMatch = itemXml.match(/<pubDate>(.*?)<\/pubDate>/i);
-      const authorMatch = itemXml.match(
-        /<dc:creator><!\[CDATA\[(.*?)\]\]><\/dc:creator>|<dc:creator>(.*?)<\/dc:creator>|<author>(.*?)<\/author>/i
-      );
-      const guidMatch = itemXml.match(/<guid[^>]*>(.*?)<\/guid>/i);
-      const thumbnailMatch =
-        itemXml.match(/<media:thumbnail[^>]+url="([^"]+)"/i) ||
-        itemXml.match(/<enclosure[^>]+url="([^"]+)"/i);
-
-      if (titleMatch) item.title = [titleMatch[1] || titleMatch[2]];
-      if (linkMatch) item.link = [linkMatch[1].trim()];
-      if (descMatch) item.description = [descMatch[1] || descMatch[2]];
-      if (dateMatch) item.pubDate = [dateMatch[1]];
-      if (authorMatch)
-        item["dc:creator"] = [
-          authorMatch[1] || authorMatch[2] || authorMatch[3],
-        ];
-      if (guidMatch) item.guid = [{ _: guidMatch[1] }];
-      if (thumbnailMatch)
-        item["media:thumbnail"] = [{ $: { url: thumbnailMatch[1] } }];
-
-      items.push(parseRSSItem(item, feedTitle));
-    }
-
-    return items;
-  } catch (error) {
-    console.error(`Error fetching RSS feed ${url}:`, error.message);
-    return [];
+    return new URL(url).hostname.replace("www.", "");
+  } catch {
+    return "Unknown Source";
   }
 };
 
-// Main handler
+const parseFeedItem = (item, source) => {
+  let thumbnail = null;
+  if (item["media:thumbnail"]) {
+    thumbnail = item["media:thumbnail"].$
+      ? item["media:thumbnail"].$.url
+      : item["media:thumbnail"];
+  }
+
+  // clean description
+  let description =
+    item.contentSnippet || item.description || item.summary || "";
+  description = description.replace(/<[^>]*>/g, "").trim();
+  if (description.length > 200) {
+    description = description.substring(0, 197) + "...";
+  }
+
+  const pubDate =
+    item.pubDate || item.isoDate || item.published || new Date().toISOString();
+
+  return {
+    title: item.title || "Untitled",
+    link: item.link || item.guid || "#",
+    description,
+    thumbnail,
+    source: getFeedDisplayName(source),
+    sourceUrl: source,
+    creator: item.creator || item.author || getFeedDisplayName(source),
+    guid: item.guid || item.link || `${source}-${pubDate}`,
+    pubDate,
+    time: new Date(pubDate).toLocaleString(),
+  };
+};
+
+// Fetch a single RSS feed with timeout and error handling
+const fetchSingleFeed = async (url, timeout = 8000) => {
+  return new Promise(async (resolve) => {
+    const timer = setTimeout(() => resolve([]), timeout);
+    try {
+      const feed = await parser.parseURL(url);
+      clearTimeout(timer);
+      resolve(feed.items.map((item) => parseFeedItem(item, url)));
+    } catch (error) {
+      clearTimeout(timer);
+      console.error(`Error fetching feed ${url}:`, error.message);
+      resolve([]);
+    }
+  });
+};
+
 export default async function handler(req, res) {
   // Set CORS headers
-  res.setHeader("Access-Control-Allow-Credentials", true);
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
@@ -133,73 +246,62 @@ export default async function handler(req, res) {
     "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
   );
 
-  // Handle preflight requests
+  // OPTIONS for preflight
   if (req.method === "OPTIONS") {
     res.status(200).end();
     return;
   }
 
-  // Only allow POST requests
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  try {
-    const { category, subcategory } = req.body;
+  const { category, subcategory } = req.body;
 
-    if (!category) {
-      return res.status(400).json({ error: "Category is required" });
-    }
-
-    // Get feeds for the category, with fallback to technology
-    const feedUrls = RSS_FEEDS[category.toLowerCase()] || RSS_FEEDS.technology;
-
-    // Fetch all feeds concurrently with a reasonable timeout
-    const feedPromises = feedUrls.map((url) => fetchRSSFeed(url));
-    const feedResults = await Promise.allSettled(feedPromises);
-
-    // Combine all successful results
-    const allItems = [];
-    feedResults.forEach((result) => {
-      if (result.status === "fulfilled" && result.value.length > 0) {
-        allItems.push(...result.value);
-      }
-    });
-
-    // Sort by date and remove duplicates
-    const uniqueItems = [];
-    const seen = new Set();
-
-    allItems
-      .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
-      .forEach((item) => {
-        const key = item.guid || item.link;
-        if (!seen.has(key) && item.title && item.link) {
-          seen.add(key);
-          uniqueItems.push(item);
-        }
-      });
-
-    // Limit results to match MAX_ITEMS from feedAggregator
-    const limitedItems = uniqueItems.slice(0, 20);
-
-    // Return in the format expected by feedAggregator.js
-    return res.status(200).json({
-      success: true,
-      items: limitedItems,
-      category,
-      subcategory: subcategory || null,
-      timestamp: new Date().toISOString(),
-      count: limitedItems.length,
-    });
-  } catch (error) {
-    console.error("Error in feeds API:", error);
-    return res.status(500).json({
-      error: "Internal server error",
-      message:
-        process.env.NODE_ENV === "development"
-          ? error.message
-          : "Failed to fetch feeds",
-    });
+  if (!category) {
+    return res.status(400).json({ error: "Category is required" });
   }
+
+  // Get feeds for category and subcategory
+  const feedUrls = subcategory
+    ? getFeedsForSubcategory(category, subcategory)
+    : getFeedsForCategory(category);
+
+  if (!feedUrls || feedUrls.length === 0) {
+    return res
+      .status(200)
+      .json({ items: [], message: "No feeds found for this category" });
+  }
+
+  // Fetch feeds in parallel
+  const feedPromises = feedUrls.map((url) => fetchSingleFeed(url));
+  const feedResults = await Promise.all(feedPromises);
+
+  // Flatten and deduplicate
+  let allItems = feedResults.flat();
+
+  // Deduplicate by GUID/link
+  const seen = new Set();
+  allItems = allItems.filter((item) => {
+    const key = item.guid || item.link;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  // Sort by date (newest first)
+  allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+  // Limit to 20
+  const finalItems = allItems.slice(0, 20);
+
+  // Return in unified JSON
+  return res.status(200).json({
+    items: finalItems,
+    count: finalItems.length,
+    category,
+    subcategory,
+    timestamp: new Date().toISOString(),
+    success: true,
+  });
 }
