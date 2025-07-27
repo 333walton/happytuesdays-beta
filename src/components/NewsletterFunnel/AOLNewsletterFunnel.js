@@ -1,76 +1,87 @@
-import React, { useState } from "react";
+import React, { Component, createRef } from "react";
+import Window from "../tools/Window";
+import { WindowProgram, WindowAlert } from "packard-belle";
+import buildMenu from "../../helpers/menuBuilder";
+import cx from "classnames";
 import "./AOLNewsletterFunnel.scss";
 
-const AOLNewsletterFunnel = ({ onClose, onComplete }) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    email: "",
-    categories: {
-      technology: {
-        main: false,
-        subcategories: {
-          sub1: false,
-          sub2: false,
-          sub3: false,
-          sub4: false,
-          sub5: false,
-          sub6: false,
+class AOLNewsletterFunnel extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentStep: 1,
+      formData: {
+        email: "",
+        categories: {
+          technology: {
+            main: false,
+            subcategories: {
+              sub1: false,
+              sub2: false,
+              sub3: false,
+              sub4: false,
+              sub5: false,
+              sub6: false,
+            },
+          },
+          builders: {
+            main: false,
+            subcategories: {
+              sub1: false,
+              sub2: false,
+              sub3: false,
+              sub4: false,
+              sub5: false,
+              sub6: false,
+            },
+          },
+          artDesign: {
+            main: false,
+            subcategories: {
+              sub1: false,
+              sub2: false,
+              sub3: false,
+              sub4: false,
+              sub5: false,
+              sub6: false,
+            },
+          },
+          gaming: {
+            main: false,
+            subcategories: {
+              sub1: false,
+              sub2: false,
+              sub3: false,
+              sub4: false,
+              sub5: false,
+              sub6: false,
+            },
+          },
         },
+        frequency: "weekly",
       },
-      builders: {
-        main: false,
-        subcategories: {
-          sub1: false,
-          sub2: false,
-          sub3: false,
-          sub4: false,
-          sub5: false,
-          sub6: false,
-        },
-      },
-      artDesign: {
-        main: false,
-        subcategories: {
-          sub1: false,
-          sub2: false,
-          sub3: false,
-          sub4: false,
-          sub5: false,
-          sub6: false,
-        },
-      },
-      gaming: {
-        main: false,
-        subcategories: {
-          sub1: false,
-          sub2: false,
-          sub3: false,
-          sub4: false,
-          sub5: false,
-          sub6: false,
-        },
-      },
-    },
-    frequency: "weekly", // default
-  });
-  const [errors, setErrors] = useState({});
+      errors: {},
+      displayAlert: false,
+    };
+  }
 
   // Email validation
-  const validateEmail = (email) => {
+  validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   };
 
   // Check if at least one category is selected
-  const hasSelectedCategories = () => {
-    return Object.values(formData.categories).some(
+  hasSelectedCategories = () => {
+    return Object.values(this.state.formData.categories).some(
       (cat) => cat.main || Object.values(cat.subcategories).some((sub) => sub)
     );
   };
 
   // Handle main category selection
-  const handleMainCategoryChange = (category) => {
-    const newCategories = { ...formData.categories };
+  handleMainCategoryChange = (category) => {
+    const newFormData = { ...this.state.formData };
+    const newCategories = { ...newFormData.categories };
     const isSelected = !newCategories[category].main;
     newCategories[category].main = isSelected;
 
@@ -79,12 +90,14 @@ const AOLNewsletterFunnel = ({ onClose, onComplete }) => {
       newCategories[category].subcategories[sub] = isSelected;
     });
 
-    setFormData({ ...formData, categories: newCategories });
+    newFormData.categories = newCategories;
+    this.setState({ formData: newFormData });
   };
 
   // Handle subcategory selection
-  const handleSubcategoryChange = (category, subcategory) => {
-    const newCategories = { ...formData.categories };
+  handleSubcategoryChange = (category, subcategory) => {
+    const newFormData = { ...this.state.formData };
+    const newCategories = { ...newFormData.categories };
     newCategories[category].subcategories[subcategory] =
       !newCategories[category].subcategories[subcategory];
 
@@ -94,335 +107,478 @@ const AOLNewsletterFunnel = ({ onClose, onComplete }) => {
     ).every((sub) => sub);
     newCategories[category].main = allSubsSelected;
 
-    setFormData({ ...formData, categories: newCategories });
+    newFormData.categories = newCategories;
+    this.setState({ formData: newFormData });
+  };
+
+  // Handle input changes
+  handleInputChange = (e) => {
+    const { name, value } = e.target;
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        [name]: value,
+      },
+    });
   };
 
   // Handle step progression
-  const handleNextStep = () => {
-    const newErrors = {};
+  handleNextStep = () => {
+    const { currentStep, formData } = this.state;
+
+    if (currentStep === 1) {
+      this.setState({ currentStep: 2 });
+      return;
+    }
 
     if (currentStep === 2) {
+      const newErrors = {};
+
       // Validate email
       if (!formData.email) {
         newErrors.email = "Email is required";
-      } else if (!validateEmail(formData.email)) {
+      } else if (!this.validateEmail(formData.email)) {
         newErrors.email = "Please enter a valid email";
       }
 
       // Validate categories
-      if (!hasSelectedCategories()) {
+      if (!this.hasSelectedCategories()) {
         newErrors.categories = "Please select at least one category";
       }
 
       if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
+        this.setState({ errors: newErrors });
         return;
       }
-    }
 
-    setErrors({});
-    setCurrentStep(currentStep + 1);
+      this.setState({ errors: {}, currentStep: 3 });
+      return;
+    }
+  };
+
+  // Handle going back
+  handlePreviousStep = () => {
+    this.setState({
+      currentStep: this.state.currentStep - 1,
+      errors: {},
+    });
   };
 
   // Handle final confirmation
-  const handleConfirm = () => {
-    // Show confirmation message
-    const selectedCategories = [];
-    Object.entries(formData.categories).forEach(([cat, data]) => {
-      if (data.main) {
-        selectedCategories.push(cat);
-      } else {
-        Object.entries(data.subcategories).forEach(([sub, selected]) => {
-          if (selected) {
-            selectedCategories.push(`${cat} - ${sub}`);
-          }
-        });
-      }
-    });
+  handleConfirm = () => {
+    this.setState({ currentStep: 4 }); // Show family icon
 
-    const message =
-      `You've signed up for Happy Tuesdays!\n\n` +
-      `Email: ${formData.email}\n` +
-      `Categories: ${selectedCategories.join(", ")}\n` +
-      `Frequency: ${formData.frequency}`;
-
-    alert(message);
-
-    // Mark as complete and close
-    if (onComplete) {
-      onComplete(formData);
-    }
-    if (onClose) {
-      onClose(true); // true indicates successful completion
-    }
+    // Show Clippy confirmation after brief delay
+    setTimeout(() => {
+      this.setState({ displayAlert: true });
+    }, 500);
   };
 
   // Handle declining in step 1
-  const handleDecline = () => {
-    if (onClose) {
-      onClose(false); // false indicates user declined
+  handleDecline = () => {
+    if (this.props.onClose) {
+      this.props.onClose(false);
     }
   };
 
-  return (
-    <div className="aol-newsletter-funnel-overlay">
-      <div className="aol-newsletter-funnel window">
-        <div className="title-bar">
-          <div className="title-bar-text">Happy Tuesdays Newsletter</div>
-          <div className="title-bar-controls">
-            <button
-              className="close-button"
-              onClick={() => onClose(false)}
-              aria-label="Close"
-            >
-              <span aria-hidden="true">×</span>
-            </button>
-          </div>
-        </div>
+  // Handle Clippy confirmation
+  confirm = () => {
+    console.log("Newsletter signup completed:", this.state.formData);
+    this.setState({ displayAlert: false });
 
-        <div className="funnel-header">
-          <div className="step-indicators">
-            <div className={`step-box ${currentStep >= 1 ? "active" : ""}`}>
-              {currentStep >= 1 && <div className="aol-figure" />}
-            </div>
-            <div className={`step-box ${currentStep >= 2 ? "active" : ""}`}>
-              {currentStep >= 2 && <div className="aol-figure" />}
-            </div>
-            <div className={`step-box ${currentStep >= 3 ? "active" : ""}`}>
-              {currentStep >= 3 && (
-                <>
-                  <div className="happy-tuesdays-logo" />
-                  {currentStep > 3 && <div className="family-icon" />}
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+    if (this.props.onComplete) {
+      this.props.onComplete(this.state.formData);
+    }
+    if (this.props.onClose) {
+      this.props.onClose(true);
+    }
+  };
 
-        <div className="window-body funnel-content">
-          {currentStep === 1 && (
-            <div className="step-1">
-              <h2>Join Happy Tuesdays!</h2>
-              <p>
-                Would you like to receive our newsletter with the latest
-                updates?
-              </p>
-              <div className="button-group">
-                <button onClick={handleNextStep} className="btn">
-                  Yes, Sign Me Up!
-                </button>
-                <button onClick={handleDecline} className="btn">
-                  No Thanks
-                </button>
-              </div>
-            </div>
-          )}
+  render() {
+    const { currentStep, formData, errors } = this.state;
 
-          {currentStep === 2 && (
-            <div className="step-2 channels-page">
-              <h2>Choose Your Interests</h2>
+    const commonProps = {
+      title: "Welcome to Happy Tuesdays!",
+      zIndex: 1000,
+      onClose: () => this.setState({ displayAlert: false }),
+    };
 
-              <div className="email-section">
-                <label>Email Address:</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className={errors.email ? "error" : ""}
+    const filteredMenuOptions = buildMenu(this.props).filter(
+      (option) =>
+        option.title.toLowerCase() !== "file" &&
+        option.title.toLowerCase() !== "help"
+    );
+
+    return (
+      <Window
+        {...this.props}
+        title="Happy Tuesdays Newsletter"
+        Component={WindowProgram}
+        initialWidth={480}
+        initialHeight={420}
+        resizable={false}
+        onMaximize={null}
+        menuOptions={filteredMenuOptions}
+        className={cx("AOLNewsletterFunnel", this.props.className)}
+      >
+        <div className="aol-funnel-container">
+          {/* Step 1 & 3: Dial-up interface */}
+          {(currentStep === 1 || currentStep === 3) && (
+            <div className="dial-up-interface">
+              <div className="dial-up-background">
+                <img
+                  src="/static/aol/dial_up1.png"
+                  alt="AOL Dial-up Interface"
+                  className="dial-up-bg-image"
                 />
-                {errors.email && (
-                  <span className="error-message">{errors.email}</span>
-                )}
               </div>
 
-              <div className="categories-section">
-                <h3>Select Your Categories:</h3>
-                {errors.categories && (
-                  <span className="error-message">{errors.categories}</span>
-                )}
-
-                <div className="categories-grid">
-                  {/* Technology */}
-                  <div className="category-group">
-                    <label className="main-category">
-                      <input
-                        type="checkbox"
-                        checked={formData.categories.technology.main}
-                        onChange={() => handleMainCategoryChange("technology")}
-                      />
-                      Technology
-                    </label>
-                    <div className="subcategories">
-                      {Object.keys(
-                        formData.categories.technology.subcategories
-                      ).map((sub) => (
-                        <label key={sub} className="subcategory">
-                          <input
-                            type="checkbox"
-                            checked={
-                              formData.categories.technology.subcategories[sub]
-                            }
-                            onChange={() =>
-                              handleSubcategoryChange("technology", sub)
-                            }
-                          />
-                          Tech {sub}
-                        </label>
-                      ))}
+              {/* Three step boxes overlaid on dial-up interface */}
+              <div className="step-boxes-overlay">
+                <div className="step-box">
+                  {currentStep >= 1 && (
+                    <div className="aol-figure-small">AOL</div>
+                  )}
+                </div>
+                <div className="step-box">
+                  {currentStep >= 2 && (
+                    <div className="aol-figure-small">AOL</div>
+                  )}
+                </div>
+                <div className="step-box">
+                  {currentStep >= 3 && (
+                    <div className="happy-tuesdays-logo">
+                      Happy
+                      <br />
+                      Tuesdays
                     </div>
-                  </div>
-
-                  {/* For Builders */}
-                  <div className="category-group">
-                    <label className="main-category">
-                      <input
-                        type="checkbox"
-                        checked={formData.categories.builders.main}
-                        onChange={() => handleMainCategoryChange("builders")}
-                      />
-                      For Builders
-                    </label>
-                    <div className="subcategories">
-                      {Object.keys(
-                        formData.categories.builders.subcategories
-                      ).map((sub) => (
-                        <label key={sub} className="subcategory">
-                          <input
-                            type="checkbox"
-                            checked={
-                              formData.categories.builders.subcategories[sub]
-                            }
-                            onChange={() =>
-                              handleSubcategoryChange("builders", sub)
-                            }
-                          />
-                          Builder {sub}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Art & Design */}
-                  <div className="category-group">
-                    <label className="main-category">
-                      <input
-                        type="checkbox"
-                        checked={formData.categories.artDesign.main}
-                        onChange={() => handleMainCategoryChange("artDesign")}
-                      />
-                      Art & Design
-                    </label>
-                    <div className="subcategories">
-                      {Object.keys(
-                        formData.categories.artDesign.subcategories
-                      ).map((sub) => (
-                        <label key={sub} className="subcategory">
-                          <input
-                            type="checkbox"
-                            checked={
-                              formData.categories.artDesign.subcategories[sub]
-                            }
-                            onChange={() =>
-                              handleSubcategoryChange("artDesign", sub)
-                            }
-                          />
-                          Art {sub}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Gaming */}
-                  <div className="category-group">
-                    <label className="main-category">
-                      <input
-                        type="checkbox"
-                        checked={formData.categories.gaming.main}
-                        onChange={() => handleMainCategoryChange("gaming")}
-                      />
-                      Gaming
-                    </label>
-                    <div className="subcategories">
-                      {Object.keys(
-                        formData.categories.gaming.subcategories
-                      ).map((sub) => (
-                        <label key={sub} className="subcategory">
-                          <input
-                            type="checkbox"
-                            checked={
-                              formData.categories.gaming.subcategories[sub]
-                            }
-                            onChange={() =>
-                              handleSubcategoryChange("gaming", sub)
-                            }
-                          />
-                          Gaming {sub}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
+                  )}
+                  {currentStep >= 4 && <div className="family-icon">👨‍👩‍👧‍👦</div>}
                 </div>
               </div>
 
-              <div className="button-group">
-                <button onClick={() => setCurrentStep(1)} className="btn">
-                  Back
-                </button>
-                <button onClick={handleNextStep} className="btn">
-                  Continue
-                </button>
+              {/* Content overlay */}
+              <div className="dial-up-content-overlay">
+                {currentStep === 1 && (
+                  <div className="step-content">
+                    <div className="dial-up-prompt">
+                      <p>
+                        Would you like to join the Happy Tuesdays mailing list?
+                      </p>
+                      <div className="button-group">
+                        <button
+                          onClick={this.handleNextStep}
+                          className="pb-button"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={this.handleDecline}
+                          className="pb-button"
+                        >
+                          No
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 3 && (
+                  <div className="step-content">
+                    <div className="dial-up-prompt">
+                      <p>Select your preferred email frequency:</p>
+
+                      <div className="frequency-options">
+                        <label>
+                          <input
+                            type="radio"
+                            name="frequency"
+                            value="weekly"
+                            checked={formData.frequency === "weekly"}
+                            onChange={this.handleInputChange}
+                          />
+                          Weekly
+                        </label>
+                        <label>
+                          <input
+                            type="radio"
+                            name="frequency"
+                            value="biweekly"
+                            checked={formData.frequency === "biweekly"}
+                            onChange={this.handleInputChange}
+                          />
+                          Bi-weekly
+                        </label>
+                      </div>
+
+                      <div className="button-group">
+                        <button
+                          onClick={this.handlePreviousStep}
+                          className="pb-button"
+                        >
+                          Back
+                        </button>
+                        <button
+                          onClick={this.handleConfirm}
+                          className="pb-button"
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {currentStep === 3 && (
-            <div className="step-3">
-              <h2>Email Frequency</h2>
-              <p>How often would you like to receive updates?</p>
-
-              <div className="frequency-options">
-                <label>
-                  <input
-                    type="radio"
-                    name="frequency"
-                    value="weekly"
-                    checked={formData.frequency === "weekly"}
-                    onChange={(e) =>
-                      setFormData({ ...formData, frequency: e.target.value })
-                    }
-                  />
-                  Weekly
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="frequency"
-                    value="biweekly"
-                    checked={formData.frequency === "biweekly"}
-                    onChange={(e) =>
-                      setFormData({ ...formData, frequency: e.target.value })
-                    }
-                  />
-                  Bi-Weekly
-                </label>
+          {/* Step 2: Channels interface */}
+          {currentStep === 2 && (
+            <div className="channels-interface">
+              <div className="channels-background">
+                <img
+                  src="/static/aol/channels_background.png"
+                  alt="AOL Channels Background"
+                  className="channels-bg-image"
+                />
               </div>
 
-              <div className="button-group">
-                <button onClick={() => setCurrentStep(2)} className="btn">
-                  Back
-                </button>
-                <button onClick={handleConfirm} className="btn">
-                  Confirm Signup
-                </button>
+              {/* Channels content overlay */}
+              <div className="channels-content-overlay">
+                <div className="step-content channels-content">
+                  <div className="form-group email-section">
+                    <label htmlFor="email" className="w98-label">
+                      Email Address:
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={this.handleInputChange}
+                      className={cx("w98-input", { error: errors.email })}
+                      placeholder="yourname@aol.com"
+                      required
+                    />
+                    {errors.email && (
+                      <span className="error-message">{errors.email}</span>
+                    )}
+                  </div>
+
+                  <div className="channels-selection">
+                    <p className="channels-header">Choose Your Channels:</p>
+                    {errors.categories && (
+                      <span className="error-message categories-error">
+                        {errors.categories}
+                      </span>
+                    )}
+
+                    <div className="channel-buttons-grid">
+                      {/* Technology Channel */}
+                      <div className="channel-item">
+                        <div
+                          className={cx("channel-button", {
+                            selected: formData.categories.technology.main,
+                          })}
+                          onClick={() =>
+                            this.handleMainCategoryChange("technology")
+                          }
+                        >
+                          <img
+                            src="/static/aol/channels_computing_btn.png"
+                            alt="Technology"
+                            className="channel-btn-image"
+                          />
+                        </div>
+                        <div className="subcategories-list">
+                          {Object.keys(
+                            formData.categories.technology.subcategories
+                          ).map((sub) => (
+                            <label key={sub} className="subcategory-item">
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.categories.technology.subcategories[
+                                    sub
+                                  ]
+                                }
+                                onChange={() =>
+                                  this.handleSubcategoryChange(
+                                    "technology",
+                                    sub
+                                  )
+                                }
+                              />
+                              Tech {sub}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Builders Channel */}
+                      <div className="channel-item">
+                        <div
+                          className={cx("channel-button", {
+                            selected: formData.categories.builders.main,
+                          })}
+                          onClick={() =>
+                            this.handleMainCategoryChange("builders")
+                          }
+                        >
+                          <img
+                            src="/static/aol/channels_workplace_btn.png"
+                            alt="For Builders"
+                            className="channel-btn-image"
+                          />
+                        </div>
+                        <div className="subcategories-list">
+                          {Object.keys(
+                            formData.categories.builders.subcategories
+                          ).map((sub) => (
+                            <label key={sub} className="subcategory-item">
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.categories.builders.subcategories[
+                                    sub
+                                  ]
+                                }
+                                onChange={() =>
+                                  this.handleSubcategoryChange("builders", sub)
+                                }
+                              />
+                              Builder {sub}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Art & Design Channel */}
+                      <div className="channel-item">
+                        <div
+                          className={cx("channel-button", {
+                            selected: formData.categories.artDesign.main,
+                          })}
+                          onClick={() =>
+                            this.handleMainCategoryChange("artDesign")
+                          }
+                        >
+                          <img
+                            src="/static/aol/channels_entertainment_btn.png"
+                            alt="Art & Design"
+                            className="channel-btn-image"
+                          />
+                        </div>
+                        <div className="subcategories-list">
+                          {Object.keys(
+                            formData.categories.artDesign.subcategories
+                          ).map((sub) => (
+                            <label key={sub} className="subcategory-item">
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.categories.artDesign.subcategories[
+                                    sub
+                                  ]
+                                }
+                                onChange={() =>
+                                  this.handleSubcategoryChange("artDesign", sub)
+                                }
+                              />
+                              Art {sub}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Gaming Channel */}
+                      <div className="channel-item">
+                        <div
+                          className={cx("channel-button", {
+                            selected: formData.categories.gaming.main,
+                          })}
+                          onClick={() =>
+                            this.handleMainCategoryChange("gaming")
+                          }
+                        >
+                          <img
+                            src="/static/aol/channels_games_btn.png"
+                            alt="Gaming"
+                            className="channel-btn-image"
+                          />
+                        </div>
+                        <div className="subcategories-list">
+                          {Object.keys(
+                            formData.categories.gaming.subcategories
+                          ).map((sub) => (
+                            <label key={sub} className="subcategory-item">
+                              <input
+                                type="checkbox"
+                                checked={
+                                  formData.categories.gaming.subcategories[sub]
+                                }
+                                onChange={() =>
+                                  this.handleSubcategoryChange("gaming", sub)
+                                }
+                              />
+                              Gaming {sub}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="channels-navigation">
+                    <button
+                      onClick={this.handlePreviousStep}
+                      className="pb-button"
+                    >
+                      ← Back to Dial-up
+                    </button>
+                    <button onClick={this.handleNextStep} className="pb-button">
+                      Continue to Frequency
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
+          )}
+
+          {/* Clippy confirmation alert */}
+          {this.state.displayAlert && !this.props.data?.disableAlert && (
+            <WindowAlert
+              {...commonProps}
+              onOK={this.confirm}
+              onCancel={commonProps.onClose}
+              className="AOLNewsletterFunnel--alert Window--active"
+            >
+              <div className="clippy-message">
+                <div className="clippy-character">📎</div>
+                <div className="clippy-text">
+                  <p>
+                    <strong>Great choice!</strong>
+                  </p>
+                  <p>
+                    You've successfully joined the Happy Tuesdays newsletter!
+                  </p>
+                  <p>Welcome to the family! 🎉</p>
+                </div>
+              </div>
+              <div className="w98-button-container">
+                <button className="w98-button" onClick={this.confirm}>
+                  OK
+                </button>
+                <button className="w98-button" onClick={commonProps.onClose}>
+                  Cancel
+                </button>
+              </div>
+            </WindowAlert>
           )}
         </div>
-      </div>
-    </div>
-  );
-};
+      </Window>
+    );
+  }
+}
 
 export default AOLNewsletterFunnel;
