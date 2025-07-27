@@ -1,0 +1,230 @@
+.aol-newsletter-funnel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999; // Very high z-index to ensure visibility
+}
+
+.aol-newsletter-funnel {
+  background: #c0c0c0;
+  border: 2px solid #000;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  width: 600px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+
+  &.window {
+    // Windows 98 style
+    background: #c0c0c0;
+  }
+
+  .title-bar {
+    background: linear-gradient(to right, #000080, #1084d0);
+    padding: 2px 2px 3px 3px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .title-bar-text {
+      color: white;
+      font-weight: bold;
+      font-size: 11px;
+      padding: 0 5px;
+    }
+
+    .title-bar-controls {
+      .close-button {
+        width: 16px;
+        height: 14px;
+        background: #c0c0c0;
+        border: 1px solid #000;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        &:hover {
+          background: #e0e0e0;
+        }
+      }
+    }
+  }
+
+  .window-body {
+    padding: 8px;
+  }
+
+  .funnel-header {
+    padding: 20px;
+    background: #000080;
+
+    .step-indicators {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+
+      .step-box {
+        width: 80px;
+        height: 80px;
+        border: 2px solid #fff;
+        background: #c0c0c0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+
+        &.active {
+          background: #fff;
+        }
+
+        .aol-figure {
+          width: 40px;
+          height: 40px;
+          background: yellow;
+          border-radius: 50%;
+          // Placeholder - will be replaced with actual AOL figure
+        }
+
+        .happy-tuesdays-logo {
+          width: 50px;
+          height: 50px;
+          background: #0080ff;
+          // Placeholder - will be replaced with actual logo
+        }
+
+        .family-icon {
+          position: absolute;
+          width: 30px;
+          height: 30px;
+          background: #ff0080;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          // Placeholder - will be replaced with actual icon
+        }
+      }
+    }
+  }
+
+  .funnel-content {
+    padding: 20px;
+    min-height: 300px;
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .email-section {
+      margin-bottom: 20px;
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      input {
+        width: 100%;
+        padding: 4px;
+        border: 1px solid #000;
+
+        &.error {
+          border-color: #ff0000;
+        }
+      }
+
+      .error-message {
+        color: #ff0000;
+        font-size: 12px;
+      }
+    }
+
+    .categories-section {
+      .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-top: 10px;
+
+        .category-group {
+          border: 1px solid #808080;
+          padding: 10px;
+
+          .main-category {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+          }
+
+          .subcategories {
+            padding-left: 20px;
+
+            .subcategory {
+              display: block;
+              font-size: 12px;
+              margin-bottom: 5px;
+            }
+          }
+        }
+      }
+    }
+
+    .frequency-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 20px 0;
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+    }
+  }
+
+  .close-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000;
+    background: #c0c0c0;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+      background: #e0e0e0;
+    }
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .aol-newsletter-funnel {
+    width: 95vw;
+
+    .categories-section {
+      .categories-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}

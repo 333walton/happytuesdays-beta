@@ -22,6 +22,7 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 import { enableCustomMenuTooltips } from "./helpers/customTooltip";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { withRouterParams } from "./components/withRouterParams";
+import NewsletterFunnelManager from "./components/NewsletterFunnel/NewsletterFunnelManager";
 import HappyTuesdayNewsFeed from "./components/HappyTuesdayNewsFeed/HappyTuesdayNewsFeed";
 // Program data
 import desktopData from "./data/desktop";
@@ -202,24 +203,26 @@ class DesktopInner extends Component {
 
     return (
       <MonitorView>
-        <Theme
-          className={cx("desktop screen", {
-            desktopX2: settings.scale === 2,
-            desktopX1_5: settings.scale === 1.5,
-            notMobile: !isMobile,
-            fullScreen: settings.fullScreen,
-          })}
-        >
-          <Background />
-          <DesktopView />
-          <TaskBar />
-          <WindowManager navigate={navigate} />
-          <TaskManager />
-          <Settings />
-          <ShutDown />
-          <ClippyProvider defaultAgent="Clippy" />
-          {settings.crt && <CRTOverlay />}
-        </Theme>
+        <NewsletterFunnelManager>
+          <Theme
+            className={cx("desktop screen", {
+              desktopX2: settings.scale === 2,
+              desktopX1_5: settings.scale === 1.5,
+              notMobile: !isMobile,
+              fullScreen: settings.fullScreen,
+            })}
+          >
+            <Background />
+            <DesktopView />
+            <TaskBar />
+            <WindowManager navigate={navigate} />
+            <TaskManager />
+            <Settings />
+            <ShutDown />
+            <ClippyProvider defaultAgent="Clippy" />
+            {settings.crt && <CRTOverlay />}
+          </Theme>
+        </NewsletterFunnelManager>
       </MonitorView>
     );
   }

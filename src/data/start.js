@@ -8,6 +8,9 @@ const getMailStatus = () => {
 };
 
 // Create a dynamic online services generator
+// This code should be added to the start.js file in the getOnlineServices function
+// Replace the existing "You've Got Mail" onClick handler with this:
+
 const getOnlineServices = () => {
   const currentMailStatus = getMailStatus();
   console.log("📧 getOnlineServices called - mail status:", currentMailStatus);
@@ -20,7 +23,17 @@ const getOnlineServices = () => {
       className: currentMailStatus ? "menu-item" : "menu-item notification",
       onClick: () => {
         console.log("📧 Mail item clicked");
+
+        // Emit event for newsletter funnel ONLY - no mail program opens
+        window.dispatchEvent(
+          new CustomEvent("startMenuAction", {
+            detail: { action: "youve_got_mail" },
+          })
+        );
+
+        // Mark as read after showing funnel
         markMailAsRead();
+
         // Force immediate re-render
         setTimeout(() => {
           window.dispatchEvent(new CustomEvent("forceMenuRefresh"));

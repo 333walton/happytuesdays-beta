@@ -580,6 +580,28 @@ class ProgramProvider extends Component {
       zIndexes: this.state.zIndexes.filter((p) => p !== program.id),
     });
 
+    // Emit close event for Feeds program
+    // Check multiple possible identifiers for the Feeds window
+    const isFeedsWindow =
+      program.title === "Feeds" ||
+      program.title === "News Feed" ||
+      program.component === "HappyTuesdayNewsFeed" ||
+      (program.component === "InternetExplorer" &&
+        program.data?.component === "HappyTuesdayNewsFeed");
+
+    if (isFeedsWindow) {
+      console.log("📧 Feeds window closed, emitting event");
+      window.dispatchEvent(
+        new CustomEvent("programClosed", {
+          detail: {
+            programTitle: "Feeds",
+            programComponent: program.component,
+            programId: program.id,
+          },
+        })
+      );
+    }
+
     if (!program.background || exit) {
       this.exit(program.id);
     }
