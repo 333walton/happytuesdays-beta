@@ -822,3 +822,89 @@ pre.bios-sysinfo * {
   border: none;
   height: 1px !important;
 }
+
+/* start menu notification dots*/
+/* Start menu notification dots */
+.menu-item.notification .title::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 6px;
+  background-color: red;
+  border-radius: 50%;
+  vertical-align: middle;
+  animation: pulse 1.5s infinite;
+}
+
+/* Alternative selector if the title isn't wrapped in a .title class */
+
+/* Start menu notification dots - positioned right next to the title text */
+.menu-item.notification::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: -11px;
+  background-color: #ff0000;
+  border-radius: 50%;
+  vertical-align: middle;
+  animation: pulse 3s infinite;
+  position: relative;
+  top: 9px; /* Fine-tune vertical alignment */
+
+  /* If the menu item text is wrapped in a span or other element */
+  .menu-item.notification > span::after,
+  .menu-item.notification .title::after {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-left: -20px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    vertical-align: middle;
+    animation: pulse 3s infinite;
+    position: relative;
+    top: 0px;
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.4);
+        opacity: 0.6;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0px;
+    }
+
+    .title {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Alternative approach using a separate dot class */
+    .dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background-color: red;
+      border-radius: 50%;
+      margin-left: -20px;
+      animation: pulse 1.5s infinite;
+      gap: 0px;
+    }
+  }
+}

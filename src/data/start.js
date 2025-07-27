@@ -1,6 +1,8 @@
 import * as icons from "../icons";
 import clippyFaq from "./textFiles/clippyFaq";
 
+let hasReadMail = false;
+
 // Agent change handler
 window.onAgentChange = (newAgent) => {
   console.log(`🎯 Start Menu: Changing agent to ${newAgent}`);
@@ -48,7 +50,32 @@ const getCurrentAgent = () => {
   return window.currentAgent || "Clippy";
 };
 
-// AI Assistants menu with dynamic checkmarks
+// Fix the markMailAsRead function (remove the return statement and array)
+const markMailAsRead = () => {
+  hasReadMail = true;
+
+  // Method 1: Dispatch custom event
+  window.dispatchEvent(new CustomEvent("mailStatusChanged"));
+
+  // Method 2: If you have access to a state setter (more reliable)
+  if (window.updateStartMenu) {
+    window.updateStartMenu();
+  }
+
+  // Method 3: Force re-render by updating the context (if using React context)
+  if (window.forceStartMenuUpdate) {
+    window.forceStartMenuUpdate();
+  }
+
+  // Method 4: Close and reopen menu to force refresh
+  if (window.closeStartMenu) {
+    setTimeout(() => {
+      window.closeStartMenu();
+    }, 100);
+  }
+}; // <-- Function ends here, no return statement
+
+// The createAIAssistants function should look like this:
 const createAIAssistants = () => {
   const currentAgent = getCurrentAgent();
 
@@ -93,14 +120,12 @@ const createAIAssistants = () => {
       title: currentAgent === "Merlin" ? "✓ Merlin GPT" : "Merlin GPT",
       tooltip: "Art & Design",
       icon: icons.vid16,
-
       onClick: selectAgent("Merlin"),
     },
     {
       title: currentAgent === "Bonzi" ? "✓ Bonzi GPT" : "Bonzi GPT",
       tooltip: "Gaming",
       icon: icons.vid16,
-
       onClick: selectAgent("Bonzi"),
     },
   ];
@@ -144,15 +169,23 @@ const getPrograms = () => [
     className: "submenu-align-bottom-online-services-programs",
     options: [
       {
-        title: "AOL",
+        title: "You've Got Mail",
         icon: icons.aol16,
-        isDisabled: true,
+        isDisabled: false,
+        className: hasReadMail ? "menu-item" : "menu-item notification",
+        onClick: () => {
+          markMailAsRead();
+        },
       },
       {
-        title: "Outlook98 (soon™)",
-        icon: icons.outlook16,
-        isDisabled: false,
-        component: "Outlook98",
+        title: "Internet Explorer",
+        icon: icons.internetExplorer16,
+        component: "TestExplorer",
+        data: {
+          src: "https://myspace.windows93.net/",
+          title: "Internet Explorer",
+        },
+        multiInstance: true,
       },
     ],
   },
@@ -184,14 +217,10 @@ const getPrograms = () => [
     ],
   },
   {
-    title: "Internet Explorer",
-    icon: icons.internetExplorer16,
-    component: "TestExplorer",
-    data: {
-      src: "https://myspace.windows93.net/",
-      title: "Internet Explorer",
-    },
-    multiInstance: true,
+    title: "Outlook98 (soon™)",
+    icon: icons.outlook16,
+    isDisabled: false,
+    component: "Outlook98",
   },
 ];
 

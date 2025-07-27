@@ -5,6 +5,8 @@ import StartMenuPortal from "../StartMenuPortal";
 import { ProgramContext } from "../../contexts";
 import useStartMenuTooltipEnhancer from "../../helpers/useStartMenuTooltipEnhancer";
 
+let hasReadMail = false;
+
 // Custom tooltip component
 const CustomTooltip = ({ text, visible }) => {
   if (!visible) return null;
@@ -216,6 +218,19 @@ const TaskBar = () => {
       document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [menuOpen, isMobile]);
+
+  useEffect(() => {
+    const handleMailStatusChange = () => {
+      // Force a re-render of the start menu
+      setMenuOpen(false); // Close and reopen if needed
+      // You might need to trigger a context update here depending on your setup
+    };
+
+    window.addEventListener("mailStatusChanged", handleMailStatusChange);
+    return () => {
+      window.removeEventListener("mailStatusChanged", handleMailStatusChange);
+    };
+  }, []);
 
   return (
     <div ref={taskbarRef} style={{ position: "relative" }}>
