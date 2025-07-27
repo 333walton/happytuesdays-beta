@@ -1033,7 +1033,7 @@ const ClippyContextMenu = ({
         padding: 0;
         text-align: left;
         min-width: 120px !important;
-        max-height: 154px !important; /* Default for desktop */
+        max-height: 152px !important; /* Default for desktop */
       }
 
       @media (max-width: 768px) {
