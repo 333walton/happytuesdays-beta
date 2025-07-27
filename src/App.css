@@ -845,13 +845,13 @@ pre.bios-sysinfo * {
   display: inline-block;
   width: 6px;
   height: 6px;
-  margin-left: -11px;
-  background-color: #ff0000;
+  margin-left: -10.5px;
+  background-color: #17a05b;
   border-radius: 50%;
   vertical-align: middle;
   animation: pulse 3s infinite;
   position: relative;
-  top: 9px; /* Fine-tune vertical alignment */
+  top: 9.5px; /* Fine-tune vertical alignment */
 
   /* If the menu item text is wrapped in a span or other element */
   .menu-item.notification > span::after,
@@ -860,7 +860,6 @@ pre.bios-sysinfo * {
     display: inline-block;
     width: 6px;
     height: 6px;
-    margin-left: -20px;
     background-color: #ff0000;
     border-radius: 50%;
     vertical-align: middle;
@@ -902,7 +901,6 @@ pre.bios-sysinfo * {
       height: 6px;
       background-color: red;
       border-radius: 50%;
-      margin-left: -20px;
       animation: pulse 1.5s infinite;
       gap: 0px;
     }

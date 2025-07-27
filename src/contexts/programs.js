@@ -342,6 +342,12 @@ class ProgramProvider extends Component {
   componentDidMount() {
     window.addEventListener("agentChanged", this.refreshStartMenu);
 
+    // ADD THESE LINES - Listen for mail status changes
+    window.addEventListener("mailStatusChanged", this.refreshStartMenu);
+    window.addEventListener("startMenuUpdate", this.refreshStartMenu);
+    window.addEventListener("forceRefresh", this.refreshStartMenu);
+    window.addEventListener("forceMenuRefresh", this.refreshStartMenu);
+
     // Set initial startMenu with correct method binding
     this.setState({
       startMenu: initialize(
@@ -368,21 +374,35 @@ class ProgramProvider extends Component {
       onOpen: this.open,
       onClose: this.close,
       setRecycleBinFull: this.setRecycleBinFull,
-      toggleSettings: this.toggleSettings, // Add this line
+      toggleSettings: this.toggleSettings,
+      refreshStartMenu: this.refreshStartMenu, // ADD THIS - make it globally accessible
     };
   }
 
+  // UPDATE componentWillUnmount to remove all event listeners:
   componentWillUnmount() {
     window.removeEventListener("agentChanged", this.refreshStartMenu);
+    // ADD THESE LINES
+    window.removeEventListener("mailStatusChanged", this.refreshStartMenu);
+    window.removeEventListener("startMenuUpdate", this.refreshStartMenu);
+    window.removeEventListener("forceRefresh", this.refreshStartMenu);
+    window.removeEventListener("forceMenuRefresh", this.refreshStartMenu);
   }
 
   refreshStartMenu = () => {
+    console.log(
+      "📧 ProgramProvider.refreshStartMenu called - regenerating start menu"
+    );
+    // Get fresh start menu data (this will call getStartMenuData() again)
+    const freshStartMenuData = this.props.getStartMenuData();
+    console.log("📧 Fresh start menu data generated:", freshStartMenuData);
+
     this.setState({
       startMenu: initialize(
         (p) => this.open(p),
         addIdsToData(
           startMenu(
-            this.props.getStartMenuData(),
+            freshStartMenuData, // Use fresh data
             this.toggleSettings,
             this.toggleTaskManager,
             this.toggleShutDownMenu
@@ -390,6 +410,8 @@ class ProgramProvider extends Component {
         )
       ),
     });
+
+    console.log("📧 Start menu state updated");
   };
 
   toggleShutDownMenu = () =>

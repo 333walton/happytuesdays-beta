@@ -41,6 +41,7 @@ const TaskBar = () => {
   const [tooltipTimeout, setTooltipTimeout] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ left: 0, bottom: 0 });
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const isMobile =
     typeof window !== "undefined" &&
@@ -219,22 +220,45 @@ const TaskBar = () => {
     };
   }, [menuOpen, isMobile]);
 
+  // Mail status change event handler - simplified since ProgramProvider handles the refresh
   useEffect(() => {
-    const handleMailStatusChange = () => {
-      // Force a re-render of the start menu
-      setMenuOpen(false); // Close and reopen if needed
-      // You might need to trigger a context update here depending on your setup
+    const handleMenuRefresh = (eventType) => {
+      console.log(
+        `📧 TaskBar received ${eventType} - ProgramProvider should handle this`
+      );
+
+      // Close menu to show the update
+      setMenuOpen(false);
+
+      // The ProgramProvider will handle the actual refresh
+      // We just need to force a re-render to pick up the new state
+      setRefreshKey((prev) => prev + 1);
     };
 
-    window.addEventListener("mailStatusChanged", handleMailStatusChange);
+    const events = [
+      "mailStatusChanged",
+      "startMenuUpdate",
+      "forceRefresh",
+      "forceMenuRefresh",
+    ];
+
+    const handlers = events.map((eventType) => {
+      const handler = () => handleMenuRefresh(eventType);
+      window.addEventListener(eventType, handler);
+      return { eventType, handler };
+    });
+
     return () => {
-      window.removeEventListener("mailStatusChanged", handleMailStatusChange);
+      handlers.forEach(({ eventType, handler }) => {
+        window.removeEventListener(eventType, handler);
+      });
     };
   }, []);
 
   return (
     <div ref={taskbarRef} style={{ position: "relative" }}>
       <TaskBarComponent
+        key={refreshKey} // This will force a complete re-render when refreshKey changes
         options={context.startMenu}
         quickLaunch={context.quickLaunch.map((item) => {
           const isClippy =

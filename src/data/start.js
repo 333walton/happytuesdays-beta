@@ -3,6 +3,43 @@ import clippyFaq from "./textFiles/clippyFaq";
 
 let hasReadMail = false;
 
+const getMailStatus = () => {
+  return window.hasReadMail || hasReadMail;
+};
+
+// Create a dynamic online services generator
+const getOnlineServices = () => {
+  const currentMailStatus = getMailStatus();
+  console.log("📧 getOnlineServices called - mail status:", currentMailStatus);
+
+  return [
+    {
+      title: "You've Got Mail",
+      icon: icons.aol16,
+      isDisabled: false,
+      className: currentMailStatus ? "menu-item" : "menu-item notification",
+      onClick: () => {
+        console.log("📧 Mail item clicked");
+        markMailAsRead();
+        // Force immediate re-render
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent("forceMenuRefresh"));
+        }, 100);
+      },
+    },
+    {
+      title: "Internet Explorer",
+      icon: icons.internetExplorer16,
+      component: "TestExplorer",
+      data: {
+        src: "https://myspace.windows93.net/",
+        title: "Internet Explorer",
+      },
+      multiInstance: true,
+    },
+  ];
+};
+
 // Agent change handler
 window.onAgentChange = (newAgent) => {
   console.log(`🎯 Start Menu: Changing agent to ${newAgent}`);
@@ -51,29 +88,50 @@ const getCurrentAgent = () => {
 };
 
 // Fix the markMailAsRead function (remove the return statement and array)
+// Modified markMailAsRead function
 const markMailAsRead = () => {
+  console.log("📧 markMailAsRead called - BEFORE:", {
+    local: hasReadMail,
+    global: window.hasReadMail,
+  });
+
+  // Set global state
+  window.hasReadMail = true;
   hasReadMail = true;
 
-  // Method 1: Dispatch custom event
-  window.dispatchEvent(new CustomEvent("mailStatusChanged"));
+  console.log("📧 markMailAsRead called - AFTER:", {
+    local: hasReadMail,
+    global: window.hasReadMail,
+  });
 
-  // Method 2: If you have access to a state setter (more reliable)
+  // Force menu regeneration - try multiple approaches
+  window.dispatchEvent(new CustomEvent("mailStatusChanged"));
+  window.dispatchEvent(new CustomEvent("startMenuUpdate"));
+  window.dispatchEvent(new CustomEvent("forceRefresh"));
+
+  // Try to force context update
   if (window.updateStartMenu) {
+    console.log("📧 Calling updateStartMenu");
     window.updateStartMenu();
   }
 
-  // Method 3: Force re-render by updating the context (if using React context)
   if (window.forceStartMenuUpdate) {
+    console.log("📧 Calling forceStartMenuUpdate");
     window.forceStartMenuUpdate();
   }
 
-  // Method 4: Close and reopen menu to force refresh
+  // Force close and reopen menu to refresh
   if (window.closeStartMenu) {
-    setTimeout(() => {
-      window.closeStartMenu();
-    }, 100);
+    console.log("📧 Closing start menu");
+    window.closeStartMenu();
   }
-}; // <-- Function ends here, no return statement
+
+  // Additional force refresh attempts
+  setTimeout(() => {
+    if (window.refreshContext) window.refreshContext();
+    if (window.updateContext) window.updateContext();
+  }, 50);
+};
 
 // The createAIAssistants function should look like this:
 const createAIAssistants = () => {
@@ -150,79 +208,64 @@ const accessories = [
   },
 ];
 
-const getPrograms = () => [
-  {
-    title: "AI Assistants",
-    icon: icons.folderProgram16,
-    className: "submenu-align-bottom-ai-assistants-programs",
-    options: getAIAssistants(),
-  },
-  {
-    title: "Accessories",
-    icon: icons.folderProgram16,
-    className: "submenu-align-bottom-accessories-programs",
-    options: accessories,
-  },
-  {
-    title: "Online Services",
-    icon: icons.folderProgram16,
-    className: "submenu-align-bottom-online-services-programs",
-    options: [
-      {
-        title: "You've Got Mail",
-        icon: icons.aol16,
-        isDisabled: false,
-        className: hasReadMail ? "menu-item" : "menu-item notification",
-        onClick: () => {
-          markMailAsRead();
-        },
-      },
-      {
-        title: "Internet Explorer",
-        icon: icons.internetExplorer16,
-        component: "TestExplorer",
-        data: {
-          src: "https://myspace.windows93.net/",
-          title: "Internet Explorer",
-        },
-        multiInstance: true,
-      },
-    ],
-  },
-  {
-    title: "Entertainment",
-    icon: icons.folderProgram16,
-    className: "submenu-align-bottom-entertainment-programs",
-    options: [
-      {
-        title: "Movie Player",
-        icon: icons.camera16,
-        component: "VideoPlayerTest",
-        data: {
-          src: "",
-          style: {
-            marginBottom: 4,
-            height: "100%",
-            width: "100%",
-            objectFit: "contain",
+// Modified getPrograms function
+const getPrograms = () => {
+  console.log("📧 getPrograms called - checking mail status");
+
+  return [
+    {
+      title: "AI Assistants",
+      icon: icons.folderProgram16,
+      className: "submenu-align-bottom-ai-assistants-programs",
+      options: getAIAssistants(),
+    },
+    {
+      title: "Accessories",
+      icon: icons.folderProgram16,
+      className: "submenu-align-bottom-accessories-programs",
+      options: accessories,
+    },
+    {
+      title: "Online Services",
+      icon: icons.folderProgram16,
+      className: "submenu-align-bottom-online-services-programs",
+      options: getOnlineServices(), // Use dynamic function
+    },
+    {
+      title: "Entertainment",
+      icon: icons.folderProgram16,
+      className: "submenu-align-bottom-entertainment-programs",
+      options: [
+        {
+          title: "Movie Player",
+          icon: icons.camera16,
+          component: "VideoPlayerTest",
+          data: {
+            src: "",
+            style: {
+              marginBottom: 4,
+              height: "100%",
+              width: "100%",
+              objectFit: "contain",
+            },
           },
         },
-      },
-      {
-        title: "Music Player",
-        icon: icons.mediacd16,
-        component: "MusicPlayer",
-        isDisabled: false,
-      },
-    ],
-  },
-  {
-    title: "Outlook98 (soon™)",
-    icon: icons.outlook16,
-    isDisabled: false,
-    component: "Outlook98",
-  },
-];
+        {
+          title: "Music Player",
+          icon: icons.mediacd16,
+          component: "MusicPlayer",
+          isDisabled: false,
+        },
+      ],
+    },
+    {
+      title: "Outlook98 (soon™)",
+      icon: icons.outlook16,
+      isDisabled: false,
+      component: "Outlook98",
+    },
+  ];
+};
 
 // Favorites section
 const myFavorites = [
@@ -425,61 +468,61 @@ const productivityTools = [
 
 // Creative Tools - showing 3 tools + View Catalogue
 /*const creativeTools = [
-  {
-    title: "SVG Trace",
-    icon: icons.vid16,
-    component: "",
-    isDisabled: true,
-  },
-  {
-    title: "Pixel Doodles",
-    icon: icons.wangimg32,
-    component: "IframeWindow",
-    isDisabled: false,
-    data: {
-      src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
-      disableAlert: true,
-      style: {
-        width: "100%",
-        height: "100%",
+    {
+      title: "SVG Trace",
+      icon: icons.vid16,
+      component: "",
+      isDisabled: true,
+    },
+    {
+      title: "Pixel Doodles",
+      icon: icons.wangimg32,
+      component: "IframeWindow",
+      isDisabled: false,
+      data: {
+        src: "https://paint-doodle-pixel.vercel.app/#vertical-color-box-mode",
+        disableAlert: true,
+        style: {
+          width: "100%",
+          height: "100%",
+        },
       },
     },
-  },
-  {
-    title: "Paint Doodles",
-    icon: icons.paint16,
-    component: "IframeWindow",
-    data: {
-      src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
-      disableAlert: true,
-      style: {
-        width: "100%",
-        height: "100%",
+    {
+      title: "Paint Doodles",
+      icon: icons.paint16,
+      component: "IframeWindow",
+      data: {
+        src: "https://paint-normal.vercel.app/#vertical-color-box-mode",
+        disableAlert: true,
+        style: {
+          width: "100%",
+          height: "100%",
+        },
       },
     },
-  },
-  {
-    type: "divider",
-    className: "divider divider--group-0-end",
-    title: "",
-  },
-  {
-    title: "Native Tools",
-    icon: icons.folder16,
-    component: "CuboneFileExplorer",
-    data: {
-      initialPath: "C:/Tools/Productivity Tools/Native",
+    {
+      type: "divider",
+      className: "divider divider--group-0-end",
+      title: "",
     },
-  },
-  {
-    title: "View Catalogue",
-    icon: icons.folder16,
-    component: "CuboneFileExplorer",
-    data: {
-      initialPath: "C:/Tools/Productivity Tools/Catalogue",
+    {
+      title: "Native Tools",
+      icon: icons.folder16,
+      component: "CuboneFileExplorer",
+      data: {
+        initialPath: "C:/Tools/Productivity Tools/Native",
+      },
     },
-  }
-];*/
+    {
+      title: "View Catalogue",
+      icon: icons.folder16,
+      component: "CuboneFileExplorer",
+      data: {
+        initialPath: "C:/Tools/Productivity Tools/Catalogue",
+      },
+    }
+  ];*/
 
 // Marketing Tools - showing 3 tools + View Catalogue
 const marketingTools = [
@@ -1073,38 +1116,41 @@ export const find = [
   },
 ];
 
-// Export function to generate menu data dynamically
-const getStartMenuData = () => [
-  {
-    title: "Programs",
-    icon: icons.folderProgram24,
-    options: getPrograms(),
-  },
-  {
-    title: "Favorites",
-    icon: icons.folderFavorites24,
-    options: favorites,
-  },
-  {
-    title: "Tools",
-    icon: icons.directoryFolderOptions16,
-    options: tools,
-  },
-  {
-    title: "Documents",
-    icon: icons.folderOpen24,
-    options: documents,
-  },
-  {
-    title: "Artifacts",
-    icon: icons.ascii24,
-    options: artifacts,
-  },
-  {
-    title: "Games",
-    icon: icons.joystick24,
-    options: games,
-  },
-];
+const getStartMenuData = () => {
+  console.log("📧 getStartMenuData called - generating fresh menu");
+
+  return [
+    {
+      title: "Programs",
+      icon: icons.folderProgram24,
+      options: getPrograms(), // This will now call getOnlineServices() which checks current state
+    },
+    {
+      title: "Favorites",
+      icon: icons.folderFavorites24,
+      options: favorites,
+    },
+    {
+      title: "Tools",
+      icon: icons.directoryFolderOptions16,
+      options: tools,
+    },
+    {
+      title: "Documents",
+      icon: icons.folderOpen24,
+      options: documents,
+    },
+    {
+      title: "Artifacts",
+      icon: icons.ascii24,
+      options: artifacts,
+    },
+    {
+      title: "Games",
+      icon: icons.joystick24,
+      options: games,
+    },
+  ];
+};
 
 export default getStartMenuData;
