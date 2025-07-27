@@ -982,9 +982,9 @@ const ClippyContextMenu = ({
 
   const separatorStyle = {
     height: "1px",
-    backgroundColor: "#c0c0c0",
+    backgroundColor: "#FFFFFF",
     margin: "-1px 0",
-    borderTop: "2px solid #808080",
+    borderTop: "2px solid ##FFFFFF",
   };
 
   const submenuStyle = {
