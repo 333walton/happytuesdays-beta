@@ -184,7 +184,7 @@ const NewsletterFunnelManager = ({ children }) => {
             isActive={true}
             minimized={false}
           />,
-          document.querySelector(".desktop-content-wrapper")
+          document.querySelector(".desktop.screen") || document.body
         )}
       {/* Debug button - remove in production */}
       {process.env.NODE_ENV === "development" && (
