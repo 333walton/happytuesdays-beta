@@ -17,9 +17,11 @@ const getOnlineServices = () => {
 
   return [
     {
-      title: "You've Got Mail",
+      title: "You've Got Mail?",
       icon: icons.aol16,
       isDisabled: false,
+      multiInstance: true,
+      component: "NewsletterFunnel",
       className: currentMailStatus ? "menu-item" : "menu-item notification",
       onClick: () => {
         console.log("📧 Mail item clicked");
@@ -40,12 +42,13 @@ const getOnlineServices = () => {
         }, 100);
       },
     },
-    {
+    /*{
       title: "Newsletter Signup",
       icon: icons.aol16, // or icons.newsletter16
       component: "NewsletterFunnel",
+      multiInstance: true,
       isDisabled: false,
-    },
+    },*/
     {
       title: "Internet Explorer",
       icon: icons.internetExplorer16,

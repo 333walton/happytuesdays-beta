@@ -374,8 +374,8 @@ class AOLNewsletterFunnel extends Component {
               {/* Temporary channels background overlay */}
               <div className="channels-background">
                 <img
-                  src="/static/aol/channels_background.png"
-                  alt="AOL Channels Background"
+                  src="" ///static/aol/channels_background.png
+                  alt="" //AOL Channels Background
                   className="channels-bg-image"
                 />
               </div>
