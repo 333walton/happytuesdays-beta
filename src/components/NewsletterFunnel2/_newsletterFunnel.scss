@@ -1,0 +1,405 @@
+// _newsletterFunnel.scss
+
+/*.newsletter-funnel-wrapper {
+  position: relative;
+
+  // AOL Frame Container - Always visible at top
+  .aol-frame {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 578px;
+    height: 299px;
+    z-index: 100;
+    pointer-events: none;
+
+    .frame-background {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    // Figure boxes positioned within the frame
+    .figure-boxes {
+      position: absolute;
+      top: 110px;
+      left: 64px;
+      right: 57px;
+      height: 95px;
+      display: flex;
+      gap: 18px;
+
+      .figure-box {
+        flex: 1;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+
+        &.visible {
+          opacity: 1;
+        }
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        &.box-1 {
+          width: 141px;
+        }
+        &.box-2 {
+          width: 139px;
+        }
+        &.box-3 {
+          width: 139px;
+        }
+      }
+    }
+  }
+}
+
+// The actual window component
+.NewsletterFunnel {
+  // Override default window styling to match AOL aesthetic
+  background: #f5f5dc !important; // FloralWhite equivalent
+
+  // Position window below the AOL frame
+  margin-top: 160px !important;
+
+  .Window__body {
+    background: transparent !important;
+    overflow: visible !important;
+  }
+
+  .newsletter-content {
+    position: relative;
+    padding: 20px;
+    min-height: 250px;
+
+    // Channels background overlay for step 2
+    &.with-channels-bg {
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url("/static/aol/channels_background.png");
+        background-size: cover;
+        background-position: center;
+        opacity: 0.15;
+        z-index: 0;
+      }
+    }
+
+    .channels-background {
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
+      background-size: cover;
+      background-position: center;
+      z-index: -1;
+      opacity: 0.8;
+    }
+  }
+
+  // Step content styling
+  .newsletter-step {
+    position: relative;
+    z-index: 1;
+
+    &.success {
+      text-align: center;
+
+      .success-message {
+        margin-top: 30px;
+
+        .success-icon {
+          display: block;
+          font-size: 48px;
+          color: #008542;
+          margin-bottom: 20px;
+        }
+      }
+    }
+  }
+
+  // AOL-style typography
+  .aol-heading {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000080;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .aol-text {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #333;
+    line-height: 1.4;
+    margin-bottom: 15px;
+  }
+
+  .aol-label {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  // Form elements
+  .aol-input {
+    width: 100%;
+    padding: 4px 6px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    border: 2px inset #fff;
+    background: #fff;
+
+    &:focus {
+      outline: 1px dotted #000;
+      outline-offset: -2px;
+    }
+  }
+
+  // Benefits list (Step 1)
+  .benefits-list {
+    margin: 20px 0;
+
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 13px;
+
+      .benefit-icon {
+        font-size: 20px;
+        margin-right: 10px;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  // Email section (Step 2)
+  .email-section {
+    margin-bottom: 20px;
+  }
+
+  // Channel grid (Step 2)
+  .channel-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin: 15px 0;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 5px;
+
+    @media (max-width: 600px) {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  .channel-button {
+    width: 64px;
+    height: 64px;
+    border: 2px solid transparent;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+
+    &:hover {
+      border-color: #ffd700;
+      transform: scale(1.05);
+    }
+
+    &.selected {
+      border-color: #0055ff;
+      box-shadow: 0 0 8px rgba(0, 85, 255, 0.5);
+
+      &::after {
+        content: "✓";
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        background: #0055ff;
+        color: white;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+      }
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  }
+
+  // Frequency section (Step 3)
+  .frequency-section {
+    margin-bottom: 20px;
+
+    .radio-group {
+      margin-top: 10px;
+    }
+
+    .radio-option {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 13px;
+      cursor: pointer;
+
+      input[type="radio"] {
+        margin-right: 8px;
+        cursor: pointer;
+      }
+
+      &:hover {
+        color: #0055ff;
+      }
+    }
+  }
+
+  // Summary section (Step 3)
+  .summary-section {
+    background: #e8e8e8;
+    border: 1px solid #c0c0c0;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 12px;
+
+    h3 {
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: #000080;
+    }
+
+    p {
+      margin: 4px 0;
+    }
+  }
+
+  // Buttons
+  .button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .aol-button {
+    padding: 6px 16px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    border: 2px solid;
+    cursor: pointer;
+    min-width: 80px;
+
+    &.primary {
+      background: #0055ff;
+      color: white;
+      border-color: #0044cc #003399 #003399 #0044cc;
+
+      &:hover:not(:disabled) {
+        background: #0044cc;
+      }
+
+      &:active {
+        border-color: #003399 #0044cc #0044cc #003399;
+      }
+    }
+
+    &.secondary {
+      background: #e0e0e0;
+      color: #333;
+      border-color: #f0f0f0 #808080 #808080 #f0f0f0;
+
+      &:hover:not(:disabled) {
+        background: #d0d0d0;
+      }
+
+      &:active {
+        border-color: #808080 #f0f0f0 #f0f0f0 #808080;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &:focus {
+      outline: 1px dotted #000;
+      outline-offset: -4px;
+    }
+  }
+
+  .small-text {
+    font-size: 11px;
+    color: #666;
+    margin-top: 10px;
+  }
+}
+
+// Ensure window is properly styled
+.Window.NewsletterFunnel {
+  .Window__heading {
+    background: linear-gradient(to right, #000080, #0084ff) !important;
+
+    .Window__title {
+      color: white !important;
+      font-weight: bold;
+    }
+  }
+
+  .Window__body {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
+// Mobile adjustments
+@media (max-width: 768px) {
+  .newsletter-funnel-wrapper {
+    .aol-frame {
+      transform: translate(-50%, -50%) scale(0.8);
+    }
+  }
+
+  .NewsletterFunnel {
+    width: 90vw !important;
+    max-width: 500px !important;
+
+    .channel-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}
+*/

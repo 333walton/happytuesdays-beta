@@ -41,6 +41,12 @@ const getOnlineServices = () => {
       },
     },
     {
+      title: "Newsletter Signup",
+      icon: icons.aol16, // or icons.newsletter16
+      component: "NewsletterFunnel",
+      isDisabled: false,
+    },
+    {
       title: "Internet Explorer",
       icon: icons.internetExplorer16,
       component: "TestExplorer",

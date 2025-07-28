@@ -1,320 +1,452 @@
-// AOL Newsletter Funnel - Layered approach with always-visible dial-up base
-.AOLNewsletterFunnel {
-  .aol-funnel-container {
-    height: 100%;
-    position: relative;
-    background: transparent;
-    display: flex;
-    flex-direction: column;
-  }
+// AOLNewsletterFunnel.scss - Hybrid Approach
 
-  // Always visible dial-up base section
-  .dial-up-base {
-    position: relative;
-    width: 100%;
-    height: 299px; // Match original DialUpForm height
-    flex-shrink: 0;
+// Main wrapper that can contain the fixed frame system
+.aol-funnel-wrapper {
+  position: relative;
 
-    .dial-up-bg-image {
+  // Fixed AOL Frame Container - Always visible at top (from original)
+  .aol-frame {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 578px;
+    height: 299px;
+    z-index: 100;
+    pointer-events: none;
+
+    .frame-background {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      image-rendering: pixelated;
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
     }
 
-    // Step boxes overlaid on dial-up interface - positioned to match original C# layout
+    // Figure boxes positioned within the fixed frame
     .step-boxes-overlay {
       position: absolute;
-      top: 110px; // Match original pictureBox positioning
-      left: 64px; // Match original pictureBox positioning
+      top: 150px !important;
+      left: 64px;
+      width: calc(100% - 121px); // 64px left + 57px right
+      height: 195px;
       display: flex;
-      gap: 18px; // Space between boxes
-      z-index: 10;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
 
       .step-box {
-        width: 141px; // Match original pictureBox1 size
-        height: 95px; // Match original pictureBox1 size
         position: relative;
-        overflow: hidden;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+        flex: 0 0 auto;
 
-        &.step-box-2 {
-          width: 139px; // Match original pictureBox2 size
-        }
-
+        &.visible,
+        &.step-box-1,
+        &.step-box-2,
         &.step-box-3 {
-          width: 139px; // Match original pictureBox3 size
+          opacity: 1;
         }
 
+        &.box-1,
+        &.step-box-1 {
+          width: 141px;
+          height: 95px;
+        }
+
+        &.box-2,
+        &.step-box-2 {
+          width: 139px;
+          height: 95px;
+        }
+
+        &.box-3,
+        &.step-box-3 {
+          width: 139px;
+          height: 95px;
+        }
+
+        img,
         .aol-figure-image {
           width: 100%;
           height: 100%;
-          object-fit: stretch; // Match original StretchImage mode
+          object-fit: contain;
           display: block;
-          animation: slideInFigure 0.5s ease-in;
-          image-rendering: pixelated;
         }
 
         .family-icon {
           position: absolute;
-          bottom: 8px;
-          right: 8px;
-          font-size: 20px;
-          background: rgba(255, 255, 255, 0.95);
-          border-radius: 50%;
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          animation: bounceIn 0.8s ease-in;
-          border: 2px solid #000080;
-          box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 32px;
+          animation: fadeIn 0.5s ease-in-out;
         }
       }
     }
+  }
+}
 
-    // Status text overlay - positioned like original statusLabel
-    .status-text-overlay {
-      position: absolute;
-      top: 214px; // Match original statusLabel position
-      left: 133px; // Match original statusLabel position
-      right: 133px;
-      z-index: 15;
-      font-family: "Microsoft Sans Serif", "MS Sans Serif", sans-serif;
-      font-size: 11.25px; // Match original font size
-      color: #000000;
-      font-weight: normal;
-      text-align: left;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 4px 8px;
-      border: 1px solid #808080;
-    }
+// The actual window component
+.AOLNewsletterFunnel {
+  // Override default window styling to match AOL aesthetic
+  background: #f5f5dc !important; // FloralWhite equivalent
+
+  // Position window below the AOL frame (from original)
+  margin-top: 160px !important;
+
+  .Window__body {
+    background: transparent !important;
+    overflow: visible !important;
   }
 
-  // Step windows container - appears below dial-up base
-  .step-window-container {
-    flex: 1;
+  .aol-funnel-container {
     position: relative;
-    background: transparent;
-    min-height: 200px;
-  }
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+    padding: 20px;
 
-  // Individual step windows
-  .step-window {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #c0c0c0;
-    border: 2px outset #c0c0c0;
-    animation: slideInWindow 0.3s ease-in;
+    // Generic content container that can have background overlays
+    .newsletter-content {
+      position: relative;
+      min-height: 200px;
 
-    .step-window-content {
-      padding: 16px;
-      height: 100%;
-      overflow-y: auto;
-      font-family: "Microsoft Sans Serif", "MS Sans Serif", sans-serif;
-
-      .step-prompt {
-        font-size: 11px;
-        color: #000000;
-        margin-bottom: 16px;
-        text-align: center;
-      }
-
-      .button-group {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        margin-top: 16px;
-
-        .aol-button {
-          min-width: 75px;
-          padding: 6px 16px;
-          font-size: 11px;
-          border: 2px outset #c0c0c0;
-          background: #c0c0c0;
-          cursor: pointer;
-          font-family: "Microsoft Sans Serif", "MS Sans Serif", sans-serif;
-
-          &:active {
-            border: 2px inset #c0c0c0;
-          }
-
-          &:hover {
-            background: #e0e0e0;
-          }
-
-          &.aol-button-primary {
-            background: #c0ffc0;
-            font-weight: bold;
-
-            &:hover {
-              background: #e0ffe0;
-            }
-          }
-
-          &.aol-button-secondary {
-            background: #ffc0c0;
-
-            &:hover {
-              background: #ffe0e0;
-            }
-          }
+      // Channels background overlay for step 2 (from original)
+      &.with-channels-bg {
+        &::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-image: url("../../../public/static/aol/channels_background.png");
+          background-size: cover;
+          background-position: center;
+          opacity: 0.15;
+          z-index: 0;
         }
       }
 
-      .frequency-options {
-        margin: 16px 0;
-        padding: 12px;
-        background: #ffffff;
-        border: 2px inset #c0c0c0;
+      .channels-background {
+        position: absolute;
+        top: -20px;
+        left: -20px;
+        right: -20px;
+        bottom: -20px;
+        background-size: cover;
+        background-position: center;
+        z-index: -1;
+        opacity: 0.8;
 
-        label {
-          display: block;
-          margin-bottom: 8px;
-          cursor: pointer;
-          font-size: 11px;
-          color: #000000;
-          font-weight: normal;
-
-          input {
-            margin-right: 8px;
-          }
+        .channels-bg-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
       }
     }
   }
 
-  // Step 2 specific styling with channels background
-  .step-2-window {
-    .channels-window-bg {
+  // Dial-up interface (Steps 1 & 3) - JS structure
+  .dial-up-interface {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .dial-up-background {
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
+      width: 100%;
+      height: 100%;
       z-index: 1;
+
+      .dial-up-bg-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    // These step boxes are for inline display when not using fixed frame
+    .step-boxes-overlay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      height: 100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+
+      .step-box {
+        position: relative;
+        flex: 0 0 auto;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+
+        &.visible,
+        &.step-box-1,
+        &.step-box-2,
+        &.step-box-3 {
+          opacity: 1;
+        }
+
+        .aol-figure-image {
+          width: 100%;
+          height: auto;
+          max-width: 100px;
+          object-fit: contain;
+        }
+
+        .family-icon {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 24px;
+          animation: fadeIn 0.5s ease-in-out;
+        }
+      }
+    }
+
+    // Content overlay for steps 1 & 3
+    .dial-up-content-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      z-index: 3;
+
+      .step-content {
+        background: rgba(245, 245, 220, 0.95);
+        border: 2px solid #c0c0c0;
+        padding: 15px;
+        border-radius: 4px;
+
+        .dial-up-prompt {
+          text-align: center;
+
+          .status-text {
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+            color: #008000;
+            margin-bottom: 10px;
+            font-weight: bold;
+          }
+
+          p {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 15px;
+          }
+
+          .frequency-options {
+            margin: 15px 0;
+            text-align: left;
+
+            label {
+              display: block;
+              margin-bottom: 8px;
+              font-family: Arial, sans-serif;
+              font-size: 13px;
+              cursor: pointer;
+
+              input[type="radio"] {
+                margin-right: 8px;
+              }
+
+              &:hover {
+                color: #0055ff;
+              }
+            }
+          }
+
+          .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+          }
+        }
+      }
+    }
+  }
+
+  // Channels interface (Step 2) - JS structure
+  .channels-interface {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .dial-up-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+
+      .dial-up-bg-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .step-boxes-overlay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      height: 100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+
+      .step-box {
+        position: relative;
+        flex: 0 0 auto;
+
+        .aol-figure-image {
+          width: 100%;
+          height: auto;
+          max-width: 100px;
+          object-fit: contain;
+        }
+      }
+    }
+
+    .channels-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      opacity: 0.3;
 
       .channels-bg-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        image-rendering: pixelated;
       }
     }
 
-    .step-window-content {
-      position: relative;
-      z-index: 10;
-      background: transparent;
+    .channels-content-overlay {
+      position: absolute;
+      top: 130px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      z-index: 3;
+      overflow-y: auto;
 
-      .email-section {
-        background: rgba(255, 255, 255, 0.98);
-        border: 2px inset #c0c0c0;
-        padding: 12px;
-        margin-bottom: 16px;
+      .channels-content {
+        background: rgba(245, 245, 220, 0.95);
+        border: 2px solid #c0c0c0;
+        padding: 15px;
+        border-radius: 4px;
+        min-height: 200px;
 
-        .aol-label {
-          display: block;
-          margin-bottom: 6px;
-          font-size: 11px;
+        .status-text-channels {
+          font-family: "Courier New", monospace;
+          font-size: 12px;
+          color: #008000;
+          margin-bottom: 15px;
           font-weight: bold;
-          color: #000080;
-        }
-
-        .aol-input {
-          width: 200px;
-          padding: 4px 6px;
-          border: 2px inset #c0c0c0;
-          font-size: 11px;
-          font-family: "Microsoft Sans Serif", "MS Sans Serif", sans-serif;
-
-          &.error {
-            border-color: #ff0000;
-          }
-
-          &::placeholder {
-            color: #808080;
-            font-style: italic;
-          }
+          text-align: center;
         }
 
         .channels-selection {
           .channels-header {
-            font-size: 14px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
             font-weight: bold;
             color: #000080;
-            margin-bottom: 4px;
             text-align: center;
-            font-family: "MS Sans Serif", sans-serif;
+            margin-bottom: 5px;
           }
 
           .channels-subheader {
-            font-size: 11px;
-            color: #000000;
-            margin-bottom: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #333;
             text-align: center;
-            font-family: "MS Sans Serif", sans-serif;
+            margin-bottom: 15px;
           }
 
           .categories-error {
             display: block;
             color: #ff0000;
-            font-size: 10px;
-            margin-bottom: 12px;
+            font-size: 11px;
             text-align: center;
-            font-family: "MS Sans Serif", sans-serif;
+            margin-bottom: 10px;
           }
 
           .channel-buttons-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            margin-bottom: 16px;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px inset #c0c0c0;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+            justify-items: center;
+
+            @media (max-width: 600px) {
+              grid-template-columns: repeat(4, 1fr);
+            }
 
             .channel-button {
-              cursor: pointer;
-              border: 2px outset #c0c0c0;
-              background: #c0c0c0;
-              padding: 4px;
-              transition: none; // No modern transitions
               position: relative;
+              width: 60px;
+              height: 60px;
+              border: 2px solid transparent;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              border-radius: 4px;
 
-              &:hover {
-                background: #e0e0e0;
+              .channel-btn-image {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                display: block;
               }
 
-              &:active {
-                border: 2px inset #c0c0c0;
-                background: #a0a0a0;
+              &:hover {
+                border-color: #ffd700;
+                transform: scale(1.05);
               }
 
               &.selected {
-                border: 2px inset #c0c0c0;
-                background: #ffff00;
+                border-color: #0055ff;
+                box-shadow: 0 0 8px rgba(0, 85, 255, 0.5);
 
                 &::after {
                   content: "✓";
                   position: absolute;
-                  top: 2px;
+                  bottom: 2px;
                   right: 2px;
-                  color: #000080;
+                  background: #0055ff;
+                  color: white;
+                  width: 16px;
+                  height: 16px;
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
                   font-size: 10px;
                   font-weight: bold;
                 }
-              }
-
-              .channel-btn-image {
-                width: 100%;
-                max-height: 32px;
-                object-fit: contain;
-                display: block;
-                image-rendering: pixelated; // Preserve pixel art quality
               }
             }
           }
@@ -323,189 +455,373 @@
         .channels-navigation {
           display: flex;
           justify-content: space-between;
-          background: rgba(192, 192, 192, 0.98);
-          border: 2px outset #c0c0c0;
-          padding: 12px;
+          margin-top: 20px;
+        }
+      }
+    }
+  }
 
-          .aol-button {
-            padding: 6px 20px;
-            font-size: 11px;
-            font-family: "MS Sans Serif", sans-serif;
-            border: 2px outset #c0c0c0;
-            background: #c0c0c0;
-            cursor: pointer;
-            min-width: 80px;
+  // Generic step content styling (from original)
+  .newsletter-step {
+    position: relative;
+    z-index: 1;
 
-            &:active {
-              border: 2px inset #c0c0c0;
-            }
+    &.success {
+      text-align: center;
 
-            &:hover {
-              background: #e0e0e0;
-            }
+      .success-message {
+        margin-top: 30px;
 
-            &.aol-button-back {
-              background: #ffc0c0;
+        .success-icon {
+          display: block;
+          font-size: 48px;
+          color: #008542;
+          margin-bottom: 20px;
+        }
+      }
+    }
+  }
 
-              &:hover {
-                background: #ffe0e0;
-              }
-            }
+  // Form sections (from original)
+  .email-section {
+    margin-bottom: 20px;
 
-            &.aol-button-continue {
-              background: #c0ffc0;
+    .w98-label,
+    .aol-label {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      font-weight: bold;
+      color: #333;
+      display: block;
+      margin-bottom: 5px;
+    }
 
-              &:hover {
-                background: #e0ffe0;
-              }
-            }
+    .w98-input,
+    .aol-input {
+      width: 100%;
+      padding: 4px 6px;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      border: 2px inset #fff;
+      background: #fff;
+      box-sizing: border-box;
+
+      &:focus {
+        outline: 1px dotted #000;
+        outline-offset: -2px;
+      }
+
+      &.error {
+        border-color: #ff0000;
+      }
+    }
+
+    .error-message {
+      display: block;
+      color: #ff0000;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+  }
+
+  // Benefits list (from original)
+  .benefits-list {
+    margin: 20px 0;
+
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 13px;
+
+      .benefit-icon {
+        font-size: 20px;
+        margin-right: 10px;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  // Frequency section (from original)
+  .frequency-section {
+    margin-bottom: 20px;
+
+    .radio-group {
+      margin-top: 10px;
+    }
+
+    .radio-option {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 13px;
+      cursor: pointer;
+
+      input[type="radio"] {
+        margin-right: 8px;
+        cursor: pointer;
+      }
+
+      &:hover {
+        color: #0055ff;
+      }
+    }
+  }
+
+  // Summary section (from original)
+  .summary-section {
+    background: #e8e8e8;
+    border: 1px solid #c0c0c0;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 12px;
+
+    h3 {
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: #000080;
+    }
+
+    p {
+      margin: 4px 0;
+    }
+  }
+
+  // AOL-style typography (from original)
+  .aol-heading {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000080;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .aol-text {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #333;
+    line-height: 1.4;
+    margin-bottom: 15px;
+  }
+
+  // Button styling - supports both naming conventions
+  .button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .aol-button {
+    padding: 6px 16px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    border: 2px solid;
+    cursor: pointer;
+    min-width: 80px;
+    background: none;
+
+    // New JS naming convention
+    &.aol-button-primary,
+    &.primary {
+      background: #0055ff;
+      color: white;
+      border-color: #0044cc #003399 #003399 #0044cc;
+
+      &:hover:not(:disabled) {
+        background: #0044cc;
+      }
+
+      &:active {
+        border-color: #003399 #0044cc #0044cc #003399;
+      }
+    }
+
+    &.aol-button-secondary,
+    &.secondary {
+      background: #e0e0e0;
+      color: #333;
+      border-color: #f0f0f0 #808080 #808080 #f0f0f0;
+
+      &:hover:not(:disabled) {
+        background: #d0d0d0;
+      }
+
+      &:active {
+        border-color: #808080 #f0f0f0 #f0f0f0 #808080;
+      }
+    }
+
+    &.aol-button-back {
+      background: #e0e0e0;
+      color: #333;
+      border-color: #f0f0f0 #808080 #808080 #f0f0f0;
+
+      &:hover:not(:disabled) {
+        background: #d0d0d0;
+      }
+    }
+
+    &.aol-button-continue {
+      background: #0055ff;
+      color: white;
+      border-color: #0044cc #003399 #003399 #0044cc;
+
+      &:hover:not(:disabled) {
+        background: #0044cc;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &:focus {
+      outline: 1px dotted #000;
+      outline-offset: -4px;
+    }
+  }
+
+  .small-text {
+    font-size: 11px;
+    color: #666;
+    margin-top: 10px;
+  }
+
+  // Clippy alert styling
+  &--alert {
+    .clippy-message {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+
+      .clippy-character {
+        font-size: 24px;
+        margin-right: 10px;
+        flex-shrink: 0;
+      }
+
+      .clippy-text {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        line-height: 1.4;
+
+        p {
+          margin: 0 0 8px 0;
+
+          &:last-child {
+            margin-bottom: 0;
           }
+        }
+      }
+    }
+
+    .w98-button-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+
+      .w98-button {
+        padding: 4px 12px;
+        font-family: Arial, sans-serif;
+        font-size: 11px;
+        border: 1px solid #808080;
+        background: #e0e0e0;
+        cursor: pointer;
+
+        &:hover {
+          background: #d0d0d0;
+        }
+
+        &:active {
+          border-style: inset;
         }
       }
     }
   }
 }
 
+// Ensure window is properly styled
+.Window.AOLNewsletterFunnel {
+  .Window__heading {
+    background: linear-gradient(to right, #000080, #0084ff) !important;
+
+    .Window__title {
+      color: white !important;
+      font-weight: bold;
+    }
+  }
+
+  .Window__body {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
 // Animations
-@keyframes slideInFigure {
-  from {
-    transform: translateX(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInChannels {
+@keyframes fadeIn {
   from {
     opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
   }
   to {
     opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
-@keyframes bounceIn {
-  0% {
-    transform: scale(0);
+// Mobile adjustments
+@media (max-width: 768px) {
+  .aol-funnel-wrapper {
+    .aol-frame {
+      transform: translate(-50%, -50%) scale(0.8);
+    }
   }
-  50% {
-    transform: scale(1.3);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
 
-@keyframes clippyBounce {
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-4px);
-  }
-  60% {
-    transform: translateY(-2px);
-  }
-}
-
-// Mobile responsiveness
-@media (max-width: 500px) {
   .AOLNewsletterFunnel {
+    width: 90vw !important;
+    max-width: 500px !important;
+
+    .channels-interface {
+      .channels-content-overlay {
+        .channels-content {
+          .channel-buttons-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+
+            .channel-button {
+              width: 50px;
+              height: 50px;
+            }
+          }
+        }
+      }
+    }
+
     .dial-up-interface {
       .step-boxes-overlay {
-        left: 32px;
-        gap: 12px;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        height: 60px;
 
         .step-box {
-          width: 80px;
-          height: 55px;
-
-          &.step-box-2,
-          &.step-box-3 {
-            width: 78px;
-          }
-
-          .family-icon {
-            width: 24px;
-            height: 24px;
-            font-size: 14px;
-            bottom: 4px;
-            right: 4px;
+          .aol-figure-image {
+            max-width: 60px;
           }
         }
       }
 
       .dial-up-content-overlay {
-        width: 300px;
-        bottom: 60px;
-
-        .dial-up-prompt {
-          padding: 12px;
-
-          .status-text {
-            font-size: 10px;
-          }
-
-          p {
-            font-size: 10px;
-          }
-
-          .button-group .pb-button {
-            min-width: 60px;
-            padding: 4px 12px;
-            font-size: 10px;
-          }
-        }
+        top: 80px;
       }
     }
 
     .channels-interface {
-      .step-boxes-overlay {
-        left: 32px;
-        gap: 12px;
-
-        .step-box {
-          width: 80px;
-          height: 55px;
-
-          &.step-box-2,
-          &.step-box-3 {
-            width: 78px;
-          }
-        }
-      }
-
       .channels-content-overlay {
-        padding: 8px;
-
-        .channels-selection {
-          .channel-buttons-grid {
-            grid-template-columns: 1fr;
-
-            .channel-item {
-              .subcategories-list {
-                max-height: 80px;
-              }
-            }
-          }
-        }
-
-        .channels-navigation {
-          flex-direction: column;
-          gap: 8px;
-
-          .pb-button {
-            width: 100%;
-            font-size: 10px;
-          }
-        }
+        top: 80px;
       }
     }
   }
