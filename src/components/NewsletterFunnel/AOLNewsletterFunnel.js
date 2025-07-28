@@ -225,6 +225,11 @@ class AOLNewsletterFunnel extends Component {
                   alt="AOL Dial-up Interface"
                   className="dial-up-bg-image"
                 />
+                <img
+                  src="/static/aol/logo_edit1.png"
+                  alt="Happy Tuesdays Logo"
+                  className="dial-up-bg-image-logo"
+                />
               </div>
 
               {/* Three step boxes overlaid on dial-up interface */}
@@ -232,7 +237,7 @@ class AOLNewsletterFunnel extends Component {
                 <div className="step-box step-box-1">
                   {currentStep >= 1 && (
                     <img
-                      src="/static/aol/dialup_pic1.png"
+                      src="/static/aol/dialup_pic11.png"
                       alt="AOL Figure 1"
                       className="aol-figure-image"
                     />
@@ -241,7 +246,7 @@ class AOLNewsletterFunnel extends Component {
                 <div className="step-box step-box-2">
                   {currentStep >= 2 && (
                     <img
-                      src="/static/aol/dialup_pic2.png"
+                      src="/static/aol/dialup_pic22.png"
                       alt="AOL Figure 2"
                       className="aol-figure-image"
                     />
@@ -250,9 +255,9 @@ class AOLNewsletterFunnel extends Component {
                 <div className="step-box step-box-3">
                   {currentStep >= 3 && (
                     <img
-                      src="/static/aol/dialup_pic3.png"
+                      src="/static/aol/logo3.png"
                       alt="AOL Figure 3"
-                      className="aol-figure-image"
+                      className="aol-figure-image aol-figure-3"
                     />
                   )}
                   {currentStep >= 4 && <div className="family-icon">👨‍👩‍👧‍👦</div>}
@@ -344,33 +349,37 @@ class AOLNewsletterFunnel extends Component {
           {currentStep === 2 && (
             <div className="channels-interface">
               {/* Base dial-up background still visible */}
+
               <div className="dial-up-background">
                 <img
                   src="/static/aol/dial_up_5.png"
                   alt="AOL Dial-up Interface"
                   className="dial-up-bg-image"
                 />
+                <img
+                  src="/static/aol/logo_edit1.png"
+                  alt="Happy Tuesdays Logo"
+                  className="dial-up-bg-image-logo"
+                />
               </div>
-
               {/* Progression boxes still visible */}
               <div className="step-boxes-overlay">
                 <div className="step-box step-box-1">
                   <img
-                    src="/static/aol/dialup_pic1.png"
+                    src="/static/aol/dialup_pic11.png"
                     alt="AOL Figure 1"
                     className="aol-figure-image"
                   />
                 </div>
                 <div className="step-box step-box-2">
                   <img
-                    src="/static/aol/dialup_pic2.png"
+                    src="/static/aol/dialup_pic22.png"
                     alt="AOL Figure 2"
                     className="aol-figure-image"
                   />
                 </div>
                 <div className="step-box step-box-3">{/* Empty for now */}</div>
               </div>
-
               {/* Temporary channels background overlay */}
               <div className="channels-background">
                 <img
@@ -379,7 +388,6 @@ class AOLNewsletterFunnel extends Component {
                   className="channels-bg-image"
                 />
               </div>
-
               {/* Channels content overlay */}
               <div className="channels-content-overlay">
                 <div className="step-content channels-content">
