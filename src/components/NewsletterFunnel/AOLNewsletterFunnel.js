@@ -214,6 +214,8 @@ class AOLNewsletterFunnel extends Component {
         onMaximize={null}
         menuOptions={filteredMenuOptions}
         className={cx("AOLNewsletterFunnel", this.props.className)}
+        forceActive={true}
+        minimized={false}
       >
         <div className="aol-funnel-container">
           {/* Step 1 & 3: Dial-up interface */}
@@ -264,14 +266,23 @@ class AOLNewsletterFunnel extends Component {
                 </div>
               </div>
 
+              {/* Status text positioned below dial-up background */}
+              <div className="status-text-container">
+                {currentStep === 1 && (
+                  <div className="status-text">Dialing...</div>
+                )}
+                {currentStep === 3 && (
+                  <div className="status-text">
+                    Step 3: Checking preferences...
+                  </div>
+                )}
+              </div>
+
               {/* Content overlay */}
               <div className="dial-up-content-overlay">
                 {currentStep === 1 && (
                   <div className="step-content">
                     <div className="dial-up-prompt">
-                      <div className="status-text">
-                        Step 1: Looking for Happy Tuesdays via TCP/IP...
-                      </div>
                       <p>
                         Would you like to join the Happy Tuesdays mailing list?
                       </p>
@@ -296,9 +307,6 @@ class AOLNewsletterFunnel extends Component {
                 {currentStep === 3 && (
                   <div className="step-content">
                     <div className="dial-up-prompt">
-                      <div className="status-text">
-                        Step 3: Checking preferences...
-                      </div>
                       <p>Select your preferred email frequency:</p>
 
                       <div className="frequency-options">
@@ -349,7 +357,6 @@ class AOLNewsletterFunnel extends Component {
           {currentStep === 2 && (
             <div className="channels-interface">
               {/* Base dial-up background still visible */}
-
               <div className="dial-up-background">
                 <img
                   src="/static/aol/dial_up_5.png"
@@ -362,6 +369,7 @@ class AOLNewsletterFunnel extends Component {
                   className="dial-up-bg-image-logo"
                 />
               </div>
+
               {/* Progression boxes still visible */}
               <div className="step-boxes-overlay">
                 <div className="step-box step-box-1">
@@ -380,6 +388,12 @@ class AOLNewsletterFunnel extends Component {
                 </div>
                 <div className="step-box step-box-3">{/* Empty for now */}</div>
               </div>
+
+              {/* Status text positioned below dial-up background */}
+              <div className="status-text-container">
+                <div className="status-text">Connecting...</div>
+              </div>
+
               {/* Temporary channels background overlay */}
               <div className="channels-background">
                 <img
@@ -388,13 +402,10 @@ class AOLNewsletterFunnel extends Component {
                   className="channels-bg-image"
                 />
               </div>
+
               {/* Channels content overlay */}
               <div className="channels-content-overlay">
                 <div className="step-content channels-content">
-                  <div className="status-text-channels">
-                    Step 2: Connecting using TCP/IP...
-                  </div>
-
                   <div className="form-group email-section">
                     <label htmlFor="email" className="w98-label">
                       Email Address:

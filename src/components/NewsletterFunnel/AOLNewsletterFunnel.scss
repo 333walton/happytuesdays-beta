@@ -28,74 +28,12 @@
         object-fit: cover;
       }
     }
-
-    // Figure boxes positioned within the fixed frame
-    /*.step-boxes-overlay {
-      position: absolute;
-      top: 150px !important;
-      left: 64px;
-      width: calc(100% - 121px); // 64px left + 57px right
-      height: 195px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-
-      .step-box {
-        position: relative;
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-        flex: 0 0 auto;
-
-        &.visible,
-        &.step-box-1,
-        &.step-box-2,
-        &.step-box-3 {
-          opacity: 1;
-        }
-
-        &.box-1,
-        &.step-box-1 {
-          width: 141px;
-          height: 95px;
-        }
-
-        &.box-2,
-        &.step-box-2 {
-          width: 139px;
-          height: 95px;
-        }
-
-        &.box-3,
-        &.step-box-3 {
-          width: 139px;
-          height: 95px;
-        }
-
-        img,
-        .aol-figure-image {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          display: block;
-        }
-
-        .family-icon {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          font-size: 32px;
-          animation: fadeIn 0.5s ease-in-out;
-        }
-      }
-    }*/
   }
 }
 
 // The actual window component
 .AOLNewsletterFunnel {
-  background: #fffaf2; // alternative "floral white" equivalent is #f5f5dc if you want to override default window styling to match AOL aesthetic
+  background: #fffaf2;
 
   // Position window below the AOL frame (from original)
   margin-top: auto;
@@ -117,7 +55,6 @@
       position: relative;
       min-height: 200px;
 
-      // Channels background overlay for step 2 (from original)
       &.with-channels-bg {
         &::before {
           content: "";
@@ -154,9 +91,30 @@
     }
   }
 
+  // Status text container - positioned below dial-up background
+  .status-text-container {
+    position: absolute;
+    top: 180px; // Adjust this to position below the dial-up background
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 3;
+
+    .status-text {
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      color: black;
+      font-weight: bold;
+      //background: rgba(245, 245, 220, 0.9);
+      display: inline-block;
+      padding: 7px 15px;
+      border-radius: 4px;
+      //border: 1px solid #c0c0c0;
+    }
+  }
+
   // Dial-up interface (Steps 1 & 3) - JS structure
   .dial-up-interface {
-    //position: absolute;
     top: 0px;
     left: 0px;
     right: 0px;
@@ -167,7 +125,6 @@
       top: 0;
       left: 0;
       width: 100%;
-      //height: 100%;
       z-index: 1;
 
       .dial-up-bg-image {
@@ -180,7 +137,6 @@
         top: 50px;
         left: 200px;
         scale: 1.5;
-        //object-position: center;
         position: absolute;
         height: 29;
         width: 113;
@@ -188,7 +144,6 @@
     }
 
     // for step 1 and 3
-    // These step boxes are for inline display when not using fixed frame
     .step-boxes-overlay {
       position: absolute;
       top: 98px;
@@ -220,18 +175,14 @@
         &.step-box-3 {
           opacity: 1;
           scale: 1.15;
-          //width: 141px;
-          //height: 95px;
         }
 
         .aol-figure-image {
           width: 100%;
           height: 100%;
           margin-left: 5%;
-          //max-width: 100px;
           object-fit: contain;
           z-index: 10;
-          //position: absolute;
         }
 
         .aol-figure-3 {
@@ -271,14 +222,6 @@
 
         .dial-up-prompt {
           text-align: center;
-
-          .status-text {
-            font-family: "Courier New", monospace;
-            font-size: 12px;
-            color: #008000;
-            margin-bottom: 10px;
-            font-weight: bold;
-          }
 
           p {
             font-family: Arial, sans-serif;
@@ -321,7 +264,6 @@
 
   // Channels interface (Step 2) - JS structure
   .channels-interface {
-    //position: absolute;
     top: 0px;
     left: 0px;
     right: 0px;
@@ -332,7 +274,6 @@
       top: 0;
       left: 0;
       width: 100%;
-      //height: 100%;
       z-index: 1;
 
       .dial-up-bg-image {
@@ -345,7 +286,6 @@
         top: 50px;
         left: 200px;
         scale: 1.5;
-        //object-position: center;
         position: absolute;
         height: 29;
         width: 113;
@@ -384,17 +324,13 @@
         &.step-box-3 {
           opacity: 1;
           scale: 1.15;
-          //width: 141px;
-          //height: 95px;
         }
 
         .aol-figure-image {
           width: 100%;
           height: 100%;
           z-index: 10;
-          //position: absolute;
           margin-left: 5%;
-          //max-width: 100px;
           object-fit: contain;
         }
       }
@@ -418,7 +354,7 @@
 
     .channels-content-overlay {
       position: absolute;
-      top: 130px;
+      top: 210px;
       left: 10px;
       right: 10px;
       bottom: 10px;
@@ -431,15 +367,6 @@
         padding: 15px;
         border-radius: 4px;
         min-height: 200px;
-
-        .status-text-channels {
-          font-family: "Courier New", monospace;
-          font-size: 12px;
-          color: #008000;
-          margin-bottom: 15px;
-          font-weight: bold;
-          text-align: center;
-        }
 
         .channels-selection {
           .channels-header {
@@ -761,30 +688,6 @@
     color: #666;
     margin-top: 10px;
   }
-
-  /*.w98-button-container {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-
-      .w98-button {
-        padding: 4px 12px;
-        font-family: Arial, sans-serif;
-        font-size: 11px;
-        border: 1px solid #808080;
-        background: #e0e0e0;
-        cursor: pointer;
-
-        &:hover {
-          background: #d0d0d0;
-        }
-
-        &:active {
-          border-style: inset;
-        }
-      }
-    }
-  }*/
 }
 
 #monitor-overlay > div > div > div:nth-child(1) > div:nth-child(1) > button {
@@ -845,8 +748,14 @@
     width: 90vw !important;
     max-width: 500px !important;
 
+    .status-text-container {
+      top: 140px; // Adjust for mobile
+    }
+
     .channels-interface {
       .channels-content-overlay {
+        top: 170px; // Adjust for mobile
+
         .channels-content {
           .channel-buttons-grid {
             grid-template-columns: repeat(3, 1fr);
@@ -876,13 +785,7 @@
       }
 
       .dial-up-content-overlay {
-        top: 80px;
-      }
-    }
-
-    .channels-interface {
-      .channels-content-overlay {
-        top: 80px;
+        top: 200px; // Adjust for mobile to be below status text
       }
     }
   }

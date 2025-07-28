@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { ProgramContext } from "../../contexts";
 import AOLNewsletterFunnel from "./AOLNewsletterFunnel";
 
@@ -54,38 +54,99 @@ const NewsletterFunnelManager = ({ children }) => {
     return () => window.removeEventListener("programClosed", handleFeedsClose);
   }, [hasShownThisSession]);
 
+  // Use ref to access current state in event listener
+  const hasShownRef = useRef(hasShownThisSession);
+  useEffect(() => {
+    hasShownRef.current = hasShownThisSession;
+  }, [hasShownThisSession]);
+
   // Listen for "You've Got Mail" click
   useEffect(() => {
     const handleMailClick = (event) => {
+      console.log(
+        "📧 NewsletterFunnelManager - startMenuAction event received:",
+        event
+      );
+      console.log("📧 Event detail:", event.detail);
+      console.log("📧 hasShownThisSession (from ref):", hasShownRef.current);
+
       if (event.detail && event.detail.action === "youve_got_mail") {
-        triggerFunnel("mail_clicked");
+        console.log("📧 Mail action detected, triggering funnel");
+        // Use the ref instead of state directly
+        if (!hasShownRef.current) {
+          console.log("📧 Setting showFunnel to true");
+          setShowFunnel(true);
+          setHasShownThisSession(true);
+          sessionStorage.setItem("newsletterFunnelStatus", "shown");
+
+          // Clear the timer if it exists
+          if (sessionTimer) {
+            clearTimeout(sessionTimer);
+          }
+
+          // Focus the window after a short delay
+          setTimeout(() => {
+            const funnelWindow = document.querySelector(
+              ".Window.AOLNewsletterFunnel"
+            );
+            if (funnelWindow) {
+              funnelWindow.click(); // Simulate click to bring to front
+              const titleBar = funnelWindow.querySelector(".Window__heading");
+              if (titleBar) {
+                titleBar.click(); // Click title bar to ensure focus
+              }
+            }
+          }, 100);
+        } else {
+          console.log("📧 Funnel already shown this session, skipping");
+        }
       }
     };
 
     window.addEventListener("startMenuAction", handleMailClick);
-    return () => window.removeEventListener("startMenuAction", handleMailClick);
-  }, [hasShownThisSession]);
+    console.log("📧 NewsletterFunnelManager - Event listener attached");
+
+    return () => {
+      window.removeEventListener("startMenuAction", handleMailClick);
+      console.log("📧 NewsletterFunnelManager - Event listener removed");
+    };
+  }, []); // Remove hasShownThisSession dependency
 
   // Central trigger function with suppression check
   const triggerFunnel = (source) => {
-    console.log(`Newsletter funnel triggered by: ${source}`);
-    console.log("Current state before trigger:", {
-      hasShownThisSession,
+    console.log(`📧 Newsletter funnel triggered by: ${source}`);
+    console.log("📧 Current state before trigger:", {
+      hasShownThisSession: hasShownRef.current,
       showFunnel,
     });
 
-    if (!hasShownThisSession) {
-      console.log("Setting showFunnel to true");
+    if (!hasShownRef.current) {
+      console.log("📧 Setting showFunnel to true");
       setShowFunnel(true);
       setHasShownThisSession(true);
+      hasShownRef.current = true; // Update ref immediately
       sessionStorage.setItem("newsletterFunnelStatus", "shown");
 
       // Clear the timer if it exists
       if (sessionTimer) {
         clearTimeout(sessionTimer);
       }
+
+      // Focus the window after a short delay
+      setTimeout(() => {
+        const funnelWindow = document.querySelector(
+          ".Window.AOLNewsletterFunnel"
+        );
+        if (funnelWindow) {
+          funnelWindow.click(); // Simulate click to bring to front
+          const titleBar = funnelWindow.querySelector(".Window__heading");
+          if (titleBar) {
+            titleBar.click(); // Click title bar to ensure focus
+          }
+        }
+      }, 100);
     } else {
-      console.log("Funnel already shown this session, skipping");
+      console.log("📧 Funnel already shown this session, skipping");
     }
   };
 
@@ -142,6 +203,8 @@ const NewsletterFunnelManager = ({ children }) => {
         <AOLNewsletterFunnel
           onClose={handleFunnelClose}
           onComplete={handleFunnelComplete}
+          isActive={true}
+          minimized={false}
         />
       )}
       {/* Debug button - remove in production */}
@@ -150,6 +213,19 @@ const NewsletterFunnelManager = ({ children }) => {
           onClick={() => {
             console.log("Debug: Force showing funnel");
             setShowFunnel(true);
+            // Focus the window after a short delay
+            setTimeout(() => {
+              const funnelWindow = document.querySelector(
+                ".Window.AOLNewsletterFunnel"
+              );
+              if (funnelWindow) {
+                funnelWindow.click();
+                const titleBar = funnelWindow.querySelector(".Window__heading");
+                if (titleBar) {
+                  titleBar.click();
+                }
+              }
+            }, 100);
           }}
           style={{
             position: "fixed",
