@@ -62,7 +62,6 @@ class AOLNewsletterFunnel extends Component {
         frequency: "weekly",
       },
       errors: {},
-      displayAlert: false,
     };
   }
 
@@ -172,31 +171,24 @@ class AOLNewsletterFunnel extends Component {
 
   // Handle OK from recap screen
   handleRecapOk = () => {
-    this.setState({ currentStep: 5 }); // Show family icon and Clippy confirmation
+    // Save the form data
+    console.log("Newsletter signup completed:", this.state.formData);
 
-    // Show Clippy confirmation after brief delay
-    setTimeout(() => {
-      this.setState({ displayAlert: true });
-    }, 500);
+    // Call the completion handler
+    if (this.props.onComplete) {
+      this.props.onComplete(this.state.formData);
+    }
+
+    // Close the window
+    if (this.props.onClose) {
+      this.props.onClose(true);
+    }
   };
 
   // Handle declining in step 1
   handleDecline = () => {
     if (this.props.onClose) {
       this.props.onClose(false);
-    }
-  };
-
-  // Handle Clippy confirmation
-  confirm = () => {
-    console.log("Newsletter signup completed:", this.state.formData);
-    this.setState({ displayAlert: false });
-
-    if (this.props.onComplete) {
-      this.props.onComplete(this.state.formData);
-    }
-    if (this.props.onClose) {
-      this.props.onClose(true);
     }
   };
 
@@ -225,10 +217,7 @@ class AOLNewsletterFunnel extends Component {
       >
         <div className="aol-funnel-container">
           {/* Step 1, 3 & 4: Dial-up interface */}
-          {(currentStep === 1 ||
-            currentStep === 3 ||
-            currentStep === 4 ||
-            currentStep === 5) && (
+          {(currentStep === 1 || currentStep === 3 || currentStep === 4) && (
             <div className="dial-up-interface">
               <div className="dial-up-background">
                 <img
