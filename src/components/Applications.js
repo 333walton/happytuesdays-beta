@@ -41,4 +41,5 @@ export { default as ClippyAssistant } from "./ClippyAssistant";
 export { default as HamsterCreator } from "./HamsterCreator/HamsterCreator";
 export { default as GraphExplorer } from "./Apps/GraphExplorer/GraphExplorer";
 export { default as CuboneFileExplorer } from "./CuboneFileExplorer";
-export { default as NewsletterFunnel } from "./NewsletterFunnel";
+export { default as NewsletterFunnelManager } from "./NewsletterFunnel/NewsletterFunnelManager";
+export { default as AOLNewsletterFunnel } from "./NewsletterFunnel/AOLNewsletterFunnel";

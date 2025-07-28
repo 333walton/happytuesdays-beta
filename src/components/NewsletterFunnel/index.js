@@ -1,5 +1,7 @@
-export { default as AOLNewsletterFunnel } from "./AOLNewsletterFunnel";
-export { default as NewsletterFunnelManager } from "./NewsletterFunnelManager";
-export { default } from "./NewsletterFunnelManager";
+import AOLNewsletterFunnel from "./AOLNewsletterFunnel";
 
-//import Notepad from "./Notepad";
+export default AOLNewsletterFunnel;
+
+//import NewsletterFunnelManager from "./NewsletterFunnelManager";
+
+//export default NewsletterFunnelManager;
