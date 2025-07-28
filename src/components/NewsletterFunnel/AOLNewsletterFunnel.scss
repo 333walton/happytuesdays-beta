@@ -138,8 +138,8 @@
         left: 30px;
         scale: 0.6;
         position: absolute;
-        //height: 100%;
-        //width: 100%;
+        //height: 29;
+        //width: 113;
       }
     }
 
@@ -225,11 +225,59 @@
         .dial-up-prompt {
           text-align: center;
 
+          h3 {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #000080;
+            margin-bottom: 15px;
+            font-weight: bold;
+          }
+
           p {
             font-family: Arial, sans-serif;
             font-size: 14px;
             color: #333;
             margin-bottom: 15px;
+          }
+
+          &.recap-prompt {
+            .recap-section {
+              background: #f0f0f0;
+              border: 1px solid #c0c0c0;
+              padding: 15px;
+              margin: 15px 0;
+              border-radius: 4px;
+              text-align: left;
+
+              p {
+                margin: 5px 0;
+                font-size: 13px;
+
+                strong {
+                  color: #000080;
+                }
+              }
+
+              .selected-channels {
+                margin: 10px 0 0 20px;
+                padding: 0;
+                list-style-type: disc;
+
+                li {
+                  font-family: Arial, sans-serif;
+                  font-size: 13px;
+                  color: #333;
+                  margin-bottom: 5px;
+                }
+              }
+            }
+
+            .confirmation-text {
+              font-size: 13px;
+              color: #008000;
+              font-style: italic;
+              margin: 20px 0;
+            }
           }
 
           .frequency-options {
@@ -289,6 +337,8 @@
         left: 30px;
         scale: 0.6;
         position: absolute;
+        //height: 29;
+        //width: 113;
       }
     }
 

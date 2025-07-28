@@ -3,6 +3,7 @@ import Window from "../tools/Window";
 import { WindowProgram, WindowAlert } from "packard-belle";
 import buildMenu from "../../helpers/menuBuilder";
 import cx from "classnames";
+import * as icons from "../../icons";
 import "./AOLNewsletterFunnel.scss";
 
 class AOLNewsletterFunnel extends Component {
@@ -166,7 +167,12 @@ class AOLNewsletterFunnel extends Component {
 
   // Handle final confirmation
   handleConfirm = () => {
-    this.setState({ currentStep: 4 }); // Show family icon
+    this.setState({ currentStep: 4 }); // Show recap screen
+  };
+
+  // Handle OK from recap screen
+  handleRecapOk = () => {
+    this.setState({ currentStep: 5 }); // Show family icon and Clippy confirmation
 
     // Show Clippy confirmation after brief delay
     setTimeout(() => {
@@ -218,8 +224,11 @@ class AOLNewsletterFunnel extends Component {
         minimized={false}
       >
         <div className="aol-funnel-container">
-          {/* Step 1 & 3: Dial-up interface */}
-          {(currentStep === 1 || currentStep === 3) && (
+          {/* Step 1, 3 & 4: Dial-up interface */}
+          {(currentStep === 1 ||
+            currentStep === 3 ||
+            currentStep === 4 ||
+            currentStep === 5) && (
             <div className="dial-up-interface">
               <div className="dial-up-background">
                 <img
@@ -262,7 +271,6 @@ class AOLNewsletterFunnel extends Component {
                       className="aol-figure-image aol-figure-3"
                     />
                   )}
-                  {currentStep >= 4 && <div className="family-icon">👨‍👩‍👧‍👦</div>}
                 </div>
               </div>
 
@@ -274,6 +282,11 @@ class AOLNewsletterFunnel extends Component {
                 {currentStep === 3 && (
                   <div className="status-text">
                     Step 3: Checking preferences...
+                  </div>
+                )}
+                {currentStep === 4 && (
+                  <div className="status-text">
+                    Step 4: Confirming subscription...
                   </div>
                 )}
               </div>
@@ -344,6 +357,54 @@ class AOLNewsletterFunnel extends Component {
                           className="aol-button aol-button-primary"
                         >
                           Confirm
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 4 && (
+                  <div className="step-content">
+                    <div className="dial-up-prompt recap-prompt">
+                      <h3>Subscription Summary</h3>
+                      <div className="recap-section">
+                        <p>
+                          <strong>Email:</strong> {formData.email}
+                        </p>
+                        <p>
+                          <strong>Frequency:</strong>{" "}
+                          {formData.frequency === "weekly"
+                            ? "Weekly"
+                            : "Bi-weekly"}
+                        </p>
+                        <p>
+                          <strong>Selected Channels:</strong>
+                        </p>
+                        <ul className="selected-channels">
+                          {formData.categories.technology.main && (
+                            <li>Technology/News</li>
+                          )}
+                          {formData.categories.builders.main && (
+                            <li>Builders/Computing</li>
+                          )}
+                          {formData.categories.gaming.main && (
+                            <li>Gaming/Travel</li>
+                          )}
+                          {formData.categories.artDesign.main && (
+                            <li>Art & Design/Entertainment</li>
+                          )}
+                        </ul>
+                      </div>
+                      <p className="confirmation-text">
+                        Welcome to the Happy Tuesdays community! Your
+                        subscription has been confirmed.
+                      </p>
+                      <div className="button-group">
+                        <button
+                          onClick={this.handleRecapOk}
+                          className="aol-button aol-button-primary"
+                        >
+                          OK
                         </button>
                       </div>
                     </div>
