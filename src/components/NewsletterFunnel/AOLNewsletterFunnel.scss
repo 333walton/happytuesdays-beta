@@ -99,7 +99,7 @@
   background: #f5f5dc !important; // FloralWhite equivalent
 
   // Position window below the AOL frame (from original)
-  margin-top: 160px !important;
+  margin-top: auto;
 
   .Window__body {
     background: transparent !important;
@@ -157,31 +157,34 @@
 
   // Dial-up interface (Steps 1 & 3) - JS structure
   .dial-up-interface {
-    position: relative;
-    width: 100%;
-    height: 100%;
+    //position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
 
     .dial-up-background {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100%;
+      //height: 100%;
       z-index: 1;
 
       .dial-up-bg-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
       }
     }
 
     // These step boxes are for inline display when not using fixed frame
     .step-boxes-overlay {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
+      top: 40px;
+      left: 40px;
+      right: 40px;
       height: 100px;
       display: flex;
       justify-content: space-between;
@@ -222,9 +225,9 @@
     // Content overlay for steps 1 & 3
     .dial-up-content-overlay {
       position: absolute;
-      bottom: 20px;
-      left: 20px;
-      right: 20px;
+      bottom: 40px;
+      left: 40px;
+      right: 40px;
       z-index: 3;
 
       .step-content {
@@ -285,30 +288,33 @@
 
   // Channels interface (Step 2) - JS structure
   .channels-interface {
-    position: relative;
-    width: 100%;
-    height: 100%;
+    //position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
 
     .dial-up-background {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100%;
+      //height: 100%;
       z-index: 1;
 
       .dial-up-bg-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
       }
     }
 
     .step-boxes-overlay {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
+      top: 40px;
+      left: 40px;
+      right: 40px;
       height: 100px;
       display: flex;
       justify-content: space-between;
@@ -690,35 +696,7 @@
     margin-top: 10px;
   }
 
-  // Clippy alert styling
-  &--alert {
-    .clippy-message {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 15px;
-
-      .clippy-character {
-        font-size: 24px;
-        margin-right: 10px;
-        flex-shrink: 0;
-      }
-
-      .clippy-text {
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-        line-height: 1.4;
-
-        p {
-          margin: 0 0 8px 0;
-
-          &:last-child {
-            margin-bottom: 0;
-          }
-        }
-      }
-    }
-
-    .w98-button-container {
+  /*.w98-button-container {
       display: flex;
       justify-content: center;
       gap: 10px;
@@ -740,17 +718,26 @@
         }
       }
     }
-  }
+  }*/
 }
 
 // Ensure window is properly styled
 .Window.AOLNewsletterFunnel {
   .Window__heading {
     background: linear-gradient(to right, #000080, #0084ff) !important;
+    display: flex;
+    width: 100%;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 1px;
+    padding: 0px 1px 0px 3px;
+    align-items: center;
+    letter-spacing: 1px;
 
     .Window__title {
       color: white !important;
       font-weight: bold;
+      width: 100%;
     }
   }
 
@@ -770,6 +757,10 @@
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
+}
+
+.Window.AOLNewsletterFunnel:not(.Window--active) {
+  filter: grayscale(0) !important;
 }
 
 // Mobile adjustments

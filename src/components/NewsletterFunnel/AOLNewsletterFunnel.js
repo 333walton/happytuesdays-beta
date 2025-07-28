@@ -197,12 +197,6 @@ class AOLNewsletterFunnel extends Component {
   render() {
     const { currentStep, formData, errors } = this.state;
 
-    const commonProps = {
-      title: "Welcome to Happy Tuesdays!",
-      zIndex: 1000,
-      onClose: () => this.setState({ displayAlert: false }),
-    };
-
     const filteredMenuOptions = buildMenu(this.props).filter(
       (option) =>
         option.title.toLowerCase() !== "file" &&
@@ -489,7 +483,14 @@ class AOLNewsletterFunnel extends Component {
                       </div>
 
                       {/* News */}
-                      <div className="channel-button">
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.technology.main,
+                        })}
+                        onClick={() =>
+                          this.handleMainCategoryChange("technology")
+                        }
+                      >
                         <img
                           src="/static/aol/channels_news_btn.png"
                           alt="News"
@@ -498,7 +499,14 @@ class AOLNewsletterFunnel extends Component {
                       </div>
 
                       {/* Sports */}
-                      <div className="channel-button">
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.builders.main,
+                        })}
+                        onClick={() =>
+                          this.handleMainCategoryChange("builders")
+                        }
+                      >
                         <img
                           src="/static/aol/channels_sports_btn.png"
                           alt="Sports"
@@ -507,7 +515,12 @@ class AOLNewsletterFunnel extends Component {
                       </div>
 
                       {/* Travel */}
-                      <div className="channel-button">
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.gaming.main,
+                        })}
+                        onClick={() => this.handleMainCategoryChange("gaming")}
+                      >
                         <img
                           src="/static/aol/channels_travel_btn.png"
                           alt="Travel"
@@ -516,7 +529,14 @@ class AOLNewsletterFunnel extends Component {
                       </div>
 
                       {/* Shopping */}
-                      <div className="channel-button">
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.artDesign.main,
+                        })}
+                        onClick={() =>
+                          this.handleMainCategoryChange("artDesign")
+                        }
+                      >
                         <img
                           src="/static/aol/channels_shopping_btn.png"
                           alt="Shopping"
@@ -525,7 +545,14 @@ class AOLNewsletterFunnel extends Component {
                       </div>
 
                       {/* Families */}
-                      <div className="channel-button">
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.technology.main,
+                        })}
+                        onClick={() =>
+                          this.handleMainCategoryChange("technology")
+                        }
+                      >
                         <img
                           src="/static/aol/channels_families_btn.png"
                           alt="Families"
@@ -534,7 +561,14 @@ class AOLNewsletterFunnel extends Component {
                       </div>
 
                       {/* Kids Only */}
-                      <div className="channel-button">
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.builders.main,
+                        })}
+                        onClick={() =>
+                          this.handleMainCategoryChange("builders")
+                        }
+                      >
                         <img
                           src="/static/aol/channels_kids_only_btn.png"
                           alt="Kids Only"
@@ -543,7 +577,12 @@ class AOLNewsletterFunnel extends Component {
                       </div>
 
                       {/* Health */}
-                      <div className="channel-button">
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.gaming.main,
+                        })}
+                        onClick={() => this.handleMainCategoryChange("gaming")}
+                      >
                         <img
                           src="/static/aol/channels_health_btn.png"
                           alt="Health"
@@ -552,7 +591,14 @@ class AOLNewsletterFunnel extends Component {
                       </div>
 
                       {/* Personal Finance */}
-                      <div className="channel-button">
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.artDesign.main,
+                        })}
+                        onClick={() =>
+                          this.handleMainCategoryChange("artDesign")
+                        }
+                      >
                         <img
                           src="/static/aol/channels_personal_finance_btn.png"
                           alt="Personal Finance"
@@ -579,37 +625,6 @@ class AOLNewsletterFunnel extends Component {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* Clippy confirmation alert */}
-          {this.state.displayAlert && !this.props.data?.disableAlert && (
-            <WindowAlert
-              {...commonProps}
-              onOK={this.confirm}
-              onCancel={commonProps.onClose}
-              className="AOLNewsletterFunnel--alert Window--active"
-            >
-              <div className="clippy-message">
-                <div className="clippy-character">📎</div>
-                <div className="clippy-text">
-                  <p>
-                    <strong>Great choice!</strong>
-                  </p>
-                  <p>
-                    You've successfully joined the Happy Tuesdays newsletter!
-                  </p>
-                  <p>Welcome to the family! 🎉</p>
-                </div>
-              </div>
-              <div className="w98-button-container">
-                <button className="w98-button" onClick={this.confirm}>
-                  OK
-                </button>
-                <button className="w98-button" onClick={commonProps.onClose}>
-                  Cancel
-                </button>
-              </div>
-            </WindowAlert>
           )}
         </div>
       </Window>
