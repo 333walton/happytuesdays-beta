@@ -228,7 +228,7 @@ class AOLNewsletterFunnel extends Component {
                   className="dial-up-bg-image"
                 />
                 <img
-                  src="/static/aol/logo_edit1.png"
+                  src="/static/aol/logo_edit2.png"
                   alt="Happy Tuesdays Logo"
                   className="dial-up-bg-image-logo"
                 />
@@ -364,7 +364,7 @@ class AOLNewsletterFunnel extends Component {
                   className="dial-up-bg-image"
                 />
                 <img
-                  src="/static/aol/logo_edit1.png"
+                  src="/static/aol/logo_edit2.png"
                   alt="Happy Tuesdays Logo"
                   className="dial-up-bg-image-logo"
                 />
