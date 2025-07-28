@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
+import { createPortal } from "react-dom";
 import { ProgramContext } from "../../contexts";
 import AOLNewsletterFunnel from "./AOLNewsletterFunnel";
 
@@ -175,14 +176,16 @@ const NewsletterFunnelManager = ({ children }) => {
   return (
     <>
       {children}
-      {showFunnel && (
-        <AOLNewsletterFunnel
-          onClose={handleFunnelClose}
-          onComplete={handleFunnelComplete}
-          isActive={true}
-          minimized={false}
-        />
-      )}
+      {showFunnel &&
+        createPortal(
+          <AOLNewsletterFunnel
+            onClose={handleFunnelClose}
+            onComplete={handleFunnelComplete}
+            isActive={true}
+            minimized={false}
+          />,
+          document.querySelector(".desktop-content-wrapper")
+        )}
       {/* Debug button - remove in production */}
       {process.env.NODE_ENV === "development" && (
         <button
