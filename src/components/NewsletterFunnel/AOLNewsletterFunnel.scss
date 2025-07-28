@@ -30,7 +30,7 @@
     }
 
     // Figure boxes positioned within the fixed frame
-    .step-boxes-overlay {
+    /*.step-boxes-overlay {
       position: absolute;
       top: 150px !important;
       left: 64px;
@@ -89,7 +89,7 @@
           animation: fadeIn 0.5s ease-in-out;
         }
       }
-    }
+    }*/
   }
 }
 
@@ -178,14 +178,15 @@
       }
     }
 
+    // for step 1 and 3
     // These step boxes are for inline display when not using fixed frame
     .step-boxes-overlay {
       position: absolute;
-      top: 40px;
-      left: 40px;
-      right: 40px;
+      top: 86px;
+      left: 59px;
       height: 100px;
       display: flex;
+      gap: 30px;
       justify-content: space-between;
       align-items: center;
       z-index: 2;
@@ -201,6 +202,9 @@
         &.step-box-2,
         &.step-box-3 {
           opacity: 1;
+          scale: 1.15;
+          //width: 141px;
+          //height: 95px;
         }
 
         .aol-figure-image {
@@ -309,13 +313,14 @@
       }
     }
 
+    // for step 2
     .step-boxes-overlay {
       position: absolute;
-      top: 40px;
-      left: 40px;
-      right: 40px;
+      top: 86px;
+      left: 59px;
       height: 100px;
       display: flex;
+      gap: 30px;
       justify-content: space-between;
       align-items: center;
       z-index: 2;
@@ -323,6 +328,8 @@
       .step-box {
         position: relative;
         flex: 0 0 auto;
+        opacity: 1;
+        scale: 1.15;
 
         .aol-figure-image {
           width: 100%;

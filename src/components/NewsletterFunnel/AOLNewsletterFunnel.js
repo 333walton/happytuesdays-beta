@@ -221,7 +221,7 @@ class AOLNewsletterFunnel extends Component {
             <div className="dial-up-interface">
               <div className="dial-up-background">
                 <img
-                  src="/static/aol/dial_up1.png"
+                  src="/static/aol/dial_up_5.png"
                   alt="AOL Dial-up Interface"
                   className="dial-up-bg-image"
                 />
@@ -346,7 +346,7 @@ class AOLNewsletterFunnel extends Component {
               {/* Base dial-up background still visible */}
               <div className="dial-up-background">
                 <img
-                  src="/static/aol/dial_up1.png"
+                  src="/static/aol/dial_up_5.png"
                   alt="AOL Dial-up Interface"
                   className="dial-up-bg-image"
                 />
