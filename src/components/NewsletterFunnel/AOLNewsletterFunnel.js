@@ -235,23 +235,31 @@ class AOLNewsletterFunnel extends Component {
 
               {/* Three step boxes overlaid on dial-up interface */}
               <div className="step-boxes-overlay">
-                <div className="step-box">
+                <div className="step-box step-box-1">
                   {currentStep >= 1 && (
-                    <div className="aol-figure-small">AOL</div>
+                    <img
+                      src="/static/aol/dialup_pic1.png"
+                      alt="AOL Figure 1"
+                      className="aol-figure-image"
+                    />
                   )}
                 </div>
-                <div className="step-box">
+                <div className="step-box step-box-2">
                   {currentStep >= 2 && (
-                    <div className="aol-figure-small">AOL</div>
+                    <img
+                      src="/static/aol/dialup_pic2.png"
+                      alt="AOL Figure 2"
+                      className="aol-figure-image"
+                    />
                   )}
                 </div>
-                <div className="step-box">
+                <div className="step-box step-box-3">
                   {currentStep >= 3 && (
-                    <div className="happy-tuesdays-logo">
-                      Happy
-                      <br />
-                      Tuesdays
-                    </div>
+                    <img
+                      src="/static/aol/dialup_pic3.png"
+                      alt="AOL Figure 3"
+                      className="aol-figure-image"
+                    />
                   )}
                   {currentStep >= 4 && <div className="family-icon">👨‍👩‍👧‍👦</div>}
                 </div>
@@ -262,19 +270,22 @@ class AOLNewsletterFunnel extends Component {
                 {currentStep === 1 && (
                   <div className="step-content">
                     <div className="dial-up-prompt">
+                      <div className="status-text">
+                        Step 1: Looking for Happy Tuesdays via TCP/IP...
+                      </div>
                       <p>
                         Would you like to join the Happy Tuesdays mailing list?
                       </p>
                       <div className="button-group">
                         <button
                           onClick={this.handleNextStep}
-                          className="pb-button"
+                          className="aol-button aol-button-primary"
                         >
                           Yes
                         </button>
                         <button
                           onClick={this.handleDecline}
-                          className="pb-button"
+                          className="aol-button aol-button-secondary"
                         >
                           No
                         </button>
@@ -286,6 +297,9 @@ class AOLNewsletterFunnel extends Component {
                 {currentStep === 3 && (
                   <div className="step-content">
                     <div className="dial-up-prompt">
+                      <div className="status-text">
+                        Step 3: Checking preferences...
+                      </div>
                       <p>Select your preferred email frequency:</p>
 
                       <div className="frequency-options">
@@ -314,13 +328,13 @@ class AOLNewsletterFunnel extends Component {
                       <div className="button-group">
                         <button
                           onClick={this.handlePreviousStep}
-                          className="pb-button"
+                          className="aol-button aol-button-secondary"
                         >
                           Back
                         </button>
                         <button
                           onClick={this.handleConfirm}
-                          className="pb-button"
+                          className="aol-button aol-button-primary"
                         >
                           Confirm
                         </button>
@@ -335,6 +349,35 @@ class AOLNewsletterFunnel extends Component {
           {/* Step 2: Channels interface */}
           {currentStep === 2 && (
             <div className="channels-interface">
+              {/* Base dial-up background still visible */}
+              <div className="dial-up-background">
+                <img
+                  src="/static/aol/dial_up1.png"
+                  alt="AOL Dial-up Interface"
+                  className="dial-up-bg-image"
+                />
+              </div>
+
+              {/* Progression boxes still visible */}
+              <div className="step-boxes-overlay">
+                <div className="step-box step-box-1">
+                  <img
+                    src="/static/aol/dialup_pic1.png"
+                    alt="AOL Figure 1"
+                    className="aol-figure-image"
+                  />
+                </div>
+                <div className="step-box step-box-2">
+                  <img
+                    src="/static/aol/dialup_pic2.png"
+                    alt="AOL Figure 2"
+                    className="aol-figure-image"
+                  />
+                </div>
+                <div className="step-box step-box-3">{/* Empty for now */}</div>
+              </div>
+
+              {/* Temporary channels background overlay */}
               <div className="channels-background">
                 <img
                   src="/static/aol/channels_background.png"
@@ -346,6 +389,10 @@ class AOLNewsletterFunnel extends Component {
               {/* Channels content overlay */}
               <div className="channels-content-overlay">
                 <div className="step-content channels-content">
+                  <div className="status-text-channels">
+                    Step 2: Connecting using TCP/IP...
+                  </div>
+
                   <div className="form-group email-section">
                     <label htmlFor="email" className="w98-label">
                       Email Address:
@@ -366,7 +413,12 @@ class AOLNewsletterFunnel extends Component {
                   </div>
 
                   <div className="channels-selection">
-                    <p className="channels-header">Choose Your Channels:</p>
+                    <div className="channels-header">
+                      Welcome to AOL Channels!
+                    </div>
+                    <div className="channels-subheader">
+                      Choose your interests:
+                    </div>
                     {errors.categories && (
                       <span className="error-message categories-error">
                         {errors.categories}
@@ -374,157 +426,138 @@ class AOLNewsletterFunnel extends Component {
                     )}
 
                     <div className="channel-buttons-grid">
-                      {/* Technology Channel */}
-                      <div className="channel-item">
-                        <div
-                          className={cx("channel-button", {
-                            selected: formData.categories.technology.main,
-                          })}
-                          onClick={() =>
-                            this.handleMainCategoryChange("technology")
-                          }
-                        >
-                          <img
-                            src="/static/aol/channels_computing_btn.png"
-                            alt="Technology"
-                            className="channel-btn-image"
-                          />
-                        </div>
-                        <div className="subcategories-list">
-                          {Object.keys(
-                            formData.categories.technology.subcategories
-                          ).map((sub) => (
-                            <label key={sub} className="subcategory-item">
-                              <input
-                                type="checkbox"
-                                checked={
-                                  formData.categories.technology.subcategories[
-                                    sub
-                                  ]
-                                }
-                                onChange={() =>
-                                  this.handleSubcategoryChange(
-                                    "technology",
-                                    sub
-                                  )
-                                }
-                              />
-                              Tech {sub}
-                            </label>
-                          ))}
-                        </div>
+                      {/* AOL Today */}
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.technology.main,
+                        })}
+                        onClick={() =>
+                          this.handleMainCategoryChange("technology")
+                        }
+                      >
+                        <img
+                          src="/static/aol/channels_aol_today_btn.png"
+                          alt="AOL Today"
+                          className="channel-btn-image"
+                        />
                       </div>
 
-                      {/* Builders Channel */}
-                      <div className="channel-item">
-                        <div
-                          className={cx("channel-button", {
-                            selected: formData.categories.builders.main,
-                          })}
-                          onClick={() =>
-                            this.handleMainCategoryChange("builders")
-                          }
-                        >
-                          <img
-                            src="/static/aol/channels_workplace_btn.png"
-                            alt="For Builders"
-                            className="channel-btn-image"
-                          />
-                        </div>
-                        <div className="subcategories-list">
-                          {Object.keys(
-                            formData.categories.builders.subcategories
-                          ).map((sub) => (
-                            <label key={sub} className="subcategory-item">
-                              <input
-                                type="checkbox"
-                                checked={
-                                  formData.categories.builders.subcategories[
-                                    sub
-                                  ]
-                                }
-                                onChange={() =>
-                                  this.handleSubcategoryChange("builders", sub)
-                                }
-                              />
-                              Builder {sub}
-                            </label>
-                          ))}
-                        </div>
+                      {/* Computing */}
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.builders.main,
+                        })}
+                        onClick={() =>
+                          this.handleMainCategoryChange("builders")
+                        }
+                      >
+                        <img
+                          src="/static/aol/channels_computing_btn.png"
+                          alt="Computing"
+                          className="channel-btn-image"
+                        />
                       </div>
 
-                      {/* Art & Design Channel */}
-                      <div className="channel-item">
-                        <div
-                          className={cx("channel-button", {
-                            selected: formData.categories.artDesign.main,
-                          })}
-                          onClick={() =>
-                            this.handleMainCategoryChange("artDesign")
-                          }
-                        >
-                          <img
-                            src="/static/aol/channels_entertainment_btn.png"
-                            alt="Art & Design"
-                            className="channel-btn-image"
-                          />
-                        </div>
-                        <div className="subcategories-list">
-                          {Object.keys(
-                            formData.categories.artDesign.subcategories
-                          ).map((sub) => (
-                            <label key={sub} className="subcategory-item">
-                              <input
-                                type="checkbox"
-                                checked={
-                                  formData.categories.artDesign.subcategories[
-                                    sub
-                                  ]
-                                }
-                                onChange={() =>
-                                  this.handleSubcategoryChange("artDesign", sub)
-                                }
-                              />
-                              Art {sub}
-                            </label>
-                          ))}
-                        </div>
+                      {/* Games */}
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.gaming.main,
+                        })}
+                        onClick={() => this.handleMainCategoryChange("gaming")}
+                      >
+                        <img
+                          src="/static/aol/channels_games_btn.png"
+                          alt="Games"
+                          className="channel-btn-image"
+                        />
                       </div>
 
-                      {/* Gaming Channel */}
-                      <div className="channel-item">
-                        <div
-                          className={cx("channel-button", {
-                            selected: formData.categories.gaming.main,
-                          })}
-                          onClick={() =>
-                            this.handleMainCategoryChange("gaming")
-                          }
-                        >
-                          <img
-                            src="/static/aol/channels_games_btn.png"
-                            alt="Gaming"
-                            className="channel-btn-image"
-                          />
-                        </div>
-                        <div className="subcategories-list">
-                          {Object.keys(
-                            formData.categories.gaming.subcategories
-                          ).map((sub) => (
-                            <label key={sub} className="subcategory-item">
-                              <input
-                                type="checkbox"
-                                checked={
-                                  formData.categories.gaming.subcategories[sub]
-                                }
-                                onChange={() =>
-                                  this.handleSubcategoryChange("gaming", sub)
-                                }
-                              />
-                              Gaming {sub}
-                            </label>
-                          ))}
-                        </div>
+                      {/* Entertainment */}
+                      <div
+                        className={cx("channel-button", {
+                          selected: formData.categories.artDesign.main,
+                        })}
+                        onClick={() =>
+                          this.handleMainCategoryChange("artDesign")
+                        }
+                      >
+                        <img
+                          src="/static/aol/channels_entertainment_btn.png"
+                          alt="Entertainment"
+                          className="channel-btn-image"
+                        />
+                      </div>
+
+                      {/* News */}
+                      <div className="channel-button">
+                        <img
+                          src="/static/aol/channels_news_btn.png"
+                          alt="News"
+                          className="channel-btn-image"
+                        />
+                      </div>
+
+                      {/* Sports */}
+                      <div className="channel-button">
+                        <img
+                          src="/static/aol/channels_sports_btn.png"
+                          alt="Sports"
+                          className="channel-btn-image"
+                        />
+                      </div>
+
+                      {/* Travel */}
+                      <div className="channel-button">
+                        <img
+                          src="/static/aol/channels_travel_btn.png"
+                          alt="Travel"
+                          className="channel-btn-image"
+                        />
+                      </div>
+
+                      {/* Shopping */}
+                      <div className="channel-button">
+                        <img
+                          src="/static/aol/channels_shopping_btn.png"
+                          alt="Shopping"
+                          className="channel-btn-image"
+                        />
+                      </div>
+
+                      {/* Families */}
+                      <div className="channel-button">
+                        <img
+                          src="/static/aol/channels_families_btn.png"
+                          alt="Families"
+                          className="channel-btn-image"
+                        />
+                      </div>
+
+                      {/* Kids Only */}
+                      <div className="channel-button">
+                        <img
+                          src="/static/aol/channels_kids_only_btn.png"
+                          alt="Kids Only"
+                          className="channel-btn-image"
+                        />
+                      </div>
+
+                      {/* Health */}
+                      <div className="channel-button">
+                        <img
+                          src="/static/aol/channels_health_btn.png"
+                          alt="Health"
+                          className="channel-btn-image"
+                        />
+                      </div>
+
+                      {/* Personal Finance */}
+                      <div className="channel-button">
+                        <img
+                          src="/static/aol/channels_personal_finance_btn.png"
+                          alt="Personal Finance"
+                          className="channel-btn-image"
+                        />
                       </div>
                     </div>
                   </div>
@@ -532,12 +565,15 @@ class AOLNewsletterFunnel extends Component {
                   <div className="channels-navigation">
                     <button
                       onClick={this.handlePreviousStep}
-                      className="pb-button"
+                      className="aol-button aol-button-back"
                     >
-                      ← Back to Dial-up
+                      ← Back
                     </button>
-                    <button onClick={this.handleNextStep} className="pb-button">
-                      Continue to Frequency
+                    <button
+                      onClick={this.handleNextStep}
+                      className="aol-button aol-button-continue"
+                    >
+                      Continue →
                     </button>
                   </div>
                 </div>
