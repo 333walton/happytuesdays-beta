@@ -4,45 +4,44 @@ import AOLNewsletterFunnel from "./AOLNewsletterFunnel";
 
 const NewsletterFunnelManager = ({ children }) => {
   const [showFunnel, setShowFunnel] = useState(false);
-  const [hasShownThisSession, setHasShownThisSession] = useState(false);
+  // Remove session restriction state variables
+  // const [hasShownThisSession, setHasShownThisSession] = useState(false);
   const [sessionTimer, setSessionTimer] = useState(null);
   const programContext = useContext(ProgramContext);
 
   // Debug log
   console.log("NewsletterFunnelManager state:", {
     showFunnel,
-    hasShownThisSession,
+    // hasShownThisSession,
   });
 
-  // Check if funnel was already shown/declined this session
+  // Remove session storage check
+  // useEffect(() => {
+  //   const sessionStatus = sessionStorage.getItem("newsletterFunnelStatus");
+  //   console.log("Session status from storage:", sessionStatus);
+  //   if (
+  //     sessionStatus === "shown" ||
+  //     sessionStatus === "declined" ||
+  //     sessionStatus === "completed"
+  //   ) {
+  //     setHasShownThisSession(true);
+  //   }
+  // }, []);
+
+  // Set up 2-minute timer (no session restriction)
   useEffect(() => {
-    const sessionStatus = sessionStorage.getItem("newsletterFunnelStatus");
-    console.log("Session status from storage:", sessionStatus);
-    if (
-      sessionStatus === "shown" ||
-      sessionStatus === "declined" ||
-      sessionStatus === "completed"
-    ) {
-      setHasShownThisSession(true);
-    }
-  }, []);
+    const timer = setTimeout(() => {
+      triggerFunnel("session_duration");
+    }, 2 * 60 * 1000); // 2 minutes
 
-  // Set up 2-minute timer
-  useEffect(() => {
-    if (!hasShownThisSession) {
-      const timer = setTimeout(() => {
-        triggerFunnel("session_duration");
-      }, 2 * 60 * 1000); // 2 minutes
+    setSessionTimer(timer);
 
-      setSessionTimer(timer);
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, []); // Remove hasShownThisSession dependency
 
-      return () => {
-        if (timer) clearTimeout(timer);
-      };
-    }
-  }, [hasShownThisSession]);
-
-  // Listen for Feeds window close event
+  // Listen for Feeds window close event (no session restriction)
   useEffect(() => {
     const handleFeedsClose = (event) => {
       if (event.detail && event.detail.programTitle === "Feeds") {
@@ -52,15 +51,9 @@ const NewsletterFunnelManager = ({ children }) => {
 
     window.addEventListener("programClosed", handleFeedsClose);
     return () => window.removeEventListener("programClosed", handleFeedsClose);
-  }, [hasShownThisSession]);
+  }, []); // Remove hasShownThisSession dependency
 
-  // Use ref to access current state in event listener
-  const hasShownRef = useRef(hasShownThisSession);
-  useEffect(() => {
-    hasShownRef.current = hasShownThisSession;
-  }, [hasShownThisSession]);
-
-  // Listen for "You've Got Mail" click
+  // Listen for "You've Got Mail" click (no session restriction)
   useEffect(() => {
     const handleMailClick = (event) => {
       console.log(
@@ -68,38 +61,30 @@ const NewsletterFunnelManager = ({ children }) => {
         event
       );
       console.log("📧 Event detail:", event.detail);
-      console.log("📧 hasShownThisSession (from ref):", hasShownRef.current);
 
       if (event.detail && event.detail.action === "youve_got_mail") {
         console.log("📧 Mail action detected, triggering funnel");
-        // Use the ref instead of state directly
-        if (!hasShownRef.current) {
-          console.log("📧 Setting showFunnel to true");
-          setShowFunnel(true);
-          setHasShownThisSession(true);
-          sessionStorage.setItem("newsletterFunnelStatus", "shown");
+        console.log("📧 Setting showFunnel to true");
+        setShowFunnel(true);
 
-          // Clear the timer if it exists
-          if (sessionTimer) {
-            clearTimeout(sessionTimer);
-          }
-
-          // Focus the window after a short delay
-          setTimeout(() => {
-            const funnelWindow = document.querySelector(
-              ".Window.AOLNewsletterFunnel"
-            );
-            if (funnelWindow) {
-              funnelWindow.click(); // Simulate click to bring to front
-              const titleBar = funnelWindow.querySelector(".Window__heading");
-              if (titleBar) {
-                titleBar.click(); // Click title bar to ensure focus
-              }
-            }
-          }, 100);
-        } else {
-          console.log("📧 Funnel already shown this session, skipping");
+        // Clear the timer if it exists
+        if (sessionTimer) {
+          clearTimeout(sessionTimer);
         }
+
+        // Focus the window after a short delay
+        setTimeout(() => {
+          const funnelWindow = document.querySelector(
+            ".Window.AOLNewsletterFunnel"
+          );
+          if (funnelWindow) {
+            funnelWindow.click(); // Simulate click to bring to front
+            const titleBar = funnelWindow.querySelector(".Window__heading");
+            if (titleBar) {
+              titleBar.click(); // Click title bar to ensure focus
+            }
+          }
+        }, 100);
       }
     };
 
@@ -110,59 +95,50 @@ const NewsletterFunnelManager = ({ children }) => {
       window.removeEventListener("startMenuAction", handleMailClick);
       console.log("📧 NewsletterFunnelManager - Event listener removed");
     };
-  }, []); // Remove hasShownThisSession dependency
+  }, []);
 
-  // Central trigger function with suppression check
+  // Central trigger function (no suppression check)
   const triggerFunnel = (source) => {
     console.log(`📧 Newsletter funnel triggered by: ${source}`);
     console.log("📧 Current state before trigger:", {
-      hasShownThisSession: hasShownRef.current,
       showFunnel,
     });
 
-    if (!hasShownRef.current) {
-      console.log("📧 Setting showFunnel to true");
-      setShowFunnel(true);
-      setHasShownThisSession(true);
-      hasShownRef.current = true; // Update ref immediately
-      sessionStorage.setItem("newsletterFunnelStatus", "shown");
+    console.log("📧 Setting showFunnel to true");
+    setShowFunnel(true);
 
-      // Clear the timer if it exists
-      if (sessionTimer) {
-        clearTimeout(sessionTimer);
-      }
-
-      // Focus the window after a short delay
-      setTimeout(() => {
-        const funnelWindow = document.querySelector(
-          ".Window.AOLNewsletterFunnel"
-        );
-        if (funnelWindow) {
-          funnelWindow.click(); // Simulate click to bring to front
-          const titleBar = funnelWindow.querySelector(".Window__heading");
-          if (titleBar) {
-            titleBar.click(); // Click title bar to ensure focus
-          }
-        }
-      }, 100);
-    } else {
-      console.log("📧 Funnel already shown this session, skipping");
+    // Clear the timer if it exists
+    if (sessionTimer) {
+      clearTimeout(sessionTimer);
     }
+
+    // Focus the window after a short delay
+    setTimeout(() => {
+      const funnelWindow = document.querySelector(
+        ".Window.AOLNewsletterFunnel"
+      );
+      if (funnelWindow) {
+        funnelWindow.click(); // Simulate click to bring to front
+        const titleBar = funnelWindow.querySelector(".Window__heading");
+        if (titleBar) {
+          titleBar.click(); // Click title bar to ensure focus
+        }
+      }
+    }, 100);
   };
 
-  // Handle funnel close
+  // Handle funnel close (still track completion for analytics if needed)
   const handleFunnelClose = (completed) => {
     setShowFunnel(false);
 
     if (!completed) {
       // User declined or closed without completing
-      sessionStorage.setItem("newsletterFunnelStatus", "declined");
+      // Optional: still store for analytics but don't use for restriction
+      // sessionStorage.setItem("newsletterFunnelStatus", "declined");
     } else {
       // User completed signup
-      sessionStorage.setItem("newsletterFunnelStatus", "completed");
-
-      // Store signup data for future use
-      // This will be implemented in Part 3
+      // Optional: still store for analytics but don't use for restriction
+      // sessionStorage.setItem("newsletterFunnelStatus", "completed");
     }
   };
 
@@ -194,7 +170,7 @@ const NewsletterFunnelManager = ({ children }) => {
     return () => {
       delete window.triggerNewsletterFunnel;
     };
-  }, [hasShownThisSession]);
+  }, []);
 
   return (
     <>
