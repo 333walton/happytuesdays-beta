@@ -32,6 +32,38 @@
 }
 
 // The actual window component
+.react-draggable
+  > .Frame
+  .Window
+  .WindowProgram
+  .AOLNewsletterFunnel
+  .Window--active {
+  transform: none !important;
+}
+
+.react-draggable:has(.frequency-options):has(
+    > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
+  ) {
+  transform: none !important; /* Keep this if you still want it tied to this condition */
+  height: 436px !important;
+}
+
+.react-draggable:has(.step-content.channels-content) {
+  height: 436px !important; // Using 420px based on your last attempt, confirm if this is the desired height
+  // Add other styles you want applied when the prompt is active, e.g., transform: none;
+}
+
+.react-draggable:has(.dial-up-prompt.recap-prompt) {
+  height: 436px !important; // Using 420px based on your last attempt, confirm if this is the desired height
+  // Add other styles you want applied when the prompt is active, e.g., transform: none;
+  transform: none !important;
+}
+
+.react-draggable:has(.AOLNewsletterFunnel) {
+  transform: none !important;
+  height: 380px !important;
+}
+
 .Frame .Window .WindowProgram .AOLNewsletterFunnel .Window--active {
   background-color: #fffaf2 !important;
 }
@@ -67,9 +99,9 @@
           left: 0;
           right: 0;
           bottom: 0;
-          background-image: url("../../../public/static/aol/channels_background.png");
-          background-size: cover;
-          background-position: center;
+          //background-image: url("../../../public/static/aol/channels_background.png");
+          //background-size: cover;
+          //background-position: center;
           opacity: 0.15;
           z-index: 0;
         }
@@ -401,7 +433,7 @@
 
       .channels-bg-image {
         width: 100%;
-        height: 100%;
+        //height: 100%;
         object-fit: cover;
       }
     }
