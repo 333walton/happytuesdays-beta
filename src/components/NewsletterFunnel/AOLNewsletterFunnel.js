@@ -255,7 +255,7 @@ class AOLNewsletterFunnel extends Component {
                 <div className="step-box step-box-3">
                   {currentStep >= 3 && (
                     <img
-                      src="/static/aol/logo3.png"
+                      src="/static/aol/logo_pic3.png"
                       alt="AOL Figure 3"
                       className="aol-figure-image aol-figure-3"
                     />
