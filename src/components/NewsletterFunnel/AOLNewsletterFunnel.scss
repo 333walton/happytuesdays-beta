@@ -33,11 +33,11 @@
 
 // The actual window component
 .Frame .Window .WindowProgram .AOLNewsletterFunnel .Window--active {
-  background: #fffaf2;
+  background: #fffaf2 !important;
 }
 
 .AOLNewsletterFunnel {
-  background: #fffaf2;
+  background: #fffaf2 !important;
 
   // Position window below the AOL frame (from original)
   margin-top: auto;
