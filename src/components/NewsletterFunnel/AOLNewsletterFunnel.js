@@ -3,7 +3,7 @@ import Window from "../tools/Window";
 import { WindowProgram, WindowAlert } from "packard-belle";
 import buildMenu from "../../helpers/menuBuilder";
 import cx from "classnames";
-import * as icons from "../../icons";
+import * as icons from "../../icons"; //
 import "./AOLNewsletterFunnel.scss";
 
 class AOLNewsletterFunnel extends Component {
