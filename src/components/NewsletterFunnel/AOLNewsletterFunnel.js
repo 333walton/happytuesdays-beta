@@ -237,7 +237,7 @@ class AOLNewsletterFunnel extends Component {
                 <div className="step-box step-box-1">
                   {currentStep >= 1 && (
                     <img
-                      src="/static/aol/dialup_pic111.png"
+                      src="/static/aol/dialup_pic1.png"
                       alt="AOL Figure 1"
                       className="aol-figure-image"
                     />
@@ -246,7 +246,7 @@ class AOLNewsletterFunnel extends Component {
                 <div className="step-box step-box-2">
                   {currentStep >= 2 && (
                     <img
-                      src="/static/aol/dialup_pic222.png"
+                      src="/static/aol/dialup_pic2.png"
                       alt="AOL Figure 2"
                       className="aol-figure-image"
                     />
@@ -424,14 +424,14 @@ class AOLNewsletterFunnel extends Component {
               <div className="step-boxes-overlay">
                 <div className="step-box step-box-1">
                   <img
-                    src="/static/aol/dialup_pic111.png"
+                    src="/static/aol/dialup_pic1.png"
                     alt="AOL Figure 1"
                     className="aol-figure-image"
                   />
                 </div>
                 <div className="step-box step-box-2">
                   <img
-                    src="/static/aol/dialup_pic222.png"
+                    src="/static/aol/dialup_pic2.png"
                     alt="AOL Figure 2"
                     className="aol-figure-image"
                   />
