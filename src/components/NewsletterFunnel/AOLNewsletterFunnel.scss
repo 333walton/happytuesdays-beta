@@ -44,7 +44,7 @@
 @media (min-width: 768px), (pointer: coarse) {
   .react-draggable:has(.AOLNewsletterFunnel) {
     transform: none !important;
-    height: 380px !important; // height for step 1 of the funnel
+    height: 375px !important; // height for step 1 of the funnel
   }
 
   .react-draggable:has(.step-content.channels-content) {
@@ -410,7 +410,7 @@
         }
         &.step-box-3 {
           opacity: 1;
-          scale: 1.15;
+          scale: 1;
         }
 
         .aol-figure-image {
@@ -485,23 +485,23 @@
 
           .channel-buttons-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(6, 1fr); // 4 rows of 6 needed
             gap: 8px;
             margin: 15px 0;
             justify-items: center;
 
             @media (max-width: 600px) {
-              grid-template-columns: repeat(4, 1fr);
+              grid-template-columns: repeat(4, 1fr); // 4 rows of 6 needed
             }
 
             .channel-button {
               position: relative;
               width: 60px;
               height: 60px;
-              border: 2px solid transparent;
+              //border: 2px solid transparent;
               cursor: pointer;
               transition: all 0.2s ease;
-              border-radius: 4px;
+              //border-radius: 2px;
 
               .channel-btn-image {
                 width: 100%;
@@ -516,7 +516,7 @@
               }
 
               &.selected {
-                border-color: #0055ff;
+                //border-color: #0055ff;
                 box-shadow: 0 0 8px rgba(0, 85, 255, 0.5);
 
                 &::after {
@@ -528,7 +528,7 @@
                   color: white;
                   width: 16px;
                   height: 16px;
-                  border-radius: 50%;
+                  //border-radius: 50%;
                   display: flex;
                   align-items: center;
                   justify-content: center;
@@ -844,8 +844,8 @@
   }
 }
 
-// Mobile adjustments
-// Mobile-specific fixes for non-maximized newsletter window
+// MOBILE STYLES
+
 @media (max-width: 480px) {
   // Fix the react-draggable container height on mobile
   .react-draggable:has(.AOLNewsletterFunnel) {
@@ -1003,6 +1003,14 @@
 
         .channels-content-overlay {
           margin-top: 0px;
+          margin-left: -15px;
+          padding-right: 15px;
+          right: 10px;
+          width: 382px;
+          left: 10px;
+          //margin-right: 25px;
+          align-content: center;
+          padding: 0px !important;
         }
 
         // Content overlay - fixed positioning
@@ -1028,6 +1036,10 @@
             -webkit-overflow-scrolling: touch;
             display: flex;
             flex-direction: column;
+
+            .channels-content {
+              //margin-right: 50px;
+            }
 
             // First step - simple prompt
             .dial-up-prompt {
@@ -1061,9 +1073,9 @@
               }
 
               .w98-input {
-                font-size: 16px; // Prevent zoom on iOS
-                padding: 5px 8px;
-                height: 32px;
+                font-size: 12px; // Prevent zoom on iOS
+                padding: 4px 6px;
+                height: 100%;
               }
 
               .error-message {
@@ -1085,7 +1097,7 @@
 
               .channels-subheader {
                 font-size: 11px;
-                margin-bottom: 8px;
+                margin-bottom: 0px;
               }
 
               .categories-error {
@@ -1097,14 +1109,15 @@
                 flex: 1;
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
-                gap: 8px;
-                margin: 8px 0;
+                gap: 2px;
+                margin: 0px 0px;
+                margin-top: 20px;
                 overflow-y: auto;
                 align-content: start;
 
                 .channel-button {
-                  width: 55px;
-                  height: 55px;
+                  width: 100%;
+                  height: 100%;
                   justify-self: center;
 
                   .channel-btn-image {
