@@ -485,7 +485,7 @@
 
           .channel-buttons-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr); // 4 rows of 6 needed
+            grid-template-columns: repeat(4, 1fr); // 4 rows of 6 needed
             gap: 8px;
             margin: 15px 0;
             justify-items: center;
