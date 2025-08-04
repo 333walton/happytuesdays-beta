@@ -108,6 +108,13 @@
         }
       }
 
+      .aol-figure-image aol-figure-2 {
+        width: 85%;
+        height: 85%;
+        object-fit: contain;
+        margin-left: 5%;
+      }
+
       .channels-background {
         position: absolute;
         top: -20px;
@@ -202,12 +209,14 @@
         &.step-box-1 {
           width: 109px;
           height: 70px;
+          //scale: 0.97;
           opacity: 1;
         }
         &.step-box-2 {
           width: 109px;
           height: 70px;
           opacity: 1;
+          //scale: 0.94;
         }
         &.step-box-3 {
           opacity: 1;
@@ -217,20 +226,20 @@
         .aol-figure-image {
           width: 100%;
           height: 100%;
-          margin-left: 5%;
+          //margin-left: 5%;
           object-fit: contain;
           z-index: 10;
         }
 
-        .aol-figure-3 {
-          height: 75%;
-          width: 75%;
+        /*.aol-figure-3 {
+          height: 73%;
+          width: 73%;
           margin-top: 5px;
           margin-left: 12px;
           height: auto;
           max-width: 100px;
           object-fit: contain;
-        }
+        }*/
 
         .family-icon {
           position: absolute;
@@ -313,7 +322,7 @@
               font-size: 13px;
               color: #008000;
               font-style: italic;
-              margin: 20px 0;
+              //margin: 20px 0;
             }
           }
 
@@ -417,7 +426,9 @@
           width: 100%;
           height: 100%;
           z-index: 10;
-          margin-left: 5%;
+          //scale: 0.94;
+          //margin-left: 5%;
+          margin-right: auto;
           object-fit: contain;
         }
       }
@@ -486,8 +497,8 @@
           .channel-buttons-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr); // 4 rows of 4 needed
-            gap: 8px;
-            margin: 15px 0;
+            //gap: 8px;
+            margin: 25px 0;
             justify-items: center;
 
             @media (max-width: 600px) {
@@ -496,8 +507,8 @@
 
             .channel-button {
               position: relative;
-              width: 60px;
-              height: 60px;
+              //width: 60px;
+              //height: 60px;
               //border: 2px solid transparent;
               cursor: pointer;
               transition: all 0.2s ease;
@@ -875,7 +886,7 @@
   }
 
   .react-draggable:has(.dial-up-prompt.recap-prompt) {
-    height: 375px !important; // height for step 4 of the funnel
+    //height: 375px !important; // height for step 4 of the funnel
     transform: none !important;
   }
 
@@ -960,11 +971,29 @@
               width: 85px;
             }
 
+            .aol-figure-1 {
+              width: 90%;
+              height: 90%;
+              scale: 0.99;
+              object-fit: contain;
+              margin: 0;
+            }
+
             .aol-figure-image {
               width: 100%;
               height: 100%;
+              //scale: 0.94;
+              //margin-left: 5%;
+              margin-right: auto;
+              object-fit: contain;
+            }
+
+            .aol-figure-2 {
+              width: 90%;
+              //height: 90%;
               object-fit: contain;
               margin: 0;
+              //scale: 0.99;
             }
 
             .aol-figure-3 {
@@ -972,6 +1001,7 @@
               height: 100%;
               object-fit: contain;
               margin: 0;
+              scale: 0.94;
             }
           }
         }
@@ -998,7 +1028,7 @@
         }
 
         .dial-up-content-overlay {
-          height: 161px;
+          //height: 161px;
         }
 
         .channels-content-overlay {
@@ -1112,7 +1142,7 @@
                 gap: 2px;
                 margin: 0px 0px;
                 margin-top: 20px;
-                overflow-y: auto;
+                //overflow-y: auto;
                 align-content: start;
 
                 .channel-button {

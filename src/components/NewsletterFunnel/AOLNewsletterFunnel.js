@@ -9,56 +9,117 @@ import "./AOLNewsletterFunnel.scss";
 class AOLNewsletterFunnel extends Component {
   constructor(props) {
     super(props);
+
+    // Define all available channels with their properties
+    this.channels = [
+      {
+        id: "aol_today",
+        name: "AOL Today",
+        image: "/static/aol/channels_aol_today_btn.png",
+      },
+      {
+        id: "computing",
+        name: "Computing",
+        image: "/static/aol/channels_computing_btn.png",
+      },
+      {
+        id: "games",
+        name: "Games",
+        image: "/static/aol/channels_games_btn.png",
+      },
+      {
+        id: "entertainment",
+        name: "Entertainment",
+        image: "/static/aol/channels_entertainment_btn.png",
+      },
+      { id: "news", name: "News", image: "/static/aol/channels_news_btn.png" },
+      {
+        id: "sports",
+        name: "Sports",
+        image: "/static/aol/channels_sports_btn.png",
+      },
+      {
+        id: "travel",
+        name: "Travel",
+        image: "/static/aol/channels_travel_btn.png",
+      },
+      {
+        id: "shopping",
+        name: "Shopping",
+        image: "/static/aol/channels_shopping_btn.png",
+      },
+      {
+        id: "families",
+        name: "Families",
+        image: "/static/aol/channels_families_btn.png",
+      },
+      {
+        id: "kids_only",
+        name: "Kids Only",
+        image: "/static/aol/channels_kids_only_btn.png",
+      },
+      {
+        id: "health",
+        name: "Health",
+        image: "/static/aol/channels_health_btn.png",
+      },
+      {
+        id: "personal_finance",
+        name: "Personal Finance",
+        image: "/static/aol/channels_personal_finance_btn.png",
+      },
+      {
+        id: "influence",
+        name: "Influence",
+        image: "/static/aol/new_channels_influence_btn.png",
+      },
+      {
+        id: "workplace",
+        name: "Workplace",
+        image: "/static/aol/new_channels_workplace_btn.png",
+      },
+      {
+        id: "research_learn",
+        name: "Research & Learn",
+        image: "/static/aol/new_channels_research_and_learn_btn.png",
+      },
+      {
+        id: "lifestyles",
+        name: "Lifestyles",
+        image: "/static/aol/new_channels_lifestyles_btn.png",
+      },
+      {
+        id: "international",
+        name: "International",
+        image: "/static/aol/new_channels_international_btn.png",
+      },
+      {
+        id: "local",
+        name: "Local",
+        image: "/static/aol/new_channels_local_btn.png",
+      },
+      // Using placeholder images for the last two to reach 20 total
+      {
+        id: "music",
+        name: "Music",
+        image: "/static/aol/channels_news_btn.png",
+      },
+      {
+        id: "food",
+        name: "Food & Dining",
+        image: "/static/aol/channels_news_btn.png",
+      },
+    ];
+
     this.state = {
       currentStep: 1,
       formData: {
         email: "",
-        categories: {
-          technology: {
-            main: false,
-            subcategories: {
-              sub1: false,
-              sub2: false,
-              sub3: false,
-              sub4: false,
-              sub5: false,
-              sub6: false,
-            },
-          },
-          builders: {
-            main: false,
-            subcategories: {
-              sub1: false,
-              sub2: false,
-              sub3: false,
-              sub4: false,
-              sub5: false,
-              sub6: false,
-            },
-          },
-          artDesign: {
-            main: false,
-            subcategories: {
-              sub1: false,
-              sub2: false,
-              sub3: false,
-              sub4: false,
-              sub5: false,
-              sub6: false,
-            },
-          },
-          gaming: {
-            main: false,
-            subcategories: {
-              sub1: false,
-              sub2: false,
-              sub3: false,
-              sub4: false,
-              sub5: false,
-              sub6: false,
-            },
-          },
-        },
+        // Initialize selectedChannels as an object with all channels set to false
+        selectedChannels: this.channels.reduce((acc, channel) => {
+          acc[channel.id] = false;
+          return acc;
+        }, {}),
         frequency: "weekly",
       },
       errors: {},
@@ -71,44 +132,31 @@ class AOLNewsletterFunnel extends Component {
     return re.test(email);
   };
 
-  // Check if at least one category is selected
-  hasSelectedCategories = () => {
-    return Object.values(this.state.formData.categories).some(
-      (cat) => cat.main || Object.values(cat.subcategories).some((sub) => sub)
+  // Check if at least one channel is selected
+  hasSelectedChannels = () => {
+    return Object.values(this.state.formData.selectedChannels).some(
+      (isSelected) => isSelected
     );
   };
 
-  // Handle main category selection
-  handleMainCategoryChange = (category) => {
-    const newFormData = { ...this.state.formData };
-    const newCategories = { ...newFormData.categories };
-    const isSelected = !newCategories[category].main;
-    newCategories[category].main = isSelected;
-
-    // Toggle all subcategories when main is selected/deselected
-    Object.keys(newCategories[category].subcategories).forEach((sub) => {
-      newCategories[category].subcategories[sub] = isSelected;
-    });
-
-    newFormData.categories = newCategories;
-    this.setState({ formData: newFormData });
+  // Handle individual channel selection
+  handleChannelToggle = (channelId) => {
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        selectedChannels: {
+          ...prevState.formData.selectedChannels,
+          [channelId]: !prevState.formData.selectedChannels[channelId],
+        },
+      },
+    }));
   };
 
-  // Handle subcategory selection
-  handleSubcategoryChange = (category, subcategory) => {
-    const newFormData = { ...this.state.formData };
-    const newCategories = { ...newFormData.categories };
-    newCategories[category].subcategories[subcategory] =
-      !newCategories[category].subcategories[subcategory];
-
-    // Check if all subcategories are selected to update main
-    const allSubsSelected = Object.values(
-      newCategories[category].subcategories
-    ).every((sub) => sub);
-    newCategories[category].main = allSubsSelected;
-
-    newFormData.categories = newCategories;
-    this.setState({ formData: newFormData });
+  // Get list of selected channel names for summary
+  getSelectedChannelNames = () => {
+    return this.channels
+      .filter((channel) => this.state.formData.selectedChannels[channel.id])
+      .map((channel) => channel.name);
   };
 
   // Handle input changes
@@ -141,9 +189,9 @@ class AOLNewsletterFunnel extends Component {
         newErrors.email = "Please enter a valid email";
       }
 
-      // Validate categories
-      if (!this.hasSelectedCategories()) {
-        newErrors.categories = "Please select at least one category";
+      // Validate channels
+      if (!this.hasSelectedChannels()) {
+        newErrors.categories = "Please select at least one channel";
       }
 
       if (Object.keys(newErrors).length > 0) {
@@ -248,14 +296,14 @@ class AOLNewsletterFunnel extends Component {
                     <img
                       src="/static/aol/dialup_pic2.png"
                       alt="AOL Figure 2"
-                      className="aol-figure-image"
+                      className="aol-figure-image aol-figure-2"
                     />
                   )}
                 </div>
                 <div className="step-box step-box-3">
                   {currentStep >= 3 && (
                     <img
-                      src="/static/aol/logo_pic3.png"
+                      src="" ///static/aol/logo_pic3.png
                       alt="AOL Figure 3"
                       className="aol-figure-image aol-figure-3"
                     />
@@ -351,6 +399,10 @@ class AOLNewsletterFunnel extends Component {
                 {currentStep === 4 && (
                   <div className="step-content">
                     <div className="dial-up-prompt recap-prompt">
+                      <p className="confirmation-text">
+                        Welcome to the Happy Tuesdays community! Your
+                        subscription has been confirmed.
+                      </p>
                       <h3>Subscription Summary</h3>
                       <div className="recap-section">
                         <p>
@@ -366,24 +418,13 @@ class AOLNewsletterFunnel extends Component {
                           <strong>Selected Channels:</strong>
                         </p>
                         <ul className="selected-channels">
-                          {formData.categories.technology.main && (
-                            <li>Technology/News</li>
-                          )}
-                          {formData.categories.builders.main && (
-                            <li>Builders/Computing</li>
-                          )}
-                          {formData.categories.gaming.main && (
-                            <li>Gaming/Travel</li>
-                          )}
-                          {formData.categories.artDesign.main && (
-                            <li>Art & Design/Entertainment</li>
+                          {this.getSelectedChannelNames().map(
+                            (channelName, index) => (
+                              <li key={index}>{channelName}</li>
+                            )
                           )}
                         </ul>
                       </div>
-                      <p className="confirmation-text">
-                        Welcome to the Happy Tuesdays community! Your
-                        subscription has been confirmed.
-                      </p>
                       <div className="button-group">
                         <button
                           onClick={this.handleRecapOk}
@@ -485,311 +526,21 @@ class AOLNewsletterFunnel extends Component {
                     )}
 
                     <div className="channel-buttons-grid">
-                      {/* AOL Today */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.technology.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("technology")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_aol_today_btn.png"
-                          alt="AOL Today"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* Computing */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.builders.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("builders")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_computing_btn.png"
-                          alt="Computing"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* Games */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.gaming.main,
-                        })}
-                        onClick={() => this.handleMainCategoryChange("gaming")}
-                      >
-                        <img
-                          src="/static/aol/channels_games_btn.png"
-                          alt="Games"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* Entertainment */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.artDesign.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("artDesign")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_entertainment_btn.png"
-                          alt="Entertainment"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* News */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.technology.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("technology")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_news_btn.png"
-                          alt="News"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* Sports */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.builders.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("builders")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_sports_btn.png"
-                          alt="Sports"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* Travel */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.gaming.main,
-                        })}
-                        onClick={() => this.handleMainCategoryChange("gaming")}
-                      >
-                        <img
-                          src="/static/aol/channels_travel_btn.png"
-                          alt="Travel"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* Shopping */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.artDesign.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("artDesign")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_shopping_btn.png"
-                          alt="Shopping"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* Families */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.technology.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("technology")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_families_btn.png"
-                          alt="Families"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* Kids Only */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.builders.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("builders")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_kids_only_btn.png"
-                          alt="Kids Only"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* Health */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.gaming.main,
-                        })}
-                        onClick={() => this.handleMainCategoryChange("gaming")}
-                      >
-                        <img
-                          src="/static/aol/channels_health_btn.png"
-                          alt="Health"
-                          className="channel-btn-image"
-                        />
-                      </div>
-
-                      {/* Personal Finance */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.artDesign.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("artDesign")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_personal_finance_btn.png"
-                          alt="Personal Finance"
-                          className="channel-btn-image"
-                        />
-                      </div>
-                      {/* added */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.artDesign.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("artDesign")
-                        }
-                      >
-                        <img
-                          src="/static/aol/new_channels_influence_btn.png"
-                          alt="Personal Finance"
-                          className="channel-btn-image"
-                        />
-                      </div>
-                      {/* added */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.artDesign.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("artDesign")
-                        }
-                      >
-                        <img
-                          src="/static/aol/new_channels_workplace_btn.png"
-                          alt="Personal Finance"
-                          className="channel-btn-image"
-                        />
-                      </div>
-                      {/* added */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.artDesign.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("artDesign")
-                        }
-                      >
-                        <img
-                          src="/static/aol/new_channels_research_and_learn_btn.png"
-                          alt="Personal Finance"
-                          className="channel-btn-image"
-                        />
-                      </div>
-                      {/* added */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.artDesign.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("artDesign")
-                        }
-                      >
-                        <img
-                          src="/static/aol/new_channels_lifestyles_btn.png"
-                          alt="Personal Finance"
-                          className="channel-btn-image"
-                        />
-                      </div>
-                      {/* added */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.artDesign.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("artDesign")
-                        }
-                      >
-                        <img
-                          src="/static/aol/new_channels_international_btn.png"
-                          alt="Personal Finance"
-                          className="channel-btn-image"
-                        />
-                      </div>
-                      {/* added */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.artDesign.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("artDesign")
-                        }
-                      >
-                        <img
-                          src="/static/aol/new_channels_local_btn.png"
-                          alt="Personal Finance"
-                          className="channel-btn-image"
-                        />
-                      </div>
-                      {/* added */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.technology.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("technology")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_news_btn.png"
-                          alt="News"
-                          className="channel-btn-image"
-                        />
-                      </div>
-                      {/* added */}
-                      <div
-                        className={cx("channel-button", {
-                          selected: formData.categories.technology.main,
-                        })}
-                        onClick={() =>
-                          this.handleMainCategoryChange("technology")
-                        }
-                      >
-                        <img
-                          src="/static/aol/channels_news_btn.png"
-                          alt="News"
-                          className="channel-btn-image"
-                        />
-                      </div>
+                      {this.channels.map((channel) => (
+                        <div
+                          key={channel.id}
+                          className={cx("channel-button", {
+                            selected: formData.selectedChannels[channel.id],
+                          })}
+                          onClick={() => this.handleChannelToggle(channel.id)}
+                        >
+                          <img
+                            src={channel.image}
+                            alt={channel.name}
+                            className="channel-btn-image"
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
 

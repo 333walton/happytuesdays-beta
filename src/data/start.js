@@ -17,7 +17,7 @@ const getOnlineServices = () => {
 
   return [
     {
-      title: "You've Got Mail?",
+      title: "You've Got Mail",
       icon: icons.aol16,
       isDisabled: false,
       multiInstance: true,
