@@ -269,9 +269,7 @@ class AOLNewsletterFunnel extends Component {
                   <div className="status-text">Dialing...</div>
                 )}
                 {currentStep === 3 && (
-                  <div className="status-text">
-                    Step 3: Checking preferences...
-                  </div>
+                  <div className="status-text">Checking preferences...</div>
                 )}
                 {currentStep === 4 && (
                   <div className="status-text">
