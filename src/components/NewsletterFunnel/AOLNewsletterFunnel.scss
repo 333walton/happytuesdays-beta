@@ -861,8 +861,8 @@
 @media (max-width: 480px) {
   // Fix the react-draggable container height on mobile
   .react-draggable:has(.AOLNewsletterFunnel) {
-    height: 330px !important; // height for step 1 of the funnel
-    width: 90vw !important;
+    height: 336px !important; // height for step 1 of the funnel
+    width: 96vw !important;
     max-width: 480px !important;
     position: absolute !important;
     transform: none !important;
@@ -875,7 +875,8 @@
   }
 
   .react-draggable:has(.step-content.channels-content) {
-    height: 436px !important; // height for step 2 of the funnel
+    height: 496px !important; // height for step 2 of the funnel
+    width: 96vw !important;
     // Add other styles you want applied when the prompt is active, e.g., transform: none;
   }
 
@@ -883,7 +884,8 @@
       > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
     ) {
     transform: none !important; /* Keep this if you still want it tied to this condition */
-    height: 375px !important; // height for step 3 of the funnel
+    height: 393px !important; // height for step 3 of the funnel
+    //padding-top: 10px !important;
   }
 
   .react-draggable:has(.dial-up-prompt.recap-prompt) {
@@ -947,8 +949,8 @@
         // Step boxes overlay - adjusted for mobile
         .step-boxes-overlay {
           position: absolute;
-          top: 77px;
-          left: 43px;
+          top: 82px;
+          left: 48px;
           right: 10px;
           height: auto;
           width: auto; // Fixed width for mobile
@@ -981,8 +983,8 @@
             }
 
             .aol-figure-image {
-              width: 100%;
-              height: 100%;
+              //width: 100%;
+              //height: 100%;
               //scale: 0.94;
               //margin-left: 5%;
               margin-right: auto;
@@ -1010,7 +1012,7 @@
         // Status text positioning
         .status-text-container {
           position: absolute;
-          top: 143px; // Below step boxes
+          top: 153px; // Below step boxes
           left: 0;
           right: 0;
           text-align: center;
@@ -1048,7 +1050,7 @@
         .dial-up-content-overlay,
         .channels-content-overlay {
           position: absolute;
-          top: 174px; // Below status text
+          top: 190px; // Below status text
           left: 15px;
           right: 15px;
           //font-size: 11px;
@@ -1061,7 +1063,7 @@
             //height: 100%;
             background: rgba(245, 245, 220, 0.95);
             border: 2px solid #c0c0c0;
-            padding: 12px;
+            //padding: 12px;
             border-radius: 4px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
@@ -1128,7 +1130,7 @@
 
               .channels-subheader {
                 font-size: 11px;
-                margin-bottom: 0px;
+                margin-bottom: 33px;
               }
 
               .categories-error {
@@ -1142,7 +1144,7 @@
                 grid-template-columns: repeat(4, 1fr);
                 gap: 2px;
                 margin: 0px 0px;
-                margin-top: 15px;
+                //padding-top: 35px;
                 //overflow-y: auto;
                 align-content: start;
 
