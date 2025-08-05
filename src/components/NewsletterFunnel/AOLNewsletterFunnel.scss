@@ -481,9 +481,10 @@
           .channels-subheader {
             font-family: Arial, sans-serif;
             font-size: 13px;
+            font-weight: bold;
             color: #333;
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
           }
 
           .categories-error {
@@ -498,7 +499,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr); // 4 rows of 4 needed
             //gap: 8px;
-            margin: 25px 0;
+            margin: 10px 0;
             justify-items: center;
 
             @media (max-width: 600px) {
@@ -583,7 +584,7 @@
 
   // Form sections (from original)
   .email-section {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 
     .w98-label,
     .aol-label {
@@ -1141,7 +1142,7 @@
                 grid-template-columns: repeat(4, 1fr);
                 gap: 2px;
                 margin: 0px 0px;
-                margin-top: 20px;
+                margin-top: 15px;
                 //overflow-y: auto;
                 align-content: start;
 

@@ -513,9 +513,7 @@ class AOLNewsletterFunnel extends Component {
                   </div>
 
                   <div className="channels-selection">
-                    <div className="channels-header">
-                      Welcome to AOL Channels!
-                    </div>
+                    <div className="channels-header"></div>
                     <div className="channels-subheader">
                       Choose your interests:
                     </div>
