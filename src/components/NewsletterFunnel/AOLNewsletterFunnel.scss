@@ -1050,11 +1050,11 @@
         .dial-up-content-overlay,
         .channels-content-overlay {
           position: absolute;
-          top: 190px; // Below status text
-          left: 15px;
+          top: 189px; // Below status text
+          left: 20px;
           right: 15px;
           //font-size: 11px;
-          bottom: 10px;
+          bottom: 13px;
           z-index: 3;
           overflow: hidden;
           overflow-y: auto;
@@ -1186,11 +1186,11 @@
 
             // Frequency options
             .frequency-options {
-              margin: 10px 0;
+              margin: 10px 0 !important;
 
               label {
                 font-size: 13px;
-                margin-bottom: 6px;
+                margin-bottom: 3px;
 
                 input[type="radio"] {
                   margin-right: 6px;
