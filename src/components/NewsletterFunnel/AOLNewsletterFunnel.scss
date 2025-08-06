@@ -44,7 +44,7 @@
 @media (min-width: 768px), (pointer: coarse) {
   .react-draggable:has(.AOLNewsletterFunnel) {
     transform: none !important;
-    height: 375px !important; // height for step 1 of the funnel
+    height: 355px !important; // height for step 1 of the funnel
   }
 
   .react-draggable:has(.step-content.channels-content) {
@@ -56,7 +56,7 @@
       > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
     ) {
     transform: none !important; /* Keep this if you still want it tied to this condition */
-    height: 438px !important; // height for step 3 of the funnel
+    height: 408px !important; // height for step 3 of the funnel
   }
 
   .react-draggable:has(.dial-up-prompt.recap-prompt) {
@@ -86,6 +86,7 @@
     height: 100%;
     min-height: 250px;
     padding: 5px;
+    image-rendering: auto;
 
     // Generic content container that can have background overlays
     .newsletter-content {
@@ -138,7 +139,7 @@
   // Status text container - positioned below dial-up background
   .status-text-container {
     position: absolute;
-    top: 180px; // Adjust this to position below the dial-up background
+    top: 182px; // Adjust this to position below the dial-up background
     left: 0;
     right: 0;
     text-align: center;
@@ -261,11 +262,21 @@
       bottom: 20px;
       z-index: 3;
       overflow-y: auto;
+      //width: 95% !important; // width for step 3 of the funnel
+
+      .react-draggable:has(.frequency-options) {
+        transform: none !important; /* Keep this if you still want it tied to this condition */
+        width: 95% !important; // width for step 3 of the funnel
+      }
 
       .step-content {
         background: rgba(245, 245, 220, 0.95);
         border: 2px solid #c0c0c0;
-        padding: 15px;
+
+        padding-top: 0px;
+        padding-right: 15px;
+        padding-bottom: 10px;
+        padding-left: 15px;
         border-radius: 4px;
 
         .dial-up-prompt {
@@ -298,6 +309,15 @@
               margin: 0px 0;
               border-radius: 4px;
               text-align: left;
+              .dial-up-content-overlay {
+                position: absolute;
+                top: 220px; // Position below status text with consistent gap
+                left: 40px;
+                right: 40px;
+                bottom: 13px;
+                z-index: 3;
+                overflow-y: auto;
+              }
 
               p {
                 margin: 5px 0;
@@ -326,7 +346,7 @@
               font-size: 13px;
               color: #008000;
               font-style: italic;
-              margin-top: 0px;
+              margin-top: 8px;
               //margin: 20px 0;
             }
           }
@@ -337,7 +357,7 @@
 
             label {
               display: block;
-              margin-bottom: 8px;
+              //margin-bottom: 8px;
               font-family: Arial, sans-serif;
               font-size: 13px;
               cursor: pointer;
@@ -533,6 +553,7 @@
             //gap: 8px;
             margin: 5px 0;
             justify-items: center;
+            image-rendering: auto;
 
             @media (max-width: 600px) {
               grid-template-columns: repeat(4, 1fr); // 4 rows of 6 needed

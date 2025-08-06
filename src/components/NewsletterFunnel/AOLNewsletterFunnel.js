@@ -139,6 +139,13 @@ class AOLNewsletterFunnel extends Component {
     );
   };
 
+  playMailSound = () => {
+    const audio = new Audio("/sounds/aol-yougotmail.wav");
+    audio.play().catch((error) => {
+      console.log("Could not play mail sound:", error);
+    });
+  };
+
   // Handle individual channel selection
   handleChannelToggle = (channelId) => {
     this.setState((prevState) => ({
@@ -256,7 +263,10 @@ class AOLNewsletterFunnel extends Component {
 
   // Handle final confirmation
   handleConfirm = () => {
-    this.setState({ currentStep: 4 }); // Show recap screen
+    this.setState({ currentStep: 4 }, () => {
+      // Play the sound after state update
+      this.playMailSound();
+    });
   };
 
   // Handle OK from recap screen
