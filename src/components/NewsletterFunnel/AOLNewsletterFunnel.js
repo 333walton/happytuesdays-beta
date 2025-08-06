@@ -152,26 +152,37 @@ class AOLNewsletterFunnel extends Component {
     }));
   };
 
-  handleColumnSelect = (columnIndex) => {
-    // Define which channels belong to each column (5 channels per column for 20 total)
-    const channelsPerColumn = 5;
-    const startIndex = columnIndex * channelsPerColumn;
-    const endIndex = startIndex + channelsPerColumn;
+  handleColumnSelect = (columnName) => {
+    // Define which channels belong to each column
+    const columnChannelMap = {
+      Tech: ["aol_today", "news", "families", "influence", "international"],
+      Design: ["computing", "sports", "kids_only", "workplace", "local"],
+      Builders: ["games", "travel", "health", "research_learn", "music"],
+      Gaming: [
+        "entertainment",
+        "shopping",
+        "personal_finance",
+        "lifestyles",
+        "food",
+      ],
+    };
 
-    // Get channels for this column
-    const columnChannels = this.channels.slice(startIndex, endIndex);
+    // Get channel IDs for this column
+    const columnChannelIds = columnChannelMap[columnName];
+
+    if (!columnChannelIds) return;
 
     // Check if all channels in this column are currently selected
-    const allSelected = columnChannels.every(
-      (channel) => this.state.formData.selectedChannels[channel.id]
+    const allSelected = columnChannelIds.every(
+      (channelId) => this.state.formData.selectedChannels[channelId]
     );
 
     // Toggle all channels in this column
     this.setState((prevState) => {
       const newSelectedChannels = { ...prevState.formData.selectedChannels };
 
-      columnChannels.forEach((channel) => {
-        newSelectedChannels[channel.id] = !allSelected;
+      columnChannelIds.forEach((channelId) => {
+        newSelectedChannels[channelId] = !allSelected;
       });
 
       return {
@@ -558,25 +569,25 @@ class AOLNewsletterFunnel extends Component {
                     <div className="channel-column-titles">
                       <div
                         className="column-title"
-                        onClick={() => this.handleColumnSelect(0)}
+                        onClick={() => this.handleColumnSelect("Tech")}
                       >
                         Tech
                       </div>
                       <div
                         className="column-title"
-                        onClick={() => this.handleColumnSelect(1)}
+                        onClick={() => this.handleColumnSelect("Design")}
                       >
                         Design
                       </div>
                       <div
                         className="column-title"
-                        onClick={() => this.handleColumnSelect(2)}
+                        onClick={() => this.handleColumnSelect("Builders")}
                       >
                         Builders
                       </div>
                       <div
                         className="column-title"
-                        onClick={() => this.handleColumnSelect(3)}
+                        onClick={() => this.handleColumnSelect("Gaming")}
                       >
                         Gaming
                       </div>
