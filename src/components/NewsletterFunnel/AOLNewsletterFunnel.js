@@ -152,6 +152,37 @@ class AOLNewsletterFunnel extends Component {
     }));
   };
 
+  handleColumnSelect = (columnIndex) => {
+    // Define which channels belong to each column (5 channels per column for 20 total)
+    const channelsPerColumn = 5;
+    const startIndex = columnIndex * channelsPerColumn;
+    const endIndex = startIndex + channelsPerColumn;
+
+    // Get channels for this column
+    const columnChannels = this.channels.slice(startIndex, endIndex);
+
+    // Check if all channels in this column are currently selected
+    const allSelected = columnChannels.every(
+      (channel) => this.state.formData.selectedChannels[channel.id]
+    );
+
+    // Toggle all channels in this column
+    this.setState((prevState) => {
+      const newSelectedChannels = { ...prevState.formData.selectedChannels };
+
+      columnChannels.forEach((channel) => {
+        newSelectedChannels[channel.id] = !allSelected;
+      });
+
+      return {
+        formData: {
+          ...prevState.formData,
+          selectedChannels: newSelectedChannels,
+        },
+      };
+    });
+  };
+
   // Get list of selected channel names for summary
   getSelectedChannelNames = () => {
     return this.channels
@@ -522,6 +553,34 @@ class AOLNewsletterFunnel extends Component {
                         {errors.categories}
                       </span>
                     )}
+
+                    {/* Column titles for the 4 columns */}
+                    <div className="channel-column-titles">
+                      <div
+                        className="column-title"
+                        onClick={() => this.handleColumnSelect(0)}
+                      >
+                        Tech
+                      </div>
+                      <div
+                        className="column-title"
+                        onClick={() => this.handleColumnSelect(1)}
+                      >
+                        Design
+                      </div>
+                      <div
+                        className="column-title"
+                        onClick={() => this.handleColumnSelect(2)}
+                      >
+                        Builders
+                      </div>
+                      <div
+                        className="column-title"
+                        onClick={() => this.handleColumnSelect(3)}
+                      >
+                        Gaming
+                      </div>
+                    </div>
 
                     <div className="channel-buttons-grid">
                       {this.channels.map((channel) => (

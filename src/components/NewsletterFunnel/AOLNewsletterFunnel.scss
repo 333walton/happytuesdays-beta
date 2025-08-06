@@ -275,7 +275,8 @@
             font-family: Arial, sans-serif;
             font-size: 16px;
             color: #000080;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
+            margin-top: 12px;
             font-weight: bold;
           }
 
@@ -305,15 +306,15 @@
               }
 
               .selected-channels {
-                margin: 10px 0 0 20px;
+                margin: 5px 0 0 20px;
                 padding: 0;
                 list-style-type: disc;
 
                 li {
                   font-family: Arial, sans-serif;
-                  font-size: 13px;
+                  font-size: 11px;
                   color: #333;
-                  margin-bottom: 5px;
+                  margin-bottom: 1px;
                 }
               }
             }
@@ -484,7 +485,7 @@
             font-weight: bold;
             color: #333;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 7px;
           }
 
           .categories-error {
@@ -495,11 +496,38 @@
             margin-bottom: 10px;
           }
 
+          .channel-column-titles {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            margin-bottom: 5px;
+            padding: 0 2px;
+
+            .column-title {
+              font-family: Arial, sans-serif;
+              font-size: 11px;
+              font-weight: bold;
+              color: #000080;
+              text-align: center;
+              padding: 2px 0;
+              cursor: pointer;
+              user-select: none;
+              transition: all 0.2s ease;
+
+              &:hover {
+                color: #0055ff;
+                text-decoration: underline;
+              }
+              &:active {
+                transform: scale(0.95);
+              }
+            }
+          }
+
           .channel-buttons-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr); // 4 rows of 4 needed
             //gap: 8px;
-            margin: 10px 0;
+            margin: 5px 0;
             justify-items: center;
 
             @media (max-width: 600px) {
@@ -861,7 +889,7 @@
 @media (max-width: 480px) {
   // Fix the react-draggable container height on mobile
   .react-draggable:has(.AOLNewsletterFunnel) {
-    height: 336px !important; // height for step 1 of the funnel
+    height: 325px !important; // height for step 1 of the funnel
     width: 96vw !important;
     max-width: 480px !important;
     position: absolute !important;
@@ -884,7 +912,7 @@
       > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
     ) {
     transform: none !important; /* Keep this if you still want it tied to this condition */
-    height: 393px !important; // height for step 3 of the funnel
+    height: 377px !important; // height for step 3 of the funnel
     //padding-top: 10px !important;
   }
 
@@ -1080,7 +1108,8 @@
 
               p {
                 font-size: 13px;
-                margin-bottom: 15px;
+                margin-top: 1px;
+                margin-bottom: 5px;
               }
 
               .button-group {
@@ -1092,6 +1121,30 @@
                   font-size: 12px;
                   padding: 6px 14px;
                   min-width: 80px;
+                }
+              }
+
+              .recap-section {
+                background: #f0f0f0;
+                border: 1px solid #c0c0c0;
+                padding-top: 10px;
+                padding-right: 15px;
+                padding-bottom: 10px;
+                padding-left: 15px;
+                margin: 1px 0;
+                border-radius: 4px;
+                text-align: left;
+
+                p {
+                  margin: 5px 0;
+                  font-size: 13px;
+
+                  strong {
+                    color: #000080;
+                  }
+                  //}
+                  //.button-group {
+                  //  gap: 5px !important;
                 }
               }
             }
@@ -1130,12 +1183,24 @@
 
               .channels-subheader {
                 font-size: 11px;
-                margin-bottom: 33px;
+                margin-bottom: 13px;
               }
 
               .categories-error {
                 font-size: 10px;
                 margin-bottom: 5px;
+              }
+
+              @media (max-width: 480px) {
+                .channels-selection {
+                  .channel-column-titles {
+                    margin-bottom: 3px;
+
+                    .column-title {
+                      font-size: 10px;
+                    }
+                  }
+                }
               }
 
               .channel-buttons-grid {
