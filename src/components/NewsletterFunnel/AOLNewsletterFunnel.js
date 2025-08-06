@@ -14,99 +14,103 @@ class AOLNewsletterFunnel extends Component {
     this.channels = [
       {
         id: "aol_today",
-        name: "AOL Today",
+        name: "AI & Machine Learning",
         image: "/static/aol/channels_aol_today_btn.png",
       },
       {
         id: "computing",
-        name: "Computing",
+        name: "Generative & AI Art",
         image: "/static/aol/channels_computing_btn.png",
       },
       {
         id: "games",
-        name: "Games",
+        name: "Productivity Hacks",
         image: "/static/aol/channels_games_btn.png",
       },
       {
         id: "entertainment",
-        name: "Entertainment",
+        name: "Speedruns & Events",
         image: "/static/aol/channels_entertainment_btn.png",
       },
-      { id: "news", name: "News", image: "/static/aol/channels_news_btn.png" },
+      {
+        id: "news",
+        name: "Martech & AdTech",
+        image: "/static/aol/channels_news_btn.png",
+      },
       {
         id: "sports",
-        name: "Sports",
+        name: "UI/UX Trends",
         image: "/static/aol/channels_sports_btn.png",
       },
       {
         id: "travel",
-        name: "Travel",
+        name: "Automation & No-Code",
         image: "/static/aol/channels_travel_btn.png",
       },
       {
         id: "shopping",
-        name: "Shopping",
+        name: "Emulation & Modding",
         image: "/static/aol/channels_shopping_btn.png",
       },
       {
         id: "families",
-        name: "Families",
+        name: "Blockchain & Web3",
         image: "/static/aol/channels_families_btn.png",
       },
       {
         id: "kids_only",
-        name: "Kids Only",
+        name: "Color & Typography",
         image: "/static/aol/channels_kids_only_btn.png",
       },
       {
         id: "health",
-        name: "Health",
+        name: "Project Management",
         image: "/static/aol/channels_health_btn.png",
       },
       {
         id: "personal_finance",
-        name: "Personal Finance",
+        name: "Collecting & Hardware",
         image: "/static/aol/channels_personal_finance_btn.png",
       },
       {
         id: "influence",
-        name: "Influence",
+        name: "Cybersecurity & Privacy",
         image: "/static/aol/new_channels_influence_btn.png",
       },
       {
         id: "workplace",
-        name: "Workplace",
+        name: "Animation & Motion",
         image: "/static/aol/new_channels_workplace_btn.png",
       },
       {
         id: "research_learn",
-        name: "Research & Learn",
+        name: "Founder Stories",
         image: "/static/aol/new_channels_research_and_learn_btn.png",
       },
       {
         id: "lifestyles",
-        name: "Lifestyles",
+        name: "Indie Retro Releases",
         image: "/static/aol/new_channels_lifestyles_btn.png",
       },
       {
         id: "international",
-        name: "International",
+        name: "Web Dev & DevOps",
         image: "/static/aol/new_channels_international_btn.png",
       },
       {
         id: "local",
-        name: "Local",
+        name: "Tutorials & Walkthroughs",
         image: "/static/aol/new_channels_local_btn.png",
       },
       // Using placeholder images for the last two to reach 20 total
       {
         id: "music",
-        name: "Music",
+        name: "Stoic Mindset",
         image: "/static/aol/channels_news_btn.png",
       },
       {
         id: "food",
-        name: "Food & Dining",
+        name: "Retro Game News",
         image: "/static/aol/channels_news_btn.png",
       },
     ];
@@ -452,10 +456,9 @@ class AOLNewsletterFunnel extends Component {
                   <div className="step-content">
                     <div className="dial-up-prompt recap-prompt">
                       <p className="confirmation-text">
-                        Welcome to the Happy Tuesdays community! Your
-                        subscription has been confirmed.
+                        Welcome to the Happy Tuesdays community!
                       </p>
-                      <h3>Subscription Summary</h3>
+                      {/* <h3>Subscription Summary</h3> */}
                       <div className="recap-section">
                         <p>
                           <strong>Email:</strong> {formData.email}

@@ -41,27 +41,41 @@
   transform: none !important;
 }
 
+// Desktop window centering and positioning
+.react-draggable:has(.AOLNewsletterFunnel) {
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+// Prevent resize handles from appearing
+.AOLNewsletterFunnel {
+  .Window__resize-handle {
+    display: none !important;
+  }
+}
+
 @media (min-width: 768px), (pointer: coarse) {
   .react-draggable:has(.AOLNewsletterFunnel) {
-    transform: none !important;
+    transform: translate(-50%, -50%) !important;
     height: 355px !important; // height for step 1 of the funnel
   }
 
   .react-draggable:has(.step-content.channels-content) {
     height: 436px !important; // height for step 2 of the funnel
-    // Add other styles you want applied when the prompt is active, e.g., transform: none;
   }
 
   .react-draggable:has(.frequency-options):has(
       > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
     ) {
-    transform: none !important; /* Keep this if you still want it tied to this condition */
+    transform: translate(-50%, -50%) !important;
     height: 408px !important; // height for step 3 of the funnel
   }
 
   .react-draggable:has(.dial-up-prompt.recap-prompt) {
     height: 445px !important; // height for step 4 of the funnel
-    transform: none !important;
+    transform: translate(-50%, -50%) !important;
   }
 }
 
@@ -101,9 +115,6 @@
           left: 0;
           right: 0;
           bottom: 0;
-          //background-image: url("../../../public/static/aol/channels_background.png");
-          //background-size: cover;
-          //background-position: center;
           opacity: 0.15;
           z-index: 0;
         }
@@ -139,7 +150,7 @@
   // Status text container - positioned below dial-up background
   .status-text-container {
     position: absolute;
-    top: 182px; // Adjust this to position below the dial-up background
+    top: 182px;
     left: 0;
     right: 0;
     text-align: center;
@@ -150,11 +161,10 @@
       font-size: 12px;
       color: black;
       font-weight: bold;
-      //background: rgba(245, 245, 220, 0.9);
       display: inline-block;
       padding: 8px 15px;
       border-radius: 4px;
-      //border: 1px solid #c0c0c0;
+      text-align: center;
     }
   }
 
@@ -183,8 +193,6 @@
         left: 30px;
         scale: 0.6;
         position: absolute;
-        //height: 29;
-        //width: 113;
       }
     }
 
@@ -196,7 +204,6 @@
       height: 73px;
       display: flex;
       gap: 20px;
-      //justify-content: space-between;
       align-items: center;
       z-index: 2;
 
@@ -210,37 +217,23 @@
         &.step-box-1 {
           width: 109px;
           height: 70px;
-          //scale: 0.97;
           opacity: 1;
         }
         &.step-box-2 {
           width: 109px;
           height: 70px;
           opacity: 1;
-          //scale: 0.94;
         }
         &.step-box-3 {
           opacity: 1;
-          //scale: 1.15;
         }
 
         .aol-figure-image {
           width: 100%;
           height: 100%;
-          //margin-left: 5%;
           object-fit: contain;
           z-index: 10;
         }
-
-        /*.aol-figure-3 {
-          height: 73%;
-          width: 73%;
-          margin-top: 5px;
-          margin-left: 12px;
-          height: auto;
-          max-width: 100px;
-          object-fit: contain;
-        }*/
 
         .family-icon {
           position: absolute;
@@ -256,26 +249,24 @@
     // Content overlay for steps 1 & 3
     .dial-up-content-overlay {
       position: absolute;
-      top: 220px; // Position below status text with consistent gap
+      top: 220px;
       left: 40px;
       right: 40px;
       bottom: 20px;
       z-index: 3;
       overflow-y: auto;
-      //width: 95% !important; // width for step 3 of the funnel
 
       .react-draggable:has(.frequency-options) {
-        transform: none !important; /* Keep this if you still want it tied to this condition */
-        width: 95% !important; // width for step 3 of the funnel
+        transform: none !important;
+        width: 95% !important;
       }
 
       .step-content {
         background: rgba(245, 245, 220, 0.95);
         border: 2px solid #c0c0c0;
-
         padding-top: 0px;
         padding-right: 15px;
-        padding-bottom: 10px;
+        padding-bottom: 9px;
         padding-left: 15px;
         border-radius: 4px;
 
@@ -296,6 +287,7 @@
             font-size: 14px;
             color: #333;
             margin-bottom: 15px;
+            margin-top: 15px;
           }
 
           &.recap-prompt {
@@ -309,9 +301,10 @@
               margin: 0px 0;
               border-radius: 4px;
               text-align: left;
+
               .dial-up-content-overlay {
                 position: absolute;
-                top: 220px; // Position below status text with consistent gap
+                top: 220px;
                 left: 40px;
                 right: 40px;
                 bottom: 13px;
@@ -320,7 +313,8 @@
               }
 
               p {
-                margin: 5px 0;
+                margin-top: 2px;
+                margin-bottom: 2px;
                 font-size: 13px;
 
                 strong {
@@ -346,8 +340,8 @@
               font-size: 13px;
               color: #008000;
               font-style: italic;
-              margin-top: 8px;
-              //margin: 20px 0;
+              margin-top: 7px;
+              margin-bottom: 7px;
             }
           }
 
@@ -357,7 +351,6 @@
 
             label {
               display: block;
-              //margin-bottom: 8px;
               font-family: Arial, sans-serif;
               font-size: 13px;
               cursor: pointer;
@@ -408,8 +401,6 @@
         left: 30px;
         scale: 0.6;
         position: absolute;
-        //height: 29;
-        //width: 113;
       }
     }
 
@@ -451,8 +442,6 @@
           width: 100%;
           height: 100%;
           z-index: 10;
-          //scale: 0.94;
-          //margin-left: 5%;
           margin-right: auto;
           object-fit: contain;
         }
@@ -470,7 +459,6 @@
 
       .channels-bg-image {
         width: 100%;
-        //height: 100%;
         object-fit: cover;
       }
     }
@@ -549,24 +537,19 @@
 
           .channel-buttons-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); // 4 rows of 4 needed
-            //gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
             margin: 5px 0;
             justify-items: center;
             image-rendering: auto;
 
             @media (max-width: 600px) {
-              grid-template-columns: repeat(4, 1fr); // 4 rows of 6 needed
+              grid-template-columns: repeat(4, 1fr);
             }
 
             .channel-button {
               position: relative;
-              //width: 60px;
-              //height: 60px;
-              //border: 2px solid transparent;
               cursor: pointer;
               transition: all 0.2s ease;
-              //border-radius: 2px;
 
               .channel-btn-image {
                 width: 100%;
@@ -581,7 +564,6 @@
               }
 
               &.selected {
-                //border-color: #0055ff;
                 box-shadow: 0 0 8px rgba(0, 85, 255, 0.5);
 
                 &::after {
@@ -593,7 +575,6 @@
                   color: white;
                   width: 16px;
                   height: 16px;
-                  //border-radius: 50%;
                   display: flex;
                   align-items: center;
                   justify-content: center;
@@ -845,7 +826,7 @@
 }
 
 #monitor-overlay > div > div > div:nth-child(1) > div:nth-child(1) > button {
-  display: none; /* or visibility: hidden; */
+  display: none;
 }
 
 // Ensure window is properly styled
@@ -899,47 +880,41 @@
 
     .step-box {
       .aol-figure-image {
-        //max-width: 60px;
+        // Removed max-width
       }
     }
   }
 
   .dial-up-content-overlay {
-    top: 170px; // Adjust for mobile to maintain gap below status text
+    top: 170px;
   }
 }
 
 // MOBILE STYLES
-
 @media (max-width: 480px) {
   // Fix the react-draggable container height on mobile
   .react-draggable:has(.AOLNewsletterFunnel) {
-    height: 325px !important; // height for step 1 of the funnel
+    height: 315px !important; // Reduced by 10px for step 1
     width: 96vw !important;
     max-width: 480px !important;
     position: absolute !important;
     transform: none !important;
-    left: 50% !important; // Center the window on mobile
-    top: 50% !important; // Center the window on mobile
-    margin-left: -45vw !important; // Half of width
-    margin-top: -190px !important; // Half of height
-    //width: 95vw !important;
+    left: 50% !important;
+    top: 50% !important;
     margin-left: -47.5vw !important;
-    //max-height: 500px !important;
+    margin-top: -190px !important;
   }
 
   .react-draggable:has(.step-content.channels-content) {
     height: 496px !important; // height for step 2 of the funnel
     width: 96vw !important;
-    // Add other styles you want applied when the prompt is active, e.g., transform: none;
   }
 
   .react-draggable:has(.frequency-options):has(
       > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
     ) {
-    transform: none !important; /* Keep this if you still want it tied to this condition */
-    height: 377px !important; // height for step 3 of the funnel
-    //padding-top: 10px !important;
+    transform: none !important;
+    height: 367px !important; // Reduced by 10px for step 3
   }
 
   .react-draggable:has(
@@ -954,7 +929,7 @@
     height: 100%;
 
     .Window__body {
-      height: calc(100% - 26px) !important; // Account for title bar
+      height: calc(100% - 26px) !important;
     }
 
     .aol-funnel-container {
@@ -973,7 +948,6 @@
         bottom: 0;
         width: 100%;
         height: 100%;
-        //max-height: 550px;
 
         // Background image container
         .dial-up-background {
@@ -981,7 +955,6 @@
           top: 0;
           left: 0;
           width: 100%;
-          //height: 140px; // Fixed height for mobile
           z-index: 1;
 
           .dial-up-bg-image {
@@ -996,9 +969,7 @@
             top: -13px;
             left: -25px;
             scale: 0.5;
-            //width: 90px;
-            //height: 23px;
-            transform: none; // Remove scale on mobile
+            transform: none;
             z-index: 2;
           }
         }
@@ -1010,7 +981,7 @@
           left: 48px;
           right: 10px;
           height: auto;
-          width: auto; // Fixed width for mobile
+          width: auto;
           display: flex;
           gap: 16px;
           justify-content: flex-start;
@@ -1040,20 +1011,14 @@
             }
 
             .aol-figure-image {
-              //width: 100%;
-              //height: 100%;
-              //scale: 0.94;
-              //margin-left: 5%;
               margin-right: auto;
               object-fit: contain;
             }
 
             .aol-figure-2 {
               width: 90%;
-              //height: 90%;
               object-fit: contain;
               margin: 0;
-              //scale: 0.99;
             }
 
             .aol-figure-3 {
@@ -1066,29 +1031,23 @@
           }
         }
 
-        // Status text positioning
+        // Status text positioning - centered for mobile
         .status-text-container {
           position: absolute;
-          top: 153px; // Below step boxes
+          top: 153px;
           left: 0;
           right: 0;
           text-align: center;
           z-index: 3;
           height: 30px;
-          font-size: 11px;
 
           .status-text {
             font-size: 11px;
             padding: 3px 10px;
             display: inline-block;
-            margin-left: 20px;
-            //background: rgba(255, 250, 242, 0.8);
-            border-radius: 3px;
+            margin: 0 auto; // Center the status text
+            text-align: center;
           }
-        }
-
-        .dial-up-content-overlay {
-          //height: 161px;
         }
 
         .channels-content-overlay {
@@ -1098,7 +1057,6 @@
           right: 10px;
           width: 382px;
           left: 10px;
-          //margin-right: 25px;
           align-content: center;
           padding: 0px !important;
         }
@@ -1107,29 +1065,23 @@
         .dial-up-content-overlay,
         .channels-content-overlay {
           position: absolute;
-          top: 189px; // Below status text
+          top: 189px;
           left: 20px;
           right: 15px;
-          //font-size: 11px;
-          bottom: 13px;
+          bottom: 3px; // Reduced from 13px
           z-index: 3;
           overflow: hidden;
           overflow-y: auto;
 
           .step-content {
-            //height: 100%;
             background: rgba(245, 245, 220, 0.95);
             border: 2px solid #c0c0c0;
-            //padding: 12px;
             border-radius: 4px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             display: flex;
             flex-direction: column;
-
-            .channels-content {
-              //margin-right: 50px;
-            }
+            padding: 12px; // Add padding for mobile
 
             // First step - simple prompt
             .dial-up-prompt {
@@ -1137,8 +1089,9 @@
 
               p {
                 font-size: 13px;
-                //margin-top: 1px;
                 margin-bottom: 5px;
+                margin-top: 15px; // Add top margin to match desktop
+                padding-top: 5px; // Additional padding for better spacing
               }
 
               .button-group {
@@ -1171,9 +1124,6 @@
                   strong {
                     color: #000080;
                   }
-                  //}
-                  //.button-group {
-                  //  gap: 5px !important;
                 }
               }
             }
@@ -1188,7 +1138,7 @@
               }
 
               .w98-input {
-                font-size: 12px; // Prevent zoom on iOS
+                font-size: 12px;
                 padding: 4px 6px;
                 height: 100%;
               }
@@ -1220,15 +1170,11 @@
                 margin-bottom: 5px;
               }
 
-              @media (max-width: 480px) {
-                .channels-selection {
-                  .channel-column-titles {
-                    margin-bottom: 3px;
+              .channel-column-titles {
+                margin-bottom: 3px;
 
-                    .column-title {
-                      font-size: 10px;
-                    }
-                  }
+                .column-title {
+                  font-size: 10px;
                 }
               }
 
@@ -1238,8 +1184,6 @@
                 grid-template-columns: repeat(4, 1fr);
                 gap: 2px;
                 margin: 0px 0px;
-                //padding-top: 35px;
-                //overflow-y: auto;
                 align-content: start;
 
                 .channel-button {
@@ -1327,7 +1271,7 @@
   // Very small screens
   @media (max-width: 360px) {
     .react-draggable:has(.AOLNewsletterFunnel) {
-      height: 360px !important;
+      height: 350px !important; // Reduced for smaller screens
       margin-top: -180px !important;
     }
 
