@@ -43,10 +43,10 @@
 
 // Desktop window centering and positioning
 .react-draggable:has(.AOLNewsletterFunnel) {
-  position: fixed !important;
-  left: 50% !important;
-  top: 50% !important;
-  transform: translate(-50%, -50%) !important;
+  //position: fixed !important;
+  //left: 50% !important;
+  //top: 50% !important;
+  //transform: translate(-50%, -50%) !important;
 }
 
 // Prevent resize handles from appearing
@@ -58,24 +58,26 @@
 
 @media (min-width: 768px), (pointer: coarse) {
   .react-draggable:has(.AOLNewsletterFunnel) {
-    transform: translate(-50%, -50%) !important;
+    //transform: translate(-50%, -50%) !important;
     height: 355px !important; // height for step 1 of the funnel
+    top: 50% !important;
   }
 
   .react-draggable:has(.step-content.channels-content) {
     height: 436px !important; // height for step 2 of the funnel
+    top: 50% !important;
   }
 
   .react-draggable:has(.frequency-options):has(
       > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
     ) {
-    transform: translate(-50%, -50%) !important;
+    //transform: translate(-50%, -50%) !important;
     height: 408px !important; // height for step 3 of the funnel
   }
 
   .react-draggable:has(.dial-up-prompt.recap-prompt) {
-    height: 445px !important; // height for step 4 of the funnel
-    transform: translate(-50%, -50%) !important;
+    height: 434px !important; // height for step 4 of the funnel
+    //transform: translate(-50%, -50%) !important;
   }
 }
 
@@ -249,10 +251,10 @@
     // Content overlay for steps 1 & 3
     .dial-up-content-overlay {
       position: absolute;
-      top: 220px;
+      top: 225px;
       left: 40px;
       right: 40px;
-      bottom: 20px;
+      bottom: 15px;
       z-index: 3;
       overflow-y: auto;
 
@@ -301,6 +303,9 @@
               margin: 0px 0;
               border-radius: 4px;
               text-align: left;
+              overflow-y: auto; /* Add this line */
+              /* You might also consider setting a max-height if you want to limit how tall it can become before scrolling starts */
+              max-height: 80px;
 
               .dial-up-content-overlay {
                 position: absolute;
@@ -906,7 +911,7 @@
   }
 
   .react-draggable:has(.step-content.channels-content) {
-    height: 496px !important; // height for step 2 of the funnel
+    height: 486px !important; // height for step 2 of the funnel
     width: 96vw !important;
   }
 
@@ -921,7 +926,7 @@
       .AOLNewsletterFunnel .dial-up-interface .dial-up-prompt.recap-prompt
     ) {
     transform: none !important;
-    max-height: 500px !important;
+    height: 416px !important;
   }
 
   // Main window adjustments
@@ -937,6 +942,15 @@
       padding: 0;
       position: relative;
       overflow: hidden;
+
+      .dial-up-content-overlay .step-content {
+        /* ... other styles ... */
+        margin-top: 10px; /* Add this line */
+        background: rgba(245, 245, 220, 0.95);
+        border: 2px solid #c0c0c0;
+        padding: 15px;
+        border-radius: 4px;
+      }
 
       // Dial-up and channels interface
       .dial-up-interface,
@@ -1065,7 +1079,7 @@
         .dial-up-content-overlay,
         .channels-content-overlay {
           position: absolute;
-          top: 189px;
+          top: 179px;
           left: 20px;
           right: 15px;
           bottom: 3px; // Reduced from 13px
@@ -1089,20 +1103,30 @@
 
               p {
                 font-size: 13px;
-                margin-bottom: 5px;
-                margin-top: 15px; // Add top margin to match desktop
-                padding-top: 5px; // Additional padding for better spacing
+                margin-bottom: 0px;
+                margin-top: 0px; // Add top margin to match desktop
+                padding-top: 0px; // Additional padding for better spacing
               }
 
               .button-group {
                 display: flex;
                 justify-content: center;
                 gap: 10px;
+                margin-top: 14px;
 
                 .aol-button {
                   font-size: 12px;
                   padding: 6px 14px;
                   min-width: 80px;
+                }
+              }
+              p.confirmation-text {
+                margin-top: -3px; // specific to step 4
+                margin-bottom: 10px; // specific to step 4
+                font-size: 13px; // specific to step 4
+
+                strong {
+                  color: #000080;
                 }
               }
 
@@ -1116,15 +1140,6 @@
                 margin: 1px 0;
                 border-radius: 4px;
                 text-align: left;
-
-                p {
-                  margin: 5px 0;
-                  font-size: 13px;
-
-                  strong {
-                    color: #000080;
-                  }
-                }
               }
             }
 
@@ -1162,7 +1177,7 @@
 
               .channels-subheader {
                 font-size: 11px;
-                margin-bottom: 13px;
+                margin-bottom: 6px;
               }
 
               .categories-error {
