@@ -1,4 +1,4 @@
-// AOLNewsletterFunnel.scss - Hybrid Approach
+// AOLNewsletterFunnel.scss - Hybrid Approach with Mobile Draggable Support
 
 // Main wrapper that can contain the fixed frame system
 .aol-funnel-wrapper {
@@ -42,11 +42,17 @@
 }
 
 // Desktop window centering and positioning
-.react-draggable:has(.AOLNewsletterFunnel) {
-  //position: fixed !important;
-  //left: 50% !important;
-  //top: 50% !important;
-  //transform: translate(-50%, -50%) !important;
+@media (min-width: 481px) {
+  .react-draggable:has(.AOLNewsletterFunnel) {
+    // Always use consistent origin point
+    left: 0 !important;
+    top: 0 !important;
+
+    // Initial center positioning for desktop via transform
+    &[style*="transform: translate(0px, 0px)"] {
+      transform: translate(calc(50vw - 240px), calc(50vh - 210px)) !important;
+    }
+  }
 }
 
 // Prevent resize handles from appearing
@@ -58,26 +64,21 @@
 
 @media (min-width: 768px), (pointer: coarse) {
   .react-draggable:has(.AOLNewsletterFunnel) {
-    //transform: translate(-50%, -50%) !important;
     height: 355px !important; // height for step 1 of the funnel
-    top: 50% !important;
   }
 
   .react-draggable:has(.step-content.channels-content) {
     height: 436px !important; // height for step 2 of the funnel
-    top: 50% !important;
   }
 
   .react-draggable:has(.frequency-options):has(
       > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
     ) {
-    //transform: translate(-50%, -50%) !important;
     height: 408px !important; // height for step 3 of the funnel
   }
 
   .react-draggable:has(.dial-up-prompt.recap-prompt) {
     height: 434px !important; // height for step 4 of the funnel
-    //transform: translate(-50%, -50%) !important;
   }
 }
 
@@ -895,38 +896,66 @@
   }
 }
 
-// MOBILE STYLES
+// MOBILE STYLES - Updated to allow dragging
 @media (max-width: 480px) {
-  // Fix the react-draggable container height on mobile
+  // Set dimensions on the Window component itself
+  .Window.AOLNewsletterFunnel {
+    width: calc(100vw - 20px) !important;
+    max-width: 460px !important;
+    min-width: 320px !important;
+
+    // Step-specific heights using parent selectors
+    &:has(
+        .dial-up-interface:not(:has(.frequency-options)):not(
+            :has(.recap-prompt)
+          )
+      ) {
+      height: 315px !important; // Step 1
+    }
+
+    &:has(.channels-content) {
+      height: 486px !important; // Step 2
+    }
+
+    &:has(.frequency-options) {
+      height: 367px !important; // Step 3
+    }
+
+    &:has(.recap-prompt) {
+      height: 416px !important; // Step 4
+    }
+  }
+
+  // Handle the draggable container for proper centering and boundaries
   .react-draggable:has(.AOLNewsletterFunnel) {
-    height: 315px !important; // Reduced by 10px for step 1
-    width: 96vw !important;
-    max-width: 480px !important;
-    position: absolute !important;
-    transform: none !important;
-    left: 50% !important;
-    top: 50% !important;
-    margin-left: -47.5vw !important;
-    margin-top: -190px !important;
+    // Always use the same positioning origin (top-left)
+    // This prevents jumping when dragging starts
+    left: 0 !important;
+    top: 0 !important;
+
+    // Initial centering via transform
+    // Only apply centering transform if not yet dragged
+    &[style*="transform: translate(0px, 0px)"] {
+      // Center the window on initial load
+      transform: translate(
+        calc(50vw - min(230px, 50vw - 10px)),
+        calc(50vh - 200px)
+      ) !important;
+    }
+
+    // Ensure the window stays within viewport
+    max-width: calc(100vw - 20px) !important;
   }
 
-  .react-draggable:has(.step-content.channels-content) {
-    height: 486px !important; // height for step 2 of the funnel
-    width: 96vw !important;
-  }
+  // Ensure proper viewport constraints
+  .desktop.screen {
+    overflow: hidden;
+    position: relative;
 
-  .react-draggable:has(.frequency-options):has(
-      > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
-    ) {
-    transform: none !important;
-    height: 367px !important; // Reduced by 10px for step 3
-  }
-
-  .react-draggable:has(
-      .AOLNewsletterFunnel .dial-up-interface .dial-up-prompt.recap-prompt
-    ) {
-    transform: none !important;
-    height: 416px !important;
+    .react-draggable:has(.AOLNewsletterFunnel) {
+      // Constrain to viewport
+      contain: layout;
+    }
   }
 
   // Main window adjustments
@@ -944,8 +973,7 @@
       overflow: hidden;
 
       .dial-up-content-overlay .step-content {
-        /* ... other styles ... */
-        margin-top: 10px; /* Add this line */
+        margin-top: 10px;
         background: rgba(245, 245, 220, 0.95);
         border: 2px solid #c0c0c0;
         padding: 15px;
@@ -1059,20 +1087,19 @@
             font-size: 11px;
             padding: 3px 10px;
             display: inline-block;
-            margin: 0 auto; // Center the status text
+            margin: 0 auto;
             text-align: center;
           }
         }
 
         .channels-content-overlay {
           margin-top: 0px;
-          margin-left: -15px;
-          padding-right: 15px;
+          padding-right: 10px;
           right: 10px;
-          width: 382px;
           left: 10px;
           align-content: center;
           padding: 0px !important;
+          width: calc(100% - 20px);
         }
 
         // Content overlay - fixed positioning
@@ -1082,7 +1109,7 @@
           top: 179px;
           left: 20px;
           right: 15px;
-          bottom: 3px; // Reduced from 13px
+          bottom: 3px;
           z-index: 3;
           overflow: hidden;
           overflow-y: auto;
@@ -1095,7 +1122,7 @@
             -webkit-overflow-scrolling: touch;
             display: flex;
             flex-direction: column;
-            padding: 12px; // Add padding for mobile
+            padding: 12px;
 
             // First step - simple prompt
             .dial-up-prompt {
@@ -1104,8 +1131,8 @@
               p {
                 font-size: 13px;
                 margin-bottom: 0px;
-                margin-top: 0px; // Add top margin to match desktop
-                padding-top: 0px; // Additional padding for better spacing
+                margin-top: 0px;
+                padding-top: 0px;
               }
 
               .button-group {
@@ -1120,10 +1147,11 @@
                   min-width: 80px;
                 }
               }
+
               p.confirmation-text {
-                margin-top: -3px; // specific to step 4
-                margin-bottom: 10px; // specific to step 4
-                font-size: 13px; // specific to step 4
+                margin-top: -3px;
+                margin-bottom: 10px;
+                font-size: 13px;
 
                 strong {
                   color: #000080;
@@ -1285,9 +1313,33 @@
 
   // Very small screens
   @media (max-width: 360px) {
+    .Window.AOLNewsletterFunnel {
+      width: calc(100vw - 10px) !important;
+      min-width: 300px !important;
+
+      &:has(
+          .dial-up-interface:not(:has(.frequency-options)):not(
+              :has(.recap-prompt)
+            )
+        ) {
+        height: 350px !important;
+      }
+    }
+
     .react-draggable:has(.AOLNewsletterFunnel) {
-      height: 350px !important; // Reduced for smaller screens
-      margin-top: -180px !important;
+      // Always use the same positioning origin
+      left: 0 !important;
+      top: 0 !important;
+
+      // Initial centering for small screens
+      &[style*="transform: translate(0px, 0px)"] {
+        transform: translate(
+          calc(50vw - min(150px, 50vw - 5px)),
+          calc(50vh - 175px)
+        ) !important;
+      }
+
+      max-width: calc(100vw - 10px) !important;
     }
 
     .AOLNewsletterFunnel {
