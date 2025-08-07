@@ -872,6 +872,18 @@ $font-mono: "Courier New", monospace;
 // ========================================
 
 @media (min-width: 768px), (pointer: coarse) {
+  // Apply similar positioning as desktop but adjusted for tablet viewport
+  .react-draggable:has(.AOLNewsletterFunnel) {
+    // Force initial position 20px higher
+    transform: translate(calc(50vw - 790px), -20px) !important;
+
+    // Or if you want to affect ALL positions (even after dragging)
+    &[style*="transform"] {
+      // This will shift everything 20px up from wherever it is
+      margin-top: 30px !important;
+    }
+  }
+
   // Step-specific heights for tablet/desktop
   .react-draggable:has(.AOLNewsletterFunnel) {
     height: 355px !important; // Step 1 default height
@@ -928,17 +940,23 @@ $font-mono: "Courier New", monospace;
     }
   }
 
-  // Draggable container positioning
+  // Draggable container positioning - applying desktop-like rules
   .react-draggable:has(.AOLNewsletterFunnel) {
-    left: 0 !important;
-    top: 0 !important;
+    left: 594px !important;
+    top: 0px !important;
+    //margin-left: 600px !important; // Add this line
 
-    // Initial centering for mobile
+    // Initial centering for mobile with upward adjustment
     &[style*="transform: translate(0px, 0px)"] {
       transform: translate(
         calc(50vw - min(230px, 50vw - 10px)),
-        calc(50vh - 200px)
+        calc(50vh - 220px) // Adjusted higher like desktop
       ) !important;
+    }
+
+    // Apply margin-top adjustment for all positions
+    &[style*="transform"] {
+      margin-top: 20px !important; // Consistent upward shift
     }
 
     max-width: calc(100vw - 20px) !important;
