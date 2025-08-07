@@ -49,12 +49,13 @@ $font-mono: "Courier New", monospace;
 // ========================================
 
 .aol-funnel-wrapper {
-  position: relative;
+  //position: relative;
 
   // Fixed AOL Frame Container - Always visible at top
   .aol-frame {
-    position: fixed;
-    top: 50%;
+    display: none;
+    /*position: fixed;
+    top: calc(50% - 20px);
     left: 50%;
     transform: translate(-50%, -50%);
     width: 578px;
@@ -74,7 +75,7 @@ $font-mono: "Courier New", monospace;
         height: 100%;
         object-fit: cover;
       }
-    }
+    }*/
   }
 }
 
@@ -774,28 +775,43 @@ $font-mono: "Courier New", monospace;
 .dial-up-interface {
   .dial-up-prompt {
     &.recap-prompt {
-      height: 143px;
+      display: flex; // Added: Make this a flex container
+      flex-direction: column; // Added: Stack children vertically
+      height: 155px; // Adjusted: Set a fixed height for the flex container (using previously observed value as an example)
+      /* Ensure this height is appropriate for your design */
 
       .button-group {
-        margin-top: auto;
-        align-items: center;
+        margin-top: auto; // Ensures this item is pushed to the bottom of the flex container
+        align-items: center; // Centers content within button-group horizontally (likely the button)
+      }
+
+      .confirmation-text {
+        // This rule targets your selected p.confirmation-text element
+        font-size: 13px;
+        color: #008000;
+        font-style: italic;
+        margin-top: 8px !important; // Note: Consider removing !important and adjusting specificity
+        margin-bottom: 10px !important; // Note: Consider removing !important and adjusting specificity
       }
 
       .recap-section {
         background: $color-gray-light;
         border: 1px solid $color-border;
         padding: 6px 15px;
-        margin: 0px 0 5px 0;
+        margin: 0px 0 8px 0; // Keeping your latest margin-bottom value
         border-radius: 4px;
         text-align: left;
-        overflow-y: auto;
-        max-height: 90px;
+        overflow-y: auto; // Added: Add vertical scrollbar if content overflows
+        max-height: 95px; // Added: Limit the height to enable overflow
 
+        /* --- Review these nested selectors --- */
+        /* This targets p elements INSIDE an element with class confirmation-text, which is inside .recap-section */
         .confirmation-text p {
           font-size: 13px;
           color: #008000;
           font-style: italic;
 
+          /* This selector is very long and nested, likely not what you intend */
           .dial-up-interface
             .dial-up-content-overlay
             .step-content
@@ -808,6 +824,7 @@ $font-mono: "Courier New", monospace;
           }
         }
 
+        /* This targets p elements directly inside .recap-section */
         p {
           margin-top: 2px;
           margin-bottom: 0px;
@@ -830,14 +847,7 @@ $font-mono: "Courier New", monospace;
             margin-bottom: 1px;
           }
         }
-      }
-
-      .confirmation-text {
-        font-size: 13px;
-        color: #008000;
-        font-style: italic;
-        margin-top: 8px;
-        margin-bottom: 10px;
+        /* --- End Review --- */
       }
     }
   }
@@ -849,13 +859,13 @@ $font-mono: "Courier New", monospace;
 
 @media (min-width: 481px) {
   .react-draggable:has(.AOLNewsletterFunnel) {
-    // Always use consistent origin point
-    left: 0 !important;
-    top: 0 !important;
+    // Force initial position 20px higher
+    transform: translate(calc(50vw - 790px), -20px) !important;
 
-    // Initial center positioning for desktop via transform
-    &[style*="transform: translate(0px, 0px)"] {
-      transform: translate(calc(50vw - 240px), calc(50vh - 210px)) !important;
+    // Or if you want to affect ALL positions (even after dragging)
+    &[style*="transform"] {
+      // This will shift everything 20px up from wherever it is
+      margin-top: 30px !important;
     }
   }
 }
