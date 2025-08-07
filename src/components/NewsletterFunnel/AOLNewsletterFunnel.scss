@@ -772,62 +772,29 @@ $font-mono: "Courier New", monospace;
 // 8. STEP 4: RECAP & CONFIRMATION
 // ========================================
 
+// Alternative: Center between recap-section and confirmation-text
 .dial-up-interface {
   .dial-up-prompt {
     &.recap-prompt {
-      display: flex; // Added: Make this a flex container
-      flex-direction: column; // Added: Stack children vertically
-      height: 155px; // Adjusted: Set a fixed height for the flex container (using previously observed value as an example)
-      /* Ensure this height is appropriate for your design */
-
-      .button-group {
-        margin-top: auto; // Ensures this item is pushed to the bottom of the flex container
-        align-items: center; // Centers content within button-group horizontally (likely the button)
-      }
-
-      .confirmation-text {
-        // This rule targets your selected p.confirmation-text element
-        font-size: 13px;
-        color: #008000;
-        font-style: italic;
-        margin-top: 8px !important; // Note: Consider removing !important and adjusting specificity
-        margin-bottom: 10px !important; // Note: Consider removing !important and adjusting specificity
-      }
+      display: flex;
+      flex-direction: column;
+      height: 155px;
 
       .recap-section {
         background: $color-gray-light;
         border: 1px solid $color-border;
-        padding: 6px 15px;
-        margin: 0px 0 8px 0; // Keeping your latest margin-bottom value
+        padding: 2px 15px;
+        margin: 0;
         border-radius: 4px;
         text-align: left;
-        overflow-y: auto; // Added: Add vertical scrollbar if content overflows
-        max-height: 95px; // Added: Limit the height to enable overflow
+        overflow-y: auto;
+        height: 80px;
+        max-height: 80px;
+        flex-shrink: 0; // Don't shrink
 
-        /* --- Review these nested selectors --- */
-        /* This targets p elements INSIDE an element with class confirmation-text, which is inside .recap-section */
-        .confirmation-text p {
-          font-size: 13px;
-          color: #008000;
-          font-style: italic;
-
-          /* This selector is very long and nested, likely not what you intend */
-          .dial-up-interface
-            .dial-up-content-overlay
-            .step-content
-            .dial-up-prompt
-            .confirmation-text
-            p {
-            margin-top: 2px;
-            margin-bottom: 0px;
-            font-size: 13px;
-          }
-        }
-
-        /* This targets p elements directly inside .recap-section */
         p {
           margin-top: 2px;
-          margin-bottom: 0px;
+          margin-bottom: 2px;
           font-size: 13px;
 
           strong {
@@ -847,7 +814,37 @@ $font-mono: "Courier New", monospace;
             margin-bottom: 1px;
           }
         }
-        /* --- End Review --- */
+      }
+
+      .button-group {
+        flex: 1; // Take up remaining space
+        display: flex;
+        justify-content: center;
+        align-items: center; // Centers vertically in available space
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .confirmation-text {
+        font-family: $font-primary;
+        color: #008000;
+        margin: 0 !important; // Remove all margins
+        padding: 0; // Also remove padding if needed
+        font-size: 13px;
+        font-style: italic;
+        text-align: center;
+        flex-shrink: 0; // Don't shrink
+      }
+
+      // If .confirmation-text is a p element, also target it directly
+      p.confirmation-text {
+        margin: 11px !important;
+        padding: 0;
+        font-size: 13px;
+        color: #008000;
+        font-style: italic;
+        text-align: center;
+        flex-shrink: 0;
       }
     }
   }
