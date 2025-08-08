@@ -883,7 +883,7 @@ $font-mono: "Courier New", monospace;
 @media (min-width: 481px) {
   .react-draggable:has(.AOLNewsletterFunnel) {
     // Force initial position 20px higher
-    transform: translate(calc(50vw - 790px), -20px) !important;
+    transform: translate(calc(50vw - 760px), -20px) !important;
 
     // Or if you want to affect ALL positions (even after dragging)
     &[style*="transform"] {
@@ -901,7 +901,7 @@ $font-mono: "Courier New", monospace;
   // Apply similar positioning as desktop but adjusted for tablet viewport
   .react-draggable:has(.AOLNewsletterFunnel) {
     // Force initial position 20px higher
-    transform: translate(calc(50vw - 790px), -20px) !important;
+    transform: translate(calc(50vw - 760px), -20px) !important;
 
     // Or if you want to affect ALL positions (even after dragging)
     &[style*="transform"] {
