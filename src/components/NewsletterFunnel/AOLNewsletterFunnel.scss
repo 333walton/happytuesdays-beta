@@ -220,7 +220,7 @@ $font-mono: "Courier New", monospace;
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .aol-button {
@@ -444,7 +444,7 @@ $font-mono: "Courier New", monospace;
     .step-content {
       background: $color-overlay;
       border: 2px solid $color-border;
-      padding: 0px 15px 9px 15px;
+      padding: 0px 15px 0px 15px;
       border-radius: 4px;
       height: 100%;
 
@@ -464,7 +464,7 @@ $font-mono: "Courier New", monospace;
           font-family: $font-primary;
           font-size: 14px;
           color: $color-text;
-          margin-bottom: 15px;
+          margin-bottom: 5px;
           margin-top: 15px;
         }
 
@@ -475,6 +475,22 @@ $font-mono: "Courier New", monospace;
           //margin-top: 15px;
         }
       }
+      .dial-up-prompt:has(.frequency-options) {
+        p {
+          font-family: $font-primary;
+          font-size: 14px;
+          color: $color-text;
+          margin-bottom: 5px;
+          margin-top: 10px;
+        }
+      }
+    }
+    .step-content:has(.frequency-options) {
+      height: 122px !important; // Allow height to adjust based on content
+      //padding-bottom: 9px;
+    }
+    .dial-up-prompt:has(.frequency-options) .button-group {
+      margin-top: 7px !important; /* Consider avoiding !important */
     }
   }
 }
@@ -705,11 +721,16 @@ $font-mono: "Courier New", monospace;
 // ========================================
 
 // Step 3 uses the dial-up-interface with frequency-specific content
+.AOLNewsletterFunnel {
+  .aol-funnel-container:has(.frequency-options) {
+    padding-bottom: 0px !important; // Consider avoiding !important
+  }
+}
+
 .dial-up-interface {
   .frequency-options {
-    margin: 15px 0;
+    margin: 0px 0 !important;
     text-align: left;
-
     label {
       display: block;
       font-family: $font-primary;
@@ -723,6 +744,11 @@ $font-mono: "Courier New", monospace;
       &:hover {
         color: $color-primary;
       }
+    }
+    .button-container,
+    .button-group {
+      margin-top: 10px !important; // Consider avoiding !important
+      //margin-bottom: 3px !important; // Consider avoiding !important
     }
   }
 
@@ -896,7 +922,7 @@ $font-mono: "Courier New", monospace;
   .react-draggable:has(.frequency-options):has(
       > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
     ) {
-    height: 408px !important; // Step 3 height
+    height: 383px !important; // Step 3 height
   }
 
   .react-draggable:has(.dial-up-prompt.recap-prompt) {
@@ -931,7 +957,7 @@ $font-mono: "Courier New", monospace;
 
     // Step 3 height
     &:has(.frequency-options) {
-      height: 347px !important;
+      height: 342px !important;
     }
 
     // Step 4 height
@@ -1294,17 +1320,25 @@ $font-mono: "Courier New", monospace;
             }
 
             // Mobile Step 3 frequency options
-            .frequency-options {
-              margin-top: 7px !important;
-              margin-bottom: 4px !important;
+            .dial-up-prompt {
+              // Assuming .dial-up-prompt is the parent of both
+              .frequency-options {
+                margin-top: 7px !important; // Consider avoiding !important
+                margin-bottom: 4px !important; // Consider avoiding !important
 
-              label {
-                font-size: 13px;
-                margin-bottom: 0px;
+                label {
+                  font-size: 13px;
+                  margin-bottom: 0px;
 
-                input[type="radio"] {
-                  margin-right: 6px;
+                  input[type="radio"] {
+                    margin-right: 6px;
+                  }
                 }
+              }
+
+              // Rule for the .button-group immediately following .frequency-options
+              .frequency-options + .button-group {
+                margin-top: 10px !important; // Consider avoiding !important
               }
             }
 
