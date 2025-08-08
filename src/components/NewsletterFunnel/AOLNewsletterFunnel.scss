@@ -926,7 +926,7 @@ $font-mono: "Courier New", monospace;
 
     // Step 2 height
     &:has(.channels-content) {
-      height: 460px !important;
+      height: 470px !important;
     }
 
     // Step 3 height
@@ -941,7 +941,7 @@ $font-mono: "Courier New", monospace;
   }
 
   .react-draggable:has(.step-content.channels-content) {
-    height: 430px !important; // Step 2 height
+    height: 440px !important; // Step 2 height
   }
 
   // Draggable container positioning - applying desktop-like rules
@@ -1545,7 +1545,3 @@ $font-mono: "Courier New", monospace;
     margin: 4px 0;
   }
 }
-
-// ========================================
-// END OF FILE
-// ========================================
