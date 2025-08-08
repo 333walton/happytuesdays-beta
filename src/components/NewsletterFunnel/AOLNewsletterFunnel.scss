@@ -940,6 +940,10 @@ $font-mono: "Courier New", monospace;
     }
   }
 
+  .react-draggable:has(.step-content.channels-content) {
+    height: 430px !important; // Step 2 height
+  }
+
   // Draggable container positioning - applying desktop-like rules
   .react-draggable:has(.AOLNewsletterFunnel) {
     left: 594px !important;
@@ -969,6 +973,7 @@ $font-mono: "Courier New", monospace;
 
     .react-draggable:has(.AOLNewsletterFunnel) {
       contain: layout;
+      height: 303px !important;
     }
   }
 
@@ -1020,18 +1025,21 @@ $font-mono: "Courier New", monospace;
             transform: none;
             z-index: 2;
           }
+          .step-box-1 {
+            height: auto;
+          }
         }
 
         // Mobile step boxes
         .step-boxes-overlay {
           position: absolute;
-          top: 82px;
-          left: 48px;
+          top: 79px !important;
+          left: 36px !important;
           right: 10px;
           height: auto;
           width: auto;
           display: flex;
-          gap: 16px;
+          gap: 29px;
           justify-content: flex-start;
           align-items: center;
           z-index: 2;
@@ -1039,6 +1047,7 @@ $font-mono: "Courier New", monospace;
           .step-box {
             position: relative;
             height: 56px;
+            top: 0px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1059,22 +1068,23 @@ $font-mono: "Courier New", monospace;
             }
 
             .aol-figure-2 {
-              width: 90%;
-              object-fit: contain;
-              margin: 0;
+              //width: 90%;
+              //object-fit: contain;
+              //margin-left: 5px;
+              //left: -20px !important;
             }
 
             .aol-figure-3 {
-              width: 100%;
-              height: 100%;
+              width: 90%;
+              //height: 100%;
               object-fit: contain;
               margin: 0;
               scale: 0.94;
             }
 
             .aol-figure-image {
-              margin-right: auto;
-              object-fit: contain;
+              //margin-right: auto;
+              //object-fit: contain;
             }
           }
         }
@@ -1082,7 +1092,7 @@ $font-mono: "Courier New", monospace;
         // Mobile status text
         .status-text-container {
           position: absolute;
-          top: 153px;
+          top: 147px;
           left: 0;
           right: 0;
           text-align: center;
@@ -1091,7 +1101,7 @@ $font-mono: "Courier New", monospace;
 
           .status-text {
             font-size: 11px;
-            padding: 3px 10px;
+            padding: 3px 3px;
             display: inline-block;
             margin: 0 auto;
             text-align: center;
@@ -1113,12 +1123,15 @@ $font-mono: "Courier New", monospace;
           .step-content {
             background: $color-overlay;
             border: 2px solid $color-border;
+            padding: 0 15px 9px;
             border-radius: 4px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             display: flex;
             flex-direction: column;
-            padding: 12px;
+            height: auto;
+            //height: 100%;
+            //padding: 12px;
 
             // Mobile Step 1 & 3 prompt
             .dial-up-prompt {
@@ -1126,8 +1139,8 @@ $font-mono: "Courier New", monospace;
 
               p {
                 font-size: 13px;
-                margin-bottom: 0px;
-                margin-top: 0px;
+                margin-bottom: 12px;
+                margin-top: 12px;
                 padding-top: 0px;
               }
 
@@ -1145,8 +1158,7 @@ $font-mono: "Courier New", monospace;
               }
 
               p.confirmation-text {
-                margin-top: -3px;
-                margin-bottom: 10px;
+                margin-bottom: 12px;
                 font-size: 13px;
 
                 strong {
@@ -1176,11 +1188,12 @@ $font-mono: "Courier New", monospace;
                     margin-bottom: 2px;
                   }
                 }
-              }
 
-              .confirmation-text {
-                font-size: 11px;
-                margin: 8px 0;
+                .confirmation-text {
+                  font-size: 11px;
+                  margin: 11px !important;
+                  margin: 8px 0;
+                }
               }
             }
 
@@ -1327,6 +1340,7 @@ $font-mono: "Courier New", monospace;
           padding-right: 10px;
           right: 10px;
           left: 10px;
+          bottom: 26px;
           align-content: center;
           padding: 0px !important;
           width: calc(100% - 20px);
