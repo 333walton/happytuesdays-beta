@@ -926,12 +926,12 @@ $font-mono: "Courier New", monospace;
 
     // Step 2 height
     &:has(.channels-content) {
-      height: 470px !important;
+      height: 457px !important;
     }
 
     // Step 3 height
     &:has(.frequency-options) {
-      height: 355px !important;
+      height: 340px !important;
     }
 
     // Step 4 height
@@ -960,7 +960,7 @@ $font-mono: "Courier New", monospace;
 
     // Apply margin-top adjustment for all positions
     &[style*="transform"] {
-      margin-top: 20px !important; // Consistent upward shift
+      margin-top: 80px !important; // shifts the window position down
     }
 
     max-width: calc(100vw - 20px) !important;
@@ -1139,7 +1139,7 @@ $font-mono: "Courier New", monospace;
 
               p {
                 font-size: 13px;
-                margin-bottom: 12px;
+                margin-bottom: 0px;
                 margin-top: 12px;
                 padding-top: 0px;
               }
@@ -1148,7 +1148,7 @@ $font-mono: "Courier New", monospace;
                 display: flex;
                 justify-content: center;
                 gap: 10px;
-                margin-top: 14px;
+                margin-top: 10px;
 
                 .aol-button {
                   font-size: 12px;
@@ -1228,7 +1228,7 @@ $font-mono: "Courier New", monospace;
 
               .channels-header {
                 font-size: 14px;
-                margin-bottom: 3px;
+                margin-bottom: 0px;
               }
 
               .channels-subheader {
@@ -1295,11 +1295,12 @@ $font-mono: "Courier New", monospace;
 
             // Mobile Step 3 frequency options
             .frequency-options {
-              margin: 10px 0 !important;
+              margin-top: 7px !important;
+              margin-bottom: 4px !important;
 
               label {
                 font-size: 13px;
-                margin-bottom: 3px;
+                margin-bottom: 0px;
 
                 input[type="radio"] {
                   margin-right: 6px;
@@ -1342,7 +1343,7 @@ $font-mono: "Courier New", monospace;
           padding-right: 10px;
           right: 10px;
           left: 10px;
-          bottom: 36px;
+          bottom: 53px;
           align-content: center;
           padding: 0px !important;
           width: calc(100% - 20px);
