@@ -926,17 +926,17 @@ $font-mono: "Courier New", monospace;
 
     // Step 2 height
     &:has(.channels-content) {
-      height: 486px !important;
+      height: 460px !important;
     }
 
     // Step 3 height
     &:has(.frequency-options) {
-      height: 367px !important;
+      height: 355px !important;
     }
 
     // Step 4 height
     &:has(.recap-prompt) {
-      height: 416px !important;
+      height: 387px !important;
     }
   }
 
@@ -1000,7 +1000,7 @@ $font-mono: "Courier New", monospace;
         right: 0;
         bottom: 0;
         width: 100%;
-        height: 100%;
+        height: 460px !important;
 
         // Mobile background adjustments
         .dial-up-background {
@@ -1170,10 +1170,11 @@ $font-mono: "Courier New", monospace;
               .recap-section {
                 background: $color-gray-light;
                 border: 1px solid $color-border;
-                padding: 10px 15px;
+                //padding: 10px 15px;
                 margin: 1px 0;
                 border-radius: 4px;
                 text-align: left;
+                height: auto !important;
 
                 p {
                   font-size: 11px;
@@ -1200,6 +1201,7 @@ $font-mono: "Courier New", monospace;
             // Mobile email input
             .email-section {
               margin-bottom: 10px;
+              margin-top: 6px;
 
               .w98-label {
                 font-size: 12px;
@@ -1340,7 +1342,7 @@ $font-mono: "Courier New", monospace;
           padding-right: 10px;
           right: 10px;
           left: 10px;
-          bottom: 26px;
+          bottom: 36px;
           align-content: center;
           padding: 0px !important;
           width: calc(100% - 20px);
