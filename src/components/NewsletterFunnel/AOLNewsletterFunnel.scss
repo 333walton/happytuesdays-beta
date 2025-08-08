@@ -926,12 +926,12 @@ $font-mono: "Courier New", monospace;
 
     // Step 2 height
     &:has(.channels-content) {
-      height: 457px !important;
+      height: 470px !important;
     }
 
     // Step 3 height
     &:has(.frequency-options) {
-      height: 340px !important;
+      height: 347px !important;
     }
 
     // Step 4 height
@@ -1148,7 +1148,7 @@ $font-mono: "Courier New", monospace;
                 display: flex;
                 justify-content: center;
                 gap: 10px;
-                margin-top: 10px;
+                margin-top: 18px !important;
 
                 .aol-button {
                   font-size: 12px;
