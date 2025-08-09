@@ -1687,8 +1687,20 @@ $font-mono: "Courier New", monospace;
 
 .aol-figure-image.aol-figure-4 {
   left: 28px !important;
+  scale: 0.95 !important;
 }
 
 .aol-figure-image.aol-figure-3 {
   scale: 0.9 !important;
+}
+
+// Mobile override for both
+@media (max-width: 480px) {
+  .aol-figure-3,
+  .aol-figure-4,
+  .aol-figure-image.aol-figure-3,
+  .aol-figure-image.aol-figure-4 {
+    margin-right: 35px !important;
+    margin-top: 5px !important;
+  }
 }
