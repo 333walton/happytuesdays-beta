@@ -532,7 +532,7 @@ $font-mono: "Courier New", monospace;
   .step-boxes-overlay {
     position: absolute;
     //top: 98px;
-    left: 48px;
+    left: 50px;
     //height: 73px;
     display: flex;
     gap: 29px;
@@ -780,7 +780,8 @@ $font-mono: "Courier New", monospace;
 
       &.step-box-3 {
         opacity: 1;
-        scale: 1;
+        scale: 0.9;
+        left: 26px;
       }
 
       .aol-figure-image {
@@ -1612,4 +1613,82 @@ $font-mono: "Courier New", monospace;
   p {
     margin: 4px 0;
   }
+}
+
+// Added for ease effect
+
+// Fade-in animation for AOL Figure images
+.aol-figure-fade-in {
+  animation: fadeInScale 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+// Special easing for figures 3 and 4 with more gradual ease-in-out
+.aol-figure-3.aol-figure-fade-in {
+  animation: fadeInScale 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.aol-figure-4.aol-figure-fade-in {
+  animation: fadeInScale 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Responsive sizing for step-box-3 images (dialup_pic44 and dialup_pic55)
+.step-box-3 {
+  .aol-figure-image {
+    width: 100%;
+    height: auto;
+    max-width: 85px; // Adjust this value to match your desired desktop size
+
+    // For larger screens, constrain the size
+    @media (min-width: 768px) {
+      max-width: 85px !important; // Smaller on desktop
+    }
+
+    .aol-figure-image.aol-figure-4 {
+      left: 28px !important;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    max-width: 85px !important; // Even smaller on larger desktops
+  }
+}
+
+// Specific sizing for figures 3 and 4 if needed
+.aol-figure-3,
+.aol-figure-4 {
+  object-fit: contain;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.aol-figure-image.aol-figure-4 {
+  left: 28px !important;
+}
+
+.aol-figure-image.aol-figure-3 {
+  scale: 0.9 !important;
 }

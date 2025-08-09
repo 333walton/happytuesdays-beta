@@ -145,9 +145,28 @@ class AOLNewsletterFunnel extends Component {
 
   playMailSound = () => {
     const audio = new Audio("/sounds/aol-yougotmail.wav");
-    audio.play().catch((error) => {
-      console.log("Could not play mail sound:", error);
-    });
+    // Reduce volume by 85%
+    audio.volume = 0.15;
+
+    // Preload the audio to ensure it's fully loaded before playing
+    audio.preload = "auto";
+
+    // Add a small delay to ensure audio context is ready
+    audio.addEventListener(
+      "canplaythrough",
+      () => {
+        // Small timeout to prevent audio cutoff at the beginning
+        setTimeout(() => {
+          audio.play().catch((error) => {
+            console.log("Could not play mail sound:", error);
+          });
+        }, 50); // 50ms delay to ensure clean playback start
+      },
+      { once: true }
+    );
+
+    // Load the audio
+    audio.load();
   };
 
   // Handle individual channel selection
@@ -357,11 +376,19 @@ class AOLNewsletterFunnel extends Component {
                   )}
                 </div>
                 <div className="step-box step-box-3">
-                  {currentStep >= 3 && (
+                  {currentStep === 3 && (
                     <img
-                      src="" ///static/aol/logo_pic3.png
+                      src="/static/aol/dialup_pic44.png"
                       alt="AOL Figure 3"
-                      className="aol-figure-image aol-figure-3"
+                      className="aol-figure-image aol-figure-3 aol-figure-fade-in"
+                    />
+                  )}
+                  {currentStep === 4 && (
+                    <img
+                      src="/static/aol/dialup_pic55.png"
+                      alt="AOL Figure 4"
+                      className="aol-figure-image aol-figure-4 aol-figure-fade-in"
+                      style={{ marginLeft: "2px" }}
                     />
                   )}
                 </div>
@@ -525,10 +552,9 @@ class AOLNewsletterFunnel extends Component {
                   <img
                     src="/static/aol/dialup_pic2.png"
                     alt="AOL Figure 2"
-                    className="aol-figure-image"
+                    className="aol-figure-image aol-figure-fade-in"
                   />
                 </div>
-                <div className="step-box step-box-3">{/* Empty for now */}</div>
               </div>
 
               {/* Status text positioned below dial-up background */}
