@@ -952,17 +952,17 @@ $font-mono: "Courier New", monospace;
 
     // Step 2 height
     &:has(.channels-content) {
-      height: 470px !important;
+      height: 460px !important;
     }
 
     // Step 3 height
     &:has(.frequency-options) {
-      height: 342px !important;
+      height: 338px !important;
     }
 
     // Step 4 height
     &:has(.recap-prompt) {
-      height: 387px !important;
+      height: 377px !important;
     }
   }
 
@@ -972,7 +972,7 @@ $font-mono: "Courier New", monospace;
 
   // Draggable container positioning - applying desktop-like rules
   .react-draggable:has(.AOLNewsletterFunnel) {
-    left: 594px !important;
+    left: 563px !important;
     top: 0px !important;
     //margin-left: 600px !important; // Add this line
 
@@ -1018,6 +1018,23 @@ $font-mono: "Courier New", monospace;
       overflow: hidden;
 
       // Mobile dial-up and channels interface
+      .dial-up-interface .dial-up-prompt.recap-prompt .button-group {
+        flex: 1 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding-top: 5px !important; // Adjusted padding for recap prompt
+        margin-top: 0px !important;
+        //margin-bottom: 5px !important;
+      }
+
+      .dial-up-interface
+        .dial-up-content-overlay
+        .step-content:has(.recap-prompt) {
+        padding-bottom: 5px !important;
+      }
+
       .dial-up-interface,
       .channels-interface {
         position: absolute;
@@ -1134,6 +1151,18 @@ $font-mono: "Courier New", monospace;
           }
         }
 
+        .channels-interface
+          .channels-content-overlay
+          .step-content.channels-content {
+          margin-top: 0px !important;
+        }
+
+        .channels-content-overlay .step-content.channels-content {
+          padding: 15px !important;
+          padding-bottom: 12px !important;
+          margin-top: 0px !important;
+        }
+
         // Mobile content overlays
         .dial-up-content-overlay,
         .channels-content-overlay {
@@ -1145,11 +1174,12 @@ $font-mono: "Courier New", monospace;
           z-index: 3;
           //overflow: hidden;
           overflow-y: auto;
+          margin-top: 0px !important;
 
           .step-content {
             background: $color-overlay;
             border: 2px solid $color-border;
-            padding: 0 15px 9px;
+            padding: 0 15px 9px; // General padding for .step-content
             border-radius: 4px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
@@ -1162,6 +1192,7 @@ $font-mono: "Courier New", monospace;
             // Mobile Step 1 & 3 prompt
             .dial-up-prompt {
               text-align: center;
+              //height: auto !important; // Allow height to adjust based on content
 
               p {
                 font-size: 13px;
@@ -1170,17 +1201,12 @@ $font-mono: "Courier New", monospace;
                 padding-top: 0px;
               }
 
+              // General styles for .button-group within .dial-up-prompt
               .button-group {
                 display: flex;
                 justify-content: center;
                 gap: 10px;
-                margin-top: 18px !important;
-
-                .aol-button {
-                  font-size: 12px;
-                  padding: 6px 14px;
-                  min-width: 80px;
-                }
+                // margin-top: 18px !important; // Example of a potential default margin-top
               }
 
               p.confirmation-text {
@@ -1192,11 +1218,19 @@ $font-mono: "Courier New", monospace;
                 }
               }
 
-              // Mobile Step 4 recap
+              // Mobile Step 4 recap specific styles
+              // This rule targets the .dial-up-prompt.recap-prompt when it has a .recap-section,
+              // and then styles the .button-group within it.
+              .dial-up-prompt.recap-prompt:has(.recap-section) {
+                .button-group {
+                  margin-top: 0px !important; // Apply specific margin-top here
+                }
+              }
+
               .recap-section {
                 background: $color-gray-light;
                 border: 1px solid $color-border;
-                //padding: 10px 15px;
+                //padding: 10px 15px; // Example padding for .recap-section itself
                 margin: 1px 0;
                 border-radius: 4px;
                 text-align: left;
@@ -1206,6 +1240,8 @@ $font-mono: "Courier New", monospace;
                   font-size: 11px;
                   margin: 3px 0;
                 }
+
+                // Removed the incorrect .button-group rule nested here
 
                 .selected-channels {
                   margin: 5px 0 0 15px;
@@ -1218,16 +1254,22 @@ $font-mono: "Courier New", monospace;
 
                 .confirmation-text {
                   font-size: 11px;
-                  margin: 11px !important;
-                  margin: 8px 0;
+                  margin: 11px !important; // Consider avoiding !important
+                  margin: 8px 0; // Note: Two margin rules here, the second one will apply
                 }
               }
             }
 
+            // Assuming .step-content.channels-content is a specific type of .step-content
+            // Adding the rule for its specific padding we discussed earlier
+            &.channels-content {
+              padding: 0 15px 15px; // Specific padding for .step-content.channels-content
+            }
+
             // Mobile email input
             .email-section {
-              margin-bottom: 4px;
-              margin-top: 4px;
+              margin-bottom: 10px;
+              //margin-top: 4px;
 
               .w98-label {
                 font-size: 12px;
@@ -1258,7 +1300,7 @@ $font-mono: "Courier New", monospace;
               }
 
               .channels-subheader {
-                font-size: 11px;
+                font-size: 12px;
                 margin-bottom: 6px;
               }
 
@@ -1310,8 +1352,8 @@ $font-mono: "Courier New", monospace;
               display: flex;
               justify-content: space-between;
               margin-top: 10px;
-              padding-top: 2px;
-              border-top: 1px solid $color-gray;
+              //padding-top: 2px;
+              //border-top: 1px solid $color-gray;
 
               .aol-button {
                 font-size: 11px;
@@ -1338,7 +1380,7 @@ $font-mono: "Courier New", monospace;
 
               // Rule for the .button-group immediately following .frequency-options
               .frequency-options + .button-group {
-                margin-top: 10px !important; // Consider avoiding !important
+                //margin-top: 10px !important; // Consider avoiding !important
               }
             }
 
@@ -1369,18 +1411,6 @@ $font-mono: "Courier New", monospace;
               }
             }
           }
-        }
-
-        // Mobile channels-specific overlay adjustments
-        .channels-content-overlay {
-          margin-top: 0px;
-          padding-right: 10px;
-          right: 10px;
-          left: 10px;
-          bottom: 53px;
-          align-content: center;
-          padding: 0px !important;
-          width: calc(100% - 20px);
         }
       }
     }
