@@ -1158,9 +1158,11 @@ $font-mono: "Courier New", monospace;
         }
 
         .channels-content-overlay .step-content.channels-content {
-          padding: 15px !important;
-          padding-bottom: 12px !important;
           margin-top: 0px !important;
+          padding-top: 7px !important;
+          padding-right: 15px !important;
+          padding-bottom: 12px !important;
+          padding-left: 15px !important;
         }
 
         // Mobile content overlays
@@ -1196,8 +1198,8 @@ $font-mono: "Courier New", monospace;
 
               p {
                 font-size: 13px;
-                margin-bottom: 0px;
-                margin-top: 12px;
+                margin-bottom: 3px;
+                margin-top: 10px;
                 padding-top: 0px;
               }
 
@@ -1365,8 +1367,8 @@ $font-mono: "Courier New", monospace;
             .dial-up-prompt {
               // Assuming .dial-up-prompt is the parent of both
               .frequency-options {
-                margin-top: 7px !important; // Consider avoiding !important
-                margin-bottom: 4px !important; // Consider avoiding !important
+                margin-top: 0px !important; // Consider avoiding !important
+                margin-bottom: 0px !important; // Consider avoiding !important
 
                 label {
                   font-size: 13px;
