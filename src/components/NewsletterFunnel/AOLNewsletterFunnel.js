@@ -378,14 +378,14 @@ class AOLNewsletterFunnel extends Component {
                 <div className="step-box step-box-3">
                   {currentStep === 3 && (
                     <img
-                      src="/static/aol/dialup_pic44.png"
+                      src="/static/aol/dialup_pic3.png"
                       alt="AOL Figure 3"
                       className="aol-figure-image aol-figure-3 aol-figure-fade-in"
                     />
                   )}
                   {currentStep === 4 && (
                     <img
-                      src="/static/aol/dialup_pic55.png"
+                      src="/static/aol/dialup_pic4.png"
                       alt="AOL Figure 4"
                       className="aol-figure-image aol-figure-4 aol-figure-fade-in"
                       style={{ marginLeft: "2px" }}
