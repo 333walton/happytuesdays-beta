@@ -42,9 +42,9 @@ const NewsletterFunnelManager = ({ children }) => {
 
         console.log(`Feeds closed ${newCount} time(s)`);
 
-        // Trigger on every even count (2nd, 4th, 6th close, etc.)
-        if (newCount % 2 === 0) {
-          console.log("Triggering funnel on Feeds close (even count)");
+        // Trigger on every odd count (1st, 3rd, 5th close, etc.)
+        if (newCount % 2 === 1) {
+          console.log("Triggering funnel on Feeds close (odd count)");
           triggerFunnel("feeds_closed");
         }
       }
