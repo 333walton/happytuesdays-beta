@@ -5,56 +5,56 @@ import AOLNewsletterFunnel from "./AOLNewsletterFunnel";
 
 const NewsletterFunnelManager = ({ children }) => {
   const [showFunnel, setShowFunnel] = useState(false);
-  // Remove session restriction state variables
-  // const [hasShownThisSession, setHasShownThisSession] = useState(false);
-  const [sessionTimer, setSessionTimer] = useState(null);
+  const [feedsCloseCount, setFeedsCloseCount] = useState(0);
+  const [hasCompletedThisSession, setHasCompletedThisSession] = useState(false);
   const programContext = useContext(ProgramContext);
 
   // Debug log
   console.log("NewsletterFunnelManager state:", {
     showFunnel,
-    // hasShownThisSession,
+    feedsCloseCount,
+    hasCompletedThisSession,
   });
 
-  // Remove session storage check
-  // useEffect(() => {
-  //   const sessionStatus = sessionStorage.getItem("newsletterFunnelStatus");
-  //   console.log("Session status from storage:", sessionStatus);
-  //   if (
-  //     sessionStatus === "shown" ||
-  //     sessionStatus === "declined" ||
-  //     sessionStatus === "completed"
-  //   ) {
-  //     setHasShownThisSession(true);
-  //   }
-  // }, []);
-
-  // Set up 2-minute timer (no session restriction)
+  // Check if signup was completed this session
   useEffect(() => {
-    const timer = setTimeout(() => {
-      triggerFunnel("session_duration");
-    }, 2 * 60 * 1000); // 2 minutes
+    const sessionStatus = sessionStorage.getItem("newsletterCompleted");
+    if (sessionStatus === "true") {
+      setHasCompletedThisSession(true);
+    }
+  }, []);
 
-    setSessionTimer(timer);
-
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, []); // Remove hasShownThisSession dependency
-
-  // Listen for Feeds window close event (no session restriction)
+  // Listen for Feeds window close event - open every other time (1 out of 2)
   useEffect(() => {
     const handleFeedsClose = (event) => {
       if (event.detail && event.detail.programTitle === "Feeds") {
-        triggerFunnel("feeds_closed");
+        // Don't trigger if already completed this session
+        if (hasCompletedThisSession) {
+          console.log(
+            "Newsletter already completed this session, skipping auto-trigger"
+          );
+          return;
+        }
+
+        // Increment the close count
+        const newCount = feedsCloseCount + 1;
+        setFeedsCloseCount(newCount);
+
+        console.log(`Feeds closed ${newCount} time(s)`);
+
+        // Trigger on every even count (2nd, 4th, 6th close, etc.)
+        if (newCount % 2 === 0) {
+          console.log("Triggering funnel on Feeds close (even count)");
+          triggerFunnel("feeds_closed");
+        }
       }
     };
 
     window.addEventListener("programClosed", handleFeedsClose);
     return () => window.removeEventListener("programClosed", handleFeedsClose);
-  }, []); // Remove hasShownThisSession dependency
+  }, [feedsCloseCount, hasCompletedThisSession]);
 
-  // Listen for "You've Got Mail" click (no session restriction)
+  // Listen for "You've Got Mail" click (manual trigger - always allowed)
   useEffect(() => {
     const handleMailClick = (event) => {
       console.log(
@@ -67,11 +67,6 @@ const NewsletterFunnelManager = ({ children }) => {
         console.log("📧 Mail action detected, triggering funnel");
         console.log("📧 Setting showFunnel to true");
         setShowFunnel(true);
-
-        // Clear the timer if it exists
-        if (sessionTimer) {
-          clearTimeout(sessionTimer);
-        }
 
         // Focus the window after a short delay
         setTimeout(() => {
@@ -98,20 +93,24 @@ const NewsletterFunnelManager = ({ children }) => {
     };
   }, []);
 
-  // Central trigger function (no suppression check)
+  // Central trigger function
   const triggerFunnel = (source) => {
     console.log(`📧 Newsletter funnel triggered by: ${source}`);
     console.log("📧 Current state before trigger:", {
       showFunnel,
+      hasCompletedThisSession,
     });
+
+    // Only block automatic triggers if completed this session
+    if (source !== "manual" && hasCompletedThisSession) {
+      console.log(
+        "📧 Blocking automatic trigger - already completed this session"
+      );
+      return;
+    }
 
     console.log("📧 Setting showFunnel to true");
     setShowFunnel(true);
-
-    // Clear the timer if it exists
-    if (sessionTimer) {
-      clearTimeout(sessionTimer);
-    }
 
     // Focus the window after a short delay
     setTimeout(() => {
@@ -128,24 +127,24 @@ const NewsletterFunnelManager = ({ children }) => {
     }, 100);
   };
 
-  // Handle funnel close (still track completion for analytics if needed)
+  // Handle funnel close
   const handleFunnelClose = (completed) => {
     setShowFunnel(false);
 
     if (!completed) {
-      // User declined or closed without completing
-      // Optional: still store for analytics but don't use for restriction
-      // sessionStorage.setItem("newsletterFunnelStatus", "declined");
+      console.log("User declined or closed without completing");
     } else {
-      // User completed signup
-      // Optional: still store for analytics but don't use for restriction
-      // sessionStorage.setItem("newsletterFunnelStatus", "completed");
+      console.log("User completed signup");
     }
   };
 
   // Handle successful signup
   const handleFunnelComplete = (formData) => {
     console.log("Newsletter signup completed:", formData);
+
+    // Mark as completed for this session
+    setHasCompletedThisSession(true);
+    sessionStorage.setItem("newsletterCompleted", "true");
 
     // Store the signup data
     localStorage.setItem(
@@ -156,7 +155,7 @@ const NewsletterFunnelManager = ({ children }) => {
       })
     );
 
-    // You can dispatch events or update context here
+    // Dispatch event for other components
     window.dispatchEvent(
       new CustomEvent("newsletterSignupComplete", {
         detail: formData,
@@ -171,7 +170,7 @@ const NewsletterFunnelManager = ({ children }) => {
     return () => {
       delete window.triggerNewsletterFunnel;
     };
-  }, []);
+  }, [hasCompletedThisSession]);
 
   return (
     <>
