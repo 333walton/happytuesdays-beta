@@ -616,13 +616,13 @@ class AOLNewsletterFunnel extends Component {
                         className="column-title"
                         onClick={() => this.handleColumnSelect("Design")}
                       >
-                        Design
+                        Art/Design
                       </div>
                       <div
                         className="column-title"
                         onClick={() => this.handleColumnSelect("Builders")}
                       >
-                        Builders
+                        Build/Grow
                       </div>
                       <div
                         className="column-title"

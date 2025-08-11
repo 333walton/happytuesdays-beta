@@ -193,6 +193,26 @@ $font-mono: "Courier New", monospace;
   }
 }
 
+// Global optimization for all AOL figures
+.aol-figure-image,
+.aol-figure-1,
+.aol-figure-2,
+.aol-figure-3,
+.aol-figure-4 {
+  // Prevent blur from scaling
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -webkit-font-smoothing: antialiased;
+
+  // Use GPU acceleration for better rendering
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+
+  // Ensure no sub-pixel rendering issues
+  will-change: transform;
+}
+
 // Status text (used in multiple steps)
 .status-text-container {
   position: absolute;
@@ -378,6 +398,7 @@ $font-mono: "Courier New", monospace;
       left: 30px;
       scale: 0.6;
       position: absolute;
+      image-rendering: auto !important;
     }
   }
 
@@ -525,6 +546,7 @@ $font-mono: "Courier New", monospace;
       left: 30px;
       scale: 0.6;
       position: absolute;
+      image-rendering: auto !important;
     }
   }
 
@@ -1068,6 +1090,7 @@ $font-mono: "Courier New", monospace;
             scale: 0.5;
             transform: none;
             z-index: 2;
+            image-rendering: auto !important;
           }
           .step-box-1 {
             height: auto;
