@@ -15,103 +15,102 @@ class AOLNewsletterFunnel extends Component {
       {
         id: "aol_today",
         name: "AI & Machine Learning",
-        image: "/static/aol/channels_aol_today_btn.png",
+        image: "/static/aol/channels/channel_ai_ml.png", // Fixed: removed 'public'
       },
       {
         id: "computing",
         name: "Generative & AI Art",
-        image: "/static/aol/channels_computing_btn.png",
+        image: "/static/aol/channels/channel_ai_art_lab.png", // Fixed: removed 'public'
       },
       {
         id: "games",
-        name: "Productivity Hacks",
-        image: "/static/aol/channels_games_btn.png",
+        name: "Startup Stories",
+        image: "/static/aol/channels/channel_startup_stories.png", // Fixed: removed 'public'
       },
       {
         id: "entertainment",
         name: "Speedruns & Events",
-        image: "/static/aol/channels_entertainment_btn.png",
+        image: "/static/aol/channels_entertainment_btn.png", // Already correct
       },
       {
         id: "news",
         name: "Martech & AdTech",
-        image: "/static/aol/channels_news_btn.png",
+        image: "/static/aol/channels/channel_marketing_tech.png", // Fixed: removed 'public'
       },
       {
         id: "sports",
         name: "UI/UX Trends",
-        image: "/static/aol/channels_sports_btn.png",
+        image: "/static/aol/channels_sports_btn.png", // Already correct
       },
       {
         id: "travel",
         name: "Automation & No-Code",
-        image: "/static/aol/channels_travel_btn.png",
+        image: "/static/aol/channels/channel_no_code_tools.png", // Fixed: removed 'public'
       },
       {
         id: "shopping",
         name: "Emulation & Modding",
-        image: "/static/aol/channels_shopping_btn.png",
+        image: "/static/aol/channels_shopping_btn.png", // Already correct
       },
       {
         id: "families",
         name: "Blockchain & Web3",
-        image: "/static/aol/channels_families_btn.png",
+        image: "/static/aol/channels/channel_blockchain_web3.png", // Fixed: removed 'public'
       },
       {
         id: "kids_only",
         name: "Color & Typography",
-        image: "/static/aol/channels_kids_only_btn.png",
+        image: "/static/aol/channels_kids_only_btn.png", // Already correct
       },
       {
         id: "health",
         name: "Project Management",
-        image: "/static/aol/channels_health_btn.png",
+        image: "/static/aol/channels/channel_pm_playbook.png", // Fixed: removed 'public'
       },
       {
         id: "personal_finance",
         name: "Collecting & Hardware",
-        image: "/static/aol/channels_personal_finance_btn.png",
+        image: "/static/aol/channels_personal_finance_btn.png", // Already correct
       },
       {
         id: "influence",
         name: "Cybersecurity & Privacy",
-        image: "/static/aol/new_channels_influence_btn.png",
+        image: "/static/aol/channels/channel_cyber_privacy.png", // Fixed: removed 'public'
       },
       {
         id: "workplace",
         name: "Animation & Motion",
-        image: "/static/aol/new_channels_workplace_btn.png",
+        image: "/static/aol/new_channels_workplace_btn.png", // Already correct
       },
       {
         id: "research_learn",
-        name: "Founder Stories",
-        image: "/static/aol/new_channels_research_and_learn_btn.png",
+        name: "Work Smarter",
+        image: "/static/aol/channels/channel_work_smarter.png", // Fixed: removed 'public'
       },
       {
         id: "lifestyles",
         name: "Indie Retro Releases",
-        image: "/static/aol/new_channels_lifestyles_btn.png",
+        image: "/static/aol/new_channels_lifestyles_btn.png", // Already correct
       },
       {
         id: "international",
         name: "Web Dev & DevOps",
-        image: "/static/aol/new_channels_international_btn.png",
+        image: "/static/aol/channels/channel_web_devops.png", // Fixed: added proper slashes
       },
       {
         id: "local",
         name: "Tutorials & Walkthroughs",
-        image: "/static/aol/new_channels_local_btn.png",
+        image: "/static/aol/new_channels_local_btn.png", // Already correct
       },
-      // Using placeholder images for the last two to reach 20 total
       {
         id: "music",
         name: "Stoic Mindset",
-        image: "/static/aol/channels_news_btn.png",
+        image: "/static/aol/channels_news_btn.png", // Already correct (placeholder)
       },
       {
         id: "food",
         name: "Retro Game News",
-        image: "/static/aol/channels_news_btn.png",
+        image: "/static/aol/channels_news_btn.png", // Already correct (placeholder)
       },
     ];
 
