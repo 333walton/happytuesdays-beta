@@ -1545,22 +1545,45 @@ $font-mono: "Courier New", monospace;
                 align-content: start;
 
                 .channel-button {
+                  position: relative; // Add this for proper positioning
+                  cursor: pointer; // Add this for consistency
+                  transition: all 0.2s ease; // Add this for consistency
                   width: 100%;
-                  height: 100%;
-                  justify-self: center;
+                  height: auto; // Let height be determined by aspect ratio
+                  aspect-ratio: 101/20; // Maintain the same proportions as desktop
+                  display: flex; // Add this for centering
+                  align-items: center; // Add this for centering
+                  justify-content: center; // Add this for centering
 
                   .channel-btn-image {
                     width: 100%;
                     height: 100%;
-                    object-fit: contain;
+                    object-fit: fill; // Change from contain to fill to match desktop
+                    display: block; // Add this for consistency
                   }
 
-                  &.selected::after {
-                    width: 14px;
-                    height: 14px;
-                    font-size: 9px;
-                    bottom: 1px;
-                    right: 1px;
+                  &:hover {
+                    transform: scale(1.02); // Smaller scale for mobile
+                  }
+
+                  &.selected {
+                    box-shadow: 0 0 6px rgba(0, 85, 255, 0.5); // Slightly smaller shadow for mobile
+
+                    &::after {
+                      content: "✓";
+                      position: absolute;
+                      width: 14px;
+                      height: 14px;
+                      font-size: 9px;
+                      bottom: 1px;
+                      right: 1px;
+                      background: $color-primary;
+                      color: white;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-weight: bold;
+                    }
                   }
                 }
               }
@@ -1571,8 +1594,6 @@ $font-mono: "Courier New", monospace;
               display: flex;
               justify-content: space-between;
               margin-top: 10px;
-              //padding-top: 2px;
-              //border-top: 1px solid $color-gray;
 
               .aol-button {
                 font-size: 11px;
