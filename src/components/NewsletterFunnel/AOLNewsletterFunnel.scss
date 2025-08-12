@@ -922,18 +922,38 @@ $font-mono: "Courier New", monospace;
       }
       .channels-navigation {
         display: flex;
-        //justify-content: space-between;
-        justify-content: center;
-        gap: 55%;
+        justify-content: space-between;
+        align-items: center;
         margin-top: 15px;
-        margin-right: 2px;
-        bottom: 20px;
+        margin-right: 8px;
+        margin-left: 8px;
+        //bottom: 20px;
+        gap: 10px;
+        position: relative; // Add this for absolute positioning
 
         .aol-button {
-          font-size: 12px; // Slightly smaller for mobile
+          font-size: 12px;
           padding: 6px 16px;
           width: 85px;
           height: 30px;
+          flex-shrink: 0;
+        }
+
+        // Add this new rule for the description
+        .channel-description {
+          position: absolute;
+          left: 95px; // Position after the Back button
+          right: 95px; // Position before the Next button
+          top: 50%;
+          transform: translateY(-50%);
+          text-align: center;
+          font-size: 10px;
+          font-style: italic;
+          color: $color-text;
+          padding: 0 10px;
+          line-height: 1.3;
+          pointer-events: none; // Prevent interfering with button clicks
+          z-index: 1;
         }
       }
     }
@@ -1599,22 +1619,46 @@ $font-mono: "Courier New", monospace;
               }
             }
 
-            // Mobile navigation buttons
+            // Mobile navigation buttons with description
             .channels-navigation {
               display: flex;
-              //justify-content: space-between;
-              justify-content: center;
-              gap: 53%;
+              justify-content: space-between; // Change from center to space-between
+              align-items: center;
               margin-top: 10px;
+              gap: 5px; // Reduce gap since we're using absolute positioning
+              position: relative; // Add this for absolute positioning of description
 
               .aol-button {
                 font-size: 12px;
                 padding: 5px 12px;
+                width: 75px;
+                height: 30px;
                 min-width: 75px;
+                flex-shrink: 0; // Prevent buttons from shrinking
+                margin-right: -7px;
+                margin-left: -7px;
               }
+
+              // Add the channel description styles
+              .channel-description {
+                position: absolute;
+                left: 80px; // Position after the Back button
+                right: 80px; // Position before the Next button
+                top: 50%;
+                transform: translateY(-50%);
+                text-align: center;
+                font-size: 10px;
+                font-style: italic;
+                color: $color-text;
+                padding: 0 5px;
+                line-height: 1.2;
+                pointer-events: none; // Prevent interfering with button clicks
+                z-index: 1;
+              }
+
               button.aol-button-continue {
-                padding-top: 0px; /* Increase top padding */
-                padding-bottom: 2px; /* Decrease bottom padding */
+                padding-top: 0px;
+                padding-bottom: 2px;
               }
             }
 

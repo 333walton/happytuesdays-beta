@@ -17,120 +17,200 @@ class AOLNewsletterFunnel extends Component {
         name: "AI & Machine Learning",
         image: "/static/aol/channels/channel_ai_ml.png", // tech
         className: "channel-ai-ml",
+        description:
+          "Covers developments and applications of AI and machine learning for beginners and experienced readers.",
+        mobileDescription:
+          "Covers AI and machine learning developments, tools, and uses for all experience levels.",
       },
       {
         id: "ai_art",
         name: "Generative & AI Art",
         image: "/static/aol/channels/channel_ai_art_lab.png", // art
         className: "channel-ai-art",
+        description:
+          "Covers developments and applications of AI and machine learning for beginners and experienced readers.",
+        mobileDescription:
+          "Explores projects, techniques, and trends in generative and AI-driven art.",
       },
       {
         id: "startup_stories",
         name: "Startup Stories",
         image: "/static/aol/channels/channel_startup_stories.png", // build
         className: "channel-startup-stories",
+        description:
+          "Shares lessons, challenges, and experiences from entrepreneurs and their journeys building and growing businesses.",
+        mobileDescription:
+          "Shares lessons and experiences from entrepreneurs building & scaling businesses.",
       },
       {
         id: "weekly_roundup",
         name: "Weekly Roundup",
         image: "/static/aol/channels/channel_weekly_roundup.png", // gaming
         className: "channel-weekly-roundup",
+        description:
+          "Summarizes notable developments, releases, and discussions from across the gaming world in one concise update.",
+        mobileDescription:
+          "Summarizes weekly gaming news, releases, and key community updates.",
       },
       {
         id: "marketing_tech",
         name: "Martech & AdTech",
         image: "/static/aol/channels/channel_marketing_tech.png", // tech
         className: "channel-marketing-tech",
+        description:
+          "Explores marketing and advertising technology, tools, trends, and strategies that drive campaign success.",
+        mobileDescription:
+          "Covers marketing and advertising tech, including tools, trends, and strategies.",
       },
       {
         id: "ui_ux",
         name: "UI/UX Insider",
         image: "static/aol/channels/channel_ui_ux_insider.png", // art
         className: "channel-ui-ux",
+        description:
+          "Covers user interface and user experience design trends, principles, and practices shaping modern digital products.",
+        mobileDescription:
+          "Covers trends and best practices shaping UI and UX design for digital products.",
       },
       {
         id: "no_code",
         name: "Automation & No-Code",
         image: "/static/aol/channels/channel_no_code_tools.png", // build
         className: "channel-no-code",
+        description:
+          "Explores automation and no-code tools for building and managing projects without traditional programming.",
+        mobileDescription:
+          "Explores automation and no-code tools for building and managing projects.",
       },
       {
         id: "guides",
         name: "Pro Guides/Tips",
         image: "/static/aol/channels/channel_pro_guides_tips.png", // gaming
         className: "channel-guides",
+        description:
+          "Offers strategies, insights, and methods for improving skills and performance in various games.",
+        mobileDescription:
+          "Shares strategies to improve skills and performance in various games.",
       },
       {
         id: "blockchain_web3",
         name: "Blockchain & Web3",
         image: "/static/aol/channels/channel_blockchain_web3.png", // tech
         className: "channel-blockchain-web3",
+        description:
+          "Covers blockchain technology, decentralization trends, the evolving Web3 ecosystem and digital economies.",
+        mobileDescription:
+          "Covers blockchain, decentralization, and Web3 trends with project spotlights.",
       },
       {
         id: "tutorials",
         name: "Tutorials",
         image: "/static/aol/channels/channel_tutorials.png", // art
         className: "channel-tutorials",
+        description:
+          "Step-by-step guides for creative & technical skills, helping readers learn and apply techniques across multiple mediums.",
+        mobileDescription:
+          "Step-by-step guides for learning creative and technical skills.",
       },
       {
         id: "pm_playbook",
         name: "Project Management",
         image: "/static/aol/channels/channel_pm_playbook.png", // build
         className: "channel-pm-playbook",
+        description:
+          "Explores methods, tools, and workflows for planning, organizing, and delivering projects in various settings.",
+        mobileDescription:
+          "Explores tools and workflows for planning and delivering projects.",
       },
       {
         id: "retro_gaming",
         name: "Retro Gaming",
         image: "/static/aol/channels/channel_retro_gaming.png", // gaming
         className: "channel-retro-gaming",
+        description:
+          "Covers classic video games, modern perspectives, preservation, and community stories from earlier gaming eras.",
+        mobileDescription:
+          "Covers classic games, modern takes, preservation, and community stories.",
       },
       {
         id: "cybersecurity_privacy",
         name: "Cybersecurity & Privacy",
         image: "/static/aol/channels/channel_cyber_privacy.png", // tech
         className: "channel-cybersecurity-privacy",
+        description:
+          "Examines security challenges, data protection practices, and evolving threats in the digital environment.",
+        mobileDescription:
+          "Examines security, data protection, and emerging digital threats.",
       },
       {
         id: "motion_design",
         name: "Animation & Motion",
         image: "static/aol/channels/channel_motion_design.png", // art
         className: "channel-motion-design",
+        description:
+          "Covers animation techniques and motion design, from core principles to applications in media, products, and marketing.",
+        mobileDescription:
+          "Covers animation and motion design from principles to real applications.",
       },
       {
         id: "work_smarter",
         name: "Work Smarter",
         image: "/static/aol/channels/channel_work_smarter.png", // build
         className: "channel-work-smarter",
+        description:
+          "Highlights ideas, habits, and tools aimed at improving productivity, efficiency, and focus in work and daily life.",
+        mobileDescription:
+          "Highlights tools and habits for improving productivity and focus.",
       },
       {
         id: "indie_spotlights",
         name: "Indie Spotlights",
         image: "static/aol/channels/channel_indie_spotlights.png", // gaming
         className: "channel-indie-spotlights",
+        description:
+          "Showcases indie game projects and stories, including releases, development insights, and creator perspectives.",
+        mobileDescription:
+          "Showcases indie game releases, development stories, and creator insights.",
       },
       {
         id: "web_devops",
         name: "Web Dev & DevOps",
         image: "/static/aol/channels/channel_web_devops.png", // tech
         className: "channel-web-devops",
+        description:
+          "Focuses on web development, tools, workflows, and deployment strategies for building & maintaining projects.",
+        mobileDescription:
+          "Focuses on web development tools, workflows, and deployment strategies.",
       },
       {
         id: "typeface_color",
         name: "Typeface + Color",
         image: "static/aol/channels/channel_typeface_color.png", // art
         className: "channel-typeface-color",
+        description:
+          "Examines typography and color design, exploring their role in branding, communication, and visual storytelling.",
+        mobileDescription:
+          "Explores typography and color in branding, design, and communication.",
       },
       {
         id: "momentum_mindset",
         name: "Momentum & Mindset",
         image: "/static/aol/channels/channel_work_smarter.png", // build placeholder
         className: "channel-momentum-mindset",
+        description:
+          "Shares approaches and ideas for building resilience, focus, and positive habits for growth.",
+        mobileDescription:
+          "Shares ideas for building resilience, focus, and positive daily habits.",
       },
       {
         id: "collecting",
         name: "Collecting",
         image: "static/aol/channels/channel_collectors_hub.png", // gaming
         className: "channel-collecting",
+        description:
+          "Celebrates the culture of game collecting, with looks at trends, items, and communities built around them.",
+        mobileDescription:
+          "Explores game collecting trends, notable items, and collector communities.",
       },
     ];
 
@@ -146,8 +226,35 @@ class AOLNewsletterFunnel extends Component {
         frequency: "weekly",
       },
       errors: {},
+      hoveredChannelId: null, // Add state for tracking hovered channel
+    };
+    this.state = {
+      currentStep: 1,
+      formData: {
+        email: "",
+        selectedChannels: this.channels.reduce((acc, channel) => {
+          acc[channel.id] = false;
+          return acc;
+        }, {}),
+        frequency: "weekly",
+      },
+      errors: {},
+      hoveredChannelId: null,
+      isMobile: window.innerWidth <= 480, // detect on load
     };
   }
+
+  componentDidMount() {
+    window.addEventListener("resize", this.handleResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+  }
+
+  handleResize = () => {
+    this.setState({ isMobile: window.innerWidth <= 480 });
+  };
 
   // Email validation
   validateEmail = (email) => {
@@ -186,6 +293,40 @@ class AOLNewsletterFunnel extends Component {
 
     // Load the audio
     audio.load();
+  };
+
+  // Handle channel hover
+  handleChannelHover = (channelId) => {
+    this.setState({ hoveredChannelId: channelId });
+  };
+
+  // Handle channel hover leave
+  handleChannelHoverLeave = () => {
+    this.setState({ hoveredChannelId: null });
+  };
+
+  // Get the description to display (either from hovered or selected channel)
+  getActiveDescription = () => {
+    const { hoveredChannelId, formData, isMobile } = this.state;
+
+    // Determine which description field to use
+    const descKey = isMobile ? "mobileDescription" : "description";
+
+    if (hoveredChannelId) {
+      const channel = this.channels.find((c) => c.id === hoveredChannelId);
+      return channel ? channel[descKey] : null;
+    }
+
+    const selectedChannelId = Object.keys(formData.selectedChannels).find(
+      (id) => formData.selectedChannels[id]
+    );
+
+    if (selectedChannelId) {
+      const channel = this.channels.find((c) => c.id === selectedChannelId);
+      return channel ? channel[descKey] : null;
+    }
+
+    return null;
   };
 
   // Handle individual channel selection
@@ -677,6 +818,10 @@ class AOLNewsletterFunnel extends Component {
                             selected: formData.selectedChannels[channel.id],
                           })}
                           onClick={() => this.handleChannelToggle(channel.id)}
+                          onMouseEnter={() =>
+                            this.handleChannelHover(channel.id)
+                          }
+                          onMouseLeave={this.handleChannelHoverLeave}
                         >
                           <img
                             src={channel.image}
@@ -695,6 +840,9 @@ class AOLNewsletterFunnel extends Component {
                     >
                       Back
                     </button>
+                    <div className="channel-description">
+                      {this.getActiveDescription()}
+                    </div>
                     <button
                       onClick={this.handleNextStep}
                       className="aol-button aol-button-continue"
