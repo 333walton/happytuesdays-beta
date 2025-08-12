@@ -257,6 +257,7 @@ $font-mono: "Courier New", monospace;
   &.aol-button-primary,
   &.primary,
   &.aol-button-continue {
+    //padding-right: 6px;
     background: $color-primary;
     color: white;
     border-color: $color-primary-dark $color-primary-darker
@@ -657,7 +658,7 @@ $font-mono: "Courier New", monospace;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           margin-bottom: 5px;
-          padding: 0 2px;
+          padding: 0 1px;
 
           .column-title {
             font-family: $font-primary;
@@ -684,8 +685,9 @@ $font-mono: "Courier New", monospace;
         .channel-buttons-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 2px; // Add consistent gap between all buttons
-          margin: 2px 0;
+          gap: 1px; // Add consistent gap between all buttons
+          margin-left: 2px;
+          margin-right: 2px;
           justify-items: center;
           image-rendering: auto;
 
@@ -693,8 +695,8 @@ $font-mono: "Courier New", monospace;
             position: relative;
             cursor: pointer;
             transition: all 0.2s ease;
-            width: 101px; // Set consistent container width
-            height: 20px; // Set consistent container height
+            width: 96px; // Set consistent container width
+            height: 19px; // Set consistent container height
             display: flex;
             align-items: center;
             justify-content: center;
@@ -919,12 +921,21 @@ $font-mono: "Courier New", monospace;
           }
         }*/ /* End of Channel Button Styles */
       }
-
       .channels-navigation {
         display: flex;
-        justify-content: space-between;
+        //justify-content: space-between;
+        justify-content: center;
+        gap: 230px;
         margin-top: 15px;
+        margin-right: 2px;
         bottom: 20px;
+
+        .aol-button {
+          font-size: 12px; // Slightly smaller for mobile
+          padding: 6px 16px;
+          width: 85px;
+          height: 30px;
+        }
       }
     }
   }
@@ -1592,12 +1603,15 @@ $font-mono: "Courier New", monospace;
             // Mobile navigation buttons
             .channels-navigation {
               display: flex;
-              justify-content: space-between;
+              //justify-content: space-between;
+              justify-content: center;
+              gap: 50%;
               margin-top: 10px;
 
               .aol-button {
-                font-size: 11px;
+                font-size: 12px;
                 padding: 5px 12px;
+                min-width: 75px;
               }
             }
 

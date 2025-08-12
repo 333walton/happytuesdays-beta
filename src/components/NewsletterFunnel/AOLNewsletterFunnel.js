@@ -693,13 +693,13 @@ class AOLNewsletterFunnel extends Component {
                       onClick={this.handlePreviousStep}
                       className="aol-button aol-button-back"
                     >
-                      ← Back
+                      Back
                     </button>
                     <button
                       onClick={this.handleNextStep}
                       className="aol-button aol-button-continue"
                     >
-                      Continue →
+                      Next →
                     </button>
                   </div>
                 </div>
