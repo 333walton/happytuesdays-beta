@@ -140,6 +140,7 @@
       height: 481px;
       margin: auto;
       padding: 16px;
+      position: relative;
     }
 
     .BIOS {
@@ -168,6 +169,8 @@
       justify-content: center;
       align-items: center;
       background-color: #000;
+      cursor: pointer;
+      user-select: none;
     }
 
     .WindowsLaunchWrapper {
@@ -199,6 +202,63 @@
 
     .BIOS>div.visible {
       visibility: visible;
+    }
+
+    /* SVG Logo Bottom Right */
+    .bios-logo-bottom {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      width: 50%;
+      height: auto;
+      opacity: 0.7;
+      z-index: 2;
+    }
+
+    /* Hold-to-skip progress indicator */
+    .hold-progress-container {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 3;
+    }
+
+    .hold-progress-container.visible {
+      opacity: 1;
+    }
+
+    .hold-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #00ff41, #ffffff);
+      border-radius: 2px;
+      transition: width 0.1s linear;
+    }
+
+    .hold-hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 8px;
+      font-family: pixelmix, FixedSys, AMIBios, monospace;
+      letter-spacing: 0.5px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 3;
+      text-align: center;
+    }
+
+    .hold-hint.visible {
+      opacity: 1;
     }
 
     /* Typewriter cursor effect */
@@ -299,6 +359,22 @@
         background-position: right;
         background-size: contain;
       }
+
+      .bios-logo-bottom {
+        width: 40%;
+        bottom: 10px;
+        right: 10px;
+      }
+
+      .hold-progress-container {
+        width: 80px;
+        bottom: 15px;
+      }
+
+      .hold-hint {
+        bottom: 25px;
+        font-size: 7px;
+      }
     }
 
     @media (max-width: 600px),
@@ -340,6 +416,99 @@
   </style>
 
   <script>
+    // Hold-to-skip functionality
+    let holdTimer = null;
+    let holdStartTime = 0;
+    let progressInterval = null;
+    const HOLD_DURATION = 3000; // 3 seconds
+
+    function initHoldToSkip() {
+      const biosWrapper = document.querySelector('.BIOSWrapper');
+      const progressContainer = document.createElement('div');
+      const progressBar = document.createElement('div');
+      const hintText = document.createElement('div');
+
+      progressContainer.className = 'hold-progress-container';
+      progressBar.className = 'hold-progress-bar';
+      hintText.className = 'hold-hint';
+      hintText.textContent = 'Hold to skip BIOS';
+
+      progressContainer.appendChild(progressBar);
+      biosWrapper.appendChild(progressContainer);
+      biosWrapper.appendChild(hintText);
+
+      function startHold() {
+        holdStartTime = Date.now();
+        progressContainer.classList.add('visible');
+        hintText.classList.add('visible');
+
+        holdTimer = setTimeout(() => {
+          // Skip BIOS
+          clearProgressUpdater();
+          windowsLogo();
+        }, HOLD_DURATION);
+
+        // Update progress bar
+        progressInterval = setInterval(() => {
+          const elapsed = Date.now() - holdStartTime;
+          const progress = Math.min((elapsed / HOLD_DURATION) * 100, 100);
+          progressBar.style.width = progress + '%';
+        }, 50);
+      }
+
+      function clearProgressUpdater() {
+        if (progressInterval) {
+          clearInterval(progressInterval);
+          progressInterval = null;
+        }
+      }
+
+      function endHold() {
+        if (holdTimer) {
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+        clearProgressUpdater();
+
+        progressContainer.classList.remove('visible');
+        hintText.classList.remove('visible');
+        progressBar.style.width = '0%';
+      }
+
+      // Mouse events
+      biosWrapper.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        startHold();
+      });
+
+      biosWrapper.addEventListener('mouseup', endHold);
+      biosWrapper.addEventListener('mouseleave', endHold);
+
+      // Touch events
+      biosWrapper.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startHold();
+      });
+
+      biosWrapper.addEventListener('touchend', endHold);
+      biosWrapper.addEventListener('touchcancel', endHold);
+
+      // Keyboard events (spacebar or enter)
+      document.addEventListener('keydown', (e) => {
+        if ((e.code === 'Space' || e.code === 'Enter') && !holdTimer && !biosWrapper.classList.contains('hidden')) {
+          e.preventDefault();
+          startHold();
+        }
+      });
+
+      document.addEventListener('keyup', (e) => {
+        if ((e.code === 'Space' || e.code === 'Enter') && holdTimer) {
+          e.preventDefault();
+          endHold();
+        }
+      });
+    }
+
     // --- Utility: System Environment BIOS Fields as in screenshot ---
     function headerLine(text, totalWidth = window.innerWidth <= 768 ? 45 : 54) {
       // No dots, just centered or left-aligned
@@ -672,178 +841,171 @@
               i = tagEnd + 1;
             } else {
               typedSpan.innerHTML += text.charAt(i);
-              i++;
             }
+            setTimeout(type, speed);
           } else {
-            typedSpan.innerHTML += text.charAt(i);
-            i++;
+            cursorSpan.style.display = 'none';
+            if (callback) callback();
           }
-          setTimeout(type, speed);
-        } else {
-          cursorSpan.style.display = 'none';
-          if (callback) callback();
         }
+
+        type();
       }
 
-      type();
-    }
+      function staggerElements(elems, entry) {
+        if (!elems[entry]) {
+          setTimeout(() => {
+            // Add separator line before Memory Test with typewriter effect
+            const separatorLine = document.createElement('div');
+            separatorLine.style.fontFamily = "'Courier New', Courier, monospace";
+            separatorLine.style.color = "#d4fe6b";
+            separatorLine.style.fontSize = "10.5px";
+            separatorLine.style.letterSpacing = ".86px";
+            separatorLine.style.lineHeight = ".89em";
+            separatorLine.style.marginBottom = "4px";
+            separatorLine.style.marginTop = window.innerWidth <= 768 ? "-29px" : "-11px";
 
-    function staggerElements(elems, entry) {
-      if (!elems[entry]) {
-        setTimeout(() => {
-          // Add separator line before Memory Test with typewriter effect
-          const separatorLine = document.createElement('div');
-          separatorLine.style.fontFamily = "'Courier New', Courier, monospace";
-          separatorLine.style.color = "#d4fe6b";
-          separatorLine.style.fontSize = "10.5px";
-          separatorLine.style.letterSpacing = ".86px";
-          separatorLine.style.lineHeight = ".89em";
-          separatorLine.style.marginBottom = "4px";
-          separatorLine.style.marginTop = window.innerWidth <= 768 ? "-29px" : "-11px";
+            let bootContainer = document.getElementById("BIOS__bootContainer");
+            bootContainer.appendChild(separatorLine);
 
+            // Apply typewriter effect to the separator line
+            typewriterEffect(separatorLine, '='.repeat(window.innerWidth <= 768 ? 45 : 54), 15, function () {
+              // Continue with memory test after separator is complete
 
-
-          let bootContainer = document.getElementById("BIOS__bootContainer");
-          bootContainer.appendChild(separatorLine);
-
-          // Apply typewriter effect to the separator line
-          typewriterEffect(separatorLine, '='.repeat(window.innerWidth <= 768 ? 45 : 54), 15, function () {
-            // Continue with memory test after separator is complete
-
-            // Memory test line
-            const fakeBootLine = document.createElement('div');
-            fakeBootLine.innerHTML = `
+              // Memory test line
+              const fakeBootLine = document.createElement('div');
+              fakeBootLine.innerHTML = `
   <span>Memory Status</span>
   <span style="color: #d4fe6b;">65536k</span>
   <span class="typewriter-cursor"></span>
 `;
 
-            function countUpMemoryTest(parentElem, options = {}, onDone) {
-              // Enhanced memory detection functions
-              function getSystemMemoryEstimate() {
-                if (navigator.deviceMemory) {
-                  return navigator.deviceMemory * 1024 * 1024; // Convert GB to KB
-                }
-
-                const cores = navigator.hardwareConcurrency || 4;
-                let estimatedGB = 4; // Default fallback
-
-                if (cores >= 8) estimatedGB = 16;
-                else if (cores >= 6) estimatedGB = 12;
-                else if (cores >= 4) estimatedGB = 8;
-                else if (cores >= 2) estimatedGB = 6;
-
-                // Mobile devices typically have less RAM
-                if (/mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
-                  estimatedGB = Math.max(2, estimatedGB / 2);
-                }
-
-                return estimatedGB * 1024 * 1024; // Convert to KB
-              }
-
-              function getCacheEstimate() {
-                const cores = navigator.hardwareConcurrency || 4;
-                let cachePerCore = 256; // KB, conservative estimate
-
-                // Better heuristics based on performance timing precision
-                const timingPrecision = performance.timeOrigin ? 0.1 : 1;
-                if (timingPrecision < 0.01) cachePerCore = 1024; // High-end
-                else if (timingPrecision < 0.1) cachePerCore = 512; // Mid-range
-
-                return Math.min(cores * cachePerCore, 32768); // Cap at 32MB
-              }
-
-              function getAccurateStorageUsage() {
-                let totalBytes = 0;
-
-                // localStorage
-                try {
-                  for (let key in localStorage) {
-                    if (localStorage.hasOwnProperty(key)) {
-                      const value = localStorage.getItem(key) || '';
-                      totalBytes += key.length + value.length;
-                    }
+              function countUpMemoryTest(parentElem, options = {}, onDone) {
+                // Enhanced memory detection functions
+                function getSystemMemoryEstimate() {
+                  if (navigator.deviceMemory) {
+                    return navigator.deviceMemory * 1024 * 1024; // Convert GB to KB
                   }
-                } catch (e) { }
 
-                // sessionStorage  
-                try {
-                  for (let key in sessionStorage) {
-                    if (sessionStorage.hasOwnProperty(key)) {
-                      const value = sessionStorage.getItem(key) || '';
-                      totalBytes += key.length + value.length;
-                    }
+                  const cores = navigator.hardwareConcurrency || 4;
+                  let estimatedGB = 4; // Default fallback
+
+                  if (cores >= 8) estimatedGB = 16;
+                  else if (cores >= 6) estimatedGB = 12;
+                  else if (cores >= 4) estimatedGB = 8;
+                  else if (cores >= 2) estimatedGB = 6;
+
+                  // Mobile devices typically have less RAM
+                  if (/mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
+                    estimatedGB = Math.max(2, estimatedGB / 2);
                   }
-                } catch (e) { }
 
-                return Math.round(totalBytes / 1024); // Convert to KB
-              }
-
-              function getGraphicsMemoryEstimate() {
-                try {
-                  const canvas = document.createElement('canvas');
-                  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-                  if (!gl) return 0;
-
-                  // Get max texture size as an indicator of VRAM
-                  const maxTexture = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-
-                  // Rough VRAM estimation based on max texture size (in MB)
-                  if (maxTexture >= 16384) return 8192; // High-end: 8GB
-                  if (maxTexture >= 8192) return 4096;  // Mid-high: 4GB
-                  if (maxTexture >= 4096) return 2048;  // Mid-range: 2GB
-                  if (maxTexture >= 2048) return 1024;  // Low-mid: 1GB
-                  return 512; // Integrated/low-end: 512MB
-
-                } catch (e) {
-                  return 0;
+                  return estimatedGB * 1024 * 1024; // Convert to KB
                 }
-              }
 
-              function getHeapMemoryInfo() {
-                if (performance.memory) {
-                  return {
-                    used: Math.round(performance.memory.usedJSHeapSize / 1024),
-                    total: Math.round(performance.memory.totalJSHeapSize / 1024),
-                    limit: Math.round(performance.memory.jsHeapSizeLimit / 1024)
-                  };
+                function getCacheEstimate() {
+                  const cores = navigator.hardwareConcurrency || 4;
+                  let cachePerCore = 256; // KB, conservative estimate
+
+                  // Better heuristics based on performance timing precision
+                  const timingPrecision = performance.timeOrigin ? 0.1 : 1;
+                  if (timingPrecision < 0.01) cachePerCore = 1024; // High-end
+                  else if (timingPrecision < 0.1) cachePerCore = 512; // Mid-range
+
+                  return Math.min(cores * cachePerCore, 32768); // Cap at 32MB
                 }
-                return { used: 0, total: 0, limit: 0 };
-              }
 
-              // Use dynamic values instead of hardcoded ones
-              const targetKB = getSystemMemoryEstimate();
-              const cacheSRAM = getCacheEstimate();
-              const actualStorageKB = getAccurateStorageUsage();
-              const graphicsMemoryMB = getGraphicsMemoryEstimate();
-              const heapInfo = getHeapMemoryInfo();
+                function getAccurateStorageUsage() {
+                  let totalBytes = 0;
 
-              const TOTAL_WIDTH = window.innerWidth <= 768 ? 45 : 54; // Match the main TOTAL_WIDTH
+                  // localStorage
+                  try {
+                    for (let key in localStorage) {
+                      if (localStorage.hasOwnProperty(key)) {
+                        const value = localStorage.getItem(key) || '';
+                        totalBytes += key.length + value.length;
+                      }
+                    }
+                  } catch (e) { }
 
-              // Helper: Dotted style, right-aligned value with perfect alignment
-              function infoLine(label, value, suffix = "", showPassDot = false, noDots = false) {
-                label = label ?? '';
-                value = value == null ? '' : String(value);
-                const TOTAL_WIDTH = window.innerWidth <= 768 ? 45 : 54;
-                // Only use dots if noDots is false
-                let dots = "";
-                if (!noDots) {
-                  const totalContentLength = label.length + 1 + value.length + (suffix ? 1 + suffix.length : 0);
-                  let dotsLen = Math.max(1, TOTAL_WIDTH - totalContentLength);
-                  dots = '.'.repeat(dotsLen);
+                  // sessionStorage  
+                  try {
+                    for (let key in sessionStorage) {
+                      if (sessionStorage.hasOwnProperty(key)) {
+                        const value = sessionStorage.getItem(key) || '';
+                        totalBytes += key.length + value.length;
+                      }
+                    }
+                  } catch (e) { }
+
+                  return Math.round(totalBytes / 1024); // Convert to KB
                 }
-                let dot = showPassDot
-                  ? `<span class="bios-status-dot" aria-label="pass"></span>`
-                  : (suffix ? suffix : "");
-                // Only trailing dot. Don't print suffix if dot is present.
-                return `<span>${label}:${dots}${value}</span>${dot}`;
-              }
 
-              // Helper function to animate counting with typewriter effect
-              function animateMemoryField(parentElem, label, targetValue, unit, showPassDot, callback) {
-                const div = document.createElement('div');
-                div.style.cssText = `
+                function getGraphicsMemoryEstimate() {
+                  try {
+                    const canvas = document.createElement('canvas');
+                    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+                    if (!gl) return 0;
+
+                    // Get max texture size as an indicator of VRAM
+                    const maxTexture = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+
+                    // Rough VRAM estimation based on max texture size (in MB)
+                    if (maxTexture >= 16384) return 8192; // High-end: 8GB
+                    if (maxTexture >= 8192) return 4096;  // Mid-high: 4GB
+                    if (maxTexture >= 4096) return 2048;  // Mid-range: 2GB
+                    if (maxTexture >= 2048) return 1024;  // Low-mid: 1GB
+                    return 512; // Integrated/low-end: 512MB
+
+                  } catch (e) {
+                    return 0;
+                  }
+                }
+
+                function getHeapMemoryInfo() {
+                  if (performance.memory) {
+                    return {
+                      used: Math.round(performance.memory.usedJSHeapSize / 1024),
+                      total: Math.round(performance.memory.totalJSHeapSize / 1024),
+                      limit: Math.round(performance.memory.jsHeapSizeLimit / 1024)
+                    };
+                  }
+                  return { used: 0, total: 0, limit: 0 };
+                }
+
+                // Use dynamic values instead of hardcoded ones
+                const targetKB = getSystemMemoryEstimate();
+                const cacheSRAM = getCacheEstimate();
+                const actualStorageKB = getAccurateStorageUsage();
+                const graphicsMemoryMB = getGraphicsMemoryEstimate();
+                const heapInfo = getHeapMemoryInfo();
+
+                const TOTAL_WIDTH = window.innerWidth <= 768 ? 45 : 54; // Match the main TOTAL_WIDTH
+
+                // Helper: Dotted style, right-aligned value with perfect alignment
+                function infoLine(label, value, suffix = "", showPassDot = false, noDots = false) {
+                  label = label ?? '';
+                  value = value == null ? '' : String(value);
+                  const TOTAL_WIDTH = window.innerWidth <= 768 ? 45 : 54;
+                  // Only use dots if noDots is false
+                  let dots = "";
+                  if (!noDots) {
+                    const totalContentLength = label.length + 1 + value.length + (suffix ? 1 + suffix.length : 0);
+                    let dotsLen = Math.max(1, TOTAL_WIDTH - totalContentLength);
+                    dots = '.'.repeat(dotsLen);
+                  }
+                  let dot = showPassDot
+                    ? `<span class="bios-status-dot" aria-label="pass"></span>`
+                    : (suffix ? suffix : "");
+                  // Only trailing dot. Don't print suffix if dot is present.
+                  return `<span>${label}:${dots}${value}</span>${dot}`;
+                }
+
+                // Helper function to animate counting with typewriter effect
+                function animateMemoryField(parentElem, label, targetValue, unit, showPassDot, callback) {
+                  const div = document.createElement('div');
+                  div.style.cssText = `
   font-family: 'Courier New', Courier, monospace, FixedSys, AMIBios;
   font-size: 10.5px;
   color: #d4fe6b;
@@ -854,334 +1016,333 @@
   line-height: .89em;
   display: block;
 `;
-;
-                parentElem.appendChild(div);
+                  ;
+                  parentElem.appendChild(div);
 
-                let current = 0;
-                const steps = 15; // Quick animation in 15 steps
-                const increment = Math.ceil(targetValue / steps);
+                  let current = 0;
+                  const steps = 15; // Quick animation in 15 steps
+                  const increment = Math.ceil(targetValue / steps);
 
-                function updateValue() {
-                  current = Math.min(current + increment, targetValue);
-                  div.innerHTML = infoLine(label, current.toString() + unit, '', showPassDot && current === targetValue) +
-                    (current < targetValue ? '<span class="typewriter-cursor"></span>' : '');
+                  function updateValue() {
+                    current = Math.min(current + increment, targetValue);
+                    div.innerHTML = infoLine(label, current.toString() + unit, '', showPassDot && current === targetValue) +
+                      (current < targetValue ? '<span class="typewriter-cursor"></span>' : '');
 
-                  if (current < targetValue) {
-                    setTimeout(updateValue, 30); // Fast updates
-                  } else if (callback) {
-                    setTimeout(callback, 100);
+                    if (current < targetValue) {
+                      setTimeout(updateValue, 30); // Fast updates
+                    } else if (callback) {
+                      setTimeout(callback, 100);
+                    }
                   }
+
+                  // Start with typewriter effect for the label
+                  div.innerHTML = infoLine(label, '0' + unit, '', false) + '<span class="typewriter-cursor"></span>';
+                  setTimeout(updateValue, 200);
                 }
 
-                // Start with typewriter effect for the label
-                div.innerHTML = infoLine(label, '0' + unit, '', false) + '<span class="typewriter-cursor"></span>';
-                setTimeout(updateValue, 200);
-              }
-
-              // Animate each field sequentially
-              animateMemoryField(parentElem, 'System Memory', Math.round(targetKB / 1024), 'MB', true, () => {
-                animateMemoryField(parentElem, 'Cache SRAM', cacheSRAM, 'KB', true, () => {
-                  animateMemoryField(parentElem, 'Storage Used', actualStorageKB, 'KB', false, () => {
-                    if (graphicsMemoryMB > 0) {
-                      const graphicsGB = (graphicsMemoryMB / 1024).toFixed(1);
-                      animateMemoryField(parentElem, 'Graphics Memory', parseFloat(graphicsGB), 'GB', false, () => {
-                        if (heapInfo.used > 0) {
-                          animateMemoryField(parentElem, 'Heap Used', Math.round(heapInfo.used / 1024), 'MB', false, () => {
-                            animateMemoryField(parentElem, 'Heap Total', Math.round(heapInfo.total / 1024), 'MB', false, () => {
-                              animateMemoryField(parentElem, 'Heap Limit', Math.round(heapInfo.limit / 1024), 'MB', false, () => {
-                                if (onDone) setTimeout(onDone, 300);
+                // Animate each field sequentially
+                animateMemoryField(parentElem, 'System Memory', Math.round(targetKB / 1024), 'MB', true, () => {
+                  animateMemoryField(parentElem, 'Cache SRAM', cacheSRAM, 'KB', true, () => {
+                    animateMemoryField(parentElem, 'Storage Used', actualStorageKB, 'KB', false, () => {
+                      if (graphicsMemoryMB > 0) {
+                        const graphicsGB = (graphicsMemoryMB / 1024).toFixed(1);
+                        animateMemoryField(parentElem, 'Graphics Memory', parseFloat(graphicsGB), 'GB', false, () => {
+                          if (heapInfo.used > 0) {
+                            animateMemoryField(parentElem, 'Heap Used', Math.round(heapInfo.used / 1024), 'MB', false, () => {
+                              animateMemoryField(parentElem, 'Heap Total', Math.round(heapInfo.total / 1024), 'MB', false, () => {
+                                animateMemoryField(parentElem, 'Heap Limit', Math.round(heapInfo.limit / 1024), 'MB', false, () => {
+                                  if (onDone) setTimeout(onDone, 300);
+                                });
                               });
                             });
-                          });
-                        } else if (onDone) {
-                          setTimeout(onDone, 300);
-                        }
-                      });
-                    } else if (heapInfo.used > 0) {
-                      animateMemoryField(parentElem, 'Heap Used', Math.round(heapInfo.used / 1024), 'MB', false, () => {
-                        animateMemoryField(parentElem, 'Heap Total', Math.round(heapInfo.total / 1024), 'MB', false, () => {
-                          animateMemoryField(parentElem, 'Heap Limit', Math.round(heapInfo.limit / 1024), 'MB', false, () => {
-                            if (onDone) setTimeout(onDone, 300);
+                          }
+                        });
+                      } else if (heapInfo.used > 0) {
+                        animateMemoryField(parentElem, 'Heap Used', Math.round(heapInfo.used / 1024), 'MB', false, () => {
+                          animateMemoryField(parentElem, 'Heap Total', Math.round(heapInfo.total / 1024), 'MB', false, () => {
+                            animateMemoryField(parentElem, 'Heap Limit', Math.round(heapInfo.limit / 1024), 'MB', false, () => {
+                              if (onDone) setTimeout(onDone, 300);
+                            });
                           });
                         });
-                      });
-                    } else if (onDone) {
-                      setTimeout(onDone, 300);
-                    }
+                      } else if (onDone) {
+                        setTimeout(onDone, 300);
+                      }
+                    });
                   });
                 });
+              }
+
+              fakeBootLine.style.fontFamily = "AMIBios, pixelmix, monospace";
+              fakeBootLine.style.color = "#d4fe6b";
+              fakeBootLine.style.fontSize = "10.5px";
+              fakeBootLine.style.letterSpacing = ".86px";
+              fakeBootLine.style.lineHeight = ".89em";
+              fakeBootLine.style.marginBottom = "4px";
+              countUpMemoryTest(bootContainer, {}, function () {
+                // Continue after all lines are animated
+                const sysinfoContainer = document.createElement('pre');
+                sysinfoContainer.className = "bios-sysinfo";
+                bootContainer.appendChild(sysinfoContainer);
+
+                const infoLines = getSystemFields();
+                typewriterEffectSysinfo(sysinfoContainer, infoLines, 8, 50, windowsLogo);
               });
+            }); // Close the typewriter effect callback
+          }, 500);
+          return;
+        }
+
+        const currentElem = elems[entry];
+        currentElem.classList.add("visible");
+
+        // Skip typewriter effect for logo div
+        if (currentElem.classList.contains('BIOS__logo')) {
+          setTimeout(() => staggerElements(elems, entry + 1), 500);
+          return;
+        }
+
+        // Apply typewriter effect to text content
+        const originalHTML = currentElem.innerHTML;
+        typewriterEffect(currentElem, originalHTML, 30, () => {
+          setTimeout(() => staggerElements(elems, entry + 1), 300);
+        });
+      }
+
+      function loadScreen() {
+        var biosElem = document.querySelector(".BIOS");
+        biosElem.classList.remove("initial");
+
+        // Skip BIOS if already logged in OR if accessing a subdirectory
+        const pathname = window.location.pathname;
+        const isSubdirectory = pathname !== '/' && pathname !== '/index.html' && pathname !== '';
+
+        if (window.localStorage.getItem("loggedIn") || isSubdirectory) {
+          hideBios();
+          // Also hide Windows launch screen for subdirectories
+          if (isSubdirectory) {
+            const windowsLaunch = document.getElementsByClassName("WindowsLaunchWrapper")[0];
+            if (windowsLaunch) {
+              windowsLaunch.classList.add("hidden");
             }
+          }
+          return;
+        }
 
+        biosElem.classList.add("visible");
 
-            fakeBootLine.style.fontFamily = "AMIBios, pixelmix, monospace";
-            fakeBootLine.style.color = "#d4fe6b";
-            fakeBootLine.style.fontSize = "10.5px";
-            fakeBootLine.style.letterSpacing = ".86px";
-            fakeBootLine.style.lineHeight = ".89em";
-            fakeBootLine.style.marginBottom = "4px";
-            countUpMemoryTest(bootContainer, {}, function () {
-              // Continue after all lines are animated
-              const sysinfoContainer = document.createElement('pre');
-              sysinfoContainer.className = "bios-sysinfo";
-              bootContainer.appendChild(sysinfoContainer);
+        // Position BIOS inside monitor if function is available
+        if (typeof window.positionStartupSequencesIfReady === 'function') {
+          window.positionStartupSequencesIfReady();
+        }
 
-              const infoLines = getSystemFields();
-              typewriterEffectSysinfo(sysinfoContainer, infoLines, 8, 50, windowsLogo);
+        // Initialize hold-to-skip functionality
+        initHoldToSkip();
+
+        staggerElements(biosElem.getElementsByTagName("div"), 0);
+      }
+
+      // Enhanced shutdown detection system
+      function setupShutdownDetection() {
+        // Monitor when shutdown screens become visible
+        const shutdownObserver = new MutationObserver((mutations) => {
+          const biosWrapper = document.querySelector(".BIOSWrapper");
+          const windowsLaunchWrapper = document.querySelector(".WindowsLaunchWrapper");
+          const desktop = document.querySelector(".desktop");
+          const shutdownScreen = document.querySelector(".itIsNowSafeToTurnOffYourComputer");
+
+          let sequenceActive = false;
+
+          // Check startup/shutdown screens
+          if (biosWrapper && windowsLaunchWrapper) {
+            const biosStyles = getComputedStyle(biosWrapper);
+            const windowsStyles = getComputedStyle(windowsLaunchWrapper);
+
+            const biosVisible = !biosWrapper.classList.contains("hidden") &&
+              biosStyles.opacity !== "0" &&
+              biosStyles.visibility !== "hidden" &&
+              biosStyles.display !== "none";
+
+            const windowsVisible = !windowsLaunchWrapper.classList.contains("hidden") &&
+              windowsStyles.opacity !== "0" &&
+              windowsStyles.visibility !== "hidden" &&
+              windowsStyles.display !== "none";
+
+            // Also check for transition states
+            const biosTransitioning = parseFloat(biosStyles.opacity) > 0 ||
+              biosWrapper.style.opacity === "1" ||
+              biosWrapper.classList.contains("visible");
+
+            const windowsTransitioning = parseFloat(windowsStyles.opacity) > 0 ||
+              windowsLaunchWrapper.style.opacity === "1" ||
+              windowsLaunchWrapper.classList.contains("visible");
+
+            sequenceActive = biosVisible || windowsVisible || biosTransitioning || windowsTransitioning;
+          }
+
+          // Check for Windows shutting down screen (desktop.windowsShuttingDown)
+          if (desktop && desktop.classList.contains("windowsShuttingDown")) {
+            sequenceActive = true;
+            console.log("🔄 Desktop has windowsShuttingDown class");
+          }
+
+          // Check for final shutdown screen
+          if (shutdownScreen) {
+            sequenceActive = true;
+            console.log("🔄 itIsNowSafeToTurnOffYourComputer screen detected");
+          }
+
+          const wasShutdownActive = window.isShutdownSequenceActive;
+          window.isShutdownSequenceActive = sequenceActive;
+
+          // If shutdown state changed, notify React
+          if (wasShutdownActive !== window.isShutdownSequenceActive) {
+            console.log("🔄 Shutdown sequence state changed:", window.isShutdownSequenceActive, {
+              windowsShuttingDown: desktop?.classList.contains("windowsShuttingDown"),
+              shutdownScreen: !!shutdownScreen
             });
-          }); // Close the typewriter effect callback
-        }, 500);
-        return;
-      }
 
-      const currentElem = elems[entry];
-      currentElem.classList.add("visible");
+            // Dispatch custom event for React to listen to
+            window.dispatchEvent(new CustomEvent('shutdownStateChanged', {
+              detail: { isActive: window.isShutdownSequenceActive }
+            }));
 
-      // Skip typewriter effect for logo div
-      if (currentElem.classList.contains('BIOS__logo')) {
-        setTimeout(() => staggerElements(elems, entry + 1), 500);
-        return;
-      }
-
-      // Apply typewriter effect to text content
-      const originalHTML = currentElem.innerHTML;
-      typewriterEffect(currentElem, originalHTML, 30, () => {
-        setTimeout(() => staggerElements(elems, entry + 1), 300);
-      });
-    }
-
-
-    function loadScreen() {
-      var biosElem = document.querySelector(".BIOS");
-      biosElem.classList.remove("initial");
-
-      // Skip BIOS if already logged in OR if accessing a subdirectory
-      const pathname = window.location.pathname;
-      const isSubdirectory = pathname !== '/' && pathname !== '/index.html' && pathname !== '';
-
-      if (window.localStorage.getItem("loggedIn") || isSubdirectory) {
-        hideBios();
-        // Also hide Windows launch screen for subdirectories
-        if (isSubdirectory) {
-          const windowsLaunch = document.getElementsByClassName("WindowsLaunchWrapper")[0];
-          if (windowsLaunch) {
-            windowsLaunch.classList.add("hidden");
+            // Also add/remove body class immediately
+            if (window.isShutdownSequenceActive) {
+              document.body.classList.add("startup-sequence-active");
+              document.body.classList.add("shutdown-sequence-active");
+              console.log("🔄 Added shutdown sequence classes via index.html");
+            } else {
+              document.body.classList.remove("startup-sequence-active");
+              document.body.classList.remove("shutdown-sequence-active");
+              console.log("✅ Removed shutdown sequence classes via index.html");
+            }
           }
-        }
-        return;
-      }
+        });
 
-      biosElem.classList.add("visible");
-
-      // Position BIOS inside monitor if function is available
-      if (typeof window.positionStartupSequencesIfReady === 'function') {
-        window.positionStartupSequencesIfReady();
-      }
-
-      staggerElements(biosElem.getElementsByTagName("div"), 0);
-    }
-
-    // Enhanced shutdown detection system
-    function setupShutdownDetection() {
-      // Monitor when shutdown screens become visible
-      const shutdownObserver = new MutationObserver((mutations) => {
+        // Start observing
         const biosWrapper = document.querySelector(".BIOSWrapper");
         const windowsLaunchWrapper = document.querySelector(".WindowsLaunchWrapper");
         const desktop = document.querySelector(".desktop");
-        const shutdownScreen = document.querySelector(".itIsNowSafeToTurnOffYourComputer");
 
-        let sequenceActive = false;
-
-        // Check startup/shutdown screens
-        if (biosWrapper && windowsLaunchWrapper) {
-          const biosStyles = getComputedStyle(biosWrapper);
-          const windowsStyles = getComputedStyle(windowsLaunchWrapper);
-
-          const biosVisible = !biosWrapper.classList.contains("hidden") &&
-            biosStyles.opacity !== "0" &&
-            biosStyles.visibility !== "hidden" &&
-            biosStyles.display !== "none";
-
-          const windowsVisible = !windowsLaunchWrapper.classList.contains("hidden") &&
-            windowsStyles.opacity !== "0" &&
-            windowsStyles.visibility !== "hidden" &&
-            windowsStyles.display !== "none";
-
-          // Also check for transition states
-          const biosTransitioning = parseFloat(biosStyles.opacity) > 0 ||
-            biosWrapper.style.opacity === "1" ||
-            biosWrapper.classList.contains("visible");
-
-          const windowsTransitioning = parseFloat(windowsStyles.opacity) > 0 ||
-            windowsLaunchWrapper.style.opacity === "1" ||
-            windowsLaunchWrapper.classList.contains("visible");
-
-          sequenceActive = biosVisible || windowsVisible || biosTransitioning || windowsTransitioning;
-        }
-
-        // Check for Windows shutting down screen (desktop.windowsShuttingDown)
-        if (desktop && desktop.classList.contains("windowsShuttingDown")) {
-          sequenceActive = true;
-          console.log("🔄 Desktop has windowsShuttingDown class");
-        }
-
-        // Check for final shutdown screen
-        if (shutdownScreen) {
-          sequenceActive = true;
-          console.log("🔄 itIsNowSafeToTurnOffYourComputer screen detected");
-        }
-
-        const wasShutdownActive = window.isShutdownSequenceActive;
-        window.isShutdownSequenceActive = sequenceActive;
-
-        // If shutdown state changed, notify React
-        if (wasShutdownActive !== window.isShutdownSequenceActive) {
-          console.log("🔄 Shutdown sequence state changed:", window.isShutdownSequenceActive, {
-            windowsShuttingDown: desktop?.classList.contains("windowsShuttingDown"),
-            shutdownScreen: !!shutdownScreen
-          });
-
-          // Dispatch custom event for React to listen to
-          window.dispatchEvent(new CustomEvent('shutdownStateChanged', {
-            detail: { isActive: window.isShutdownSequenceActive }
-          }));
-
-          // Also add/remove body class immediately
-          if (window.isShutdownSequenceActive) {
-            document.body.classList.add("startup-sequence-active");
-            document.body.classList.add("shutdown-sequence-active");
-            console.log("🔄 Added shutdown sequence classes via index.html");
-          } else {
-            document.body.classList.remove("startup-sequence-active");
-            document.body.classList.remove("shutdown-sequence-active");
-            console.log("✅ Removed shutdown sequence classes via index.html");
-          }
-        }
-      });
-
-      // Start observing
-      const biosWrapper = document.querySelector(".BIOSWrapper");
-      const windowsLaunchWrapper = document.querySelector(".WindowsLaunchWrapper");
-      const desktop = document.querySelector(".desktop");
-
-      if (biosWrapper) {
-        shutdownObserver.observe(biosWrapper, {
-          attributes: true,
-          attributeFilter: ['class', 'style'],
-          subtree: true
-        });
-
-        // Also observe parent if it exists
-        if (biosWrapper.parentElement) {
-          shutdownObserver.observe(biosWrapper.parentElement, {
+        if (biosWrapper) {
+          shutdownObserver.observe(biosWrapper, {
             attributes: true,
             attributeFilter: ['class', 'style'],
-            childList: true
+            subtree: true
           });
-        }
-      }
 
-      if (windowsLaunchWrapper) {
-        shutdownObserver.observe(windowsLaunchWrapper, {
-          attributes: true,
-          attributeFilter: ['class', 'style'],
-          subtree: true
-        });
-
-        // Also observe parent if it exists
-        if (windowsLaunchWrapper.parentElement) {
-          shutdownObserver.observe(windowsLaunchWrapper.parentElement, {
-            attributes: true,
-            attributeFilter: ['class', 'style'],
-            childList: true
-          });
-        }
-      }
-
-      // IMPORTANT: Watch the desktop element for windowsShuttingDown class
-      if (desktop) {
-        shutdownObserver.observe(desktop, {
-          attributes: true,
-          attributeFilter: ['class'],
-          subtree: false
-        });
-      }
-
-      // Watch for shutdown screen elements being added
-      shutdownObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class']
-      });
-
-      // Additional polling for safety - check for all shutdown states (REDUCED FREQUENCY)
-      setInterval(() => {
-        const biosWrapper = document.querySelector(".BIOSWrapper");
-        const windowsLaunchWrapper = document.querySelector(".WindowsLaunchWrapper");
-        const desktop = document.querySelector(".desktop");
-        const shutdownScreen = document.querySelector(".itIsNowSafeToTurnOffYourComputer");
-
-        let sequenceActive = false;
-
-        // Check startup screens
-        if (biosWrapper && windowsLaunchWrapper) {
-          const biosStyles = getComputedStyle(biosWrapper);
-          const windowsStyles = getComputedStyle(windowsLaunchWrapper);
-
-          const biosActive = (!biosWrapper.classList.contains("hidden") &&
-            biosStyles.opacity !== "0") ||
-            parseFloat(biosStyles.opacity) > 0;
-
-          const windowsActive = (!windowsLaunchWrapper.classList.contains("hidden") &&
-            windowsStyles.opacity !== "0") ||
-            parseFloat(windowsStyles.opacity) > 0;
-
-          sequenceActive = biosActive || windowsActive;
-        }
-
-        // Check for shutdown-specific states
-        if (desktop && desktop.classList.contains("windowsShuttingDown")) {
-          sequenceActive = true;
-        }
-
-        if (shutdownScreen) {
-          sequenceActive = true;
-        }
-
-        const wasShutdownActive = window.isShutdownSequenceActive;
-        window.isShutdownSequenceActive = sequenceActive;
-
-        // Only log and dispatch when state actually changes
-        if (wasShutdownActive !== window.isShutdownSequenceActive) {
-          console.log("🔄 Polling detected shutdown state change:", window.isShutdownSequenceActive);
-
-          window.dispatchEvent(new CustomEvent('shutdownStateChanged', {
-            detail: { isActive: window.isShutdownSequenceActive }
-          }));
-
-          if (window.isShutdownSequenceActive) {
-            document.body.classList.add("startup-sequence-active");
-            document.body.classList.add("shutdown-sequence-active");
-          } else {
-            document.body.classList.remove("startup-sequence-active");
-            document.body.classList.remove("shutdown-sequence-active");
+          // Also observe parent if it exists
+          if (biosWrapper.parentElement) {
+            shutdownObserver.observe(biosWrapper.parentElement, {
+              attributes: true,
+              attributeFilter: ['class', 'style'],
+              childList: true
+            });
           }
         }
-      }, 1000); // Reduced from 100ms to 1000ms (1 second)
-    }
 
-    // Initialize shutdown detection
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
+        if (windowsLaunchWrapper) {
+          shutdownObserver.observe(windowsLaunchWrapper, {
+            attributes: true,
+            attributeFilter: ['class', 'style'],
+            subtree: true
+          });
+
+          // Also observe parent if it exists
+          if (windowsLaunchWrapper.parentElement) {
+            shutdownObserver.observe(windowsLaunchWrapper.parentElement, {
+              attributes: true,
+              attributeFilter: ['class', 'style'],
+              childList: true
+            });
+          }
+        }
+
+        // IMPORTANT: Watch the desktop element for windowsShuttingDown class
+        if (desktop) {
+          shutdownObserver.observe(desktop, {
+            attributes: true,
+            attributeFilter: ['class'],
+            subtree: false
+          });
+        }
+
+        // Watch for shutdown screen elements being added
+        shutdownObserver.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class']
+        });
+
+        // Additional polling for safety - check for all shutdown states (REDUCED FREQUENCY)
+        setInterval(() => {
+          const biosWrapper = document.querySelector(".BIOSWrapper");
+          const windowsLaunchWrapper = document.querySelector(".WindowsLaunchWrapper");
+          const desktop = document.querySelector(".desktop");
+          const shutdownScreen = document.querySelector(".itIsNowSafeToTurnOffYourComputer");
+
+          let sequenceActive = false;
+
+          // Check startup screens
+          if (biosWrapper && windowsLaunchWrapper) {
+            const biosStyles = getComputedStyle(biosWrapper);
+            const windowsStyles = getComputedStyle(windowsLaunchWrapper);
+
+            const biosActive = (!biosWrapper.classList.contains("hidden") &&
+              biosStyles.opacity !== "0") ||
+              parseFloat(biosStyles.opacity) > 0;
+
+            const windowsActive = (!windowsLaunchWrapper.classList.contains("hidden") &&
+              windowsStyles.opacity !== "0") ||
+              parseFloat(windowsStyles.opacity) > 0;
+
+            sequenceActive = biosActive || windowsActive;
+          }
+
+          // Check for shutdown-specific states
+          if (desktop && desktop.classList.contains("windowsShuttingDown")) {
+            sequenceActive = true;
+          }
+
+          if (shutdownScreen) {
+            sequenceActive = true;
+          }
+
+          const wasShutdownActive = window.isShutdownSequenceActive;
+          window.isShutdownSequenceActive = sequenceActive;
+
+          // Only log and dispatch when state actually changes
+          if (wasShutdownActive !== window.isShutdownSequenceActive) {
+            console.log("🔄 Polling detected shutdown state change:", window.isShutdownSequenceActive);
+
+            window.dispatchEvent(new CustomEvent('shutdownStateChanged', {
+              detail: { isActive: window.isShutdownSequenceActive }
+            }));
+
+            if (window.isShutdownSequenceActive) {
+              document.body.classList.add("startup-sequence-active");
+              document.body.classList.add("shutdown-sequence-active");
+            } else {
+              document.body.classList.remove("startup-sequence-active");
+              document.body.classList.remove("shutdown-sequence-active");
+            }
+          }
+        }, 1000); // Reduced from 100ms to 1000ms (1 second)
+      }
+
+      // Initialize shutdown detection
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          setTimeout(setupShutdownDetection, 100);
+        });
+      } else {
         setTimeout(setupShutdownDetection, 100);
-      });
-    } else {
-      setTimeout(setupShutdownDetection, 100);
-    }
+      }
 
-    // Longer delay to ensure React has time to initialize
-    setTimeout(loadScreen, 1500);
+      // Longer delay to ensure React has time to initialize
+      setTimeout(loadScreen, 1500);
 
   </script>
 </head>
@@ -1203,15 +1364,16 @@
         <p class="version-label">
           Initializing Boot Agent<span class="dots"></span>
         </p>
-
-
       </div>
       <div class="BIOS__bootMessage4">
         <div id="BIOS__bootContainer"></div>
       </div>
     </div>
+
+    <!-- SVG Logo overlaid on BIOS wrapper -->
+    <img src="%PUBLIC_URL%/static/white vector text.svg" alt="Logo" class="bios-logo-bottom" />
+
     <!-- System fields will be dynamically inserted here by JS: <pre class="bios-sysinfo">...</pre> -->
-  </div>
   </div>
 
   <div class="WindowsLaunchWrapper hidden">
@@ -1222,3 +1384,47 @@
 </body>
 
 </html>
+
+</script>
+</head>
+
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-FVTXCVSR" height="0" width="0"
+      style="display:none;visibility:hidden"></iframe></noscript>
+
+  <div class="BIOSWrapper initial">
+    <div class="BIOS">
+      <div class="BIOS__logo">
+        <img src="%PUBLIC_URL%/static/tuesdays_pixel_slowed.gif" alt="Tuesdays Cal" class="left-image" />
+        <img src="%PUBLIC_URL%/static/tuesdays.png" alt="Tuesdays Logo" class="right-image" />
+      </div>
+      <div class="BIOS__bootHeader">
+        <p>AMII BIOS (C) 1992-2025</p>
+        <p>BIOS Version 18.3.1 REACT</p>
+        <p class="version-label">
+          Initializing Boot Agent<span class="dots"></span>
+        </p>
+      </div>
+      <div class="BIOS__bootMessage4">
+        <div id="BIOS__bootContainer"></div>
+      </div>
+
+      <!-- SVG Logo in bottom right corner -->
+      <img src="%PUBLIC_URL%/static/white vector text.svg" alt="Logo" class="bios-logo-bottom" />
+    </div>
+    <!-- System fields will be dynamically inserted here by JS: <pre class="bios-sysinfo">...</pre> -->
+  </div>
+
+  <div class="WindowsLaunchWrapper hidden">
+    <div class="WindowsLaunch"></div>
+  </div>
+
+  <div id="root"></div>
+</body>
+
+</html>
+i++;
+}
+} else {
+typedSpan.innerHTML += text.charAt(i);
