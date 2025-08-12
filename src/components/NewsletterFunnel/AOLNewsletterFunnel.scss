@@ -281,7 +281,6 @@ $font-mono: "Courier New", monospace;
     color: $color-text;
     border-color: $color-gray-light $color-gray-dark $color-gray-dark
       $color-gray-light;
-
     &:hover:not(:disabled) {
       background: #d0d0d0;
     }
@@ -925,7 +924,7 @@ $font-mono: "Courier New", monospace;
         display: flex;
         //justify-content: space-between;
         justify-content: center;
-        gap: 230px;
+        gap: 55%;
         margin-top: 15px;
         margin-right: 2px;
         bottom: 20px;
@@ -1605,13 +1604,17 @@ $font-mono: "Courier New", monospace;
               display: flex;
               //justify-content: space-between;
               justify-content: center;
-              gap: 50%;
+              gap: 53%;
               margin-top: 10px;
 
               .aol-button {
                 font-size: 12px;
                 padding: 5px 12px;
                 min-width: 75px;
+              }
+              button.aol-button-continue {
+                padding-top: 0px; /* Increase top padding */
+                padding-bottom: 5px; /* Decrease bottom padding */
               }
             }
 
