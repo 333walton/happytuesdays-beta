@@ -13,104 +13,124 @@ class AOLNewsletterFunnel extends Component {
     // Define all available channels with their properties
     this.channels = [
       {
-        id: "aol_today",
+        id: "ai_ml",
         name: "AI & Machine Learning",
-        image: "/static/aol/channels/channel_ai_ml.png", // Fixed: removed 'public'
+        image: "/static/aol/channels/channel_ai_ml.png", // tech
+        className: "channel-ai-ml",
       },
       {
-        id: "computing",
+        id: "ai_art",
         name: "Generative & AI Art",
-        image: "/static/aol/channels/channel_ai_art_lab.png", // Fixed: removed 'public'
+        image: "/static/aol/channels/channel_ai_art_lab.png", // art
+        className: "channel-ai-art",
       },
       {
-        id: "games",
+        id: "startup_stories",
         name: "Startup Stories",
-        image: "/static/aol/channels/channel_startup_stories.png", // Fixed: removed 'public'
+        image: "/static/aol/channels/channel_startup_stories.png", // build
+        className: "channel-startup-stories",
       },
       {
-        id: "entertainment",
-        name: "Speedruns & Events",
-        image: "/static/aol/channels_entertainment_btn.png", // Already correct
+        id: "weekly_roundup",
+        name: "Weekly Roundup",
+        image: "/static/aol/channels/channel_weekly_roundup.png", // gaming
+        className: "channel-weekly-roundup",
       },
       {
-        id: "news",
+        id: "marketing_tech",
         name: "Martech & AdTech",
-        image: "/static/aol/channels/channel_marketing_tech.png", // Fixed: removed 'public'
+        image: "/static/aol/channels/channel_marketing_tech.png", // tech
+        className: "channel-marketing-tech",
       },
       {
-        id: "sports",
-        name: "UI/UX Trends",
-        image: "/static/aol/channels_sports_btn.png", // Already correct
+        id: "ui_ux",
+        name: "UI/UX Insider",
+        image: "static/aol/channels/channel_ui_ux_insider.png", // art
+        className: "channel-ui-ux",
       },
       {
-        id: "travel",
+        id: "no_code",
         name: "Automation & No-Code",
-        image: "/static/aol/channels/channel_no_code_tools.png", // Fixed: removed 'public'
+        image: "/static/aol/channels/channel_no_code_tools.png", // build
+        className: "channel-no-code",
       },
       {
-        id: "shopping",
-        name: "Emulation & Modding",
-        image: "/static/aol/channels_shopping_btn.png", // Already correct
+        id: "guides",
+        name: "Pro Guides/Tips",
+        image: "/static/aol/channels/channel_pro_guides_tips.png", // gaming
+        className: "channel-guides",
       },
       {
-        id: "families",
+        id: "blockchain_web3",
         name: "Blockchain & Web3",
-        image: "/static/aol/channels/channel_blockchain_web3.png", // Fixed: removed 'public'
+        image: "/static/aol/channels/channel_blockchain_web3.png", // tech
+        className: "channel-blockchain-web3",
       },
       {
-        id: "kids_only",
-        name: "Color & Typography",
-        image: "/static/aol/channels_kids_only_btn.png", // Already correct
+        id: "tutorials",
+        name: "Tutorials",
+        image: "/static/aol/channels/channel_tutorials.png", // art
+        className: "channel-tutorials",
       },
       {
-        id: "health",
+        id: "pm_playbook",
         name: "Project Management",
-        image: "/static/aol/channels/channel_pm_playbook.png", // Fixed: removed 'public'
+        image: "/static/aol/channels/channel_pm_playbook.png", // build
+        className: "channel-pm-playbook",
       },
       {
-        id: "personal_finance",
-        name: "Collecting & Hardware",
-        image: "/static/aol/channels_personal_finance_btn.png", // Already correct
+        id: "retro_gaming",
+        name: "Retro Gaming",
+        image: "/static/aol/channels/channel_retro_gaming.png", // gaming
+        className: "channel-retro-gaming",
       },
       {
-        id: "influence",
+        id: "cybersecurity_privacy",
         name: "Cybersecurity & Privacy",
-        image: "/static/aol/channels/channel_cyber_privacy.png", // Fixed: removed 'public'
+        image: "/static/aol/channels/channel_cyber_privacy.png", // tech
+        className: "channel-cybersecurity-privacy",
       },
       {
-        id: "workplace",
+        id: "motion_design",
         name: "Animation & Motion",
-        image: "/static/aol/new_channels_workplace_btn.png", // Already correct
+        image: "static/aol/channels/channel_motion_design.png", // art
+        className: "channel-motion-design",
       },
       {
-        id: "research_learn",
+        id: "work_smarter",
         name: "Work Smarter",
-        image: "/static/aol/channels/channel_work_smarter.png", // Fixed: removed 'public'
+        image: "/static/aol/channels/channel_work_smarter.png", // build
+        className: "channel-work-smarter",
       },
       {
-        id: "lifestyles",
-        name: "Indie Retro Releases",
-        image: "/static/aol/new_channels_lifestyles_btn.png", // Already correct
+        id: "indie_spotlights",
+        name: "Indie Spotlights",
+        image: "static/aol/channels/channel_indie_spotlights.png", // gaming
+        className: "channel-indie-spotlights",
       },
       {
-        id: "international",
+        id: "web_devops",
         name: "Web Dev & DevOps",
-        image: "/static/aol/channels/channel_web_devops.png", // Fixed: added proper slashes
+        image: "/static/aol/channels/channel_web_devops.png", // tech
+        className: "channel-web-devops",
       },
       {
-        id: "local",
-        name: "Tutorials & Walkthroughs",
-        image: "/static/aol/new_channels_local_btn.png", // Already correct
+        id: "typeface_color",
+        name: "Typeface + Color",
+        image: "static/aol/channels/channel_typeface_color.png", // art
+        className: "channel-typeface-color",
       },
       {
-        id: "music",
-        name: "Stoic Mindset",
-        image: "/static/aol/channels_news_btn.png", // Already correct (placeholder)
+        id: "momentum_mindset",
+        name: "Momentum & Mindset",
+        image: "/static/aol/channels/channel_work_smarter.png", // build placeholder
+        className: "channel-momentum-mindset",
       },
       {
-        id: "food",
-        name: "Retro Game News",
-        image: "/static/aol/channels_news_btn.png", // Already correct (placeholder)
+        id: "collecting",
+        name: "Collecting",
+        image: "static/aol/channels/channel_collectors_hub.png", // gaming
+        className: "channel-collecting",
       },
     ];
 
@@ -184,15 +204,33 @@ class AOLNewsletterFunnel extends Component {
   handleColumnSelect = (columnName) => {
     // Define which channels belong to each column
     const columnChannelMap = {
-      Tech: ["aol_today", "news", "families", "influence", "international"],
-      Design: ["computing", "sports", "kids_only", "workplace", "local"],
-      Builders: ["games", "travel", "health", "research_learn", "music"],
+      Tech: [
+        "ai_ml",
+        "marketing_tech",
+        "blockchain_web3",
+        "cybersecurity_privacy",
+        "web_devops",
+      ],
+      Design: [
+        "ai_art",
+        "ui_ux",
+        "tutorials",
+        "motion_design",
+        "typeface_color",
+      ],
+      Builders: [
+        "startup_stories",
+        "no_code",
+        "pm_playbook",
+        "work_smarter",
+        "momentum_mindset",
+      ],
       Gaming: [
-        "entertainment",
-        "shopping",
-        "personal_finance",
-        "lifestyles",
-        "food",
+        "weekly_roundup",
+        "guides",
+        "retro_gaming",
+        "indie_spotlights",
+        "collecting",
       ],
     };
 
@@ -635,7 +673,7 @@ class AOLNewsletterFunnel extends Component {
                       {this.channels.map((channel) => (
                         <div
                           key={channel.id}
-                          className={cx("channel-button", {
+                          className={cx("channel-button", channel.className, {
                             selected: formData.selectedChannels[channel.id],
                           })}
                           onClick={() => this.handleChannelToggle(channel.id)}

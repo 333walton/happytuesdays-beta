@@ -684,7 +684,8 @@ $font-mono: "Courier New", monospace;
         .channel-buttons-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          margin: 5px 0;
+          gap: 2px; // Add consistent gap between all buttons
+          margin: 2px 0;
           justify-items: center;
           image-rendering: auto;
 
@@ -692,11 +693,16 @@ $font-mono: "Courier New", monospace;
             position: relative;
             cursor: pointer;
             transition: all 0.2s ease;
+            width: 101px; // Set consistent container width
+            height: 20px; // Set consistent container height
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
             .channel-btn-image {
-              width: 100%;
-              height: 100%;
-              object-fit: contain;
+              width: 100%; // Fill the container completely
+              height: 100%; // Fill the container completely
+              object-fit: fill; // This will fill the space without distortion
               display: block;
             }
 
@@ -726,6 +732,192 @@ $font-mono: "Courier New", monospace;
             }
           }
         }
+        /*
+          // TECH CHANNELS
+          .channel-ai-ml {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-marketing-tech {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-blockchain-web3 {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-cybersecurity-privacy {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-web-devops {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          // ART CHANNELS
+          .channel-ai-art {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-ui-ux {
+            .channel-btn-image {
+              width: 100px;
+              height: 20px;
+              margin-left: 1px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-tutorials {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-motion-design {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-typeface-color {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          // BUILD CHANNELS
+          .channel-startup-stories {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-no-code {
+            .channel-btn-image {
+              width: 99px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-pm-playbook {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-work-smarter {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-momentum-mindset {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          // GAMING CHANNELS
+          .channel-weekly-roundup {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-guides {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-retro-gaming {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-indie-spotlights {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+
+          .channel-collecting {
+            .channel-btn-image {
+              width: 101px;
+              height: 20px;
+              object-fit: contain;
+              display: block;
+            }
+          }
+        }*/ /* End of Channel Button Styles */
       }
 
       .channels-navigation {
