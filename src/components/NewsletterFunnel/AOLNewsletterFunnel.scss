@@ -1735,12 +1735,57 @@ $font-mono: "Courier New", monospace;
 
           // Small screen channels grid - 3 columns instead of 4
           .channels-selection {
+            .channel-column-titles {
+              grid-template-columns: repeat(
+                3,
+                1fr
+              ); // Add this to match button grid
+            }
+
             .channel-buttons-grid {
               grid-template-columns: repeat(3, 1fr);
+              gap: 3px; // Add consistent gap
 
               .channel-button {
+                position: relative; // Add for consistency
+                cursor: pointer; // Add for consistency
+                transition: all 0.2s ease; // Add for consistency
                 width: 50px;
                 height: 50px;
+                display: flex; // Add for centering
+                align-items: center; // Add for centering
+                justify-content: center; // Add for centering
+
+                .channel-btn-image {
+                  width: 100%; // Fill container
+                  height: 100%; // Fill container
+                  object-fit: cover; // Match desktop behavior
+                  display: block; // Add for consistency
+                }
+
+                &:hover {
+                  transform: scale(1.02); // Small hover effect
+                }
+
+                &.selected {
+                  box-shadow: 0 0 4px rgba(0, 85, 255, 0.5); // Smaller shadow
+
+                  &::after {
+                    content: "✓";
+                    position: absolute;
+                    bottom: 1px;
+                    right: 1px;
+                    background: $color-primary;
+                    color: white;
+                    width: 12px; // Smaller for small screen
+                    height: 12px; // Smaller for small screen
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 8px; // Smaller font
+                    font-weight: bold;
+                  }
+                }
               }
             }
           }
