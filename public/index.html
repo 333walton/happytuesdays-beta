@@ -1212,7 +1212,7 @@
       </div>
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
-        <p>BIOS Version 18.3.1 REACT</p>
+        <p>BIOS Version 18.3. REACT</p>
         <p class="version-label">
           Initializing Boot Agent<span class="dots"></span>
         </p>
@@ -1220,10 +1220,16 @@
       <div class="BIOS__bootMessage4">
         <div id="BIOS__bootContainer"></div>
       </div>
+      <!-- Video Logo Container INSIDE BIOS -->
+      <div
+        style="position: absolute; bottom: 80px; right: 16px; width: 25%; height: auto; z-index: 522; pointer-events: none;">
+        <video style="width: 100%; height: auto;" autoplay loop muted playsinline>
+          <source src="%PUBLIC_URL%/static/animated-logo-white.mp4" type="video/mp4">
+        </video>
+      </div>
+      <!-- SVG Logo INSIDE BIOS -->
+      <img src="%PUBLIC_URL%/static/white vector text.svg" alt="Logo" class="bios-logo-bottom" />
     </div>
-
-    <!-- SVG Logo overlaid on BIOS wrapper -->
-    <img src="%PUBLIC_URL%/static/white vector text.svg" alt="Logo" class="bios-logo-bottom" />
   </div>
 
   <div class="WindowsLaunchWrapper hidden">
