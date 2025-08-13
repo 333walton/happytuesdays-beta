@@ -209,7 +209,7 @@
     .bios-logo-bottom {
       position: absolute;
       bottom: 16px;
-      right: 16px;
+      right: 26px;
       width: 11%;
       height: auto;
       opacity: 0.9;
@@ -999,7 +999,7 @@
         }
         windowsLaunch.classList.remove("visible");
         windowsLaunch.classList.add("hidden");
-      }, 5000);
+      }, 8000); // 8000 is 8 seconds
     }
 
     // Typewriter effect function
@@ -1495,12 +1495,7 @@
         <div id="BIOS__bootContainer"></div>
       </div>
       <!-- Video Logo Container INSIDE BIOS -->
-      <div
-        style="position: absolute; bottom: 80px; right: 16px; width: 25%; height: auto; z-index: 522; pointer-events: none;">
-        <video style="width: 100%; height: auto;" autoplay loop muted playsinline>
-          <source src="%PUBLIC_URL%/static/animated-logo-white.mp4" type="video/mp4">
-        </video>
-      </div>
+        
       <!-- SVG Logo INSIDE BIOS -->
       <img src="%PUBLIC_URL%/static/white vector text.svg" alt="Logo" class="bios-logo-bottom" />
     </div>
