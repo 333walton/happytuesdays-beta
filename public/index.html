@@ -1023,6 +1023,13 @@
       startDots();
       staggerElements(biosElem.getElementsByTagName("div"), 0);
     }
+    // Slow down the animated logo video
+      /*document.addEventListener('DOMContentLoaded', function () {
+        const slowedVideo = document.getElementById('slowedGif');
+        if (slowedVideo && slowedVideo.tagName === 'VIDEO') {
+          slowedVideo.playbackRate = 0.5; // 50% speed
+        }
+      });*/
 
     function setupShutdownDetection() {
       const shutdownObserver = new MutationObserver((mutations) => {
@@ -1220,9 +1227,17 @@
       </div>
     </div>
 
+    <!-- Video Logo above SVG -->
+    <!-- Video Logo Container -->
+    <div style="position: absolute; bottom: 80px; right: 16px; width: 5%; height: auto; z-index: 2; pointer-events: none;">
+      <video style="width: 100%; height: auto; display: block;" autoplay loop muted playsinline>
+        <source src="%PUBLIC_URL%/static/animated-logo-white.mkv" type="video/x-matroska">
+        <source src="%PUBLIC_URL%/static/animated-logo-white.webm" type="video/webm">
+      </video>
+    </div>
+    
     <!-- SVG Logo overlaid on BIOS wrapper -->
     <img src="%PUBLIC_URL%/static/white vector text.svg" alt="Logo" class="bios-logo-bottom" />
-  </div>
 
   <div class="WindowsLaunchWrapper hidden">
     <div class="WindowsLaunch"></div>
