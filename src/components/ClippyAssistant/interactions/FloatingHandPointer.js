@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import handPointerIcon from "../../../icons/HandPointer16-min.png";
 import "../styles/FloatingHandPointer.scss";
 
-const FloatingHandPointer = ({ duration = 8000, onComplete }) => {
+const FloatingHandPointer = ({ duration = 3000, onComplete }) => {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {

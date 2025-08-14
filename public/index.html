@@ -189,7 +189,7 @@
     }
 
     .WindowsLaunchWrapper {
-      background: #000;
+      background: #000; /*#a6c7df; light blue alternative*/ 
       z-index: 1002;
       /* Higher than BIOS for smooth crossfade */
       position: fixed;
@@ -213,9 +213,25 @@
     }
 
     #cloudCanvas {
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 60vw;   /* wider than viewport */
+      height: 42vh;   /* shorter than viewport */
       display: block;
+    }
+
+  @media (max-width: 600px) {
+    #cloudCanvas {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;   /* wider than viewport */
+    height: 42vh;   /* shorter than viewport */
+    display: block;
+      }
     }
 
     .BIOS>div {
@@ -368,22 +384,23 @@
 
       .bios-logo-bottom {
         width: 18%;
-        margin-bottom: 158px;
+        margin-bottom: 6%;
         right: 20px;
       }
 
       .hold-progress-container {
         width: 80px;
-        margin-bottom: 298px;
-        bottom: 15px;
+        
+        margin-bottom: 80%;
       }
 
       .hold-hint {
-        bottom: 25px;
-        margin-bottom: 270px;
+        
+        margin-bottom: 80%;
         font-size: 9px;
       }
     }
+    
 
     @media (max-width: 600px),
     (max-height: 600px) {

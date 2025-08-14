@@ -1127,12 +1127,12 @@ $font-mono: "Courier New", monospace;
 
 @media (min-width: 481px) {
   .react-draggable:has(.AOLNewsletterFunnel) {
-    // Force initial position 20px higher
-    transform: translate(calc(50vw - 760px), -20px) !important;
+    left: 50% !important;
+    top: 0 !important;
+    transform: translate(-50%, -20px) !important;
 
     // Or if you want to affect ALL positions (even after dragging)
     &[style*="transform"] {
-      // This will shift everything 20px up from wherever it is
       margin-top: 30px !important;
     }
   }
@@ -1740,7 +1740,7 @@ $font-mono: "Courier New", monospace;
 
   // Draggable positioning for small screens
   .react-draggable:has(.AOLNewsletterFunnel) {
-    left: 0 !important;
+    left: auto !important;
     top: 0 !important;
 
     // Initial centering for small screens
