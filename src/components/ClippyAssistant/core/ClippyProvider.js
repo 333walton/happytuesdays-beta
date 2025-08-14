@@ -2323,7 +2323,12 @@ const ClippyProvider = ({ children, defaultAgent = "Clippy" }) => {
             y={contextMenuPosition.y}
             onClose={hideContextMenu}
             currentAgent={currentAgent}
-            agents={["Clippy", "F1", "Genius", "Merlin", "Bonzi"]}
+            agents={[
+              "Clippy",
+              "F1",
+              "Genius",
+              "Merlin" /*"Bonzi" edit used to remove bonzi temperarily from context menu and start menu*/,
+            ]}
             toggleSettings={
               window.program?.toggleSettings || window.toggleSettings
             } // <-- ADD THIS LINE HERE

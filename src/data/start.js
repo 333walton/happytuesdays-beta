@@ -202,12 +202,12 @@ const createAIAssistants = () => {
       icon: icons.vid16,
       onClick: selectAgent("Merlin"),
     },
-    {
+    /*{
       title: currentAgent === "Bonzi" ? "✓ Bonzi GPT" : "Bonzi GPT",
       tooltip: "Gaming",
       icon: icons.vid16,
       onClick: selectAgent("Bonzi"),
-    },
+    },edit used to remove bonzi temperarily from context menu and start menu*/
   ];
 };
 

@@ -5,15 +5,14 @@ Welcome to Happy Tuesdays' AI Assistant System!
 ╚════════════════════════════════════════╝
 
 This is Happy Tuesdays' modernized recreation of
-Microsoft Agent technology, bringing Windows 98
+the Microsoft Agent API, bringing Windows 98
 nostalgia into the modern web with enhanced AI
-capabilities and specialized expertise.
+capabilities and specialized knowledge per agent.
 
-Each AI assistant has been carefully crafted with
-unique personalities and specialized knowledge
-aligned with our four content pillars, providing
-you with engaging and helpful support as you
-explore everything Happy Tuesdays has to offer.
+Each AI assistant was designed with a distinct
+personality and expertise tied to our four
+content pillars, offering helpful support as
+you explore the site.
 
 ╔════════════════════════════════════════╗
 ║               AVAILABLE AI AGENTS              ║

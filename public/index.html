@@ -1049,6 +1049,12 @@
         // Initialize cloud shader once fade-in starts
         setTimeout(() => {
           initCloudShader();
+        }, 50);
+        windowsLaunch.classList.add("visible");
+
+        // Initialize cloud shader once fade-in starts
+        setTimeout(() => {
+          initCloudShader();
         }, 100);
       }, 500);
 
@@ -1060,17 +1066,18 @@
 
       // After display duration, fade out the cloud screen
       setTimeout(() => {
+        if (window.cleanupCloudShader) {
+          window.cleanupCloudShader();
+        }
         windowsLaunch.classList.remove("visible");
-
-        // Clean up after fade completes
-        setTimeout(() => {
-          if (window.cleanupCloudShader) {
-            window.cleanupCloudShader();
-          }
-          windowsLaunch.classList.add("hidden");
-          windowsLaunch.classList.remove("fading-in");
-        }, 1500);
-      }, 7000);  // Cloud animation display duration (7 seconds)
+        windowsLaunch.classList.add("hidden");
+        windowsLaunch.classList.remove("fading-in");
+        // Permanently remove the cloudCanvas from the DOM
+        const canvas = document.getElementById('cloudCanvas');
+        if (canvas && canvas.parentNode) {
+          canvas.parentNode.removeChild(canvas);
+        }
+      }, 8000); // 8000 is 8 seconds
     }
 
     // Typewriter effect function
@@ -1344,6 +1351,7 @@
 
     function loadScreen() {
       var biosElem = document.querySelector(".BIOS");
+      
 
       const pathname = window.location.pathname;
       const isSubdirectory = pathname !== '/' && pathname !== '/index.html' && pathname !== '';
