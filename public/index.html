@@ -126,7 +126,24 @@
       top: 0px;
       left: 0px;
       display: flex;
-      transition: opacity 0.5s ease-in-out;
+      transition: opacity 1s ease-in-out;
+    }
+
+    /* Fade transition states */
+    .BIOSWrapper.fading-out {
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .WindowsLaunchWrapper.fading-in {
+      opacity: 0;
+      visibility: visible;
+    }
+
+    .WindowsLaunchWrapper.fading-in.visible {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 1s ease-in-out;
     }
 
     .BIOS,
@@ -168,11 +185,13 @@
       background-color: #000;
       cursor: pointer;
       user-select: none;
+      opacity: 1;
     }
 
     .WindowsLaunchWrapper {
       background: #000;
-      z-index: 1001;
+      z-index: 1002;
+      /* Higher than BIOS for smooth crossfade */
       position: fixed;
       top: 0;
       left: 0;
@@ -181,6 +200,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1s ease-in-out;
     }
 
     .WindowsLaunch {
@@ -398,6 +420,12 @@
       opacity: 1;
       visibility: visible;
     }
+
+    /* Ensure BIOS is visible initially */
+    .BIOSWrapper:not(.fading-out):not(.hidden) {
+      opacity: 1;
+      visibility: visible;
+    }
   </style>
 
   <script>
@@ -428,7 +456,7 @@
         hintText.classList.add('visible');
 
         holdTimer = setTimeout(() => {
-          // Skip BIOS
+          // Skip BIOS with fade transition
           clearProgressUpdater();
           windowsLogo();
         }, HOLD_DURATION);
@@ -642,7 +670,7 @@
 
           setTimeout(() => {
             if (callback) callback();
-          }, 2000);
+          }, 2200);  // Give user time to see the system info before fading
           return;
         }
 
@@ -712,7 +740,14 @@
     };
 
     function hideBios() {
-      document.getElementsByClassName("BIOSWrapper")[0].classList.add("hidden");
+      const biosWrapper = document.getElementsByClassName("BIOSWrapper")[0];
+      // Start fading out BIOS
+      biosWrapper.classList.add("fading-out");
+
+      // After fade completes, fully hide it
+      setTimeout(() => {
+        biosWrapper.classList.add("hidden");
+      }, 1000);
     }
 
     // Cloud Shader Implementation - Direct port from Shadertoy
@@ -970,36 +1005,55 @@
       console.log('Falling back to CSS gradient');
       const wrapper = document.querySelector('.WindowsLaunchWrapper');
       if (wrapper) {
+        // Beautiful blue gradient sky
         wrapper.style.background = `linear-gradient(to bottom, 
-          #336699 0%, 
-          #66b3ff 50%, 
-          #99ccff 100%)`;
+          #1e3c72 0%,    /* Deep blue */
+          #2a5298 20%,   /* Royal blue */
+          #7e8ba3 50%,   /* Grayish blue (horizon) */
+          #b8c6db 80%,   /* Light blue */
+          #f5f7fa 100%)`;/* Almost white at bottom */
       }
     }
 
     function windowsLogo() {
+      // Start the BIOS fade out
       hideBios();
-      const windowsLaunch = document.getElementsByClassName("WindowsLaunchWrapper")[0];
-      windowsLaunch.classList.add("visible");
-      windowsLaunch.classList.remove("hidden");
-      window.localStorage.setItem("loggedIn", "true");
 
-      // Initialize cloud shader
+      const windowsLaunch = document.getElementsByClassName("WindowsLaunchWrapper")[0];
+
+      // Prepare the cloud screen (invisible at first)
+      windowsLaunch.classList.add("fading-in");
+      windowsLaunch.classList.remove("hidden");
+
+      // Start fading in the cloud screen after a slight delay
       setTimeout(() => {
-        initCloudShader();
-      }, 50);
+        windowsLaunch.classList.add("visible");
+
+        // Initialize cloud shader once fade-in starts
+        setTimeout(() => {
+          initCloudShader();
+        }, 100);
+      }, 500);
+
+      window.localStorage.setItem("loggedIn", "true");
 
       if (typeof window.positionStartupSequencesIfReady === 'function') {
         window.positionStartupSequencesIfReady();
       }
 
+      // After display duration, fade out the cloud screen
       setTimeout(() => {
-        if (window.cleanupCloudShader) {
-          window.cleanupCloudShader();
-        }
         windowsLaunch.classList.remove("visible");
-        windowsLaunch.classList.add("hidden");
-      }, 8000); // 8000 is 8 seconds
+
+        // Clean up after fade completes
+        setTimeout(() => {
+          if (window.cleanupCloudShader) {
+            window.cleanupCloudShader();
+          }
+          windowsLaunch.classList.add("hidden");
+          windowsLaunch.classList.remove("fading-in");
+        }, 1500);
+      }, 7000);  // Cloud animation display duration (7 seconds)
     }
 
     // Typewriter effect function
@@ -1273,7 +1327,6 @@
 
     function loadScreen() {
       var biosElem = document.querySelector(".BIOS");
-      biosElem.classList.remove("initial");
 
       const pathname = window.location.pathname;
       const isSubdirectory = pathname !== '/' && pathname !== '/index.html' && pathname !== '';
@@ -1478,7 +1531,7 @@
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-FVTXCVSR" height="0" width="0"
       style="display:none;visibility:hidden"></iframe></noscript>
 
-  <div class="BIOSWrapper initial">
+  <div class="BIOSWrapper">
     <div class="BIOS">
       <div class="BIOS__logo">
         <img src="%PUBLIC_URL%/static/tuesdays_pixel_slowed.gif" alt="Tuesdays Cal" class="left-image" />
@@ -1486,7 +1539,7 @@
       </div>
       <div class="BIOS__bootHeader">
         <p>AMII BIOS (C) 1992-2025</p>
-        <p>BIOS Version 18.3. REACT</p>
+        <p>BIOS Version 18.3.1 REACT</p>
         <p class="version-label">
           Initializing Boot Agent<span class="dots"></span>
         </p>
@@ -1495,7 +1548,12 @@
         <div id="BIOS__bootContainer"></div>
       </div>
       <!-- Video Logo Container INSIDE BIOS -->
-        
+      <div
+        style="position: absolute; bottom: 80px; right: 16px; width: 25%; height: auto; z-index: 522; pointer-events: none;">
+        <video style="width: 100%; height: auto;" autoplay loop muted playsinline>
+          <source src="%PUBLIC_URL%/static/animated-logo-white.mp4" type="video/mp4">
+        </video>
+      </div>
       <!-- SVG Logo INSIDE BIOS -->
       <img src="%PUBLIC_URL%/static/white vector text.svg" alt="Logo" class="bios-logo-bottom" />
     </div>
