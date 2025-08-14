@@ -123,8 +123,8 @@
       overflow: hidden;
       height: 100%;
       width: 100%;
-      top: 0px;
-      left: 0px;
+      top: 0px !important;
+      left: 0px !important;
       display: flex;
       transition: opacity 1s ease-in-out;
     }
@@ -173,7 +173,7 @@
     }
 
     .BIOSWrapper {
-      position: fixed;
+      position: absolute !important; /* Changed from fixed */
       top: 0;
       left: 0;
       width: 100%;
@@ -192,7 +192,7 @@
       background: #000; /*#a6c7df; light blue alternative*/ 
       z-index: 1002;
       /* Higher than BIOS for smooth crossfade */
-      position: fixed;
+      position: absolute !important; /* Changed from fixed */
       top: 0;
       left: 0;
       width: 100%;
@@ -484,6 +484,37 @@
           const progress = Math.min((elapsed / HOLD_DURATION) * 100, 100);
           progressBar.style.width = progress + '%';
         }, 50);
+      }
+
+      function ensureProperStructure() {
+        const checkDesktop = setInterval(() => {
+          const desktop = document.querySelector('.desktop');
+          const biosWrapper = document.querySelector('.BIOSWrapper');
+          const windowsWrapper = document.querySelector('.WindowsLaunchWrapper');
+
+          if (desktop) {
+            clearInterval(checkDesktop);
+
+            // Move wrappers inside desktop if not already there
+            if (biosWrapper && biosWrapper.parentElement !== desktop) {
+              desktop.appendChild(biosWrapper);
+            }
+
+            if (windowsWrapper && windowsWrapper.parentElement !== desktop) {
+              desktop.appendChild(windowsWrapper);
+            }
+
+            // Ensure desktop is positioning context
+            desktop.style.position = 'relative';
+          }
+        }, 100);
+      }
+
+      // Initialize when ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', ensureProperStructure);
+      } else {
+        ensureProperStructure();
       }
 
       function clearProgressUpdater() {
