@@ -118,10 +118,21 @@ const NewsletterFunnelManager = ({ children }) => {
         ".Window.AOLNewsletterFunnel"
       );
       if (funnelWindow) {
-        funnelWindow.click(); // Simulate click to bring to front
+        // Ensure proper positioning
+        const draggableWrapper = funnelWindow.closest(".react-draggable");
+        const desktopContainer = funnelWindow.closest(".desktop");
+
+        if (draggableWrapper && desktopContainer) {
+          draggableWrapper.style.position = "absolute";
+          draggableWrapper.style.left = "0px";
+          draggableWrapper.style.top = "0px";
+          draggableWrapper.style.transform = "none";
+        }
+
+        funnelWindow.click();
         const titleBar = funnelWindow.querySelector(".Window__heading");
         if (titleBar) {
-          titleBar.click(); // Click title bar to ensure focus
+          titleBar.click();
         }
       }
     }, 100);
@@ -176,15 +187,30 @@ const NewsletterFunnelManager = ({ children }) => {
     <>
       {children}
       {showFunnel &&
-        createPortal(
-          <AOLNewsletterFunnel
-            onClose={handleFunnelClose}
-            onComplete={handleFunnelComplete}
-            isActive={true}
-            minimized={false}
-          />,
-          document.querySelector(".desktop.screen") || document.body
-        )}
+        (() => {
+          // Find the proper container and ensure it's positioned correctly
+          const desktopContainer =
+            document.querySelector(".desktop.screen") ||
+            document.querySelector(".desktop") ||
+            document.querySelector("#root");
+
+          // Ensure container has proper positioning context
+          if (desktopContainer) {
+            desktopContainer.style.position = "relative";
+          }
+
+          return createPortal(
+            <AOLNewsletterFunnel
+              onClose={handleFunnelClose}
+              onComplete={handleFunnelComplete}
+              isActive={true}
+              minimized={false}
+              initialPosition={{ x: 0, y: 0 }}
+            />,
+            desktopContainer
+          );
+        })()}
+
       {/* Debug button - remove in production */}
       {process.env.NODE_ENV === "development" && (
         <button
@@ -197,6 +223,16 @@ const NewsletterFunnelManager = ({ children }) => {
                 ".Window.AOLNewsletterFunnel"
               );
               if (funnelWindow) {
+                // Ensure proper positioning when manually triggered
+                const draggableWrapper =
+                  funnelWindow.closest(".react-draggable");
+                if (draggableWrapper) {
+                  draggableWrapper.style.position = "absolute";
+                  draggableWrapper.style.left = "0px";
+                  draggableWrapper.style.top = "0px";
+                  draggableWrapper.style.transform = "none";
+                }
+
                 funnelWindow.click();
                 const titleBar = funnelWindow.querySelector(".Window__heading");
                 if (titleBar) {

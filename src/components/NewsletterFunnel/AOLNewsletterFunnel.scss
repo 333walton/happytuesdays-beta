@@ -2046,3 +2046,136 @@ $font-mono: "Courier New", monospace;
     margin-top: 5px !important;
   }
 }
+
+// ========================================
+// POSITIONING FIX FOR MONITOR VIEWPORT
+// ========================================
+
+// Ensure the desktop container is the positioning context
+.desktop.screen,
+.desktop {
+  position: relative !important;
+  overflow: hidden;
+}
+
+// Fix the draggable container positioning
+.react-draggable:has(.AOLNewsletterFunnel) {
+  position: absolute !important;
+  z-index: 10000 !important;
+
+  // Initial centering relative to desktop container
+  &[style*="transform: translate(0px, 0px)"] {
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
+
+// Desktop specific positioning adjustments
+@media (min-width: 481px) {
+  .react-draggable:has(.AOLNewsletterFunnel) {
+    left: 13% !important;
+    top: -5% !important;
+    margin-top: 0 !important;
+
+    &[style*="transform: translate(0px, 0px)"] {
+      transform: translate(-50%, -50%) !important;
+    }
+  }
+}
+
+// Tablet specific positioning
+@media (min-width: 768px) {
+  .react-draggable:has(.AOLNewsletterFunnel) {
+    // Remove the old transform calc
+    transform: none !important;
+    left: 13% !important;
+    //top: 40% !important;
+    margin-top: 0 !important;
+
+    &[style*="transform: translate(0px, 0px)"] {
+      left: 50% !important;
+      top: 40% !important;
+      transform: translate(-50%, -50%) !important;
+    }
+  }
+}
+
+// Mobile specific positioning - REPLACE THE EXISTING MOBILE RULE
+@media (max-width: 480px) {
+  .react-draggable:has(.AOLNewsletterFunnel) {
+    position: absolute !important;
+    left: 50% !important;
+    top: 30% !important;
+    transform: translate(-50%, -50%) !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  // Remove the desktop.screen specific rule that was causing issues
+  .desktop.screen {
+    .react-draggable:has(.AOLNewsletterFunnel) {
+      contain: layout;
+      position: absolute !important;
+      left: 50% !important;
+      top: 30% !important;
+      transform: translate(-50%, -50%) !important;
+    }
+  }
+}
+
+// Small mobile specific positioning
+@media (max-width: 360px) {
+  .react-draggable:has(.AOLNewsletterFunnel) {
+    left: 50% !important;
+    top: 30% !important;
+
+    &[style*="transform: translate(0px, 0px)"] {
+      transform: translate(-50%, -50%) !important;
+    }
+
+    max-width: calc(100vw - 10px) !important;
+  }
+}
+
+// Ensure Window component stays within container
+.Window.AOLNewsletterFunnel {
+  position: relative !important;
+  max-width: 100%;
+  //max-height: 100%;
+
+  .Window__body {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+}
+
+// Fix for desktop.notMobile class
+.desktop.notMobile {
+  position: relative !important;
+
+  .react-draggable:has(.AOLNewsletterFunnel) {
+    max-width: 640px;
+    max-height: 480px;
+  }
+}
+
+// Ensure all interface elements stay relative to window
+.aol-funnel-wrapper,
+.aol-funnel-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.dial-up-interface,
+.channels-interface {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}

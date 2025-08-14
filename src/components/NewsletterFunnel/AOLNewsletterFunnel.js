@@ -246,14 +246,86 @@ class AOLNewsletterFunnel extends Component {
 
   componentDidMount() {
     window.addEventListener("resize", this.handleResize);
+    this.ensureProperPositioning();
+    this.observeDesktopResize();
   }
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.handleResize);
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   }
 
   handleResize = () => {
     this.setState({ isMobile: window.innerWidth <= 480 });
+    this.ensureProperPositioning();
+  };
+
+  ensureProperPositioning = () => {
+    setTimeout(() => {
+      const windowElement = document.querySelector(
+        ".Window.AOLNewsletterFunnel"
+      );
+      const desktopContainer = windowElement?.closest(".desktop");
+
+      if (windowElement && desktopContainer) {
+        const draggableWrapper = windowElement.closest(".react-draggable");
+
+        if (draggableWrapper) {
+          const desktopRect = desktopContainer.getBoundingClientRect();
+          const windowRect = windowElement.getBoundingClientRect();
+
+          // Check if window is outside the desktop bounds
+          if (
+            windowRect.left < desktopRect.left ||
+            windowRect.top < desktopRect.top ||
+            windowRect.right > desktopRect.right ||
+            windowRect.bottom > desktopRect.bottom
+          ) {
+            // Reset to original positioning based on viewport size
+            draggableWrapper.style.position = "absolute";
+
+            if (window.innerWidth >= 768) {
+              // Tablet/Desktop: upper center
+              draggableWrapper.style.left = "50%";
+              draggableWrapper.style.top = "0";
+              draggableWrapper.style.transform = "translate(-50%, -20px)";
+              draggableWrapper.style.marginTop = "30px";
+            } else if (window.innerWidth >= 481) {
+              // Larger mobile: upper center
+              draggableWrapper.style.left = "50%";
+              draggableWrapper.style.top = "0";
+              draggableWrapper.style.transform = "translate(-50%, -20px)";
+              draggableWrapper.style.marginTop = "30px";
+            } else {
+              // Mobile: centered but higher
+              draggableWrapper.style.left = "50%";
+              draggableWrapper.style.top = "50%";
+              draggableWrapper.style.transform =
+                "translate(-50%, calc(-50% - 100px))";
+              draggableWrapper.style.marginTop = "80px";
+            }
+          }
+        }
+      }
+    }, 100);
+  };
+
+  observeDesktopResize = () => {
+    const desktopContainer = document.querySelector(".desktop");
+
+    if (desktopContainer && window.ResizeObserver) {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          if (entry.target === desktopContainer) {
+            this.ensureProperPositioning();
+          }
+        }
+      });
+
+      this.resizeObserver.observe(desktopContainer);
+    }
   };
 
   // Email validation
