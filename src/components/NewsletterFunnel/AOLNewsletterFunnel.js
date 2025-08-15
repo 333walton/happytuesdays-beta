@@ -342,28 +342,38 @@ class AOLNewsletterFunnel extends Component {
   };
 
   playMailSound = () => {
+    // Use Web Audio API for consistent volume control on desktop and mobile
     const audio = new Audio("/sounds/aol-yougotmail.wav");
-    // Reduce volume by 95%
-    audio.volume = 0.05;
-
-    // Preload the audio to ensure it's fully loaded before playing
     audio.preload = "auto";
 
-    // Add a small delay to ensure audio context is ready
+    // Play using Web Audio API for better mobile support
     audio.addEventListener(
       "canplaythrough",
       () => {
-        // Small timeout to prevent audio cutoff at the beginning
-        setTimeout(() => {
-          audio.play().catch((error) => {
-            console.log("Could not play mail sound:", error);
-          });
-        }, 50); // 50ms delay to ensure clean playback start
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          const ctx = new AudioContext();
+          const source = ctx.createMediaElementSource(audio);
+          const gainNode = ctx.createGain();
+          gainNode.gain.value = 0.15; // 10% volume
+          source.connect(gainNode).connect(ctx.destination);
+          setTimeout(() => {
+            audio.play().catch((error) => {
+              console.log("Could not play mail sound:", error);
+            });
+          }, 50);
+        } catch (err) {
+          // Fallback for browsers without Web Audio API
+          audio.volume = 0.15;
+          setTimeout(() => {
+            audio.play().catch((error) => {
+              console.log("Could not play mail sound:", error);
+            });
+          }, 50);
+        }
       },
       { once: true }
     );
-
-    // Load the audio
     audio.load();
   };
 
