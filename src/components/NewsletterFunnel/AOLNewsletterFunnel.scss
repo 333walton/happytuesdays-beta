@@ -1128,7 +1128,7 @@ $font-mono: "Courier New", monospace;
 @media (min-width: 481px) {
   .react-draggable:has(.AOLNewsletterFunnel) {
     left: 50% !important;
-    top: 0 !important;
+    top: -5% !important;
     transform: translate(-50%, -20px) !important;
 
     // Or if you want to affect ALL positions (even after dragging)
@@ -2058,32 +2058,15 @@ $font-mono: "Courier New", monospace;
   overflow: hidden;
 }
 
-// Fix the draggable container positioning
+// Fix the draggable container positioning for all viewports
 .react-draggable:has(.AOLNewsletterFunnel) {
   position: absolute !important;
   z-index: 10000 !important;
-
-  // Initial centering relative to desktop container
-  &[style*="transform: translate(0px, 0px)"] {
-    left: 50% !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-  }
+  left: 50% !important;
+  //top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-width: 100vw;
 }
-
-// Desktop specific positioning adjustments
-@media (min-width: 481px) {
-  .react-draggable:has(.AOLNewsletterFunnel) {
-    left: 13% !important;
-    top: -5% !important;
-    margin-top: 0 !important;
-
-    &[style*="transform: translate(0px, 0px)"] {
-      transform: translate(-50%, -50%) !important;
-    }
-  }
-}
-
 // Tablet specific positioning
 @media (min-width: 768px) {
   .react-draggable:has(.AOLNewsletterFunnel) {
@@ -2092,49 +2075,17 @@ $font-mono: "Courier New", monospace;
     left: 13% !important;
     //top: 40% !important;
     margin-top: 0 !important;
-
-    &[style*="transform: translate(0px, 0px)"] {
-      left: 50% !important;
-      top: 40% !important;
-      transform: translate(-50%, -50%) !important;
-    }
   }
 }
-
-// Mobile specific positioning - REPLACE THE EXISTING MOBILE RULE
 @media (max-width: 480px) {
   .react-draggable:has(.AOLNewsletterFunnel) {
-    position: absolute !important;
-    left: 50% !important;
     top: 30% !important;
-    transform: translate(-50%, -50%) !important;
-    margin-top: 0 !important;
-    margin-left: 0 !important;
     max-width: calc(100vw - 20px) !important;
-  }
-
-  // Remove the desktop.screen specific rule that was causing issues
-  .desktop.screen {
-    .react-draggable:has(.AOLNewsletterFunnel) {
-      contain: layout;
-      position: absolute !important;
-      left: 50% !important;
-      top: 30% !important;
-      transform: translate(-50%, -50%) !important;
-    }
   }
 }
 
-// Small mobile specific positioning
 @media (max-width: 360px) {
   .react-draggable:has(.AOLNewsletterFunnel) {
-    left: 50% !important;
-    top: 30% !important;
-
-    &[style*="transform: translate(0px, 0px)"] {
-      transform: translate(-50%, -50%) !important;
-    }
-
     max-width: calc(100vw - 10px) !important;
   }
 }
