@@ -1122,13 +1122,6 @@
       // Start fading in the cloud screen after a slight delay
       setTimeout(() => {
         windowsLaunch.classList.add("visible");
-
-        // Initialize cloud shader once fade-in starts
-        setTimeout(() => {
-          initCloudShader();
-        }, 50);
-        windowsLaunch.classList.add("visible");
-
         // Initialize cloud shader once fade-in starts
         setTimeout(() => {
           initCloudShader();
@@ -1141,20 +1134,24 @@
         window.positionStartupSequencesIfReady();
       }
 
-      // After display duration, fade out the cloud screen
+      // After display duration, fade out the cloud screen and prevent re-show
       setTimeout(() => {
         if (window.cleanupCloudShader) {
           window.cleanupCloudShader();
         }
         windowsLaunch.classList.remove("visible");
-        windowsLaunch.classList.add("hidden");
         windowsLaunch.classList.remove("fading-in");
-        // Permanently remove the cloudCanvas from the DOM
+        windowsLaunch.classList.add("hidden");
+        // Remove cloudCanvas from DOM
         const canvas = document.getElementById('cloudCanvas');
         if (canvas && canvas.parentNode) {
           canvas.parentNode.removeChild(canvas);
         }
-      }, 8000); // 8000 is 8 seconds
+        // Remove WindowsLaunchWrapper from DOM to prevent any further reappearance
+        if (windowsLaunch && windowsLaunch.parentNode) {
+          windowsLaunch.parentNode.removeChild(windowsLaunch);
+        }
+      }, 4000);
     }
 
     // Typewriter effect function

@@ -343,8 +343,8 @@ class AOLNewsletterFunnel extends Component {
 
   playMailSound = () => {
     const audio = new Audio("/sounds/aol-yougotmail.wav");
-    // Reduce volume by 85%
-    audio.volume = 0.15;
+    // Reduce volume by 95%
+    audio.volume = 0.05;
 
     // Preload the audio to ensure it's fully loaded before playing
     audio.preload = "auto";
