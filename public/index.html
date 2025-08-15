@@ -5,6 +5,26 @@
   <meta charset="utf-8" />
   <!-- Google Tag Manager -->
   <script>
+    // Ensure BIOSWrapper and WindowsLaunchWrapper are inside .monitor-screen if it exists
+    function moveWrappersToMonitorScreen() {
+      var monitorScreen = document.querySelector('.monitor-screen');
+      var biosWrapper = document.querySelector('.BIOSWrapper');
+      var windowsWrapper = document.querySelector('.WindowsLaunchWrapper');
+      if (monitorScreen) {
+        if (biosWrapper && biosWrapper.parentElement !== monitorScreen) {
+          monitorScreen.appendChild(biosWrapper);
+        }
+        if (windowsWrapper && windowsWrapper.parentElement !== monitorScreen) {
+          monitorScreen.appendChild(windowsWrapper);
+        }
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', moveWrappersToMonitorScreen);
+    } else {
+      moveWrappersToMonitorScreen();
+    }
     (function (w, d, s, l, i) {
       w[l] = w[l] || [];
       w[l].push({
