@@ -130,10 +130,10 @@
     }
 
     /* Fade transition states */
-    .BIOSWrapper.fading-out {
+    /*.BIOSWrapper.fading-out {
       opacity: 0;
       transition: opacity 1s ease-in-out;
-    }
+    }*/
 
     .WindowsLaunchWrapper.fading-in {
       opacity: 0;
@@ -143,6 +143,12 @@
     .WindowsLaunchWrapper.fading-in.visible {
       opacity: 1;
       visibility: visible;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .WindowsLaunchWrapper.fading-out {
+      opacity: 0 !important;
+      visibility: visible !important;
       transition: opacity 1s ease-in-out;
     }
 
@@ -248,10 +254,10 @@
     .bios-logo-bottom {
       position: absolute;
       bottom: 16px;
-      right: 26px;
+      right: 15px;
       width: 11%;
       height: auto;
-      opacity: 0.9;
+      opacity: 0.4;
       z-index: 2;
     }
 
@@ -1134,23 +1140,25 @@
         window.positionStartupSequencesIfReady();
       }
 
-      // After display duration, fade out the cloud screen and prevent re-show
+      // After display duration, fade out the cloud screen
       setTimeout(() => {
         if (window.cleanupCloudShader) {
           window.cleanupCloudShader();
         }
+        windowsLaunch.classList.add("fading-out");
         windowsLaunch.classList.remove("visible");
         windowsLaunch.classList.remove("fading-in");
-        windowsLaunch.classList.add("hidden");
-        // Remove cloudCanvas from DOM
-        const canvas = document.getElementById('cloudCanvas');
-        if (canvas && canvas.parentNode) {
-          canvas.parentNode.removeChild(canvas);
-        }
-        // Remove WindowsLaunchWrapper from DOM to prevent any further reappearance
-        if (windowsLaunch && windowsLaunch.parentNode) {
-          windowsLaunch.parentNode.removeChild(windowsLaunch);
-        }
+        // Wait for fade-out to finish before hiding/removing
+        setTimeout(() => {
+          windowsLaunch.classList.add("hidden");
+          const canvas = document.getElementById('cloudCanvas');
+          if (canvas && canvas.parentNode) {
+            canvas.parentNode.removeChild(canvas);
+          }
+          if (windowsLaunch && windowsLaunch.parentNode) {
+            windowsLaunch.parentNode.removeChild(windowsLaunch);
+          }
+        }, 1000); // Match fade-out duration
       }, 4000);
     }
 
