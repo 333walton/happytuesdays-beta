@@ -637,25 +637,25 @@ const HappyTuesdayNewsFeed = ({
           <div style={styles.tabContent}>
             {[
               {
-                title: "The Renaissance of Retro Computing",
+                title: "Tech Trends: The Rise of AI-Powered Creativity",
                 date: "January 10, 2025",
                 readTime: "5 min read",
                 excerpt:
-                  "Exploring how vintage computing aesthetics are influencing modern web design and user interfaces. From pixelated fonts to nostalgic color palettes, the retro revolution is here to stay...",
+                  "Explore how artificial intelligence is transforming creative industries, from smart design tools to generative art and music. See what’s next for tech-driven innovation...",
               },
               {
-                title: "Building in Public: A Stoic Approach",
-                date: "January 8, 2025",
-                readTime: "7 min read",
-                excerpt:
-                  "How ancient Stoic philosophy can guide modern builders and entrepreneurs through the challenges of creating in the digital age. Lessons from Marcus Aurelius for the indie hacker...",
-              },
-              {
-                title: "AI Art Meets Pixel Perfection",
+                title: "Art & Design: Color Theory in Modern UI/UX",
                 date: "January 5, 2025",
                 readTime: "4 min read",
                 excerpt:
-                  "The intersection of generative AI and retro pixel art aesthetics is creating a new wave of digital creativity. Discover tools and techniques for blending the old with the new...",
+                  "Uncover the secrets of color psychology and how designers use palettes to shape user experience. Learn how to apply color theory for stunning, effective interfaces...",
+              },
+              {
+                title: "Builder Spotlight: Productivity Hacks for Indie Makers",
+                date: "January 8, 2025",
+                readTime: "7 min read",
+                excerpt:
+                  "Discover proven strategies and digital tools that help solo founders and small teams work smarter, not harder. Real-world tips from successful indie builders...",
               },
             ].map((post, index) => (
               <article
