@@ -733,192 +733,7 @@ $font-mono: "Courier New", monospace;
             }
           }
         }
-        /*
-          // TECH CHANNELS
-          .channel-ai-ml {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-marketing-tech {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-blockchain-web3 {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-cybersecurity-privacy {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-web-devops {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          // ART CHANNELS
-          .channel-ai-art {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-ui-ux {
-            .channel-btn-image {
-              width: 100px;
-              height: 20px;
-              margin-left: 1px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-tutorials {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-motion-design {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-typeface-color {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          // BUILD CHANNELS
-          .channel-startup-stories {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-no-code {
-            .channel-btn-image {
-              width: 99px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-pm-playbook {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-work-smarter {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-momentum-mindset {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          // GAMING CHANNELS
-          .channel-weekly-roundup {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-guides {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-retro-gaming {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-indie-spotlights {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-
-          .channel-collecting {
-            .channel-btn-image {
-              width: 101px;
-              height: 20px;
-              object-fit: contain;
-              display: block;
-            }
-          }
-        }*/ /* End of Channel Button Styles */
+        // ...removed large commented-out channel button styles...
       }
       .channels-navigation {
         display: flex;
@@ -1356,12 +1171,7 @@ $font-mono: "Courier New", monospace;
               margin: 0;
             }
 
-            .aol-figure-2 {
-              //width: 90%;
-              //object-fit: contain;
-              //margin-left: 5px;
-              //left: -20px !important;
-            }
+            // ...existing code...
 
             .aol-figure-3 {
               width: 90%;
@@ -1371,10 +1181,7 @@ $font-mono: "Courier New", monospace;
               scale: 0.94;
             }
 
-            .aol-figure-image {
-              //margin-right: auto;
-              //object-fit: contain;
-            }
+            // ...existing code...
           }
         }
 
@@ -1680,9 +1487,7 @@ $font-mono: "Courier New", monospace;
               }
 
               // Rule for the .button-group immediately following .frequency-options
-              .frequency-options + .button-group {
-                //margin-top: 10px !important; // Consider avoiding !important
-              }
+              // ...existing code...
             }
 
             // Mobile Step 4 recap adjustments
@@ -1973,17 +1778,6 @@ $font-mono: "Courier New", monospace;
 
 .aol-figure-4.aol-figure-fade-in {
   animation: fadeInScale 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes fadeInScale {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 @keyframes fadeInScale {
