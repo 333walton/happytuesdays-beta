@@ -337,7 +337,7 @@
     /* Hold-to-skip progress indicator */
     .hold-progress-container {
       position: absolute;
-      bottom: 40px;
+      bottom: 5%;
       left: 50%;
       transform: translateX(-50%);
       width: 100px;
@@ -363,7 +363,7 @@
 
     .hold-hint {
       position: absolute;
-      bottom: 25px;
+      bottom: 2%;
       left: 50%;
       transform: translateX(-50%);
       color: rgba(255, 255, 255, 0.6);
@@ -463,12 +463,12 @@
 
       .hold-progress-container {
         width: 80px;
-        margin-bottom: 40%;
+        margin-bottom: 32%;
       }
 
       .hold-hint {
 
-        margin-bottom: 35%;
+        margin-bottom: 20%;
         font-size: 9px;
       }
     }
@@ -759,14 +759,14 @@
         headerLine("*** HARDWARE & DEVICE ***"),
         formatLine("Display Adapter", `${window.screen.width} x ${window.screen.height}px`),
         formatLine("GPU", graphicsAdapter),
-        formatLine("Power Management Status", batteryStatus),
+        //formatLine("Power Management Status", batteryStatus),
         formatLine("Processor Type", nav.platform),
         formatLine("Hardware Concurrency", nav.hardwareConcurrency || ""),
         formatLine("Pointing Device Count", nav.maxTouchPoints || ""),
         formatLine("Input Peripheral List", getInputPeripherals()),
         formatLine("Sound Device Detected", getSoundDeviceStatus()),
         formatLine("Link Speed Estimate", linkSpeed),
-        formatLine("Network", netType),
+        //formatLine("Network", netType),
         formatLine("Vendor", nav.vendor),
         formatLine("Platform", nav.platform),
         formatLine("Product", nav.product),
