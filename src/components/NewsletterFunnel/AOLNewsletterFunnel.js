@@ -241,11 +241,18 @@ class AOLNewsletterFunnel extends Component {
       errors: {},
       hoveredChannelId: null,
       isMobile: window.innerWidth <= 480, // detect on load
+      viewportHeight: window.innerHeight,
+      viewportWidth: window.innerWidth,
+      isSmallMobile: window.innerWidth <= 375,
+      isMediumMobile: window.innerWidth > 375 && window.innerWidth <= 414,
+      isLargeMobile: window.innerWidth > 414 && window.innerWidth <= 480,
     };
   }
 
   componentDidMount() {
     window.addEventListener("resize", this.handleResize);
+    window.addEventListener("orientationchange", this.handleOrientationChange);
+    this.updateViewportDimensions();
     this.ensureProperPositioning();
     this.observeDesktopResize();
   }
@@ -257,9 +264,47 @@ class AOLNewsletterFunnel extends Component {
     }
   }
 
+  // Add new methods
+  updateViewportDimensions = () => {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty("--vh", `${vh}px`);
+
+    this.setState({
+      viewportHeight: window.innerHeight,
+      viewportWidth: window.innerWidth,
+      isSmallMobile: window.innerWidth <= 375,
+      isMediumMobile: window.innerWidth > 375 && window.innerWidth <= 414,
+      isLargeMobile: window.innerWidth > 414 && window.innerWidth <= 480,
+    });
+  };
+
+  handleOrientationChange = () => {
+    setTimeout(() => {
+      this.updateViewportDimensions();
+      this.ensureProperPositioning();
+    }, 100);
+  };
+
+  // Update handleResize
   handleResize = () => {
+    this.updateViewportDimensions();
     this.setState({ isMobile: window.innerWidth <= 480 });
     this.ensureProperPositioning();
+  };
+
+  // Add dynamic height calculation
+  getDynamicWindowHeight = () => {
+    const { currentStep, viewportHeight } = this.state;
+    const baseHeights = {
+      1: 315,
+      2: 463,
+      3: 342,
+      4: 379,
+    };
+
+    // Scale heights based on viewport
+    const scaleFactor = Math.min(1, viewportHeight / 896); // 896 is iPhone XR height
+    return Math.max(baseHeights[currentStep] * scaleFactor, 280); // Minimum height of 280px
   };
 
   ensureProperPositioning = () => {
@@ -576,7 +621,20 @@ class AOLNewsletterFunnel extends Component {
   };
 
   render() {
-    const { currentStep, formData, errors } = this.state;
+    const {
+      currentStep,
+      formData,
+      errors,
+      isSmallMobile,
+      isMediumMobile,
+      isLargeMobile,
+    } = this.state;
+
+    const mobileClass = cx({
+      "mobile-small": isSmallMobile,
+      "mobile-medium": isMediumMobile,
+      "mobile-large": isLargeMobile,
+    });
 
     const filteredMenuOptions = buildMenu(this.props).filter(
       (option) =>
