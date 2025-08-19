@@ -987,7 +987,8 @@ $font-mono: "Courier New", monospace;
   .react-draggable:has(.frequency-options):has(
       > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
     ) {
-    height: 298px !important; // Step 3 height
+    //height: 298px !important; // Step 3 height
+    height: 383px !important; // Step 3 height
   }
 
   .react-draggable:has(.dial-up-prompt.recap-prompt) {
