@@ -1061,7 +1061,7 @@ $font-mono: "Courier New", monospace;
       height: auto !important;
       min-height: 440px !important;
       top: 38% !important;
-      margin-top: 2px !important;
+      margin-top: -1px !important;
     }
   }
 
@@ -1132,7 +1132,6 @@ $font-mono: "Courier New", monospace;
           }
         }
 
-        // Step boxes responsive positioning
         .step-boxes-overlay {
           position: absolute;
           top: 44% !important;
@@ -1143,7 +1142,6 @@ $font-mono: "Courier New", monospace;
           gap: 29px;
           justify-content: flex-start;
           align-items: center;
-
           z-index: 2;
           transform: scale(0.86) !important;
           transform-origin: center center !important;
@@ -1772,11 +1770,18 @@ $font-mono: "Courier New", monospace;
   }
   .react-draggable:has(.frequency-options) {
     top: 33% !important;
-    margin-top: -11px !important;
+    margin-top: -2px !important;
   }
   .react-draggable:has(.recap-section) {
     top: 35% !important;
-    margin-top: -6px !important;
+    margin-top: 2px !important;
+  }
+  .channels-interface {
+    // other styles for channels-interface
+    .step-boxes-overlay {
+      margin-top: -1px !important; // Or simply 74.7031px
+      // other styles for step-boxes-overlay
+    }
   }
 }
 
