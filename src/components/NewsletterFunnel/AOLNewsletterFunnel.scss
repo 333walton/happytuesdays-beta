@@ -1143,7 +1143,7 @@ $font-mono: "Courier New", monospace;
           justify-content: flex-start;
           align-items: center;
           z-index: 2;
-          transform: scale(0.86) !important;
+          transform: scale(0.84) !important;
           transform-origin: center center !important;
 
           .step-box {
@@ -1775,13 +1775,6 @@ $font-mono: "Courier New", monospace;
   .react-draggable:has(.recap-section) {
     top: 35% !important;
     margin-top: 2px !important;
-  }
-  .channels-interface {
-    // other styles for channels-interface
-    .step-boxes-overlay {
-      margin-top: -1px !important; // Or simply 74.7031px
-      // other styles for step-boxes-overlay
-    }
   }
 }
 
