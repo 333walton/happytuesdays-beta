@@ -984,9 +984,7 @@ $font-mono: "Courier New", monospace;
     height: 436px !important; // Step 2 height
   }
 
-  .react-draggable:has(.frequency-options):has(
-      > .Frame.Window.WindowProgram.AOLNewsletterFunnel.Window--active
-    ) {
+  .react-draggable:has(.frequency-options) {
     //height: 298px !important; // Step 3 height
     height: 383px !important; // Step 3 height
   }
@@ -1470,8 +1468,11 @@ $font-mono: "Courier New", monospace;
               }
 
               button.aol-button-continue {
-                padding-top: 0px;
-                padding-bottom: 2px;
+                font-size: 12px;
+                padding-top: 2px !important;
+                padding-right: 8px !important;
+                padding-bottom: 2px !important;
+                padding-left: 8px !important;
               }
             }
 
