@@ -300,6 +300,11 @@ $font-mono: "Courier New", monospace;
     outline: 1px dotted #000;
     outline-offset: -4px;
   }
+  &.aol-button-continue {
+    padding-top: 0px;
+    text-align: center;
+    //padding-bottom: 2px !important;
+  }
 }
 
 // Typography classes
