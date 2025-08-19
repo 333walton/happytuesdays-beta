@@ -1026,13 +1026,15 @@ $font-mono: "Courier New", monospace;
       height: auto !important;
       min-height: 48vh !important;
       max-height: 90vh !important;
+      margin-top: 4px !important;
     }
 
     &:has(.frequency-options) {
-      height: 100% !important;
+      height: auto !important;
       //min-height: 100% !important;
       min-height: 41vh !important;
       //height: 383px !important; // Step 3 height
+      margin-top: 10px !important;
     }
 
     &:has(.recap-prompt) {
@@ -1184,10 +1186,9 @@ $font-mono: "Courier New", monospace;
               z-index: 10;
 
               &.aol-figure-1 {
-                width: 90%;
-                height: 90%;
-                scale: 0.99;
-                margin: 0;
+                //width: 90%;
+                //scale: 0.99;
+                //margin: 0;
               }
 
               &.aol-figure-3 {
