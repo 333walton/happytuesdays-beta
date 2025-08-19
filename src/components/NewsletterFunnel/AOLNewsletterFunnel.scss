@@ -1061,6 +1061,7 @@ $font-mono: "Courier New", monospace;
       height: auto !important;
       min-height: 440px !important;
       top: 38% !important;
+      margin-top: 2px !important;
     }
   }
 
@@ -1771,11 +1772,11 @@ $font-mono: "Courier New", monospace;
   }
   .react-draggable:has(.frequency-options) {
     top: 33% !important;
-    margin-top: -2px !important;
+    margin-top: -11px !important;
   }
   .react-draggable:has(.recap-section) {
     top: 35% !important;
-    margin-top: 1px !important;
+    margin-top: -6px !important;
   }
 }
 
