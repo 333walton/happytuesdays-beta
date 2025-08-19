@@ -17,8 +17,7 @@
 // 9. DESKTOP STYLES (481px+)
 // 10. TABLET STYLES (768px+)
 // 11. MOBILE STYLES (480px and below)
-// 12. SMALL MOBILE STYLES (360px and below)
-// 13. ANIMATIONS & UTILITIES
+// 12. ANIMATIONS & UTILITIES
 // ========================================
 
 // ========================================
@@ -1531,145 +1530,7 @@ $font-mono: "Courier New", monospace;
 }
 
 // ========================================
-// 12. SMALL MOBILE STYLES (360px and below)
-// ========================================
-
-@media (max-width: 360px) {
-  // Window dimensions for very small screens
-  .Window.AOLNewsletterFunnel {
-    width: calc(100vw - 10px) !important;
-    min-width: 300px !important;
-
-    // Step 1 height for small screens
-    &:has(
-        .dial-up-interface:not(:has(.frequency-options)):not(
-            :has(.recap-prompt)
-          )
-      ) {
-      height: 350px !important;
-    }
-  }
-
-  // Draggable positioning for small screens
-  .react-draggable:has(.AOLNewsletterFunnel) {
-    left: auto !important;
-    top: 0 !important;
-
-    // Initial centering for small screens
-    &[style*="transform: translate(0px, 0px)"] {
-      transform: translate(
-        calc(50vw - min(150px, 50vw - 5px)),
-        calc(50vh - 175px)
-      ) !important;
-    }
-
-    max-width: calc(100vw - 10px) !important;
-  }
-
-  // Small screen component adjustments
-  .AOLNewsletterFunnel {
-    .aol-funnel-container {
-      .dial-up-interface,
-      .channels-interface {
-        // Small screen background
-        .dial-up-background {
-          height: 120px;
-
-          .dial-up-bg-image-logo {
-            width: 75px;
-            height: 19px;
-          }
-        }
-
-        // Small screen step boxes
-        .step-boxes-overlay {
-          top: 40px;
-          height: 55px;
-
-          .step-box {
-            width: 70px;
-            height: 50px;
-
-            .aol-figure-3 {
-              width: 55px;
-            }
-          }
-        }
-
-        // Small screen status text
-        .status-text-container {
-          top: 105px;
-        }
-
-        // Small screen content overlays
-        .dial-up-content-overlay,
-        .channels-content-overlay {
-          top: 135px;
-
-          // Small screen channels grid - 3 columns instead of 4
-          .channels-selection {
-            .channel-column-titles {
-              grid-template-columns: repeat(
-                3,
-                1fr
-              ); // Add this to match button grid
-            }
-
-            .channel-buttons-grid {
-              grid-template-columns: repeat(3, 1fr);
-              gap: 3px; // Add consistent gap
-
-              .channel-button {
-                position: relative; // Add for consistency
-                cursor: pointer; // Add for consistency
-                transition: all 0.2s ease; // Add for consistency
-                width: 50px;
-                height: 50px;
-                display: flex; // Add for centering
-                align-items: center; // Add for centering
-                justify-content: center; // Add for centering
-
-                .channel-btn-image {
-                  width: 100%; // Fill container
-                  height: 100%; // Fill container
-                  object-fit: cover; // Match desktop behavior
-                  display: block; // Add for consistency
-                }
-
-                &:hover {
-                  transform: scale(1.02); // Small hover effect
-                }
-
-                &.selected {
-                  box-shadow: 0 0 4px rgba(0, 85, 255, 0.5); // Smaller shadow
-
-                  &::after {
-                    content: "✓";
-                    position: absolute;
-                    bottom: 1px;
-                    right: 1px;
-                    background: $color-primary;
-                    color: white;
-                    width: 12px; // Smaller for small screen
-                    height: 12px; // Smaller for small screen
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 8px; // Smaller font
-                    font-weight: bold;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-// ========================================
-// 13. ANIMATIONS & UTILITIES
+// 12. ANIMATIONS & UTILITIES
 // ========================================
 
 // Fade in animation
