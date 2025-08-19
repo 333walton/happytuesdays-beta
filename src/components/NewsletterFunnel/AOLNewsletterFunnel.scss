@@ -1024,20 +1024,20 @@ $font-mono: "Courier New", monospace;
 
     &:has(.channels-content) {
       height: auto !important;
-      min-height: 45vh !important;
+      min-height: 48vh !important;
       max-height: 90vh !important;
     }
 
     &:has(.frequency-options) {
       height: 100% !important;
       //min-height: 100% !important;
-      min-height: 38vh !important;
+      min-height: 40vh !important;
       //height: 383px !important; // Step 3 height
     }
 
     &:has(.recap-prompt) {
       height: auto !important;
-      min-height: 43vh !important;
+      min-height: 46vh !important;
       //min-height: 100% !important;
     }
 
