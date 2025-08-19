@@ -1060,7 +1060,7 @@ $font-mono: "Courier New", monospace;
     &:has(.step-content.channels-content) {
       height: auto !important;
       min-height: 440px !important;
-      top: 50% !important;
+      top: 38% !important;
     }
   }
 
@@ -1766,8 +1766,14 @@ $font-mono: "Courier New", monospace;
 }
 @media (max-width: 480px) {
   .react-draggable:has(.AOLNewsletterFunnel) {
-    top: 30% !important;
+    top: 28% !important;
     max-width: calc(100vw - 20px) !important;
+  }
+  .react-draggable:has(.frequency-options) {
+    top: 33% !important;
+  }
+  .react-draggable:has(.recap-section) {
+    top: 35% !important;
   }
 }
 
