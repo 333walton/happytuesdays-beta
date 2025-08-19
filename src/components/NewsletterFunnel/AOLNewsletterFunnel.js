@@ -400,7 +400,7 @@ class AOLNewsletterFunnel extends Component {
           const ctx = new AudioContext();
           const source = ctx.createMediaElementSource(audio);
           const gainNode = ctx.createGain();
-          gainNode.gain.value = 0.15; // 10% volume
+          gainNode.gain.value = 0.1; // 10% volume
           source.connect(gainNode).connect(ctx.destination);
           setTimeout(() => {
             audio.play().catch((error) => {
@@ -409,7 +409,7 @@ class AOLNewsletterFunnel extends Component {
           }, 50);
         } catch (err) {
           // Fallback for browsers without Web Audio API
-          audio.volume = 0.15;
+          audio.volume = 0.1;
           setTimeout(() => {
             audio.play().catch((error) => {
               console.log("Could not play mail sound:", error);

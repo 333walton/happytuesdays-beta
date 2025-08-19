@@ -970,7 +970,7 @@ $font-mono: "Courier New", monospace;
     // Or if you want to affect ALL positions (even after dragging)
     &[style*="transform"] {
       // This will shift everything 20px up from wherever it is
-      margin-top: 30px !important;
+      margin-top: 30px;
     }
   }
 
@@ -1761,19 +1761,21 @@ $font-mono: "Courier New", monospace;
     transform: none !important;
     left: 13% !important;
     //top: 40% !important;
-    margin-top: 0 !important;
   }
 }
 @media (max-width: 480px) {
   .react-draggable:has(.AOLNewsletterFunnel) {
     top: 28% !important;
     max-width: calc(100vw - 20px) !important;
+    margin-top: 0px !important;
   }
   .react-draggable:has(.frequency-options) {
     top: 33% !important;
+    margin-top: -2px !important;
   }
   .react-draggable:has(.recap-section) {
     top: 35% !important;
+    margin-top: 1px !important;
   }
 }
 
