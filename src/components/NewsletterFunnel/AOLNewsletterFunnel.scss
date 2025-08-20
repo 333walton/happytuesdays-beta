@@ -910,7 +910,7 @@ $font-mono: "Courier New", monospace;
 
     &:has(.recap-prompt) {
       height: auto !important;
-      min-height: 45vh !important;
+      min-height: 46vh !important;
       margin-top: 3.6% !important;
     }
 
@@ -939,14 +939,14 @@ $font-mono: "Courier New", monospace;
     }
 
     &:has(.frequency-options) {
-      top: 31.5% !important;
+      top: 32% !important;
       margin-top: -1px !important;
       //margin-top: 2% !important;
     }
 
     &:has(.recap-section) {
       top: 31.5% !important;
-      margin-top: 1% !important;
+      margin-top: 1.4% !important;
     }
   }
 
