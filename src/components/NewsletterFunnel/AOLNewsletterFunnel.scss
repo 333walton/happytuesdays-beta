@@ -56,8 +56,9 @@ $font-mono: "Courier New", monospace;
 .aol-figure-1,
 .aol-figure-2,
 .aol-figure-3,
-.aol-figure-4 {
-  image-rendering: -webkit-optimize-contrast;
+.aol-figure-4,
+.dial-up-bg-image-logo {
+  image-rendering: -webkit-optimize-contrast !important;
   image-rendering: crisp-edges;
   -webkit-font-smoothing: antialiased;
   transform: translateZ(0);
@@ -373,7 +374,14 @@ $font-mono: "Courier New", monospace;
       left: 30px;
       scale: 0.6;
       position: absolute;
-      image-rendering: auto !important;
+      //image-rendering: auto !important;
+      image-rendering: -webkit-optimize-contrast !important;
+      //image-rendering: crisp-edges;
+      -webkit-font-smoothing: antialiased;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      perspective: 1000px;
+      will-change: transform;
     }
   }
 
@@ -940,12 +948,12 @@ $font-mono: "Courier New", monospace;
 
     &:has(.frequency-options) {
       top: 32.7% !important;
-      margin-top: 1px !important;
+      margin-top: 0px !important;
       //margin-top: 2% !important;
     }
 
     &:has(.recap-section) {
-      top: 32% !important;
+      top: 32.15% !important;
       margin-top: 1.5% !important;
     }
   }
@@ -1013,7 +1021,14 @@ $font-mono: "Courier New", monospace;
             scale: 0.5;
             transform: none;
             z-index: 2;
-            image-rendering: auto !important;
+            //image-rendering: auto !important;
+            image-rendering: -webkit-optimize-contrast !important;
+            //image-rendering: crisp-edges;
+            -webkit-font-smoothing: antialiased;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+            will-change: transform;
           }
         }
 
