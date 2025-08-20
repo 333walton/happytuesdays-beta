@@ -933,13 +933,14 @@ $font-mono: "Courier New", monospace;
 
     &:has(.step-content.channels-content) {
       height: auto !important;
-      min-height: 440px !important;
-      top: 38% !important;
-      margin-top: 0px !important;
+      min-height: 510px !important;
+      top: 39% !important;
+      margin-top: 1px !important;
     }
 
     &:has(.frequency-options) {
       top: 31.5% !important;
+      margin-top: -1px !important;
       //margin-top: 2% !important;
     }
 
