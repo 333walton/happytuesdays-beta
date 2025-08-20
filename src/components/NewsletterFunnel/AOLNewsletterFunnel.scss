@@ -903,15 +903,15 @@ $font-mono: "Courier New", monospace;
 
     &:has(.frequency-options) {
       height: auto !important;
-      min-height: 38vh !important;
+      min-height: 41vh !important;
       margin-top: 0px !important;
-      margin-bottom: 7%;
+      margin-bottom: 6%;
     }
 
     &:has(.recap-prompt) {
       height: auto !important;
-      min-height: 44vh !important;
-      margin-top: 3.9% !important;
+      min-height: 45vh !important;
+      margin-top: 3.6% !important;
     }
 
     .Window__body {
@@ -935,7 +935,7 @@ $font-mono: "Courier New", monospace;
       height: auto !important;
       min-height: auto !important;
       top: 38% !important;
-      margin-top: 1px !important;
+      margin-top: 2px !important;
     }
 
     &:has(.frequency-options) {
