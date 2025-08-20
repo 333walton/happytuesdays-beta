@@ -996,6 +996,15 @@ $font-mono: "Courier New", monospace;
       position: relative;
       overflow: visible;
 
+      // Special positioning adjustment for recap step
+      &:has(.recap-section) {
+        .step-boxes-overlay {
+          top: calc(
+            var(--overlay-top) + 1%
+          ) !important; // Move down by 1% for recap
+        }
+      }
+
       .dial-up-interface,
       .channels-interface {
         display: flex;
@@ -1106,6 +1115,7 @@ $font-mono: "Courier New", monospace;
             &.step-box-2 {
               transform: none !important;
               transform-origin: center center !important;
+              left: 1% !important;
             }
 
             .aol-figure-image {
@@ -1115,13 +1125,13 @@ $font-mono: "Courier New", monospace;
               z-index: 10 !important;
               position: absolute !important; // Changed to absolute for precise centering
               top: 50% !important;
-              left: 50% !important;
+              left: 48% !important;
               transform: translate(-50%, -50%) !important; // Perfect centering
               margin: 0 !important; // Remove all margins
 
-              &.aol-figure-3 {
-                width: 85% !important; // Slightly smaller to fit nicely
-                height: 85% !important;
+              &.aol-figure-2 {
+                width: 98% !important; // Slightly smaller to fit nicely
+                height: 98% !important;
                 scale: 1 !important; // Reset scale
                 position: absolute !important;
                 top: 50% !important;
@@ -1130,12 +1140,23 @@ $font-mono: "Courier New", monospace;
                 margin: 0 !important; // Remove conflicting margins
               }
 
-              &.aol-figure-4 {
-                width: 85% !important; // Slightly smaller to fit nicely
-                height: 85% !important;
+              &.aol-figure-3 {
+                width: 90% !important; // Slightly smaller to fit nicely
+                height: 90% !important;
                 scale: 1 !important; // Reset scale
                 position: absolute !important;
-                top: 50% !important;
+                top: 57% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                margin: 0 !important; // Remove conflicting margins
+              }
+
+              &.aol-figure-4 {
+                width: 90% !important; // Slightly smaller to fit nicely
+                height: 90% !important;
+                scale: 1 !important; // Reset scale
+                position: absolute !important;
+                top: 57% !important;
                 left: 50% !important;
                 transform: translate(-50%, -50%) !important;
                 margin: 0 !important; // Remove conflicting margins
