@@ -1053,7 +1053,7 @@ $font-mono: "Courier New", monospace;
         }
 
         // Step indicators - UNIFIED STYLING FOR CONSISTENCY
-        .step-boxes-overlay {
+        .step-boxes-overlay:not(:has(.recap-section)) {
           position: absolute !important;
           top: var(
             --overlay-top
@@ -1115,7 +1115,7 @@ $font-mono: "Courier New", monospace;
             &.step-box-2 {
               transform: none !important;
               transform-origin: center center !important;
-              left: 1% !important;
+              left: 2% !important;
             }
 
             .aol-figure-image {
@@ -1130,8 +1130,8 @@ $font-mono: "Courier New", monospace;
               margin: 0 !important; // Remove all margins
 
               &.aol-figure-2 {
-                width: 98% !important; // Slightly smaller to fit nicely
-                height: 98% !important;
+                width: 99% !important; // Slightly smaller to fit nicely
+                height: 99% !important;
                 scale: 1 !important; // Reset scale
                 position: absolute !important;
                 top: 50% !important;
