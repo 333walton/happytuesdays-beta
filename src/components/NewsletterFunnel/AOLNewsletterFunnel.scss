@@ -890,7 +890,7 @@ $font-mono: "Courier New", monospace;
 
     &:has(.channels-content) {
       height: auto !important;
-      min-height: 45vh !important;
+      min-height: 47vh !important;
       max-height: 90vh !important;
       margin-top: 0px !important;
     }
@@ -933,8 +933,8 @@ $font-mono: "Courier New", monospace;
 
     &:has(.step-content.channels-content) {
       height: auto !important;
-      min-height: 510px !important;
-      top: 39% !important;
+      min-height: auto !important;
+      top: 38% !important;
       margin-top: 1px !important;
     }
 
