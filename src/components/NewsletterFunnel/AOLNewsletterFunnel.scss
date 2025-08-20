@@ -996,6 +996,25 @@ $font-mono: "Courier New", monospace;
       position: relative;
       overflow: visible;
 
+      &:has(
+          .dial-up-interface:not(:has(.frequency-options)):not(
+              :has(.recap-prompt)
+            )
+        ) {
+        .step-box-1 .aol-figure-1 {
+          transform: translate(-50%, calc(-50% + 2px)) !important; // 1px lower
+        }
+      }
+
+      &:has(.channels-content) {
+        .step-box-2 .aol-figure-2 {
+          transform: translate(
+            calc(-50% + 2px),
+            -50%
+          ) !important; // 2px to the right
+        }
+      }
+
       // Special positioning adjustment for recap step
       &:has(.recap-section) {
         .step-boxes-overlay {
@@ -1086,8 +1105,19 @@ $font-mono: "Courier New", monospace;
             flex-shrink: 0 !important; // Prevent flexbox from shrinking items
             overflow: visible !important; // Allow figures to render fully
 
-            &.step-box-1,
+            &.step-box-1 {
+              opacity: 1 !important;
+              width: var(
+                --step-box-width
+              ) !important; // Consistent responsive width
+              height: 56px !important;
+              top: 1px !important;
+            }
+
             &.step-box-2 {
+              transform: none !important;
+              transform-origin: center center !important;
+              left: 2% !important;
               opacity: 1 !important;
               width: var(
                 --step-box-width
@@ -1110,12 +1140,6 @@ $font-mono: "Courier New", monospace;
               .aol-figure-image {
                 // Inherits centering from parent rule
               }
-            }
-
-            &.step-box-2 {
-              transform: none !important;
-              transform-origin: center center !important;
-              left: 2% !important;
             }
 
             .aol-figure-image {
