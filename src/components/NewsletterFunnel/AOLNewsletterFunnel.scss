@@ -879,6 +879,11 @@ $font-mono: "Courier New", monospace;
     --mobile-window-width: calc(100vw - (var(--mobile-padding) * 2));
     --mobile-max-width: 460px;
     --mobile-content-padding: 15px;
+    --step-box-width: min(25%, 100px); // Responsive with max limit
+    --step-box-gap: 7%; // Percentage-based gap for responsiveness
+    --bg-scale: 0.95; // Consistent background scale
+    --overlay-scale: 0.84; // Consistent overlay scale
+    --overlay-top: 45%; // Locked overlay position
   }
 
   // Window sizing
@@ -901,12 +906,6 @@ $font-mono: "Courier New", monospace;
       min-height: 47vh !important;
       max-height: 90vh !important;
       margin-top: 0px !important;
-    }
-
-    .channels-interface {
-      .dial-up-background {
-        margin-bottom: -2px;
-      }
     }
 
     &:has(.frequency-options) {
@@ -959,6 +958,15 @@ $font-mono: "Courier New", monospace;
   }
 
   @media (max-width: 360px) {
+    :root {
+      --step-box-width: min(
+        23%,
+        80px
+      ); // Slightly smaller for very small screens
+      --step-box-gap: 5%; // Reduced gap for tight spaces
+      // Background and overlay scales remain the same for consistency
+    }
+
     .react-draggable:has(.AOLNewsletterFunnel) {
       max-width: calc(100vw - 10px) !important;
     }
@@ -997,30 +1005,33 @@ $font-mono: "Courier New", monospace;
         height: 100%;
         min-height: 0;
 
-        // Background
+        // Background - UNIFIED POSITIONING FOR CONSISTENCY
         .dial-up-background {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          flex-shrink: 0;
-          z-index: 1;
+          position: relative !important;
+          width: 100% !important;
+          height: 100% !important;
+          flex-shrink: 0 !important;
+          z-index: 1 !important;
 
           .dial-up-bg-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center top;
-            transform: scale(0.95) !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            object-position: center top !important;
+            transform: scale(
+              var(--bg-scale)
+            ) !important; // Uses consistent scale variable
             transform-origin: center center !important;
+            position: relative !important; // Ensure consistent positioning context
           }
 
           .dial-up-bg-image-logo {
-            position: absolute;
-            top: -13px;
-            left: -25px;
-            scale: 0.5;
-            transform: none;
-            z-index: 2;
+            position: absolute !important;
+            top: -13px !important;
+            left: -25px !important;
+            scale: 0.5 !important;
+            transform: none !important;
+            z-index: 2 !important;
             //image-rendering: auto !important;
             image-rendering: -webkit-optimize-contrast !important;
             //image-rendering: crisp-edges;
@@ -1035,20 +1046,27 @@ $font-mono: "Courier New", monospace;
         // Step indicators - UNIFIED STYLING FOR CONSISTENCY
         .step-boxes-overlay {
           position: absolute !important;
-          top: 44% !important;
+          top: var(
+            --overlay-top
+          ) !important; // Uses consistent position variable
           left: 9% !important;
           right: 3% !important;
           height: 56px !important;
           display: flex !important;
-          gap: 29px !important;
+          gap: var(--step-box-gap) !important; // Uses responsive gap variable
           justify-content: flex-start !important;
           align-items: center !important;
           z-index: 2 !important;
-          transform: scale(0.84) !important;
+          transform: scale(
+            var(--overlay-scale)
+          ) !important; // Uses consistent scale variable
           transform-origin: center center !important;
 
           .step-box {
-            position: relative !important;
+            position: relative !important; // Positioning context for centered figures
+            width: var(
+              --step-box-width
+            ) !important; // Uses responsive width variable
             height: 56px !important;
             top: 0px !important;
             display: flex !important;
@@ -1056,22 +1074,33 @@ $font-mono: "Courier New", monospace;
             justify-content: center !important;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
+            flex-shrink: 0 !important; // Prevent flexbox from shrinking items
+            overflow: visible !important; // Allow figures to render fully
 
             &.step-box-1,
             &.step-box-2 {
               opacity: 1 !important;
-              width: 87px !important;
+              width: var(
+                --step-box-width
+              ) !important; // Consistent responsive width
               height: 56px !important;
               top: 0px !important;
             }
 
             &.step-box-3 {
               opacity: 1 !important;
-              width: 87px !important;
+              width: var(
+                --step-box-width
+              ) !important; // Consistent responsive width
               height: 56px !important;
               scale: 0.9 !important;
               left: 6% !important;
               top: 0px !important;
+
+              // Ensure figure 3 stays centered within its scaled container
+              .aol-figure-image {
+                // Inherits centering from parent rule
+              }
             }
 
             &.step-box-2 {
@@ -1084,20 +1113,32 @@ $font-mono: "Courier New", monospace;
               height: 100% !important;
               object-fit: contain !important;
               z-index: 10 !important;
+              position: absolute !important; // Changed to absolute for precise centering
+              top: 50% !important;
+              left: 50% !important;
+              transform: translate(-50%, -50%) !important; // Perfect centering
+              margin: 0 !important; // Remove all margins
 
               &.aol-figure-3 {
-                width: 90% !important;
-                scale: 0.94 !important;
-                margin: 0 !important;
-                margin-right: 35px !important;
-                margin-top: 5px !important;
+                width: 85% !important; // Slightly smaller to fit nicely
+                height: 85% !important;
+                scale: 1 !important; // Reset scale
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                margin: 0 !important; // Remove conflicting margins
               }
 
               &.aol-figure-4 {
-                left: 28px !important;
-                scale: 0.95 !important;
-                margin-right: 35px !important;
-                margin-top: 5px !important;
+                width: 85% !important; // Slightly smaller to fit nicely
+                height: 85% !important;
+                scale: 1 !important; // Reset scale
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                margin: 0 !important; // Remove conflicting margins
               }
             }
           }
@@ -1428,10 +1469,32 @@ $font-mono: "Courier New", monospace;
         }
 
         &.channels-interface {
+          // Ensure background positioning remains consistent
+          .dial-up-background {
+            margin-bottom: 0 !important; // Override any desktop margin
+            position: relative !important;
+            width: 100% !important;
+            height: 100% !important;
+
+            .dial-up-bg-image {
+              // Inherits unified positioning from parent selector
+            }
+          }
+
           .channels-content-overlay {
             .step-content.channels-content {
               margin-top: 1px !important;
             }
+          }
+        }
+
+        // Ensure consistent rendering across all step interfaces
+        &.dial-up-interface,
+        &.channels-interface {
+          // Both interfaces use exact same background and overlay positioning
+          .dial-up-background,
+          .step-boxes-overlay {
+            // All positioning handled by unified styles above
           }
         }
       }
@@ -1599,46 +1662,45 @@ $font-mono: "Courier New", monospace;
   }
 }
 
-// Figure-specific sizing
-.step-box-3 {
-  .aol-figure-image {
-    width: 100%;
-    height: auto;
-    max-width: 85px;
+// Figure-specific sizing - Desktop only (>480px)
+// Mobile centering is handled in the mobile media query section above
+@media (min-width: 481px) {
+  .step-box-3 {
+    .aol-figure-image {
+      width: 100%;
+      height: auto;
+      max-width: 85px;
 
-    @media (min-width: 768px) {
-      max-width: 85px !important;
-    }
+      @media (min-width: 768px) {
+        max-width: 85px !important;
+      }
 
-    @media (min-width: 1024px) {
-      max-width: 85px !important;
+      @media (min-width: 1024px) {
+        max-width: 85px !important;
+      }
     }
   }
 }
 
+// Global figure styles - basic object-fit only
 .aol-figure-3,
 .aol-figure-4 {
   object-fit: contain;
-  width: 100% !important;
-  height: 100% !important;
+  // Width, height, and positioning handled by context-specific styles
 }
 
-.aol-figure-image.aol-figure-4 {
-  left: 28px !important;
-  scale: 0.95 !important;
-}
+// Desktop-specific positioning can be added here if needed
+// Mobile positioning is handled entirely within the mobile media query
 
-.aol-figure-image.aol-figure-3 {
-  scale: 0.9 !important;
-}
-
+// Mobile-specific figure overrides removed
+// All mobile figure centering is now handled in the main mobile media query
 @media (max-width: 480px) {
   .aol-figure-3,
   .aol-figure-4,
   .aol-figure-image.aol-figure-3,
   .aol-figure-image.aol-figure-4 {
-    margin-right: 35px !important;
-    margin-top: 5px !important;
+    // Margin overrides removed - perfect centering is achieved through
+    // absolute positioning with transform: translate(-50%, -50%)
   }
 }
 
