@@ -1032,60 +1032,63 @@ $font-mono: "Courier New", monospace;
           }
         }
 
-        // Step indicators
+        // Step indicators - UNIFIED STYLING FOR CONSISTENCY
         .step-boxes-overlay {
-          position: absolute;
+          position: absolute !important;
           top: 44% !important;
           left: 9% !important;
-          right: 3%;
-          height: auto;
-          display: flex;
-          gap: 29px;
-          justify-content: flex-start;
-          align-items: center;
-          z-index: 2;
+          right: 3% !important;
+          height: 56px !important;
+          display: flex !important;
+          gap: 29px !important;
+          justify-content: flex-start !important;
+          align-items: center !important;
+          z-index: 2 !important;
           transform: scale(0.84) !important;
           transform-origin: center center !important;
 
           .step-box {
-            position: relative;
-            height: 56px;
-            top: 0px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative !important;
+            height: 56px !important;
+            top: 0px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
 
             &.step-box-1,
             &.step-box-2 {
-              opacity: 1;
-              width: 25%;
-              height: auto;
+              opacity: 1 !important;
+              width: 87px !important;
+              height: 56px !important;
+              top: 0px !important;
             }
 
             &.step-box-3 {
-              opacity: 1;
-              width: 25%;
-              scale: 0.9;
-              left: 6%;
+              opacity: 1 !important;
+              width: 87px !important;
+              height: 56px !important;
+              scale: 0.9 !important;
+              left: 6% !important;
+              top: 0px !important;
             }
 
             &.step-box-2 {
-              transform: scale(0.97) !important;
+              transform: none !important;
               transform-origin: center center !important;
             }
 
             .aol-figure-image {
-              width: 100%;
-              height: 100%;
-              object-fit: contain;
-              z-index: 10;
+              width: 100% !important;
+              height: 100% !important;
+              object-fit: contain !important;
+              z-index: 10 !important;
 
               &.aol-figure-3 {
-                width: 90%;
-                scale: 0.94;
-                margin: 0;
+                width: 90% !important;
+                scale: 0.94 !important;
+                margin: 0 !important;
                 margin-right: 35px !important;
                 margin-top: 5px !important;
               }
