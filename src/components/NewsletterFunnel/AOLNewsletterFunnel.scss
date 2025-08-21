@@ -1154,8 +1154,8 @@ $font-mono: "Courier New", monospace;
               margin: 0 !important; // Remove all margins
 
               &.aol-figure-2 {
-                width: 99% !important; // Slightly smaller to fit nicely
-                height: 99% !important;
+                width: 100% !important; // Slightly smaller to fit nicely
+                height: 100% !important;
                 scale: 1 !important; // Reset scale
                 position: absolute !important;
                 top: 50% !important;
@@ -1523,6 +1523,15 @@ $font-mono: "Courier New", monospace;
 
             .dial-up-bg-image {
               // Inherits unified positioning from parent selector
+            }
+          }
+
+          // Mobile-specific adjustment for step-box-2 ONLY in channels interface
+          &:has(.channels-content-overlay) {
+            .step-boxes-overlay {
+              .step-box-2 {
+                left: calc(2% + 3px) !important; // 3px further to the right
+              }
             }
           }
 
