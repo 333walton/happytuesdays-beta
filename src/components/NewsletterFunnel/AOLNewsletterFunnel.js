@@ -155,7 +155,7 @@ class AOLNewsletterFunnel extends Component {
       {
         id: "work_smarter",
         name: "Work Smarter",
-        image: "/static/aol/channels/channel_work_smarter.png", // build
+        image: "/static/aol/channels/channels_work_smarter2.png", // build
         className: "channel-work-smarter",
         description:
           "Highlights ideas, habits, and tools aimed at improving productivity, efficiency, and focus in work and daily life.",
@@ -175,7 +175,7 @@ class AOLNewsletterFunnel extends Component {
       {
         id: "web_devops",
         name: "Web Dev & DevOps",
-        image: "/static/aol/channels/channel_web_devops.png", // tech
+        image: "/static/aol/channels/channels_web_devops2.png", // tech
         className: "channel-web-devops",
         description:
           "Focuses on web development, tools, workflows, and deployment strategies for building & maintaining projects.",
@@ -195,7 +195,7 @@ class AOLNewsletterFunnel extends Component {
       {
         id: "momentum_mindset",
         name: "Momentum & Mindset",
-        image: "/static/aol/channels/channel_work_smarter.png", // build placeholder
+        image: "/static/aol/channels/channels_momentum_mindset2.png", // build placeholder
         className: "channel-momentum-mindset",
         description:
           "Shares approaches and ideas for building resilience, focus, and positive habits for growth.",
