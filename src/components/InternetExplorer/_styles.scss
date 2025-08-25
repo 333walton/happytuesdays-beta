@@ -130,6 +130,22 @@
   z-index: 7;
 }
 
+@media (max-width: 768px) {
+  .w98.desktop.screen {
+    > .react-draggable:has(iframe[title="Paint"]) {
+      top: 0px;
+      left: 0px !important;
+      width: 99.5% !important;
+      height: 50%;
+      min-height: 344px !important;
+      transform: none !important;
+    }
+  }
+  canvas.main-canvas {
+    width: 100% !important;
+  }
+}
+
 .react-draggable-dragging .InternetExplorer {
   width: 100% !important;
   height: 100% !important;
