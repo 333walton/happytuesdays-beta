@@ -1041,7 +1041,7 @@ $font-mono: "Courier New", monospace;
       // STEP 4 ONLY - Recap section
       &:has(.recap-section) {
         .step-boxes-overlay {
-          // Step 4 specific styles here if needed
+          height: 57px !important;
         }
       }
 
@@ -1100,7 +1100,7 @@ $font-mono: "Courier New", monospace;
           ) !important; // Uses consistent position variable
           left: 9% !important;
           right: 3% !important;
-          height: 57px;
+          height: 56px;
           display: flex !important;
           gap: var(--step-box-gap) !important; // Uses responsive gap variable
           justify-content: flex-start !important;
