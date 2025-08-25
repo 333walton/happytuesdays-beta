@@ -1035,7 +1035,9 @@ $font-mono: "Courier New", monospace;
 
       // STEP 3 ONLY - Frequency options (but not recap)
       &:has(.frequency-options):not(:has(.recap-prompt)) {
-        // Step 3 specific styles here if needed
+        .step-boxes-overlay {
+          height: 57px !important;
+        }
       }
 
       // STEP 4 ONLY - Recap section
