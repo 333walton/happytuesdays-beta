@@ -886,6 +886,22 @@ $font-mono: "Courier New", monospace;
     --overlay-top: 45%; // Locked overlay position
   }
 
+  // AOL Funnel container
+  .AOLNewsletterFunnel {
+    .aol-funnel-container {
+      // Target only the first step (no frequency options, no recap, no channels)
+      &:has(
+          .dial-up-interface:not(:has(.frequency-options)):not(
+              :has(.recap-prompt):not(:has(.channels-content))
+            )
+        ) {
+        .step-box-1 .aol-figure-1 {
+          transform: translate(-50%, calc(-50% + 1px)) !important;
+        }
+      }
+    }
+  }
+
   // Window sizing
   .Window.AOLNewsletterFunnel {
     width: var(--mobile-window-width) !important;
@@ -1022,6 +1038,13 @@ $font-mono: "Courier New", monospace;
             var(--overlay-top) + 1%
           ) !important; // Move down by 1% for recap
         }
+      }
+
+      .dial-up-interface
+        .step-boxes-overlay:not(:has(.frequency-options)):not(
+          :has(.recap-prompt):not(:has(.channels-content))
+        ) {
+        height: 57px !important;
       }
 
       .dial-up-interface,
