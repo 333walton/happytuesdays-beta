@@ -175,7 +175,7 @@ class AOLNewsletterFunnel extends Component {
       {
         id: "web_devops",
         name: "Web Development",
-        image: "/static/aol/channels/channels_web_devops2.png", // tech
+        image: "/static/aol/channels/channels_web_devops3.png", // tech
         className: "channel-web-devops",
         description:
           "Focuses on web development, tools, workflows, and deployment strategies for building & maintaining projects.",
@@ -195,7 +195,7 @@ class AOLNewsletterFunnel extends Component {
       {
         id: "momentum_mindset",
         name: "Mindset & Habits",
-        image: "/static/aol/channels/channels_momentum_mindset3.png", // build placeholder
+        image: "/static/aol/channels/channels_momentum_mindset4.png", // build placeholder
         className: "channel-momentum-mindset",
         description:
           "Shares approaches and ideas for building resilience, focus, and positive habits for growth.",
