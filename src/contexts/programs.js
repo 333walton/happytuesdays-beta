@@ -109,7 +109,7 @@ const settings = (injectedData = [], toggleSettings, toggleTaskManager) => [
       title: "Start Menu Builder",
       icon: icons.start_menu32,
       component: "Notepad",
-      tooltip: "Log in to access", // this version of tooltips is not showing
+      //tooltip: "Log in to access", // this version of tooltips is not showing
       isDisabled: true,
       multiInstance: true,
       //customTooltip: true, // new
@@ -169,7 +169,7 @@ const startMenu = (
     ),
     icon: icons.logOff24,
     isDisabled: true,
-    tooltip: "soon",
+    //tooltip: "soon",
   },
   {
     title: "Shut Down...",

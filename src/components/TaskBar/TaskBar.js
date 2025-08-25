@@ -18,12 +18,11 @@ const CustomTooltip = ({ text, visible }) => {
         position: "fixed",
         bottom: "30px",
         left: "105px",
-        backgroundColor: "#ffffcc",
+        backgroundColor: "#ffffe1",
         border: "1px solid black",
         padding: "2px 4px",
         fontSize: "10px",
         whiteSpace: "nowrap",
-        zIndex: 999999,
         pointerEvents: "none",
       }}
     >

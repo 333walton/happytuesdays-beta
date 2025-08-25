@@ -1,4 +1,4 @@
-// src/helpers/customTooltip.js
+// this mainly just helps apply tooltips to disables menu items
 
 const customTooltipTargets = ["Start Menu Builder", "Log In", "Join"];
 

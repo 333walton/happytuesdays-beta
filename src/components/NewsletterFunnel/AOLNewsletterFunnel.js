@@ -218,20 +218,6 @@ class AOLNewsletterFunnel extends Component {
       currentStep: 1,
       formData: {
         email: "",
-        // Initialize selectedChannels as an object with all channels set to false
-        selectedChannels: this.channels.reduce((acc, channel) => {
-          acc[channel.id] = false;
-          return acc;
-        }, {}),
-        frequency: "weekly",
-      },
-      errors: {},
-      hoveredChannelId: null, // Add state for tracking hovered channel
-    };
-    this.state = {
-      currentStep: 1,
-      formData: {
-        email: "",
         selectedChannels: this.channels.reduce((acc, channel) => {
           acc[channel.id] = false;
           return acc;
@@ -476,7 +462,7 @@ class AOLNewsletterFunnel extends Component {
       this.tooltipEl.className = "aol-newsletter-channel-tooltip"; // Don't use 'custom-tooltip'
       this.tooltipEl.textContent = channel.name;
       this.tooltipEl.style.position = "fixed";
-      this.tooltipEl.style.zIndex = "100001";
+      this.tooltipEl.style.zIndex = "100";
       this.tooltipEl.style.backgroundColor = "#ffffe1";
       this.tooltipEl.style.border = "1px solid #000";
       this.tooltipEl.style.padding = "2px 4px";
@@ -527,12 +513,6 @@ class AOLNewsletterFunnel extends Component {
       this.tooltipTimer = null;
     }
 
-    // Remove ONLY this component's tooltip
-    if (this.tooltipEl) {
-      this.tooltipEl.remove();
-      this.tooltipEl = null;
-    }
-
     // Run cleanup if exists
     if (this.tooltipCleanup) {
       this.tooltipCleanup();
@@ -544,10 +524,6 @@ class AOLNewsletterFunnel extends Component {
     if (this.tooltipTimer) {
       clearTimeout(this.tooltipTimer);
       this.tooltipTimer = null;
-    }
-    if (this.tooltipEl) {
-      this.tooltipEl.remove();
-      this.tooltipEl = null;
     }
     if (this.tooltipCleanup) {
       this.tooltipCleanup();
