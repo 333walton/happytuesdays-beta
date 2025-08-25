@@ -962,7 +962,7 @@ $font-mono: "Courier New", monospace;
     }
 
     &:has(.frequency-options) {
-      top: 32.8% !important;
+      top: 32.6% !important;
       margin-top: 0px !important;
       //margin-top: 2% !important;
     }
@@ -1551,7 +1551,7 @@ $font-mono: "Courier New", monospace;
           &:has(.channels-content-overlay) {
             .step-boxes-overlay {
               .step-box-2 {
-                left: calc(2% + 1px) !important; // 1px further to the right
+                left: calc(2% + 2px) !important; // 1px further to the right
               }
             }
           }
