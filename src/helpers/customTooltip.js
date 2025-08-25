@@ -11,7 +11,14 @@ export function enableCustomMenuTooltips() {
 
     const btn = e.currentTarget;
     const text = btn.textContent.replace(/\s+/g, " ").trim();
-    if (!customTooltipTargets.some((target) => text.includes(target))) return;
+
+    // Check if this is a specific disabled button OR has data-tooltip
+    const isTargetButton = customTooltipTargets.some((target) =>
+      text.includes(target)
+    );
+    const hasDataTooltip = btn.hasAttribute("data-tooltip");
+
+    if (!isTargetButton && !hasDataTooltip) return;
 
     const tooltipMap = {
       "Start Menu Builder": "Log in to access",
@@ -19,11 +26,13 @@ export function enableCustomMenuTooltips() {
       "Log In": "soon",
       Join: "soon",
     };
+
     const matched = Object.keys(tooltipMap).find((key) => text.includes(key));
     const tooltipText =
+      btn.getAttribute("data-tooltip") || // Check data-tooltip first
       btn.getAttribute("title") ||
-      btn.getAttribute("data-tooltip") ||
       (matched ? tooltipMap[matched] : "Info");
+
     if (!tooltipText) return;
 
     // Clean up any previous show attempts or existing tooltip
@@ -36,35 +45,12 @@ export function enableCustomMenuTooltips() {
       tooltipTimer = null;
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const tooltip = document.createElement("div");
-      tooltip.className = "custom-tooltip";
-      document.body.appendChild(tooltip);
-      tooltip.style.display = "none";
-
-      document.querySelectorAll("[data-tooltip]").forEach((el) => {
-        el.addEventListener("mouseenter", (e) => {
-          const tooltipText = el.getAttribute("data-tooltip");
-          tooltip.textContent = tooltipText;
-
-          // Fixed offset from cursor
-          const offsetX = 10; // right
-          const offsetY = 50; // lower
-
-          tooltip.style.left = `${e.clientX + offsetX}px`;
-          tooltip.style.top = `${e.clientY + offsetY}px`;
-          tooltip.style.display = "block";
-        });
-
-        el.addEventListener("mouseleave", () => {
-          tooltip.style.display = "none";
-        });
-      });
-    });
-
     // Start a timer for standard tooltip delay (500ms)
     tooltipTimer = setTimeout(() => {
       tooltipEl = document.createElement("div");
+      tooltipEl.className = "custom-tooltip global-menu-tooltip"; // Add unique identifier
+      tooltipEl.setAttribute("data-tooltip-type", "global-menu"); // Mark it
+
       tooltipEl.className = "custom-tooltip";
       tooltipEl.textContent = tooltipText;
       tooltipEl.style.left = "0px";
@@ -110,6 +96,7 @@ export function enableCustomMenuTooltips() {
   }
 
   function attachHandlersToMenuItems() {
+    // Handle disabled items with specific text
     document
       .querySelectorAll(".StandardMenuItem__button.disabled")
       .forEach((btn) => {
@@ -123,6 +110,17 @@ export function enableCustomMenuTooltips() {
           btn._customTooltipAttached = true;
         }
       });
+
+    // Handle any menu items with data-tooltip attribute
+    document
+      .querySelectorAll(".StandardMenuItem__button[data-tooltip]")
+      .forEach((btn) => {
+        if (!btn._customTooltipAttached) {
+          btn.addEventListener("mouseenter", showTooltip);
+          btn.addEventListener("mouseleave", hideTooltip);
+          btn._customTooltipAttached = true;
+        }
+      });
   }
 
   attachHandlersToMenuItems();
@@ -131,16 +129,15 @@ export function enableCustomMenuTooltips() {
   observer.observe(document.body, { childList: true, subtree: true });
 
   window.addEventListener("beforeunload", () => {
-    document
-      .querySelectorAll(".StandardMenuItem__button.disabled")
-      .forEach((btn) => {
-        if (btn._customTooltipAttached) {
-          btn.removeEventListener("mouseenter", showTooltip);
-          btn.removeEventListener("mouseleave", hideTooltip);
-          btn._customTooltipAttached = false;
-          btn._customTooltipCleanup = null;
-        }
-      });
+    // Clean up ALL buttons with tooltips
+    document.querySelectorAll(".StandardMenuItem__button").forEach((btn) => {
+      if (btn._customTooltipAttached) {
+        btn.removeEventListener("mouseenter", showTooltip);
+        btn.removeEventListener("mouseleave", hideTooltip);
+        btn._customTooltipAttached = false;
+        btn._customTooltipCleanup = null;
+      }
+    });
     if (tooltipEl) {
       tooltipEl.remove();
       tooltipEl = null;

@@ -259,30 +259,39 @@ class AOLNewsletterFunnel extends Component {
     this.ensureProperPositioning();
     this.observeDesktopResize();
     this.setupChannelTooltips();
+
+    // Dispatch event that window opened (for tooltip protection)
+    window.dispatchEvent(
+      new CustomEvent("windowOpened", {
+        detail: { component: "AOLNewsletterFunnel" },
+      })
+    );
   }
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.handleResize);
+    window.removeEventListener(
+      "orientationchange",
+      this.handleOrientationChange
+    );
+
+    this.cleanupTooltips();
+
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
-      this.cleanupTooltips();
     }
+
+    // Dispatch event that window closed (for tooltip restoration)
+    window.dispatchEvent(
+      new CustomEvent("windowClosed", {
+        detail: { component: "AOLNewsletterFunnel" },
+      })
+    );
   }
 
   setupChannelTooltips = () => {
     this.tooltipEl = null;
     this.tooltipTimer = null;
-  };
-
-  cleanupTooltips = () => {
-    if (this.tooltipTimer) {
-      clearTimeout(this.tooltipTimer);
-      this.tooltipTimer = null;
-    }
-    if (this.tooltipEl) {
-      this.tooltipEl.remove();
-      this.tooltipEl = null;
-    }
   };
 
   // Add new methods
@@ -451,7 +460,7 @@ class AOLNewsletterFunnel extends Component {
       this.tooltipTimer = null;
     }
 
-    // Remove any existing tooltip
+    // Remove any existing tooltip FOR THIS COMPONENT ONLY
     if (this.tooltipEl) {
       this.tooltipEl.remove();
       this.tooltipEl = null;
@@ -460,15 +469,25 @@ class AOLNewsletterFunnel extends Component {
     // Capture the button element reference BEFORE setTimeout
     const buttonElement = event.currentTarget;
 
-    // Create tooltip after delay (matching customTooltip.js behavior)
+    // Create tooltip after delay
     this.tooltipTimer = setTimeout(() => {
       this.tooltipEl = document.createElement("div");
-      this.tooltipEl.className = "channel-tooltip custom-tooltip";
+      // Use a UNIQUE class name that won't conflict with global tooltips
+      this.tooltipEl.className = "aol-newsletter-channel-tooltip"; // Don't use 'custom-tooltip'
       this.tooltipEl.textContent = channel.name;
+      this.tooltipEl.style.position = "fixed";
+      this.tooltipEl.style.zIndex = "100001";
+      this.tooltipEl.style.backgroundColor = "#ffffe1";
+      this.tooltipEl.style.border = "1px solid #000";
+      this.tooltipEl.style.padding = "2px 4px";
+      this.tooltipEl.style.fontSize = "11px";
+      this.tooltipEl.style.fontFamily = '"MS Sans Serif", sans-serif';
+      this.tooltipEl.style.pointerEvents = "none";
+      this.tooltipEl.style.whiteSpace = "nowrap";
 
       document.body.appendChild(this.tooltipEl);
 
-      // Position tooltip above the channel button - use captured buttonElement
+      // Position tooltip above the channel button
       const rect = buttonElement.getBoundingClientRect();
       const tooltipWidth = this.tooltipEl.offsetWidth;
       const tooltipHeight = this.tooltipEl.offsetHeight;
@@ -498,7 +517,7 @@ class AOLNewsletterFunnel extends Component {
         window.removeEventListener("scroll", updatePosition, true);
         window.removeEventListener("resize", updatePosition, true);
       };
-    }, 500); // 500ms delay for tooltip appearance
+    }, 500);
   };
 
   hideChannelTooltip = () => {
@@ -508,13 +527,28 @@ class AOLNewsletterFunnel extends Component {
       this.tooltipTimer = null;
     }
 
-    // Remove tooltip element
+    // Remove ONLY this component's tooltip
     if (this.tooltipEl) {
       this.tooltipEl.remove();
       this.tooltipEl = null;
     }
 
     // Run cleanup if exists
+    if (this.tooltipCleanup) {
+      this.tooltipCleanup();
+      this.tooltipCleanup = null;
+    }
+  };
+
+  cleanupTooltips = () => {
+    if (this.tooltipTimer) {
+      clearTimeout(this.tooltipTimer);
+      this.tooltipTimer = null;
+    }
+    if (this.tooltipEl) {
+      this.tooltipEl.remove();
+      this.tooltipEl = null;
+    }
     if (this.tooltipCleanup) {
       this.tooltipCleanup();
       this.tooltipCleanup = null;

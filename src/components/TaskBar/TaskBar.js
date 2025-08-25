@@ -12,16 +12,18 @@ const CustomTooltip = ({ text, visible }) => {
   if (!visible) return null;
   return (
     <div
+      className="taskbar-custom-tooltip" // Unique class name
+      data-tooltip-type="taskbar" // Mark it
       style={{
-        position: "absolute",
-        bottom: "calc(100% + 30px)",
+        position: "fixed",
+        bottom: "30px",
         left: "105px",
         backgroundColor: "#ffffcc",
         border: "1px solid black",
         padding: "2px 4px",
         fontSize: "10px",
         whiteSpace: "nowrap",
-        zIndex: 99999,
+        zIndex: 999999,
         pointerEvents: "none",
       }}
     >
@@ -166,6 +168,7 @@ const TaskBar = () => {
   }, []);
 
   // Add RSS icon to notification area
+  // Update the RSS icon effect to be more persistent
   useEffect(() => {
     const addRSSIcon = () => {
       if (!taskbarRef.current) return;
@@ -186,6 +189,7 @@ const TaskBar = () => {
           rssIcon.style.marginRight = "1px";
           rssIcon.style.verticalAlign = "middle";
           rssIcon.style.cursor = "pointer";
+          rssIcon.style.zIndex = "99999"; // Add high z-index
           rssIcon.addEventListener("click", () => {
             console.log("RSS icon clicked");
           });
@@ -194,14 +198,34 @@ const TaskBar = () => {
       }
     };
 
+    // Initial add
     addRSSIcon();
-    const timeouts = [100, 500, 1000].map((delay) =>
+
+    // Multiple attempts to ensure it stays
+    const timeouts = [100, 500, 1000, 2000].map((delay) =>
       setTimeout(addRSSIcon, delay)
     );
+
+    // Watch for DOM changes and re-add if needed
+    const observer = new MutationObserver(() => {
+      const existingIcon = taskbarRef.current?.querySelector(".rss-icon");
+      if (!existingIcon) {
+        addRSSIcon();
+      }
+    });
+
+    if (taskbarRef.current) {
+      observer.observe(taskbarRef.current, {
+        childList: true,
+        subtree: true,
+      });
+    }
+
     return () => {
       timeouts.forEach((timeout) => clearTimeout(timeout));
+      observer.disconnect();
     };
-  }, []);
+  }, [refreshKey]); // Add refreshKey as dependency to re-add on refresh
 
   useEffect(() => {
     if (!menuOpen || !isMobile) return;
