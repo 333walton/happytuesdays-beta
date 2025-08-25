@@ -440,6 +440,9 @@ class AOLNewsletterFunnel extends Component {
 
   // Handle channel hover
   showChannelTooltip = (channel, event) => {
+    // Prevent tooltips from showing on mobile-sized screens
+    if (this.state.isMobile) return;
+
     // Clear any existing timer
     if (this.tooltipTimer) {
       clearTimeout(this.tooltipTimer);
@@ -452,14 +455,11 @@ class AOLNewsletterFunnel extends Component {
       this.tooltipEl = null;
     }
 
-    // Capture the button element reference BEFORE setTimeout
     const buttonElement = event.currentTarget;
 
-    // Create tooltip after delay
     this.tooltipTimer = setTimeout(() => {
       this.tooltipEl = document.createElement("div");
-      // Use a UNIQUE class name that won't conflict with global tooltips
-      this.tooltipEl.className = "aol-newsletter-channel-tooltip"; // Don't use 'custom-tooltip'
+      this.tooltipEl.className = "aol-newsletter-channel-tooltip";
       this.tooltipEl.textContent = channel.name;
       this.tooltipEl.style.position = "fixed";
       this.tooltipEl.style.zIndex = "100";
@@ -473,17 +473,14 @@ class AOLNewsletterFunnel extends Component {
 
       document.body.appendChild(this.tooltipEl);
 
-      // Position tooltip above the channel button
       const rect = buttonElement.getBoundingClientRect();
-      const tooltipWidth = this.tooltipEl.offsetWidth;
-      const tooltipHeight = this.tooltipEl.offsetHeight;
-
       this.tooltipEl.style.left = `${
-        rect.left + rect.width / 2 - tooltipWidth / 2
+        rect.left + rect.width / 2 - this.tooltipEl.offsetWidth / 2
       }px`;
-      this.tooltipEl.style.top = `${rect.top - tooltipHeight - 8}px`;
+      this.tooltipEl.style.top = `${
+        rect.top - this.tooltipEl.offsetHeight - 8
+      }px`;
 
-      // Add position update listeners
       const updatePosition = () => {
         if (!this.tooltipEl || !buttonElement) return;
         const newRect = buttonElement.getBoundingClientRect();
@@ -498,7 +495,6 @@ class AOLNewsletterFunnel extends Component {
       window.addEventListener("scroll", updatePosition, true);
       window.addEventListener("resize", updatePosition, true);
 
-      // Store cleanup function
       this.tooltipCleanup = () => {
         window.removeEventListener("scroll", updatePosition, true);
         window.removeEventListener("resize", updatePosition, true);
