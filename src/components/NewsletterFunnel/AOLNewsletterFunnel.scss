@@ -1012,39 +1012,37 @@ $font-mono: "Courier New", monospace;
       position: relative;
       overflow: visible;
 
-      &:has(
-          .dial-up-interface:not(:has(.frequency-options)):not(
-              :has(.recap-prompt)
-            )
-        ) {
-        .step-box-1 .aol-figure-1 {
-          transform: translate(-50%, calc(-50% + 2px)) !important; // 1px lower
+      // STEP 1 ONLY - Initial dial-up interface (no other content)
+      &:has(.dial-up-interface):not(:has(.frequency-options)):not(
+          :has(.recap-prompt)
+        ):not(:has(.channels-content)) {
+        .step-boxes-overlay .step-box-1 .aol-figure-1 {
+          transform: translate(-50%, calc(-50% + 2px)) !important;
+        }
+
+        // Also target the step-boxes-overlay height for step 1 only
+        .step-boxes-overlay {
+          height: 57px !important;
         }
       }
 
+      // STEP 2 ONLY - Channels content
       &:has(.channels-content) {
-        .step-box-2 .aol-figure-2 {
-          transform: translate(
-            calc(-50% + 2px),
-            -50%
-          ) !important; // 2px to the right
+        .step-boxes-overlay .step-box-2 .aol-figure-2 {
+          transform: translate(calc(-50% + 2px), -50%) !important;
         }
       }
 
-      // Special positioning adjustment for recap step
+      // STEP 3 ONLY - Frequency options (but not recap)
+      &:has(.frequency-options):not(:has(.recap-prompt)) {
+        // Step 3 specific styles here if needed
+      }
+
+      // STEP 4 ONLY - Recap section
       &:has(.recap-section) {
         .step-boxes-overlay {
-          top: calc(
-            var(--overlay-top) + 1%
-          ) !important; // Move down by 1% for recap
+          top: calc(var(--overlay-top) + 1%) !important;
         }
-      }
-
-      .dial-up-interface
-        .step-boxes-overlay:not(:has(.frequency-options)):not(
-          :has(.recap-prompt):not(:has(.channels-content))
-        ) {
-        height: 57px !important;
       }
 
       .dial-up-interface,
@@ -1102,7 +1100,7 @@ $font-mono: "Courier New", monospace;
           ) !important; // Uses consistent position variable
           left: 9% !important;
           right: 3% !important;
-          height: 56px !important;
+          height: 56px;
           display: flex !important;
           gap: var(--step-box-gap) !important; // Uses responsive gap variable
           justify-content: flex-start !important;
