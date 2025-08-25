@@ -215,6 +215,7 @@ class AOLNewsletterFunnel extends Component {
     ];
 
     this.state = {
+      statusTextKey: 1, // Add this for triggering fade-in animation
       currentStep: 1,
       formData: {
         email: "",
@@ -245,6 +246,7 @@ class AOLNewsletterFunnel extends Component {
     this.ensureProperPositioning();
     this.observeDesktopResize();
     this.setupChannelTooltips();
+    this.preloadMailSound(); // Add this line
 
     // Dispatch event that window opened (for tooltip protection)
     window.dispatchEvent(
@@ -253,6 +255,41 @@ class AOLNewsletterFunnel extends Component {
       })
     );
   }
+
+  preloadMailSound = () => {
+    this.mailAudio = new Audio("/sounds/aol-yougotmail.wav");
+    this.mailAudio.preload = "auto";
+    this.mailAudio.volume = 0.1;
+
+    // Load the audio file
+    this.mailAudio.load();
+
+    // Set up Web Audio API context if available
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        this.audioContext = new AudioContext();
+        this.mailAudio.addEventListener(
+          "canplaythrough",
+          () => {
+            if (!this.audioSource && this.audioContext) {
+              this.audioSource = this.audioContext.createMediaElementSource(
+                this.mailAudio
+              );
+              this.gainNode = this.audioContext.createGain();
+              this.gainNode.gain.value = 0.1;
+              this.audioSource
+                .connect(this.gainNode)
+                .connect(this.audioContext.destination);
+            }
+          },
+          { once: true }
+        );
+      }
+    } catch (err) {
+      console.log("Web Audio API not available, falling back to HTML5 audio");
+    }
+  };
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.handleResize);
@@ -281,6 +318,7 @@ class AOLNewsletterFunnel extends Component {
   };
 
   // Add new methods
+
   updateViewportDimensions = () => {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty("--vh", `${vh}px`);
@@ -402,40 +440,47 @@ class AOLNewsletterFunnel extends Component {
     );
   };
 
-  playMailSound = () => {
-    // Use Web Audio API for consistent volume control on desktop and mobile
-    const audio = new Audio("/sounds/aol-yougotmail.wav");
-    audio.preload = "auto";
-
-    // Play using Web Audio API for better mobile support
-    audio.addEventListener(
+  // Play using Web Audio API for better mobile support
+  /*audio.addEventListener(
       "canplaythrough",
       () => {
         try {
           const AudioContext = window.AudioContext || window.webkitAudioContext;
-          const ctx = new AudioContext();
-          const source = ctx.createMediaElementSource(audio);
-          const gainNode = ctx.createGain();
-          gainNode.gain.value = 0.04; // 10% volume
-          source.connect(gainNode).connect(ctx.destination);
-          setTimeout(() => {
-            audio.play().catch((error) => {
-              console.log("Could not play mail sound:", error);
-            });
-          }, 50);
+          if (AudioContext) {
+            this.audioContext = new AudioContext();
+            this.mailAudio.addEventListener('canplaythrough', () => {
+              if (!this.audioSource && this.audioContext) {
+                this.audioSource = this.audioContext.createMediaElementSource(this.mailAudio);
+                this.gainNode = this.audioContext.createGain();
+                this.gainNode.gain.value = 0.04;
+                this.audioSource.connect(this.gainNode).connect(this.audioContext.destination);
+              }
+            }, { once: true });
+          }
         } catch (err) {
-          // Fallback for browsers without Web Audio API
-          audio.volume = 0.04;
-          setTimeout(() => {
-            audio.play().catch((error) => {
-              console.log("Could not play mail sound:", error);
-            });
-          }, 50);
-        }
-      },
-      { once: true }
-    );
-    audio.load();
+          console.log("Web Audio API not available, falling back to HTML5 audio");
+        }*/
+
+  playMailSound = () => {
+    if (!this.mailAudio) {
+      console.log("Mail audio not loaded");
+      return;
+    }
+
+    // Reset audio to beginning
+    this.mailAudio.currentTime = 0;
+
+    // Resume audio context if suspended (required by some browsers)
+    if (this.audioContext && this.audioContext.state === "suspended") {
+      this.audioContext.resume();
+    }
+
+    // Add a small delay to ensure audio is ready
+    setTimeout(() => {
+      this.mailAudio.play().catch((error) => {
+        console.log("Could not play mail sound:", error);
+      });
+    }, 100);
   };
 
   // Handle channel hover
@@ -658,12 +703,15 @@ class AOLNewsletterFunnel extends Component {
     });
   };
 
-  // Handle step progression
+  // Modify handleNextStep to trigger status text animation
   handleNextStep = () => {
     const { currentStep, formData } = this.state;
 
     if (currentStep === 1) {
-      this.setState({ currentStep: 2 });
+      this.setState({
+        currentStep: 2,
+        statusTextKey: this.state.statusTextKey + 1, // Trigger animation
+      });
       return;
     }
 
@@ -687,7 +735,11 @@ class AOLNewsletterFunnel extends Component {
         return;
       }
 
-      this.setState({ errors: {}, currentStep: 3 });
+      this.setState({
+        errors: {},
+        currentStep: 3,
+        statusTextKey: this.state.statusTextKey + 1, // Trigger animation
+      });
       return;
     }
   };
@@ -702,10 +754,18 @@ class AOLNewsletterFunnel extends Component {
 
   // Handle final confirmation
   handleConfirm = () => {
-    this.setState({ currentStep: 4 }, () => {
-      // Play the sound after state update
-      this.playMailSound();
-    });
+    this.setState(
+      {
+        currentStep: 4,
+        statusTextKey: this.state.statusTextKey + 1, // Trigger animation
+      },
+      () => {
+        // Play the sound after state update with additional delay
+        setTimeout(() => {
+          this.playMailSound();
+        }, 800); // Delay to let the status text animation complete
+      }
+    );
   };
 
   // Handle OK from recap screen
@@ -826,13 +886,28 @@ class AOLNewsletterFunnel extends Component {
               {/* Status text positioned below dial-up background */}
               <div className="status-text-container">
                 {currentStep === 1 && (
-                  <div className="status-text">Dialing...</div>
+                  <div
+                    key={`dialing-${this.state.statusTextKey}`}
+                    className="status-text"
+                  >
+                    Dialing...
+                  </div>
                 )}
                 {currentStep === 3 && (
-                  <div className="status-text">Checking preferences...</div>
+                  <div
+                    key={`checking-${this.state.statusTextKey}`}
+                    className="status-text"
+                  >
+                    Checking preferences...
+                  </div>
                 )}
                 {currentStep === 4 && (
-                  <div className="status-text">Confirming subscription...</div>
+                  <div
+                    key={`confirming-${this.state.statusTextKey}`}
+                    className="status-text"
+                  >
+                    Confirming subscription...
+                  </div>
                 )}
               </div>
 
@@ -988,7 +1063,12 @@ class AOLNewsletterFunnel extends Component {
 
               {/* Status text positioned below dial-up background */}
               <div className="status-text-container">
-                <div className="status-text">Connecting...</div>
+                <div
+                  key={`connecting-${this.state.statusTextKey}`}
+                  className="status-text"
+                >
+                  Connecting...
+                </div>
               </div>
 
               {/* Temporary channels background overlay */}
