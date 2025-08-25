@@ -480,7 +480,7 @@ class AOLNewsletterFunnel extends Component {
       this.mailAudio.play().catch((error) => {
         console.log("Could not play mail sound:", error);
       });
-    }, 100);
+    }, 333);
   };
 
   // Handle channel hover
