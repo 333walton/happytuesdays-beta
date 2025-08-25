@@ -53,6 +53,16 @@ export function enableCustomMenuTooltips() {
 
       tooltipEl.className = "custom-tooltip";
       tooltipEl.textContent = tooltipText;
+      // Apply AOLNewsletterFunnel.js tooltip styling
+      tooltipEl.style.position = "fixed";
+      tooltipEl.style.zIndex = "100";
+      tooltipEl.style.backgroundColor = "#ffffe1";
+      tooltipEl.style.border = "1px solid #000";
+      tooltipEl.style.padding = "2px 4px";
+      tooltipEl.style.fontSize = "11px";
+      tooltipEl.style.fontFamily = '"MS Sans Serif", sans-serif';
+      tooltipEl.style.pointerEvents = "none";
+      tooltipEl.style.whiteSpace = "nowrap";
       tooltipEl.style.left = "0px";
       tooltipEl.style.top = "0px";
 
