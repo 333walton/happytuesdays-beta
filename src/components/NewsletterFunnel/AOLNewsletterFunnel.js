@@ -24,7 +24,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "ai_art",
-        name: "Generative & AI Art",
+        name: "Generative AI Art",
         image: "/static/aol/channels/channel_ai_art_lab.png", // art
         className: "channel-ai-art",
         description:
@@ -44,7 +44,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "weekly_roundup",
-        name: "Weekly Roundup",
+        name: "Weekly Gaming News",
         image: "/static/aol/channels/channel_weekly_roundup.png", // gaming
         className: "channel-weekly-roundup",
         description:
@@ -54,7 +54,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "marketing_tech",
-        name: "Martech & AdTech",
+        name: "MarTech & AdTech",
         image: "/static/aol/channels/channel_marketing_tech.png", // tech
         className: "channel-marketing-tech",
         description:
@@ -64,7 +64,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "ui_ux",
-        name: "UI/UX Insider",
+        name: "UI/UX Design",
         image: "static/aol/channels/channel_ui_ux_insider.png", // art
         className: "channel-ui-ux",
         description:
@@ -74,7 +74,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "no_code",
-        name: "Automation & No-Code",
+        name: "Automation Tools",
         image: "/static/aol/channels/channel_no_code_tools.png", // build
         className: "channel-no-code",
         description:
@@ -84,7 +84,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "guides",
-        name: "Pro Guides/Tips",
+        name: "Game Guides",
         image: "/static/aol/channels/channel_pro_guides_tips.png", // gaming
         className: "channel-guides",
         description:
@@ -134,7 +134,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "cybersecurity_privacy",
-        name: "Cybersecurity & Privacy",
+        name: "Cybersecurity",
         image: "/static/aol/channels/channel_cyber_privacy.png", // tech
         className: "channel-cybersecurity-privacy",
         description:
@@ -144,7 +144,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "motion_design",
-        name: "Animation & Motion",
+        name: "Motion Design",
         image: "static/aol/channels/channel_motion_design.png", // art
         className: "channel-motion-design",
         description:
@@ -154,7 +154,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "work_smarter",
-        name: "Work Smarter",
+        name: "Productivity Tips",
         image: "/static/aol/channels/channels_work_smarter2.png", // build
         className: "channel-work-smarter",
         description:
@@ -164,7 +164,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "indie_spotlights",
-        name: "Indie Spotlights",
+        name: "Indie Games",
         image: "static/aol/channels/channel_indie_spotlights.png", // gaming
         className: "channel-indie-spotlights",
         description:
@@ -174,7 +174,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "web_devops",
-        name: "Web Dev & DevOps",
+        name: "Web Development",
         image: "/static/aol/channels/channels_web_devops2.png", // tech
         className: "channel-web-devops",
         description:
@@ -184,7 +184,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "typeface_color",
-        name: "Typeface + Color",
+        name: "Typeface & Color",
         image: "static/aol/channels/channel_typeface_color.png", // art
         className: "channel-typeface-color",
         description:
@@ -194,8 +194,8 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "momentum_mindset",
-        name: "Momentum & Mindset",
-        image: "/static/aol/channels/channels_momentum_mindset2.png", // build placeholder
+        name: "Mindset & Habits",
+        image: "/static/aol/channels/channels_momentum_mindset3.png", // build placeholder
         className: "channel-momentum-mindset",
         description:
           "Shares approaches and ideas for building resilience, focus, and positive habits for growth.",
@@ -204,7 +204,7 @@ class AOLNewsletterFunnel extends Component {
       },
       {
         id: "collecting",
-        name: "Collecting",
+        name: "Game Collecting",
         image: "static/aol/channels/channel_collectors_hub.png", // gaming
         className: "channel-collecting",
         description:
@@ -246,6 +246,9 @@ class AOLNewsletterFunnel extends Component {
       isSmallMobile: window.innerWidth <= 375,
       isMediumMobile: window.innerWidth > 375 && window.innerWidth <= 414,
       isLargeMobile: window.innerWidth > 414 && window.innerWidth <= 480,
+      tooltipVisible: false,
+      tooltipText: "",
+      tooltipPosition: { x: 0, y: 0 },
     };
   }
 
@@ -255,14 +258,32 @@ class AOLNewsletterFunnel extends Component {
     this.updateViewportDimensions();
     this.ensureProperPositioning();
     this.observeDesktopResize();
+    this.setupChannelTooltips();
   }
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.handleResize);
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
+      this.cleanupTooltips();
     }
   }
+
+  setupChannelTooltips = () => {
+    this.tooltipEl = null;
+    this.tooltipTimer = null;
+  };
+
+  cleanupTooltips = () => {
+    if (this.tooltipTimer) {
+      clearTimeout(this.tooltipTimer);
+      this.tooltipTimer = null;
+    }
+    if (this.tooltipEl) {
+      this.tooltipEl.remove();
+      this.tooltipEl = null;
+    }
+  };
 
   // Add new methods
   updateViewportDimensions = () => {
@@ -423,13 +444,97 @@ class AOLNewsletterFunnel extends Component {
   };
 
   // Handle channel hover
-  handleChannelHover = (channelId) => {
-    this.setState({ hoveredChannelId: channelId });
+  showChannelTooltip = (channel, event) => {
+    // Clear any existing timer
+    if (this.tooltipTimer) {
+      clearTimeout(this.tooltipTimer);
+      this.tooltipTimer = null;
+    }
+
+    // Remove any existing tooltip
+    if (this.tooltipEl) {
+      this.tooltipEl.remove();
+      this.tooltipEl = null;
+    }
+
+    // Capture the button element reference BEFORE setTimeout
+    const buttonElement = event.currentTarget;
+
+    // Create tooltip after delay (matching customTooltip.js behavior)
+    this.tooltipTimer = setTimeout(() => {
+      this.tooltipEl = document.createElement("div");
+      this.tooltipEl.className = "channel-tooltip custom-tooltip";
+      this.tooltipEl.textContent = channel.name;
+
+      document.body.appendChild(this.tooltipEl);
+
+      // Position tooltip above the channel button - use captured buttonElement
+      const rect = buttonElement.getBoundingClientRect();
+      const tooltipWidth = this.tooltipEl.offsetWidth;
+      const tooltipHeight = this.tooltipEl.offsetHeight;
+
+      this.tooltipEl.style.left = `${
+        rect.left + rect.width / 2 - tooltipWidth / 2
+      }px`;
+      this.tooltipEl.style.top = `${rect.top - tooltipHeight - 8}px`;
+
+      // Add position update listeners
+      const updatePosition = () => {
+        if (!this.tooltipEl || !buttonElement) return;
+        const newRect = buttonElement.getBoundingClientRect();
+        this.tooltipEl.style.left = `${
+          newRect.left + newRect.width / 2 - this.tooltipEl.offsetWidth / 2
+        }px`;
+        this.tooltipEl.style.top = `${
+          newRect.top - this.tooltipEl.offsetHeight - 8
+        }px`;
+      };
+
+      window.addEventListener("scroll", updatePosition, true);
+      window.addEventListener("resize", updatePosition, true);
+
+      // Store cleanup function
+      this.tooltipCleanup = () => {
+        window.removeEventListener("scroll", updatePosition, true);
+        window.removeEventListener("resize", updatePosition, true);
+      };
+    }, 500); // 500ms delay for tooltip appearance
   };
 
-  // Handle channel hover leave
+  hideChannelTooltip = () => {
+    // Clear timer if tooltip hasn't appeared yet
+    if (this.tooltipTimer) {
+      clearTimeout(this.tooltipTimer);
+      this.tooltipTimer = null;
+    }
+
+    // Remove tooltip element
+    if (this.tooltipEl) {
+      this.tooltipEl.remove();
+      this.tooltipEl = null;
+    }
+
+    // Run cleanup if exists
+    if (this.tooltipCleanup) {
+      this.tooltipCleanup();
+      this.tooltipCleanup = null;
+    }
+  };
+
+  // Updated existing methods
+  handleChannelHover = (channelId, event) => {
+    this.setState({ hoveredChannelId: channelId });
+
+    // Find the channel and show tooltip
+    const channel = this.channels.find((c) => c.id === channelId);
+    if (channel) {
+      this.showChannelTooltip(channel, event);
+    }
+  };
+
   handleChannelHoverLeave = () => {
     this.setState({ hoveredChannelId: null });
+    this.hideChannelTooltip();
   };
 
   // Get the description to display (either from hovered or selected channel)
@@ -958,10 +1063,11 @@ class AOLNewsletterFunnel extends Component {
                             selected: formData.selectedChannels[channel.id],
                           })}
                           onClick={() => this.handleChannelToggle(channel.id)}
-                          onMouseEnter={() =>
-                            this.handleChannelHover(channel.id)
+                          onMouseEnter={(e) =>
+                            this.handleChannelHover(channel.id, e)
                           }
                           onMouseLeave={this.handleChannelHoverLeave}
+                          data-channel-name={channel.name} // Add for accessibility
                         >
                           <img
                             src={channel.image}
