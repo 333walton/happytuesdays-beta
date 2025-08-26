@@ -191,6 +191,8 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
 /* ===== DOM-BASED CUSTOM SPEECH BALLOON ===== */
 .custom-clippy-balloon {
   position: fixed !important;
+  margin-left: 2% !important;
+  transform: translateZ(0) translateX(-50px) !important; /* Shift 50px to the right */
   background-color: #fffcde !important;
   border: 3px solid #000 !important;
   border-radius: 8px !important;
@@ -202,6 +204,11 @@ body:has(.itIsNowSafeToTurnOffYourComputer) #clippy-clickable-overlay {
   opacity: 1 !important;
   display: block !important;
   z-index: 9999 !important;
+
+  /* Mobile override */
+  @media screen and (max-width: 768px) {
+    margin-left: 6% !important;
+  }
 
   /* Performance optimizations */
   transform: translateZ(0) !important;
