@@ -7,24 +7,104 @@ import useStartMenuTooltipEnhancer from "../../helpers/useStartMenuTooltipEnhanc
 
 let hasReadMail = false;
 
-// Custom tooltip component
+// Custom tooltip component with enforced styling that cannot be overridden
 const CustomTooltip = ({ text, visible }) => {
+  const tooltipRef = useRef(null);
+  const [tooltipId] = useState(`taskbar-tooltip-${Date.now()}`);
+
+  useEffect(() => {
+    if (tooltipRef.current && visible) {
+      // Force style application with !important via direct style manipulation
+      const applyProtectedStyles = () => {
+        if (!tooltipRef.current) return;
+
+        const tooltip = tooltipRef.current;
+
+        // Set attributes for identification
+        tooltip.setAttribute("data-tooltip-type", "taskbar");
+        tooltip.setAttribute("data-tooltip-owner", "taskbar-component");
+        tooltip.setAttribute("data-protected", "true");
+        tooltip.setAttribute("id", tooltipId);
+
+        // Apply styles with maximum specificity
+        const styleRules = [
+          "position: fixed !important",
+          "bottom: 30px !important",
+          "left: 105px !important",
+          "background-color: #ffffe1 !important",
+          "border: 1px solid black !important",
+          "padding: 2px 4px !important",
+          "font-size: 10px !important",
+          "white-space: nowrap !important",
+          "pointer-events: none !important",
+          'font-family: "MS Sans Serif", sans-serif !important',
+          "z-index: 99 !important",
+          "color: #000000 !important",
+          "line-height: normal !important",
+          "text-align: left !important",
+          "box-shadow: none !important",
+          "border-radius: 0 !important",
+          "opacity: 1 !important",
+          "transform: none !important",
+          "display: block !important",
+        ].join(";");
+
+        tooltip.setAttribute("style", styleRules);
+
+        // Also add a style element to ensure our styles take precedence
+        if (!document.getElementById(`${tooltipId}-style`)) {
+          const styleEl = document.createElement("style");
+          styleEl.id = `${tooltipId}-style`;
+          styleEl.textContent = `
+            #${tooltipId} {
+              background-color: #ffffe1 !important;
+              border: 1px solid black !important;
+              font-family: "MS Sans Serif", sans-serif !important;
+              font-size: 10px !important;
+              color: #000000 !important;
+            }
+            #${tooltipId}[data-tooltip-type="taskbar"] {
+              background-color: #ffffe1 !important;
+              border: 1px solid black !important;
+            }
+          `;
+          document.head.appendChild(styleEl);
+        }
+      };
+
+      // Apply styles immediately
+      applyProtectedStyles();
+
+      // Reapply styles on a short interval to combat any style changes
+      const protectionInterval = setInterval(applyProtectedStyles, 100);
+
+      // Store interval for cleanup
+      tooltipRef.current._protectionInterval = protectionInterval;
+    }
+
+    // Cleanup on unmount or when tooltip becomes invisible
+    return () => {
+      if (tooltipRef.current && tooltipRef.current._protectionInterval) {
+        clearInterval(tooltipRef.current._protectionInterval);
+      }
+      // Remove style element
+      const styleEl = document.getElementById(`${tooltipId}-style`);
+      if (styleEl) {
+        styleEl.remove();
+      }
+    };
+  }, [visible, tooltipId]);
+
   if (!visible) return null;
+
   return (
     <div
-      className="taskbar-custom-tooltip" // Unique class name
-      data-tooltip-type="taskbar" // Mark it
-      style={{
-        position: "fixed",
-        bottom: "30px",
-        left: "105px",
-        backgroundColor: "#ffffe1",
-        border: "1px solid black",
-        padding: "2px 4px",
-        fontSize: "10px",
-        whiteSpace: "nowrap",
-        pointerEvents: "none",
-      }}
+      ref={tooltipRef}
+      id={tooltipId}
+      className="taskbar-custom-tooltip"
+      data-tooltip-type="taskbar"
+      data-tooltip-owner="taskbar-component"
+      data-protected="true"
     >
       {text}
     </div>
@@ -71,6 +151,69 @@ const TaskBar = () => {
   };
 
   const closeMenu = () => setMenuOpen(false);
+
+  // Enhanced protection against style changes from other components
+  useEffect(() => {
+    // Create a MutationObserver to watch for attribute/style changes on taskbar tooltips
+    const protectTaskbarTooltips = () => {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (
+            mutation.target &&
+            mutation.target.nodeType === 1 &&
+            (mutation.target.getAttribute("data-tooltip-owner") ===
+              "taskbar-component" ||
+              mutation.target.classList?.contains("taskbar-custom-tooltip"))
+          ) {
+            // If styles were changed, reapply our styles
+            if (
+              mutation.type === "attributes" &&
+              (mutation.attributeName === "style" ||
+                mutation.attributeName === "class")
+            ) {
+              const target = mutation.target;
+              const currentStyle = target.getAttribute("style") || "";
+
+              // Check if our styles are still applied
+              if (!currentStyle.includes("background-color: #ffffe1")) {
+                console.log("Taskbar tooltip style was changed, reapplying...");
+
+                const correctStyles = [
+                  "position: fixed !important",
+                  "bottom: 30px !important",
+                  "left: 105px !important",
+                  "background-color: #ffffe1 !important",
+                  "border: 1px solid black !important",
+                  "padding: 2px 4px !important",
+                  "font-size: 10px !important",
+                  "white-space: nowrap !important",
+                  "pointer-events: none !important",
+                  'font-family: "MS Sans Serif", sans-serif !important',
+                  "z-index: 99 !important",
+                  "color: #000000 !important",
+                ].join(";");
+
+                target.setAttribute("style", correctStyles);
+              }
+            }
+          }
+        });
+      });
+
+      // Observe the entire document for changes
+      observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ["style", "class"],
+        subtree: true,
+      });
+
+      return () => observer.disconnect();
+    };
+
+    const cleanup = protectTaskbarTooltips();
+
+    return cleanup;
+  }, []);
 
   // Mobile: override Start button behavior
   useEffect(() => {
@@ -125,29 +268,40 @@ const TaskBar = () => {
         const buttonTitle = clippyButton.title;
         setTooltipText(buttonTitle);
 
-        clippyButton.addEventListener("mouseenter", handleMouseEnter);
-        clippyButton.addEventListener("mouseleave", handleMouseLeave);
+        // Completely remove all tooltip attributes
         clippyButton.removeAttribute("title");
         clippyButton.removeAttribute("data-tooltip");
+        clippyButton.removeAttribute("aria-label");
+        clippyButton.setAttribute("data-no-native-tooltip", "true");
+
+        clippyButton.addEventListener("mouseenter", handleMouseEnter);
+        clippyButton.addEventListener("mouseleave", handleMouseLeave);
 
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
-            if (
-              mutation.type === "attributes" &&
-              mutation.attributeName === "title"
-            ) {
-              const newTitle = clippyButton.getAttribute("title");
-              if (newTitle) {
-                setTooltipText(newTitle);
-                clippyButton.removeAttribute("title");
-              }
+            if (mutation.type === "attributes") {
+              // Remove any tooltip-related attributes that get added
+              const attributesToRemove = [
+                "title",
+                "data-tooltip",
+                "aria-label",
+              ];
+              attributesToRemove.forEach((attr) => {
+                if (clippyButton.hasAttribute(attr)) {
+                  const value = clippyButton.getAttribute(attr);
+                  if (value && attr === "title") {
+                    setTooltipText(value);
+                  }
+                  clippyButton.removeAttribute(attr);
+                }
+              });
             }
           });
         });
 
         observer.observe(clippyButton, {
           attributes: true,
-          attributeFilter: ["title"],
+          attributeFilter: ["title", "data-tooltip", "aria-label"],
         });
 
         return () => {
@@ -167,7 +321,6 @@ const TaskBar = () => {
   }, []);
 
   // Add RSS icon to notification area
-  // Update the RSS icon effect to be more persistent
   useEffect(() => {
     const addRSSIcon = () => {
       if (!taskbarRef.current) return;
@@ -188,7 +341,7 @@ const TaskBar = () => {
           rssIcon.style.marginRight = "1px";
           rssIcon.style.verticalAlign = "middle";
           rssIcon.style.cursor = "pointer";
-          rssIcon.style.zIndex = "99999"; // Add high z-index
+          rssIcon.style.zIndex = "99999";
           rssIcon.addEventListener("click", () => {
             console.log("RSS icon clicked");
           });
@@ -197,15 +350,11 @@ const TaskBar = () => {
       }
     };
 
-    // Initial add
     addRSSIcon();
-
-    // Multiple attempts to ensure it stays
     const timeouts = [100, 500, 1000, 2000].map((delay) =>
       setTimeout(addRSSIcon, delay)
     );
 
-    // Watch for DOM changes and re-add if needed
     const observer = new MutationObserver(() => {
       const existingIcon = taskbarRef.current?.querySelector(".rss-icon");
       if (!existingIcon) {
@@ -224,7 +373,7 @@ const TaskBar = () => {
       timeouts.forEach((timeout) => clearTimeout(timeout));
       observer.disconnect();
     };
-  }, [refreshKey]); // Add refreshKey as dependency to re-add on refresh
+  }, [refreshKey]);
 
   useEffect(() => {
     if (!menuOpen || !isMobile) return;
@@ -243,18 +392,13 @@ const TaskBar = () => {
     };
   }, [menuOpen, isMobile]);
 
-  // Mail status change event handler - simplified since ProgramProvider handles the refresh
+  // Mail status change event handler
   useEffect(() => {
     const handleMenuRefresh = (eventType) => {
       console.log(
         `📧 TaskBar received ${eventType} - ProgramProvider should handle this`
       );
-
-      // Close menu to show the update
       setMenuOpen(false);
-
-      // The ProgramProvider will handle the actual refresh
-      // We just need to force a re-render to pick up the new state
       setRefreshKey((prev) => prev + 1);
     };
 
@@ -281,7 +425,7 @@ const TaskBar = () => {
   return (
     <div ref={taskbarRef} style={{ position: "relative" }}>
       <TaskBarComponent
-        key={refreshKey} // This will force a complete re-render when refreshKey changes
+        key={refreshKey}
         options={context.startMenu}
         quickLaunch={context.quickLaunch.map((item) => {
           const isClippy =

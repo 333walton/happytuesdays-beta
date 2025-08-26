@@ -19,7 +19,7 @@ import MonitorView from "./components/MonitorView/MonitorView";
 import { ClippyProvider } from "./components/ClippyAssistant/index";
 import BIOSPixelEffect from "./components/BIOSPixelEffect/BIOSPixelEffect";
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import { enableCustomMenuTooltips } from "./helpers/customTooltip";
+import { setupTooltipSystem } from "./helpers/unifiedTooltipInit"; // Use unified initialization
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { withRouterParams } from "./components/withRouterParams";
 import NewsletterFunnelManager from "./components/NewsletterFunnel/NewsletterFunnelManager";
@@ -260,10 +260,22 @@ function DesktopWithRouter(props) {
 
 const DesktopWithParams = withRouterParams(DesktopWithRouter);
 
+// Remove this line - it was causing tooltips to initialize too early
+// const cleanupAI = setupAIAssistantTooltips();
+
 const App = () => {
   useEffect(() => {
-    enableCustomMenuTooltips();
-  }, []);
+    // Use the unified tooltip system that prevents duplicates
+    const cleanupTooltips = setupTooltipSystem();
+
+    // Cleanup when component unmounts
+    return () => {
+      if (cleanupTooltips) {
+        cleanupTooltips();
+      }
+    };
+  }, []); // Empty dependency array - only run once on mount
+
   return (
     <HelmetProvider>
       <Helmet>{/*...*/}</Helmet>

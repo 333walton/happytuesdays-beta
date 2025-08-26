@@ -1,10 +1,9 @@
-// this mainly just helps apply tooltips to disables menu items
-
 const customTooltipTargets = ["Start Menu Builder", "Log In", "Join"];
 
 export function enableCustomMenuTooltips() {
   let tooltipEl = null;
   let tooltipTimer = null;
+  const tooltipId = `global-menu-${Date.now()}`;
 
   function showTooltip(e) {
     if (!e.currentTarget) return;
@@ -35,8 +34,11 @@ export function enableCustomMenuTooltips() {
 
     if (!tooltipText) return;
 
-    // Clean up any previous show attempts or existing tooltip
-    if (tooltipEl) {
+    // Clean up only OUR tooltip, not others
+    if (
+      tooltipEl &&
+      tooltipEl.getAttribute("data-tooltip-owner") === tooltipId
+    ) {
       tooltipEl.remove();
       tooltipEl = null;
     }
@@ -45,13 +47,13 @@ export function enableCustomMenuTooltips() {
       tooltipTimer = null;
     }
 
-    // Start a timer for standard tooltip delay (500ms)
+    // Start a timer for standard tooltip delay (500ms to match AOL)
     tooltipTimer = setTimeout(() => {
       tooltipEl = document.createElement("div");
-      tooltipEl.className = "custom-tooltip global-menu-tooltip"; // Add unique identifier
-      tooltipEl.setAttribute("data-tooltip-type", "global-menu"); // Mark it
+      tooltipEl.className = "custom-tooltip global-menu-tooltip";
+      tooltipEl.setAttribute("data-tooltip-type", "global-menu");
+      tooltipEl.setAttribute("data-tooltip-owner", tooltipId); // Mark ownership
 
-      tooltipEl.className = "custom-tooltip";
       tooltipEl.textContent = tooltipText;
       // Apply AOLNewsletterFunnel.js tooltip styling
       tooltipEl.style.position = "fixed";
@@ -69,7 +71,11 @@ export function enableCustomMenuTooltips() {
       document.body.appendChild(tooltipEl);
 
       function positionTooltip() {
-        if (!tooltipEl) return;
+        if (
+          !tooltipEl ||
+          tooltipEl.getAttribute("data-tooltip-owner") !== tooltipId
+        )
+          return;
         const rect = btn.getBoundingClientRect();
         tooltipEl.style.left = `${
           rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2
@@ -78,18 +84,26 @@ export function enableCustomMenuTooltips() {
       }
 
       positionTooltip();
-      window.addEventListener("scroll", positionTooltip, true);
-      window.addEventListener("resize", positionTooltip, true);
+
+      const scrollHandler = () => positionTooltip();
+      const resizeHandler = () => positionTooltip();
+
+      window.addEventListener("scroll", scrollHandler, true);
+      window.addEventListener("resize", resizeHandler, true);
 
       btn._customTooltipCleanup = () => {
-        if (tooltipEl) {
+        // Only clean up our own tooltip
+        if (
+          tooltipEl &&
+          tooltipEl.getAttribute("data-tooltip-owner") === tooltipId
+        ) {
           tooltipEl.remove();
           tooltipEl = null;
         }
-        window.removeEventListener("resize", positionTooltip, true);
-        window.removeEventListener("scroll", positionTooltip, true);
+        window.removeEventListener("resize", resizeHandler, true);
+        window.removeEventListener("scroll", scrollHandler, true);
       };
-    }, 1000); // 1000ms delay (matches browser tooltips)
+    }, 500); // 500ms delay to match AOL funnel
   }
 
   function hideTooltip(e) {
@@ -138,8 +152,25 @@ export function enableCustomMenuTooltips() {
   const observer = new MutationObserver(attachHandlersToMenuItems);
   observer.observe(document.body, { childList: true, subtree: true });
 
+  // Listen for window events but don't interfere with other components
+  window.addEventListener("windowOpened", (e) => {
+    // Don't hide our tooltips when AOLNewsletterFunnel opens
+    if (e.detail && e.detail.component === "AOLNewsletterFunnel") {
+      // AOL component will manage its own tooltips
+      return;
+    }
+  });
+
+  window.addEventListener("windowClosed", (e) => {
+    // Don't restore tooltips when AOLNewsletterFunnel closes
+    if (e.detail && e.detail.component === "AOLNewsletterFunnel") {
+      // AOL component has cleaned up its own tooltips
+      return;
+    }
+  });
+
   window.addEventListener("beforeunload", () => {
-    // Clean up ALL buttons with tooltips
+    // Clean up only OUR tooltips and handlers
     document.querySelectorAll(".StandardMenuItem__button").forEach((btn) => {
       if (btn._customTooltipAttached) {
         btn.removeEventListener("mouseenter", showTooltip);
@@ -148,10 +179,30 @@ export function enableCustomMenuTooltips() {
         btn._customTooltipCleanup = null;
       }
     });
-    if (tooltipEl) {
+
+    // Remove only our tooltips
+    document
+      .querySelectorAll(`[data-tooltip-owner="${tooltipId}"]`)
+      .forEach((el) => {
+        el.remove();
+      });
+
+    if (
+      tooltipEl &&
+      tooltipEl.getAttribute("data-tooltip-owner") === tooltipId
+    ) {
       tooltipEl.remove();
       tooltipEl = null;
     }
     observer.disconnect();
   });
+
+  return () => {
+    // Cleanup function that only affects our tooltips
+    document
+      .querySelectorAll(`[data-tooltip-owner="${tooltipId}"]`)
+      .forEach((el) => {
+        el.remove();
+      });
+  };
 }
