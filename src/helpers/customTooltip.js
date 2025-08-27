@@ -1,4 +1,11 @@
-const customTooltipTargets = ["Start Menu Builder", "Log In", "Join"];
+const customTooltipTargets = [
+  "Start Menu Builder",
+  "Log In",
+  "Join",
+  "My Feed",
+  "Hide Clippy",
+  "Show Clippy",
+];
 
 export function enableCustomMenuTooltips() {
   let tooltipEl = null;
@@ -21,6 +28,9 @@ export function enableCustomMenuTooltips() {
 
     const tooltipMap = {
       "Start Menu Builder": "Log in to access",
+      "My Feed": "Log in to access",
+      "Hide Clippy": "Hide Clippy",
+      "Show Clippy": "Show Clippy",
       "Log In • Join": "soon",
       "Log In": "soon",
       Join: "soon",
