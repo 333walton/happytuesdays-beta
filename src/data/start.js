@@ -354,7 +354,7 @@ const favorites = [
 // Tools section - Updated structure
 const newsFeeds = [
   {
-    title: "Tech Feed",
+    title: "Tech",
     icon: icons.newsletter16,
     component: "InternetExplorer",
     isDisabled: false,
@@ -368,7 +368,7 @@ const newsFeeds = [
     },
   },
   {
-    title: "Builders Feed",
+    title: "Build & Grow",
     icon: icons.newsletter16,
     component: "InternetExplorer",
     isDisabled: false,
@@ -382,7 +382,7 @@ const newsFeeds = [
     },
   },
   {
-    title: "Art/Design Feed",
+    title: "Art & Design",
     icon: icons.newsletter16,
     component: "InternetExplorer",
     isDisabled: false,
@@ -396,7 +396,7 @@ const newsFeeds = [
     },
   },
   {
-    title: "Gaming Feed",
+    title: "Gaming",
     icon: icons.newsletter16,
     component: "InternetExplorer",
     isDisabled: false,

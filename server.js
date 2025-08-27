@@ -314,7 +314,7 @@ module.exports = async (req, res) => {
     allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
     // Limit items
-    const maxItems = 20;
+    const maxItems = 10;
     const finalItems = allItems.slice(0, maxItems);
 
     res.status(200).json({
@@ -377,8 +377,8 @@ app.post("/api/feeds", async (req, res) => {
       return dateB - dateA;
     });
 
-    // Limit to max items (default 20)
-    const maxItems = parseInt(process.env.MAX_FEED_ITEMS) || 20;
+    // Limit to max items (default 10)
+    const maxItems = parseInt(process.env.MAX_FEED_ITEMS) || 10;
     const finalItems = allItems.slice(0, maxItems);
 
     res.json({

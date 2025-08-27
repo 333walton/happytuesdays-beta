@@ -78,7 +78,7 @@
     opacity: 0;
     animation: fadeInUp 0.5s ease forwards;
 
-    @for $i from 1 through 20 {
+    @for $i from 1 through 10 {
       &:nth-child(#{$i}) {
         animation-delay: #{$i * 0.05}s;
       }

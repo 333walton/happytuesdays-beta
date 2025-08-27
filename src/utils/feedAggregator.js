@@ -4,7 +4,7 @@ import axios from "axios";
 // Cache configuration
 const CACHE_DURATION =
   parseInt(process.env.REACT_APP_RSS_CACHE_DURATION) || 900000; // 15 minutes
-const MAX_ITEMS = parseInt(process.env.REACT_APP_MAX_FEED_ITEMS) || 20;
+const MAX_ITEMS = parseInt(process.env.REACT_APP_MAX_FEED_ITEMS) || 10;
 const ENABLE_FALLBACK = process.env.REACT_APP_ENABLE_FALLBACK_DATA === "true";
 
 // Determine API endpoint based on environment

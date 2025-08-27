@@ -271,8 +271,8 @@ export default async function handler(req, res) {
   // Sort by date (newest first)
   allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-  // Limit to 20
-  const finalItems = allItems.slice(0, 20);
+  // Limit to 10
+  const finalItems = allItems.slice(0, 10);
 
   // Return in unified JSON
   return res.status(200).json({

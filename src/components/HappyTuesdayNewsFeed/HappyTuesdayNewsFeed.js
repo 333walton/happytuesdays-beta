@@ -217,10 +217,10 @@ const HappyTuesdayNewsFeed = ({
   const categories = {
     tech: [
       "AI & Machine Learning",
-      "Martech & AdTech",
+      "Martech & Adtech",
       "Blockchain & Web3",
       "Cybersecurity & Privacy",
-      "Web Dev & DevOps",
+      "Web Dev & Dev Ops",
     ],
     art: [
       "Generative & AI Art",
@@ -607,9 +607,9 @@ const HappyTuesdayNewsFeed = ({
         {/* Tabs */}
         <div style={styles.tabs}>
           {[
-            { key: "tech", label: "Tech Feed" },
-            { key: "build-grow", label: "Build & Grow" },
-            { key: "art-design", label: "Art & Design" },
+            { key: "tech", label: "Tech" },
+            { key: "builder", label: "Build & Grow" },
+            { key: "art", label: "Art & Design" },
             { key: "gaming", label: "Gaming" },
             { key: "blog", label: "Blog" },
           ].map((tab) => (
