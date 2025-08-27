@@ -50,14 +50,9 @@ const RSS_FEEDS = {
       "https://www.theblock.co/rss/",
       "https://api.theblockbeats.news/v2/rss/all",
     ],
-    "vintage-tech-spotlights": [
-      "https://tedium.co/feed/",
-      "https://paleotronic.com/feed/",
-      "https://www.theregister.com/headlines.atom",
-    ],
   },
   builder: {
-    "founder-stories": [
+    "startup-stories": [
       "https://review.firstround.com/rss/",
       "https://blog.ycombinator.com/feed/",
       "https://steveblank.com/feed/",
@@ -76,18 +71,12 @@ const RSS_FEEDS = {
       "https://bubble.io/blog/rss",
       "https://www.makerpad.co/feed",
     ],
-    "funding-monetization": [
-      "https://bothsidesofthetable.com/feed",
-      "https://feld.com/feed",
-      "https://avc.com/feed/",
-      "https://saastr.com/feed/",
-    ],
     "project-management": [
       "https://blog.asana.com/feed/",
       "https://blog.trello.com/rss",
       "https://monday.com/blog/feed/",
     ],
-    "stoic-mindset": [
+    "momentum-mindset": [
       "https://dailystoic.com/feed/",
       "https://modernstoicism.com/feed/",
       "https://www.artofmanliness.com/feed/",
@@ -98,11 +87,6 @@ const RSS_FEEDS = {
       "https://ml-art.co/feed",
       "https://aiartists.org/feed",
       "https://www.creativebloq.com/feeds/tag/ai-art",
-    ],
-    "pixel-retro-art": [
-      "https://retronator.com/feed/",
-      "https://indieretronews.com/feeds/posts/default?alt=rss",
-      "https://pixelartacademy.com/feed/",
     ],
     "ui-ux-trends": [
       "https://www.smashingmagazine.com/feed/",
@@ -127,36 +111,31 @@ const RSS_FEEDS = {
     ],
   },
   gaming: {
-    "retro-game-news": [
+    "retro-gaming": [
       "https://www.timeextension.com/feed/",
       "https://indieretronews.com/feeds/posts/default?alt=rss",
       "https://retrododo.com/feed/",
       "https://www.retrogamer.net/feed/",
     ],
-    "emulation-modding": [
+    "guides-tips": [
       "https://retropie.org.uk/feed/",
       "https://www.youtube.com/feeds/videos.xml?channel_id=UC_0CVCfC_3iuHqmyClu59Uw",
       "https://emulation.gametechwiki.com/index.php?title=Special:RecentChanges&feed=rss",
     ],
-    "collecting-hardware": [
+    "game-collecting": [
       "https://www.racketboy.com/feed/",
       "https://consolevariations.com/feed/",
       "https://retrogamecollecting.com/feed/",
     ],
-    "speedruns-events": [
+    "daily-roundup": [
       "https://www.speedrun.com/api/v1/posts.rss",
       "https://gamesdonequick.com/feeds/blog",
       "https://tasvideos.org/feed/publications",
     ],
-    "indie-retro-releases": [
+    "indie-spotlights": [
       "https://itch.io/games/tag-retro.xml",
       "https://indieretronews.com/feeds/posts/default?alt=rss",
       "https://warpdoor.com/feed/",
-    ],
-    "dos-game-deep-dives": [
-      "https://dos.itch.io/feed/new.xml",
-      "https://dosgamer.com/feed/",
-      "https://www.dosgamesarchive.com/feed/",
     ],
   },
 };

@@ -26,28 +26,27 @@ const HappyTuesdayNewsFeed = ({
   const categoryIcons = {
     "ai-machine-learning": "🤖",
     "martech-adtech": "📊",
-    "web-dev-devops": "💻",
-    "cybersecurity-privacy": "🔒",
     "blockchain-web3": "⛓️",
-    "vintage-tech-spotlights": "🖥️",
-    "founder-stories": "🚀",
-    "productivity-hacks": "⚡",
-    "automation-no-code": "⚙️",
-    "funding-monetization": "💰",
-    "project-management": "📋",
-    "stoic-mindset": "🧘",
+    "cybersecurity-privacy": "🔒",
+    "web-dev-devops": "💻",
+
     "generative-ai-art": "🎨",
-    "pixel-retro-art": "👾",
-    "ui-ux-trends": "🎯",
-    "color-typography": "🎨",
-    "animation-motion": "✨",
     "tutorials-walkthroughs": "📚",
-    "retro-game-news": "🕹️",
-    "emulation-modding": "💾",
-    "collecting-hardware": "🎮",
-    "speedruns-events": "⏱️",
-    "indie-retro-releases": "🎲",
-    "dos-game-deep-dives": "💿",
+    "ui-ux-trends": "🎯",
+    "animation-motion": "✨",
+    "color-typography": "🎨",
+
+    "startup-stories": "🚀", // renamed from founder stories
+    "automation-no-code": "⚙️",
+    "project-management": "📋",
+    "productivity-hacks": "⚡",
+    "momentum-mindset": "🧘", // renamed from stoic mindset
+
+    "daily-roundup": "⏱️", // renamed from speedruns & events
+    "guides-tips": "💾", // renamed from emulation modding
+    "retro-gaming": "🕹️", // renamed from retro game news
+    "indie-spotlights": "🎲", // renamed from indie retro releases
+    "game-collecting": "🎮", // renamed from collecting & hardware
   };
 
   // Default category icon
@@ -219,34 +218,30 @@ const HappyTuesdayNewsFeed = ({
     tech: [
       "AI & Machine Learning",
       "Martech & AdTech",
-      "Web Dev & DevOps",
-      "Cybersecurity & Privacy",
       "Blockchain & Web3",
-      "Vintage Tech Spotlights",
-    ],
-    builder: [
-      "Founder Stories",
-      "Productivity Hacks",
-      "Automation & No-Code",
-      "Funding & Monetization",
-      "Project Management",
-      "Stoic Mindset",
+      "Cybersecurity & Privacy",
+      "Web Dev & DevOps",
     ],
     art: [
       "Generative & AI Art",
-      "Pixel & Retro Art",
-      "UI/UX Trends",
-      "Color & Typography",
-      "Animation & Motion",
       "Tutorials & Walkthroughs",
+      "UI/UX Trends",
+      "Animation & Motion",
+      "Color & Typography",
+    ],
+    builder: [
+      "Startup Stories",
+      "Automation & No-Code",
+      "Project Management",
+      "Productivity Hacks",
+      "Momentum & Mindset",
     ],
     gaming: [
-      "Retro Game News",
-      "Emulation & Modding",
-      "Collecting & Hardware",
-      "Speedruns & Events",
-      "Indie Retro Releases",
-      "DOS Game Deep Dives",
+      "Daily Roundup",
+      "Pro Guides & Tips",
+      "Retro Gaming",
+      "Indie Spotlights",
+      "Collectors Hub",
     ],
   };
 
@@ -612,11 +607,11 @@ const HappyTuesdayNewsFeed = ({
         {/* Tabs */}
         <div style={styles.tabs}>
           {[
-            { key: "blog", label: "Blog" },
             { key: "tech", label: "Tech Feed" },
-            { key: "builder", label: "Builder Feed" },
-            { key: "art", label: "Art & Design Feed" },
-            { key: "gaming", label: "Gaming Feed" },
+            { key: "build-grow", label: "Build & Grow" },
+            { key: "art-design", label: "Art & Design" },
+            { key: "gaming", label: "Gaming" },
+            { key: "blog", label: "Blog" },
           ].map((tab) => (
             <button
               key={tab.key}
