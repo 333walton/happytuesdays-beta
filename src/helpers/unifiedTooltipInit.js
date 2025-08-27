@@ -305,7 +305,7 @@ function cleanupAll() {
   cleanupFunctions = [];
   tooltipsInitialized = false;
 
-  // Remove any lingering tooltips
+  // Remove any lingering tooltips - but NEVER remove protected ones
   document
     .querySelectorAll(
       [".ai-assistant-tooltip", ".custom-tooltip", "[data-tooltip-type]"].join(
@@ -313,7 +313,16 @@ function cleanupAll() {
       )
     )
     .forEach((el) => {
-      if (el.getAttribute("data-protected") !== "true") {
+      // Check multiple protection attributes
+      const isProtected =
+        el.getAttribute("data-protected") === "true" ||
+        el.getAttribute("data-taskbar-protected") === "true" ||
+        el.getAttribute("data-tooltip-owner") === "taskbar-component" ||
+        el.classList.contains("taskbar-custom-tooltip") ||
+        el.classList.contains("taskbar-tooltip-protected") ||
+        el.id?.includes("taskbar-tooltip");
+
+      if (!isProtected) {
         el.remove();
       }
     });
@@ -350,21 +359,35 @@ function protectNonAOLTooltips() {
       '[data-tooltip-type="global-menu"]',
       '[data-tooltip-type="taskbar"]',
       '[data-tooltip-owner="taskbar-component"]',
-      ".taskbar-custom-tooltip",
+      ".taskbar-custom-tooltip", // FIXED: Added the dot for class selector
+      ".taskbar-tooltip-protected", // Added for additional protection
+      "#taskbar-tooltip", // Added ID selector support
+      '[data-taskbar-protected="true"]', // Added attribute selector
     ].join(",")
   );
 
   tooltipsToProtect.forEach((tooltip) => {
     tooltip.setAttribute("data-protected", "true");
+    tooltip.setAttribute("data-taskbar-protected", "true"); // Add extra protection
 
     if (
       tooltip.getAttribute("data-tooltip-type") === "taskbar" ||
-      tooltip.classList.contains("taskbar-custom-tooltip")
+      tooltip.classList.contains("taskbar-custom-tooltip") ||
+      tooltip.classList.contains("taskbar-tooltip-protected")
     ) {
-      tooltip.style.backgroundColor = "#ffffe1";
-      tooltip.style.border = "1px solid black";
-      tooltip.style.fontFamily = '"MS Sans Serif", sans-serif';
-      tooltip.style.fontSize = "10px";
+      // Apply inline styles with !important to ensure they stick
+      const styles = [
+        "background-color: #ffffe1 !important",
+        "border: 1px solid black !important",
+        'font-family: "MS Sans Serif", sans-serif !important',
+        "font-size: 10px !important",
+        "color: #000000 !important",
+        "padding: 2px 4px !important",
+        "position: fixed !important",
+        "z-index: 999999 !important",
+      ].join(";");
+
+      tooltip.setAttribute("style", styles);
     }
   });
 }

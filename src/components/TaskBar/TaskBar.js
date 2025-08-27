@@ -5,95 +5,61 @@ import StartMenuPortal from "../StartMenuPortal";
 import { ProgramContext } from "../../contexts";
 import useStartMenuTooltipEnhancer from "../../helpers/useStartMenuTooltipEnhancer";
 
-let hasReadMail = false;
-
 // Custom tooltip component with enforced styling that cannot be overridden
 const CustomTooltip = ({ text, visible }) => {
   const tooltipRef = useRef(null);
   const [tooltipId] = useState(`taskbar-tooltip-${Date.now()}`);
 
   useEffect(() => {
-    if (tooltipRef.current && visible) {
-      // Force style application with !important via direct style manipulation
-      const applyProtectedStyles = () => {
-        if (!tooltipRef.current) return;
+    if (!tooltipRef.current) return;
 
-        const tooltip = tooltipRef.current;
+    const applyProtectedStyles = () => {
+      if (!tooltipRef.current) return;
+      const tooltip = tooltipRef.current;
+      tooltip.setAttribute("data-tooltip-type", "taskbar");
+      tooltip.setAttribute("data-tooltip-owner", "taskbar-component");
+      tooltip.setAttribute("data-protected", "true");
+      tooltip.setAttribute("id", tooltipId);
 
-        // Set attributes for identification
-        tooltip.setAttribute("data-tooltip-type", "taskbar");
-        tooltip.setAttribute("data-tooltip-owner", "taskbar-component");
-        tooltip.setAttribute("data-protected", "true");
-        tooltip.setAttribute("id", tooltipId);
+      const styleRules = [
+        "position: fixed !important",
+        "bottom: 30px !important",
+        "left: 105px !important",
+        "background-color: #ffffe1 !important",
+        "border: 1px solid black !important",
+        "padding: 2px 4px !important",
+        "font-size: 10px !important",
+        "white-space: nowrap !important",
+        "pointer-events: none !important",
+        'font-family: "MS Sans Serif", sans-serif !important',
+        "z-index: 99 !important",
+        "color: #000000 !important",
+        "line-height: normal !important",
+        "text-align: left !important",
+        "box-shadow: none !important",
+        "border-radius: 0 !important",
+        "opacity: 1 !important",
+        "transform: none !important",
+        "display: block !important",
+      ].join(";");
 
-        // Apply styles with maximum specificity
-        const styleRules = [
-          "position: fixed !important",
-          "bottom: 30px !important",
-          "left: 105px !important",
-          "background-color: #ffffe1 !important",
-          "border: 1px solid black !important",
-          "padding: 2px 4px !important",
-          "font-size: 10px !important",
-          "white-space: nowrap !important",
-          "pointer-events: none !important",
-          'font-family: "MS Sans Serif", sans-serif !important',
-          "z-index: 99 !important",
-          "color: #000000 !important",
-          "line-height: normal !important",
-          "text-align: left !important",
-          "box-shadow: none !important",
-          "border-radius: 0 !important",
-          "opacity: 1 !important",
-          "transform: none !important",
-          "display: block !important",
-        ].join(";");
+      tooltip.setAttribute("style", styleRules);
+    };
 
-        tooltip.setAttribute("style", styleRules);
+    // Always apply styles (not just when visible)
+    applyProtectedStyles();
 
-        // Also add a style element to ensure our styles take precedence
-        if (!document.getElementById(`${tooltipId}-style`)) {
-          const styleEl = document.createElement("style");
-          styleEl.id = `${tooltipId}-style`;
-          styleEl.textContent = `
-            #${tooltipId} {
-              background-color: #ffffe1 !important;
-              border: 1px solid black !important;
-              font-family: "MS Sans Serif", sans-serif !important;
-              font-size: 10px !important;
-              color: #000000 !important;
-            }
-            #${tooltipId}[data-tooltip-type="taskbar"] {
-              background-color: #ffffe1 !important;
-              border: 1px solid black !important;
-            }
-          `;
-          document.head.appendChild(styleEl);
-        }
-      };
+    const protectionInterval = setInterval(applyProtectedStyles, 100);
+    tooltipRef.current._protectionInterval = protectionInterval;
 
-      // Apply styles immediately
-      applyProtectedStyles();
-
-      // Reapply styles on a short interval to combat any style changes
-      const protectionInterval = setInterval(applyProtectedStyles, 100);
-
-      // Store interval for cleanup
-      tooltipRef.current._protectionInterval = protectionInterval;
-    }
-
-    // Cleanup on unmount or when tooltip becomes invisible
     return () => {
       if (tooltipRef.current && tooltipRef.current._protectionInterval) {
         clearInterval(tooltipRef.current._protectionInterval);
       }
-      // Remove style element
       const styleEl = document.getElementById(`${tooltipId}-style`);
-      if (styleEl) {
-        styleEl.remove();
-      }
+      if (styleEl) styleEl.remove();
     };
-  }, [visible, tooltipId]);
+  }, [tooltipId, visible]);
 
   if (!visible) return null;
 
@@ -152,6 +118,19 @@ const TaskBar = () => {
 
   const closeMenu = () => setMenuOpen(false);
 
+  useEffect(() => {
+    const btn = clippyButtonRef.current;
+    if (!btn) return;
+    btn.addEventListener("mouseenter", handleMouseEnter);
+    btn.addEventListener("mouseleave", handleMouseLeave);
+    return () => {
+      btn.removeEventListener("mouseenter", handleMouseEnter);
+      btn.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [clippyButtonRef.current]);
+
+  <button ref={clippyButtonRef}>Clippy</button>;
+
   // Enhanced protection against style changes from other components
   useEffect(() => {
     // Create a MutationObserver to watch for attribute/style changes on taskbar tooltips
@@ -191,6 +170,13 @@ const TaskBar = () => {
                   'font-family: "MS Sans Serif", sans-serif !important',
                   "z-index: 99 !important",
                   "color: #000000 !important",
+                  "line-height: normal !important",
+                  "text-align: left !important",
+                  "box-shadow: none !important",
+                  "border-radius: 0 !important",
+                  "opacity: 1 !important",
+                  "transform: none !important",
+                  "display: block !important",
                 ].join(";");
 
                 target.setAttribute("style", correctStyles);
@@ -214,6 +200,67 @@ const TaskBar = () => {
 
     return cleanup;
   }, []);
+
+  useEffect(() => {
+    let protectionInterval = null;
+
+    const protectClippyTooltip = () => {
+      // Ensure tooltip remains visible when it should be
+      if (tooltipVisible) {
+        // Check if tooltip exists
+        const existingTooltips = document.querySelectorAll(
+          [
+            ".taskbar-custom-tooltip",
+            ".taskbar-tooltip-protected",
+            '[data-tooltip-owner="taskbar-component"]',
+            '[id*="taskbar-tooltip"]',
+          ].join(",")
+        );
+
+        if (existingTooltips.length === 0) {
+          // Force re-render if tooltip is missing
+          console.log("Taskbar tooltip missing, forcing visibility");
+          setTooltipVisible(false);
+          setTimeout(() => setTooltipVisible(true), 10);
+        }
+      }
+    };
+
+    // Listen for AOL funnel events
+    const handleAOLOpened = () => {
+      console.log("AOL Funnel opened - protecting taskbar tooltip");
+      // Start protection interval when AOL opens
+      protectionInterval = setInterval(protectClippyTooltip, 100);
+
+      // Also ensure our tooltip state is preserved
+      if (tooltipVisible) {
+        // Force tooltip to remain visible
+        const tempText = tooltipText;
+        setTooltipText("");
+        setTimeout(() => setTooltipText(tempText), 10);
+      }
+    };
+
+    const handleAOLClosed = () => {
+      console.log("AOL Funnel closed - stopping protection");
+      // Clear protection interval when AOL closes
+      if (protectionInterval) {
+        clearInterval(protectionInterval);
+        protectionInterval = null;
+      }
+    };
+
+    window.addEventListener("aolFunnelOpened", handleAOLOpened);
+    window.addEventListener("aolFunnelClosed", handleAOLClosed);
+
+    return () => {
+      window.removeEventListener("aolFunnelOpened", handleAOLOpened);
+      window.removeEventListener("aolFunnelClosed", handleAOLClosed);
+      if (protectionInterval) {
+        clearInterval(protectionInterval);
+      }
+    };
+  }, [tooltipVisible, tooltipText]);
 
   // Mobile: override Start button behavior
   useEffect(() => {
@@ -253,34 +300,52 @@ const TaskBar = () => {
 
   // Clippy button tooltip detection
   useEffect(() => {
-    const findClippyButton = () => {
+    const findAndProtectClippyButton = () => {
       if (!taskbarRef.current) return;
+
       const buttons = taskbarRef.current.querySelectorAll("button");
       const clippyButton = Array.from(buttons).find((button) => {
         const hasClippyIcon = button.innerHTML.includes("textchat32");
         const hasClippyTitle =
           button.title === "Show Clippy" || button.title === "Hide Clippy";
-        return hasClippyIcon || hasClippyTitle;
+        const hasClippyClass = button.className?.includes("clippy");
+        return hasClippyIcon || hasClippyTitle || hasClippyClass;
       });
 
       if (clippyButton) {
         clippyButtonRef.current = clippyButton;
-        const buttonTitle = clippyButton.title;
+
+        // Extract and save the title
+        const buttonTitle =
+          clippyButton.title ||
+          clippyButton.getAttribute("data-original-title") ||
+          tooltipText ||
+          "Show Clippy";
         setTooltipText(buttonTitle);
 
-        // Completely remove all tooltip attributes
+        // Store original title in data attribute
+        if (!clippyButton.getAttribute("data-original-title")) {
+          clippyButton.setAttribute("data-original-title", buttonTitle);
+        }
+
+        // Remove native tooltip attributes
         clippyButton.removeAttribute("title");
         clippyButton.removeAttribute("data-tooltip");
         clippyButton.removeAttribute("aria-label");
         clippyButton.setAttribute("data-no-native-tooltip", "true");
 
+        // Remove old listeners to prevent duplicates
+        clippyButton.removeEventListener("mouseenter", handleMouseEnter);
+        clippyButton.removeEventListener("mouseleave", handleMouseLeave);
+
+        // Add new listeners
         clippyButton.addEventListener("mouseenter", handleMouseEnter);
         clippyButton.addEventListener("mouseleave", handleMouseLeave);
 
+        // Monitor for attribute changes
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
             if (mutation.type === "attributes") {
-              // Remove any tooltip-related attributes that get added
               const attributesToRemove = [
                 "title",
                 "data-tooltip",
@@ -291,10 +356,17 @@ const TaskBar = () => {
                   const value = clippyButton.getAttribute(attr);
                   if (value && attr === "title") {
                     setTooltipText(value);
+                    clippyButton.setAttribute("data-original-title", value);
                   }
                   clippyButton.removeAttribute(attr);
                 }
               });
+              // Always ensure data-no-native-tooltip is set to "true"
+              if (
+                clippyButton.getAttribute("data-no-native-tooltip") !== "true"
+              ) {
+                clippyButton.setAttribute("data-no-native-tooltip", "true");
+              }
             }
           });
         });
@@ -312,13 +384,26 @@ const TaskBar = () => {
       }
     };
 
-    const cleanup = findClippyButton();
-    const timeoutId = setTimeout(findClippyButton, 1000);
+    const cleanup = findAndProtectClippyButton();
+
+    // Re-run periodically to ensure button is protected
+    const interval = setInterval(findAndProtectClippyButton, 1000);
+
+    // Listen for AOL events to re-establish protection
+    const handleAOLChange = () => {
+      setTimeout(findAndProtectClippyButton, 100);
+    };
+
+    window.addEventListener("aolFunnelOpened", handleAOLChange);
+    window.addEventListener("aolFunnelClosed", handleAOLChange);
+
     return () => {
       if (cleanup) cleanup();
-      clearTimeout(timeoutId);
+      clearInterval(interval);
+      window.removeEventListener("aolFunnelOpened", handleAOLChange);
+      window.removeEventListener("aolFunnelClosed", handleAOLChange);
     };
-  }, []);
+  }, [tooltipText]); // Include tooltipText in dependencies
 
   // Add RSS icon to notification area
   useEffect(() => {

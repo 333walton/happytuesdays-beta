@@ -214,8 +214,9 @@ class AOLNewsletterFunnel extends Component {
       },
     ];
 
+    // Initialize state
     this.state = {
-      statusTextKey: 1, // Add this for triggering fade-in animation
+      statusTextKey: 1,
       currentStep: 1,
       formData: {
         email: "",
@@ -227,7 +228,7 @@ class AOLNewsletterFunnel extends Component {
       },
       errors: {},
       hoveredChannelId: null,
-      isMobile: window.innerWidth <= 480, // detect on load
+      isMobile: window.innerWidth <= 480,
       viewportHeight: window.innerHeight,
       viewportWidth: window.innerWidth,
       isSmallMobile: window.innerWidth <= 375,
@@ -248,6 +249,7 @@ class AOLNewsletterFunnel extends Component {
     this.activeTooltips = new Set(); // Track our tooltips
   }
 
+  // Component lifecycle methods
   componentDidMount() {
     window.addEventListener("resize", this.handleResize);
     window.addEventListener("orientationchange", this.handleOrientationChange);
@@ -259,8 +261,9 @@ class AOLNewsletterFunnel extends Component {
 
     // CREATE A STYLE NAMESPACE SPECIFICALLY FOR OUR TOOLTIPS
     this.createTooltipStyles();
-    // COMPLETELY AVOID global events that could interfere
-    // NO windowOpened/windowClosed events
+
+    // IMPORTANT: Mark this window as open for other components
+    window.dispatchEvent(new CustomEvent("aolFunnelOpened"));
   }
 
   componentWillUnmount() {
@@ -270,69 +273,18 @@ class AOLNewsletterFunnel extends Component {
       this.handleOrientationChange
     );
 
-    this.cleanupTooltips();
+    this.cleanupTooltips(); // This will call cleanupOurTooltips internally
     this.removeTooltipStyles();
 
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
 
-    // NO global events dispatched
+    // IMPORTANT: Notify other components that we're closing
+    window.dispatchEvent(new CustomEvent("aolFunnelClosed"));
   }
 
-  // CREATE ISOLATED STYLES FOR OUR TOOLTIPS
-  createTooltipStyles = () => {
-    if (document.getElementById(`${this.tooltipNamespace}-styles`)) return;
-
-    const styleEl = document.createElement("style");
-    styleEl.id = `${this.tooltipNamespace}-styles`;
-    styleEl.textContent = `
-      .${this.tooltipNamespace}-tooltip {
-        position: fixed !important;
-        z-index: 100 !important;
-        background-color: #ffffe1 !important;
-        border: 1px solid #000 !important;
-        padding: 2px 4px !important;
-        font-size: 11px !important;
-        font-family: "MS Sans Serif", sans-serif !important;
-        pointer-events: none !important;
-        white-space: nowrap !important;
-        color: #000000 !important;
-        line-height: normal !important;
-        text-align: left !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        opacity: 1 !important;
-        transform: none !important;
-        display: block !important;
-        max-width: none !important;
-        min-width: auto !important;
-        height: auto !important;
-        width: auto !important;
-      }
-      
-      /* Prevent any other tooltip styles from affecting ours */
-      .${this.tooltipNamespace}-tooltip * {
-        all: unset !important;
-      }
-    `;
-    document.head.appendChild(styleEl);
-  };
-
-  // REMOVE OUR STYLES ON CLEANUP
-  removeTooltipStyles = () => {
-    const styleEl = document.getElementById(`${this.tooltipNamespace}-styles`);
-    if (styleEl) {
-      styleEl.remove();
-    }
-  };
-
-  setupChannelTooltips = () => {
-    this.tooltipTimer = null;
-  };
-
-  // Add new methods
-
+  // Viewport and positioning methods
   updateViewportDimensions = () => {
     const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty("--vh", `${vh}px`);
@@ -353,14 +305,12 @@ class AOLNewsletterFunnel extends Component {
     }, 100);
   };
 
-  // Update handleResize
   handleResize = () => {
     this.updateViewportDimensions();
     this.setState({ isMobile: window.innerWidth <= 480 });
     this.ensureProperPositioning();
   };
 
-  // Add dynamic height calculation
   getDynamicWindowHeight = () => {
     const { currentStep, viewportHeight } = this.state;
     const baseHeights = {
@@ -373,41 +323,6 @@ class AOLNewsletterFunnel extends Component {
     // Scale heights based on viewport
     const scaleFactor = Math.min(1, viewportHeight / 896); // 896 is iPhone XR height
     return Math.max(baseHeights[currentStep] * scaleFactor, 280); // Minimum height of 280px
-  };
-
-  preloadMailSound = () => {
-    this.mailAudio = new Audio("/sounds/aol-yougotmail.wav");
-    this.mailAudio.preload = "auto";
-    this.mailAudio.volume = 0.1;
-
-    // Load the audio file
-    this.mailAudio.load();
-
-    // Set up Web Audio API context if available
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) {
-        this.audioContext = new AudioContext();
-        this.mailAudio.addEventListener(
-          "canplaythrough",
-          () => {
-            if (!this.audioSource && this.audioContext) {
-              this.audioSource = this.audioContext.createMediaElementSource(
-                this.mailAudio
-              );
-              this.gainNode = this.audioContext.createGain();
-              this.gainNode.gain.value = 0.1;
-              this.audioSource
-                .connect(this.gainNode)
-                .connect(this.audioContext.destination);
-            }
-          },
-          { once: true }
-        );
-      }
-    } catch (err) {
-      console.log("Web Audio API not available, falling back to HTML5 audio");
-    }
   };
 
   ensureProperPositioning = () => {
@@ -476,17 +391,40 @@ class AOLNewsletterFunnel extends Component {
     }
   };
 
-  // Email validation
-  validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
+  // Audio methods
+  preloadMailSound = () => {
+    this.mailAudio = new Audio("/sounds/aol-yougotmail.wav");
+    this.mailAudio.preload = "auto";
+    this.mailAudio.volume = 0.1;
 
-  // Check if at least one channel is selected
-  hasSelectedChannels = () => {
-    return Object.values(this.state.formData.selectedChannels).some(
-      (isSelected) => isSelected
-    );
+    // Load the audio file
+    this.mailAudio.load();
+
+    // Set up Web Audio API context if available
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        this.audioContext = new AudioContext();
+        this.mailAudio.addEventListener(
+          "canplaythrough",
+          () => {
+            if (!this.audioSource && this.audioContext) {
+              this.audioSource = this.audioContext.createMediaElementSource(
+                this.mailAudio
+              );
+              this.gainNode = this.audioContext.createGain();
+              this.gainNode.gain.value = 0.1;
+              this.audioSource
+                .connect(this.gainNode)
+                .connect(this.audioContext.destination);
+            }
+          },
+          { once: true }
+        );
+      }
+    } catch (err) {
+      console.log("Web Audio API not available, falling back to HTML5 audio");
+    }
   };
 
   playMailSound = () => {
@@ -511,7 +449,110 @@ class AOLNewsletterFunnel extends Component {
     }, 333);
   };
 
-  // COMPLETELY ISOLATED TOOLTIP METHODS
+  // Validation methods
+  validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  hasSelectedChannels = () => {
+    return Object.values(this.state.formData.selectedChannels).some(
+      (isSelected) => isSelected
+    );
+  };
+
+  // Tooltip methods
+  createTooltipStyles = () => {
+    if (document.getElementById(`${this.tooltipNamespace}-styles`)) return;
+
+    const styleEl = document.createElement("style");
+    styleEl.id = `${this.tooltipNamespace}-styles`;
+    styleEl.textContent = `
+      .${this.tooltipNamespace}-tooltip {
+        position: fixed !important;
+        z-index: 100 !important;
+        background-color: #ffffe1 !important;
+        border: 1px solid #000 !important;
+        padding: 2px 4px !important;
+        font-size: 11px !important;
+        font-family: "MS Sans Serif", sans-serif !important;
+        pointer-events: none !important;
+        white-space: nowrap !important;
+        color: #000000 !important;
+        line-height: normal !important;
+        text-align: left !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        opacity: 1 !important;
+        transform: none !important;
+        display: block !important;
+        max-width: none !important;
+        min-width: auto !important;
+        height: auto !important;
+        width: auto !important;
+      }
+      
+      /* Prevent any other tooltip styles from affecting ours */
+      .${this.tooltipNamespace}-tooltip * {
+        all: unset !important;
+      }
+    `;
+    document.head.appendChild(styleEl);
+  };
+
+  removeTooltipStyles = () => {
+    const styleEl = document.getElementById(`${this.tooltipNamespace}-styles`);
+    if (styleEl) {
+      styleEl.remove();
+    }
+  };
+
+  setupChannelTooltips = () => {
+    this.tooltipTimer = null;
+  };
+
+  cleanupOurTooltips = () => {
+    // Clean up tooltips we're tracking
+    this.activeTooltips.forEach((tooltip) => {
+      if (tooltip._cleanup) {
+        tooltip._cleanup();
+      }
+      if (tooltip.parentNode) {
+        tooltip.remove();
+      }
+    });
+    this.activeTooltips.clear();
+
+    // ONLY clean up elements that are DEFINITELY ours
+    // Check multiple conditions to ensure we don't remove other components' tooltips
+    document.querySelectorAll("div").forEach((el) => {
+      const isOurTooltip =
+        el.getAttribute("data-tooltip-namespace") === this.tooltipNamespace ||
+        el.className === `${this.tooltipNamespace}-tooltip` ||
+        (el.getAttribute("data-tooltip-owner") === this.componentId &&
+          el.getAttribute("data-component") === "AOLNewsletterFunnel");
+
+      // NEVER remove taskbar tooltips or protected tooltips
+      const isProtected =
+        el.getAttribute("data-protected") === "true" ||
+        el.getAttribute("data-tooltip-owner") === "taskbar-component" ||
+        el.classList.contains("taskbar-tooltip-protected") ||
+        el.id?.includes("taskbar-tooltip");
+
+      if (isOurTooltip && !isProtected) {
+        el.remove();
+      }
+    });
+  };
+
+  cleanupTooltips = () => {
+    if (this.tooltipTimer) {
+      clearTimeout(this.tooltipTimer);
+      this.tooltipTimer = null;
+    }
+    this.cleanupOurTooltips();
+  };
+
   showChannelTooltip = (channel, event) => {
     // Prevent tooltips from showing on mobile-sized screens
     if (this.state.isMobile) return;
@@ -530,18 +571,16 @@ class AOLNewsletterFunnel extends Component {
     this.tooltipTimer = setTimeout(() => {
       const tooltipEl = document.createElement("div");
 
-      // Use our isolated class name and namespace
+      // Use our isolated class name and multiple identifiers
       tooltipEl.className = `${this.tooltipNamespace}-tooltip`;
       tooltipEl.setAttribute("data-tooltip-namespace", this.tooltipNamespace);
       tooltipEl.setAttribute("data-tooltip-owner", this.componentId);
       tooltipEl.setAttribute("data-tooltip-type", "aol-channel");
       tooltipEl.setAttribute("data-component", "AOLNewsletterFunnel");
       tooltipEl.setAttribute("data-isolated", "true");
+      tooltipEl.setAttribute("data-aol-funnel", "true"); // Additional identifier
 
       tooltipEl.textContent = channel.name;
-
-      // DON'T set inline styles - let our CSS handle it completely
-      // This prevents any style conflicts
 
       document.body.appendChild(tooltipEl);
       this.activeTooltips.add(tooltipEl);
@@ -586,43 +625,7 @@ class AOLNewsletterFunnel extends Component {
     this.cleanupOurTooltips();
   };
 
-  // COMPLETELY ISOLATED CLEANUP - ONLY TOUCH OUR ELEMENTS
-  cleanupOurTooltips = () => {
-    // Clean up tooltips we're tracking
-    this.activeTooltips.forEach((tooltip) => {
-      if (tooltip._cleanup) {
-        tooltip._cleanup();
-      }
-      if (tooltip.parentNode) {
-        tooltip.remove();
-      }
-    });
-    this.activeTooltips.clear();
-
-    // ONLY clean up elements with OUR EXACT namespace
-    document
-      .querySelectorAll(`[data-tooltip-namespace="${this.tooltipNamespace}"]`)
-      .forEach((el) => {
-        el.remove();
-      });
-
-    // ALSO clean up by our specific class name
-    document
-      .querySelectorAll(`.${this.tooltipNamespace}-tooltip`)
-      .forEach((el) => {
-        el.remove();
-      });
-  };
-
-  cleanupTooltips = () => {
-    if (this.tooltipTimer) {
-      clearTimeout(this.tooltipTimer);
-      this.tooltipTimer = null;
-    }
-    this.cleanupOurTooltips();
-  };
-
-  // Updated existing methods
+  // Add your other existing methods here...
   handleChannelHover = (channelId, event) => {
     this.setState({ hoveredChannelId: channelId });
 
