@@ -45,7 +45,7 @@ export const RSS_FEEDS = {
       "https://www.indiehackers.com/feed.xml",
     ],
     "productivity-hacks": [
-      "https://lifehacker.com/rss",
+      //"https://lifehacker.com/rss",
       "https://gettingthingsdone.com/feed/",
       "https://zenhabits.net/feed/",
       "https://jamesclear.com/feed",
@@ -160,7 +160,7 @@ export const getFeedDisplayName = (url) => {
     "https://www.coindesk.com/arc/outboundfeeds/rss/": "CoinDesk",
     "https://review.firstround.com/rss/": "First Round Review",
     "https://blog.ycombinator.com/feed/": "Y Combinator Blog",
-    "https://lifehacker.com/rss": "Lifehacker",
+    //"https://lifehacker.com/rss": "Lifehacker",
     "https://zapier.com/blog/feeds/latest/": "Zapier Blog",
     "https://www.smashingmagazine.com/feed/": "Smashing Magazine",
     "https://retronator.com/feed/": "Retronator",

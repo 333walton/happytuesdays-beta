@@ -4,7 +4,7 @@ import axios from "axios";
 // Cache configuration
 const CACHE_DURATION =
   parseInt(process.env.REACT_APP_RSS_CACHE_DURATION) || 900000; // 15 minutes
-const MAX_ITEMS = parseInt(process.env.REACT_APP_MAX_FEED_ITEMS) || 10;
+const MAX_ITEMS = 10; // Fixed limit, not configurable
 const ENABLE_FALLBACK = process.env.REACT_APP_ENABLE_FALLBACK_DATA === "true";
 
 // Determine API endpoint based on environment
@@ -139,7 +139,7 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
   // Check cache first
   const cached = getCachedFeed(cacheKey);
   if (cached) {
-    return cached;
+    return cached.slice(0, MAX_ITEMS);
   }
 
   try {
@@ -158,7 +158,10 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
       }
     );
 
-    const { items } = response.data;
+    let { items } = response.data;
+
+    // LIMIT ITEMS FROM SERVER TO MAX_ITEMS
+    items = items.slice(0, MAX_ITEMS);
 
     // If we have too few items and NewsAPI is available, fetch additional content
     if (items.length < 5 && ENABLE_FALLBACK) {
@@ -184,7 +187,7 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
       return sortedItems;
     }
 
-    // Cache and return the results
+    // Cache and return the LIMITED results
     storeInCache(cacheKey, items);
     return items;
   } catch (error) {
@@ -198,16 +201,19 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
       const query = subcategory ? subcategory.replace(/-/g, " ") : category;
       const fallbackItems = await fetchFromNewsAPI(query);
       if (fallbackItems.length > 0) {
-        storeInCache(cacheKey, fallbackItems);
-        return fallbackItems;
+        // LIMIT FALLBACK ITEMS
+        const limitedFallback = fallbackItems.slice(0, MAX_ITEMS);
+        storeInCache(cacheKey, limitedFallback);
+        return limitedFallback;
       }
     }
 
-    // Return cached data even if expired
+    // Return cached data even if expired (but limited)
     const expiredCache = localStorage.getItem(cacheKey);
     if (expiredCache) {
       try {
-        return JSON.parse(expiredCache).data;
+        const expiredData = JSON.parse(expiredCache).data;
+        return expiredData.slice(0, MAX_ITEMS);
       } catch (e) {
         return [];
       }

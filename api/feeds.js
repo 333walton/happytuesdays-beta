@@ -60,7 +60,7 @@ const RSS_FEEDS = {
       "https://www.indiehackers.com/feed.xml",
     ],
     "productivity-hacks": [
-      "https://lifehacker.com/rss",
+      //"https://lifehacker.com/rss",
       "https://gettingthingsdone.com/feed/",
       "https://zenhabits.net/feed/",
       "https://jamesclear.com/feed",

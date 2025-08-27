@@ -361,7 +361,7 @@ const newsFeeds = [
     data: {
       component: "HappyTuesdayNewsFeed",
       type: "happy-tuesday-feed",
-      tab: "tech",
+      initialTab: "tech", // Changed from 'tab' to 'initialTab'
       title: "News Feed",
       shouldNavigate: true,
       navigateTo: "/feeds/tech",
@@ -375,7 +375,7 @@ const newsFeeds = [
     data: {
       component: "HappyTuesdayNewsFeed",
       type: "happy-tuesday-feed",
-      tab: "builder",
+      initialTab: "builder", // Changed from 'tab' to 'initialTab'
       title: "News Feed",
       shouldNavigate: true,
       navigateTo: "/feeds/builder",
@@ -389,7 +389,7 @@ const newsFeeds = [
     data: {
       component: "HappyTuesdayNewsFeed",
       type: "happy-tuesday-feed",
-      tab: "art",
+      initialTab: "art", // Changed from 'tab' to 'initialTab'
       title: "News Feed",
       shouldNavigate: true,
       navigateTo: "/feeds/art",
@@ -403,7 +403,7 @@ const newsFeeds = [
     data: {
       component: "HappyTuesdayNewsFeed",
       type: "happy-tuesday-feed",
-      tab: "gaming",
+      initialTab: "gaming", // Changed from 'tab' to 'initialTab'
       title: "News Feed",
       shouldNavigate: true,
       navigateTo: "/feeds/gaming",
@@ -424,7 +424,7 @@ const newsFeeds = [
     data: {
       component: "HappyTuesdayNewsFeed",
       type: "happy-tuesday-feed",
-      tab: "",
+      initialTab: "",
       title: "News Feed",
     },
   },

@@ -8,6 +8,24 @@ import {
 } from "../../utils/feedAggregator";
 import FeedSkeleton from "../FeedSkeleton/FeedSkeleton";
 
+const shouldShowThumbnail = (thumbnail) => {
+  if (!thumbnail) return false;
+
+  const blockedPatterns = [
+    /favicon/i,
+    /\.ico$/i,
+    /feed.*icon/i,
+    /rss.*icon/i,
+    /logo/i,
+    /avatar/i,
+    /icon[-_]?\d+x\d+/i,
+    /\/icons?\//i,
+    /16x16|32x32|48x48|64x64|128x128|144x144/i,
+  ];
+
+  return !blockedPatterns.some((pattern) => pattern.test(thumbnail));
+};
+
 const HappyTuesdayNewsFeed = ({
   inIE = false,
   initialTab = "blog",
@@ -56,6 +74,26 @@ const HappyTuesdayNewsFeed = ({
     }
     const defaultIcons = ["📰", "📡", "📢", "📣", "📻"];
     return defaultIcons[index % defaultIcons.length];
+  };
+
+  const forceCompleteRefresh = () => {
+    // Clear all caches
+    if (window.clearAllCachesCompletely) {
+      window.clearAllCachesCompletely();
+    }
+
+    // Clear component state
+    setFeedItems({});
+    setLoading({});
+    setError({});
+    setLastRefresh({});
+
+    // Reload current feed
+    if (activeSubTab) {
+      loadFeed(activeTab, activeSubTab);
+    } else {
+      loadInitialFeed(activeTab);
+    }
   };
 
   useEffect(() => {
@@ -110,6 +148,9 @@ const HappyTuesdayNewsFeed = ({
   };
 
   // Define functions without useCallback first to avoid circular dependencies
+  // In HappyTuesdayNewsFeed.js, update the loadInitialFeed and loadFeed functions
+  // to limit items to 10 after fetching:
+
   const loadInitialFeed = async (feedType) => {
     setLoading((prev) => ({ ...prev, [feedType]: true }));
     setError((prev) => ({ ...prev, [feedType]: null }));
@@ -117,13 +158,16 @@ const HappyTuesdayNewsFeed = ({
     try {
       const items = await fetchAndCacheFeed(feedType);
 
-      if (items.length === 0) {
+      // LIMIT TO 10 ITEMS
+      const limitedItems = items.slice(0, 10);
+
+      if (limitedItems.length === 0) {
         setError((prev) => ({
           ...prev,
           [feedType]: "No items found. Please try again later.",
         }));
       } else {
-        setFeedItems((prev) => ({ ...prev, [feedType]: items }));
+        setFeedItems((prev) => ({ ...prev, [feedType]: limitedItems })); // Use limited items
         setLastRefresh((prev) => ({ ...prev, [feedType]: Date.now() }));
       }
     } catch (err) {
@@ -145,13 +189,16 @@ const HappyTuesdayNewsFeed = ({
     try {
       const items = await fetchAndCacheFeed(category, subcategory);
 
-      if (items.length === 0) {
+      // LIMIT TO 10 ITEMS
+      const limitedItems = items.slice(0, 10);
+
+      if (limitedItems.length === 0) {
         setError((prev) => ({
           ...prev,
           [feedKey]: "No items found for this category.",
         }));
       } else {
-        setFeedItems((prev) => ({ ...prev, [feedKey]: items }));
+        setFeedItems((prev) => ({ ...prev, [feedKey]: limitedItems })); // Use limited items
         setLastRefresh((prev) => ({ ...prev, [feedKey]: Date.now() }));
       }
     } catch (err) {
@@ -745,7 +792,7 @@ const HappyTuesdayNewsFeed = ({
                     className="feed-item"
                   >
                     <div style={styles.feedIcon}>
-                      {item.thumbnail ? (
+                      {item.thumbnail && shouldShowThumbnail(item.thumbnail) ? (
                         <img
                           src={item.thumbnail}
                           alt=""
