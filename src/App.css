@@ -947,7 +947,7 @@ button.btn.ButtonProgram.btn--active::before {
       .bios-active
     ):not(.windows-launch-active) {
     background-color: darkslategrey !important;
-    transition: background-color 0.3s ease-in-out;
+    transition: background-color 0.35s ease-in-out;
   }
 
   /* Additional selectors for when startup sequence ends - MOBILE ONLY */
@@ -955,7 +955,7 @@ button.btn.ButtonProgram.btn--active::before {
   .startup-sequence-ended body,
   body.startup-sequence-ended {
     background-color: darkslategrey !important;
-    transition: background-color 0.3s ease-in-out;
+    transition: background-color 0.35s ease-in-out;
   }
 
   /* Override body background during startup - MOBILE ONLY */
