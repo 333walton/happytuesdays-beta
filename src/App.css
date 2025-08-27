@@ -896,3 +896,102 @@ button.btn.ButtonProgram.btn--active::before {
 .btn.StartButton {
   z-index: 0 !important;
 }
+
+/* Mobile-only fixes for startup sequence backgrounds */
+
+/* Force black background during BIOS phase - MOBILE ONLY */
+@media (max-width: 768px) {
+  .bios-active,
+  .bios-active body,
+  body.bios-active {
+    background-color: #000000 !important;
+  }
+
+  /* Force black background during CloudCanvas/WindowsLaunch phase - MOBILE ONLY */
+  .cloudcanvas-active,
+  .cloudcanvas-active body,
+  body.cloudcanvas-active,
+  .windows-launch-active,
+  .windows-launch-active body,
+  body.windows-launch-active {
+    background-color: #000000 !important;
+  }
+
+  /* Force black background for any startup sequence container - MOBILE ONLY */
+  .startup-sequence-active,
+  .startup-sequence-active body,
+  body.startup-sequence-active {
+    background-color: #000000 !important;
+  }
+
+  /* Ensure BIOS screen components have black background - MOBILE ONLY */
+  .BIOS,
+  .BIOSWrapper,
+  .BIOS__bootContainer,
+  #BIOS__bootContainer {
+    background-color: #000000 !important;
+  }
+
+  /* Ensure cloud animation screen has black background - MOBILE ONLY */
+  .screen.cloudcanvas,
+  .desktop.cloudcanvas,
+  .cloud-animation-container,
+  .windows-launch-container {
+    background-color: #000000 !important;
+  }
+
+  /* Restore darkslategrey background when ExplorerView loads (startup sequence ended) - MOBILE ONLY */
+  body.explorer-view-active,
+  body:has(.ExplorerView),
+  body:not(.startup-sequence-active):not(.cloudcanvas-active):not(
+      .bios-active
+    ):not(.windows-launch-active) {
+    background-color: darkslategrey !important;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  /* Additional selectors for when startup sequence ends - MOBILE ONLY */
+  .startup-sequence-ended,
+  .startup-sequence-ended body,
+  body.startup-sequence-ended {
+    background-color: darkslategrey !important;
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  /* Override body background during startup - MOBILE ONLY */
+  body:has(.cloudcanvas),
+  body:has(.BIOS),
+  body:has(.BIOSWrapper),
+  body:has(.windows-launch) {
+    background-color: #000000 !important;
+  }
+
+  /* Ensure full viewport coverage during startup - MOBILE ONLY */
+  .startup-sequence-container,
+  .cloud-animation-container,
+  .bios-container,
+  .windows-launch-container {
+    background-color: #000000 !important;
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* iOS Safari fix */
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+  }
+
+  /* Prevent scrolling during startup - MOBILE ONLY */
+  body.cloudcanvas-active,
+  body.bios-active,
+  body.startup-sequence-active,
+  body.windows-launch-active {
+    overflow: hidden;
+  }
+
+  /* Restore scrolling when ExplorerView loads - MOBILE ONLY */
+  body.explorer-view-active,
+  body.startup-sequence-ended {
+    overflow: visible;
+  }
+}

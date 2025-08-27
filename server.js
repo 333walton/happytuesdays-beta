@@ -1,4 +1,4 @@
-// server.js
+// server.js - Complete updated version with enhanced filtering
 const express = require("express");
 const Parser = require("rss-parser");
 const cors = require("cors");
@@ -30,7 +30,7 @@ app.use(
 );
 app.use(express.json());
 
-// RSS Feed catalog - Lifehacker removed from productivity-hacks
+// Updated RSS Feed catalog aligned with new categories
 const RSS_FEEDS = {
   tech: {
     "ai-machine-learning": [
@@ -40,119 +40,167 @@ const RSS_FEEDS = {
       "https://machinelearningmastery.com/feed/",
       "https://www.marktechpost.com/feed/",
       "https://hnrss.org/newest?q=AI+OR+machine+learning",
+      "https://blog.google/technology/ai/rss/",
+      "https://huggingface.co/blog/feed.xml",
+      "https://www.deeplearning.ai/blog/feed/",
     ],
+
     "martech-adtech": [
       "https://martech.org/feed/",
       "https://adexchanger.com/feed/",
-      "https://adtechdaily.com/feed/",
       "https://marketingland.com/feed/",
+      "https://chiefmartec.com/feed/",
+      "https://www.marketingtechnews.net/rss.xml",
     ],
+
     "web-dev-devops": [
       "https://css-tricks.com/feed/",
       "https://www.smashingmagazine.com/feed/",
       "https://dev.to/feed",
-      "https://scotch.io/feed",
       "https://web.dev/feed.xml",
+      "https://blog.logrocket.com/feed/",
+      "https://www.joshwcomeau.com/rss.xml",
+      "https://kentcdodds.com/blog/rss.xml",
     ],
+
     "cybersecurity-privacy": [
       "https://krebsonsecurity.com/feed/",
       "https://feeds.feedburner.com/TheHackersNews",
       "https://www.darkreading.com/rss.xml",
       "https://www.schneier.com/feed/atom/",
-      "https://www.wired.com/feed/category/security/latest/rss",
+      "https://www.bleepingcomputer.com/feed/",
+      "https://threatpost.com/feed/",
     ],
+
     "blockchain-web3": [
       "https://www.coindesk.com/arc/outboundfeeds/rss/",
       "https://decrypt.co/feed",
-      "https://www.theblock.co/rss/",
-      "https://api.theblockbeats.news/v2/rss/all",
+      "https://cointelegraph.com/rss",
+      "https://ethereum.org/en/blog/feed.xml",
+      "https://blog.chain.link/rss/",
     ],
   },
+
   builder: {
     "startup-stories": [
       "https://review.firstround.com/rss/",
       "https://blog.ycombinator.com/feed/",
-      "https://steveblank.com/feed/",
       "https://techcrunch.com/category/startups/feed/",
       "https://www.indiehackers.com/feed.xml",
+      "https://sifted.eu/feed/",
+      "https://venturebeat.com/category/entrepreneur/feed/",
     ],
+
     "productivity-hacks": [
-      // "https://lifehacker.com/rss", // Removed - too many promotional articles
-      "https://gettingthingsdone.com/feed/",
       "https://zenhabits.net/feed/",
       "https://jamesclear.com/feed",
+      "https://gettingthingsdone.com/feed/",
+      "https://aliabdaal.com/rss/",
+      "https://tim.blog/feed/",
+      "https://calnewport.com/blog/feed/",
     ],
+
     "automation-no-code": [
       "https://zapier.com/blog/feeds/latest/",
-      "https://nocodedevs.com/feed/",
       "https://bubble.io/blog/rss",
-      "https://www.makerpad.co/feed",
+      "https://www.nocode.tech/feed",
+      "https://blog.airtable.com/rss/",
+      "https://webflow.com/blog/feed.rss",
+      "https://blog.n8n.io/rss/",
     ],
+
     "project-management": [
       "https://blog.asana.com/feed/",
       "https://blog.trello.com/rss",
       "https://monday.com/blog/feed/",
+      "https://www.projectmanager.com/blog/feed",
+      "https://blog.clickup.com/feed/",
     ],
+
     "momentum-mindset": [
-      "https://dailystoic.com/feed/",
-      "https://modernstoicism.com/feed/",
+      "https://fs.blog/feed/",
+      "https://ryanholiday.net/feed/",
+      "https://markmanson.net/feed",
       "https://www.artofmanliness.com/feed/",
+      "https://sethgodin.typepad.com/seths_blog/atom.xml",
     ],
   },
+
   art: {
     "generative-ai-art": [
-      "https://ml-art.co/feed",
       "https://aiartists.org/feed",
       "https://www.creativebloq.com/feeds/tag/ai-art",
+      "https://ml.berkeley.edu/blog/feed.xml",
+      "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
     ],
+
     "ui-ux-trends": [
       "https://www.smashingmagazine.com/feed/",
       "https://uxplanet.org/feed",
       "https://alistapart.com/main/feed",
-      "https://uxbooth.com/feed/",
+      "https://uxdesign.cc/feed",
+      "https://www.nngroup.com/feed/rss/",
+      "https://www.invisionapp.com/inside-design/feed/",
     ],
+
     "color-typography": [
       "https://www.typewolf.com/feed/",
-      "https://colorhunt.co/feed/",
+      "https://fontsinuse.com/feed",
       "https://blog.adobe.com/en/publish/creative-cloud.xml",
+      "https://typographica.org/feed/",
+      "https://ilovetypography.com/feed/",
     ],
+
     "animation-motion": [
       "https://motionographer.com/feed/",
-      "https://www.animatedreview.com/feed/",
       "https://greensock.com/blog/feed",
+      "https://www.animatedreview.com/feed/",
+      "https://lottiefiles.com/blog/feed",
     ],
+
     "tutorials-walkthroughs": [
       "https://tympanus.net/codrops/feed/",
       "https://webdesign.tutsplus.com/posts.atom",
       "https://designmodo.com/feed/",
+      "https://www.sitepoint.com/design-ux/feed/",
     ],
   },
+
   gaming: {
+    "daily-roundup": [
+      "https://www.polygon.com/rss/index.xml",
+      "https://www.gamespot.com/feeds/news/",
+      "https://www.rockpapershotgun.com/feed",
+      "https://www.gamesradar.com/rss/",
+      "https://www.eurogamer.net/feed",
+    ],
+
+    "pro-guides-tips": [
+      "https://www.gamepur.com/feed",
+      "https://www.thegamer.com/feed/",
+      "https://dotesports.com/feed",
+      "https://www.pcgamer.com/rss/",
+    ],
+
     "retro-gaming": [
       "https://www.timeextension.com/feed/",
       "https://indieretronews.com/feeds/posts/default?alt=rss",
       "https://retrododo.com/feed/",
       "https://www.retrogamer.net/feed/",
     ],
-    "guides-tips": [
-      "https://retropie.org.uk/feed/",
-      "https://www.youtube.com/feeds/videos.xml?channel_id=UC_0CVCfC_3iuHqmyClu59Uw",
-      "https://emulation.gametechwiki.com/index.php?title=Special:RecentChanges&feed=rss",
-    ],
-    "game-collecting": [
-      "https://www.racketboy.com/feed/",
-      "https://consolevariations.com/feed/",
-      "https://retrogamecollecting.com/feed/",
-    ],
-    "daily-roundup": [
-      "https://www.speedrun.com/api/v1/posts.rss",
-      "https://gamesdonequick.com/feeds/blog",
-      "https://tasvideos.org/feed/publications",
-    ],
+
     "indie-spotlights": [
-      "https://itch.io/games/tag-retro.xml",
-      "https://indieretronews.com/feeds/posts/default?alt=rss",
+      "https://indiegames.com/feed/",
+      "https://www.indiedb.com/rss/games/",
+      "https://www.gamedeveloper.com/rss.xml",
       "https://warpdoor.com/feed/",
+      "https://alphabetagamer.com/feed/",
+    ],
+
+    "collectors-hub": [
+      "https://www.racketboy.com/feed/",
+      "https://videogamekrieg.com/feed",
+      "https://www.pricecharting.com/blog/feed",
     ],
   },
 };
@@ -187,10 +235,8 @@ const getFeedDisplayName = (url) => {
     "https://www.coindesk.com/arc/outboundfeeds/rss/": "CoinDesk",
     "https://review.firstround.com/rss/": "First Round Review",
     "https://blog.ycombinator.com/feed/": "Y Combinator Blog",
-    "https://lifehacker.com/rss": "Lifehacker",
     "https://zapier.com/blog/feeds/latest/": "Zapier Blog",
     "https://www.smashingmagazine.com/feed/": "Smashing Magazine",
-    "https://retronator.com/feed/": "Retronator",
     "https://www.timeextension.com/feed/": "Time Extension",
     "https://indieretronews.com/feeds/posts/default?alt=rss":
       "Indie Retro News",
@@ -203,25 +249,72 @@ const getFeedDisplayName = (url) => {
   }
 };
 
+// Enhanced validation functions
+const containsCodeOrTechnical = (text) => {
+  if (!text) return false;
+
+  const codePatterns = [
+    /function\s*\(/,
+    /\=\>/,
+    /\{\s*\}/,
+    /\[\s*\]/,
+    /console\./,
+    /import\s+.*from/,
+    /export\s+(default|const)/,
+    /class\s+\w+\s*{/,
+    /const\s+\w+\s*=/,
+    /let\s+\w+\s*=/,
+    /var\s+\w+\s*=/,
+    /\$\(.*\)/,
+    /document\./,
+    /window\./,
+    /getElementById/,
+    /querySelector/,
+    /addEventListener/,
+    /<[a-z][\s\S]*>/i,
+    /\{margin.*\}/,
+    /\{padding.*\}/,
+    /\.css\s*\{/,
+    /#[a-z]+\s*\{/i,
+    /^https?:\/\/[^\s]+$/,
+    /^www\.[^\s]+$/,
+    /\/\w+\/\w+\.\w{2,4}/,
+    /C:\\.*\\/,
+    /npm\s+install/,
+    /yarn\s+add/,
+    /pip\s+install/,
+    /\/\/.{0,100}$/,
+    /\/\*.*\*\//,
+    /<!--.*-->/,
+    /at\s+\w+\s*\(.*:\d+:\d+\)/,
+    /Error:.*at/,
+    /Exception.*at/,
+    /undefined.*is not/,
+    /^\s*\{.*".*":.*\}\s*$/,
+    /^\s*\[.*\]\s*$/,
+  ];
+
+  return codePatterns.some((pattern) => pattern.test(text));
+};
+
 // Helper function to detect non-English text
 const isLikelyEnglish = (text) => {
   if (!text) return true;
 
   const nonLatinPattern = /[^\u0000-\u007F\u0080-\u00FF]/g;
   const matches = text.match(nonLatinPattern) || [];
-
   const nonLatinRatio = matches.length / text.length;
   if (nonLatinRatio > 0.3) return false;
 
   const nonEnglishScripts = [
-    /[\u0600-\u06FF]/, // Arabic
-    /[\u4E00-\u9FFF]/, // Chinese
-    /[\u3040-\u309F\u30A0-\u30FF]/, // Japanese
-    /[\uAC00-\uD7AF]/, // Korean
-    /[\u0E00-\u0E7F]/, // Thai
-    /[\u0400-\u04FF]/, // Cyrillic
-    /[\u0900-\u097F]/, // Devanagari (Hindi)
-    /[\u0B80-\u0BFF]/, // Tamil
+    /[\u0600-\u06FF]/,
+    /[\u4E00-\u9FFF]/,
+    /[\u3040-\u309F\u30A0-\u30FF]/,
+    /[\uAC00-\uD7AF]/,
+    /[\u0E00-\u0E7F]/,
+    /[\u0400-\u04FF]/,
+    /[\u0900-\u097F]/,
+    /[\u0B80-\u0BFF]/,
   ];
 
   return !nonEnglishScripts.some((pattern) => pattern.test(text));
@@ -231,21 +324,19 @@ const isLikelyEnglish = (text) => {
 const isSpamTitle = (title) => {
   if (!title) return true;
 
-  // Check for excessive special characters
   const specialChars = title.match(/[^\w\s\-.,!?'"]/g) || [];
   const specialRatio = specialChars.length / title.length;
   if (specialRatio > 0.2) return true;
 
-  // Specific spam patterns
   const spamPatterns = [
-    /\(╯.*╰\)/, // Emoticon patterns
-    /[\u2500-\u257F]/, // Box drawing characters
-    /[\u2580-\u259F]/, // Block elements
-    /\[.*\].*\[.*\].*\[.*\]/, // Multiple brackets
-    /【.*】/, // Asian brackets
-    /\uD83D[\uDC00-\uDFFF]/, // Excessive emojis
-    /(.)\1{4,}/, // Repeated characters
-    /^[A-Z\s]{15,}$/, // ALL CAPS TITLES
+    /\(╯.*╰\)/,
+    /[\u2500-\u257F]/,
+    /[\u2580-\u259F]/,
+    /\[.*\].*\[.*\].*\[.*\]/,
+    /【.*】/,
+    /\uD83D[\uDC00-\uDFFF]/,
+    /(.)\1{4,}/,
+    /^[A-Z\s]{15,}$/,
     /\bclick\s*here\b/i,
     /\bfree\s*download\b/i,
     /\bmust\s*see\b/i,
@@ -256,84 +347,161 @@ const isSpamTitle = (title) => {
   return spamPatterns.some((pattern) => pattern.test(title));
 };
 
-// Helper function to detect generic icons
-const isGenericIcon = (url) => {
-  if (!url) return true;
-
-  const genericPatterns = [
-    /favicon/i,
-    /\.ico$/i,
-    /\/ico\//i,
-    /apple-touch-icon/i,
-    /feed[-_]?icon/i,
-    /rss[-_]?icon/i,
-    /default[-_]?thumb/i,
-    /default[-_]?image/i,
-    /placeholder/i,
-    /no[-_]?image/i,
-    /avatar/i,
-    /16x16|32x32|48x48|64x64|72x72|96x96|120x120|128x128|144x144|152x152/i,
-    /\/icons?\//i,
-    /\/assets\/icons?\//i,
-    /\/images\/icons?\//i,
-    /\/static\/icons?\//i,
-    /logo/i,
-    /brand/i,
-    /\/site[-_]?assets\//i,
-    /profile/i,
-    /author[-_]?image/i,
-    /og[-_]?image[-_]?default/i,
-    /twitter[-_]?card[-_]?default/i,
-    /\.gravatar\.com/i,
-    /\.wp\.com\/.*\/favicon/i,
-    /icon[-_]?\d{2,3}x\d{2,3}/i,
-    /touch[-_]?icon/i,
-    /ms[-_]?icon/i,
-    /shortcut[-_]?icon/i,
-  ];
-
-  return genericPatterns.some((pattern) => pattern.test(url));
-};
-
-// Strict thumbnail validation - must be real article image
+// Strict thumbnail validation
 const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
   if (!thumbnailUrl) return false;
 
-  // Must be a proper image URL
-  const imageExtensions = /\.(jpg|jpeg|png|webp)$/i;
+  const imageExtensions = /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i;
   const hasImageExtension = imageExtensions.test(thumbnailUrl);
-
-  // Check if URL contains image indicators
   const hasImagePath =
-    /\/(images?|img|media|content|uploads|photos?|pictures?|graphics?)\//i.test(
+    /\/(images?|img|media|content|uploads|photos?|pictures?|graphics?|articles?|posts?|blog|news|wp-content)\//i.test(
       thumbnailUrl
     );
 
-  // Must either have proper extension OR be in an images directory
   if (!hasImageExtension && !hasImagePath) return false;
 
-  // Reject generic/icon images
-  if (isGenericIcon(thumbnailUrl)) return false;
-
-  // Reject CDN patterns that typically serve icons
-  const iconCDNs = [
-    /\.gravatar\.com/i,
-    /\.wp\.com\/i\/blank\.jpg/i,
+  const genericPatterns = [
+    /favicon/i,
+    /\.ico($|\?)/i,
+    /\/ico\//i,
+    /apple-touch-icon/i,
+    /touch[-_]?icon/i,
+    /site[-_]?icon/i,
+    /app[-_]?icon/i,
+    /logo/i,
+    /brand/i,
+    /masthead/i,
+    /header[-_]?image/i,
+    /avatar/i,
+    /profile[-_]?(pic|photo|image)/i,
+    /user[-_]?(pic|photo|image)/i,
+    /author[-_]?(pic|photo|image)/i,
+    /\/authors?\//i,
+    /gravatar/i,
+    /default/i,
     /placeholder/i,
-    /no-image/i,
-    /default-thumb/i,
+    /no[-_]?image/i,
+    /no[-_]?photo/i,
+    /empty[-_]?image/i,
+    /blank[-_]?image/i,
+    /missing[-_]?image/i,
+    /fallback/i,
+    /og[-_]?image[-_]?default/i,
+    /twitter[-_]?card[-_]?default/i,
+    /feed[-_]?icon/i,
+    /rss[-_]?icon/i,
+    /16x16|24x24|32x32|48x48|64x64|72x72|96x96|120x120|128x128|144x144|152x152|180x180|192x192|256x256/i,
+    /\/icons?\//i,
+    /\/emoji\//i,
+    /\/wp-includes\//i,
+    /\/wp-admin\//i,
+    /1x1\.gif/i,
+    /spacer\.gif/i,
+    /clear\.gif/i,
+    /share[-_]?button/i,
+    /social[-_]?button/i,
   ];
 
-  if (iconCDNs.some((pattern) => pattern.test(thumbnailUrl))) return false;
+  if (genericPatterns.some((pattern) => pattern.test(thumbnailUrl))) {
+    return false;
+  }
 
-  // Check minimum size requirements
-  const sizePattern = /(\d{2,4})[x\-_](\d{2,4})/;
+  const sizePattern = /[-_](\d{3,4})x(\d{3,4})[.-]/;
   const sizeMatch = thumbnailUrl.match(sizePattern);
   if (sizeMatch) {
     const width = parseInt(sizeMatch[1]);
     const height = parseInt(sizeMatch[2]);
-    if (width < 300 || height < 200) return false;
+    if (width < 400 || height < 300) return false;
   }
+
+  return true;
+};
+
+// Enhanced description quality check
+const isHighQualityDescription = (description, title = "") => {
+  if (!description || description.length < 30) return false;
+
+  const lower = description.toLowerCase();
+  const titleLower = title.toLowerCase();
+
+  if (title && lower === titleLower) return false;
+
+  if (containsCodeOrTechnical(description)) return false;
+
+  const urlPattern = /https?:\/\/[^\s]+/g;
+  const urls = description.match(urlPattern) || [];
+  const urlCharCount = urls.join("").length;
+  if (urlCharCount > description.length * 0.3) return false;
+
+  const genericPatterns = [
+    /^read the full article/i,
+    /^click here to/i,
+    /^learn more about/i,
+    /^discover how/i,
+    /^find out why/i,
+    /^the post .* appeared first on/i,
+    /^continue reading/i,
+    /^read more at/i,
+    /^source:/i,
+    /^article url:/i,
+    /^link:/i,
+    /^url:/i,
+    /^posted by/i,
+    /^submitted by/i,
+    /^comments:/i,
+    /^share this/i,
+    /^related articles/i,
+    /^tags:/i,
+    /^category:/i,
+    /^filed under:/i,
+    /^this entry was posted/i,
+  ];
+
+  if (genericPatterns.some((pattern) => pattern.test(lower))) {
+    return false;
+  }
+
+  const words = lower.split(/\s+/).filter((w) => w.length > 2);
+  const uniqueWords = new Set(words);
+  const uniqueRatio = uniqueWords.size / words.length;
+  if (uniqueRatio < 0.5) return false;
+
+  const naturalLanguageWords = [
+    "the",
+    "a",
+    "an",
+    "and",
+    "or",
+    "but",
+    "in",
+    "on",
+    "at",
+    "to",
+    "for",
+    "of",
+    "with",
+    "by",
+    "from",
+    "as",
+    "is",
+    "was",
+    "are",
+    "were",
+  ];
+  const hasNaturalFlow = naturalLanguageWords.some(
+    (word) => lower.includes(` ${word} `) || lower.startsWith(`${word} `)
+  );
+
+  if (!hasNaturalFlow && description.length > 50) return false;
+
+  const sentences = description
+    .split(/[.!?]+/)
+    .filter((s) => s.trim().length > 10);
+  if (sentences.length === 0) return false;
+
+  const specialChars = description.match(/[^\w\s\-.,!?'"]/g) || [];
+  const specialRatio = specialChars.length / description.length;
+  if (specialRatio > 0.1) return false;
 
   return true;
 };
@@ -370,11 +538,7 @@ const extractBestThumbnail = async (item, source) => {
     let imgMatch;
     while ((imgMatch = imgRegex.exec(content)) !== null) {
       const imgUrl = imgMatch[1];
-      if (
-        !isGenericIcon(imgUrl) &&
-        !imgUrl.includes("emoji") &&
-        !imgUrl.includes("smilie")
-      ) {
+      if (!imgUrl.includes("emoji") && !imgUrl.includes("smilie")) {
         candidates.push(imgUrl);
       }
     }
@@ -389,9 +553,13 @@ const extractBestThumbnail = async (item, source) => {
   return null;
 };
 
-// Helper function to clean descriptions
+// Enhanced clean description function
 const cleanDescription = (rawDescription, title = "") => {
   if (!rawDescription) return "";
+
+  if (containsCodeOrTechnical(rawDescription)) {
+    return "";
+  }
 
   let cleaned = rawDescription.replace(/<[^>]*>/g, " ");
 
@@ -409,13 +577,31 @@ const cleanDescription = (rawDescription, title = "") => {
   cleaned = cleaned.replace(/@[\w]+/g, "");
   cleaned = cleaned.replace(/#[\w]+/g, "");
 
+  const metaPatterns = [
+    /^article url:/i,
+    /^link:/i,
+    /^url:/i,
+    /^https?:\/\//i,
+    /^www\./i,
+    /^read the full/i,
+    /^click here/i,
+    /^source:/i,
+    /^originally published/i,
+    /^the post .* appeared/i,
+  ];
+
+  if (metaPatterns.some((pattern) => pattern.test(cleaned.trim()))) {
+    return "";
+  }
+
   const sentences = cleaned.split(/[.!?]+/).filter((sentence) => {
     const lower = sentence.toLowerCase().trim();
 
     if (lower.length < 20) return false;
 
+    if (containsCodeOrTechnical(sentence)) return false;
+
     const skipPatterns = [
-      // Promotional/Sales content
       /\$\d+/,
       /\d+\s*%\s*off/i,
       /sale/i,
@@ -428,16 +614,12 @@ const cleanDescription = (rawDescription, title = "") => {
       /best price/i,
       /black friday/i,
       /cyber monday/i,
-      /labor day/i,
-      /holiday sale/i,
       /limited time/i,
       /act now/i,
       /don't miss/i,
       /expires/i,
       /free shipping/i,
       /special offer/i,
-
-      // Meta content
       /^(the )?post .* appeared/i,
       /^read more/i,
       /^continue reading/i,
@@ -450,8 +632,6 @@ const cleanDescription = (rawDescription, title = "") => {
       /follow us/i,
       /share this/i,
       /comments? (on|off|closed)/i,
-
-      // Time-sensitive
       /^today only/i,
       /^this week/i,
       /^last chance/i,
@@ -463,18 +643,7 @@ const cleanDescription = (rawDescription, title = "") => {
 
   let description = sentences.slice(0, 3).join(". ").trim();
 
-  // Final check for promotional keywords
-  const promotionalKeywords = [
-    "sale",
-    "deal",
-    "discount",
-    "off for",
-    "save $",
-    "only $",
-    "just $",
-  ];
-  const descLower = description.toLowerCase();
-  if (promotionalKeywords.some((keyword) => descLower.includes(keyword))) {
+  if (!isHighQualityDescription(description, title)) {
     return "";
   }
 
@@ -509,63 +678,19 @@ const extractArticleContent = (item) => {
   return null;
 };
 
-// Helper function to check description quality
-const isHighQualityDescription = (description, title = "") => {
-  if (!description || description.length < 30) return false;
-
-  const lower = description.toLowerCase();
-  const titleLower = title.toLowerCase();
-
-  if (title && lower === titleLower) return false;
-
-  const hasGoodStructure =
-    description.split(" ").length >= 8 &&
-    description.length >= 80 &&
-    /[A-Z]/.test(description[0]);
-
-  const words = lower.split(/\s+/);
-  const uniqueWords = new Set(words);
-  const uniqueRatio = uniqueWords.size / words.length;
-  if (uniqueRatio < 0.5) return false;
-
-  const fillerPhrases = [
-    "lorem ipsum",
-    "test test",
-    "undefined",
-    "null",
-    "none",
-    "no description",
-    "coming soon",
-    "under construction",
-    "...",
-    "tbd",
-    "n/a",
-  ];
-
-  if (fillerPhrases.some((phrase) => lower.includes(phrase))) {
-    return false;
-  }
-
-  return hasGoodStructure;
-};
-
-// Parse and normalize feed items with STRICT requirements
+// Enhanced parse feed item with strict validation
 const parseFeedItem = async (item, source) => {
-  // Check title quality first
   const title = item.title || "";
 
-  // Skip if title is spam-like
   if (isSpamTitle(title)) {
     console.log(`Filtered spam title: "${title}"`);
     return null;
   }
 
-  // Skip if not English
   if (!isLikelyEnglish(title)) {
     return null;
   }
 
-  // Skip promotional content
   const titleLower = title.toLowerCase();
   const promotionalKeywords = [
     "$",
@@ -579,6 +704,10 @@ const parseFeedItem = async (item, source) => {
     "black friday",
     "cyber monday",
     "prime day",
+    "coupon",
+    "promo code",
+    "free shipping",
+    "limited time",
   ];
 
   for (const keyword of promotionalKeywords) {
@@ -588,27 +717,41 @@ const parseFeedItem = async (item, source) => {
     }
   }
 
-  // STRICT thumbnail requirement
   const thumbnail = await extractBestThumbnail(item, source);
 
-  // Skip articles without valid thumbnails
   if (!thumbnail || !(await isRealArticleThumbnail(thumbnail, item))) {
     console.log(`Filtered: No valid thumbnail for "${title}"`);
     return null;
   }
 
-  // Get clean description
   let description = extractArticleContent(item);
 
+  if (description && containsCodeOrTechnical(description)) {
+    console.log(`Filtered: Code/technical content in "${title}"`);
+    return null;
+  }
+
   if (!description || !isHighQualityDescription(description, title)) {
-    if (title.length > 60) {
-      description = title
-        .replace(/\|.*$/, "")
-        .replace(/[-–—](?=[^-–—]*$).*$/, "")
-        .trim();
-    } else {
-      return null;
-    }
+    console.log(`Filtered: Low quality description for "${title}"`);
+    return null;
+  }
+
+  const descLower = description.toLowerCase();
+  const titleWords = titleLower.split(/\s+/);
+  const titleWordsInDesc = titleWords.filter(
+    (word) => word.length > 3 && descLower.includes(word)
+  );
+
+  if (
+    titleWords.length > 0 &&
+    titleWordsInDesc.length / titleWords.length > 0.7
+  ) {
+    console.log(`Filtered: Description too similar to title for "${title}"`);
+    return null;
+  }
+
+  if (description.length < 50 || title.length < 10) {
+    return null;
   }
 
   if (description.length > 250) {
@@ -622,8 +765,6 @@ const parseFeedItem = async (item, source) => {
       }
     }
     description = truncated || description.substring(0, 247) + "...";
-  } else if (description.length < 50) {
-    return null;
   }
 
   const pubDate =
@@ -643,11 +784,17 @@ const parseFeedItem = async (item, source) => {
   };
 };
 
-// Fetch a single RSS feed with timeout
+// Fetch single RSS feed with enhanced filtering
 const fetchSingleFeed = async (url, timeout = 5000) => {
-  // Skip known promotional sources
-  if (url.includes("lifehacker.com")) {
-    console.log("Skipping Lifehacker feed (too promotional)");
+  const problematicSources = [
+    "lifehacker.com",
+    "gizmodo.com",
+    "kotaku.com",
+    "deadspin.com",
+  ];
+
+  if (problematicSources.some((source) => url.includes(source))) {
+    console.log(`Skipping problematic source: ${url}`);
     return [];
   }
 
@@ -670,8 +817,10 @@ const fetchSingleFeed = async (url, timeout = 5000) => {
             item.description.length >= 50 &&
             item.title &&
             item.title.length >= 10 &&
-            item.thumbnail
-          ); // Must have thumbnail
+            item.thumbnail &&
+            !containsCodeOrTechnical(item.description) &&
+            isHighQualityDescription(item.description, item.title)
+          );
         });
 
       resolve(validItems);
@@ -683,14 +832,15 @@ const fetchSingleFeed = async (url, timeout = 5000) => {
   });
 };
 
-// Quality scoring function
+// Enhanced quality scoring
 const scoreArticleQuality = (item) => {
   let score = 0;
 
-  // Heavily prioritize articles WITH thumbnails
-  if (item.thumbnail) score += 10;
+  if (item.thumbnail) score += 20;
 
-  // Clean title (no special chars)
+  if (!containsCodeOrTechnical(item.description)) score += 10;
+  if (isHighQualityDescription(item.description, item.title)) score += 10;
+
   const specialCount = (item.title.match(/[^\w\s\-.,!?'"]/g) || []).length;
   if (specialCount === 0) score += 5;
 
@@ -703,8 +853,8 @@ const scoreArticleQuality = (item) => {
 
   const hoursSincePublished =
     (Date.now() - new Date(item.pubDate)) / (1000 * 60 * 60);
-  if (hoursSincePublished < 24) score += 3;
-  else if (hoursSincePublished < 72) score += 2;
+  if (hoursSincePublished < 24) score += 5;
+  else if (hoursSincePublished < 72) score += 3;
   else if (hoursSincePublished < 168) score += 1;
 
   return score;
@@ -744,7 +894,6 @@ app.post("/api/feeds", async (req, res) => {
       return true;
     });
 
-    // Sort by quality score and date
     allItems.sort((a, b) => {
       const scoreA = scoreArticleQuality(a);
       const scoreB = scoreArticleQuality(b);
@@ -756,7 +905,6 @@ app.post("/api/feeds", async (req, res) => {
       return new Date(b.pubDate) - new Date(a.pubDate);
     });
 
-    // Fixed limit of 10 items
     const maxItems = 10;
     const finalItems = allItems.slice(0, maxItems);
 
@@ -856,7 +1004,6 @@ module.exports = async (req, res) => {
       return true;
     });
 
-    // Sort by quality score and date
     allItems.sort((a, b) => {
       const scoreA = scoreArticleQuality(a);
       const scoreB = scoreArticleQuality(b);
@@ -868,7 +1015,6 @@ module.exports = async (req, res) => {
       return new Date(b.pubDate) - new Date(a.pubDate);
     });
 
-    // Fixed limit of 10 items
     const maxItems = 10;
     const finalItems = allItems.slice(0, maxItems);
 
