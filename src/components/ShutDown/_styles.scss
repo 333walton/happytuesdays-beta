@@ -48,6 +48,9 @@ $grey-checkered: "data:image/gif;base64,R0lGODlhAgACAJEAAAAAAP///8zMzP///yH5BAEA
       margin-left: 4px;
       flex-grow: 1;
     }
+    button.btn.ButtonForm.btn--disabled {
+      color: grey !important;
+    }
   }
 }
 

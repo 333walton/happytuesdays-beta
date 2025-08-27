@@ -887,10 +887,17 @@ pre.bios-sysinfo * {
   -webkit-text-fill-color: #000 !important; /* WebKit-specific fill */
   -webkit-appearance: none; /* Remove native styling */
   appearance: none; /* Cross-browser support */
+  button.btn.ButtonForm.btn--disabled {
+    color: grey !important;
+  }
 }
 
 button.btn.ButtonProgram.btn--active::before {
   color: black; /* or #000 or rgb(0, 0, 0) */
+}
+
+button.btn.ButtonForm.btn--disabled {
+  color: grey !important;
 }
 
 .btn.StartButton {
