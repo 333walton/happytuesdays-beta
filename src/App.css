@@ -947,7 +947,7 @@ button.btn.ButtonProgram.btn--active::before {
       .bios-active
     ):not(.windows-launch-active) {
     background-color: darkslategrey !important;
-    transition: background-color 0.35s ease-in-out;
+    transition: background-color 0.3s ease-in-out;
   }
 
   /* Additional selectors for when startup sequence ends - MOBILE ONLY */
@@ -955,7 +955,7 @@ button.btn.ButtonProgram.btn--active::before {
   .startup-sequence-ended body,
   body.startup-sequence-ended {
     background-color: darkslategrey !important;
-    transition: background-color 0.35s ease-in-out;
+    transition: background-color 0.3s ease-in-out;
   }
 
   /* Override body background during startup - MOBILE ONLY */
@@ -993,5 +993,50 @@ button.btn.ButtonProgram.btn--active::before {
   body.explorer-view-active,
   body.startup-sequence-ended {
     overflow: visible;
+  }
+
+  /* Force light blue background during Windows shutdown sequence - MOBILE ONLY */
+  .windows-shutting-down-active,
+  .windows-shutting-down-active body,
+  body.windows-shutting-down-active,
+  body:has(.windowsShuttingDown) {
+    background-color: #a6c7df !important;
+  }
+
+  /* Ensure shutdown screen components have light blue background - MOBILE ONLY */
+  .desktop.windowsShuttingDown {
+    background-color: #a6c7df !important;
+    background-image: url("./assets/windowsShuttingDown-min.png");
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* iOS Safari fix */
+    width: 100vw;
+  }
+
+  /* Ensure full viewport coverage during shutdown - MOBILE ONLY */
+  .windows-shutdown-container,
+  .shutdown-sequence-container {
+    background-color: #a6c7df !important;
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* iOS Safari fix */
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+  }
+
+  /* Override any black/darkslategrey areas during shutdown - MOBILE ONLY */
+  .windowsShuttingDown *,
+  .windows-shutting-down-active *,
+  body.windows-shutting-down-active * {
+    background-color: inherit;
+  }
+
+  /* Prevent scrolling during shutdown - MOBILE ONLY */
+  body.windows-shutting-down-active {
+    overflow: hidden;
   }
 }
