@@ -144,7 +144,7 @@ const RSS_FEEDS = {
     ],
 
     "color-typography": [
-      "https://www.typewolf.com/feed/",
+      //"https://www.typewolf.com/feed/",
       "https://fontsinuse.com/feed",
       "https://blog.adobe.com/en/publish/creative-cloud.xml",
       "https://typographica.org/feed/",
@@ -791,6 +791,7 @@ const fetchSingleFeed = async (url, timeout = 5000) => {
     "gizmodo.com",
     "kotaku.com",
     "deadspin.com",
+    "www.typewolf.com",
   ];
 
   if (problematicSources.some((source) => url.includes(source))) {

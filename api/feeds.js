@@ -23,119 +23,167 @@ const RSS_FEEDS = {
       "https://machinelearningmastery.com/feed/",
       "https://www.marktechpost.com/feed/",
       "https://hnrss.org/newest?q=AI+OR+machine+learning",
+      "https://blog.google/technology/ai/rss/",
+      "https://huggingface.co/blog/feed.xml",
+      "https://www.deeplearning.ai/blog/feed/",
     ],
+
     "martech-adtech": [
       "https://martech.org/feed/",
       "https://adexchanger.com/feed/",
-      "https://adtechdaily.com/feed/",
       "https://marketingland.com/feed/",
+      "https://chiefmartec.com/feed/",
+      "https://www.marketingtechnews.net/rss.xml",
     ],
+
     "web-dev-devops": [
       "https://css-tricks.com/feed/",
       "https://www.smashingmagazine.com/feed/",
       "https://dev.to/feed",
-      "https://scotch.io/feed",
       "https://web.dev/feed.xml",
+      "https://blog.logrocket.com/feed/",
+      "https://www.joshwcomeau.com/rss.xml",
+      "https://kentcdodds.com/blog/rss.xml",
     ],
+
     "cybersecurity-privacy": [
       "https://krebsonsecurity.com/feed/",
       "https://feeds.feedburner.com/TheHackersNews",
       "https://www.darkreading.com/rss.xml",
       "https://www.schneier.com/feed/atom/",
-      "https://www.wired.com/feed/category/security/latest/rss",
+      "https://www.bleepingcomputer.com/feed/",
+      "https://threatpost.com/feed/",
     ],
+
     "blockchain-web3": [
       "https://www.coindesk.com/arc/outboundfeeds/rss/",
       "https://decrypt.co/feed",
-      "https://www.theblock.co/rss/",
-      "https://api.theblockbeats.news/v2/rss/all",
+      "https://cointelegraph.com/rss",
+      "https://ethereum.org/en/blog/feed.xml",
+      "https://blog.chain.link/rss/",
     ],
   },
+
   builder: {
     "startup-stories": [
       "https://review.firstround.com/rss/",
       "https://blog.ycombinator.com/feed/",
-      "https://steveblank.com/feed/",
       "https://techcrunch.com/category/startups/feed/",
       "https://www.indiehackers.com/feed.xml",
+      "https://sifted.eu/feed/",
+      "https://venturebeat.com/category/entrepreneur/feed/",
     ],
+
     "productivity-hacks": [
-      //"https://lifehacker.com/rss",
-      "https://gettingthingsdone.com/feed/",
       "https://zenhabits.net/feed/",
       "https://jamesclear.com/feed",
+      "https://gettingthingsdone.com/feed/",
+      "https://aliabdaal.com/rss/",
+      "https://tim.blog/feed/",
+      "https://calnewport.com/blog/feed/",
     ],
+
     "automation-no-code": [
       "https://zapier.com/blog/feeds/latest/",
-      "https://nocodedevs.com/feed/",
       "https://bubble.io/blog/rss",
-      "https://www.makerpad.co/feed",
+      "https://www.nocode.tech/feed",
+      "https://blog.airtable.com/rss/",
+      "https://webflow.com/blog/feed.rss",
+      "https://blog.n8n.io/rss/",
     ],
+
     "project-management": [
       "https://blog.asana.com/feed/",
       "https://blog.trello.com/rss",
       "https://monday.com/blog/feed/",
+      "https://www.projectmanager.com/blog/feed",
+      "https://blog.clickup.com/feed/",
     ],
+
     "momentum-mindset": [
-      "https://dailystoic.com/feed/",
-      "https://modernstoicism.com/feed/",
+      "https://fs.blog/feed/",
+      "https://ryanholiday.net/feed/",
+      "https://markmanson.net/feed",
       "https://www.artofmanliness.com/feed/",
+      "https://sethgodin.typepad.com/seths_blog/atom.xml",
     ],
   },
+
   art: {
     "generative-ai-art": [
-      "https://ml-art.co/feed",
       "https://aiartists.org/feed",
       "https://www.creativebloq.com/feeds/tag/ai-art",
+      "https://ml.berkeley.edu/blog/feed.xml",
+      "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
     ],
+
     "ui-ux-trends": [
       "https://www.smashingmagazine.com/feed/",
       "https://uxplanet.org/feed",
       "https://alistapart.com/main/feed",
-      "https://uxbooth.com/feed/",
+      "https://uxdesign.cc/feed",
+      "https://www.nngroup.com/feed/rss/",
+      "https://www.invisionapp.com/inside-design/feed/",
     ],
+
     "color-typography": [
-      "https://www.typewolf.com/feed/",
-      "https://colorhunt.co/feed/",
+      //"https://www.typewolf.com/feed/",
+      "https://fontsinuse.com/feed",
       "https://blog.adobe.com/en/publish/creative-cloud.xml",
+      "https://typographica.org/feed/",
+      "https://ilovetypography.com/feed/",
     ],
+
     "animation-motion": [
       "https://motionographer.com/feed/",
-      "https://www.animatedreview.com/feed/",
       "https://greensock.com/blog/feed",
+      "https://www.animatedreview.com/feed/",
+      "https://lottiefiles.com/blog/feed",
     ],
+
     "tutorials-walkthroughs": [
       "https://tympanus.net/codrops/feed/",
       "https://webdesign.tutsplus.com/posts.atom",
       "https://designmodo.com/feed/",
+      "https://www.sitepoint.com/design-ux/feed/",
     ],
   },
+
   gaming: {
+    "daily-roundup": [
+      "https://www.polygon.com/rss/index.xml",
+      "https://www.gamespot.com/feeds/news/",
+      "https://www.rockpapershotgun.com/feed",
+      "https://www.gamesradar.com/rss/",
+      "https://www.eurogamer.net/feed",
+    ],
+
+    "pro-guides-tips": [
+      "https://www.gamepur.com/feed",
+      "https://www.thegamer.com/feed/",
+      "https://dotesports.com/feed",
+      "https://www.pcgamer.com/rss/",
+    ],
+
     "retro-gaming": [
       "https://www.timeextension.com/feed/",
       "https://indieretronews.com/feeds/posts/default?alt=rss",
       "https://retrododo.com/feed/",
       "https://www.retrogamer.net/feed/",
     ],
-    "guides-tips": [
-      "https://retropie.org.uk/feed/",
-      "https://www.youtube.com/feeds/videos.xml?channel_id=UC_0CVCfC_3iuHqmyClu59Uw",
-      "https://emulation.gametechwiki.com/index.php?title=Special:RecentChanges&feed=rss",
-    ],
-    "game-collecting": [
-      "https://www.racketboy.com/feed/",
-      "https://consolevariations.com/feed/",
-      "https://retrogamecollecting.com/feed/",
-    ],
-    "daily-roundup": [
-      "https://www.speedrun.com/api/v1/posts.rss",
-      "https://gamesdonequick.com/feeds/blog",
-      "https://tasvideos.org/feed/publications",
-    ],
+
     "indie-spotlights": [
-      "https://itch.io/games/tag-retro.xml",
-      "https://indieretronews.com/feeds/posts/default?alt=rss",
+      "https://indiegames.com/feed/",
+      "https://www.indiedb.com/rss/games/",
+      "https://www.gamedeveloper.com/rss.xml",
       "https://warpdoor.com/feed/",
+      "https://alphabetagamer.com/feed/",
+    ],
+
+    "collectors-hub": [
+      "https://www.racketboy.com/feed/",
+      "https://videogamekrieg.com/feed",
+      "https://www.pricecharting.com/blog/feed",
     ],
   },
 };

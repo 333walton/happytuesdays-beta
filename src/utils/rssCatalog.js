@@ -13,7 +13,6 @@ export const RSS_FEEDS = {
       "https://blog.google/technology/ai/rss/",
       "https://huggingface.co/blog/feed.xml",
       "https://www.deeplearning.ai/blog/feed/",
-      "https://distill.pub/rss.xml",
     ],
 
     "martech-adtech": [
@@ -22,7 +21,6 @@ export const RSS_FEEDS = {
       "https://marketingland.com/feed/",
       "https://chiefmartec.com/feed/",
       "https://www.marketingtechnews.net/rss.xml",
-      "https://digiday.com/topic/marketing-technology/feed/",
     ],
 
     "web-dev-devops": [
@@ -33,7 +31,6 @@ export const RSS_FEEDS = {
       "https://blog.logrocket.com/feed/",
       "https://www.joshwcomeau.com/rss.xml",
       "https://kentcdodds.com/blog/rss.xml",
-      "https://blog.containerize.com/feed/",
     ],
 
     "cybersecurity-privacy": [
@@ -43,7 +40,6 @@ export const RSS_FEEDS = {
       "https://www.schneier.com/feed/atom/",
       "https://www.bleepingcomputer.com/feed/",
       "https://threatpost.com/feed/",
-      "https://www.csoonline.com/index.rss",
     ],
 
     "blockchain-web3": [
@@ -52,20 +48,17 @@ export const RSS_FEEDS = {
       "https://cointelegraph.com/rss",
       "https://ethereum.org/en/blog/feed.xml",
       "https://blog.chain.link/rss/",
-      "https://www.theblockcrypto.com/rss.xml",
     ],
   },
 
   builder: {
     "startup-stories": [
-      // Changed from founder-stories
       "https://review.firstround.com/rss/",
       "https://blog.ycombinator.com/feed/",
       "https://techcrunch.com/category/startups/feed/",
       "https://www.indiehackers.com/feed.xml",
       "https://sifted.eu/feed/",
       "https://venturebeat.com/category/entrepreneur/feed/",
-      "https://www.startupgrind.com/blog/feed/",
     ],
 
     "productivity-hacks": [
@@ -92,16 +85,13 @@ export const RSS_FEEDS = {
       "https://monday.com/blog/feed/",
       "https://www.projectmanager.com/blog/feed",
       "https://blog.clickup.com/feed/",
-      "https://www.pmi.org/learning/library.rss",
     ],
 
     "momentum-mindset": [
-      // Changed from stoic-mindset
       "https://fs.blog/feed/",
       "https://ryanholiday.net/feed/",
       "https://markmanson.net/feed",
       "https://www.artofmanliness.com/feed/",
-      "https://www.scottadamssays.com/feed/",
       "https://sethgodin.typepad.com/seths_blog/atom.xml",
     ],
   },
@@ -111,7 +101,6 @@ export const RSS_FEEDS = {
       "https://aiartists.org/feed",
       "https://www.creativebloq.com/feeds/tag/ai-art",
       "https://ml.berkeley.edu/blog/feed.xml",
-      "https://www.vice.com/en/rss/section/tech",
       "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
     ],
 
@@ -125,7 +114,7 @@ export const RSS_FEEDS = {
     ],
 
     "color-typography": [
-      "https://www.typewolf.com/feed/",
+      //"https://www.typewolf.com/feed/",
       "https://fontsinuse.com/feed",
       "https://blog.adobe.com/en/publish/creative-cloud.xml",
       "https://typographica.org/feed/",
@@ -137,7 +126,6 @@ export const RSS_FEEDS = {
       "https://greensock.com/blog/feed",
       "https://www.animatedreview.com/feed/",
       "https://lottiefiles.com/blog/feed",
-      "https://www.schoolofmotion.com/blog/feed",
     ],
 
     "tutorials-walkthroughs": [
@@ -145,25 +133,20 @@ export const RSS_FEEDS = {
       "https://webdesign.tutsplus.com/posts.atom",
       "https://designmodo.com/feed/",
       "https://www.sitepoint.com/design-ux/feed/",
-      "https://blog.designcrowd.com/feed",
     ],
   },
 
   gaming: {
     "daily-roundup": [
-      // Changed from daily-roundup (speedruns)
       "https://www.polygon.com/rss/index.xml",
       "https://www.gamespot.com/feeds/news/",
-      "https://www.ign.com/rss/articles/feeds/all",
       "https://www.rockpapershotgun.com/feed",
       "https://www.gamesradar.com/rss/",
       "https://www.eurogamer.net/feed",
     ],
 
     "pro-guides-tips": [
-      // Changed from guides-tips (emulation)
       "https://www.gamepur.com/feed",
-      "https://www.gamerguides.com/feed",
       "https://www.thegamer.com/feed/",
       "https://dotesports.com/feed",
       "https://www.pcgamer.com/rss/",
@@ -174,25 +157,20 @@ export const RSS_FEEDS = {
       "https://indieretronews.com/feeds/posts/default?alt=rss",
       "https://retrododo.com/feed/",
       "https://www.retrogamer.net/feed/",
-      "https://www.vintageisthenewold.com/feed/",
     ],
 
     "indie-spotlights": [
-      // Changed from indie-spotlights (retro releases)
       "https://indiegames.com/feed/",
       "https://www.indiedb.com/rss/games/",
       "https://www.gamedeveloper.com/rss.xml",
-      "https://www.tigsource.com/feed/",
       "https://warpdoor.com/feed/",
       "https://alphabetagamer.com/feed/",
     ],
 
     "collectors-hub": [
-      // Changed from game-collecting
       "https://www.racketboy.com/feed/",
       "https://videogamekrieg.com/feed",
       "https://www.pricecharting.com/blog/feed",
-      "https://nintendoage.com/forum/messageview.cfm?catid=5&threadid=feed",
     ],
   },
 };
