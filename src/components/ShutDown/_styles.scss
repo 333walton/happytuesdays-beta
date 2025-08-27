@@ -8,7 +8,7 @@ $grey-checkered: "data:image/gif;base64,R0lGODlhAgACAJEAAAAAAP///8zMzP///yH5BAEA
   height: 100%;
   display: flex;
   flex-direction: column;
-  z-index: 76;
+  z-index: 99999 !important;
 
   &:after {
     transition: all linear 2s;
@@ -17,6 +17,7 @@ $grey-checkered: "data:image/gif;base64,R0lGODlhAgACAJEAAAAAAP///8zMzP///yH5BAEA
     position: absolute;
     width: 100%;
     height: 1%;
+    z-index: 5 !important;
     content: "";
     filter: brightness(0.2);
   }
@@ -49,3 +50,5 @@ $grey-checkered: "data:image/gif;base64,R0lGODlhAgACAJEAAAAAAP///8zMzP///yH5BAEA
     }
   }
 }
+
+//.ShutDown.animation:after

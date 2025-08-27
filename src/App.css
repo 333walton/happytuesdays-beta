@@ -82,6 +82,17 @@ body {
 .itIsNowSafeToTurnOffYourComputer {
   background-color: #000000 !important;
   display: flex;
+  width: 100vw;
+  height: 80vh;
+}
+
+@media (max-width: 600px) {
+  .itIsNowSafeToTurnOffYourComputer {
+    background-color: #000000 !important;
+    display: flex;
+    width: 100vw;
+    height: 100vh !important;
+  }
 }
 
 .itIsNowSafeToTurnOffYourComputer:after {
@@ -508,7 +519,7 @@ body {
   .TaskBar__start,
   .StandardMenu,
   .StandardMenuItem__child {
-    z-index: 9999 !important;
+    z-index: 15 !important;
     position: absolute !important; /* or absolute, as needed */
   }
 
@@ -527,6 +538,7 @@ body {
   .StartMenuPortal .btn.StartButton {
     display: none !important;
     background-size: auto !important;
+    z-index: 0 !important;
   }
 
   .portaled-start-btn {
@@ -866,4 +878,21 @@ pre.bios-sysinfo * {
       }
     }
   }
+}
+
+.ShutDown__buttons button,
+.ShutDown__buttons [role="button"],
+.ShutDown__buttons .ButtonForm {
+  color: #000 !important; /* Standard CSS */
+  -webkit-text-fill-color: #000 !important; /* WebKit-specific fill */
+  -webkit-appearance: none; /* Remove native styling */
+  appearance: none; /* Cross-browser support */
+}
+
+button.btn.ButtonProgram.btn--active::before {
+  color: black; /* or #000 or rgb(0, 0, 0) */
+}
+
+.btn.StartButton {
+  z-index: 0 !important;
 }
