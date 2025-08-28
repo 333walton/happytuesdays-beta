@@ -48,6 +48,11 @@ class HamsterCreator extends Component {
     if (marquee) {
       marquee.removeEventListener("click", this.handleMarqueeBackgroundClick);
     }
+
+    // Clean up hamster tooltip
+    if (this.hamsterTooltipCleanup) {
+      this.hamsterTooltipCleanup();
+    }
   }
 
   setupMarquee = () => {
@@ -91,8 +96,102 @@ class HamsterCreator extends Component {
 
     hamsterGif.classList.add("hamster-gif");
     hamsterGif.style.cursor = "pointer";
-    hamsterGif.setAttribute("title", "Click me to unleash hamster madness!");
-    hamsterGif.addEventListener("click", this.createHamsterWindow);
+
+    // Add custom tooltip functionality
+    let tooltipEl = null;
+    let tooltipTimer = null;
+
+    const showTooltip = (e) => {
+      // Clear any existing timer
+      if (tooltipTimer) {
+        clearTimeout(tooltipTimer);
+      }
+
+      // Start timer for tooltip delay
+      tooltipTimer = setTimeout(() => {
+        // Create tooltip element
+        tooltipEl = document.createElement("div");
+        tooltipEl.className = "hamster-custom-tooltip";
+        tooltipEl.textContent = "More";
+
+        // Apply the same styling as customTooltip.js
+        tooltipEl.style.position = "fixed";
+        tooltipEl.style.zIndex = "100";
+        tooltipEl.style.backgroundColor = "#ffffe1";
+        tooltipEl.style.border = "1px solid #000";
+        tooltipEl.style.padding = "2px 4px";
+        tooltipEl.style.fontSize = "11px";
+        tooltipEl.style.fontFamily = '"MS Sans Serif", sans-serif';
+        tooltipEl.style.pointerEvents = "none";
+        tooltipEl.style.whiteSpace = "nowrap";
+
+        document.body.appendChild(tooltipEl);
+
+        // Position tooltip below the hamster
+        const rect = hamsterGif.getBoundingClientRect();
+        tooltipEl.style.left = `${
+          rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2
+        }px`;
+        tooltipEl.style.top = `${rect.bottom + 8}px`;
+
+        // Handle repositioning on scroll/resize
+        const positionTooltip = () => {
+          if (!tooltipEl) return;
+          const rect = hamsterGif.getBoundingClientRect();
+          tooltipEl.style.left = `${
+            rect.left + rect.width / 2 - tooltipEl.offsetWidth / 2
+          }px`;
+          tooltipEl.style.top = `${rect.bottom + 8}px`;
+        };
+
+        const scrollHandler = () => positionTooltip();
+        const resizeHandler = () => positionTooltip();
+
+        window.addEventListener("scroll", scrollHandler, true);
+        window.addEventListener("resize", resizeHandler, true);
+
+        // Store cleanup function
+        hamsterGif._tooltipCleanup = () => {
+          if (tooltipEl) {
+            tooltipEl.remove();
+            tooltipEl = null;
+          }
+          window.removeEventListener("scroll", scrollHandler, true);
+          window.removeEventListener("resize", resizeHandler, true);
+        };
+      }, 500); // 500ms delay to match customTooltip.js
+    };
+
+    const hideTooltip = () => {
+      // Clear timer if tooltip hasn't shown yet
+      if (tooltipTimer) {
+        clearTimeout(tooltipTimer);
+        tooltipTimer = null;
+      }
+
+      // Clean up tooltip if it exists
+      if (hamsterGif._tooltipCleanup) {
+        hamsterGif._tooltipCleanup();
+        hamsterGif._tooltipCleanup = null;
+      }
+    };
+
+    // Add event listeners for tooltip
+    hamsterGif.addEventListener("mouseenter", showTooltip);
+    hamsterGif.addEventListener("mouseleave", hideTooltip);
+
+    // Add click handler for creating hamster windows
+    hamsterGif.addEventListener("click", (e) => {
+      hideTooltip(); // Hide tooltip when clicked
+      this.createHamsterWindow(e);
+    });
+
+    // Store reference to cleanup on unmount
+    this.hamsterTooltipCleanup = () => {
+      hamsterGif.removeEventListener("mouseenter", showTooltip);
+      hamsterGif.removeEventListener("mouseleave", hideTooltip);
+      hideTooltip();
+    };
   };
 
   handleMarqueeLinkClick = (e, link, originalHref) => {

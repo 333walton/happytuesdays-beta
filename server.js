@@ -1,4 +1,4 @@
-// server.js - Complete updated version with enhanced filtering
+// server.js - Complete updated version with all enhanced filtering
 const express = require("express");
 const Parser = require("rss-parser");
 const cors = require("cors");
@@ -29,6 +29,28 @@ app.use(
   })
 );
 app.use(express.json());
+
+// Global fingerprint tracking for cross-feed deduplication
+const recentFingerprints = new Set();
+
+// Create content fingerprint for deduplication
+const createFingerprint = (title) => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .substring(0, 30);
+};
+
+// Blocked domains list
+const blockedDomains = [
+  "medium.com",
+  "forbes.com/sites",
+  "businessinsider.com",
+  "buzzfeed.com",
+  "huffpost.com",
+  "vice.com",
+  "qz.com",
+];
 
 // Updated RSS Feed catalog aligned with new categories
 const RSS_FEEDS = {
@@ -121,8 +143,10 @@ const RSS_FEEDS = {
       "https://fs.blog/feed/",
       "https://ryanholiday.net/feed/",
       "https://markmanson.net/feed",
-      "https://www.artofmanliness.com/feed/",
       "https://sethgodin.typepad.com/seths_blog/atom.xml",
+      "https://dailystoic.com/feed/",
+      "https://tim.blog/feed/",
+      "https://jamesclear.com/feed",
     ],
   },
 
@@ -144,7 +168,7 @@ const RSS_FEEDS = {
     ],
 
     "color-typography": [
-      //"https://www.typewolf.com/feed/",
+      "https://www.typewolf.com/feed/",
       "https://fontsinuse.com/feed",
       "https://blog.adobe.com/en/publish/creative-cloud.xml",
       "https://typographica.org/feed/",
@@ -347,9 +371,39 @@ const isSpamTitle = (title) => {
   return spamPatterns.some((pattern) => pattern.test(title));
 };
 
-// Strict thumbnail validation
+// Check for AI/crypto spam topics
+const isSpamTopic = (title, description) => {
+  const spamTopics = [
+    /\$\d+[KMB]?\s*(profit|earned|made)/i,
+    /crypto\s*(millionaire|fortune|rich)/i,
+    /AI\s*(will|might|could)\s*(replace|destroy|eliminate)/i,
+    /ChatGPT\s*(hack|trick|secret)/i,
+    /NFT\s*(boom|crash|dead)/i,
+    /passive\s*income/i,
+    /get\s*rich\s*quick/i,
+  ];
+
+  return spamTopics.some(
+    (pattern) =>
+      (title && pattern.test(title)) ||
+      (description && pattern.test(description))
+  );
+};
+
+// Strict thumbnail validation - ENHANCED with size checking
 const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
   if (!thumbnailUrl) return false;
+
+  // Reject emoji and unicode images
+  if (
+    thumbnailUrl.includes("emoji") ||
+    thumbnailUrl.includes("emoticon") ||
+    thumbnailUrl.includes("twemoji") ||
+    thumbnailUrl.includes("unicode") ||
+    /[\u{1F300}-\u{1F9FF}]/u.test(thumbnailUrl)
+  ) {
+    return false;
+  }
 
   const imageExtensions = /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i;
   const hasImageExtension = imageExtensions.test(thumbnailUrl);
@@ -359,6 +413,17 @@ const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
     );
 
   if (!hasImageExtension && !hasImagePath) return false;
+
+  // Check for minimum dimensions in URL
+  const minWidth = 600;
+  const minHeight = 400;
+
+  if (thumbnailUrl.includes("resize=") || thumbnailUrl.includes("w=")) {
+    const widthMatch = thumbnailUrl.match(/[?&]w=(\d+)/);
+    const heightMatch = thumbnailUrl.match(/[?&]h=(\d+)/);
+    if (widthMatch && parseInt(widthMatch[1]) < minWidth) return false;
+    if (heightMatch && parseInt(heightMatch[1]) < minHeight) return false;
+  }
 
   const genericPatterns = [
     /favicon/i,
@@ -427,6 +492,15 @@ const isHighQualityDescription = (description, title = "") => {
   if (title && lower === titleLower) return false;
 
   if (containsCodeOrTechnical(description)) return false;
+
+  // Check description/title length ratio
+  const titleLength = title.length;
+  const descLength = description.length;
+  const ratio = descLength / titleLength;
+
+  if (ratio < 1.5) {
+    return false;
+  }
 
   const urlPattern = /https?:\/\/[^\s]+/g;
   const urls = description.match(urlPattern) || [];
@@ -682,12 +756,38 @@ const extractArticleContent = (item) => {
 const parseFeedItem = async (item, source) => {
   const title = item.title || "";
 
+  // Check title capitalization quality
+  if (title === title.toUpperCase() && title.length > 10) {
+    console.log(`Filtered ALL CAPS title: "${title}"`);
+    return null;
+  }
+
+  if (title === title.toLowerCase() && title.length > 20) {
+    console.log(`Filtered all lowercase title: "${title}"`);
+    return null;
+  }
+
   if (isSpamTitle(title)) {
     console.log(`Filtered spam title: "${title}"`);
     return null;
   }
 
   if (!isLikelyEnglish(title)) {
+    return null;
+  }
+
+  // Age filter - reject articles older than 7 days
+  const pubDate =
+    item.pubDate || item.isoDate || item.published || new Date().toISOString();
+  const articleAge = Date.now() - new Date(pubDate);
+  const maxAge = 7 * 24 * 60 * 60 * 1000;
+
+  if (articleAge > maxAge) {
+    console.log(
+      `Filtered: Article too old (${Math.floor(
+        articleAge / (24 * 60 * 60 * 1000)
+      )} days): "${title}"`
+    );
     return null;
   }
 
@@ -736,6 +836,45 @@ const parseFeedItem = async (item, source) => {
     return null;
   }
 
+  // Check for spam topics
+  if (isSpamTopic(title, description)) {
+    console.log(`Filtered spam topic: "${title}"`);
+    return null;
+  }
+
+  // Check for suspicious authors
+  const suspiciousAuthors = [
+    /^admin$/i,
+    /^user\d+$/i,
+    /^guest$/i,
+    /^contributor$/i,
+    /^staff$/i,
+    /^editor$/i,
+    /^news\s*desk$/i,
+    /^press\s*release$/i,
+  ];
+
+  if (
+    item.creator &&
+    suspiciousAuthors.some((pattern) => pattern.test(item.creator))
+  ) {
+    console.log(`Filtered suspicious author "${item.creator}": "${title}"`);
+    return null;
+  }
+
+  // Cross-feed deduplication
+  const fingerprint = createFingerprint(title);
+  if (recentFingerprints.has(fingerprint)) {
+    console.log(`Filtered duplicate story: "${title}"`);
+    return null;
+  }
+  recentFingerprints.add(fingerprint);
+
+  // Clear fingerprints periodically
+  if (recentFingerprints.size > 100) {
+    recentFingerprints.clear();
+  }
+
   const descLower = description.toLowerCase();
   const titleWords = titleLower.split(/\s+/);
   const titleWordsInDesc = titleWords.filter(
@@ -767,9 +906,6 @@ const parseFeedItem = async (item, source) => {
     description = truncated || description.substring(0, 247) + "...";
   }
 
-  const pubDate =
-    item.pubDate || item.isoDate || item.published || new Date().toISOString();
-
   return {
     title: title,
     link: item.link || item.guid || "#",
@@ -791,8 +927,13 @@ const fetchSingleFeed = async (url, timeout = 5000) => {
     "gizmodo.com",
     "kotaku.com",
     "deadspin.com",
-    "www.typewolf.com",
   ];
+
+  // Check if URL contains blocked domain
+  if (blockedDomains.some((domain) => url.includes(domain))) {
+    console.log(`Blocked domain: ${url}`);
+    return [];
+  }
 
   if (problematicSources.some((source) => url.includes(source))) {
     console.log(`Skipping problematic source: ${url}`);
@@ -861,7 +1002,7 @@ const scoreArticleQuality = (item) => {
   return score;
 };
 
-// API endpoint to fetch feeds
+// API endpoint to fetch feeds with all filters
 app.post("/api/feeds", async (req, res) => {
   console.log("📨 Received feed request:", req.body);
   const { category, subcategory } = req.body;
@@ -906,8 +1047,163 @@ app.post("/api/feeds", async (req, res) => {
       return new Date(b.pubDate) - new Date(a.pubDate);
     });
 
-    const maxItems = 10;
-    const finalItems = allItems.slice(0, maxItems);
+    // Apply source diversity limit (max 3 per source)
+    const sourceCounts = new Map();
+    const diverseItems = [];
+
+    for (const item of allItems) {
+      const count = sourceCounts.get(item.source) || 0;
+      if (count < 3) {
+        diverseItems.push(item);
+        sourceCounts.set(item.source, count + 1);
+        if (diverseItems.length >= 25) break; // Get more for further filtering
+      }
+    }
+
+    // Filter out articles with duplicate uncommon words in titles
+    const filteredItems = [];
+    const usedUncommonWords = new Set();
+    const commonWords = new Set([
+      "the",
+      "and",
+      "for",
+      "with",
+      "from",
+      "that",
+      "this",
+      "what",
+      "when",
+      "where",
+      "which",
+      "while",
+      "after",
+      "before",
+      "about",
+      "into",
+      "through",
+      "during",
+      "than",
+      "under",
+      "over",
+      "between",
+      "among",
+      "within",
+      "without",
+      "upon",
+      "toward",
+      "against",
+      "across",
+      "behind",
+      "beyond",
+      "inside",
+      "outside",
+      "your",
+      "their",
+      "them",
+      "they",
+      "these",
+      "those",
+      "such",
+      "some",
+      "most",
+      "more",
+      "less",
+      "very",
+      "just",
+      "only",
+      "also",
+      "will",
+      "would",
+      "could",
+      "should",
+      "have",
+      "been",
+      "being",
+      "does",
+      "doing",
+      "done",
+      "make",
+      "made",
+      "take",
+      "took",
+      "come",
+      "came",
+      "know",
+      "knew",
+      "think",
+      "thought",
+      "look",
+      "want",
+      "need",
+      "like",
+      "love",
+      "hate",
+      "good",
+      "best",
+      "well",
+      "much",
+      "many",
+      "each",
+      "every",
+      "other",
+      "another",
+      "there",
+      "here",
+      "where",
+    ]);
+
+    // Track question titles count
+    let questionTitlesCount = 0;
+
+    // Track hour distribution
+    const hourBuckets = new Map();
+
+    for (const item of diverseItems) {
+      // Check question title limit
+      if (item.title.includes("?")) {
+        if (questionTitlesCount >= 3) {
+          console.log(`Filtered excess question title: "${item.title}"`);
+          continue;
+        }
+        questionTitlesCount++;
+      }
+
+      // Check hour distribution (max 2 per hour)
+      const hour = new Date(item.pubDate).getHours();
+      const hourCount = hourBuckets.get(hour) || 0;
+      if (hourCount >= 2) {
+        console.log(
+          `Filtered for time distribution (hour ${hour}): "${item.title}"`
+        );
+        continue;
+      }
+
+      // Check for duplicate uncommon words
+      const titleWords = item.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter((word) => word.length > 4 && !commonWords.has(word));
+
+      let hasDuplicate = false;
+      for (const word of titleWords) {
+        if (usedUncommonWords.has(word)) {
+          console.log(`Filtered duplicate word "${word}" in: "${item.title}"`);
+          hasDuplicate = true;
+          break;
+        }
+      }
+
+      if (!hasDuplicate) {
+        filteredItems.push(item);
+        titleWords.forEach((word) => usedUncommonWords.add(word));
+        hourBuckets.set(hour, hourCount + 1);
+
+        if (filteredItems.length >= 10) break;
+      }
+    }
+
+    const finalItems = filteredItems.slice(0, 10);
 
     res.json({
       items: finalItems,
@@ -1016,8 +1312,148 @@ module.exports = async (req, res) => {
       return new Date(b.pubDate) - new Date(a.pubDate);
     });
 
-    const maxItems = 10;
-    const finalItems = allItems.slice(0, maxItems);
+    // Apply source diversity limit
+    const sourceCounts = new Map();
+    const diverseItems = [];
+
+    for (const item of allItems) {
+      const count = sourceCounts.get(item.source) || 0;
+      if (count < 3) {
+        diverseItems.push(item);
+        sourceCounts.set(item.source, count + 1);
+        if (diverseItems.length >= 25) break;
+      }
+    }
+
+    // Filter duplicate uncommon words and apply other limits
+    const filteredItems = [];
+    const usedUncommonWords = new Set();
+    const commonWords = new Set([
+      "the",
+      "and",
+      "for",
+      "with",
+      "from",
+      "that",
+      "this",
+      "what",
+      "when",
+      "where",
+      "which",
+      "while",
+      "after",
+      "before",
+      "about",
+      "into",
+      "through",
+      "during",
+      "than",
+      "under",
+      "over",
+      "between",
+      "among",
+      "within",
+      "without",
+      "upon",
+      "toward",
+      "against",
+      "across",
+      "behind",
+      "beyond",
+      "inside",
+      "outside",
+      "your",
+      "their",
+      "them",
+      "they",
+      "these",
+      "those",
+      "such",
+      "some",
+      "most",
+      "more",
+      "less",
+      "very",
+      "just",
+      "only",
+      "also",
+      "will",
+      "would",
+      "could",
+      "should",
+      "have",
+      "been",
+      "being",
+      "does",
+      "doing",
+      "done",
+      "make",
+      "made",
+      "take",
+      "took",
+      "come",
+      "came",
+      "know",
+      "knew",
+      "think",
+      "thought",
+      "look",
+      "want",
+      "need",
+      "like",
+      "love",
+      "hate",
+      "good",
+      "best",
+      "well",
+      "much",
+      "many",
+      "each",
+      "every",
+      "other",
+      "another",
+      "there",
+      "here",
+      "where",
+    ]);
+
+    let questionTitlesCount = 0;
+    const hourBuckets = new Map();
+
+    for (const item of diverseItems) {
+      if (item.title.includes("?")) {
+        if (questionTitlesCount >= 3) continue;
+        questionTitlesCount++;
+      }
+
+      const hour = new Date(item.pubDate).getHours();
+      const hourCount = hourBuckets.get(hour) || 0;
+      if (hourCount >= 2) continue;
+
+      const titleWords = item.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter((word) => word.length > 4 && !commonWords.has(word));
+
+      let hasDuplicate = false;
+      for (const word of titleWords) {
+        if (usedUncommonWords.has(word)) {
+          hasDuplicate = true;
+          break;
+        }
+      }
+
+      if (!hasDuplicate) {
+        filteredItems.push(item);
+        titleWords.forEach((word) => usedUncommonWords.add(word));
+        hourBuckets.set(hour, hourCount + 1);
+
+        if (filteredItems.length >= 10) break;
+      }
+    }
+
+    const finalItems = filteredItems.slice(0, 10);
 
     res.status(200).json({
       items: finalItems,

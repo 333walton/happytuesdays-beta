@@ -104,8 +104,10 @@ const RSS_FEEDS = {
       "https://fs.blog/feed/",
       "https://ryanholiday.net/feed/",
       "https://markmanson.net/feed",
-      "https://www.artofmanliness.com/feed/",
       "https://sethgodin.typepad.com/seths_blog/atom.xml",
+      "https://dailystoic.com/feed/",
+      "https://tim.blog/feed/",
+      "https://jamesclear.com/feed",
     ],
   },
 
@@ -127,7 +129,6 @@ const RSS_FEEDS = {
     ],
 
     "color-typography": [
-      //"https://www.typewolf.com/feed/",
       "https://fontsinuse.com/feed",
       "https://blog.adobe.com/en/publish/creative-cloud.xml",
       "https://typographica.org/feed/",
