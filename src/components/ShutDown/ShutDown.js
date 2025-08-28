@@ -14,6 +14,7 @@ class ShutDown extends Component {
     selected: OPTIONS[0],
     display: this.context.shutDownMenu,
   };
+
   componentDidUpdate() {
     if (
       this.context.shutDownMenu &&
@@ -33,6 +34,11 @@ class ShutDown extends Component {
       this.context.restart();
       return;
     }
+  };
+
+  handleHelp = () => {
+    // Refresh the page when Help button is clicked
+    window.location.reload();
   };
 
   render() {
@@ -55,21 +61,25 @@ class ShutDown extends Component {
             <div>
               What do you want your computer to do?
               {OPTIONS.map((option) => (
-                <Radio
+                <div
                   key={option}
-                  value={option}
-                  label={option}
-                  onChange={() => this.setState({ selected: option })}
-                  checked={option === this.state.selected}
-                  isDisabled
-                />
+                  data-option={option}
+                  className="radio-wrapper"
+                >
+                  <Radio
+                    value={option}
+                    label={option}
+                    onChange={() => this.setState({ selected: option })}
+                    checked={option === this.state.selected}
+                  />
+                </div>
               ))}
               <div className="ShutDown__buttons">
                 <ButtonForm onClick={this.process}>OK</ButtonForm>
                 <ButtonForm onClick={context.toggleShutDownMenu}>
                   Cancel
                 </ButtonForm>
-                <ButtonForm isDisabled>Help</ButtonForm>
+                <ButtonForm onClick={this.handleHelp}>Help</ButtonForm>
               </div>
             </div>
           </div>

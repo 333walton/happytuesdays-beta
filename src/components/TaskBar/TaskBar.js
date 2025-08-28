@@ -460,6 +460,17 @@ const TaskBar = () => {
     };
   }, [refreshKey]);
 
+  // In a component that has access to ProgramContext - might not be in the best location but it works
+  useEffect(() => {
+    const body = document.body;
+
+    if (context.shutDownMenu) {
+      body.classList.add("shutdown-active");
+    } else {
+      body.classList.remove("shutdown-active");
+    }
+  }, [context.shutDownMenu]);
+
   useEffect(() => {
     if (!menuOpen || !isMobile) return;
 
@@ -545,7 +556,7 @@ const TaskBar = () => {
 
       <CustomTooltip text={tooltipText} visible={tooltipVisible} />
 
-      {menuOpen && isMobile && (
+      {menuOpen && isMobile && !context.shutDownMenu && (
         <StartMenuPortal>
           <div
             className="StartMenuPortalContainer"

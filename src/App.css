@@ -883,20 +883,24 @@ pre.bios-sysinfo * {
 .ShutDown__buttons button,
 .ShutDown__buttons [role="button"],
 .ShutDown__buttons .ButtonForm {
-  color: #000 !important; /* Standard CSS */
-  -webkit-text-fill-color: #000 !important; /* WebKit-specific fill */
-  -webkit-appearance: none; /* Remove native styling */
-  appearance: none; /* Cross-browser support */
-  button.btn.ButtonForm.btn--disabled {
-    color: grey !important;
-  }
+  color: #000 !important; /* Default text color */
+  -webkit-text-fill-color: #000 !important; /* WebKit */
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 button.btn.ButtonProgram.btn--active::before {
   color: black; /* or #000 or rgb(0, 0, 0) */
 }
 
-button.btn.ButtonForm.btn--disabled {
+/* Disabled state */
+button.btn.ButtonForm.btn--disabled,
+.ShutDown__buttons button:disabled {
+  color: grey !important;
+  -webkit-text-fill-color: grey !important;
+}
+
+.ShutDown__buttons button:disabled {
   color: grey !important;
 }
 
@@ -1046,4 +1050,24 @@ button.btn.ButtonForm.btn--disabled {
   body.windows-shutting-down-active {
     overflow: hidden;
   }
+}
+
+/* Show when not manually hidden AND shutdown is not active */
+body:not(.clippy-manually-hidden) .clippy,
+body:not(.clippy-manually-hidden) #clippy-clickable-overlay,
+body:not(.clippy-manually-hidden) .custom-clippy-balloon,
+body:not(.clippy-manually-hidden) .clippy-balloon {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transition: visibility 1.2s ease-out, opacity 1.2s ease-out !important;
+}
+
+/* Hide clippy and balloons when shutdown is active */
+body:not(.clippy-manually-hidden).shutdown-active .clippy,
+body:not(.clippy-manually-hidden).shutdown-active #clippy-clickable-overlay,
+body:not(.clippy-manually-hidden).shutdown-active .custom-clippy-balloon,
+body:not(.clippy-manually-hidden).shutdown-active .clippy-balloon {
+  opacity: 0 !important;
+  transition: visibility 0.6s ease-in, opacity 0.6s ease-in !important;
 }
