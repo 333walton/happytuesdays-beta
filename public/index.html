@@ -198,6 +198,14 @@
       line-height: .89em;
     }
 
+    .bios-holding {
+      cursor: wait !important;
+    }
+
+    .bios-holding * {
+      cursor: wait !important;
+    }
+
     .BIOSWrapper {
       position: absolute !important; /* Changed from fixed */
       top: 0 !important;
@@ -544,6 +552,8 @@
         progressContainer.classList.add('visible');
         hintText.classList.add('visible');
 
+        biosWrapper.classList.add('bios-holding');
+
         holdTimer = setTimeout(() => {
           // Skip BIOS with fade transition
           clearProgressUpdater();
@@ -556,6 +566,20 @@
           const progress = Math.min((elapsed / HOLD_DURATION) * 100, 100);
           progressBar.style.width = progress + '%';
         }, 50);
+      }
+
+      function endHold() {
+        if (holdTimer) {
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+        clearProgressUpdater();
+
+        progressContainer.classList.remove('visible');
+        hintText.classList.remove('visible');
+        progressBar.style.width = '0%';
+
+        biosWrapper.classList.remove('bios-holding');
       }
 
       function ensureProperStructure() {
@@ -606,6 +630,9 @@
         progressContainer.classList.remove('visible');
         hintText.classList.remove('visible');
         progressBar.style.width = '0%';
+
+        // ADD THIS LINE:
+        biosWrapper.classList.remove('bios-holding');
       }
 
       // Mouse events
