@@ -31,7 +31,8 @@ class ShutDown extends Component {
       return;
     }
     if (this.state.selected === OPTIONS[1]) {
-      this.context.restart();
+      // Restart option - refresh the page
+      window.location.reload();
       return;
     }
   };
@@ -67,10 +68,15 @@ class ShutDown extends Component {
                   className="radio-wrapper"
                 >
                   <Radio
+                    id={option} // Add id prop like in the working example
                     value={option}
                     label={option}
-                    onChange={() => this.setState({ selected: option })}
-                    checked={option === this.state.selected}
+                    onChange={(e) => {
+                      console.log("Radio changed to:", e.target.value); // Debug log
+                      this.setState({ selected: e.target.value });
+                    }}
+                    checked={this.state.selected === option}
+                    isDisabled={false}
                   />
                 </div>
               ))}
@@ -79,7 +85,9 @@ class ShutDown extends Component {
                 <ButtonForm onClick={context.toggleShutDownMenu}>
                   Cancel
                 </ButtonForm>
-                <ButtonForm onClick={this.handleHelp}>Help</ButtonForm>
+                <ButtonForm onClick={this.handleHelp} isDisabled>
+                  Help
+                </ButtonForm>
               </div>
             </div>
           </div>

@@ -64,7 +64,17 @@ $grey-checkered: "data:image/gif;base64,R0lGODlhAgACAJEAAAAAAP///8zMzP///yH5BAEA
     }
   }
 
-  .radio-wrapper[data-option="Restart"],
+  .ShutDown__content {
+    .radio-wrapper[data-option="Restart"] {
+      .Radio,
+      label,
+      span {
+        color: black !important;
+        -webkit-text-fill-color: black !important;
+      }
+    }
+  }
+
   .radio-wrapper[data-option="That third option I forget"] {
     .Radio,
     label,
