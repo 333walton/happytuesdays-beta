@@ -1010,6 +1010,8 @@ const cleanDescription = (rawDescription, title = "") => {
       /subscribe/i,
       /newsletter/i,
       /sign up/i,
+      /article url/i,
+      /article/i,
       /follow us/i,
       /share this/i,
       /comments? (on|off|closed)/i,
