@@ -39,6 +39,7 @@ const HappyTuesdayNewsFeed = ({
   const [loading, setLoading] = useState({});
   const [error, setError] = useState({});
   const [lastRefresh, setLastRefresh] = useState({});
+  const fetchingRef = useRef(new Set());
 
   // Category icons mapping
   const categoryIcons = {
@@ -129,7 +130,7 @@ const HappyTuesdayNewsFeed = ({
       }
 
       // Prefetch feeds for the category in background
-      prefetchFeeds(activeTab);
+      //prefetchFeeds(activeTab);
     }
   }, [activeTab, activeSubTab]); // Removed function dependencies to avoid circular reference
 
@@ -145,13 +146,31 @@ const HappyTuesdayNewsFeed = ({
     } else {
       loadInitialFeed(activeTab);
     }
-  };
+  }; //should i remove this handlerefresh snippet?
 
   // Define functions without useCallback first to avoid circular dependencies
   // In HappyTuesdayNewsFeed.js, update the loadInitialFeed and loadFeed functions
   // to limit items to 10 after fetching:
 
+  const hasLoadedRef = useRef(new Set());
+
   const loadInitialFeed = async (feedType) => {
+    const loadKey = `initial_${feedType}`;
+
+    // Check if we've already loaded this
+    if (hasLoadedRef.current.has(loadKey)) {
+      console.log(`Already loaded ${feedType}, skipping`);
+      return;
+    }
+
+    // Prevent duplicate fetches
+    if (fetchingRef.current.has(feedType)) {
+      console.log(`Already fetching ${feedType}, skipping duplicate`);
+      return;
+    }
+
+    hasLoadedRef.current.add(loadKey);
+    fetchingRef.current.add(feedType);
     setLoading((prev) => ({ ...prev, [feedType]: true }));
     setError((prev) => ({ ...prev, [feedType]: null }));
 
@@ -167,7 +186,7 @@ const HappyTuesdayNewsFeed = ({
           [feedType]: "No items found. Please try again later.",
         }));
       } else {
-        setFeedItems((prev) => ({ ...prev, [feedType]: limitedItems })); // Use limited items
+        setFeedItems((prev) => ({ ...prev, [feedType]: limitedItems }));
         setLastRefresh((prev) => ({ ...prev, [feedType]: Date.now() }));
       }
     } catch (err) {
@@ -177,11 +196,10 @@ const HappyTuesdayNewsFeed = ({
         [feedType]: "Failed to load feed. Please try again.",
       }));
     } finally {
+      fetchingRef.current.delete(feedType);
       setLoading((prev) => ({ ...prev, [feedType]: false }));
     }
   };
-
-  const fetchingRef = useRef(new Set());
 
   const loadFeed = async (category, subcategory) => {
     const feedKey = `${category}_${subcategory}`;
@@ -194,6 +212,7 @@ const HappyTuesdayNewsFeed = ({
 
     fetchingRef.current.add(feedKey);
     setLoading((prev) => ({ ...prev, [feedKey]: true }));
+    setError((prev) => ({ ...prev, [feedKey]: null }));
 
     try {
       const items = await fetchAndCacheFeed(category, subcategory);
@@ -207,7 +226,7 @@ const HappyTuesdayNewsFeed = ({
           [feedKey]: "No items found for this category.",
         }));
       } else {
-        setFeedItems((prev) => ({ ...prev, [feedKey]: limitedItems })); // Use limited items
+        setFeedItems((prev) => ({ ...prev, [feedKey]: limitedItems }));
         setLastRefresh((prev) => ({ ...prev, [feedKey]: Date.now() }));
       }
     } catch (err) {
@@ -738,25 +757,58 @@ const HappyTuesdayNewsFeed = ({
                 </h3>
                 <ul style={styles.subcategoryList}>
                   {categories[activeTab]?.map((category, index) => {
-                    const subCatKebab = category
-                      .toLowerCase()
-                      .replace(/\s+/g, "-")
-                      .replace(/&/g, "and")
-                      .replace(/\//g, "-"); // Replace forward slashes with hyphens
+                    // FIX: Map the display names to the exact RSS_FEEDS keys
+                    const getCategoryKey = (displayName) => {
+                      const mappings = {
+                        // Tech mappings
+                        "AI & Machine Learning": "ai-machine-learning",
+                        "Martech & Adtech": "martech-adtech",
+                        "Blockchain & Web3": "blockchain-web3", // NOT "blockchain-and-web3"
+                        "Cybersecurity & Privacy": "cybersecurity-privacy",
+                        "Web Dev & Dev Ops": "web-dev-devops",
+
+                        // Art mappings
+                        "Generative & AI Art": "generative-ai-art",
+                        "Tutorials & Walkthroughs": "tutorials-walkthroughs",
+                        "UI/UX Trends": "ui-ux-trends",
+                        "Animation & Motion": "animation-motion",
+                        "Color & Typography": "color-typography",
+
+                        // Builder mappings
+                        "Startup Stories": "startup-stories",
+                        "Automation & No-Code": "automation-no-code",
+                        "Project Management": "project-management",
+                        "Productivity Hacks": "productivity-hacks",
+                        "Momentum & Mindset": "momentum-mindset",
+
+                        // Gaming mappings
+                        "Daily Roundup": "daily-roundup",
+                        "Pro Guides & Tips": "pro-guides-tips",
+                        "Retro Gaming": "retro-gaming",
+                        "Indie Spotlights": "indie-spotlights",
+                        "Collectors Hub": "collectors-hub",
+                      };
+
+                      return (
+                        mappings[displayName] ||
+                        displayName.toLowerCase().replace(/\s+/g, "-")
+                      );
+                    };
+
+                    const subCatKey = getCategoryKey(category);
+
                     return (
                       <li
                         key={index}
                         onClick={() =>
-                          navigate(`/feeds/${activeTab}/${subCatKebab}`)
+                          navigate(`/feeds/${activeTab}/${subCatKey}`)
                         }
                         style={{
                           ...styles.subcategoryItem,
                           fontWeight:
-                            activeSubTab === subCatKebab ? "bold" : "normal",
+                            activeSubTab === subCatKey ? "bold" : "normal",
                           color:
-                            activeSubTab === subCatKebab
-                              ? "#e74c3c"
-                              : "inherit",
+                            activeSubTab === subCatKey ? "#e74c3c" : "inherit",
                         }}
                         className="subcategory-item"
                       >

@@ -290,6 +290,9 @@ async function fetchFeedsWithEarlyExit(feedUrls) {
   let totalProcessed = 0;
 
   console.log(`Starting early-exit processing for ${feedUrls.length} feeds`);
+  console.log(
+    `Target: ${TARGET_BUFFER} items, will process max ${MAX_ITEMS_PER_FEED} per feed`
+  );
 
   // Process feeds SEQUENTIALLY for early exit
   for (let i = 0; i < feedUrls.length; i++) {
@@ -298,7 +301,7 @@ async function fetchFeedsWithEarlyExit(feedUrls) {
     // CHECK: Do we have enough items?
     if (qualifiedItems.length >= TARGET_BUFFER) {
       console.log(
-        `Early exit: ${qualifiedItems.length} items after ${i} feeds`
+        `EARLY EXIT: ${qualifiedItems.length} items after ${i} feeds, processed ${totalProcessed} total`
       );
       break;
     }
