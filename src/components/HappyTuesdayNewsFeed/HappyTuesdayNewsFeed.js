@@ -62,10 +62,10 @@ const HappyTuesdayNewsFeed = ({
     "momentum-mindset": "🧘", // renamed from stoic mindset
 
     "daily-roundup": "⏱️", // renamed from speedruns & events
-    "guides-tips": "💾", // renamed from emulation modding
+    "pro-guides-tips": "💾", // renamed from emulation modding
     "retro-gaming": "🕹️", // renamed from retro game news
     "indie-spotlights": "🎲", // renamed from indie retro releases
-    "game-collecting": "🎮", // renamed from collecting & hardware
+    "collectors-hub": "🎮", // renamed from collecting & hardware
   };
 
   // Default category icon
