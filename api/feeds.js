@@ -26,6 +26,10 @@ const RSS_FEEDS = {
       "https://blog.google/technology/ai/rss/",
       "https://huggingface.co/blog/feed.xml",
       "https://www.deeplearning.ai/blog/feed/",
+      "https://hai.stanford.edu/news/rss.xml",
+      "https://allenai.org/rss.xml",
+      "https://venturebeat.com/category/ai/feed/",
+      "https://arxiv-sanity-lite.com/feed/?query=cs.AI",
     ],
 
     "martech-adtech": [
@@ -34,16 +38,20 @@ const RSS_FEEDS = {
       "https://marketingland.com/feed/",
       "https://chiefmartec.com/feed/",
       "https://www.marketingtechnews.net/rss.xml",
+      "https://digiday.com/feed/",
+      "https://www.marketingprofs.com/rss/all",
     ],
 
     "web-dev-devops": [
       "https://css-tricks.com/feed/",
       "https://www.smashingmagazine.com/feed/",
-      "https://dev.to/feed",
       "https://web.dev/feed.xml",
       "https://blog.logrocket.com/feed/",
       "https://www.joshwcomeau.com/rss.xml",
       "https://kentcdodds.com/blog/rss.xml",
+      "https://dev.to/feed/tag/webdev",
+      "https://blog.cloudflare.com/rss/",
+      "https://github.blog/category/development/feed/",
     ],
 
     "cybersecurity-privacy": [
@@ -53,6 +61,8 @@ const RSS_FEEDS = {
       "https://www.schneier.com/feed/atom/",
       "https://www.bleepingcomputer.com/feed/",
       "https://threatpost.com/feed/",
+      "https://blog.talosintelligence.com/feeds/posts/default",
+      "https://www.microsoft.com/security/blog/feed/",
     ],
 
     "blockchain-web3": [
@@ -61,6 +71,9 @@ const RSS_FEEDS = {
       "https://cointelegraph.com/rss",
       "https://ethereum.org/en/blog/feed.xml",
       "https://blog.chain.link/rss/",
+      "https://messari.io/rss",
+      "https://bankless.substack.com/feed",
+      "https://vitalik.eth.limo/feed.xml",
     ],
   },
 
@@ -72,6 +85,8 @@ const RSS_FEEDS = {
       "https://www.indiehackers.com/feed.xml",
       "https://sifted.eu/feed/",
       "https://venturebeat.com/category/entrepreneur/feed/",
+      "https://bothsidesofthetable.com/feed",
+      "https://avc.com/feed/",
     ],
 
     "productivity-hacks": [
@@ -81,6 +96,7 @@ const RSS_FEEDS = {
       "https://aliabdaal.com/rss/",
       "https://tim.blog/feed/",
       "https://calnewport.com/blog/feed/",
+      "https://www.asianefficiency.com/feed/",
     ],
 
     "automation-no-code": [
@@ -90,6 +106,8 @@ const RSS_FEEDS = {
       "https://blog.airtable.com/rss/",
       "https://webflow.com/blog/feed.rss",
       "https://blog.n8n.io/rss/",
+      "https://makerpad.co/posts.atom",
+      "https://www.producthunt.com/feed/no-code",
     ],
 
     "project-management": [
@@ -98,6 +116,8 @@ const RSS_FEEDS = {
       "https://monday.com/blog/feed/",
       "https://www.projectmanager.com/blog/feed",
       "https://blog.clickup.com/feed/",
+      "https://www.atlassian.com/blog/feed",
+      "https://www.wrike.com/blog/feed/",
     ],
 
     "momentum-mindset": [
@@ -108,6 +128,8 @@ const RSS_FEEDS = {
       "https://dailystoic.com/feed/",
       "https://tim.blog/feed/",
       "https://jamesclear.com/feed",
+      "https://waitbutwhy.com/feed",
+      "https://feeds.feedburner.com/brainpickings/rss", // The Marginalian
     ],
   },
 
@@ -117,6 +139,7 @@ const RSS_FEEDS = {
       "https://www.creativebloq.com/feeds/tag/ai-art",
       "https://ml.berkeley.edu/blog/feed.xml",
       "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+      "https://runwayml.com/blog/rss/",
     ],
 
     "ui-ux-trends": [
@@ -126,6 +149,8 @@ const RSS_FEEDS = {
       "https://uxdesign.cc/feed",
       "https://www.nngroup.com/feed/rss/",
       "https://www.invisionapp.com/inside-design/feed/",
+      "https://www.uxmatters.com/feed.php",
+      "https://sidebar.io/feed.xml",
     ],
 
     "color-typography": [
@@ -133,6 +158,7 @@ const RSS_FEEDS = {
       "https://blog.adobe.com/en/publish/creative-cloud.xml",
       "https://typographica.org/feed/",
       "https://ilovetypography.com/feed/",
+      "https://fonts.googleblog.com/feeds/posts/default",
     ],
 
     "animation-motion": [
@@ -140,6 +166,7 @@ const RSS_FEEDS = {
       "https://greensock.com/blog/feed",
       "https://www.animatedreview.com/feed/",
       "https://lottiefiles.com/blog/feed",
+      "https://www.schoolofmotion.com/blog/rss",
     ],
 
     "tutorials-walkthroughs": [
@@ -147,6 +174,8 @@ const RSS_FEEDS = {
       "https://webdesign.tutsplus.com/posts.atom",
       "https://designmodo.com/feed/",
       "https://www.sitepoint.com/design-ux/feed/",
+      "https://tutsplus.com/feed/",
+      "https://www.freecodecamp.org/news/rss/",
     ],
   },
 
@@ -157,6 +186,8 @@ const RSS_FEEDS = {
       "https://www.rockpapershotgun.com/feed",
       "https://www.gamesradar.com/rss/",
       "https://www.eurogamer.net/feed",
+      "https://kotaku.com/rss",
+      "https://www.destructoid.com/feed/",
     ],
 
     "pro-guides-tips": [
@@ -171,6 +202,7 @@ const RSS_FEEDS = {
       "https://indieretronews.com/feeds/posts/default?alt=rss",
       "https://retrododo.com/feed/",
       "https://www.retrogamer.net/feed/",
+      "https://www.hardcoregaming101.net/feed/",
     ],
 
     "indie-spotlights": [
@@ -179,12 +211,15 @@ const RSS_FEEDS = {
       "https://www.gamedeveloper.com/rss.xml",
       "https://warpdoor.com/feed/",
       "https://alphabetagamer.com/feed/",
+      "https://indiegameplus.com/feed/",
     ],
 
     "collectors-hub": [
       "https://www.racketboy.com/feed/",
       "https://videogamekrieg.com/feed",
       "https://www.pricecharting.com/blog/feed",
+      "https://www.retrorgb.com/feed/",
+      "https://www.gamingalexandria.com/wp/feed/",
     ],
   },
 };

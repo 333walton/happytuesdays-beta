@@ -27,6 +27,7 @@ import HappyTuesdayNewsFeed from "./components/HappyTuesdayNewsFeed/HappyTuesday
 // Program data
 import desktopData from "./data/desktop";
 import startMenuData from "./data/start";
+import FilterRulesViewer from "./components/HappyTuesdayNewsFeed/FilterRulesViewer";
 
 // Debug flag - set to false in production to disable most logging
 const DEBUG_LOGGING = process.env.NODE_ENV === "development";
@@ -203,26 +204,25 @@ class DesktopInner extends Component {
 
     return (
       <MonitorView>
-        <NewsletterFunnelManager>
-          <Theme
-            className={cx("desktop screen", {
-              desktopX2: settings.scale === 2,
-              desktopX1_5: settings.scale === 1.5,
-              notMobile: !isMobile,
-              fullScreen: settings.fullScreen,
-            })}
-          >
-            <Background />
-            <DesktopView />
-            <TaskBar />
-            <WindowManager navigate={navigate} />
-            <TaskManager />
-            <Settings />
-            <ShutDown />
-            <ClippyProvider defaultAgent="Clippy" />
-            {settings.crt && <CRTOverlay />}
-          </Theme>
-        </NewsletterFunnelManager>
+        <Theme
+          className={cx("desktop screen", {
+            desktopX2: settings.scale === 2,
+            desktopX1_5: settings.scale === 1.5,
+            notMobile: !isMobile,
+            fullScreen: settings.fullScreen,
+          })}
+        >
+          <Background />
+          <DesktopView />
+          <TaskBar />
+          <WindowManager navigate={navigate} />
+          <TaskManager />
+          <Settings />
+          <ShutDown />
+          <ClippyProvider defaultAgent="Clippy" />
+          {settings.crt && <CRTOverlay />}
+        </Theme>
+        {process.env.NODE_ENV !== "production" && <FilterRulesViewer />}
       </MonitorView>
     );
   }

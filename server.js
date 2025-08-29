@@ -1,4 +1,4 @@
-// server.js - Complete updated version with all enhanced filtering
+// server.js - Enhanced version with filter tracking and mobile optimizations
 const express = require("express");
 const Parser = require("rss-parser");
 const cors = require("cors");
@@ -6,6 +6,17 @@ const { formatDistanceToNow } = require("date-fns");
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+// Environment check for logging
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+const DEBUG_MODE = process.env.DEBUG_FILTERS === "true";
+
+// Conditional logging to prevent mobile performance issues
+const debugLog = (...args) => {
+  if (!IS_PRODUCTION && DEBUG_MODE) {
+    console.log(...args);
+  }
+};
 
 // Initialize RSS parser with custom fields
 const parser = new Parser({
@@ -21,10 +32,219 @@ const parser = new Parser({
   },
 });
 
+// FILTER RULES DOCUMENTATION AND TRACKING
+const FILTER_RULES = {
+  TITLE_RULES: {
+    MIN_LENGTH: {
+      value: 10,
+      description: "Title must be at least 10 characters",
+    },
+    MAX_LENGTH: {
+      value: 110,
+      description: "Title must be no more than 110 characters",
+    },
+    NO_ALL_CAPS: {
+      value: true,
+      description: "Reject all-caps titles over 10 chars",
+    },
+    NO_ALL_LOWERCASE: {
+      value: true,
+      description: "Reject all-lowercase titles over 20 chars",
+    },
+    NO_SPAM_PATTERNS: {
+      value: true,
+      description: "Reject titles with spam patterns",
+    },
+    ENGLISH_ONLY: {
+      value: true,
+      description: "Accept only English titles",
+    },
+    MIN_VOWELS: {
+      value: 2,
+      description: "Title must have at least 2 vowels",
+    },
+    MAX_NONALPHA: {
+      value: 7,
+      description: "Reject titles with >7 consecutive non-alphanumeric chars",
+    },
+    KEYWORD_BLACKLIST: {
+      value: true,
+      description:
+        "Reject titles with blacklisted keywords (see promotionalKeywords)",
+    },
+  },
+  CONTENT_RULES: {
+    MIN_DESCRIPTION_LENGTH: {
+      value: 50, // lower for some valid entries
+      description: "Description must be at least 50 characters",
+    },
+    NO_LOWERCASE_START: {
+      value: true,
+      description: "Description cannot start with lowercase letter",
+    },
+    NO_SPECIAL_CHAR_START: {
+      value: true,
+      description: "Description cannot start with special character",
+    },
+    NO_URLS_IN_DESCRIPTION: {
+      value: true,
+      description: "No URLs allowed in description",
+    },
+    NO_CODE_CONTENT: {
+      value: false,
+      description:
+        "No code snippets in description (Allowed for tech categories)",
+    },
+    QUALITY_CHECK: {
+      value: true,
+      description: "Must pass quality checks",
+    },
+    MAX_EMOJI_SYMBOLS: {
+      value: 3,
+      description: "Reject description with >3 non-alphanumeric/emoji",
+    },
+    KEYWORD_BLACKLIST: {
+      value: true,
+      description: "Reject descriptions with blacklisted spam/ads keywords",
+    },
+    MAX_LINKS: {
+      value: 3,
+      description: "Reject content with more than 3 hyperlinks (anti-spam)",
+    },
+    MAX_LINK_PERCENT: {
+      value: 0.5,
+      description: "Reject if links make up more than 50% of content",
+    },
+    ENGLISH_ONLY: {
+      value: true,
+      description: "Accept only English content",
+    },
+  },
+  SOURCE_RULES: {
+    MAX_PER_DOMAIN: {
+      value: 2,
+      description: "Maximum 2 articles per base domain",
+    },
+    BLOCKED_DOMAINS: {
+      value: true,
+      description: "Block specific domains (see blocklist)",
+    },
+    SOURCE_DIVERSITY: {
+      value: 3,
+      description: "Max 3 articles per RSS source",
+    },
+    BLOCKLIST_BY_FAILURE: {
+      value: { maxFailures: 3, resetInHours: 48 },
+      description: "Auto-block sources failing filter more than 3x in 48h",
+    },
+  },
+  AGE_RULES: {
+    MAX_AGE_DAYS: {
+      value: 7,
+      description: "Articles must be less than 7 days old",
+    },
+  },
+  THUMBNAIL_RULES: {
+    REQUIRED: { value: true, description: "Valid thumbnail required" },
+    MIN_WIDTH: { value: 400, description: "Thumbnail minimum width 400px" },
+    MIN_HEIGHT: { value: 300, description: "Thumbnail minimum height 300px" },
+    ASPECT_RATIO: {
+      value: [1.33, 2.5],
+      description:
+        "Thumbnail aspect ratio must be between 4:3 (1.33) and 2.5:1",
+    },
+  },
+  DEDUPLICATION: {
+    CROSS_FEED: {
+      value: true,
+      description: "Remove duplicates across feeds",
+    },
+    UNCOMMON_WORDS: {
+      value: true,
+      description: "Filter duplicate uncommon words in titles",
+    },
+    URL_STRIP_PARAMS: {
+      value: true,
+      description:
+        "Treat URLs as duplicate if only differing by tracking params",
+    },
+  },
+  LIMITS: {
+    MAX_QUESTIONS: {
+      value: 3,
+      description: "Maximum 3 question titles per batch",
+    },
+    HOUR_DISTRIBUTION: {
+      value: 2,
+      description: "Max 2 articles per hour timestamp",
+    },
+    MAX_PER_SOURCE_PER_DAY: {
+      value: 10,
+      description: "Max 10 articles per source per 24h",
+    },
+  },
+  HTML_SANITIZATION: {
+    STRIP_JS: {
+      value: true,
+      description:
+        "Remove <script>, <iframe>, and unwanted tags from description",
+    },
+  },
+};
+
+// Filter statistics tracker
+const filterStats = {
+  totalProcessed: 0,
+  filtered: {}, // {reason: count}
+  filteredSamples: {}, // {reason: [title1, title2, ...]}
+  passed: 0,
+
+  reset() {
+    this.totalProcessed = 0;
+    this.filtered = {};
+    this.filteredSamples = {};
+    this.passed = 0;
+  },
+
+  /**
+   * Records a reason for filtering an item, and keeps up to 5 sample titles/articles per reason.
+   * @param {string} reason - The filter reason label.
+   * @param {string} [title=""] - (Optional) The article title or description.
+   */
+  recordFiltered(reason, title = "") {
+    this.filtered[reason] = (this.filtered[reason] || 0) + 1;
+
+    // Track up to 5 samples per reason for debugging
+    if (!this.filteredSamples[reason]) this.filteredSamples[reason] = [];
+    if (title && this.filteredSamples[reason].length < 5) {
+      this.filteredSamples[reason].push(title.substring(0, 120)); // Make sample not too long
+    }
+    debugLog(`⚠️ Filtered [${reason}]: "${title.substring(0, 50)}..."`);
+  },
+
+  getReport() {
+    return {
+      totalProcessed: this.totalProcessed,
+      passed: this.passed,
+      filtered: this.filtered,
+      // Include sample articles for each filter reason
+      filteredSamples: this.filteredSamples,
+      filterRate:
+        this.totalProcessed > 0
+          ? (
+              ((this.totalProcessed - this.passed) / this.totalProcessed) *
+              100
+            ).toFixed(1) + "%"
+          : "0%",
+    };
+  },
+};
+
 // CORS configuration
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin:
+      process.env.NODE_ENV === "production" ? "*" : "http://localhost:3000",
     credentials: true,
   })
 );
@@ -32,6 +252,9 @@ app.use(express.json());
 
 // Global fingerprint tracking for cross-feed deduplication
 const recentFingerprints = new Set();
+
+// Domain tracker for the new rule
+const domainCounter = new Map();
 
 // Create content fingerprint for deduplication
 const createFingerprint = (title) => {
@@ -41,10 +264,20 @@ const createFingerprint = (title) => {
     .substring(0, 30);
 };
 
+// Extract base domain from URL
+const getBaseDomain = (url) => {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+};
+
 // Blocked domains list
 const blockedDomains = [
   "medium.com",
-  "forbes.com/sites",
+  "forbes.com",
   "businessinsider.com",
   "buzzfeed.com",
   "huffpost.com",
@@ -52,7 +285,7 @@ const blockedDomains = [
   "qz.com",
 ];
 
-// Updated RSS Feed catalog aligned with new categories
+// Updated RSS Feed catalog (same as before)
 const RSS_FEEDS = {
   tech: {
     "ai-machine-learning": [
@@ -65,6 +298,10 @@ const RSS_FEEDS = {
       "https://blog.google/technology/ai/rss/",
       "https://huggingface.co/blog/feed.xml",
       "https://www.deeplearning.ai/blog/feed/",
+      "https://hai.stanford.edu/news/rss.xml",
+      "https://allenai.org/rss.xml",
+      "https://venturebeat.com/category/ai/feed/",
+      "https://arxiv-sanity-lite.com/feed/?query=cs.AI",
     ],
 
     "martech-adtech": [
@@ -73,16 +310,20 @@ const RSS_FEEDS = {
       "https://marketingland.com/feed/",
       "https://chiefmartec.com/feed/",
       "https://www.marketingtechnews.net/rss.xml",
+      "https://digiday.com/feed/",
+      "https://www.marketingprofs.com/rss/all",
     ],
 
     "web-dev-devops": [
       "https://css-tricks.com/feed/",
       "https://www.smashingmagazine.com/feed/",
-      "https://dev.to/feed",
       "https://web.dev/feed.xml",
       "https://blog.logrocket.com/feed/",
       "https://www.joshwcomeau.com/rss.xml",
       "https://kentcdodds.com/blog/rss.xml",
+      "https://dev.to/feed/tag/webdev",
+      "https://blog.cloudflare.com/rss/",
+      "https://github.blog/category/development/feed/",
     ],
 
     "cybersecurity-privacy": [
@@ -92,6 +333,8 @@ const RSS_FEEDS = {
       "https://www.schneier.com/feed/atom/",
       "https://www.bleepingcomputer.com/feed/",
       "https://threatpost.com/feed/",
+      "https://blog.talosintelligence.com/feeds/posts/default",
+      "https://www.microsoft.com/security/blog/feed/",
     ],
 
     "blockchain-web3": [
@@ -100,6 +343,9 @@ const RSS_FEEDS = {
       "https://cointelegraph.com/rss",
       "https://ethereum.org/en/blog/feed.xml",
       "https://blog.chain.link/rss/",
+      "https://messari.io/rss",
+      "https://bankless.substack.com/feed",
+      "https://vitalik.eth.limo/feed.xml",
     ],
   },
 
@@ -111,6 +357,8 @@ const RSS_FEEDS = {
       "https://www.indiehackers.com/feed.xml",
       "https://sifted.eu/feed/",
       "https://venturebeat.com/category/entrepreneur/feed/",
+      "https://bothsidesofthetable.com/feed",
+      "https://avc.com/feed/",
     ],
 
     "productivity-hacks": [
@@ -120,6 +368,7 @@ const RSS_FEEDS = {
       "https://aliabdaal.com/rss/",
       "https://tim.blog/feed/",
       "https://calnewport.com/blog/feed/",
+      "https://www.asianefficiency.com/feed/",
     ],
 
     "automation-no-code": [
@@ -129,6 +378,8 @@ const RSS_FEEDS = {
       "https://blog.airtable.com/rss/",
       "https://webflow.com/blog/feed.rss",
       "https://blog.n8n.io/rss/",
+      "https://makerpad.co/posts.atom",
+      "https://www.producthunt.com/feed/no-code",
     ],
 
     "project-management": [
@@ -137,6 +388,8 @@ const RSS_FEEDS = {
       "https://monday.com/blog/feed/",
       "https://www.projectmanager.com/blog/feed",
       "https://blog.clickup.com/feed/",
+      "https://www.atlassian.com/blog/feed",
+      "https://www.wrike.com/blog/feed/",
     ],
 
     "momentum-mindset": [
@@ -147,6 +400,8 @@ const RSS_FEEDS = {
       "https://dailystoic.com/feed/",
       "https://tim.blog/feed/",
       "https://jamesclear.com/feed",
+      "https://waitbutwhy.com/feed",
+      "https://feeds.feedburner.com/brainpickings/rss", // The Marginalian
     ],
   },
 
@@ -156,6 +411,7 @@ const RSS_FEEDS = {
       "https://www.creativebloq.com/feeds/tag/ai-art",
       "https://ml.berkeley.edu/blog/feed.xml",
       "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+      "https://runwayml.com/blog/rss/",
     ],
 
     "ui-ux-trends": [
@@ -165,14 +421,16 @@ const RSS_FEEDS = {
       "https://uxdesign.cc/feed",
       "https://www.nngroup.com/feed/rss/",
       "https://www.invisionapp.com/inside-design/feed/",
+      "https://www.uxmatters.com/feed.php",
+      "https://sidebar.io/feed.xml",
     ],
 
     "color-typography": [
-      "https://www.typewolf.com/feed/",
       "https://fontsinuse.com/feed",
       "https://blog.adobe.com/en/publish/creative-cloud.xml",
       "https://typographica.org/feed/",
       "https://ilovetypography.com/feed/",
+      "https://fonts.googleblog.com/feeds/posts/default",
     ],
 
     "animation-motion": [
@@ -180,6 +438,7 @@ const RSS_FEEDS = {
       "https://greensock.com/blog/feed",
       "https://www.animatedreview.com/feed/",
       "https://lottiefiles.com/blog/feed",
+      "https://www.schoolofmotion.com/blog/rss",
     ],
 
     "tutorials-walkthroughs": [
@@ -187,6 +446,8 @@ const RSS_FEEDS = {
       "https://webdesign.tutsplus.com/posts.atom",
       "https://designmodo.com/feed/",
       "https://www.sitepoint.com/design-ux/feed/",
+      "https://tutsplus.com/feed/",
+      "https://www.freecodecamp.org/news/rss/",
     ],
   },
 
@@ -197,6 +458,8 @@ const RSS_FEEDS = {
       "https://www.rockpapershotgun.com/feed",
       "https://www.gamesradar.com/rss/",
       "https://www.eurogamer.net/feed",
+      "https://kotaku.com/rss",
+      "https://www.destructoid.com/feed/",
     ],
 
     "pro-guides-tips": [
@@ -211,6 +474,7 @@ const RSS_FEEDS = {
       "https://indieretronews.com/feeds/posts/default?alt=rss",
       "https://retrododo.com/feed/",
       "https://www.retrogamer.net/feed/",
+      "https://www.hardcoregaming101.net/feed/",
     ],
 
     "indie-spotlights": [
@@ -219,12 +483,15 @@ const RSS_FEEDS = {
       "https://www.gamedeveloper.com/rss.xml",
       "https://warpdoor.com/feed/",
       "https://alphabetagamer.com/feed/",
+      "https://indiegameplus.com/feed/",
     ],
 
     "collectors-hub": [
       "https://www.racketboy.com/feed/",
       "https://videogamekrieg.com/feed",
       "https://www.pricecharting.com/blog/feed",
+      "https://www.retrorgb.com/feed/",
+      "https://www.gamingalexandria.com/wp/feed/",
     ],
   },
 };
@@ -300,9 +567,6 @@ const containsCodeOrTechnical = (text) => {
     /\{padding.*\}/,
     /\.css\s*\{/,
     /#[a-z]+\s*\{/i,
-    /^https?:\/\/[^\s]+$/,
-    /^www\.[^\s]+$/,
-    /\/\w+\/\w+\.\w{2,4}/,
     /C:\\.*\\/,
     /npm\s+install/,
     /yarn\s+add/,
@@ -390,7 +654,53 @@ const isSpamTopic = (title, description) => {
   );
 };
 
-// Strict thumbnail validation - ENHANCED with size checking
+// NEW: Enhanced description validation
+const isValidDescription = (description, title = "") => {
+  if (!description) {
+    filterStats.recordFiltered("NO_DESCRIPTION", title);
+    return false;
+  }
+
+  // NEW RULE: Minimum 75 characters
+  if (
+    description.length < FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value
+  ) {
+    filterStats.recordFiltered("DESCRIPTION_TOO_SHORT", title);
+    return false;
+  }
+
+  // NEW RULE: Cannot start with lowercase letter
+  if (
+    FILTER_RULES.CONTENT_RULES.NO_LOWERCASE_START.value &&
+    /^[a-z]/.test(description)
+  ) {
+    filterStats.recordFiltered("LOWERCASE_START", title);
+    return false;
+  }
+
+  // NEW RULE: Cannot start with special character (except quotes)
+  if (
+    FILTER_RULES.CONTENT_RULES.NO_SPECIAL_CHAR_START.value &&
+    /^[^A-Za-z0-9"']/.test(description)
+  ) {
+    filterStats.recordFiltered("SPECIAL_CHAR_START", title);
+    return false;
+  }
+
+  // NEW RULE: No URLs in description
+  if (FILTER_RULES.CONTENT_RULES.NO_URLS_IN_DESCRIPTION.value) {
+    const urlPattern =
+      /https?:\/\/[^\s]+|www\.[^\s]+|\w+\.(com|org|net|io|dev|edu|gov|uk|ca|au|de|fr|jp|cn|in|br|mx|ru|it|es|nl|se|no|dk|fi|pl|gr|pt|cz|hu|ro|bg|hr|si|sk|lt|lv|ee)\b/gi;
+    if (urlPattern.test(description)) {
+      filterStats.recordFiltered("URL_IN_DESCRIPTION", title);
+      return false;
+    }
+  }
+
+  return true;
+};
+
+// Strict thumbnail validation
 const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
   if (!thumbnailUrl) return false;
 
@@ -414,9 +724,9 @@ const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
 
   if (!hasImageExtension && !hasImagePath) return false;
 
-  // Check for minimum dimensions in URL
-  const minWidth = 600;
-  const minHeight = 400;
+  // Check for minimum dimensions
+  const minWidth = FILTER_RULES.THUMBNAIL_RULES.MIN_WIDTH.value;
+  const minHeight = FILTER_RULES.THUMBNAIL_RULES.MIN_HEIGHT.value;
 
   if (thumbnailUrl.includes("resize=") || thumbnailUrl.includes("w=")) {
     const widthMatch = thumbnailUrl.match(/[?&]w=(\d+)/);
@@ -476,7 +786,7 @@ const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
   if (sizeMatch) {
     const width = parseInt(sizeMatch[1]);
     const height = parseInt(sizeMatch[2]);
-    if (width < 400 || height < 300) return false;
+    if (width < minWidth || height < minHeight) return false;
   }
 
   return true;
@@ -501,11 +811,6 @@ const isHighQualityDescription = (description, title = "") => {
   if (ratio < 1.5) {
     return false;
   }
-
-  const urlPattern = /https?:\/\/[^\s]+/g;
-  const urls = description.match(urlPattern) || [];
-  const urlCharCount = urls.join("").length;
-  if (urlCharCount > description.length * 0.3) return false;
 
   const genericPatterns = [
     /^read the full article/i,
@@ -646,7 +951,9 @@ const cleanDescription = (rawDescription, title = "") => {
     .replace(/&#39;/g, "'")
     .replace(/&[a-z]+;/gi, " ");
 
+  // Remove URLs
   cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, "");
+  cleaned = cleaned.replace(/www\.[^\s]+/g, "");
   cleaned = cleaned.replace(/[\w.-]+@[\w.-]+\.\w+/g, "");
   cleaned = cleaned.replace(/@[\w]+/g, "");
   cleaned = cleaned.replace(/#[\w]+/g, "");
@@ -717,6 +1024,11 @@ const cleanDescription = (rawDescription, title = "") => {
 
   let description = sentences.slice(0, 3).join(". ").trim();
 
+  // Apply NEW validation rules
+  if (!isValidDescription(description, title)) {
+    return "";
+  }
+
   if (!isHighQualityDescription(description, title)) {
     return "";
   }
@@ -725,6 +1037,20 @@ const cleanDescription = (rawDescription, title = "") => {
 
   if (description && !description.match(/[.!?]$/)) {
     description += ".";
+  }
+
+  // Ensure max length
+  if (description.length > 250) {
+    const sentences = description.match(/[^.!?]+[.!?]+/g) || [description];
+    let truncated = "";
+    for (const sentence of sentences) {
+      if ((truncated + sentence).length <= 247) {
+        truncated += sentence;
+      } else {
+        break;
+      }
+    }
+    description = truncated || description.substring(0, 247) + "...";
   }
 
   return description;
@@ -743,7 +1069,11 @@ const extractArticleContent = (item) => {
   for (const source of contentSources) {
     if (source && source.length > 50) {
       const cleaned = cleanDescription(source, item.title);
-      if (cleaned && cleaned.length > 30) {
+      if (
+        cleaned &&
+        cleaned.length >=
+          FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value
+      ) {
         return cleaned;
       }
     }
@@ -752,45 +1082,59 @@ const extractArticleContent = (item) => {
   return null;
 };
 
-// Enhanced parse feed item with strict validation
+// Enhanced parse feed item with all rules
 const parseFeedItem = async (item, source) => {
+  filterStats.totalProcessed++;
+
   const title = item.title || "";
 
-  // Check title capitalization quality
-  if (title === title.toUpperCase() && title.length > 10) {
-    console.log(`Filtered ALL CAPS title: "${title}"`);
+  // Check title rules
+  if (title.length < FILTER_RULES.TITLE_RULES.MIN_LENGTH.value) {
+    filterStats.recordFiltered("TITLE_TOO_SHORT", title);
     return null;
   }
 
-  if (title === title.toLowerCase() && title.length > 20) {
-    console.log(`Filtered all lowercase title: "${title}"`);
+  if (
+    FILTER_RULES.TITLE_RULES.NO_ALL_CAPS.value &&
+    title === title.toUpperCase() &&
+    title.length > 10
+  ) {
+    filterStats.recordFiltered("ALL_CAPS_TITLE", title);
     return null;
   }
 
-  if (isSpamTitle(title)) {
-    console.log(`Filtered spam title: "${title}"`);
+  if (
+    FILTER_RULES.TITLE_RULES.NO_ALL_LOWERCASE.value &&
+    title === title.toLowerCase() &&
+    title.length > 20
+  ) {
+    filterStats.recordFiltered("ALL_LOWERCASE_TITLE", title);
     return null;
   }
 
-  if (!isLikelyEnglish(title)) {
+  if (FILTER_RULES.TITLE_RULES.NO_SPAM_PATTERNS.value && isSpamTitle(title)) {
+    filterStats.recordFiltered("SPAM_TITLE", title);
     return null;
   }
 
-  // Age filter - reject articles older than 7 days
+  if (FILTER_RULES.TITLE_RULES.ENGLISH_ONLY.value && !isLikelyEnglish(title)) {
+    filterStats.recordFiltered("NON_ENGLISH", title);
+    return null;
+  }
+
+  // Age filter
   const pubDate =
     item.pubDate || item.isoDate || item.published || new Date().toISOString();
   const articleAge = Date.now() - new Date(pubDate);
-  const maxAge = 7 * 24 * 60 * 60 * 1000;
+  const maxAge =
+    FILTER_RULES.AGE_RULES.MAX_AGE_DAYS.value * 24 * 60 * 60 * 1000;
 
   if (articleAge > maxAge) {
-    console.log(
-      `Filtered: Article too old (${Math.floor(
-        articleAge / (24 * 60 * 60 * 1000)
-      )} days): "${title}"`
-    );
+    filterStats.recordFiltered("TOO_OLD", title);
     return null;
   }
 
+  // Check for promotional content
   const titleLower = title.toLowerCase();
   const promotionalKeywords = [
     "$",
@@ -808,37 +1152,66 @@ const parseFeedItem = async (item, source) => {
     "promo code",
     "free shipping",
     "limited time",
+    "casino",
+    "betting",
+    "buy now",
+    "loan",
+    "sponsored",
+    "crowdfunding",
+    "press release",
+    "partner announcement",
+    "advertorial",
+    "guest post",
+    "price prediction", // for blockchain/web3
+    "easy loan",
+    "investment scheme",
+    "binary option",
   ];
 
   for (const keyword of promotionalKeywords) {
     if (titleLower.includes(keyword)) {
-      console.log(`Filtered promotional: "${title}"`);
+      filterStats.recordFiltered("PROMOTIONAL", title);
       return null;
     }
   }
 
+  // Thumbnail validation
   const thumbnail = await extractBestThumbnail(item, source);
 
-  if (!thumbnail || !(await isRealArticleThumbnail(thumbnail, item))) {
-    console.log(`Filtered: No valid thumbnail for "${title}"`);
+  if (
+    FILTER_RULES.THUMBNAIL_RULES.REQUIRED.value &&
+    (!thumbnail || !(await isRealArticleThumbnail(thumbnail, item)))
+  ) {
+    filterStats.recordFiltered("NO_VALID_THUMBNAIL", title);
     return null;
   }
 
+  // Extract and validate description
   let description = extractArticleContent(item);
 
-  if (description && containsCodeOrTechnical(description)) {
-    console.log(`Filtered: Code/technical content in "${title}"`);
+  if (!description) {
+    filterStats.recordFiltered("NO_DESCRIPTION", title);
     return null;
   }
 
-  if (!description || !isHighQualityDescription(description, title)) {
-    console.log(`Filtered: Low quality description for "${title}"`);
+  if (containsCodeOrTechnical(description)) {
+    filterStats.recordFiltered("TECHNICAL_CONTENT", title);
+    return null;
+  }
+
+  // Apply new validation rules
+  if (!isValidDescription(description, title)) {
+    return null; // Already recorded in isValidDescription
+  }
+
+  if (!isHighQualityDescription(description, title)) {
+    filterStats.recordFiltered("LOW_QUALITY_DESCRIPTION", title);
     return null;
   }
 
   // Check for spam topics
   if (isSpamTopic(title, description)) {
-    console.log(`Filtered spam topic: "${title}"`);
+    filterStats.recordFiltered("SPAM_TOPIC", title);
     return null;
   }
 
@@ -858,23 +1231,26 @@ const parseFeedItem = async (item, source) => {
     item.creator &&
     suspiciousAuthors.some((pattern) => pattern.test(item.creator))
   ) {
-    console.log(`Filtered suspicious author "${item.creator}": "${title}"`);
+    filterStats.recordFiltered("SUSPICIOUS_AUTHOR", title);
     return null;
   }
 
   // Cross-feed deduplication
-  const fingerprint = createFingerprint(title);
-  if (recentFingerprints.has(fingerprint)) {
-    console.log(`Filtered duplicate story: "${title}"`);
-    return null;
+  if (FILTER_RULES.DEDUPLICATION.CROSS_FEED.value) {
+    const fingerprint = createFingerprint(title);
+    if (recentFingerprints.has(fingerprint)) {
+      filterStats.recordFiltered("DUPLICATE", title);
+      return null;
+    }
+    recentFingerprints.add(fingerprint);
   }
-  recentFingerprints.add(fingerprint);
 
   // Clear fingerprints periodically
   if (recentFingerprints.size > 100) {
     recentFingerprints.clear();
   }
 
+  // Check if description is too similar to title
   const descLower = description.toLowerCase();
   const titleWords = titleLower.split(/\s+/);
   const titleWordsInDesc = titleWords.filter(
@@ -885,14 +1261,19 @@ const parseFeedItem = async (item, source) => {
     titleWords.length > 0 &&
     titleWordsInDesc.length / titleWords.length > 0.7
   ) {
-    console.log(`Filtered: Description too similar to title for "${title}"`);
+    filterStats.recordFiltered("DESCRIPTION_TOO_SIMILAR", title);
     return null;
   }
 
-  if (description.length < 50 || title.length < 10) {
+  // Final length checks
+  if (
+    description.length < FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value
+  ) {
+    filterStats.recordFiltered("FINAL_LENGTH_CHECK", title);
     return null;
   }
 
+  // Truncate if needed
   if (description.length > 250) {
     const sentences = description.match(/[^.!?]+[.!?]+/g) || [description];
     let truncated = "";
@@ -905,6 +1286,8 @@ const parseFeedItem = async (item, source) => {
     }
     description = truncated || description.substring(0, 247) + "...";
   }
+
+  filterStats.passed++;
 
   return {
     title: title,
@@ -920,8 +1303,8 @@ const parseFeedItem = async (item, source) => {
   };
 };
 
-// Fetch single RSS feed with enhanced filtering
-const fetchSingleFeed = async (url, timeout = 5000) => {
+// Fetch single RSS feed with less aggressive timeout
+const fetchSingleFeed = async (url, timeout = 8000) => {
   const problematicSources = [
     "lifehacker.com",
     "gizmodo.com",
@@ -931,12 +1314,12 @@ const fetchSingleFeed = async (url, timeout = 5000) => {
 
   // Check if URL contains blocked domain
   if (blockedDomains.some((domain) => url.includes(domain))) {
-    console.log(`Blocked domain: ${url}`);
+    debugLog(`Blocked domain: ${url}`);
     return [];
   }
 
   if (problematicSources.some((source) => url.includes(source))) {
-    console.log(`Skipping problematic source: ${url}`);
+    debugLog(`Skipping problematic source: ${url}`);
     return [];
   }
 
@@ -951,24 +1334,12 @@ const fetchSingleFeed = async (url, timeout = 5000) => {
         feed.items.map((item) => parseFeedItem(item, url))
       );
 
-      const validItems = parsedItems
-        .filter((item) => item !== null)
-        .filter((item) => {
-          return (
-            item.description &&
-            item.description.length >= 50 &&
-            item.title &&
-            item.title.length >= 10 &&
-            item.thumbnail &&
-            !containsCodeOrTechnical(item.description) &&
-            isHighQualityDescription(item.description, item.title)
-          );
-        });
+      const validItems = parsedItems.filter((item) => item !== null);
 
       resolve(validItems);
     } catch (error) {
       clearTimeout(timer);
-      console.error(`Error fetching feed ${url}:`, error.message);
+      debugLog(`Error fetching feed ${url}:`, error.message);
       resolve([]);
     }
   });
@@ -1004,12 +1375,16 @@ const scoreArticleQuality = (item) => {
 
 // API endpoint to fetch feeds with all filters
 app.post("/api/feeds", async (req, res) => {
-  console.log("📨 Received feed request:", req.body);
+  debugLog("📨 Received feed request:", req.body);
   const { category, subcategory } = req.body;
 
   if (!category) {
     return res.status(400).json({ error: "Category is required" });
   }
+
+  // Reset stats for this request
+  filterStats.reset();
+  domainCounter.clear();
 
   try {
     const feedUrls = subcategory
@@ -1020,6 +1395,7 @@ app.post("/api/feeds", async (req, res) => {
       return res.json({
         items: [],
         message: "No feeds found for this category",
+        stats: filterStats.getReport(),
       });
     }
 
@@ -1047,20 +1423,37 @@ app.post("/api/feeds", async (req, res) => {
       return new Date(b.pubDate) - new Date(a.pubDate);
     });
 
-    // Apply source diversity limit (max 3 per source)
+    // Apply source diversity limit
     const sourceCounts = new Map();
     const diverseItems = [];
 
     for (const item of allItems) {
       const count = sourceCounts.get(item.source) || 0;
-      if (count < 3) {
+      if (count < FILTER_RULES.SOURCE_RULES.SOURCE_DIVERSITY.value) {
         diverseItems.push(item);
         sourceCounts.set(item.source, count + 1);
-        if (diverseItems.length >= 25) break; // Get more for further filtering
+        if (diverseItems.length >= 30) break; // Get extra for filtering
       }
     }
 
-    // Filter out articles with duplicate uncommon words in titles
+    // NEW: Apply base domain limit (max 2 per domain)
+    const domainFilteredItems = [];
+    for (const item of diverseItems) {
+      const baseDomain = getBaseDomain(item.link);
+      if (baseDomain) {
+        const count = domainCounter.get(baseDomain) || 0;
+        if (count < FILTER_RULES.SOURCE_RULES.MAX_PER_DOMAIN.value) {
+          domainFilteredItems.push(item);
+          domainCounter.set(baseDomain, count + 1);
+        } else {
+          filterStats.recordFiltered("DOMAIN_LIMIT", item.title);
+        }
+      } else {
+        domainFilteredItems.push(item);
+      }
+    }
+
+    // Filter duplicate uncommon words
     const filteredItems = [];
     const usedUncommonWords = new Set();
     const commonWords = new Set([
@@ -1152,83 +1545,125 @@ app.post("/api/feeds", async (req, res) => {
       "where",
     ]);
 
-    // Track question titles count
     let questionTitlesCount = 0;
-
-    // Track hour distribution
     const hourBuckets = new Map();
 
-    for (const item of diverseItems) {
+    for (const item of domainFilteredItems) {
       // Check question title limit
       if (item.title.includes("?")) {
-        if (questionTitlesCount >= 3) {
-          console.log(`Filtered excess question title: "${item.title}"`);
+        if (questionTitlesCount >= FILTER_RULES.LIMITS.MAX_QUESTIONS.value) {
+          filterStats.recordFiltered("QUESTION_LIMIT", item.title);
           continue;
         }
         questionTitlesCount++;
       }
 
-      // Check hour distribution (max 2 per hour)
+      // Check hour distribution
       const hour = new Date(item.pubDate).getHours();
       const hourCount = hourBuckets.get(hour) || 0;
-      if (hourCount >= 2) {
-        console.log(
-          `Filtered for time distribution (hour ${hour}): "${item.title}"`
-        );
+      if (hourCount >= FILTER_RULES.LIMITS.HOUR_DISTRIBUTION.value) {
+        filterStats.recordFiltered("HOUR_DISTRIBUTION", item.title);
         continue;
       }
 
       // Check for duplicate uncommon words
-      const titleWords = item.title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, " ")
-        .split(/\s+/)
-        .filter((word) => word.length > 4 && !commonWords.has(word));
+      if (FILTER_RULES.DEDUPLICATION.UNCOMMON_WORDS.value) {
+        const titleWords = item.title
+          .toLowerCase()
+          .replace(/[^a-z0-9\s]/g, " ")
+          .split(/\s+/)
+          .filter((word) => word.length > 4 && !commonWords.has(word));
 
-      let hasDuplicate = false;
-      for (const word of titleWords) {
-        if (usedUncommonWords.has(word)) {
-          console.log(`Filtered duplicate word "${word}" in: "${item.title}"`);
-          hasDuplicate = true;
-          break;
+        let hasDuplicate = false;
+        for (const word of titleWords) {
+          if (usedUncommonWords.has(word)) {
+            filterStats.recordFiltered("DUPLICATE_WORD", item.title);
+            hasDuplicate = true;
+            break;
+          }
         }
-      }
 
-      if (!hasDuplicate) {
+        if (!hasDuplicate) {
+          filteredItems.push(item);
+          titleWords.forEach((word) => usedUncommonWords.add(word));
+          hourBuckets.set(hour, hourCount + 1);
+
+          if (filteredItems.length >= 10) break;
+        }
+      } else {
         filteredItems.push(item);
-        titleWords.forEach((word) => usedUncommonWords.add(word));
         hourBuckets.set(hour, hourCount + 1);
-
         if (filteredItems.length >= 10) break;
       }
     }
 
     const finalItems = filteredItems.slice(0, 10);
 
+    // Include filter stats in response
+    const stats = filterStats.getReport();
+
     res.json({
       items: finalItems,
       count: finalItems.length,
       category,
       subcategory,
+      stats: DEBUG_MODE ? stats : undefined,
+      filterRules: DEBUG_MODE ? FILTER_RULES : undefined,
     });
   } catch (error) {
     console.error("Feed fetching error:", error);
     res.status(500).json({
       error: "Failed to fetch feeds",
       message: error.message,
+      stats: filterStats.getReport(),
     });
   }
 });
 
+// New endpoint to get filter rules documentation
+app.get("/api/filter-rules", (req, res) => {
+  const rules = {};
+
+  for (const [category, categoryRules] of Object.entries(FILTER_RULES)) {
+    rules[category] = {};
+    for (const [ruleName, ruleConfig] of Object.entries(categoryRules)) {
+      rules[category][ruleName] = {
+        enabled: ruleConfig.value !== false,
+        value: ruleConfig.value,
+        description: ruleConfig.description,
+      };
+    }
+  }
+
+  res.json({
+    rules,
+    stats: filterStats.getReport(),
+    message:
+      "These are the active filter rules being applied to all feed items",
+  });
+});
+
 // Health check endpoint
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    environment: IS_PRODUCTION ? "production" : "development",
+    debugMode: DEBUG_MODE,
+  });
 });
 
 // Start server
 const server = app.listen(port, () => {
-  console.log(`RSS Feed Server running at http://localhost:${port}`);
-  console.log(`Health check: http://localhost:${port}/api/health`);
+  console.log(`🚀 RSS Feed Server running at http://localhost:${port}`);
+  console.log(
+    `📊 Filter rules endpoint: http://localhost:${port}/api/filter-rules`
+  );
+  console.log(`❤️ Health check: http://localhost:${port}/api/health`);
+  console.log(`🔍 Debug mode: ${DEBUG_MODE ? "ON" : "OFF"}`);
+  console.log(
+    `🌍 Environment: ${IS_PRODUCTION ? "PRODUCTION" : "DEVELOPMENT"}`
+  );
 });
 
 // Keep the process alive
