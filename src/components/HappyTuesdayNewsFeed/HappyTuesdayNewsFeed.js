@@ -1,5 +1,5 @@
 // src/components/HappyTuesdayNewsFeed/HappyTuesdayNewsFeed.js
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   fetchAndCacheFeed,
@@ -181,10 +181,19 @@ const HappyTuesdayNewsFeed = ({
     }
   };
 
+  const fetchingRef = useRef(new Set());
+
   const loadFeed = async (category, subcategory) => {
     const feedKey = `${category}_${subcategory}`;
+
+    // Prevent duplicate fetches
+    if (fetchingRef.current.has(feedKey)) {
+      console.log(`Already fetching ${feedKey}, skipping duplicate`);
+      return;
+    }
+
+    fetchingRef.current.add(feedKey);
     setLoading((prev) => ({ ...prev, [feedKey]: true }));
-    setError((prev) => ({ ...prev, [feedKey]: null }));
 
     try {
       const items = await fetchAndCacheFeed(category, subcategory);
@@ -208,6 +217,7 @@ const HappyTuesdayNewsFeed = ({
         [feedKey]: "Failed to load feed. Please try again.",
       }));
     } finally {
+      fetchingRef.current.delete(feedKey);
       setLoading((prev) => ({ ...prev, [feedKey]: false }));
     }
   };

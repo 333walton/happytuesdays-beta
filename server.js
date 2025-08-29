@@ -1312,7 +1312,6 @@ const fetchSingleFeed = async (url, timeout = 8000) => {
     "deadspin.com",
   ];
 
-  // Check if URL contains blocked domain
   if (blockedDomains.some((domain) => url.includes(domain))) {
     debugLog(`Blocked domain: ${url}`);
     return [];
@@ -1330,12 +1329,14 @@ const fetchSingleFeed = async (url, timeout = 8000) => {
       const feed = await parser.parseURL(url);
       clearTimeout(timer);
 
+      // LIMIT: Process maximum 15 items per feed
+      const itemsToProcess = feed.items.slice(0, 15);
+
       const parsedItems = await Promise.all(
-        feed.items.map((item) => parseFeedItem(item, url))
+        itemsToProcess.map((item) => parseFeedItem(item, url))
       );
 
       const validItems = parsedItems.filter((item) => item !== null);
-
       resolve(validItems);
     } catch (error) {
       clearTimeout(timer);
@@ -1382,6 +1383,11 @@ app.post("/api/feeds", async (req, res) => {
     return res.status(400).json({ error: "Category is required" });
   }
 
+  // Configuration
+  const MAX_ITEMS = 10; // Final number of items to return
+  const MAX_ITEMS_PER_FEED = 15; // Max items to process per feed
+  const TARGET_BUFFER = 20; // Stop when we have this many qualified items
+
   // Reset stats for this request
   filterStats.reset();
   domainCounter.clear();
@@ -1399,20 +1405,118 @@ app.post("/api/feeds", async (req, res) => {
       });
     }
 
-    const feedPromises = feedUrls.map((url) => fetchSingleFeed(url));
-    const feedResults = await Promise.all(feedPromises);
-
-    let allItems = feedResults.flat();
-
+    // EARLY EXIT IMPLEMENTATION
+    const qualifiedItems = [];
     const seen = new Set();
-    allItems = allItems.filter((item) => {
-      const key = item.guid || item.link;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    const sourceCounts = new Map();
+    let totalProcessed = 0;
 
-    allItems.sort((a, b) => {
+    debugLog(`🎯 Starting early-exit processing for ${feedUrls.length} feeds`);
+
+    // Process feeds SEQUENTIALLY (not in parallel) to allow early exit
+    for (let feedIndex = 0; feedIndex < feedUrls.length; feedIndex++) {
+      const feedUrl = feedUrls[feedIndex];
+
+      // CHECK 1: Do we have enough qualified items?
+      if (qualifiedItems.length >= TARGET_BUFFER) {
+        debugLog(
+          `✅ Early exit: Have ${qualifiedItems.length} qualified items after ${feedIndex} feeds`
+        );
+        break;
+      }
+
+      try {
+        debugLog(
+          `📡 Fetching feed ${feedIndex + 1}/${
+            feedUrls.length
+          }: ${getFeedDisplayName(feedUrl)}`
+        );
+
+        // Fetch ONE feed at a time
+        const feed = await parser.parseURL(feedUrl);
+
+        // LIMIT items per feed to avoid over-processing
+        const itemsToProcess = feed.items.slice(0, MAX_ITEMS_PER_FEED);
+        debugLog(
+          `  Found ${feed.items.length} items, processing up to ${itemsToProcess.length}`
+        );
+
+        // Process items from this feed
+        for (
+          let itemIndex = 0;
+          itemIndex < itemsToProcess.length;
+          itemIndex++
+        ) {
+          const item = itemsToProcess[itemIndex];
+          totalProcessed++;
+
+          // CHECK 2: Do we have enough during item processing?
+          if (qualifiedItems.length >= TARGET_BUFFER) {
+            debugLog(
+              `  ⏹️ Stopping item processing at ${itemIndex}/${itemsToProcess.length}`
+            );
+            break;
+          }
+
+          // Parse and validate the item
+          const parsedItem = await parseFeedItem(item, feedUrl);
+
+          if (!parsedItem) {
+            continue; // Item was filtered out
+          }
+
+          // Deduplication check
+          const key = parsedItem.guid || parsedItem.link;
+          if (seen.has(key)) {
+            filterStats.recordFiltered("DUPLICATE", parsedItem.title);
+            continue;
+          }
+
+          // Domain limit check
+          const baseDomain = getBaseDomain(parsedItem.link);
+          if (baseDomain) {
+            const domainCount = domainCounter.get(baseDomain) || 0;
+            if (domainCount >= FILTER_RULES.SOURCE_RULES.MAX_PER_DOMAIN.value) {
+              filterStats.recordFiltered("DOMAIN_LIMIT", parsedItem.title);
+              continue;
+            }
+            domainCounter.set(baseDomain, domainCount + 1);
+          }
+
+          // Source diversity check
+          const sourceCount = sourceCounts.get(parsedItem.source) || 0;
+          if (sourceCount >= FILTER_RULES.SOURCE_RULES.SOURCE_DIVERSITY.value) {
+            filterStats.recordFiltered("SOURCE_LIMIT", parsedItem.title);
+            continue;
+          }
+
+          // ✅ Item passed all checks!
+          seen.add(key);
+          sourceCounts.set(parsedItem.source, sourceCount + 1);
+          qualifiedItems.push(parsedItem);
+
+          debugLog(
+            `  ✅ Qualified #${
+              qualifiedItems.length
+            }: "${parsedItem.title.substring(0, 50)}..."`
+          );
+        }
+
+        debugLog(
+          `  Feed complete: ${qualifiedItems.length} total qualified items`
+        );
+      } catch (error) {
+        debugLog(`  ❌ Error fetching feed: ${error.message}`);
+        // Continue to next feed on error
+      }
+    }
+
+    debugLog(
+      `📊 Processing complete: ${totalProcessed} items processed, ${qualifiedItems.length} qualified`
+    );
+
+    // Sort by quality score and date
+    qualifiedItems.sort((a, b) => {
       const scoreA = scoreArticleQuality(a);
       const scoreB = scoreArticleQuality(b);
 
@@ -1423,37 +1527,7 @@ app.post("/api/feeds", async (req, res) => {
       return new Date(b.pubDate) - new Date(a.pubDate);
     });
 
-    // Apply source diversity limit
-    const sourceCounts = new Map();
-    const diverseItems = [];
-
-    for (const item of allItems) {
-      const count = sourceCounts.get(item.source) || 0;
-      if (count < FILTER_RULES.SOURCE_RULES.SOURCE_DIVERSITY.value) {
-        diverseItems.push(item);
-        sourceCounts.set(item.source, count + 1);
-        if (diverseItems.length >= 30) break; // Get extra for filtering
-      }
-    }
-
-    // NEW: Apply base domain limit (max 2 per domain)
-    const domainFilteredItems = [];
-    for (const item of diverseItems) {
-      const baseDomain = getBaseDomain(item.link);
-      if (baseDomain) {
-        const count = domainCounter.get(baseDomain) || 0;
-        if (count < FILTER_RULES.SOURCE_RULES.MAX_PER_DOMAIN.value) {
-          domainFilteredItems.push(item);
-          domainCounter.set(baseDomain, count + 1);
-        } else {
-          filterStats.recordFiltered("DOMAIN_LIMIT", item.title);
-        }
-      } else {
-        domainFilteredItems.push(item);
-      }
-    }
-
-    // Filter duplicate uncommon words
+    // Additional filtering for uncommon words and other limits
     const filteredItems = [];
     const usedUncommonWords = new Set();
     const commonWords = new Set([
@@ -1548,7 +1622,12 @@ app.post("/api/feeds", async (req, res) => {
     let questionTitlesCount = 0;
     const hourBuckets = new Map();
 
-    for (const item of domainFilteredItems) {
+    for (const item of qualifiedItems) {
+      // Stop when we have enough final items
+      if (filteredItems.length >= MAX_ITEMS) {
+        break;
+      }
+
       // Check question title limit
       if (item.title.includes("?")) {
         if (questionTitlesCount >= FILTER_RULES.LIMITS.MAX_QUESTIONS.value) {
@@ -1587,20 +1666,19 @@ app.post("/api/feeds", async (req, res) => {
           filteredItems.push(item);
           titleWords.forEach((word) => usedUncommonWords.add(word));
           hourBuckets.set(hour, hourCount + 1);
-
-          if (filteredItems.length >= 10) break;
         }
       } else {
         filteredItems.push(item);
         hourBuckets.set(hour, hourCount + 1);
-        if (filteredItems.length >= 10) break;
       }
     }
 
-    const finalItems = filteredItems.slice(0, 10);
+    const finalItems = filteredItems.slice(0, MAX_ITEMS);
 
     // Include filter stats in response
     const stats = filterStats.getReport();
+
+    debugLog(`✅ Returning ${finalItems.length} items to client`);
 
     res.json({
       items: finalItems,

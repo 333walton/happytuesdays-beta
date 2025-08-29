@@ -224,8 +224,12 @@ const RSS_FEEDS = {
   },
 };
 
-// Helpers for category/subcategory resolution
+// Configuration
+const MAX_ITEMS = 10;
+const MAX_ITEMS_PER_FEED = 15;
+const TARGET_BUFFER = 20;
 
+// Helpers for category/subcategory resolution
 const getFeedsForCategory = (category) => {
   const categoryFeeds = RSS_FEEDS[category];
   if (!categoryFeeds) return [];
@@ -239,7 +243,6 @@ const getFeedsForSubcategory = (category, subcategory) => {
 };
 
 const getFeedDisplayName = (url) => {
-  // Optionally, use a map here for pretty source names
   try {
     return new URL(url).hostname.replace("www.", "");
   } catch {
@@ -255,7 +258,6 @@ const parseFeedItem = (item, source) => {
       : item["media:thumbnail"];
   }
 
-  // clean description
   let description =
     item.contentSnippet || item.description || item.summary || "";
   description = description.replace(/<[^>]*>/g, "").trim();
@@ -280,22 +282,71 @@ const parseFeedItem = (item, source) => {
   };
 };
 
-// Fetch a single RSS feed with timeout and error handling
-const fetchSingleFeed = async (url, timeout = 8000) => {
-  return new Promise(async (resolve) => {
-    const timer = setTimeout(() => resolve([]), timeout);
-    try {
-      const feed = await parser.parseURL(url);
-      clearTimeout(timer);
-      resolve(feed.items.map((item) => parseFeedItem(item, url)));
-    } catch (error) {
-      clearTimeout(timer);
-      console.error(`Error fetching feed ${url}:`, error.message);
-      resolve([]);
-    }
-  });
-};
+// OPTIMIZED fetch function with early exit
+async function fetchFeedsWithEarlyExit(feedUrls) {
+  const qualifiedItems = [];
+  const seen = new Set();
+  const sourceCounts = new Map();
+  let totalProcessed = 0;
 
+  console.log(`Starting early-exit processing for ${feedUrls.length} feeds`);
+
+  // Process feeds SEQUENTIALLY for early exit
+  for (let i = 0; i < feedUrls.length; i++) {
+    const feedUrl = feedUrls[i];
+
+    // CHECK: Do we have enough items?
+    if (qualifiedItems.length >= TARGET_BUFFER) {
+      console.log(
+        `Early exit: ${qualifiedItems.length} items after ${i} feeds`
+      );
+      break;
+    }
+
+    try {
+      const feed = await parser.parseURL(feedUrl);
+
+      // LIMIT items per feed
+      const itemsToProcess = feed.items.slice(0, MAX_ITEMS_PER_FEED);
+
+      for (const item of itemsToProcess) {
+        totalProcessed++;
+
+        // CHECK during processing
+        if (qualifiedItems.length >= TARGET_BUFFER) break;
+
+        const parsed = parseFeedItem(item, feedUrl);
+
+        // Deduplication
+        const key = parsed.guid || parsed.link;
+        if (seen.has(key)) continue;
+
+        // Source limit
+        const sourceCount = sourceCounts.get(parsed.source) || 0;
+        if (sourceCount >= 3) continue;
+
+        // Item qualified!
+        seen.add(key);
+        sourceCounts.set(parsed.source, sourceCount + 1);
+        qualifiedItems.push(parsed);
+      }
+    } catch (error) {
+      console.error(`Error fetching ${feedUrl}:`, error.message);
+      // Continue to next feed
+    }
+  }
+
+  console.log(
+    `Processed ${totalProcessed} items, qualified ${qualifiedItems.length}`
+  );
+
+  // Sort by date
+  qualifiedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+  return qualifiedItems.slice(0, MAX_ITEMS);
+}
+
+// Main handler
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -309,7 +360,6 @@ export default async function handler(req, res) {
     "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
   );
 
-  // OPTIONS for preflight
   if (req.method === "OPTIONS") {
     res.status(200).end();
     return;
@@ -325,46 +375,37 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Category is required" });
   }
 
-  // Get feeds for category and subcategory
-  const feedUrls = subcategory
-    ? getFeedsForSubcategory(category, subcategory)
-    : getFeedsForCategory(category);
+  try {
+    // Get feed URLs
+    const feedUrls = subcategory
+      ? getFeedsForSubcategory(category, subcategory)
+      : getFeedsForCategory(category);
 
-  if (!feedUrls || feedUrls.length === 0) {
-    return res
-      .status(200)
-      .json({ items: [], message: "No feeds found for this category" });
+    if (!feedUrls || feedUrls.length === 0) {
+      return res.status(200).json({
+        items: [],
+        message: "No feeds found for this category",
+      });
+    }
+
+    // Use optimized fetch with early exit
+    const finalItems = await fetchFeedsWithEarlyExit(feedUrls);
+
+    return res.status(200).json({
+      items: finalItems,
+      count: finalItems.length,
+      category,
+      subcategory,
+      timestamp: new Date().toISOString(),
+      success: true,
+    });
+  } catch (error) {
+    console.error("Feed fetching error:", error);
+    return res.status(500).json({
+      error: "Failed to fetch feeds",
+      message: error.message,
+      items: [],
+      count: 0,
+    });
   }
-
-  // Fetch feeds in parallel
-  const feedPromises = feedUrls.map((url) => fetchSingleFeed(url));
-  const feedResults = await Promise.all(feedPromises);
-
-  // Flatten and deduplicate
-  let allItems = feedResults.flat();
-
-  // Deduplicate by GUID/link
-  const seen = new Set();
-  allItems = allItems.filter((item) => {
-    const key = item.guid || item.link;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-
-  // Sort by date (newest first)
-  allItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
-
-  // Limit to 10
-  const finalItems = allItems.slice(0, 10);
-
-  // Return in unified JSON
-  return res.status(200).json({
-    items: finalItems,
-    count: finalItems.length,
-    category,
-    subcategory,
-    timestamp: new Date().toISOString(),
-    success: true,
-  });
 }

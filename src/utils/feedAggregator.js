@@ -12,12 +12,16 @@ const isMobile = () => {
   return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 };
 
-// Determine API endpoint based on environment
+// DEBUG: Log the environment and endpoint
 const getApiEndpoint = () => {
-  if (process.env.NODE_ENV === "development") {
-    return "http://localhost:3001/api/feeds";
-  }
-  return "/api/feeds";
+  const isDev = process.env.NODE_ENV === "development";
+  const endpoint = isDev ? "http://localhost:3001/api/feeds" : "/api/feeds";
+
+  console.log("🔍 DEBUG - Environment:", process.env.NODE_ENV);
+  console.log("🔍 DEBUG - Using endpoint:", endpoint);
+  console.log("🔍 DEBUG - Is Development?", isDev);
+
+  return endpoint;
 };
 
 const API_ENDPOINT = getApiEndpoint();
@@ -199,10 +203,10 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
   // Check cache first
   const cached = getCachedFeed(cacheKey);
   if (cached) {
+    safeLog(`✅ Returning cached data for ${cacheKey}`);
     return cached.slice(0, MAX_ITEMS);
   }
 
-  // Show we're loading
   safeLog(`🔄 Fetching fresh data for ${category}/${subcategory || "all"}`);
 
   try {
@@ -218,58 +222,77 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
         signal: isMobile() ? AbortSignal.timeout(timeout) : undefined,
       }
     );
-    console.log("RAW API response to", cacheKey, ":", response.data);
-    // Log structure before you destructure for items
 
-    let { items, stats, filterRules } = response.data;
-    console.log("items before slicing/filter:", items);
+    // Log the response for debugging
+    safeLog("API response for", cacheKey, ":", {
+      itemCount: response.data.items?.length || 0,
+      hasStats: !!response.data.stats,
+      category: response.data.category,
+      subcategory: response.data.subcategory,
+    });
 
-    // Log stats if available (not on mobile)
-    if (stats && !isMobile() && process.env.NODE_ENV !== "production") {
-      console.log(`📊 Filter Stats for ${category}/${subcategory}:`, stats);
-    }
+    // Extract items from response
+    let items = response.data.items || [];
+    const stats = response.data.stats;
 
-    // LIMIT ITEMS
-    items = items.slice(0, MAX_ITEMS);
+    // Log filter stats if available (development only)
+    if (stats && !isMobile() && process.env.NODE_ENV === "development") {
+      console.log(`📊 Filter Stats for ${category}/${subcategory}:`);
+      console.log(`  Total processed: ${stats.totalProcessed || 0}`);
+      console.log(`  Passed filters: ${stats.passed || 0}`);
+      console.log(`  Filter rate: ${stats.filterRate || "0%"}`);
 
-    // Only try NewsAPI fallback on desktop
-    if (items.length < 5 && ENABLE_FALLBACK && !isMobile()) {
-      const query = subcategory ? subcategory.replace(/-/g, " ") : category;
-      const newsApiItems = await fetchFromNewsAPI(query);
-
-      if (newsApiItems.length > 0) {
-        // Combine and deduplicate
-        const combined = [...items, ...newsApiItems];
-        const seen = new Set();
-        const uniqueItems = combined.filter((item) => {
-          const key = item.guid || item.link;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
+      // Log filter reasons if available
+      if (stats.filtered && Object.keys(stats.filtered).length > 0) {
+        console.log("  Filter reasons:");
+        Object.entries(stats.filtered).forEach(([reason, count]) => {
+          console.log(`    ${reason}: ${count}`);
         });
+      }
 
-        // Sort by date and limit
-        const sortedItems = uniqueItems
-          .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
-          .slice(0, MAX_ITEMS);
-
-        storeInCache(cacheKey, sortedItems);
-        // Right before return
-        console.log("Returning items for render:", items);
-
-        return sortedItems;
+      // Log sample filtered items if available
+      if (
+        stats.filteredSamples &&
+        Object.keys(stats.filteredSamples).length > 0
+      ) {
+        console.log("  Sample filtered items:");
+        Object.entries(stats.filteredSamples).forEach(([reason, samples]) => {
+          console.log(`    ${reason}:`);
+          samples.slice(0, 3).forEach((sample) => {
+            console.log(`      - "${sample}"`);
+          });
+        });
       }
     }
 
-    // Cache and return the results
+    // Ensure we don't exceed MAX_ITEMS
+    items = items.slice(0, MAX_ITEMS);
+
+    // Cache the results if we have items
     if (items.length > 0) {
+      // Only cache what we need (not raw response)
       storeInCache(cacheKey, items);
       safeLog(`✅ Cached ${items.length} items for ${cacheKey}`);
+    } else {
+      safeLog(`⚠️ No items returned for ${cacheKey}`);
+
+      // Try to return expired cache if available
+      const expiredCache = localStorage.getItem(cacheKey);
+      if (expiredCache) {
+        try {
+          const expiredData = JSON.parse(expiredCache).data;
+          safeLog(`⚠️ Returning expired cache for ${cacheKey}`);
+          return expiredData.slice(0, MAX_ITEMS);
+        } catch (e) {
+          safeLog("Failed to parse expired cache");
+        }
+      }
     }
 
+    safeLog(`Returning ${items.length} items for ${cacheKey}`);
     return items;
   } catch (error) {
-    // More graceful error handling for mobile
+    // Error handling
     if (axios.isCancel(error)) {
       safeLog("Request was cancelled (timeout)");
     } else {
@@ -279,26 +302,15 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
       );
     }
 
-    // Try NewsAPI as fallback (desktop only)
-    if (ENABLE_FALLBACK && !isMobile()) {
-      const query = subcategory ? subcategory.replace(/-/g, " ") : category;
-      const fallbackItems = await fetchFromNewsAPI(query);
-      if (fallbackItems.length > 0) {
-        const limitedFallback = fallbackItems.slice(0, MAX_ITEMS);
-        storeInCache(cacheKey, limitedFallback);
-        return limitedFallback;
-      }
-    }
-
-    // Return cached data even if expired
+    // Try to return cached data even if expired
     const expiredCache = localStorage.getItem(cacheKey);
     if (expiredCache) {
       try {
         const expiredData = JSON.parse(expiredCache).data;
-        safeLog(`⚠️ Returning expired cache for ${cacheKey}`);
+        safeLog(`⚠️ Returning expired cache after error for ${cacheKey}`);
         return expiredData.slice(0, MAX_ITEMS);
       } catch (e) {
-        // Silently fail
+        safeLog("Failed to parse expired cache");
       }
     }
 
@@ -306,6 +318,34 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
     return [];
   }
 }
+
+window.clearAllCachesCompletely = function () {
+  // Clear memory cache
+  memoryCache.clear();
+
+  // Clear all feed-related localStorage
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("feed")) {
+      keys.push(key);
+    }
+  }
+
+  keys.forEach((key) => {
+    try {
+      localStorage.removeItem(key);
+    } catch (e) {
+      console.error("Failed to remove:", key);
+    }
+  });
+
+  console.log(`🗑️ Cleared ${keys.length} cache entries completely`);
+
+  // Force recalculate cache if FilterRulesViewer is open
+  const event = new CustomEvent("cacheCleared");
+  window.dispatchEvent(event);
+};
 
 // Prefetch feeds for better UX (skip on mobile)
 export async function prefetchFeeds(category) {
