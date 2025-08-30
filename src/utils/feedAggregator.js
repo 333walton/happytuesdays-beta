@@ -67,13 +67,18 @@ const storeInCache = (cacheKey, data) => {
 };
 
 // Main fetch function - SIMPLIFIED VERSION
-export async function fetchAndCacheFeed(category, subcategory = null) {
+export async function fetchAndCacheFeed(
+  category,
+  subcategory = null,
+  retryCount = 0
+) {
   const cacheKey = `feed_${category}${subcategory ? `_${subcategory}` : ""}`;
 
   console.log("📋 fetchAndCacheFeed called:", {
     category,
     subcategory,
     cacheKey,
+    retry: retryCount,
   });
 
   // Check cache first
@@ -86,16 +91,11 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
   console.log(`🔄 Fetching fresh data for ${category}/${subcategory || "all"}`);
 
   try {
-    // Build request body - IMPORTANT: Don't send subcategory if it's null
     const requestBody = { category };
     if (subcategory) {
       requestBody.subcategory = subcategory;
     }
 
-    console.log("📡 Sending request to:", API_ENDPOINT);
-    console.log("📦 Request body:", requestBody);
-
-    // Simple fetch without AbortController for now
     const response = await fetch(API_ENDPOINT, {
       method: "POST",
       headers: {
@@ -104,8 +104,6 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
       },
       body: JSON.stringify(requestBody),
     });
-
-    console.log("📨 Response status:", response.status);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -119,19 +117,23 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
       sampleItem: data?.items?.[0]?.title,
     });
 
-    // Check for error in response
-    if (data?.error) {
-      console.error("❌ API returned error:", data.error);
-      return [];
-    }
-
-    // Extract items from response
     let items = data?.items || [];
 
-    if (items.length === 0) {
-      console.warn("⚠️ API returned 0 items for", cacheKey);
+    // RETRY LOGIC: If subcategory returns 0 items, retry once
+    if (subcategory && items.length === 0 && retryCount < 1) {
+      console.log(`⚠️ No items for ${cacheKey}, retrying in 1 second...`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return fetchAndCacheFeed(category, subcategory, retryCount + 1);
+    }
 
-      // Try to return expired cache if available
+    if (items.length === 0) {
+      console.warn(
+        `⚠️ API returned 0 items for ${cacheKey} after ${
+          retryCount + 1
+        } attempts`
+      );
+
+      // Try expired cache
       try {
         const expiredCache = localStorage.getItem(cacheKey);
         if (expiredCache) {
@@ -150,30 +152,20 @@ export async function fetchAndCacheFeed(category, subcategory = null) {
       return [];
     }
 
-    // Limit and cache successful results
+    // Cache successful results
     items = items.slice(0, MAX_ITEMS);
     storeInCache(cacheKey, items);
     console.log(`✅ Successfully cached ${items.length} items for ${cacheKey}`);
 
     return items;
   } catch (error) {
-    console.error("❌ Feed fetch error:", {
-      message: error.message,
-      endpoint: API_ENDPOINT,
-      category,
-      subcategory,
-    });
+    console.error("❌ Feed fetch error:", error);
 
-    // Try returning cached data even if expired
-    try {
-      const expiredCache = localStorage.getItem(cacheKey);
-      if (expiredCache) {
-        const expiredData = JSON.parse(expiredCache).data;
-        console.log("📦 Returning expired cache after error");
-        return expiredData.slice(0, MAX_ITEMS);
-      }
-    } catch (e) {
-      console.log("No cache available");
+    // On error, retry once for subcategories
+    if (subcategory && retryCount < 1) {
+      console.log(`⚠️ Error fetching ${cacheKey}, retrying...`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return fetchAndCacheFeed(category, subcategory, retryCount + 1);
     }
 
     return [];

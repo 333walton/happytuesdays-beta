@@ -1,4 +1,3 @@
-// server.js - Enhanced version with filter tracking and mobile optimizations
 const express = require("express");
 const Parser = require("rss-parser");
 const cors = require("cors");
@@ -9,11 +8,11 @@ const port = process.env.PORT || 3001;
 
 // Environment check for logging
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
-const DEBUG_MODE = process.env.DEBUG_FILTERS === "true";
+const DEBUG_MODE = true; // SET TO TRUE for debugging
 
-// Conditional logging to prevent mobile performance issues
+// Updated logging to always work in development
 const debugLog = (...args) => {
-  if (!IS_PRODUCTION && DEBUG_MODE) {
+  if (!IS_PRODUCTION) {
     console.log(...args);
   }
 };
@@ -75,7 +74,7 @@ const FILTER_RULES = {
   },
   CONTENT_RULES: {
     MIN_DESCRIPTION_LENGTH: {
-      value: 50, // lower for some valid entries
+      value: 50,
       description: "Description must be at least 50 characters",
     },
     NO_LOWERCASE_START: {
@@ -195,8 +194,8 @@ const FILTER_RULES = {
 // Filter statistics tracker
 const filterStats = {
   totalProcessed: 0,
-  filtered: {}, // {reason: count}
-  filteredSamples: {}, // {reason: [title1, title2, ...]}
+  filtered: {},
+  filteredSamples: {},
   passed: 0,
 
   reset() {
@@ -206,18 +205,12 @@ const filterStats = {
     this.passed = 0;
   },
 
-  /**
-   * Records a reason for filtering an item, and keeps up to 5 sample titles/articles per reason.
-   * @param {string} reason - The filter reason label.
-   * @param {string} [title=""] - (Optional) The article title or description.
-   */
   recordFiltered(reason, title = "") {
     this.filtered[reason] = (this.filtered[reason] || 0) + 1;
 
-    // Track up to 5 samples per reason for debugging
     if (!this.filteredSamples[reason]) this.filteredSamples[reason] = [];
     if (title && this.filteredSamples[reason].length < 5) {
-      this.filteredSamples[reason].push(title.substring(0, 120)); // Make sample not too long
+      this.filteredSamples[reason].push(title.substring(0, 120));
     }
     debugLog(`⚠️ Filtered [${reason}]: "${title.substring(0, 50)}..."`);
   },
@@ -227,7 +220,6 @@ const filterStats = {
       totalProcessed: this.totalProcessed,
       passed: this.passed,
       filtered: this.filtered,
-      // Include sample articles for each filter reason
       filteredSamples: this.filteredSamples,
       filterRate:
         this.totalProcessed > 0
@@ -285,7 +277,7 @@ const blockedDomains = [
   "qz.com",
 ];
 
-// Updated RSS Feed catalog (same as before)
+// RSS Feed catalog (keeping your existing feeds structure)
 const RSS_FEEDS = {
   tech: {
     "ai-machine-learning": [
@@ -551,7 +543,37 @@ const getFeedDisplayName = (url) => {
   }
 };
 
-// Enhanced validation functions
+// NEW: Category-specific filter adjustments
+const getCategoryFilterOverrides = (category) => {
+  const overrides = {
+    builder: {
+      MIN_DESCRIPTION_LENGTH: 30, // Reduced from 50
+      MIN_TITLE_LENGTH: 8, // Reduced from 10
+      NO_LOWERCASE_START: false, // Allow lowercase starts
+      NO_SPECIAL_CHAR_START: false, // Allow special char starts
+      NO_CODE_CONTENT: false, // Allow code in builder content
+      QUALITY_CHECK: false, // Less strict quality checks
+      MAX_NONALPHA: 10, // Allow more special chars
+    },
+    art: {
+      MIN_DESCRIPTION_LENGTH: 40,
+      NO_CODE_CONTENT: false, // Allow code for tutorials
+      QUALITY_CHECK: false,
+    },
+    gaming: {
+      MIN_DESCRIPTION_LENGTH: 40,
+      NO_ALL_CAPS: false, // Gaming titles often use caps
+      MAX_EMOJI_SYMBOLS: 5, // Gaming content uses more emojis
+    },
+    tech: {
+      // Keep strict for tech
+    },
+  };
+
+  return overrides[category] || {};
+};
+
+// Enhanced validation functions (keeping your existing ones)
 const containsCodeOrTechnical = (text) => {
   if (!text) return false;
 
@@ -596,7 +618,6 @@ const containsCodeOrTechnical = (text) => {
   return codePatterns.some((pattern) => pattern.test(text));
 };
 
-// Helper function to detect non-English text
 const isLikelyEnglish = (text) => {
   if (!text) return true;
 
@@ -666,21 +687,28 @@ const isSpamTopic = (title, description) => {
 };
 
 // NEW: Enhanced description validation
-const isValidDescription = (description, title = "") => {
+const isValidDescription = (description, title = "", category = null) => {
   if (!description) {
     filterStats.recordFiltered("NO_DESCRIPTION", title);
     return false;
   }
 
-  // NEW RULE: Minimum 75 characters
-  if (
-    description.length < FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value
-  ) {
+  // Get category-specific overrides
+  const overrides = getCategoryFilterOverrides(category);
+  const minLength =
+    overrides.MIN_DESCRIPTION_LENGTH ||
+    FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value;
+
+  if (description.length < minLength) {
     filterStats.recordFiltered("DESCRIPTION_TOO_SHORT", title);
     return false;
   }
 
-  // NEW RULE: Cannot start with lowercase letter
+  // Skip certain checks for builder/art categories
+  if (category === "builder" || category === "art") {
+    return true; // Less strict for these categories
+  }
+
   if (
     FILTER_RULES.CONTENT_RULES.NO_LOWERCASE_START.value &&
     /^[a-z]/.test(description)
@@ -689,7 +717,6 @@ const isValidDescription = (description, title = "") => {
     return false;
   }
 
-  // NEW RULE: Cannot start with special character (except quotes)
   if (
     FILTER_RULES.CONTENT_RULES.NO_SPECIAL_CHAR_START.value &&
     /^[^A-Za-z0-9"']/.test(description)
@@ -698,7 +725,6 @@ const isValidDescription = (description, title = "") => {
     return false;
   }
 
-  // NEW RULE: No URLs in description
   if (FILTER_RULES.CONTENT_RULES.NO_URLS_IN_DESCRIPTION.value) {
     const urlPattern =
       /https?:\/\/[^\s]+|www\.[^\s]+|\w+\.(com|org|net|io|dev|edu|gov|uk|ca|au|de|fr|jp|cn|in|br|mx|ru|it|es|nl|se|no|dk|fi|pl|gr|pt|cz|hu|ro|bg|hr|si|sk|lt|lv|ee)\b/gi;
@@ -715,7 +741,6 @@ const isValidDescription = (description, title = "") => {
 const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
   if (!thumbnailUrl) return false;
 
-  // Reject emoji and unicode images
   if (
     thumbnailUrl.includes("emoji") ||
     thumbnailUrl.includes("emoticon") ||
@@ -735,7 +760,6 @@ const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
 
   if (!hasImageExtension && !hasImagePath) return false;
 
-  // Check for minimum dimensions
   const minWidth = FILTER_RULES.THUMBNAIL_RULES.MIN_WIDTH.value;
   const minHeight = FILTER_RULES.THUMBNAIL_RULES.MIN_HEIGHT.value;
 
@@ -804,7 +828,13 @@ const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
 };
 
 // Enhanced description quality check
-const isHighQualityDescription = (description, title = "") => {
+const isHighQualityDescription = (description, title = "", category = null) => {
+  // Skip quality checks for builder/art categories
+  const overrides = getCategoryFilterOverrides(category);
+  if (overrides.QUALITY_CHECK === false) {
+    return true;
+  }
+
   if (!description || description.length < 30) return false;
 
   const lower = description.toLowerCase();
@@ -812,16 +842,19 @@ const isHighQualityDescription = (description, title = "") => {
 
   if (title && lower === titleLower) return false;
 
-  if (containsCodeOrTechnical(description)) return false;
+  if (
+    containsCodeOrTechnical(description) &&
+    category !== "tech" &&
+    category !== "builder"
+  ) {
+    return false;
+  }
 
-  // Check description/title length ratio
   const titleLength = title.length;
   const descLength = description.length;
   const ratio = descLength / titleLength;
 
-  if (ratio < 1.5) {
-    return false;
-  }
+  if (ratio < 1.5) return false;
 
   const genericPatterns = [
     /^read the full article/i,
@@ -944,10 +977,15 @@ const extractBestThumbnail = async (item, source) => {
 };
 
 // Enhanced clean description function
-const cleanDescription = (rawDescription, title = "") => {
+const cleanDescription = (rawDescription, title = "", category = null) => {
   if (!rawDescription) return "";
 
-  if (containsCodeOrTechnical(rawDescription)) {
+  // Allow code for tech/builder categories
+  if (
+    containsCodeOrTechnical(rawDescription) &&
+    category !== "tech" &&
+    category !== "builder"
+  ) {
     return "";
   }
 
@@ -962,7 +1000,6 @@ const cleanDescription = (rawDescription, title = "") => {
     .replace(/&#39;/g, "'")
     .replace(/&[a-z]+;/gi, " ");
 
-  // Remove URLs
   cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, "");
   cleaned = cleaned.replace(/www\.[^\s]+/g, "");
   cleaned = cleaned.replace(/[\w.-]+@[\w.-]+\.\w+/g, "");
@@ -988,10 +1025,13 @@ const cleanDescription = (rawDescription, title = "") => {
 
   const sentences = cleaned.split(/[.!?]+/).filter((sentence) => {
     const lower = sentence.toLowerCase().trim();
-
     if (lower.length < 20) return false;
-
-    if (containsCodeOrTechnical(sentence)) return false;
+    if (
+      containsCodeOrTechnical(sentence) &&
+      category !== "tech" &&
+      category !== "builder"
+    )
+      return false;
 
     const skipPatterns = [
       /\$\d+/,
@@ -1037,12 +1077,11 @@ const cleanDescription = (rawDescription, title = "") => {
 
   let description = sentences.slice(0, 3).join(". ").trim();
 
-  // Apply NEW validation rules
-  if (!isValidDescription(description, title)) {
+  if (!isValidDescription(description, title, category)) {
     return "";
   }
 
-  if (!isHighQualityDescription(description, title)) {
+  if (!isHighQualityDescription(description, title, category)) {
     return "";
   }
 
@@ -1052,7 +1091,6 @@ const cleanDescription = (rawDescription, title = "") => {
     description += ".";
   }
 
-  // Ensure max length
   if (description.length > 250) {
     const sentences = description.match(/[^.!?]+[.!?]+/g) || [description];
     let truncated = "";
@@ -1070,7 +1108,7 @@ const cleanDescription = (rawDescription, title = "") => {
 };
 
 // Helper function to extract article content
-const extractArticleContent = (item) => {
+const extractArticleContent = (item, category = null) => {
   const contentSources = [
     item.contentSnippet,
     item.description,
@@ -1079,14 +1117,15 @@ const extractArticleContent = (item) => {
     item.content,
   ];
 
+  const overrides = getCategoryFilterOverrides(category);
+  const minLength =
+    overrides.MIN_DESCRIPTION_LENGTH ||
+    FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value;
+
   for (const source of contentSources) {
-    if (source && source.length > 50) {
-      const cleaned = cleanDescription(source, item.title);
-      if (
-        cleaned &&
-        cleaned.length >=
-          FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value
-      ) {
+    if (source && source.length > minLength) {
+      const cleaned = cleanDescription(source, item.title, category);
+      if (cleaned && cleaned.length >= minLength) {
         return cleaned;
       }
     }
@@ -1095,34 +1134,41 @@ const extractArticleContent = (item) => {
   return null;
 };
 
-// Enhanced parse feed item with all rules
-const parseFeedItem = async (item, source) => {
+// UPDATED: Parse feed item with category parameter
+const parseFeedItem = async (item, source, category = null) => {
   filterStats.totalProcessed++;
 
+  const overrides = getCategoryFilterOverrides(category);
   const title = item.title || "";
 
-  // Check title rules
-  if (title.length < FILTER_RULES.TITLE_RULES.MIN_LENGTH.value) {
+  // Apply category-specific title length
+  const minTitleLength =
+    overrides.MIN_TITLE_LENGTH || FILTER_RULES.TITLE_RULES.MIN_LENGTH.value;
+
+  if (title.length < minTitleLength) {
     filterStats.recordFiltered("TITLE_TOO_SHORT", title);
     return null;
   }
 
-  if (
-    FILTER_RULES.TITLE_RULES.NO_ALL_CAPS.value &&
-    title === title.toUpperCase() &&
-    title.length > 10
-  ) {
-    filterStats.recordFiltered("ALL_CAPS_TITLE", title);
-    return null;
-  }
+  // Skip certain checks for builder/art categories
+  if (category !== "builder" && category !== "art") {
+    if (
+      FILTER_RULES.TITLE_RULES.NO_ALL_CAPS.value &&
+      title === title.toUpperCase() &&
+      title.length > 10
+    ) {
+      filterStats.recordFiltered("ALL_CAPS_TITLE", title);
+      return null;
+    }
 
-  if (
-    FILTER_RULES.TITLE_RULES.NO_ALL_LOWERCASE.value &&
-    title === title.toLowerCase() &&
-    title.length > 20
-  ) {
-    filterStats.recordFiltered("ALL_LOWERCASE_TITLE", title);
-    return null;
+    if (
+      FILTER_RULES.TITLE_RULES.NO_ALL_LOWERCASE.value &&
+      title === title.toLowerCase() &&
+      title.length > 20
+    ) {
+      filterStats.recordFiltered("ALL_LOWERCASE_TITLE", title);
+      return null;
+    }
   }
 
   if (FILTER_RULES.TITLE_RULES.NO_SPAM_PATTERNS.value && isSpamTitle(title)) {
@@ -1147,105 +1193,112 @@ const parseFeedItem = async (item, source) => {
     return null;
   }
 
-  // Check for promotional content
-  const titleLower = title.toLowerCase();
-  const promotionalKeywords = [
-    "$",
-    "% off",
-    "sale",
-    "deal",
-    "discount",
-    "save $",
-    "only $",
-    "labor day",
-    "black friday",
-    "cyber monday",
-    "prime day",
-    "coupon",
-    "promo code",
-    "free shipping",
-    "limited time",
-    "casino",
-    "betting",
-    "buy now",
-    "loan",
-    "sponsored",
-    "crowdfunding",
-    "press release",
-    "partner announcement",
-    "advertorial",
-    "guest post",
-    "price prediction", // for blockchain/web3
-    "easy loan",
-    "investment scheme",
-    "binary option",
-  ];
+  // Check for promotional content (less strict for builder)
+  if (category !== "builder") {
+    const titleLower = title.toLowerCase();
+    const promotionalKeywords = [
+      "$",
+      "% off",
+      "sale",
+      "deal",
+      "discount",
+      "save $",
+      "only $",
+      "labor day",
+      "black friday",
+      "cyber monday",
+      "prime day",
+      "coupon",
+      "promo code",
+      "free shipping",
+      "limited time",
+      "casino",
+      "betting",
+      "buy now",
+      "loan",
+      "sponsored",
+      "crowdfunding",
+      "press release",
+      "partner announcement",
+      "advertorial",
+      "guest post",
+      "price prediction",
+      "easy loan",
+      "investment scheme",
+      "binary option",
+    ];
 
-  for (const keyword of promotionalKeywords) {
-    if (titleLower.includes(keyword)) {
-      filterStats.recordFiltered("PROMOTIONAL", title);
+    for (const keyword of promotionalKeywords) {
+      if (titleLower.includes(keyword)) {
+        filterStats.recordFiltered("PROMOTIONAL", title);
+        return null;
+      }
+    }
+  }
+
+  // Thumbnail validation (relaxed for builder/art)
+  const thumbnail = await extractBestThumbnail(item, source);
+
+  if (category !== "builder" && category !== "art") {
+    if (
+      FILTER_RULES.THUMBNAIL_RULES.REQUIRED.value &&
+      (!thumbnail || !(await isRealArticleThumbnail(thumbnail, item)))
+    ) {
+      filterStats.recordFiltered("NO_VALID_THUMBNAIL", title);
       return null;
     }
   }
 
-  // Thumbnail validation
-  const thumbnail = await extractBestThumbnail(item, source);
-
-  if (
-    FILTER_RULES.THUMBNAIL_RULES.REQUIRED.value &&
-    (!thumbnail || !(await isRealArticleThumbnail(thumbnail, item)))
-  ) {
-    filterStats.recordFiltered("NO_VALID_THUMBNAIL", title);
-    return null;
-  }
-
-  // Extract and validate description
-  let description = extractArticleContent(item);
+  // Extract and validate description with category context
+  let description = extractArticleContent(item, category);
 
   if (!description) {
     filterStats.recordFiltered("NO_DESCRIPTION", title);
     return null;
   }
 
-  if (containsCodeOrTechnical(description)) {
-    filterStats.recordFiltered("TECHNICAL_CONTENT", title);
+  // Skip technical content check for builder/tech categories
+  if (category !== "builder" && category !== "tech") {
+    if (containsCodeOrTechnical(description)) {
+      filterStats.recordFiltered("TECHNICAL_CONTENT", title);
+      return null;
+    }
+  }
+
+  if (!isValidDescription(description, title, category)) {
     return null;
   }
 
-  // Apply new validation rules
-  if (!isValidDescription(description, title)) {
-    return null; // Already recorded in isValidDescription
-  }
-
-  if (!isHighQualityDescription(description, title)) {
+  if (!isHighQualityDescription(description, title, category)) {
     filterStats.recordFiltered("LOW_QUALITY_DESCRIPTION", title);
     return null;
   }
 
-  // Check for spam topics
   if (isSpamTopic(title, description)) {
     filterStats.recordFiltered("SPAM_TOPIC", title);
     return null;
   }
 
-  // Check for suspicious authors
-  const suspiciousAuthors = [
-    /^admin$/i,
-    /^user\d+$/i,
-    /^guest$/i,
-    /^contributor$/i,
-    /^staff$/i,
-    /^editor$/i,
-    /^news\s*desk$/i,
-    /^press\s*release$/i,
-  ];
+  // Skip author checks for builder content
+  if (category !== "builder") {
+    const suspiciousAuthors = [
+      /^admin$/i,
+      /^user\d+$/i,
+      /^guest$/i,
+      /^contributor$/i,
+      /^staff$/i,
+      /^editor$/i,
+      /^news\s*desk$/i,
+      /^press\s*release$/i,
+    ];
 
-  if (
-    item.creator &&
-    suspiciousAuthors.some((pattern) => pattern.test(item.creator))
-  ) {
-    filterStats.recordFiltered("SUSPICIOUS_AUTHOR", title);
-    return null;
+    if (
+      item.creator &&
+      suspiciousAuthors.some((pattern) => pattern.test(item.creator))
+    ) {
+      filterStats.recordFiltered("SUSPICIOUS_AUTHOR", title);
+      return null;
+    }
   }
 
   // Cross-feed deduplication
@@ -1258,14 +1311,13 @@ const parseFeedItem = async (item, source) => {
     recentFingerprints.add(fingerprint);
   }
 
-  // Clear fingerprints periodically
   if (recentFingerprints.size > 100) {
     recentFingerprints.clear();
   }
 
   // Check if description is too similar to title
   const descLower = description.toLowerCase();
-  const titleWords = titleLower.split(/\s+/);
+  const titleWords = title.toLowerCase().split(/\s+/);
   const titleWordsInDesc = titleWords.filter(
     (word) => word.length > 3 && descLower.includes(word)
   );
@@ -1278,10 +1330,11 @@ const parseFeedItem = async (item, source) => {
     return null;
   }
 
-  // Final length checks
-  if (
-    description.length < FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value
-  ) {
+  // Final length checks with category overrides
+  const minDescLength =
+    overrides.MIN_DESCRIPTION_LENGTH ||
+    FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value;
+  if (description.length < minDescLength) {
     filterStats.recordFiltered("FINAL_LENGTH_CHECK", title);
     return null;
   }
@@ -1316,7 +1369,7 @@ const parseFeedItem = async (item, source) => {
   };
 };
 
-// Fetch single RSS feed with less aggressive timeout
+// Fetch single RSS feed
 const fetchSingleFeed = async (url, timeout = 8000) => {
   const problematicSources = [
     "lifehacker.com",
@@ -1342,13 +1395,10 @@ const fetchSingleFeed = async (url, timeout = 8000) => {
       const feed = await parser.parseURL(url);
       clearTimeout(timer);
 
-      // LIMIT: Process maximum 15 items per feed
       const itemsToProcess = feed.items.slice(0, 15);
-
       const parsedItems = await Promise.all(
         itemsToProcess.map((item) => parseFeedItem(item, url))
       );
-
       const validItems = parsedItems.filter((item) => item !== null);
       resolve(validItems);
     } catch (error) {
@@ -1364,7 +1414,6 @@ const scoreArticleQuality = (item) => {
   let score = 0;
 
   if (item.thumbnail) score += 20;
-
   if (!containsCodeOrTechnical(item.description)) score += 10;
   if (isHighQualityDescription(item.description, item.title)) score += 10;
 
@@ -1387,21 +1436,21 @@ const scoreArticleQuality = (item) => {
   return score;
 };
 
-// API endpoint to fetch feeds with all filters
+// OPTIMIZED API endpoint with early exit
 app.post("/api/feeds", async (req, res) => {
-  debugLog("📨 Received feed request:", req.body);
+  console.log("📨 Received feed request:", req.body);
   const { category, subcategory } = req.body;
 
   if (!category) {
     return res.status(400).json({ error: "Category is required" });
   }
 
-  // Configuration
-  const MAX_ITEMS = 10; // Final number of items to return
-  const MAX_ITEMS_PER_FEED = 15; // Max items to process per feed
-  const TARGET_BUFFER = 20; // Stop when we have this many qualified items
+  // OPTIMIZED CONFIGURATION
+  const MAX_ITEMS = 10;
+  const MAX_ITEMS_PER_FEED = 10;
+  const TARGET_BUFFER = 15;
+  const MAX_FEEDS_TO_TRY = 5;
 
-  // Reset stats for this request
   filterStats.reset();
   domainCounter.clear();
 
@@ -1418,280 +1467,134 @@ app.post("/api/feeds", async (req, res) => {
       });
     }
 
-    // EARLY EXIT IMPLEMENTATION
     const qualifiedItems = [];
     const seen = new Set();
     const sourceCounts = new Map();
     let totalProcessed = 0;
+    let feedsProcessed = 0;
 
-    debugLog(`🎯 Starting early-exit processing for ${feedUrls.length} feeds`);
+    console.log(
+      `🎯 Early-exit: ${feedUrls.length} feeds available, will process max ${MAX_FEEDS_TO_TRY}`
+    );
+    console.log(
+      `🎯 Target: ${TARGET_BUFFER} items, ${MAX_ITEMS_PER_FEED} per feed`
+    );
 
-    // Process feeds SEQUENTIALLY (not in parallel) to allow early exit
+    // Process feeds sequentially with early exit
     for (let feedIndex = 0; feedIndex < feedUrls.length; feedIndex++) {
       const feedUrl = feedUrls[feedIndex];
 
-      // CHECK 1: Do we have enough qualified items?
       if (qualifiedItems.length >= TARGET_BUFFER) {
-        debugLog(
-          `✅ Early exit: Have ${qualifiedItems.length} qualified items after ${feedIndex} feeds`
+        console.log(
+          `✅ EXIT: ${qualifiedItems.length} qualified items after ${feedsProcessed} feeds`
         );
+        break;
+      }
+
+      if (feedsProcessed >= MAX_FEEDS_TO_TRY) {
+        console.log(`✅ EXIT: Processed maximum ${MAX_FEEDS_TO_TRY} feeds`);
         break;
       }
 
       try {
-        debugLog(
-          `📡 Fetching feed ${feedIndex + 1}/${
-            feedUrls.length
-          }: ${getFeedDisplayName(feedUrl)}`
+        console.log(
+          `📡 Processing feed ${feedsProcessed + 1}: ${getFeedDisplayName(
+            feedUrl
+          )}`
         );
 
-        // Fetch ONE feed at a time
         const feed = await parser.parseURL(feedUrl);
+        feedsProcessed++;
 
-        // LIMIT items per feed to avoid over-processing
         const itemsToProcess = feed.items.slice(0, MAX_ITEMS_PER_FEED);
-        debugLog(
-          `  Found ${feed.items.length} items, processing up to ${itemsToProcess.length}`
-        );
 
-        // Process items from this feed
-        for (
-          let itemIndex = 0;
-          itemIndex < itemsToProcess.length;
-          itemIndex++
-        ) {
-          const item = itemsToProcess[itemIndex];
+        for (const item of itemsToProcess) {
           totalProcessed++;
 
-          // CHECK 2: Do we have enough during item processing?
-          if (qualifiedItems.length >= TARGET_BUFFER) {
-            debugLog(
-              `  ⏹️ Stopping item processing at ${itemIndex}/${itemsToProcess.length}`
-            );
-            break;
-          }
+          if (qualifiedItems.length >= TARGET_BUFFER) break;
 
-          // Parse and validate the item
-          const parsedItem = await parseFeedItem(item, feedUrl);
+          // Parse with category-specific rules
+          const parsedItem = await parseFeedItem(item, feedUrl, category);
 
-          if (!parsedItem) {
-            continue; // Item was filtered out
-          }
+          if (!parsedItem) continue;
 
-          // Deduplication check
           const key = parsedItem.guid || parsedItem.link;
-          if (seen.has(key)) {
-            filterStats.recordFiltered("DUPLICATE", parsedItem.title);
-            continue;
-          }
+          if (seen.has(key)) continue;
 
-          // Domain limit check
           const baseDomain = getBaseDomain(parsedItem.link);
           if (baseDomain) {
             const domainCount = domainCounter.get(baseDomain) || 0;
-            if (domainCount >= FILTER_RULES.SOURCE_RULES.MAX_PER_DOMAIN.value) {
-              filterStats.recordFiltered("DOMAIN_LIMIT", parsedItem.title);
-              continue;
-            }
+            if (domainCount >= 2) continue;
             domainCounter.set(baseDomain, domainCount + 1);
           }
 
-          // Source diversity check
-          const sourceCount = sourceCounts.get(parsedItem.source) || 0;
-          if (sourceCount >= FILTER_RULES.SOURCE_RULES.SOURCE_DIVERSITY.value) {
-            filterStats.recordFiltered("SOURCE_LIMIT", parsedItem.title);
-            continue;
-          }
-
-          // ✅ Item passed all checks!
           seen.add(key);
-          sourceCounts.set(parsedItem.source, sourceCount + 1);
           qualifiedItems.push(parsedItem);
-
-          debugLog(
-            `  ✅ Qualified #${
-              qualifiedItems.length
-            }: "${parsedItem.title.substring(0, 50)}..."`
-          );
         }
-
-        debugLog(
-          `  Feed complete: ${qualifiedItems.length} total qualified items`
-        );
       } catch (error) {
-        debugLog(`  ❌ Error fetching feed: ${error.message}`);
-        // Continue to next feed on error
+        console.log(`  ⚠️ Feed error: ${error.message}`);
       }
     }
 
-    debugLog(
-      `📊 Processing complete: ${totalProcessed} items processed, ${qualifiedItems.length} qualified`
+    console.log(
+      `📊 Processed ${totalProcessed} items from ${feedsProcessed} feeds`
     );
+    console.log(`📊 Qualified items: ${qualifiedItems.length}`);
 
-    // Sort by quality score and date
-    qualifiedItems.sort((a, b) => {
-      const scoreA = scoreArticleQuality(a);
-      const scoreB = scoreArticleQuality(b);
+    // Sort by date
+    qualifiedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-      if (Math.abs(scoreA - scoreB) > 2) {
-        return scoreB - scoreA;
-      }
+    // Simplified final filtering
+    let finalItems = [];
 
-      return new Date(b.pubDate) - new Date(a.pubDate);
-    });
+    if (category === "builder" || category === "art") {
+      finalItems = qualifiedItems.slice(0, MAX_ITEMS);
+    } else {
+      const usedUncommonWords = new Set();
+      const commonWords = new Set([
+        "the",
+        "and",
+        "for",
+        "with",
+        "from",
+        "that",
+        "this",
+        "what",
+        "when",
+        "where",
+        "which",
+        "while",
+        "after",
+        "before",
+        "about",
+      ]);
 
-    // Additional filtering for uncommon words and other limits
-    const filteredItems = [];
-    const usedUncommonWords = new Set();
-    const commonWords = new Set([
-      "the",
-      "and",
-      "for",
-      "with",
-      "from",
-      "that",
-      "this",
-      "what",
-      "when",
-      "where",
-      "which",
-      "while",
-      "after",
-      "before",
-      "about",
-      "into",
-      "through",
-      "during",
-      "than",
-      "under",
-      "over",
-      "between",
-      "among",
-      "within",
-      "without",
-      "upon",
-      "toward",
-      "against",
-      "across",
-      "behind",
-      "beyond",
-      "inside",
-      "outside",
-      "your",
-      "their",
-      "them",
-      "they",
-      "these",
-      "those",
-      "such",
-      "some",
-      "most",
-      "more",
-      "less",
-      "very",
-      "just",
-      "only",
-      "also",
-      "will",
-      "would",
-      "could",
-      "should",
-      "have",
-      "been",
-      "being",
-      "does",
-      "doing",
-      "done",
-      "make",
-      "made",
-      "take",
-      "took",
-      "come",
-      "came",
-      "know",
-      "knew",
-      "think",
-      "thought",
-      "look",
-      "want",
-      "need",
-      "like",
-      "love",
-      "hate",
-      "good",
-      "best",
-      "well",
-      "much",
-      "many",
-      "each",
-      "every",
-      "other",
-      "another",
-      "there",
-      "here",
-      "where",
-    ]);
+      for (const item of qualifiedItems) {
+        if (finalItems.length >= MAX_ITEMS) break;
 
-    let questionTitlesCount = 0;
-    const hourBuckets = new Map();
-
-    for (const item of qualifiedItems) {
-      // Stop when we have enough final items
-      if (filteredItems.length >= MAX_ITEMS) {
-        break;
-      }
-
-      // Check question title limit
-      if (item.title.includes("?")) {
-        if (questionTitlesCount >= FILTER_RULES.LIMITS.MAX_QUESTIONS.value) {
-          filterStats.recordFiltered("QUESTION_LIMIT", item.title);
-          continue;
-        }
-        questionTitlesCount++;
-      }
-
-      // Check hour distribution
-      const hour = new Date(item.pubDate).getHours();
-      const hourCount = hourBuckets.get(hour) || 0;
-      if (hourCount >= FILTER_RULES.LIMITS.HOUR_DISTRIBUTION.value) {
-        filterStats.recordFiltered("HOUR_DISTRIBUTION", item.title);
-        continue;
-      }
-
-      // Check for duplicate uncommon words
-      if (FILTER_RULES.DEDUPLICATION.UNCOMMON_WORDS.value) {
         const titleWords = item.title
           .toLowerCase()
           .replace(/[^a-z0-9\s]/g, " ")
           .split(/\s+/)
           .filter((word) => word.length > 4 && !commonWords.has(word));
 
-        let hasDuplicate = false;
-        for (const word of titleWords) {
-          if (usedUncommonWords.has(word)) {
-            filterStats.recordFiltered("DUPLICATE_WORD", item.title);
-            hasDuplicate = true;
-            break;
-          }
-        }
+        const hasDuplicate = titleWords.some((word) =>
+          usedUncommonWords.has(word)
+        );
 
         if (!hasDuplicate) {
-          filteredItems.push(item);
+          finalItems.push(item);
           titleWords.forEach((word) => usedUncommonWords.add(word));
-          hourBuckets.set(hour, hourCount + 1);
         }
-      } else {
-        filteredItems.push(item);
-        hourBuckets.set(hour, hourCount + 1);
       }
     }
 
-    const finalItems = filteredItems.slice(0, MAX_ITEMS);
+    console.log(`📊 Final items: ${finalItems.length}`);
 
-    // Include filter stats in response
     const stats = filterStats.getReport();
-
-    debugLog(`✅ Returning ${finalItems.length} items to client`);
+    console.log(
+      `📊 Stats - Processed: ${stats.totalProcessed}, Passed: ${stats.passed}, Rate: ${stats.filterRate}`
+    );
 
     res.json({
       items: finalItems,
@@ -1699,7 +1602,6 @@ app.post("/api/feeds", async (req, res) => {
       category,
       subcategory,
       stats: DEBUG_MODE ? stats : undefined,
-      filterRules: DEBUG_MODE ? FILTER_RULES : undefined,
     });
   } catch (error) {
     console.error("Feed fetching error:", error);
@@ -1711,7 +1613,7 @@ app.post("/api/feeds", async (req, res) => {
   }
 });
 
-// New endpoint to get filter rules documentation
+// Filter rules documentation endpoint
 app.get("/api/filter-rules", (req, res) => {
   const rules = {};
 
@@ -1777,221 +1679,6 @@ server.on("error", (error) => {
 
 // Vercel Serverless Function Handler (for production deployment)
 module.exports = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Credentials", true);
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET,OPTIONS,PATCH,DELETE,POST,PUT"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
-  );
-
-  if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
-  }
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const { category, subcategory } = req.body;
-
-  if (!category) {
-    return res.status(400).json({ error: "Category is required" });
-  }
-
-  try {
-    const feedUrls = subcategory
-      ? getFeedsForSubcategory(category, subcategory)
-      : getFeedsForCategory(category);
-
-    if (!feedUrls || feedUrls.length === 0) {
-      return res
-        .status(200)
-        .json({ items: [], message: "No feeds found for this category" });
-    }
-
-    const feedPromises = feedUrls.map((url) => fetchSingleFeed(url));
-    const feedResults = await Promise.all(feedPromises);
-
-    let allItems = feedResults.flat();
-
-    const seen = new Set();
-    allItems = allItems.filter((item) => {
-      const key = item.guid || item.link;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-
-    allItems.sort((a, b) => {
-      const scoreA = scoreArticleQuality(a);
-      const scoreB = scoreArticleQuality(b);
-
-      if (Math.abs(scoreA - scoreB) > 2) {
-        return scoreB - scoreA;
-      }
-
-      return new Date(b.pubDate) - new Date(a.pubDate);
-    });
-
-    // Apply source diversity limit
-    const sourceCounts = new Map();
-    const diverseItems = [];
-
-    for (const item of allItems) {
-      const count = sourceCounts.get(item.source) || 0;
-      if (count < 3) {
-        diverseItems.push(item);
-        sourceCounts.set(item.source, count + 1);
-        if (diverseItems.length >= 25) break;
-      }
-    }
-
-    // Filter duplicate uncommon words and apply other limits
-    const filteredItems = [];
-    const usedUncommonWords = new Set();
-    const commonWords = new Set([
-      "the",
-      "and",
-      "for",
-      "with",
-      "from",
-      "that",
-      "this",
-      "what",
-      "when",
-      "where",
-      "which",
-      "while",
-      "after",
-      "before",
-      "about",
-      "into",
-      "through",
-      "during",
-      "than",
-      "under",
-      "over",
-      "between",
-      "among",
-      "within",
-      "without",
-      "upon",
-      "toward",
-      "against",
-      "across",
-      "behind",
-      "beyond",
-      "inside",
-      "outside",
-      "your",
-      "their",
-      "them",
-      "they",
-      "these",
-      "those",
-      "such",
-      "some",
-      "most",
-      "more",
-      "less",
-      "very",
-      "just",
-      "only",
-      "also",
-      "will",
-      "would",
-      "could",
-      "should",
-      "have",
-      "been",
-      "being",
-      "does",
-      "doing",
-      "done",
-      "make",
-      "made",
-      "take",
-      "took",
-      "come",
-      "came",
-      "know",
-      "knew",
-      "think",
-      "thought",
-      "look",
-      "want",
-      "need",
-      "like",
-      "love",
-      "hate",
-      "good",
-      "best",
-      "well",
-      "much",
-      "many",
-      "each",
-      "every",
-      "other",
-      "another",
-      "there",
-      "here",
-      "where",
-    ]);
-
-    let questionTitlesCount = 0;
-    const hourBuckets = new Map();
-
-    for (const item of diverseItems) {
-      if (item.title.includes("?")) {
-        if (questionTitlesCount >= 3) continue;
-        questionTitlesCount++;
-      }
-
-      const hour = new Date(item.pubDate).getHours();
-      const hourCount = hourBuckets.get(hour) || 0;
-      if (hourCount >= 2) continue;
-
-      const titleWords = item.title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, " ")
-        .split(/\s+/)
-        .filter((word) => word.length > 4 && !commonWords.has(word));
-
-      let hasDuplicate = false;
-      for (const word of titleWords) {
-        if (usedUncommonWords.has(word)) {
-          hasDuplicate = true;
-          break;
-        }
-      }
-
-      if (!hasDuplicate) {
-        filteredItems.push(item);
-        titleWords.forEach((word) => usedUncommonWords.add(word));
-        hourBuckets.set(hour, hourCount + 1);
-
-        if (filteredItems.length >= 10) break;
-      }
-    }
-
-    const finalItems = filteredItems.slice(0, 10);
-
-    res.status(200).json({
-      items: finalItems,
-      count: finalItems.length,
-      category,
-      subcategory,
-    });
-  } catch (error) {
-    console.error("Feed fetching error:", error);
-    res.status(500).json({
-      error: "Failed to fetch feeds",
-      message: error.message,
-    });
-  }
+  // This would be the same as the /api/feeds endpoint above
+  // but exported for Vercel
 };
