@@ -204,25 +204,27 @@ class DesktopInner extends Component {
 
     return (
       <MonitorView>
-        <Theme
-          className={cx("desktop screen", {
-            desktopX2: settings.scale === 2,
-            desktopX1_5: settings.scale === 1.5,
-            notMobile: !isMobile,
-            fullScreen: settings.fullScreen,
-          })}
-        >
-          <Background />
-          <DesktopView />
-          <TaskBar />
-          <WindowManager navigate={navigate} />
-          <TaskManager />
-          <Settings />
-          <ShutDown />
-          <ClippyProvider defaultAgent="Clippy" />
-          {settings.crt && <CRTOverlay />}
-        </Theme>
-        {process.env.NODE_ENV !== "production" && <FilterRulesViewer />}
+        <NewsletterFunnelManager>
+          <Theme
+            className={cx("desktop screen", {
+              desktopX2: settings.scale === 2,
+              desktopX1_5: settings.scale === 1.5,
+              notMobile: !isMobile,
+              fullScreen: settings.fullScreen,
+            })}
+          >
+            <Background />
+            <DesktopView />
+            <TaskBar />
+            <WindowManager navigate={navigate} />
+            <TaskManager />
+            <Settings />
+            <ShutDown />
+            <ClippyProvider defaultAgent="Clippy" />
+            {settings.crt && <CRTOverlay />}
+          </Theme>
+          {process.env.NODE_ENV !== "production" && <FilterRulesViewer />}
+        </NewsletterFunnelManager>
       </MonitorView>
     );
   }

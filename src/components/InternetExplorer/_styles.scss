@@ -118,8 +118,8 @@
   /* Account for taskbar */
   transform: translate(0px, 0px) !important;
   position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
+  top: 1px !important; //changed from 0 !important
+  left: 1px !important; //changed from 0 !important
 }
 
 /* Critical fix for dragging */
