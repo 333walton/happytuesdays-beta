@@ -28,6 +28,7 @@ import HappyTuesdayNewsFeed from "./components/HappyTuesdayNewsFeed/HappyTuesday
 import desktopData from "./data/desktop";
 import startMenuData from "./data/start";
 import FilterRulesViewer from "./components/HappyTuesdayNewsFeed/FilterRulesViewer";
+//import FilterConfigViewer from "./components/HappyTuesdayNewsFeed/FilterConfigViewer";
 
 // Debug flag - set to false in production to disable most logging
 const DEBUG_LOGGING = process.env.NODE_ENV === "development";

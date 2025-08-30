@@ -3,6 +3,9 @@ const Parser = require("rss-parser");
 const cors = require("cors");
 const { formatDistanceToNow } = require("date-fns");
 
+// Import filter config
+const { CATEGORY_FILTER_CONFIG, getFilterConfig } = require("./filterConfig");
+
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -490,7 +493,7 @@ const RSS_FEEDS = {
     ],
 
     "collectors-hub": [
-      "https://www.racketboy.com/feed/", // Collector’s guides, retro hardware coverage
+      "https://www.racketboy.com/feed/", // Collector's guides, retro hardware coverage
       "https://videogamekrieg.com/feed", // Retro and collectible games news, interviews
       "https://www.pricecharting.com/blog/feed", // Pricing reports, rare item tracking, collecting tips
       "https://www.retrorgb.com/feed/", // Hardware preservation, RGB mods, technical guides
@@ -543,34 +546,24 @@ const getFeedDisplayName = (url) => {
   }
 };
 
-// NEW: Category-specific filter adjustments
-const getCategoryFilterOverrides = (category) => {
-  const overrides = {
-    builder: {
-      MIN_DESCRIPTION_LENGTH: 30, // Reduced from 50
-      MIN_TITLE_LENGTH: 8, // Reduced from 10
-      NO_LOWERCASE_START: false, // Allow lowercase starts
-      NO_SPECIAL_CHAR_START: false, // Allow special char starts
-      NO_CODE_CONTENT: false, // Allow code in builder content
-      QUALITY_CHECK: false, // Less strict quality checks
-      MAX_NONALPHA: 10, // Allow more special chars
-    },
-    art: {
-      MIN_DESCRIPTION_LENGTH: 40,
-      NO_CODE_CONTENT: false, // Allow code for tutorials
-      QUALITY_CHECK: false,
-    },
-    gaming: {
-      MIN_DESCRIPTION_LENGTH: 40,
-      NO_ALL_CAPS: false, // Gaming titles often use caps
-      MAX_EMOJI_SYMBOLS: 5, // Gaming content uses more emojis
-    },
-    tech: {
-      // Keep strict for tech
-    },
+// UPDATED: Replace getCategoryFilterOverrides with new implementation
+const getCategoryFilterOverrides = (category, subcategory = null) => {
+  const config = getFilterConfig(category, subcategory);
+  // Return a flattened version for backward compatibility
+  return {
+    MIN_DESCRIPTION_LENGTH: config.CONTENT_RULES?.MIN_DESCRIPTION_LENGTH,
+    MIN_TITLE_LENGTH: config.TITLE_RULES?.MIN_LENGTH,
+    NO_LOWERCASE_START: config.CONTENT_RULES?.NO_LOWERCASE_START,
+    NO_SPECIAL_CHAR_START: config.CONTENT_RULES?.NO_SPECIAL_CHAR_START,
+    NO_CODE_CONTENT: config.CONTENT_RULES?.NO_CODE_CONTENT,
+    QUALITY_CHECK: config.CONTENT_RULES?.QUALITY_CHECK,
+    MAX_NONALPHA: config.TITLE_RULES?.MAX_NONALPHA,
+    NO_ALL_CAPS: config.TITLE_RULES?.NO_ALL_CAPS,
+    MAX_EMOJI_SYMBOLS: config.CONTENT_RULES?.MAX_EMOJI_SYMBOLS,
+    THUMBNAIL_REQUIRED: config.THUMBNAIL_RULES?.REQUIRED,
+    MAX_AGE_DAYS: config.AGE_RULES?.MAX_AGE_DAYS,
+    UNCOMMON_WORDS: config.DEDUPLICATION?.UNCOMMON_WORDS,
   };
-
-  return overrides[category] || {};
 };
 
 // Enhanced validation functions (keeping your existing ones)
@@ -1134,38 +1127,38 @@ const extractArticleContent = (item, category = null) => {
   return null;
 };
 
-// UPDATED: Parse feed item with category parameter
-const parseFeedItem = async (item, source, category = null) => {
+// UPDATED: Parse feed item with category AND subcategory parameters
+const parseFeedItem = async (
+  item,
+  source,
+  category = null,
+  subcategory = null
+) => {
   filterStats.totalProcessed++;
 
-  const overrides = getCategoryFilterOverrides(category);
+  // Get filter config for this specific category/subcategory
+  const config = getFilterConfig(category, subcategory);
+
   const title = item.title || "";
 
-  // Apply category-specific title length
-  const minTitleLength =
-    overrides.MIN_TITLE_LENGTH || FILTER_RULES.TITLE_RULES.MIN_LENGTH.value;
-
-  if (title.length < minTitleLength) {
+  // Use config values directly
+  if (title.length < config.TITLE_RULES.MIN_LENGTH) {
     filterStats.recordFiltered("TITLE_TOO_SHORT", title);
+    return null;
+  }
+
+  if (
+    config.TITLE_RULES.NO_ALL_CAPS &&
+    title === title.toUpperCase() &&
+    title.length > 10
+  ) {
+    filterStats.recordFiltered("ALL_CAPS_TITLE", title);
     return null;
   }
 
   // Skip certain checks for builder/art categories
   if (category !== "builder" && category !== "art") {
-    if (
-      FILTER_RULES.TITLE_RULES.NO_ALL_CAPS.value &&
-      title === title.toUpperCase() &&
-      title.length > 10
-    ) {
-      filterStats.recordFiltered("ALL_CAPS_TITLE", title);
-      return null;
-    }
-
-    if (
-      FILTER_RULES.TITLE_RULES.NO_ALL_LOWERCASE.value &&
-      title === title.toLowerCase() &&
-      title.length > 20
-    ) {
+    if (title === title.toLowerCase() && title.length > 20) {
       filterStats.recordFiltered("ALL_LOWERCASE_TITLE", title);
       return null;
     }
@@ -1181,12 +1174,11 @@ const parseFeedItem = async (item, source, category = null) => {
     return null;
   }
 
-  // Age filter
+  // For age check:
   const pubDate =
     item.pubDate || item.isoDate || item.published || new Date().toISOString();
   const articleAge = Date.now() - new Date(pubDate);
-  const maxAge =
-    FILTER_RULES.AGE_RULES.MAX_AGE_DAYS.value * 24 * 60 * 60 * 1000;
+  const maxAge = config.AGE_RULES.MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
   if (articleAge > maxAge) {
     filterStats.recordFiltered("TOO_OLD", title);
@@ -1239,21 +1231,18 @@ const parseFeedItem = async (item, source, category = null) => {
   // Thumbnail validation (relaxed for builder/art)
   const thumbnail = await extractBestThumbnail(item, source);
 
-  if (category !== "builder" && category !== "art") {
-    if (
-      FILTER_RULES.THUMBNAIL_RULES.REQUIRED.value &&
-      (!thumbnail || !(await isRealArticleThumbnail(thumbnail, item)))
-    ) {
-      filterStats.recordFiltered("NO_VALID_THUMBNAIL", title);
-      return null;
-    }
+  // For thumbnail:
+  if (config.THUMBNAIL_RULES.REQUIRED && !thumbnail) {
+    filterStats.recordFiltered("NO_VALID_THUMBNAIL", title);
+    return null;
   }
 
   // Extract and validate description with category context
   let description = extractArticleContent(item, category);
 
-  if (!description) {
-    filterStats.recordFiltered("NO_DESCRIPTION", title);
+  // For description length:
+  if (description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH) {
+    filterStats.recordFiltered("DESCRIPTION_TOO_SHORT", title);
     return null;
   }
 
@@ -1327,15 +1316,6 @@ const parseFeedItem = async (item, source, category = null) => {
     titleWordsInDesc.length / titleWords.length > 0.7
   ) {
     filterStats.recordFiltered("DESCRIPTION_TOO_SIMILAR", title);
-    return null;
-  }
-
-  // Final length checks with category overrides
-  const minDescLength =
-    overrides.MIN_DESCRIPTION_LENGTH ||
-    FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value;
-  if (description.length < minDescLength) {
-    filterStats.recordFiltered("FINAL_LENGTH_CHECK", title);
     return null;
   }
 
@@ -1436,6 +1416,136 @@ const scoreArticleQuality = (item) => {
   return score;
 };
 
+// NEW ENDPOINTS to view and test filter configurations
+
+// Get filter config for a specific category/subcategory
+app.get("/api/filter-config/:category/:subcategory?", (req, res) => {
+  const { category, subcategory } = req.params;
+  const config = getFilterConfig(category, subcategory || null);
+
+  res.json({
+    category,
+    subcategory: subcategory || "none",
+    config,
+    message: `Filter configuration for ${category}${
+      subcategory ? `/${subcategory}` : ""
+    }`,
+  });
+});
+
+// Get all filter configurations overview
+app.get("/api/filter-configs", (req, res) => {
+  const overview = {};
+
+  // Get config for each category and subcategory
+  for (const [category, categoryConfig] of Object.entries(
+    CATEGORY_FILTER_CONFIG
+  )) {
+    if (category === "DEFAULT") continue;
+
+    overview[category] = {
+      categoryRules: getFilterConfig(category),
+      subcategories: {},
+    };
+
+    if (categoryConfig.subcategories) {
+      for (const subcategory of Object.keys(categoryConfig.subcategories)) {
+        overview[category].subcategories[subcategory] = getFilterConfig(
+          category,
+          subcategory
+        );
+      }
+    }
+  }
+
+  res.json({
+    default: CATEGORY_FILTER_CONFIG.DEFAULT,
+    categories: overview,
+    message: "Complete filter configuration overview",
+  });
+});
+
+// Test filter config on a sample item
+app.post("/api/test-filters", async (req, res) => {
+  const { category, subcategory, testItem } = req.body;
+
+  if (!category || !testItem) {
+    return res.status(400).json({ error: "Category and testItem required" });
+  }
+
+  const config = getFilterConfig(category, subcategory);
+  const results = [];
+
+  // Test title length
+  if (testItem.title) {
+    if (testItem.title.length < config.TITLE_RULES.MIN_LENGTH) {
+      results.push({
+        rule: "MIN_TITLE_LENGTH",
+        failed: true,
+        reason: `Title length ${testItem.title.length} < required ${config.TITLE_RULES.MIN_LENGTH}`,
+      });
+    } else {
+      results.push({
+        rule: "MIN_TITLE_LENGTH",
+        passed: true,
+      });
+    }
+
+    if (
+      config.TITLE_RULES.NO_ALL_CAPS &&
+      testItem.title === testItem.title.toUpperCase()
+    ) {
+      results.push({
+        rule: "NO_ALL_CAPS",
+        failed: true,
+        reason: "Title is all caps",
+      });
+    }
+  }
+
+  // Test description
+  if (testItem.description) {
+    if (
+      testItem.description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH
+    ) {
+      results.push({
+        rule: "MIN_DESCRIPTION_LENGTH",
+        failed: true,
+        reason: `Description length ${testItem.description.length} < required ${config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH}`,
+      });
+    } else {
+      results.push({
+        rule: "MIN_DESCRIPTION_LENGTH",
+        passed: true,
+      });
+    }
+  }
+
+  // Test age
+  if (testItem.pubDate) {
+    const age = Date.now() - new Date(testItem.pubDate);
+    const maxAge = config.AGE_RULES.MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+    if (age > maxAge) {
+      results.push({
+        rule: "MAX_AGE_DAYS",
+        failed: true,
+        reason: `Article is ${Math.floor(
+          age / (24 * 60 * 60 * 1000)
+        )} days old, max allowed is ${config.AGE_RULES.MAX_AGE_DAYS}`,
+      });
+    }
+  }
+
+  res.json({
+    category,
+    subcategory,
+    config: config,
+    testItem,
+    results,
+    wouldPass: !results.some((r) => r.failed),
+  });
+});
+
 // OPTIMIZED API endpoint with early exit
 app.post("/api/feeds", async (req, res) => {
   console.log("📨 Received feed request:", req.body);
@@ -1508,13 +1618,19 @@ app.post("/api/feeds", async (req, res) => {
 
         const itemsToProcess = feed.items.slice(0, MAX_ITEMS_PER_FEED);
 
+        // When parsing items, pass both category and subcategory:
         for (const item of itemsToProcess) {
           totalProcessed++;
 
           if (qualifiedItems.length >= TARGET_BUFFER) break;
 
           // Parse with category-specific rules
-          const parsedItem = await parseFeedItem(item, feedUrl, category);
+          const parsedItem = await parseFeedItem(
+            item,
+            feedUrl,
+            category,
+            subcategory
+          );
 
           if (!parsedItem) continue;
 
