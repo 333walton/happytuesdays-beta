@@ -195,6 +195,9 @@ const CATEGORY_FILTER_CONFIG = {
         CONTENT_RULES: {
           MIN_DESCRIPTION_LENGTH: 30,
         },
+        AGE_RULES: {
+          MAX_AGE_DAYS: 40,
+        },
       },
       "animation-motion": {
         THUMBNAIL_RULES: {
