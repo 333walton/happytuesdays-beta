@@ -29,7 +29,7 @@ const CATEGORY_FILTER_CONFIG = {
 
     THUMBNAIL_RULES: {
       REQUIRED: true,
-      //USE_DEFAULT_ON_HIGH_QUALITY: true, // New flag for high-quality articles without thumbnails
+      USE_DEFAULT_ON_HIGH_QUALITY: true, // New flag for high-quality articles without thumbnails
       MIN_QUALITY_SCORE_FOR_DEFAULT: 35, // Minimum quality score to show default icon
     },
     DEDUPLICATION: {
@@ -88,7 +88,7 @@ const CATEGORY_FILTER_CONFIG = {
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
-      //USE_DEFAULT_ON_HIGH_QUALITY: true,
+      USE_DEFAULT_ON_HIGH_QUALITY: true,
       MIN_QUALITY_SCORE_FOR_DEFAULT: 35,
     },
     PROMOTIONAL_KEYWORDS: [
@@ -144,7 +144,7 @@ const CATEGORY_FILTER_CONFIG = {
         },
         THUMBNAIL_RULES: {
           REQUIRED: true, // Many marketing feeds lack thumbnails
-          //USE_DEFAULT_ON_HIGH_QUALITY: true,
+          USE_DEFAULT_ON_HIGH_QUALITY: true,
           MIN_QUALITY_SCORE_FOR_DEFAULT: 30, // Lower threshold for marketing
         },
         AGE_RULES: {
@@ -196,7 +196,7 @@ const CATEGORY_FILTER_CONFIG = {
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
-      //USE_DEFAULT_ON_HIGH_QUALITY: false,
+      USE_DEFAULT_ON_HIGH_QUALITY: false,
       MIN_QUALITY_SCORE_FOR_DEFAULT: 25, // Lower threshold
     },
     AGE_RULES: {
@@ -287,7 +287,7 @@ const CATEGORY_FILTER_CONFIG = {
     },
     THUMBNAIL_RULES: {
       REQUIRED: true, // Visual content needs images
-      //USE_DEFAULT_ON_HIGH_QUALITY: false, // Art content should have real images
+      USE_DEFAULT_ON_HIGH_QUALITY: false, // Art content should have real images
       MIN_QUALITY_SCORE_FOR_DEFAULT: 40,
     },
     DEDUPLICATION: {
@@ -341,7 +341,7 @@ const CATEGORY_FILTER_CONFIG = {
       "ui-ux-trends": {
         THUMBNAIL_RULES: {
           REQUIRED: true,
-          //USE_DEFAULT_ON_HIGH_QUALITY: false,
+          USE_DEFAULT_ON_HIGH_QUALITY: false,
         },
       },
       "color-typography": {
@@ -355,7 +355,7 @@ const CATEGORY_FILTER_CONFIG = {
       "animation-motion": {
         THUMBNAIL_RULES: {
           REQUIRED: true,
-          //USE_DEFAULT_ON_HIGH_QUALITY: true,
+          USE_DEFAULT_ON_HIGH_QUALITY: true,
           MIN_QUALITY_SCORE_FOR_DEFAULT: 30,
         },
       },
@@ -386,7 +386,7 @@ const CATEGORY_FILTER_CONFIG = {
     },
     THUMBNAIL_RULES: {
       REQUIRED: true, // Gaming content varies
-      //USE_DEFAULT_ON_HIGH_QUALITY: true,
+      USE_DEFAULT_ON_HIGH_QUALITY: true,
       MIN_QUALITY_SCORE_FOR_DEFAULT: 30,
     },
     PROMOTIONAL_KEYWORDS: [
@@ -442,7 +442,7 @@ const CATEGORY_FILTER_CONFIG = {
         },
         THUMBNAIL_RULES: {
           REQUIRED: true, // Old games may lack images
-          //USE_DEFAULT_ON_HIGH_QUALITY: true,
+          USE_DEFAULT_ON_HIGH_QUALITY: true,
           MIN_QUALITY_SCORE_FOR_DEFAULT: 25,
         },
       },
