@@ -1,5 +1,6 @@
 // filterConfig.js - Create this new file in your project root
 // This allows you to configure specific filter rules for each category and subcategory
+// view all settings easily by entering http://localhost:3001/api/filter-configs into the browser (select 'pretty-print')
 
 const CATEGORY_FILTER_CONFIG = {
   // Global defaults (applied unless overridden)

@@ -34,166 +34,6 @@ const parser = new Parser({
   },
 });
 
-// FILTER RULES DOCUMENTATION AND TRACKING
-const FILTER_RULES = {
-  TITLE_RULES: {
-    MIN_LENGTH: {
-      value: 10,
-      description: "Title must be at least 10 characters",
-    },
-    MAX_LENGTH: {
-      value: 110,
-      description: "Title must be no more than 110 characters",
-    },
-    NO_ALL_CAPS: {
-      value: true,
-      description: "Reject all-caps titles over 10 chars",
-    },
-    NO_ALL_LOWERCASE: {
-      value: true,
-      description: "Reject all-lowercase titles over 20 chars",
-    },
-    NO_SPAM_PATTERNS: {
-      value: true,
-      description: "Reject titles with spam patterns",
-    },
-    ENGLISH_ONLY: {
-      value: true,
-      description: "Accept only English titles",
-    },
-    MIN_VOWELS: {
-      value: 2,
-      description: "Title must have at least 2 vowels",
-    },
-    MAX_NONALPHA: {
-      value: 7,
-      description: "Reject titles with >7 consecutive non-alphanumeric chars",
-    },
-    KEYWORD_BLACKLIST: {
-      value: true,
-      description:
-        "Reject titles with blacklisted keywords (see promotionalKeywords)",
-    },
-  },
-  CONTENT_RULES: {
-    MIN_DESCRIPTION_LENGTH: {
-      value: 50,
-      description: "Description must be at least 50 characters",
-    },
-    NO_LOWERCASE_START: {
-      value: true,
-      description: "Description cannot start with lowercase letter",
-    },
-    NO_SPECIAL_CHAR_START: {
-      value: true,
-      description: "Description cannot start with special character",
-    },
-    NO_URLS_IN_DESCRIPTION: {
-      value: true,
-      description: "No URLs allowed in description",
-    },
-    NO_CODE_CONTENT: {
-      value: false,
-      description:
-        "No code snippets in description (Allowed for tech categories)",
-    },
-    QUALITY_CHECK: {
-      value: true,
-      description: "Must pass quality checks",
-    },
-    MAX_EMOJI_SYMBOLS: {
-      value: 3,
-      description: "Reject description with >3 non-alphanumeric/emoji",
-    },
-    KEYWORD_BLACKLIST: {
-      value: true,
-      description: "Reject descriptions with blacklisted spam/ads keywords",
-    },
-    MAX_LINKS: {
-      value: 3,
-      description: "Reject content with more than 3 hyperlinks (anti-spam)",
-    },
-    MAX_LINK_PERCENT: {
-      value: 0.5,
-      description: "Reject if links make up more than 50% of content",
-    },
-    ENGLISH_ONLY: {
-      value: true,
-      description: "Accept only English content",
-    },
-  },
-  SOURCE_RULES: {
-    MAX_PER_DOMAIN: {
-      value: 2,
-      description: "Maximum 2 articles per base domain",
-    },
-    BLOCKED_DOMAINS: {
-      value: true,
-      description: "Block specific domains (see blocklist)",
-    },
-    SOURCE_DIVERSITY: {
-      value: 3,
-      description: "Max 3 articles per RSS source",
-    },
-    BLOCKLIST_BY_FAILURE: {
-      value: { maxFailures: 3, resetInHours: 48 },
-      description: "Auto-block sources failing filter more than 3x in 48h",
-    },
-  },
-  AGE_RULES: {
-    MAX_AGE_DAYS: {
-      value: 7,
-      description: "Articles must be less than 7 days old",
-    },
-  },
-  THUMBNAIL_RULES: {
-    REQUIRED: { value: true, description: "Valid thumbnail required" },
-    MIN_WIDTH: { value: 400, description: "Thumbnail minimum width 400px" },
-    MIN_HEIGHT: { value: 300, description: "Thumbnail minimum height 300px" },
-    ASPECT_RATIO: {
-      value: [1.33, 2.5],
-      description:
-        "Thumbnail aspect ratio must be between 4:3 (1.33) and 2.5:1",
-    },
-  },
-  DEDUPLICATION: {
-    CROSS_FEED: {
-      value: true,
-      description: "Remove duplicates across feeds",
-    },
-    UNCOMMON_WORDS: {
-      value: true,
-      description: "Filter duplicate uncommon words in titles",
-    },
-    URL_STRIP_PARAMS: {
-      value: true,
-      description:
-        "Treat URLs as duplicate if only differing by tracking params",
-    },
-  },
-  LIMITS: {
-    MAX_QUESTIONS: {
-      value: 3,
-      description: "Maximum 3 question titles per batch",
-    },
-    HOUR_DISTRIBUTION: {
-      value: 2,
-      description: "Max 2 articles per hour timestamp",
-    },
-    MAX_PER_SOURCE_PER_DAY: {
-      value: 10,
-      description: "Max 10 articles per source per 24h",
-    },
-  },
-  HTML_SANITIZATION: {
-    STRIP_JS: {
-      value: true,
-      description:
-        "Remove <script>, <iframe>, and unwanted tags from description",
-    },
-  },
-};
-
 // Filter statistics tracker
 const filterStats = {
   totalProcessed: 0,
@@ -546,26 +386,6 @@ const getFeedDisplayName = (url) => {
   }
 };
 
-// UPDATED: Replace getCategoryFilterOverrides with new implementation
-const getCategoryFilterOverrides = (category, subcategory = null) => {
-  const config = getFilterConfig(category, subcategory);
-  // Return a flattened version for backward compatibility
-  return {
-    MIN_DESCRIPTION_LENGTH: config.CONTENT_RULES?.MIN_DESCRIPTION_LENGTH,
-    MIN_TITLE_LENGTH: config.TITLE_RULES?.MIN_LENGTH,
-    NO_LOWERCASE_START: config.CONTENT_RULES?.NO_LOWERCASE_START,
-    NO_SPECIAL_CHAR_START: config.CONTENT_RULES?.NO_SPECIAL_CHAR_START,
-    NO_CODE_CONTENT: config.CONTENT_RULES?.NO_CODE_CONTENT,
-    QUALITY_CHECK: config.CONTENT_RULES?.QUALITY_CHECK,
-    MAX_NONALPHA: config.TITLE_RULES?.MAX_NONALPHA,
-    NO_ALL_CAPS: config.TITLE_RULES?.NO_ALL_CAPS,
-    MAX_EMOJI_SYMBOLS: config.CONTENT_RULES?.MAX_EMOJI_SYMBOLS,
-    THUMBNAIL_REQUIRED: config.THUMBNAIL_RULES?.REQUIRED,
-    MAX_AGE_DAYS: config.AGE_RULES?.MAX_AGE_DAYS,
-    UNCOMMON_WORDS: config.DEDUPLICATION?.UNCOMMON_WORDS,
-  };
-};
-
 // Enhanced validation functions (keeping your existing ones)
 const containsCodeOrTechnical = (text) => {
   if (!text) return false;
@@ -679,20 +499,22 @@ const isSpamTopic = (title, description) => {
   );
 };
 
-// NEW: Enhanced description validation
-const isValidDescription = (description, title = "", category = null) => {
+// NEW: Enhanced description validation using config
+const isValidDescription = (
+  description,
+  title = "",
+  category = null,
+  subcategory = null
+) => {
   if (!description) {
     filterStats.recordFiltered("NO_DESCRIPTION", title);
     return false;
   }
 
-  // Get category-specific overrides
-  const overrides = getCategoryFilterOverrides(category);
-  const minLength =
-    overrides.MIN_DESCRIPTION_LENGTH ||
-    FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value;
+  // Get category-specific config
+  const config = getFilterConfig(category, subcategory);
 
-  if (description.length < minLength) {
+  if (description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH) {
     filterStats.recordFiltered("DESCRIPTION_TOO_SHORT", title);
     return false;
   }
@@ -702,23 +524,20 @@ const isValidDescription = (description, title = "", category = null) => {
     return true; // Less strict for these categories
   }
 
-  if (
-    FILTER_RULES.CONTENT_RULES.NO_LOWERCASE_START.value &&
-    /^[a-z]/.test(description)
-  ) {
+  if (config.CONTENT_RULES.NO_LOWERCASE_START && /^[a-z]/.test(description)) {
     filterStats.recordFiltered("LOWERCASE_START", title);
     return false;
   }
 
   if (
-    FILTER_RULES.CONTENT_RULES.NO_SPECIAL_CHAR_START.value &&
+    config.CONTENT_RULES.NO_SPECIAL_CHAR_START &&
     /^[^A-Za-z0-9"']/.test(description)
   ) {
     filterStats.recordFiltered("SPECIAL_CHAR_START", title);
     return false;
   }
 
-  if (FILTER_RULES.CONTENT_RULES.NO_URLS_IN_DESCRIPTION.value) {
+  if (config.CONTENT_RULES.NO_URLS_IN_DESCRIPTION) {
     const urlPattern =
       /https?:\/\/[^\s]+|www\.[^\s]+|\w+\.(com|org|net|io|dev|edu|gov|uk|ca|au|de|fr|jp|cn|in|br|mx|ru|it|es|nl|se|no|dk|fi|pl|gr|pt|cz|hu|ro|bg|hr|si|sk|lt|lv|ee)\b/gi;
     if (urlPattern.test(description)) {
@@ -752,16 +571,6 @@ const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
     );
 
   if (!hasImageExtension && !hasImagePath) return false;
-
-  const minWidth = FILTER_RULES.THUMBNAIL_RULES.MIN_WIDTH.value;
-  const minHeight = FILTER_RULES.THUMBNAIL_RULES.MIN_HEIGHT.value;
-
-  if (thumbnailUrl.includes("resize=") || thumbnailUrl.includes("w=")) {
-    const widthMatch = thumbnailUrl.match(/[?&]w=(\d+)/);
-    const heightMatch = thumbnailUrl.match(/[?&]h=(\d+)/);
-    if (widthMatch && parseInt(widthMatch[1]) < minWidth) return false;
-    if (heightMatch && parseInt(heightMatch[1]) < minHeight) return false;
-  }
 
   const genericPatterns = [
     /favicon/i,
@@ -809,22 +618,21 @@ const isRealArticleThumbnail = async (thumbnailUrl, item = {}) => {
     return false;
   }
 
-  const sizePattern = /[-_](\d{3,4})x(\d{3,4})[.-]/;
-  const sizeMatch = thumbnailUrl.match(sizePattern);
-  if (sizeMatch) {
-    const width = parseInt(sizeMatch[1]);
-    const height = parseInt(sizeMatch[2]);
-    if (width < minWidth || height < minHeight) return false;
-  }
-
   return true;
 };
 
-// Enhanced description quality check
-const isHighQualityDescription = (description, title = "", category = null) => {
-  // Skip quality checks for builder/art categories
-  const overrides = getCategoryFilterOverrides(category);
-  if (overrides.QUALITY_CHECK === false) {
+// Enhanced description quality check using config
+const isHighQualityDescription = (
+  description,
+  title = "",
+  category = null,
+  subcategory = null
+) => {
+  // Get config for this category/subcategory
+  const config = getFilterConfig(category, subcategory);
+
+  // Skip quality checks if disabled in config
+  if (config.CONTENT_RULES.QUALITY_CHECK === false) {
     return true;
   }
 
@@ -837,8 +645,7 @@ const isHighQualityDescription = (description, title = "", category = null) => {
 
   if (
     containsCodeOrTechnical(description) &&
-    category !== "tech" &&
-    category !== "builder"
+    config.CONTENT_RULES.NO_CODE_CONTENT
   ) {
     return false;
   }
@@ -969,15 +776,22 @@ const extractBestThumbnail = async (item, source) => {
   return null;
 };
 
-// Enhanced clean description function
-const cleanDescription = (rawDescription, title = "", category = null) => {
+// Enhanced clean description function using config
+const cleanDescription = (
+  rawDescription,
+  title = "",
+  category = null,
+  subcategory = null
+) => {
   if (!rawDescription) return "";
 
-  // Allow code for tech/builder categories
+  // Get config for this category/subcategory
+  const config = getFilterConfig(category, subcategory);
+
+  // Allow code for tech/builder categories based on config
   if (
     containsCodeOrTechnical(rawDescription) &&
-    category !== "tech" &&
-    category !== "builder"
+    config.CONTENT_RULES.NO_CODE_CONTENT
   ) {
     return "";
   }
@@ -1021,8 +835,7 @@ const cleanDescription = (rawDescription, title = "", category = null) => {
     if (lower.length < 20) return false;
     if (
       containsCodeOrTechnical(sentence) &&
-      category !== "tech" &&
-      category !== "builder"
+      config.CONTENT_RULES.NO_CODE_CONTENT
     )
       return false;
 
@@ -1070,11 +883,11 @@ const cleanDescription = (rawDescription, title = "", category = null) => {
 
   let description = sentences.slice(0, 3).join(". ").trim();
 
-  if (!isValidDescription(description, title, category)) {
+  if (!isValidDescription(description, title, category, subcategory)) {
     return "";
   }
 
-  if (!isHighQualityDescription(description, title, category)) {
+  if (!isHighQualityDescription(description, title, category, subcategory)) {
     return "";
   }
 
@@ -1100,8 +913,8 @@ const cleanDescription = (rawDescription, title = "", category = null) => {
   return description;
 };
 
-// Helper function to extract article content
-const extractArticleContent = (item, category = null) => {
+// Helper function to extract article content using config
+const extractArticleContent = (item, category = null, subcategory = null) => {
   const contentSources = [
     item.contentSnippet,
     item.description,
@@ -1110,14 +923,17 @@ const extractArticleContent = (item, category = null) => {
     item.content,
   ];
 
-  const overrides = getCategoryFilterOverrides(category);
-  const minLength =
-    overrides.MIN_DESCRIPTION_LENGTH ||
-    FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value;
+  const config = getFilterConfig(category, subcategory);
+  const minLength = config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH;
 
   for (const source of contentSources) {
     if (source && source.length > minLength) {
-      const cleaned = cleanDescription(source, item.title, category);
+      const cleaned = cleanDescription(
+        source,
+        item.title,
+        category,
+        subcategory
+      );
       if (cleaned && cleaned.length >= minLength) {
         return cleaned;
       }
@@ -1147,6 +963,11 @@ const parseFeedItem = async (
     return null;
   }
 
+  if (title.length > config.TITLE_RULES.MAX_LENGTH) {
+    filterStats.recordFiltered("TITLE_TOO_LONG", title);
+    return null;
+  }
+
   if (
     config.TITLE_RULES.NO_ALL_CAPS &&
     title === title.toUpperCase() &&
@@ -1156,25 +977,26 @@ const parseFeedItem = async (
     return null;
   }
 
-  // Skip certain checks for builder/art categories
-  if (category !== "builder" && category !== "art") {
-    if (title === title.toLowerCase() && title.length > 20) {
-      filterStats.recordFiltered("ALL_LOWERCASE_TITLE", title);
-      return null;
-    }
+  if (
+    config.TITLE_RULES.NO_ALL_LOWERCASE &&
+    title === title.toLowerCase() &&
+    title.length > 20
+  ) {
+    filterStats.recordFiltered("ALL_LOWERCASE_TITLE", title);
+    return null;
   }
 
-  if (FILTER_RULES.TITLE_RULES.NO_SPAM_PATTERNS.value && isSpamTitle(title)) {
+  if (config.TITLE_RULES.NO_SPAM_PATTERNS && isSpamTitle(title)) {
     filterStats.recordFiltered("SPAM_TITLE", title);
     return null;
   }
 
-  if (FILTER_RULES.TITLE_RULES.ENGLISH_ONLY.value && !isLikelyEnglish(title)) {
+  if (config.TITLE_RULES.ENGLISH_ONLY && !isLikelyEnglish(title)) {
     filterStats.recordFiltered("NON_ENGLISH", title);
     return null;
   }
 
-  // For age check:
+  // Age check using config
   const pubDate =
     item.pubDate || item.isoDate || item.published || new Date().toISOString();
   const articleAge = Date.now() - new Date(pubDate);
@@ -1185,80 +1007,76 @@ const parseFeedItem = async (
     return null;
   }
 
-  // Check for promotional content (less strict for builder)
-  if (category !== "builder") {
-    const titleLower = title.toLowerCase();
-    const promotionalKeywords = [
-      "$",
-      "% off",
-      "sale",
-      "deal",
-      "discount",
-      "save $",
-      "only $",
-      "labor day",
-      "black friday",
-      "cyber monday",
-      "prime day",
-      "coupon",
-      "promo code",
-      "free shipping",
-      "limited time",
-      "casino",
-      "betting",
-      "buy now",
-      "loan",
-      "sponsored",
-      "crowdfunding",
-      "press release",
-      "partner announcement",
-      "advertorial",
-      "guest post",
-      "price prediction",
-      "easy loan",
-      "investment scheme",
-      "binary option",
-    ];
+  // Check for promotional content (configurable per category)
+  const titleLower = title.toLowerCase();
+  const promotionalKeywords = [
+    "$",
+    "% off",
+    "sale",
+    "deal",
+    "discount",
+    "save $",
+    "only $",
+    "labor day",
+    "black friday",
+    "cyber monday",
+    "prime day",
+    "coupon",
+    "promo code",
+    "free shipping",
+    "limited time",
+    "casino",
+    "betting",
+    "buy now",
+    "loan",
+    "sponsored",
+    "crowdfunding",
+    "press release",
+    "partner announcement",
+    "advertorial",
+    "guest post",
+    "price prediction",
+    "easy loan",
+    "investment scheme",
+    "binary option",
+  ];
 
-    for (const keyword of promotionalKeywords) {
-      if (titleLower.includes(keyword)) {
-        filterStats.recordFiltered("PROMOTIONAL", title);
-        return null;
-      }
+  // Add category-specific promotional keywords if defined
+  if (config.PROMOTIONAL_KEYWORDS) {
+    promotionalKeywords.push(...config.PROMOTIONAL_KEYWORDS);
+  }
+
+  for (const keyword of promotionalKeywords) {
+    if (titleLower.includes(keyword)) {
+      filterStats.recordFiltered("PROMOTIONAL", title);
+      return null;
     }
   }
 
-  // Thumbnail validation (relaxed for builder/art)
+  // Thumbnail validation using config
   const thumbnail = await extractBestThumbnail(item, source);
 
-  // For thumbnail:
   if (config.THUMBNAIL_RULES.REQUIRED && !thumbnail) {
     filterStats.recordFiltered("NO_VALID_THUMBNAIL", title);
     return null;
   }
 
   // Extract and validate description with category context
-  let description = extractArticleContent(item, category);
+  let description = extractArticleContent(item, category, subcategory);
 
-  // For description length:
-  if (description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH) {
+  if (
+    !description ||
+    description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH
+  ) {
     filterStats.recordFiltered("DESCRIPTION_TOO_SHORT", title);
     return null;
   }
 
-  // Skip technical content check for builder/tech categories
-  if (category !== "builder" && category !== "tech") {
-    if (containsCodeOrTechnical(description)) {
-      filterStats.recordFiltered("TECHNICAL_CONTENT", title);
-      return null;
-    }
-  }
-
-  if (!isValidDescription(description, title, category)) {
+  if (!isValidDescription(description, title, category, subcategory)) {
     return null;
   }
 
-  if (!isHighQualityDescription(description, title, category)) {
+  if (!isHighQualityDescription(description, title, category, subcategory)) {
     filterStats.recordFiltered("LOW_QUALITY_DESCRIPTION", title);
     return null;
   }
@@ -1268,30 +1086,8 @@ const parseFeedItem = async (
     return null;
   }
 
-  // Skip author checks for builder content
-  if (category !== "builder") {
-    const suspiciousAuthors = [
-      /^admin$/i,
-      /^user\d+$/i,
-      /^guest$/i,
-      /^contributor$/i,
-      /^staff$/i,
-      /^editor$/i,
-      /^news\s*desk$/i,
-      /^press\s*release$/i,
-    ];
-
-    if (
-      item.creator &&
-      suspiciousAuthors.some((pattern) => pattern.test(item.creator))
-    ) {
-      filterStats.recordFiltered("SUSPICIOUS_AUTHOR", title);
-      return null;
-    }
-  }
-
-  // Cross-feed deduplication
-  if (FILTER_RULES.DEDUPLICATION.CROSS_FEED.value) {
+  // Cross-feed deduplication using config
+  if (config.DEDUPLICATION.CROSS_FEED) {
     const fingerprint = createFingerprint(title);
     if (recentFingerprints.has(fingerprint)) {
       filterStats.recordFiltered("DUPLICATE", title);
@@ -1416,39 +1212,26 @@ const scoreArticleQuality = (item) => {
   return score;
 };
 
-// NEW ENDPOINTS to view and test filter configurations
+// SIMPLIFIED API ENDPOINTS using filterConfig
 
 // Get filter config for a specific category/subcategory
-app.get("/api/filter-config/:category", (req, res) => {
-  const { category } = req.params;
-
-  const config = getFilterConfig(category, null);
-
-  res.json({
-    category,
-    subcategory: "none",
-    config,
-    message: `Filter configuration for ${category}`,
-  });
-});
-
-// Get filter config for category AND subcategory
 app.get("/api/filter-config/:category/:subcategory", (req, res) => {
   const { category, subcategory } = req.params;
 
-  const config = getFilterConfig(category, subcategory);
+  const config = getFilterConfig(category, subcategory || null);
 
   res.json({
     category,
-    subcategory,
+    subcategory: subcategory || "none",
     config,
-    message: `Filter configuration for ${category}/${subcategory}`,
+    message: `Filter configuration for ${category}${
+      subcategory ? `/${subcategory}` : ""
+    }`,
   });
 });
 
 // Get all filter configurations overview
 app.get("/api/filter-configs", (req, res) => {
-  // Build overview using your existing categories
   const categories = ["tech", "builder", "art", "gaming"];
   const subcategories = {
     tech: [
@@ -1485,59 +1268,34 @@ app.get("/api/filter-configs", (req, res) => {
 
   // Get config for each category
   for (const category of categories) {
-    const categoryOverrides = getCategoryFilterOverrides(category);
-
+    const categoryConfig = getFilterConfig(category);
     overview[category] = {
-      categoryRules: {
-        MIN_TITLE_LENGTH:
-          categoryOverrides.MIN_TITLE_LENGTH ||
-          FILTER_RULES.TITLE_RULES.MIN_LENGTH.value,
-        MIN_DESCRIPTION_LENGTH:
-          categoryOverrides.MIN_DESCRIPTION_LENGTH ||
-          FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value,
-        NO_CODE_CONTENT:
-          categoryOverrides.NO_CODE_CONTENT !== undefined
-            ? categoryOverrides.NO_CODE_CONTENT
-            : FILTER_RULES.CONTENT_RULES.NO_CODE_CONTENT.value,
-        QUALITY_CHECK:
-          categoryOverrides.QUALITY_CHECK !== undefined
-            ? categoryOverrides.QUALITY_CHECK
-            : FILTER_RULES.CONTENT_RULES.QUALITY_CHECK.value,
-        THUMBNAIL_REQUIRED:
-          categoryOverrides.THUMBNAIL_REQUIRED !== undefined
-            ? categoryOverrides.THUMBNAIL_REQUIRED
-            : FILTER_RULES.THUMBNAIL_RULES.REQUIRED.value,
-        MAX_AGE_DAYS:
-          categoryOverrides.MAX_AGE_DAYS ||
-          FILTER_RULES.AGE_RULES.MAX_AGE_DAYS.value,
-      },
+      categoryRules: categoryConfig,
       subcategories: {},
     };
 
-    // Add subcategory info if available
+    // Add subcategory configs
     if (subcategories[category]) {
       for (const subcat of subcategories[category]) {
-        // For now, subcategories inherit category rules
-        // You can customize this later
-        overview[category].subcategories[subcat] =
-          overview[category].categoryRules;
+        overview[category].subcategories[subcat] = getFilterConfig(
+          category,
+          subcat
+        );
       }
     }
   }
 
-  res.json({
-    default: {
-      MIN_TITLE_LENGTH: FILTER_RULES.TITLE_RULES.MIN_LENGTH.value,
-      MIN_DESCRIPTION_LENGTH:
-        FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value,
-      THUMBNAIL_REQUIRED: FILTER_RULES.THUMBNAIL_RULES.REQUIRED.value,
-      MAX_AGE_DAYS: FILTER_RULES.AGE_RULES.MAX_AGE_DAYS.value,
-      QUALITY_CHECK: FILTER_RULES.CONTENT_RULES.QUALITY_CHECK.value,
-    },
-    categories: overview,
-    message:
-      "Filter configuration overview (using existing getCategoryFilterOverrides)",
-  });
+  res.send(
+    JSON.stringify(
+      {
+        default: getFilterConfig(),
+        categories: overview,
+        message: "Complete filter configuration overview",
+      },
+      null,
+      2 // <- indentation spacing
+    )
+  );
 });
 
 // Test filter config on a sample item
@@ -1548,18 +1306,16 @@ app.post("/api/test-filters", async (req, res) => {
     return res.status(400).json({ error: "Category and testItem required" });
   }
 
-  const overrides = getCategoryFilterOverrides(category, subcategory);
+  const config = getFilterConfig(category, subcategory);
   const results = [];
 
   // Test title length
   if (testItem.title) {
-    const minLength =
-      overrides.MIN_TITLE_LENGTH || FILTER_RULES.TITLE_RULES.MIN_LENGTH.value;
-    if (testItem.title.length < minLength) {
+    if (testItem.title.length < config.TITLE_RULES.MIN_LENGTH) {
       results.push({
         rule: "MIN_TITLE_LENGTH",
         failed: true,
-        reason: `Title length ${testItem.title.length} < required ${minLength}`,
+        reason: `Title length ${testItem.title.length} < required ${config.TITLE_RULES.MIN_LENGTH}`,
       });
     } else {
       results.push({
@@ -1568,12 +1324,8 @@ app.post("/api/test-filters", async (req, res) => {
       });
     }
 
-    const noAllCaps =
-      overrides.NO_ALL_CAPS !== undefined
-        ? overrides.NO_ALL_CAPS
-        : FILTER_RULES.TITLE_RULES.NO_ALL_CAPS.value;
     if (
-      noAllCaps &&
+      config.TITLE_RULES.NO_ALL_CAPS &&
       testItem.title === testItem.title.toUpperCase() &&
       testItem.title.length > 10
     ) {
@@ -1587,14 +1339,13 @@ app.post("/api/test-filters", async (req, res) => {
 
   // Test description
   if (testItem.description) {
-    const minDescLength =
-      overrides.MIN_DESCRIPTION_LENGTH ||
-      FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value;
-    if (testItem.description.length < minDescLength) {
+    if (
+      testItem.description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH
+    ) {
       results.push({
         rule: "MIN_DESCRIPTION_LENGTH",
         failed: true,
-        reason: `Description length ${testItem.description.length} < required ${minDescLength}`,
+        reason: `Description length ${testItem.description.length} < required ${config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH}`,
       });
     } else {
       results.push({
@@ -1607,16 +1358,14 @@ app.post("/api/test-filters", async (req, res) => {
   // Test age
   if (testItem.pubDate) {
     const age = Date.now() - new Date(testItem.pubDate);
-    const maxAgeDays =
-      overrides.MAX_AGE_DAYS || FILTER_RULES.AGE_RULES.MAX_AGE_DAYS.value;
-    const maxAge = maxAgeDays * 24 * 60 * 60 * 1000;
+    const maxAge = config.AGE_RULES.MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
     if (age > maxAge) {
       results.push({
         rule: "MAX_AGE_DAYS",
         failed: true,
         reason: `Article is ${Math.floor(
           age / (24 * 60 * 60 * 1000)
-        )} days old, max allowed is ${maxAgeDays}`,
+        )} days old, max allowed is ${config.AGE_RULES.MAX_AGE_DAYS}`,
       });
     } else {
       results.push({
@@ -1643,6 +1392,9 @@ app.post("/api/feeds", async (req, res) => {
   if (!category) {
     return res.status(400).json({ error: "Category is required" });
   }
+
+  // Get config for this request
+  const config = getFilterConfig(category, subcategory);
 
   // OPTIMIZED CONFIGURATION
   const MAX_ITEMS = 10;
@@ -1729,7 +1481,7 @@ app.post("/api/feeds", async (req, res) => {
           const baseDomain = getBaseDomain(parsedItem.link);
           if (baseDomain) {
             const domainCount = domainCounter.get(baseDomain) || 0;
-            if (domainCount >= 2) continue;
+            if (domainCount >= config.SOURCE_RULES.MAX_PER_DOMAIN) continue;
             domainCounter.set(baseDomain, domainCount + 1);
           }
 
@@ -1749,12 +1501,14 @@ app.post("/api/feeds", async (req, res) => {
     // Sort by date
     qualifiedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-    // Simplified final filtering
+    // Final filtering based on config
     let finalItems = [];
 
-    if (category === "builder" || category === "art") {
+    if (config.DEDUPLICATION.UNCOMMON_WORDS === false) {
+      // No uncommon word filtering
       finalItems = qualifiedItems.slice(0, MAX_ITEMS);
     } else {
+      // Apply uncommon word deduplication
       const usedUncommonWords = new Set();
       const commonWords = new Set([
         "the",
@@ -1806,6 +1560,7 @@ app.post("/api/feeds", async (req, res) => {
       count: finalItems.length,
       category,
       subcategory,
+      config: DEBUG_MODE ? config : undefined,
       stats: DEBUG_MODE ? stats : undefined,
     });
   } catch (error) {
@@ -1816,64 +1571,6 @@ app.post("/api/feeds", async (req, res) => {
       stats: filterStats.getReport(),
     });
   }
-});
-
-// Filter rules documentation endpoint
-app.get("/api/filter-rules", (req, res) => {
-  const rules = {};
-
-  for (const [category, categoryRules] of Object.entries(FILTER_RULES)) {
-    rules[category] = {};
-    for (const [ruleName, ruleConfig] of Object.entries(categoryRules)) {
-      rules[category][ruleName] = {
-        enabled: ruleConfig.value !== false,
-        value: ruleConfig.value,
-        description: ruleConfig.description,
-      };
-    }
-  }
-
-  res.json({
-    rules,
-    stats: filterStats.getReport(),
-    message:
-      "These are the active filter rules being applied to all feed items",
-  });
-});
-
-app.get("/api/filter-configs", (req, res) => {
-  const categories = ["tech", "builder", "art", "gaming"];
-  const overview = {};
-
-  for (const category of categories) {
-    const categoryOverrides = getCategoryFilterOverrides(category);
-
-    overview[category] = {
-      MIN_TITLE_LENGTH: categoryOverrides.MIN_TITLE_LENGTH || 10,
-      MIN_DESCRIPTION_LENGTH: categoryOverrides.MIN_DESCRIPTION_LENGTH || 50,
-      NO_CODE_CONTENT: categoryOverrides.NO_CODE_CONTENT,
-      QUALITY_CHECK: categoryOverrides.QUALITY_CHECK,
-      THUMBNAIL_REQUIRED: categoryOverrides.THUMBNAIL_REQUIRED,
-      MAX_AGE_DAYS: categoryOverrides.MAX_AGE_DAYS || 7,
-    };
-  }
-
-  res.json({
-    categories: overview,
-    message: "Current filter overrides by category",
-  });
-});
-
-// Test specific category
-app.get("/api/filter-config/:category", (req, res) => {
-  const { category } = req.params;
-  const overrides = getCategoryFilterOverrides(category);
-
-  res.json({
-    category,
-    overrides,
-    message: `Filter overrides for ${category}`,
-  });
 });
 
 // Health check endpoint
@@ -1890,7 +1587,7 @@ app.get("/api/health", (req, res) => {
 const server = app.listen(port, () => {
   console.log(`🚀 RSS Feed Server running at http://localhost:${port}`);
   console.log(
-    `📊 Filter rules endpoint: http://localhost:${port}/api/filter-rules`
+    `📊 Filter config endpoint: http://localhost:${port}/api/filter-config/{category}/{subcategory}`
   );
   console.log(`❤️ Health check: http://localhost:${port}/api/health`);
   console.log(`🔍 Debug mode: ${DEBUG_MODE ? "ON" : "OFF"}`);
