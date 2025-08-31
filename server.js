@@ -1421,7 +1421,78 @@ const scoreArticleQuality = (item) => {
 // Get filter config for a specific category/subcategory
 app.get("/api/filter-config/:category/:subcategory?", (req, res) => {
   const { category, subcategory } = req.params;
-  const config = getFilterConfig(category, subcategory || null);
+
+  // Use your existing getCategoryFilterOverrides function for now
+  const overrides = getCategoryFilterOverrides(category, subcategory || null);
+
+  // Build a config object from your existing FILTER_RULES and overrides
+  const config = {
+    TITLE_RULES: {
+      MIN_LENGTH:
+        overrides.MIN_TITLE_LENGTH || FILTER_RULES.TITLE_RULES.MIN_LENGTH.value,
+      MAX_LENGTH: FILTER_RULES.TITLE_RULES.MAX_LENGTH.value,
+      NO_ALL_CAPS:
+        overrides.NO_ALL_CAPS !== undefined
+          ? overrides.NO_ALL_CAPS
+          : FILTER_RULES.TITLE_RULES.NO_ALL_CAPS.value,
+      NO_ALL_LOWERCASE: FILTER_RULES.TITLE_RULES.NO_ALL_LOWERCASE.value,
+      NO_SPAM_PATTERNS: FILTER_RULES.TITLE_RULES.NO_SPAM_PATTERNS.value,
+      ENGLISH_ONLY: FILTER_RULES.TITLE_RULES.ENGLISH_ONLY.value,
+    },
+    CONTENT_RULES: {
+      MIN_DESCRIPTION_LENGTH:
+        overrides.MIN_DESCRIPTION_LENGTH ||
+        FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value,
+      NO_LOWERCASE_START:
+        overrides.NO_LOWERCASE_START !== undefined
+          ? overrides.NO_LOWERCASE_START
+          : FILTER_RULES.CONTENT_RULES.NO_LOWERCASE_START.value,
+      NO_SPECIAL_CHAR_START:
+        overrides.NO_SPECIAL_CHAR_START !== undefined
+          ? overrides.NO_SPECIAL_CHAR_START
+          : FILTER_RULES.CONTENT_RULES.NO_SPECIAL_CHAR_START.value,
+      NO_URLS_IN_DESCRIPTION:
+        FILTER_RULES.CONTENT_RULES.NO_URLS_IN_DESCRIPTION.value,
+      NO_CODE_CONTENT:
+        overrides.NO_CODE_CONTENT !== undefined
+          ? overrides.NO_CODE_CONTENT
+          : FILTER_RULES.CONTENT_RULES.NO_CODE_CONTENT.value,
+      QUALITY_CHECK:
+        overrides.QUALITY_CHECK !== undefined
+          ? overrides.QUALITY_CHECK
+          : FILTER_RULES.CONTENT_RULES.QUALITY_CHECK.value,
+      MAX_EMOJI_SYMBOLS:
+        overrides.MAX_EMOJI_SYMBOLS ||
+        FILTER_RULES.CONTENT_RULES.MAX_EMOJI_SYMBOLS.value,
+    },
+    SOURCE_RULES: {
+      MAX_PER_DOMAIN: FILTER_RULES.SOURCE_RULES.MAX_PER_DOMAIN.value,
+      SOURCE_DIVERSITY: FILTER_RULES.SOURCE_RULES.SOURCE_DIVERSITY.value,
+    },
+    AGE_RULES: {
+      MAX_AGE_DAYS:
+        overrides.MAX_AGE_DAYS || FILTER_RULES.AGE_RULES.MAX_AGE_DAYS.value,
+    },
+    THUMBNAIL_RULES: {
+      REQUIRED:
+        overrides.THUMBNAIL_REQUIRED !== undefined
+          ? overrides.THUMBNAIL_REQUIRED
+          : FILTER_RULES.THUMBNAIL_RULES.REQUIRED.value,
+      MIN_WIDTH: FILTER_RULES.THUMBNAIL_RULES.MIN_WIDTH.value,
+      MIN_HEIGHT: FILTER_RULES.THUMBNAIL_RULES.MIN_HEIGHT.value,
+    },
+    DEDUPLICATION: {
+      CROSS_FEED: FILTER_RULES.DEDUPLICATION.CROSS_FEED.value,
+      UNCOMMON_WORDS:
+        overrides.UNCOMMON_WORDS !== undefined
+          ? overrides.UNCOMMON_WORDS
+          : FILTER_RULES.DEDUPLICATION.UNCOMMON_WORDS.value,
+    },
+    LIMITS: {
+      MAX_QUESTIONS: FILTER_RULES.LIMITS.MAX_QUESTIONS.value,
+      HOUR_DISTRIBUTION: FILTER_RULES.LIMITS.HOUR_DISTRIBUTION.value,
+    },
+  };
 
   res.json({
     category,
@@ -1435,33 +1506,95 @@ app.get("/api/filter-config/:category/:subcategory?", (req, res) => {
 
 // Get all filter configurations overview
 app.get("/api/filter-configs", (req, res) => {
+  // Build overview using your existing categories
+  const categories = ["tech", "builder", "art", "gaming"];
+  const subcategories = {
+    tech: [
+      "ai-machine-learning",
+      "martech-adtech",
+      "web-dev-devops",
+      "cybersecurity-privacy",
+      "blockchain-web3",
+    ],
+    builder: [
+      "startup-stories",
+      "productivity-hacks",
+      "automation-no-code",
+      "project-management",
+      "momentum-mindset",
+    ],
+    art: [
+      "generative-ai-art",
+      "ui-ux-trends",
+      "color-typography",
+      "animation-motion",
+      "tutorials-walkthroughs",
+    ],
+    gaming: [
+      "daily-roundup",
+      "pro-guides-tips",
+      "retro-gaming",
+      "indie-spotlights",
+      "collectors-hub",
+    ],
+  };
+
   const overview = {};
 
-  // Get config for each category and subcategory
-  for (const [category, categoryConfig] of Object.entries(
-    CATEGORY_FILTER_CONFIG
-  )) {
-    if (category === "DEFAULT") continue;
+  // Get config for each category
+  for (const category of categories) {
+    const categoryOverrides = getCategoryFilterOverrides(category);
 
     overview[category] = {
-      categoryRules: getFilterConfig(category),
+      categoryRules: {
+        MIN_TITLE_LENGTH:
+          categoryOverrides.MIN_TITLE_LENGTH ||
+          FILTER_RULES.TITLE_RULES.MIN_LENGTH.value,
+        MIN_DESCRIPTION_LENGTH:
+          categoryOverrides.MIN_DESCRIPTION_LENGTH ||
+          FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value,
+        NO_CODE_CONTENT:
+          categoryOverrides.NO_CODE_CONTENT !== undefined
+            ? categoryOverrides.NO_CODE_CONTENT
+            : FILTER_RULES.CONTENT_RULES.NO_CODE_CONTENT.value,
+        QUALITY_CHECK:
+          categoryOverrides.QUALITY_CHECK !== undefined
+            ? categoryOverrides.QUALITY_CHECK
+            : FILTER_RULES.CONTENT_RULES.QUALITY_CHECK.value,
+        THUMBNAIL_REQUIRED:
+          categoryOverrides.THUMBNAIL_REQUIRED !== undefined
+            ? categoryOverrides.THUMBNAIL_REQUIRED
+            : FILTER_RULES.THUMBNAIL_RULES.REQUIRED.value,
+        MAX_AGE_DAYS:
+          categoryOverrides.MAX_AGE_DAYS ||
+          FILTER_RULES.AGE_RULES.MAX_AGE_DAYS.value,
+      },
       subcategories: {},
     };
 
-    if (categoryConfig.subcategories) {
-      for (const subcategory of Object.keys(categoryConfig.subcategories)) {
-        overview[category].subcategories[subcategory] = getFilterConfig(
-          category,
-          subcategory
-        );
+    // Add subcategory info if available
+    if (subcategories[category]) {
+      for (const subcat of subcategories[category]) {
+        // For now, subcategories inherit category rules
+        // You can customize this later
+        overview[category].subcategories[subcat] =
+          overview[category].categoryRules;
       }
     }
   }
 
   res.json({
-    default: CATEGORY_FILTER_CONFIG.DEFAULT,
+    default: {
+      MIN_TITLE_LENGTH: FILTER_RULES.TITLE_RULES.MIN_LENGTH.value,
+      MIN_DESCRIPTION_LENGTH:
+        FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value,
+      THUMBNAIL_REQUIRED: FILTER_RULES.THUMBNAIL_RULES.REQUIRED.value,
+      MAX_AGE_DAYS: FILTER_RULES.AGE_RULES.MAX_AGE_DAYS.value,
+      QUALITY_CHECK: FILTER_RULES.CONTENT_RULES.QUALITY_CHECK.value,
+    },
     categories: overview,
-    message: "Complete filter configuration overview",
+    message:
+      "Filter configuration overview (using existing getCategoryFilterOverrides)",
   });
 });
 
@@ -1473,16 +1606,18 @@ app.post("/api/test-filters", async (req, res) => {
     return res.status(400).json({ error: "Category and testItem required" });
   }
 
-  const config = getFilterConfig(category, subcategory);
+  const overrides = getCategoryFilterOverrides(category, subcategory);
   const results = [];
 
   // Test title length
   if (testItem.title) {
-    if (testItem.title.length < config.TITLE_RULES.MIN_LENGTH) {
+    const minLength =
+      overrides.MIN_TITLE_LENGTH || FILTER_RULES.TITLE_RULES.MIN_LENGTH.value;
+    if (testItem.title.length < minLength) {
       results.push({
         rule: "MIN_TITLE_LENGTH",
         failed: true,
-        reason: `Title length ${testItem.title.length} < required ${config.TITLE_RULES.MIN_LENGTH}`,
+        reason: `Title length ${testItem.title.length} < required ${minLength}`,
       });
     } else {
       results.push({
@@ -1491,9 +1626,14 @@ app.post("/api/test-filters", async (req, res) => {
       });
     }
 
+    const noAllCaps =
+      overrides.NO_ALL_CAPS !== undefined
+        ? overrides.NO_ALL_CAPS
+        : FILTER_RULES.TITLE_RULES.NO_ALL_CAPS.value;
     if (
-      config.TITLE_RULES.NO_ALL_CAPS &&
-      testItem.title === testItem.title.toUpperCase()
+      noAllCaps &&
+      testItem.title === testItem.title.toUpperCase() &&
+      testItem.title.length > 10
     ) {
       results.push({
         rule: "NO_ALL_CAPS",
@@ -1505,13 +1645,14 @@ app.post("/api/test-filters", async (req, res) => {
 
   // Test description
   if (testItem.description) {
-    if (
-      testItem.description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH
-    ) {
+    const minDescLength =
+      overrides.MIN_DESCRIPTION_LENGTH ||
+      FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value;
+    if (testItem.description.length < minDescLength) {
       results.push({
         rule: "MIN_DESCRIPTION_LENGTH",
         failed: true,
-        reason: `Description length ${testItem.description.length} < required ${config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH}`,
+        reason: `Description length ${testItem.description.length} < required ${minDescLength}`,
       });
     } else {
       results.push({
@@ -1524,22 +1665,28 @@ app.post("/api/test-filters", async (req, res) => {
   // Test age
   if (testItem.pubDate) {
     const age = Date.now() - new Date(testItem.pubDate);
-    const maxAge = config.AGE_RULES.MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+    const maxAgeDays =
+      overrides.MAX_AGE_DAYS || FILTER_RULES.AGE_RULES.MAX_AGE_DAYS.value;
+    const maxAge = maxAgeDays * 24 * 60 * 60 * 1000;
     if (age > maxAge) {
       results.push({
         rule: "MAX_AGE_DAYS",
         failed: true,
         reason: `Article is ${Math.floor(
           age / (24 * 60 * 60 * 1000)
-        )} days old, max allowed is ${config.AGE_RULES.MAX_AGE_DAYS}`,
+        )} days old, max allowed is ${maxAgeDays}`,
+      });
+    } else {
+      results.push({
+        rule: "MAX_AGE_DAYS",
+        passed: true,
       });
     }
   }
 
   res.json({
     category,
-    subcategory,
-    config: config,
+    subcategory: subcategory || "none",
     testItem,
     results,
     wouldPass: !results.some((r) => r.failed),
@@ -1749,6 +1896,41 @@ app.get("/api/filter-rules", (req, res) => {
     stats: filterStats.getReport(),
     message:
       "These are the active filter rules being applied to all feed items",
+  });
+});
+
+app.get("/api/filter-configs", (req, res) => {
+  const categories = ["tech", "builder", "art", "gaming"];
+  const overview = {};
+
+  for (const category of categories) {
+    const categoryOverrides = getCategoryFilterOverrides(category);
+
+    overview[category] = {
+      MIN_TITLE_LENGTH: categoryOverrides.MIN_TITLE_LENGTH || 10,
+      MIN_DESCRIPTION_LENGTH: categoryOverrides.MIN_DESCRIPTION_LENGTH || 50,
+      NO_CODE_CONTENT: categoryOverrides.NO_CODE_CONTENT,
+      QUALITY_CHECK: categoryOverrides.QUALITY_CHECK,
+      THUMBNAIL_REQUIRED: categoryOverrides.THUMBNAIL_REQUIRED,
+      MAX_AGE_DAYS: categoryOverrides.MAX_AGE_DAYS || 7,
+    };
+  }
+
+  res.json({
+    categories: overview,
+    message: "Current filter overrides by category",
+  });
+});
+
+// Test specific category
+app.get("/api/filter-config/:category", (req, res) => {
+  const { category } = req.params;
+  const overrides = getCategoryFilterOverrides(category);
+
+  res.json({
+    category,
+    overrides,
+    message: `Filter overrides for ${category}`,
   });
 });
 
