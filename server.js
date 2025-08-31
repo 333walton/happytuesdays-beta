@@ -3,8 +3,12 @@ const Parser = require("rss-parser");
 const cors = require("cors");
 const { formatDistanceToNow } = require("date-fns");
 
-// Import filter config
-const { CATEGORY_FILTER_CONFIG, getFilterConfig } = require("./filterConfig");
+// First, update the import at the top of server.js:
+const {
+  CATEGORY_FILTER_CONFIG,
+  getFilterConfig,
+  qualifiesForDefaultIcon,
+} = require("./filterConfig");
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -955,6 +959,15 @@ const parseFeedItem = async (
   // Get filter config for this specific category/subcategory
   const config = getFilterConfig(category, subcategory);
 
+  // Debug log to verify correct config is being used
+  if (!IS_PRODUCTION && DEBUG_MODE) {
+    debugLog(`Using config for ${category}/${subcategory}:`, {
+      MAX_AGE_DAYS: config.AGE_RULES.MAX_AGE_DAYS,
+      MIN_DESCRIPTION: config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH,
+      THUMBNAIL_REQUIRED: config.THUMBNAIL_RULES.REQUIRED,
+    });
+  }
+
   const title = item.title || "";
 
   // Use config values directly
@@ -1039,6 +1052,11 @@ const parseFeedItem = async (
     "easy loan",
     "investment scheme",
     "binary option",
+    "url:",
+    "URL:",
+    "Article URL:",
+    "#",
+    "%",
   ];
 
   // Add category-specific promotional keywords if defined
@@ -1051,14 +1069,6 @@ const parseFeedItem = async (
       filterStats.recordFiltered("PROMOTIONAL", title);
       return null;
     }
-  }
-
-  // Thumbnail validation using config
-  const thumbnail = await extractBestThumbnail(item, source);
-
-  if (config.THUMBNAIL_RULES.REQUIRED && !thumbnail) {
-    filterStats.recordFiltered("NO_VALID_THUMBNAIL", title);
-    return null;
   }
 
   // Extract and validate description with category context
@@ -1084,6 +1094,38 @@ const parseFeedItem = async (
   if (isSpamTopic(title, description)) {
     filterStats.recordFiltered("SPAM_TOPIC", title);
     return null;
+  }
+
+  // Create a temporary item object for quality scoring
+  const tempItem = {
+    title,
+    description,
+    pubDate,
+    thumbnail: null, // Will be set below
+  };
+
+  // Calculate quality score BEFORE thumbnail check
+  const qualityScore = scoreArticleQuality(tempItem, category, subcategory);
+
+  // Thumbnail validation with quality-based fallback
+  const thumbnail = await extractBestThumbnail(item, source);
+
+  // NEW LOGIC: Check if high-quality articles can use default icon
+  let allowDefaultIcon = false;
+
+  if (!thumbnail && config.THUMBNAIL_RULES.REQUIRED) {
+    // Check if this high-quality article qualifies for a default icon
+    if (
+      qualifiesForDefaultIcon(tempItem, qualityScore, category, subcategory)
+    ) {
+      allowDefaultIcon = true;
+      debugLog(
+        `High-quality article (score: ${qualityScore}) allowed without thumbnail: ${title}`
+      );
+    } else {
+      filterStats.recordFiltered("NO_VALID_THUMBNAIL", title);
+      return null;
+    }
   }
 
   // Cross-feed deduplication using config
@@ -1135,7 +1177,9 @@ const parseFeedItem = async (
     title: title,
     link: item.link || item.guid || "#",
     description,
-    thumbnail,
+    thumbnail: thumbnail || null, // Keep null if no thumbnail
+    allowDefaultIcon, // NEW: Flag for frontend to show default icon
+    qualityScore, // Include quality score for debugging
     source: getFeedDisplayName(source),
     sourceUrl: source,
     creator: item.creator || item.author || getFeedDisplayName(source),
@@ -1185,13 +1229,22 @@ const fetchSingleFeed = async (url, timeout = 8000) => {
   });
 };
 
-// Enhanced quality scoring
-const scoreArticleQuality = (item) => {
+// Enhanced quality scoring function (keep your existing one but ensure it returns a number)
+const scoreArticleQuality = (item, category = null, subcategory = null) => {
   let score = 0;
 
+  // Base scoring (your existing logic)
   if (item.thumbnail) score += 20;
   if (!containsCodeOrTechnical(item.description)) score += 10;
-  if (isHighQualityDescription(item.description, item.title)) score += 10;
+  if (
+    isHighQualityDescription(
+      item.description,
+      item.title,
+      category,
+      subcategory
+    )
+  )
+    score += 10;
 
   const specialCount = (item.title.match(/[^\w\s\-.,!?'"]/g) || []).length;
   if (specialCount === 0) score += 5;
@@ -1208,6 +1261,22 @@ const scoreArticleQuality = (item) => {
   if (hoursSincePublished < 24) score += 5;
   else if (hoursSincePublished < 72) score += 3;
   else if (hoursSincePublished < 168) score += 1;
+
+  // Category-specific bonuses
+  if (
+    category === "tech" &&
+    item.description &&
+    item.description.length > 200
+  ) {
+    score += 5;
+  }
+  if (
+    category === "builder" &&
+    item.title &&
+    /how|guide|tutorial|tips/i.test(item.title)
+  ) {
+    score += 3;
+  }
 
   return score;
 };
@@ -1616,6 +1685,44 @@ server.on("error", (error) => {
 
 // Vercel Serverless Function Handler (for production deployment)
 module.exports = async (req, res) => {
-  // This would be the same as the /api/feeds endpoint above
-  // but exported for Vercel
+  // Your existing Vercel handler code
+  // Make sure it uses the same getFilterConfig function
+
+  // Set CORS headers
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,OPTIONS,PATCH,DELETE,POST,PUT"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+  );
+
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { category, subcategory } = req.body;
+
+  if (!category) {
+    return res.status(400).json({ error: "Category is required" });
+  }
+
+  // Use the same logic as your POST /api/feeds endpoint
+  // Ensure getFilterConfig is called with both category and subcategory
+  const config = getFilterConfig(category, subcategory);
+
+  // Log config being used in production for debugging
+  console.log(`Production config for ${category}/${subcategory}:`, {
+    AGE_DAYS: config.AGE_RULES.MAX_AGE_DAYS,
+    MIN_DESC: config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH,
+    THUMBNAIL: config.THUMBNAIL_RULES.REQUIRED,
+  });
 };

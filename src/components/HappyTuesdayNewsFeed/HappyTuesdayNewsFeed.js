@@ -8,9 +8,14 @@ import {
 } from "../../utils/feedAggregator";
 import FeedSkeleton from "../FeedSkeleton/FeedSkeleton";
 
-const shouldShowThumbnail = (thumbnail) => {
-  if (!thumbnail) return false;
+const shouldShowThumbnail = (item) => {
+  // If no thumbnail at all, check if default icon is allowed
+  if (!item.thumbnail) {
+    // Check if backend flagged this as high-quality content that can use default icon
+    return item.allowDefaultIcon === true;
+  }
 
+  // Your existing thumbnail validation patterns
   const blockedPatterns = [
     /favicon/i,
     /\.ico$/i,
@@ -23,7 +28,7 @@ const shouldShowThumbnail = (thumbnail) => {
     /16x16|32x32|48x48|64x64|128x128|144x144/i,
   ];
 
-  return !blockedPatterns.some((pattern) => pattern.test(thumbnail));
+  return !blockedPatterns.some((pattern) => pattern.test(item.thumbnail));
 };
 
 const HappyTuesdayNewsFeed = ({
@@ -69,12 +74,27 @@ const HappyTuesdayNewsFeed = ({
   };
 
   // Default category icon
-  const getIcon = (subcategory, index) => {
-    if (subcategory && categoryIcons[subcategory]) {
-      return categoryIcons[subcategory];
+  const getIcon = (item, subcategory, index) => {
+    // If item has a high quality score and no thumbnail, show category icon
+    if (item && item.allowDefaultIcon && !item.thumbnail) {
+      // Use the category-specific icon
+      if (subcategory && categoryIcons[subcategory]) {
+        return categoryIcons[subcategory];
+      }
     }
-    const defaultIcons = ["📰", "📡", "📢", "📣", "📻"];
-    return defaultIcons[index % defaultIcons.length];
+
+    // Otherwise only show default icons for items WITH thumbnails
+    // or for placeholder/loading states
+    if (!item || item.thumbnail) {
+      if (subcategory && categoryIcons[subcategory]) {
+        return categoryIcons[subcategory];
+      }
+      const defaultIcons = ["📰", "📡", "📢", "📣", "📻"];
+      return defaultIcons[index % defaultIcons.length];
+    }
+
+    // No icon for low-quality items without thumbnails
+    return null;
   };
 
   const forceCompleteRefresh = () => {
@@ -854,21 +874,48 @@ const HappyTuesdayNewsFeed = ({
                     className="feed-item"
                   >
                     <div style={styles.feedIcon}>
-                      {item.thumbnail && shouldShowThumbnail(item.thumbnail) ? (
+                      {item.thumbnail && shouldShowThumbnail(item) ? (
                         <img
                           src={item.thumbnail}
                           alt=""
                           style={styles.thumbnail}
                           onError={(e) => {
                             e.target.style.display = "none";
-                            e.target.parentElement.innerHTML = getIcon(
-                              activeSubTab,
-                              index
-                            );
+                            // Only show default icon if high quality
+                            const icon = getIcon(item, activeSubTab, index);
+                            if (icon) {
+                              e.target.parentElement.innerHTML = icon;
+                            } else {
+                              // Hide the icon container if no icon should be shown
+                              e.target.parentElement.style.display = "none";
+                            }
                           }}
                         />
                       ) : (
-                        getIcon(activeSubTab, index)
+                        // Check if we should show a default icon
+                        (() => {
+                          const icon = getIcon(item, activeSubTab, index);
+                          if (icon) {
+                            return icon;
+                          } else if (item.allowDefaultIcon) {
+                            // High quality item without thumbnail - show category icon
+                            const categoryIcon =
+                              categoryIcons[activeSubTab] || "📄";
+                            return categoryIcon;
+                          } else {
+                            // Low quality item without thumbnail - no icon
+                            return (
+                              <div
+                                style={{
+                                  width: "60px",
+                                  height: "60px",
+                                  backgroundColor: "#f0f0f0",
+                                  borderRadius: "8px",
+                                }}
+                              ></div>
+                            );
+                          }
+                        })()
                       )}
                     </div>
                     <div style={styles.feedContent}>
