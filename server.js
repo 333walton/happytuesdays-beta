@@ -1419,88 +1419,30 @@ const scoreArticleQuality = (item) => {
 // NEW ENDPOINTS to view and test filter configurations
 
 // Get filter config for a specific category/subcategory
-app.get("/api/filter-config/:category/:subcategory?", (req, res) => {
-  const { category, subcategory } = req.params;
+app.get("/api/filter-config/:category", (req, res) => {
+  const { category } = req.params;
 
-  // Use your existing getCategoryFilterOverrides function for now
-  const overrides = getCategoryFilterOverrides(category, subcategory || null);
-
-  // Build a config object from your existing FILTER_RULES and overrides
-  const config = {
-    TITLE_RULES: {
-      MIN_LENGTH:
-        overrides.MIN_TITLE_LENGTH || FILTER_RULES.TITLE_RULES.MIN_LENGTH.value,
-      MAX_LENGTH: FILTER_RULES.TITLE_RULES.MAX_LENGTH.value,
-      NO_ALL_CAPS:
-        overrides.NO_ALL_CAPS !== undefined
-          ? overrides.NO_ALL_CAPS
-          : FILTER_RULES.TITLE_RULES.NO_ALL_CAPS.value,
-      NO_ALL_LOWERCASE: FILTER_RULES.TITLE_RULES.NO_ALL_LOWERCASE.value,
-      NO_SPAM_PATTERNS: FILTER_RULES.TITLE_RULES.NO_SPAM_PATTERNS.value,
-      ENGLISH_ONLY: FILTER_RULES.TITLE_RULES.ENGLISH_ONLY.value,
-    },
-    CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH:
-        overrides.MIN_DESCRIPTION_LENGTH ||
-        FILTER_RULES.CONTENT_RULES.MIN_DESCRIPTION_LENGTH.value,
-      NO_LOWERCASE_START:
-        overrides.NO_LOWERCASE_START !== undefined
-          ? overrides.NO_LOWERCASE_START
-          : FILTER_RULES.CONTENT_RULES.NO_LOWERCASE_START.value,
-      NO_SPECIAL_CHAR_START:
-        overrides.NO_SPECIAL_CHAR_START !== undefined
-          ? overrides.NO_SPECIAL_CHAR_START
-          : FILTER_RULES.CONTENT_RULES.NO_SPECIAL_CHAR_START.value,
-      NO_URLS_IN_DESCRIPTION:
-        FILTER_RULES.CONTENT_RULES.NO_URLS_IN_DESCRIPTION.value,
-      NO_CODE_CONTENT:
-        overrides.NO_CODE_CONTENT !== undefined
-          ? overrides.NO_CODE_CONTENT
-          : FILTER_RULES.CONTENT_RULES.NO_CODE_CONTENT.value,
-      QUALITY_CHECK:
-        overrides.QUALITY_CHECK !== undefined
-          ? overrides.QUALITY_CHECK
-          : FILTER_RULES.CONTENT_RULES.QUALITY_CHECK.value,
-      MAX_EMOJI_SYMBOLS:
-        overrides.MAX_EMOJI_SYMBOLS ||
-        FILTER_RULES.CONTENT_RULES.MAX_EMOJI_SYMBOLS.value,
-    },
-    SOURCE_RULES: {
-      MAX_PER_DOMAIN: FILTER_RULES.SOURCE_RULES.MAX_PER_DOMAIN.value,
-      SOURCE_DIVERSITY: FILTER_RULES.SOURCE_RULES.SOURCE_DIVERSITY.value,
-    },
-    AGE_RULES: {
-      MAX_AGE_DAYS:
-        overrides.MAX_AGE_DAYS || FILTER_RULES.AGE_RULES.MAX_AGE_DAYS.value,
-    },
-    THUMBNAIL_RULES: {
-      REQUIRED:
-        overrides.THUMBNAIL_REQUIRED !== undefined
-          ? overrides.THUMBNAIL_REQUIRED
-          : FILTER_RULES.THUMBNAIL_RULES.REQUIRED.value,
-      MIN_WIDTH: FILTER_RULES.THUMBNAIL_RULES.MIN_WIDTH.value,
-      MIN_HEIGHT: FILTER_RULES.THUMBNAIL_RULES.MIN_HEIGHT.value,
-    },
-    DEDUPLICATION: {
-      CROSS_FEED: FILTER_RULES.DEDUPLICATION.CROSS_FEED.value,
-      UNCOMMON_WORDS:
-        overrides.UNCOMMON_WORDS !== undefined
-          ? overrides.UNCOMMON_WORDS
-          : FILTER_RULES.DEDUPLICATION.UNCOMMON_WORDS.value,
-    },
-    LIMITS: {
-      MAX_QUESTIONS: FILTER_RULES.LIMITS.MAX_QUESTIONS.value,
-      HOUR_DISTRIBUTION: FILTER_RULES.LIMITS.HOUR_DISTRIBUTION.value,
-    },
-  };
+  const config = getFilterConfig(category, null);
 
   res.json({
     category,
-    subcategory: subcategory || "none",
+    subcategory: "none",
     config,
-    message: `Filter configuration for ${category}${
-      subcategory ? `/${subcategory}` : ""
-    }`,
+    message: `Filter configuration for ${category}`,
+  });
+});
+
+// Get filter config for category AND subcategory
+app.get("/api/filter-config/:category/:subcategory", (req, res) => {
+  const { category, subcategory } = req.params;
+
+  const config = getFilterConfig(category, subcategory);
+
+  res.json({
+    category,
+    subcategory,
+    config,
+    message: `Filter configuration for ${category}/${subcategory}`,
   });
 });
 
