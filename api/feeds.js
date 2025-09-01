@@ -300,8 +300,13 @@ const isSpamTitle = (title) => {
   return spamPatterns.some((pattern) => pattern.test(title));
 };
 
-const isValidDescription = (description, title, config) => {
+// CRITICAL: Updated validation functions to use filterConfig
+const isValidDescription = (description, title, category, subcategory) => {
   if (!description) return false;
+
+  // Get category-specific config
+  const config = getFilterConfig(category, subcategory);
+
   if (description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH)
     return false;
   if (config.CONTENT_RULES.NO_LOWERCASE_START && /^[a-z]/.test(description))
@@ -319,13 +324,24 @@ const isValidDescription = (description, title, config) => {
   return true;
 };
 
-const cleanDescription = (rawDescription, config) => {
+const cleanDescription = (rawDescription, title, category, subcategory) => {
   if (!rawDescription) return "";
+
+  // Get config for this category/subcategory
+  const config = getFilterConfig(category, subcategory);
 
   let cleaned = rawDescription.replace(/<[^>]*>/g, " ");
   cleaned = cleaned.replace(/&[a-z]+;/gi, " ");
   cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, "");
   cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  // Check if code content is allowed for this category
+  if (
+    containsCodeOrTechnical(cleaned) &&
+    config.CONTENT_RULES.NO_CODE_CONTENT
+  ) {
+    return "";
+  }
 
   if (cleaned.length > 250) {
     cleaned = cleaned.substring(0, 247) + "...";
@@ -334,7 +350,43 @@ const cleanDescription = (rawDescription, config) => {
   return cleaned;
 };
 
-const parseFeedItem = (item, source) => {
+// CRITICAL: Updated parseFeedItem to use filterConfig with category/subcategory
+const parseFeedItem = (item, source, category, subcategory) => {
+  // Get filter config for this specific category/subcategory
+  const config = getFilterConfig(category, subcategory);
+
+  // Title validation using config
+  const title = item.title || "Untitled";
+  if (title.length < config.TITLE_RULES.MIN_LENGTH) return null;
+  if (title.length > config.TITLE_RULES.MAX_LENGTH) return null;
+
+  if (
+    config.TITLE_RULES.NO_ALL_CAPS &&
+    title === title.toUpperCase() &&
+    title.length > 10
+  ) {
+    return null;
+  }
+
+  if (config.TITLE_RULES.NO_SPAM_PATTERNS && isSpamTitle(title)) {
+    return null;
+  }
+
+  if (config.TITLE_RULES.ENGLISH_ONLY && !isLikelyEnglish(title)) {
+    return null;
+  }
+
+  // Age validation using config
+  const pubDate =
+    item.pubDate || item.isoDate || item.published || new Date().toISOString();
+  const articleAge = Date.now() - new Date(pubDate);
+  const maxAge = config.AGE_RULES.MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+
+  if (articleAge > maxAge) {
+    return null;
+  }
+
+  // Extract thumbnail
   let thumbnail = null;
   if (item["media:thumbnail"]) {
     thumbnail = item["media:thumbnail"].$
@@ -342,21 +394,52 @@ const parseFeedItem = (item, source) => {
       : item["media:thumbnail"];
   }
 
+  // Description validation and cleaning using config
   let description =
     item.contentSnippet || item.description || item.summary || "";
-  description = description.replace(/<[^>]*>/g, "").trim();
-  if (description.length > 200) {
-    description = description.substring(0, 197) + "...";
+  description = cleanDescription(description, title, category, subcategory);
+
+  // Validate description using config
+  if (!isValidDescription(description, title, category, subcategory)) {
+    return null;
   }
 
-  const pubDate =
-    item.pubDate || item.isoDate || item.published || new Date().toISOString();
+  // Quality scoring for potential default icon
+  const qualityScore = scoreArticleQuality(
+    {
+      title,
+      description,
+      thumbnail,
+      pubDate,
+    },
+    category,
+    subcategory
+  );
+
+  // Check if thumbnail is required or if high-quality articles can use default icon
+  let allowDefaultIcon = false;
+  if (!thumbnail && config.THUMBNAIL_RULES.REQUIRED) {
+    if (
+      qualifiesForDefaultIcon(
+        { title, description, thumbnail, pubDate },
+        qualityScore,
+        category,
+        subcategory
+      )
+    ) {
+      allowDefaultIcon = true;
+    } else {
+      return null; // No thumbnail and doesn't qualify for default icon
+    }
+  }
 
   return {
-    title: item.title || "Untitled",
+    title: title,
     link: item.link || item.guid || "#",
     description,
-    thumbnail,
+    thumbnail: thumbnail || null,
+    allowDefaultIcon, // Flag for frontend to show default icon
+    qualityScore, // Include quality score for debugging
     source: getFeedDisplayName(source),
     sourceUrl: source,
     creator: item.creator || item.author || getFeedDisplayName(source),
@@ -366,8 +449,45 @@ const parseFeedItem = (item, source) => {
   };
 };
 
-// OPTIMIZED fetch function with early exit
-async function fetchFeedsWithEarlyExit(feedUrls) {
+// Quality scoring function that considers category-specific factors
+const scoreArticleQuality = (item, category, subcategory) => {
+  let score = 0;
+
+  // Base scoring
+  if (item.thumbnail) score += 20;
+  if (item.description && item.description.length > 100) score += 10;
+  if (item.title && item.title.length > 30) score += 5;
+
+  // Age bonus
+  const hoursSincePublished =
+    (Date.now() - new Date(item.pubDate)) / (1000 * 60 * 60);
+  if (hoursSincePublished < 24) score += 10;
+  else if (hoursSincePublished < 72) score += 5;
+
+  // Category-specific bonuses
+  if (
+    category === "tech" &&
+    item.description &&
+    item.description.length > 150
+  ) {
+    score += 5;
+  }
+  if (
+    category === "builder" &&
+    item.title &&
+    /how|guide|tutorial|tips/i.test(item.title)
+  ) {
+    score += 3;
+  }
+  if (category === "art" && item.thumbnail) {
+    score += 5; // Art content benefits more from having thumbnails
+  }
+
+  return score;
+};
+
+// OPTIMIZED fetch function with early exit and category-aware filtering
+async function fetchFeedsWithEarlyExit(feedUrls, category, subcategory) {
   const qualifiedItems = [];
   const seen = new Set();
   const sourceCounts = new Map();
@@ -377,6 +497,9 @@ async function fetchFeedsWithEarlyExit(feedUrls) {
   console.log(
     `Target: ${TARGET_BUFFER} items, will process max ${MAX_ITEMS_PER_FEED} per feed`
   );
+
+  // Get config for this category/subcategory
+  const config = getFilterConfig(category, subcategory);
 
   // Process feeds SEQUENTIALLY for early exit
   for (let i = 0; i < feedUrls.length; i++) {
@@ -402,15 +525,18 @@ async function fetchFeedsWithEarlyExit(feedUrls) {
         // CHECK during processing
         if (qualifiedItems.length >= TARGET_BUFFER) break;
 
-        const parsed = parseFeedItem(item, feedUrl);
+        // CRITICAL: Parse with category and subcategory for proper config usage
+        const parsed = parseFeedItem(item, feedUrl, category, subcategory);
+
+        if (!parsed) continue;
 
         // Deduplication
         const key = parsed.guid || parsed.link;
         if (seen.has(key)) continue;
 
-        // Source limit
+        // Source limit using config
         const sourceCount = sourceCounts.get(parsed.source) || 0;
-        if (sourceCount >= 3) continue;
+        if (sourceCount >= config.SOURCE_RULES.MAX_PER_DOMAIN) continue;
 
         // Item qualified!
         seen.add(key);
@@ -430,7 +556,54 @@ async function fetchFeedsWithEarlyExit(feedUrls) {
   // Sort by date
   qualifiedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-  return qualifiedItems.slice(0, MAX_ITEMS);
+  // Apply final deduplication based on config
+  let finalItems = [];
+
+  if (config.DEDUPLICATION && config.DEDUPLICATION.UNCOMMON_WORDS === false) {
+    // No uncommon word filtering for this category
+    finalItems = qualifiedItems.slice(0, MAX_ITEMS);
+  } else {
+    // Apply uncommon word deduplication
+    const usedUncommonWords = new Set();
+    const commonWords = new Set([
+      "the",
+      "and",
+      "for",
+      "with",
+      "from",
+      "that",
+      "this",
+      "what",
+      "when",
+      "where",
+      "which",
+      "while",
+      "after",
+      "before",
+      "about",
+    ]);
+
+    for (const item of qualifiedItems) {
+      if (finalItems.length >= MAX_ITEMS) break;
+
+      const titleWords = item.title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter((word) => word.length > 4 && !commonWords.has(word));
+
+      const hasDuplicate = titleWords.some((word) =>
+        usedUncommonWords.has(word)
+      );
+
+      if (!hasDuplicate) {
+        finalItems.push(item);
+        titleWords.forEach((word) => usedUncommonWords.add(word));
+      }
+    }
+  }
+
+  return finalItems;
 }
 
 // Main handler
@@ -463,6 +636,23 @@ export default async function handler(req, res) {
   }
 
   try {
+    // CRITICAL: Get configuration for this specific category/subcategory
+    const config = getFilterConfig(category, subcategory);
+
+    // Log the configuration being used for debugging
+    console.log(
+      `Using filter config for ${category}/${subcategory || "none"}:`,
+      {
+        maxAgeDays: config.AGE_RULES.MAX_AGE_DAYS,
+        minDescLength: config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH,
+        thumbnailRequired: config.THUMBNAIL_RULES.REQUIRED,
+        useDefaultOnHighQuality:
+          config.THUMBNAIL_RULES.USE_DEFAULT_ON_HIGH_QUALITY,
+        minQualityForDefault:
+          config.THUMBNAIL_RULES.MIN_QUALITY_SCORE_FOR_DEFAULT,
+      }
+    );
+
     // Get feed URLs
     const feedUrls = subcategory
       ? getFeedsForSubcategory(category, subcategory)
@@ -475,8 +665,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // Use optimized fetch with early exit
-    const finalItems = await fetchFeedsWithEarlyExit(feedUrls);
+    // Use optimized fetch with early exit and category-aware filtering
+    const finalItems = await fetchFeedsWithEarlyExit(
+      feedUrls,
+      category,
+      subcategory
+    );
 
     return res.status(200).json({
       items: finalItems,
@@ -485,6 +679,18 @@ export default async function handler(req, res) {
       subcategory,
       timestamp: new Date().toISOString(),
       success: true,
+      // Include config summary for debugging
+      configUsed: {
+        maxAgeDays: config.AGE_RULES.MAX_AGE_DAYS,
+        minDescLength: config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH,
+        thumbnailRequired: config.THUMBNAIL_RULES.REQUIRED,
+        useDefaultOnHighQuality:
+          config.THUMBNAIL_RULES.USE_DEFAULT_ON_HIGH_QUALITY,
+        minQualityForDefault:
+          config.THUMBNAIL_RULES.MIN_QUALITY_SCORE_FOR_DEFAULT,
+        noCodeContent: config.CONTENT_RULES.NO_CODE_CONTENT,
+        qualityCheck: config.CONTENT_RULES.QUALITY_CHECK,
+      },
     });
   } catch (error) {
     console.error("Feed fetching error:", error);

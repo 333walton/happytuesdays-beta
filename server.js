@@ -1683,11 +1683,87 @@ server.on("error", (error) => {
   }
 });
 
-// Vercel Serverless Function Handler (for production deployment)
-module.exports = async (req, res) => {
-  // Your existing Vercel handler code
-  // Make sure it uses the same getFilterConfig function
+// FIXED: Complete Vercel Serverless Function Handler for production deployment
+async function fetchFeedsWithEarlyExit(feedUrls, category, subcategory) {
+  const qualifiedItems = [];
+  const seen = new Set();
+  const sourceCounts = new Map();
+  let totalProcessed = 0;
 
+  const MAX_ITEMS = 10;
+  const MAX_ITEMS_PER_FEED = 15;
+  const TARGET_BUFFER = 20;
+
+  console.log(`Starting early-exit processing for ${feedUrls.length} feeds`);
+  console.log(
+    `Target: ${TARGET_BUFFER} items, will process max ${MAX_ITEMS_PER_FEED} per feed`
+  );
+
+  // Process feeds SEQUENTIALLY for early exit
+  for (let i = 0; i < feedUrls.length; i++) {
+    const feedUrl = feedUrls[i];
+
+    // CHECK: Do we have enough items?
+    if (qualifiedItems.length >= TARGET_BUFFER) {
+      console.log(
+        `EARLY EXIT: ${qualifiedItems.length} items after ${i} feeds, processed ${totalProcessed} total`
+      );
+      break;
+    }
+
+    try {
+      const feed = await parser.parseURL(feedUrl);
+
+      // LIMIT items per feed
+      const itemsToProcess = feed.items.slice(0, MAX_ITEMS_PER_FEED);
+
+      for (const item of itemsToProcess) {
+        totalProcessed++;
+
+        // CHECK during processing
+        if (qualifiedItems.length >= TARGET_BUFFER) break;
+
+        // CRITICAL: Pass category and subcategory to parseFeedItem
+        const parsed = await parseFeedItem(
+          item,
+          feedUrl,
+          category,
+          subcategory
+        );
+
+        if (!parsed) continue;
+
+        // Deduplication
+        const key = parsed.guid || parsed.link;
+        if (seen.has(key)) continue;
+
+        // Source limit using config
+        const config = getFilterConfig(category, subcategory);
+        const sourceCount = sourceCounts.get(parsed.source) || 0;
+        if (sourceCount >= config.SOURCE_RULES.MAX_PER_DOMAIN) continue;
+
+        // Item qualified!
+        seen.add(key);
+        sourceCounts.set(parsed.source, sourceCount + 1);
+        qualifiedItems.push(parsed);
+      }
+    } catch (error) {
+      console.error(`Error fetching ${feedUrl}:`, error.message);
+      // Continue to next feed
+    }
+  }
+
+  console.log(
+    `Processed ${totalProcessed} items, qualified ${qualifiedItems.length}`
+  );
+
+  // Sort by date
+  qualifiedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+  return qualifiedItems.slice(0, MAX_ITEMS);
+}
+
+module.exports = async (req, res) => {
   // Set CORS headers
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -1715,14 +1791,61 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: "Category is required" });
   }
 
-  // Use the same logic as your POST /api/feeds endpoint
-  // Ensure getFilterConfig is called with both category and subcategory
-  const config = getFilterConfig(category, subcategory);
+  try {
+    // CRITICAL: Use the same config system as development server
+    const config = getFilterConfig(category, subcategory);
 
-  // Log config being used in production for debugging
-  console.log(`Production config for ${category}/${subcategory}:`, {
-    AGE_DAYS: config.AGE_RULES.MAX_AGE_DAYS,
-    MIN_DESC: config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH,
-    THUMBNAIL: config.THUMBNAIL_RULES.REQUIRED,
-  });
+    // Log config being used in production for debugging
+    console.log(`Production config for ${category}/${subcategory}:`, {
+      AGE_DAYS: config.AGE_RULES.MAX_AGE_DAYS,
+      MIN_DESC: config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH,
+      THUMBNAIL: config.THUMBNAIL_RULES.REQUIRED,
+      USE_DEFAULT_ICON: config.THUMBNAIL_RULES.USE_DEFAULT_ON_HIGH_QUALITY,
+      MIN_QUALITY_FOR_DEFAULT:
+        config.THUMBNAIL_RULES.MIN_QUALITY_SCORE_FOR_DEFAULT,
+    });
+
+    // Get feed URLs using the same logic as development server
+    const feedUrls = subcategory
+      ? getFeedsForSubcategory(category, subcategory)
+      : getFeedsForCategory(category);
+
+    if (!feedUrls || feedUrls.length === 0) {
+      return res.status(200).json({
+        items: [],
+        message: "No feeds found for this category",
+      });
+    }
+
+    // Use optimized fetch with early exit - SAME AS DEVELOPMENT SERVER
+    const finalItems = await fetchFeedsWithEarlyExit(
+      feedUrls,
+      category,
+      subcategory
+    );
+
+    return res.status(200).json({
+      items: finalItems,
+      count: finalItems.length,
+      category,
+      subcategory,
+      timestamp: new Date().toISOString(),
+      success: true,
+      configUsed: {
+        maxAgeDays: config.AGE_RULES.MAX_AGE_DAYS,
+        minDescLength: config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH,
+        thumbnailRequired: config.THUMBNAIL_RULES.REQUIRED,
+        useDefaultOnHighQuality:
+          config.THUMBNAIL_RULES.USE_DEFAULT_ON_HIGH_QUALITY,
+      },
+    });
+  } catch (error) {
+    console.error("Feed fetching error:", error);
+    return res.status(500).json({
+      error: "Failed to fetch feeds",
+      message: error.message,
+      items: [],
+      count: 0,
+    });
+  }
 };
