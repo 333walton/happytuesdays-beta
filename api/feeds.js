@@ -1,5 +1,5 @@
+// api/feeds.js - Unified production handler matching development server
 import Parser from "rss-parser";
-// Import the shared filterConfig from root directory
 import { getFilterConfig, qualifiesForDefaultIcon } from "../filterConfig.js";
 
 const parser = new Parser({
@@ -15,7 +15,7 @@ const parser = new Parser({
   },
 });
 
-// RSS feed URLs organized by category (your existing feeds)
+// RSS feed URLs organized by category (complete copy from server.js)
 const RSS_FEEDS = {
   tech: {
     "ai-machine-learning": [
@@ -240,8 +240,10 @@ const RSS_FEEDS = {
 const MAX_ITEMS = 10;
 const MAX_ITEMS_PER_FEED = 15;
 const TARGET_BUFFER = 20;
+const MAX_FEEDS_TO_PROCESS = 5; // Limit for Vercel timeout
+const TIMEOUT_MS = 8000; // 8 seconds total timeout
 
-// Helpers for category/subcategory resolution
+// Helper functions for category/subcategory resolution
 const getFeedsForCategory = (category) => {
   const categoryFeeds = RSS_FEEDS[category];
   if (!categoryFeeds) return [];
@@ -262,7 +264,7 @@ const getFeedDisplayName = (url) => {
   }
 };
 
-// Helper functions for validation
+// Validation functions
 const containsCodeOrTechnical = (text) => {
   if (!text) return false;
   const codePatterns = [
@@ -273,6 +275,10 @@ const containsCodeOrTechnical = (text) => {
     /console\./,
     /import\s+.*from/,
     /export\s+(default|const)/,
+    /class\s+\w+\s*{/,
+    /const\s+\w+\s*=/,
+    /let\s+\w+\s*=/,
+    /var\s+\w+\s*=/,
   ];
   return codePatterns.some((pattern) => pattern.test(text));
 };
@@ -295,6 +301,8 @@ const isSpamTitle = (title) => {
     /\bclick\s*here\b/i,
     /\bfree\s*download\b/i,
     /\byou\s*won't\s*believe\b/i,
+    /\bmust\s*see\b/i,
+    /\bshocking\b/i,
   ];
   return spamPatterns.some((pattern) => pattern.test(title));
 };
@@ -305,20 +313,33 @@ const isValidDescription = (description, title, category, subcategory) => {
 
   const config = getFilterConfig(category, subcategory);
 
-  if (description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH)
+  if (description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH) {
     return false;
-  if (config.CONTENT_RULES.NO_LOWERCASE_START && /^[a-z]/.test(description))
+  }
+
+  // Skip certain checks for builder/art categories
+  if (category === "builder" || category === "art") {
+    return true;
+  }
+
+  if (config.CONTENT_RULES.NO_LOWERCASE_START && /^[a-z]/.test(description)) {
     return false;
+  }
+
   if (
     config.CONTENT_RULES.NO_SPECIAL_CHAR_START &&
     /^[^A-Za-z0-9"']/.test(description)
-  )
+  ) {
     return false;
+  }
+
   if (
     config.CONTENT_RULES.NO_URLS_IN_DESCRIPTION &&
     /https?:\/\//.test(description)
-  )
+  ) {
     return false;
+  }
+
   return true;
 };
 
@@ -336,6 +357,19 @@ const cleanDescription = (rawDescription, title, category, subcategory) => {
     containsCodeOrTechnical(cleaned) &&
     config.CONTENT_RULES.NO_CODE_CONTENT
   ) {
+    return "";
+  }
+
+  // Remove promotional patterns
+  const skipPatterns = [
+    /^read the full article/i,
+    /^click here to/i,
+    /^learn more about/i,
+    /^the post .* appeared first on/i,
+    /^continue reading/i,
+  ];
+
+  if (skipPatterns.some((pattern) => pattern.test(cleaned))) {
     return "";
   }
 
@@ -383,7 +417,7 @@ const scoreArticleQuality = (item, category, subcategory) => {
   return score;
 };
 
-// FIXED: Parse feed item with proper category/subcategory parameters
+// Parse feed item with proper category/subcategory parameters
 const parseFeedItem = (item, source, category, subcategory) => {
   // Get filter config for this specific category/subcategory
   const config = getFilterConfig(category, subcategory);
@@ -427,7 +461,7 @@ const parseFeedItem = (item, source, category, subcategory) => {
       : item["media:thumbnail"];
   }
 
-  // Description validation and cleaning using config
+  // Extract and validate description
   let description =
     item.contentSnippet || item.description || item.summary || "";
   description = cleanDescription(description, title, category, subcategory);
@@ -466,6 +500,16 @@ const parseFeedItem = (item, source, category, subcategory) => {
     }
   }
 
+  // Check for promotional content
+  const promotionalKeywords = config.PROMOTIONAL_KEYWORDS || [];
+  const titleLower = title.toLowerCase();
+
+  for (const keyword of promotionalKeywords) {
+    if (titleLower.includes(keyword.toLowerCase())) {
+      return null;
+    }
+  }
+
   return {
     title: title,
     link: item.link || item.guid || "#",
@@ -482,47 +526,61 @@ const parseFeedItem = (item, source, category, subcategory) => {
   };
 };
 
-// FIXED: Fetch function with proper category/subcategory passing
+// Optimized fetch function with early exit and timeout protection
 async function fetchFeedsWithEarlyExit(feedUrls, category, subcategory) {
   const qualifiedItems = [];
   const seen = new Set();
   const sourceCounts = new Map();
   let totalProcessed = 0;
+  const startTime = Date.now();
 
   console.log(`Starting early-exit processing for ${feedUrls.length} feeds`);
   console.log(`Category: ${category}, Subcategory: ${subcategory || "none"}`);
   console.log(
-    `Target: ${TARGET_BUFFER} items, will process max ${MAX_ITEMS_PER_FEED} per feed`
+    `Target: ${TARGET_BUFFER} items, max ${MAX_ITEMS_PER_FEED} per feed`
   );
 
   // Get config for this category/subcategory
   const config = getFilterConfig(category, subcategory);
 
-  // Process feeds SEQUENTIALLY for early exit
-  for (let i = 0; i < feedUrls.length; i++) {
+  // Debug logging for production
+  console.log(`Using config - MAX_AGE_DAYS: ${config.AGE_RULES.MAX_AGE_DAYS}`);
+  console.log(
+    `MIN_DESCRIPTION_LENGTH: ${config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH}`
+  );
+
+  // Process feeds SEQUENTIALLY with timeout protection
+  for (let i = 0; i < Math.min(feedUrls.length, MAX_FEEDS_TO_PROCESS); i++) {
     const feedUrl = feedUrls[i];
 
-    // CHECK: Do we have enough items?
+    // Check timeout
+    if (Date.now() - startTime > TIMEOUT_MS) {
+      console.log(`TIMEOUT: Stopping after ${i} feeds to avoid timeout`);
+      break;
+    }
+
+    // Check if we have enough items
     if (qualifiedItems.length >= TARGET_BUFFER) {
       console.log(
-        `EARLY EXIT: ${qualifiedItems.length} items after ${i} feeds, processed ${totalProcessed} total`
+        `EARLY EXIT: ${qualifiedItems.length} items after ${i} feeds`
       );
       break;
     }
 
     try {
+      console.log(`Processing feed ${i + 1}: ${getFeedDisplayName(feedUrl)}`);
       const feed = await parser.parseURL(feedUrl);
 
-      // LIMIT items per feed
+      // Limit items per feed
       const itemsToProcess = feed.items.slice(0, MAX_ITEMS_PER_FEED);
 
       for (const item of itemsToProcess) {
         totalProcessed++;
 
-        // CHECK during processing
+        // Check during processing
         if (qualifiedItems.length >= TARGET_BUFFER) break;
 
-        // CRITICAL FIX: Pass category and subcategory to parseFeedItem
+        // Parse with category and subcategory
         const parsed = parseFeedItem(item, feedUrl, category, subcategory);
 
         if (!parsed) continue;
@@ -542,7 +600,7 @@ async function fetchFeedsWithEarlyExit(feedUrls, category, subcategory) {
       }
     } catch (error) {
       console.error(`Error fetching ${feedUrl}:`, error.message);
-      // Continue to next feed
+      // Continue to next feed on error
     }
   }
 
@@ -603,7 +661,7 @@ async function fetchFeedsWithEarlyExit(feedUrls, category, subcategory) {
   return finalItems;
 }
 
-// Main handler - FIXED with proper parameter passing
+// Main handler - optimized for Vercel
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -662,7 +720,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // CRITICAL FIX: Pass category and subcategory to fetchFeedsWithEarlyExit
+    // Use optimized fetch with early exit
     const finalItems = await fetchFeedsWithEarlyExit(
       feedUrls,
       category,
