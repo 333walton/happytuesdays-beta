@@ -1,4 +1,4 @@
-// filterConfig.js - Fixed version with proper override logic
+// filterConfig.js - Single Source of Truth for All Filter Configurations
 // This allows you to configure specific filter rules for each category and subcategory
 // view all settings easily by entering http://localhost:3001/api/filter-configs into the browser (select 'pretty-print')
 
@@ -26,11 +26,13 @@ const CATEGORY_FILTER_CONFIG = {
       MAX_PER_DOMAIN: 2,
       SOURCE_DIVERSITY: 3,
     },
-
+    AGE_RULES: {
+      MAX_AGE_DAYS: 14, // Default to 14 days
+    },
     THUMBNAIL_RULES: {
       REQUIRED: true,
-      USE_DEFAULT_ON_HIGH_QUALITY: true, // New flag for high-quality articles without thumbnails
-      MIN_QUALITY_SCORE_FOR_DEFAULT: 35, // Minimum quality score to show default icon
+      USE_DEFAULT_ON_HIGH_QUALITY: true,
+      MIN_QUALITY_SCORE_FOR_DEFAULT: 35,
     },
     DEDUPLICATION: {
       CROSS_FEED: true,
@@ -80,10 +82,9 @@ const CATEGORY_FILTER_CONFIG = {
 
   // Category-level overrides
   tech: {
-    // Tech keeps strict defaults, but you can override specific rules
     CONTENT_RULES: {
       MIN_DESCRIPTION_LENGTH: 50,
-      NO_CODE_CONTENT: false, // Allow code in tech content
+      NO_CODE_CONTENT: false,
       QUALITY_CHECK: true,
     },
     THUMBNAIL_RULES: {
@@ -91,61 +92,25 @@ const CATEGORY_FILTER_CONFIG = {
       USE_DEFAULT_ON_HIGH_QUALITY: true,
       MIN_QUALITY_SCORE_FOR_DEFAULT: 35,
     },
-    PROMOTIONAL_KEYWORDS: [
-      "$",
-      "% off",
-      "sale",
-      "deal",
-      "discount",
-      "save $",
-      "only $",
-      "labor day",
-      "black friday",
-      "cyber monday",
-      "prime day",
-      "coupon",
-      "promo code",
-      "free shipping",
-      "limited time",
-      "casino",
-      "betting",
-      "buy now",
-      "loan",
-      "sponsored",
-      "crowdfunding",
-      "press release",
-      "partner announcement",
-      "advertorial",
-      "guest post",
-      "price prediction",
-      "easy loan",
-      "investment scheme",
-      "binary option",
-      "url:",
-      "URL:",
-      "Article URL:",
-      "#",
-      "%",
-    ],
     // Subcategory-specific overrides within tech
     subcategories: {
       "ai-machine-learning": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 40, // AI articles often have shorter summaries
+          MIN_DESCRIPTION_LENGTH: 40,
           NO_CODE_CONTENT: false,
         },
         LIMITS: {
-          MAX_QUESTIONS: 5, // More Q&A style content in AI
+          MAX_QUESTIONS: 5,
         },
       },
       "martech-adtech": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 30, // Marketing content often brief
+          MIN_DESCRIPTION_LENGTH: 30,
         },
         THUMBNAIL_RULES: {
-          REQUIRED: true, // Many marketing feeds lack thumbnails
+          REQUIRED: true,
           USE_DEFAULT_ON_HIGH_QUALITY: true,
-          MIN_QUALITY_SCORE_FOR_DEFAULT: 30, // Lower threshold for marketing
+          MIN_QUALITY_SCORE_FOR_DEFAULT: 30,
         },
         AGE_RULES: {
           MAX_AGE_DAYS: 14,
@@ -159,14 +124,13 @@ const CATEGORY_FILTER_CONFIG = {
       },
       "cybersecurity-privacy": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 7, // Security news needs to be very fresh
+          MAX_AGE_DAYS: 7,
         },
       },
       "blockchain-web3": {
         CONTENT_RULES: {
           MIN_DESCRIPTION_LENGTH: 40,
         },
-        // Filter out price/trading spam
         PROMOTIONAL_KEYWORDS: [
           "price prediction",
           "moon",
@@ -186,61 +150,25 @@ const CATEGORY_FILTER_CONFIG = {
       NO_ALL_LOWERCASE: false,
     },
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 30, // Much shorter ok
+      MIN_DESCRIPTION_LENGTH: 30,
       NO_LOWERCASE_START: false,
       NO_SPECIAL_CHAR_START: false,
-      NO_URLS_IN_DESCRIPTION: false, // Links to tools ok
+      NO_URLS_IN_DESCRIPTION: false,
       NO_CODE_CONTENT: false,
       QUALITY_CHECK: true,
-      MAX_EMOJI_SYMBOLS: 2, // More emojis ok
+      MAX_EMOJI_SYMBOLS: 2,
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
       USE_DEFAULT_ON_HIGH_QUALITY: false,
-      MIN_QUALITY_SCORE_FOR_DEFAULT: 25, // Lower threshold
+      MIN_QUALITY_SCORE_FOR_DEFAULT: 25,
     },
     AGE_RULES: {
-      MAX_AGE_DAYS: 14, // Evergreen content ok
+      MAX_AGE_DAYS: 14,
     },
     DEDUPLICATION: {
-      UNCOMMON_WORDS: false, // Allow similar topics
+      UNCOMMON_WORDS: false,
     },
-    PROMOTIONAL_KEYWORDS: [
-      "$",
-      "% off",
-      "sale",
-      "deal",
-      "discount",
-      "save $",
-      "only $",
-      "labor day",
-      "black friday",
-      "cyber monday",
-      "prime day",
-      "coupon",
-      "promo code",
-      "free shipping",
-      "limited time",
-      "casino",
-      "betting",
-      "buy now",
-      "loan",
-      "sponsored",
-      "crowdfunding",
-      "press release",
-      "partner announcement",
-      "advertorial",
-      "guest post",
-      "price prediction",
-      "easy loan",
-      "investment scheme",
-      "binary option",
-      "url:",
-      "URL:",
-      "Article URL:",
-      "#",
-      "%",
-    ],
     subcategories: {
       "startup-stories": {
         CONTENT_RULES: {
@@ -249,7 +177,7 @@ const CATEGORY_FILTER_CONFIG = {
       },
       "productivity-hacks": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 30, // Productivity tips are evergreen - THIS SHOULD OVERRIDE
+          MAX_AGE_DAYS: 30,
         },
       },
       "automation-no-code": {
@@ -265,10 +193,10 @@ const CATEGORY_FILTER_CONFIG = {
       },
       "momentum-mindset": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 60, // Philosophy/mindset content is timeless
+          MAX_AGE_DAYS: 60,
         },
         CONTENT_RULES: {
-          QUALITY_CHECK: false, // Abstract content
+          QUALITY_CHECK: false,
         },
       },
     },
@@ -281,57 +209,21 @@ const CATEGORY_FILTER_CONFIG = {
     },
     CONTENT_RULES: {
       MIN_DESCRIPTION_LENGTH: 40,
-      NO_CODE_CONTENT: false, // Tutorials have code
+      NO_CODE_CONTENT: false,
       QUALITY_CHECK: false,
-      MAX_EMOJI_SYMBOLS: 8, // Art uses more symbols
+      MAX_EMOJI_SYMBOLS: 8,
     },
     THUMBNAIL_RULES: {
-      REQUIRED: true, // Visual content needs images
-      USE_DEFAULT_ON_HIGH_QUALITY: false, // Art content should have real images
+      REQUIRED: true,
+      USE_DEFAULT_ON_HIGH_QUALITY: false,
       MIN_QUALITY_SCORE_FOR_DEFAULT: 40,
     },
     DEDUPLICATION: {
       UNCOMMON_WORDS: false,
     },
     AGE_RULES: {
-      MAX_AGE_DAYS: 30, // Evergreen content ok
+      MAX_AGE_DAYS: 30,
     },
-    PROMOTIONAL_KEYWORDS: [
-      "$",
-      "% off",
-      "sale",
-      "deal",
-      "discount",
-      "save $",
-      "only $",
-      "labor day",
-      "black friday",
-      "cyber monday",
-      "prime day",
-      "coupon",
-      "promo code",
-      "free shipping",
-      "limited time",
-      "casino",
-      "betting",
-      "buy now",
-      "loan",
-      "sponsored",
-      "crowdfunding",
-      "press release",
-      "partner announcement",
-      "advertorial",
-      "guest post",
-      "price prediction",
-      "easy loan",
-      "investment scheme",
-      "binary option",
-      "url:",
-      "URL:",
-      "Article URL:",
-      "#",
-      "%",
-    ],
     subcategories: {
       "generative-ai-art": {
         CONTENT_RULES: {
@@ -365,7 +257,7 @@ const CATEGORY_FILTER_CONFIG = {
           NO_URLS_IN_DESCRIPTION: false,
         },
         AGE_RULES: {
-          MAX_AGE_DAYS: 90, // Tutorials stay relevant
+          MAX_AGE_DAYS: 90,
         },
       },
     },
@@ -374,7 +266,7 @@ const CATEGORY_FILTER_CONFIG = {
   gaming: {
     TITLE_RULES: {
       MIN_LENGTH: 8,
-      NO_ALL_CAPS: false, // Gaming titles use caps
+      NO_ALL_CAPS: false,
     },
     CONTENT_RULES: {
       MIN_DESCRIPTION_LENGTH: 40,
@@ -385,63 +277,27 @@ const CATEGORY_FILTER_CONFIG = {
       MAX_AGE_DAYS: 14,
     },
     THUMBNAIL_RULES: {
-      REQUIRED: true, // Gaming content varies
+      REQUIRED: true,
       USE_DEFAULT_ON_HIGH_QUALITY: true,
       MIN_QUALITY_SCORE_FOR_DEFAULT: 30,
     },
-    PROMOTIONAL_KEYWORDS: [
-      "$",
-      "% off",
-      "sale",
-      "deal",
-      "discount",
-      "save $",
-      "only $",
-      "labor day",
-      "black friday",
-      "cyber monday",
-      "prime day",
-      "coupon",
-      "promo code",
-      "free shipping",
-      "limited time",
-      "casino",
-      "betting",
-      "buy now",
-      "loan",
-      "sponsored",
-      "crowdfunding",
-      "press release",
-      "partner announcement",
-      "advertorial",
-      "guest post",
-      "price prediction",
-      "easy loan",
-      "investment scheme",
-      "binary option",
-      "url:",
-      "URL:",
-      "Article URL:",
-      "#",
-      "%",
-    ],
     subcategories: {
       "daily-roundup": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 3, // Very fresh news only
+          MAX_AGE_DAYS: 3,
         },
       },
       "pro-guides-tips": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 90, // Guides stay relevant
+          MAX_AGE_DAYS: 90,
         },
       },
       "retro-gaming": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 90, // Retro content is timeless
+          MAX_AGE_DAYS: 90,
         },
         THUMBNAIL_RULES: {
-          REQUIRED: true, // Old games may lack images
+          REQUIRED: true,
           USE_DEFAULT_ON_HIGH_QUALITY: true,
           MIN_QUALITY_SCORE_FOR_DEFAULT: 25,
         },
@@ -460,7 +316,7 @@ const CATEGORY_FILTER_CONFIG = {
   },
 };
 
-// FIXED: Deep merge function that properly handles nested objects
+// Deep merge function
 function deepMerge(target, source) {
   const result = { ...target };
 
@@ -471,7 +327,6 @@ function deepMerge(target, source) {
         typeof source[key] === "object" &&
         !Array.isArray(source[key])
       ) {
-        // If both target and source have this key as an object, deep merge
         if (
           target[key] &&
           typeof target[key] === "object" &&
@@ -479,11 +334,9 @@ function deepMerge(target, source) {
         ) {
           result[key] = deepMerge(target[key], source[key]);
         } else {
-          // Otherwise, just use the source value
           result[key] = source[key];
         }
       } else {
-        // For non-objects (including arrays), override with source value
         result[key] = source[key];
       }
     }
@@ -492,7 +345,7 @@ function deepMerge(target, source) {
   return result;
 }
 
-// FIXED: Function to get filter configuration for a specific category/subcategory
+// Function to get filter configuration for a specific category/subcategory
 function getFilterConfig(category, subcategory = null) {
   // Start with deep copy of defaults
   let config = JSON.parse(JSON.stringify(CATEGORY_FILTER_CONFIG.DEFAULT));
@@ -517,11 +370,11 @@ function getFilterConfig(category, subcategory = null) {
     const subcategoryConfig =
       CATEGORY_FILTER_CONFIG[category].subcategories[subcategory];
 
-    // Deep merge subcategory config, which should override both defaults and category
+    // Deep merge subcategory config
     config = deepMerge(config, subcategoryConfig);
   }
 
-  // Add debug info to help verify correct config is being used
+  // Add debug info
   config._DEBUG_INFO = {
     category: category || "default",
     subcategory: subcategory || "none",
@@ -544,37 +397,29 @@ function qualifiesForDefaultIcon(item, qualityScore, category, subcategory) {
   );
 }
 
-// Export for use in server.js and Vercel
-module.exports = {
-  CATEGORY_FILTER_CONFIG,
-  getFilterConfig,
-  qualifiesForDefaultIcon,
-  deepMerge, // Export for testing
-};
+// Universal export that works in both Node.js and ES6 environments
+if (typeof module !== "undefined" && module.exports) {
+  // Node.js / CommonJS export
+  module.exports = {
+    CATEGORY_FILTER_CONFIG,
+    getFilterConfig,
+    qualifiesForDefaultIcon,
+    deepMerge,
+  };
+}
 
-// Also export for ES6 imports (for Vercel)
 if (typeof exports !== "undefined") {
+  // Additional CommonJS support
   exports.CATEGORY_FILTER_CONFIG = CATEGORY_FILTER_CONFIG;
   exports.getFilterConfig = getFilterConfig;
   exports.qualifiesForDefaultIcon = qualifiesForDefaultIcon;
   exports.deepMerge = deepMerge;
 }
 
-// Test the override logic (you can remove this in production)
-if (process.env.NODE_ENV === "development") {
-  // Test case: productivity-hacks should have MAX_AGE_DAYS: 30
-  const testConfig = getFilterConfig("builder", "productivity-hacks");
-  console.log(
-    "Test: productivity-hacks MAX_AGE_DAYS =",
-    testConfig.AGE_RULES.MAX_AGE_DAYS
-  );
-  // Should output: 30
-
-  // Test case: builder category should have MAX_AGE_DAYS: 14
-  const builderConfig = getFilterConfig("builder");
-  console.log(
-    "Test: builder MAX_AGE_DAYS =",
-    builderConfig.AGE_RULES.MAX_AGE_DAYS
-  );
-  // Should output: 14
-}
+// ES6 export for Vercel
+export {
+  CATEGORY_FILTER_CONFIG,
+  getFilterConfig,
+  qualifiesForDefaultIcon,
+  deepMerge,
+};
