@@ -2,6 +2,54 @@
 // This allows you to configure specific filter rules for each category and subcategory
 // view all settings easily by entering http://localhost:3001/api/filter-configs into the browser (select 'pretty-print')
 
+/*
+  NEWSFEED FILTER REFERENCE
+
+  TITLE_RULES:
+    MIN_LENGTH         - Minimum title length (characters)
+    MAX_LENGTH         - Maximum title length (characters)
+    NO_ALL_CAPS        - Reject titles in all capitals
+    NO_ALL_LOWERCASE   - Reject titles in all lowercase
+    NO_SPAM_PATTERNS   - Block spam-like title patterns
+    ENGLISH_ONLY       - Accept only English language titles
+
+  CONTENT_RULES:
+    MIN_DESCRIPTION_LENGTH   - Minimum description length (characters)
+    NO_CODE_CONTENT          - Block articles containing code snippets
+    NO_LOWERCASE_START       - Reject descriptions starting with lowercase
+    NO_SPECIAL_CHAR_START    - Reject descriptions starting with special chars
+    NO_URLS_IN_DESCRIPTION   - Block descriptions with URLs
+    QUALITY_CHECK            - Enable quality validation (spam/gibberish/etc.)
+
+  SOURCE_RULES:
+    MAX_PER_SOURCE    - Maximum articles per unique source
+    MAX_PER_DOMAIN    - Maximum articles per domain
+
+  AGE_RULES:
+    MAX_AGE_DAYS      - Max article age in days allowed
+    MAX_AGE_HOURS     - Max article age in hours allowed
+    PREFER_RECENT     - Prefer more recent articles in sorting
+
+  THUMBNAIL_RULES:
+    REQUIRED                  - Thumbnail required (true/false)
+    USE_DEFAULT_ON_HIGH_QUALITY - Allow default icon if high quality (true/false)
+    MIN_QUALITY_SCORE_FOR_DEFAULT - Minimum score needed for default thumbnail
+    VALIDATE_REAL_IMAGE       - Validate thumbnail is an actual article image
+
+  DEDUPLICATION:
+    CROSS_FEED       - Remove duplicates across feeds (true/false)
+    UNCOMMON_WORDS   - Require article word uniqueness (true/false)
+    FINGERPRINT_LENGTH - Character length used for deduplication hashing
+
+  LIMITS:
+    MAX_ITEMS            - Maximum items returned per request
+    MAX_ITEMS_PER_FEED   - Maximum items processed per feed
+    TARGET_BUFFER        - Buffer size built before filtering
+
+  PROMOTIONAL_KEYWORDS:
+    Blocks articles containing specified promotional terms
+*/
+
 const CATEGORY_FILTER_CONFIG = {
   // Global defaults (applied unless overridden)
   DEFAULT: {
