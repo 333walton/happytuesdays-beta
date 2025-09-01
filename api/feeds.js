@@ -19,219 +19,220 @@ const parser = new Parser({
 const RSS_FEEDS = {
   tech: {
     "ai-machine-learning": [
-      "https://openai.com/news/rss/",
-      "https://cloud.google.com/blog/products/ai-machine-learning/rss/",
-      "https://news.mit.edu/topic/artificial-intelligence2/rss.xml",
-      "https://machinelearningmastery.com/feed/",
-      "https://www.marktechpost.com/feed/",
-      "https://hnrss.org/newest?q=AI+OR+machine+learning",
-      "https://blog.google/technology/ai/rss/",
-      "https://huggingface.co/blog/feed.xml",
-      "https://www.deeplearning.ai/blog/feed/",
-      "https://hai.stanford.edu/news/rss.xml",
-      "https://allenai.org/rss.xml",
-      "https://venturebeat.com/category/ai/feed/",
-      "https://www.aitrends.com/feed/",
-      "https://blogs.microsoft.com/ai/feed/",
+      "https://openai.com/news/rss/", // OpenAI news, research
+      "https://cloud.google.com/blog/products/ai-machine-learning/rss/", // Google Cloud AI, ML tools
+      "https://news.mit.edu/topic/artificial-intelligence2/rss.xml", // MIT AI research
+      "https://machinelearningmastery.com/feed/", // ML tutorials, guides
+      "https://www.marktechpost.com/feed/", // AI tools, use cases
+      "https://hnrss.org/newest?q=AI+OR+machine+learning", // Hacker News AI/ML
+      "https://blog.google/technology/ai/rss/", // Google AI updates
+      "https://huggingface.co/blog/feed.xml", // Hugging Face, NLP, transformers
+      "https://www.deeplearning.ai/blog/feed/", // Applied AI, learning
+      "https://hai.stanford.edu/news/rss.xml", // Stanford AI research
+      "https://allenai.org/rss.xml", // AI2 research, datasets
+      "https://venturebeat.com/category/ai/feed/", // AI industry, funding
+      "https://arxiv-sanity-lite.com/feed/?query=cs.AI", // arXiv AI papers
+      "https://www.aitrends.com/feed/", // AI business, adoption
+      "https://blogs.microsoft.com/ai/feed/", // Microsoft AI news
     ],
 
     "martech-adtech": [
-      "https://martech.org/feed/",
-      "https://adexchanger.com/feed/",
-      "https://marketingland.com/feed/",
-      "https://chiefmartec.com/feed/",
-      "https://www.marketingtechnews.net/rss.xml",
-      "https://digiday.com/feed/",
-      "https://www.marketingprofs.com/rss/all",
-      "https://adtechdaily.com/feed",
-      "https://verve.com/feed",
-      "https://adpushup.com/blog/feed",
+      "https://martech.org/feed/", // Martech news, tools
+      "https://adexchanger.com/feed/", // Ad tech, programmatic
+      "https://marketingland.com/feed/", // Marketing, analytics
+      "https://chiefmartec.com/feed/", // Martech landscape, ops
+      "https://www.marketingtechnews.net/rss.xml", // Martech, digital trends
+      "https://digiday.com/feed/", // Media, marketing policy
+      "https://www.marketingprofs.com/rss/all", // Marketing tips, how-to
+      "https://adtechdaily.com/feed", // Ad ops, campaign strategy
+      "https://verve.com/feed", // Omnichannel ads, privacy
+      "https://adpushup.com/blog/feed", // Ad revenue, optimization
     ],
 
     "web-dev-devops": [
-      "https://css-tricks.com/feed/",
-      "https://www.smashingmagazine.com/feed/",
-      "https://web.dev/feed.xml",
-      "https://blog.logrocket.com/feed/",
-      "https://www.joshwcomeau.com/rss.xml",
-      "https://kentcdodds.com/blog/rss.xml",
-      "https://dev.to/feed/tag/webdev",
-      "https://blog.cloudflare.com/rss/",
-      "https://github.blog/category/development/feed/",
-      "https://devops.com/feed",
-      "https://atlassian.com/blog/devops/feed",
+      "https://css-tricks.com/feed/", // CSS, JS tips
+      "https://www.smashingmagazine.com/feed/", // UX, front-end tools
+      "https://web.dev/feed.xml", // Web standards, performance
+      "https://blog.logrocket.com/feed/", // Web dev tutorials
+      "https://www.joshwcomeau.com/rss.xml", // React, CSS deep dives
+      "https://kentcdodds.com/blog/rss.xml", // JS, React, testing
+      "https://dev.to/feed/tag/webdev", // Webdev community
+      "https://blog.cloudflare.com/rss/", // Security, performance
+      "https://github.blog/category/development/feed/", // GitHub dev news
+      "https://devops.com/feed", // DevOps workflows
+      "https://atlassian.com/blog/devops/feed", // DevOps collaboration
     ],
 
     "cybersecurity-privacy": [
-      "https://krebsonsecurity.com/feed/",
-      "https://feeds.feedburner.com/TheHackersNews",
-      "https://www.darkreading.com/rss.xml",
-      "https://www.schneier.com/feed/atom/",
-      "https://www.bleepingcomputer.com/feed/",
-      "https://threatpost.com/feed/",
-      "https://blog.talosintelligence.com/feeds/posts/default",
-      "https://www.microsoft.com/security/blog/feed/",
+      "https://krebsonsecurity.com/feed/", // Security breaches, threats
+      "https://feeds.feedburner.com/TheHackersNews", // Hacks, vulnerabilities
+      "https://www.darkreading.com/rss.xml", // Enterprise security, threats
+      "https://www.schneier.com/feed/atom/", // Cryptography, privacy
+      "https://www.bleepingcomputer.com/feed/", // Malware, exploits
+      "https://threatpost.com/feed/", // Threat landscape, trends
+      "https://blog.talosintelligence.com/feeds/posts/default", // Cisco threat intel
+      "https://www.microsoft.com/security/blog/feed/", // Microsoft security
     ],
 
     "blockchain-web3": [
-      "https://www.coindesk.com/arc/outboundfeeds/rss/",
-      "https://decrypt.co/feed",
-      "https://cointelegraph.com/rss",
-      "https://ethereum.org/en/blog/feed.xml",
-      "https://blog.chain.link/rss/",
-      "https://messari.io/rss",
-      "https://bankless.substack.com/feed",
-      "https://vitalik.eth.limo/feed.xml",
+      "https://www.coindesk.com/arc/outboundfeeds/rss/", // Crypto news, blockchain
+      "https://decrypt.co/feed", // DeFi, NFTs, crypto
+      "https://cointelegraph.com/rss", // Global crypto news
+      "https://ethereum.org/en/blog/feed.xml", // Ethereum updates
+      "https://blog.chain.link/rss/", // Smart contracts, Chainlink
+      "https://messari.io/rss", // Crypto research, analysis
+      "https://bankless.substack.com/feed", // DeFi, Web3 trends
+      "https://vitalik.eth.limo/feed.xml", // Vitalik blog
     ],
   },
 
   builder: {
     "startup-stories": [
-      "https://review.firstround.com/rss/",
-      "https://blog.ycombinator.com/feed/",
-      "https://techcrunch.com/category/startups/feed/",
-      "https://www.indiehackers.com/feed.xml",
-      "https://sifted.eu/feed/",
-      "https://venturebeat.com/category/entrepreneur/feed/",
-      "https://bothsidesofthetable.com/feed",
-      "https://www.startupgrind.com/feed.xml",
+      "https://review.firstround.com/rss/", // Founder stories
+      "https://blog.ycombinator.com/feed/", // YC startups
+      "https://techcrunch.com/category/startups/feed/", // Startup news
+      "https://www.indiehackers.com/feed.xml", // Indie founders
+      "https://sifted.eu/feed/", // European startups
+      "https://venturebeat.com/category/entrepreneur/feed/", // Entrepreneurship
+      "https://bothsidesofthetable.com/feed", // VC insights
+      "https://www.startupgrind.com/feed.xml", // Startup events
     ],
 
     "productivity-hacks": [
-      "https://zenhabits.net/feed/",
-      "https://jamesclear.com/feed",
-      "https://gettingthingsdone.com/feed/",
-      "https://aliabdaal.com/rss/",
-      "https://tim.blog/feed/",
-      "https://calnewport.com/blog/feed/",
-      "https://www.asianefficiency.com/feed/",
+      "https://zenhabits.net/feed/", // Minimalism, habits
+      "https://jamesclear.com/feed", // Atomic habits
+      "https://gettingthingsdone.com/feed/", // GTD method
+      "https://aliabdaal.com/rss/", // Productivity tips
+      "https://tim.blog/feed/", // Tim Ferriss hacks
+      "https://calnewport.com/blog/feed/", // Deep work, focus
+      "https://www.asianefficiency.com/feed/", // Workflow tips
     ],
 
     "automation-no-code": [
-      "https://zapier.com/blog/feeds/latest/",
-      "https://bubble.io/blog/rss",
-      "https://www.nocode.tech/feed",
-      "https://blog.airtable.com/rss/",
-      "https://webflow.com/blog/feed.rss",
-      "https://blog.n8n.io/rss/",
-      "https://makerpad.co/posts.atom",
-      "https://www.producthunt.com/feed/no-code",
+      "https://zapier.com/blog/feeds/latest/", // Automation, integrations
+      "https://bubble.io/blog/rss", // No-code apps
+      "https://www.nocode.tech/feed", // No-code tools
+      "https://blog.airtable.com/rss/", // Airtable automation
+      "https://webflow.com/blog/feed.rss", // Webflow design
+      "https://blog.n8n.io/rss/", // Open-source automation
+      "https://makerpad.co/posts.atom", // No-code projects
+      "https://www.producthunt.com/feed/no-code", // No-code launches
     ],
 
     "project-management": [
-      "https://blog.asana.com/feed/",
-      "https://blog.trello.com/rss",
-      "https://monday.com/blog/feed/",
-      "https://www.projectmanager.com/blog/feed",
-      "https://blog.clickup.com/feed/",
-      "https://www.atlassian.com/blog/feed",
-      "https://www.wrike.com/blog/feed/",
-      "https://www.pmi.org/rss.xml",
+      "https://blog.asana.com/feed/", // Asana tips
+      "https://blog.trello.com/rss", // Trello updates
+      "https://monday.com/blog/feed/", // Monday.com stories
+      "https://www.projectmanager.com/blog/feed", // PM guides
+      "https://blog.clickup.com/feed/", // ClickUp tips
+      "https://www.atlassian.com/blog/feed", // PM tools, news
+      "https://www.wrike.com/blog/feed/", // Wrike updates
+      "https://www.pmi.org/rss.xml", // PM best practices
     ],
 
     "momentum-mindset": [
-      "https://fs.blog/feed/",
-      "https://ryanholiday.net/feed/",
-      "https://markmanson.net/feed",
-      "https://sethgodin.typepad.com/seths_blog/atom.xml",
-      "https://dailystoic.com/feed/",
-      "https://tim.blog/feed/",
-      "https://jamesclear.com/feed",
-      "https://waitbutwhy.com/feed",
-      "https://feeds.feedburner.com/brainpickings/rss",
-      "https://www.mindful.org/feed",
+      "https://fs.blog/feed/", // Mental models
+      "https://ryanholiday.net/feed/", // Stoicism
+      "https://markmanson.net/feed", // Self-help, EQ
+      "https://sethgodin.typepad.com/seths_blog/atom.xml", // Seth Godin ideas
+      "https://dailystoic.com/feed/", // Stoic practices
+      "https://tim.blog/feed/", // Life hacks
+      "https://jamesclear.com/feed", // Habits, focus
+      "https://waitbutwhy.com/feed", // Life essays
+      "https://feeds.feedburner.com/brainpickings/rss", // Philosophy, literature
+      "https://www.mindful.org/feed", // Mindfulness, wellness
     ],
   },
 
   art: {
     "generative-ai-art": [
-      "https://aiartists.org/feed",
-      "https://www.creativebloq.com/feeds/tag/ai-art",
-      "https://ml.berkeley.edu/blog/feed.xml",
-      "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
-      "https://runwayml.com/blog/rss/",
+      "https://aiartists.org/feed", // AI art showcase
+      "https://www.creativebloq.com/feeds/tag/ai-art", // AI art trends
+      "https://ml.berkeley.edu/blog/feed.xml", // ML + creativity
+      "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", // AI art news
+      "https://runwayml.com/blog/rss/", // Generative AI tools
     ],
 
     "ui-ux-trends": [
-      "https://www.smashingmagazine.com/feed/",
-      "https://uxplanet.org/feed",
-      "https://alistapart.com/main/feed",
-      "https://uxdesign.cc/feed",
-      "https://www.nngroup.com/feed/rss/",
-      "https://www.invisionapp.com/inside-design/feed/",
-      "https://www.uxmatters.com/feed.php",
-      "https://sidebar.io/feed.xml",
+      "https://www.smashingmagazine.com/feed/", // UX, design trends
+      "https://uxplanet.org/feed", // UX guides
+      "https://alistapart.com/main/feed", // Web standards, design
+      "https://uxdesign.cc/feed", // UX research, critiques
+      "https://www.nngroup.com/feed/rss/", // Usability research
+      "https://www.invisionapp.com/inside-design/feed/", // UI, UX process
+      "https://www.uxmatters.com/feed.php", // UX issues, solutions
+      "https://sidebar.io/feed.xml", // Curated design links
     ],
 
     "color-typography": [
-      "https://fontsinuse.com/feed",
-      "https://blog.adobe.com/en/publish/creative-cloud.xml",
-      "https://typographica.org/feed/",
-      "https://ilovetypography.com/feed/",
-      "https://fonts.googleblog.com/feeds/posts/default",
+      "https://fontsinuse.com/feed", // Fonts in use
+      "https://blog.adobe.com/en/publish/creative-cloud.xml", // Adobe creative
+      "https://typographica.org/feed/", // Typeface reviews
+      "https://ilovetypography.com/feed/", // Fonts, typography news
+      "https://fonts.googleblog.com/feeds/posts/default", // Google Fonts
     ],
 
     "animation-motion": [
-      "https://motionographer.com/feed/",
-      "https://greensock.com/blog/feed",
-      "https://www.animatedreview.com/feed/",
-      "https://lottiefiles.com/blog/feed",
-      "https://www.schoolofmotion.com/blog/rss",
+      "https://motionographer.com/feed/", // Animation news
+      "https://greensock.com/blog/feed", // GSAP tutorials
+      "https://www.animatedreview.com/feed/", // Animation reviews
+      "https://lottiefiles.com/blog/feed", // Lottie animations
+      "https://www.schoolofmotion.com/blog/rss", // Motion design tips
     ],
 
     "tutorials-walkthroughs": [
-      "https://tympanus.net/codrops/feed/",
-      "https://webdesign.tutsplus.com/posts.atom",
-      "https://designmodo.com/feed/",
-      "https://www.sitepoint.com/design-ux/feed/",
-      "https://tutsplus.com/feed/",
-      "https://www.freecodecamp.org/news/rss/",
+      "https://tympanus.net/codrops/feed/", // Creative tutorials
+      "https://webdesign.tutsplus.com/posts.atom", // Design tutorials
+      "https://designmodo.com/feed/", // Design guides
+      "https://www.sitepoint.com/design-ux/feed/", // UI/UX tutorials
+      "https://tutsplus.com/feed/", // Creative tutorials
+      "https://www.freecodecamp.org/news/rss/", // Dev tutorials
     ],
   },
 
   gaming: {
     "daily-roundup": [
-      "https://www.polygon.com/rss/index.xml",
-      "https://www.gamespot.com/feeds/news/",
-      "https://www.rockpapershotgun.com/feed",
-      "https://www.gamesradar.com/rss/",
-      "https://www.eurogamer.net/feed",
-      "https://kotaku.com/rss",
-      "https://www.destructoid.com/feed/",
-      "https://www.ign.com/rss",
+      "https://www.polygon.com/rss/index.xml", // Gaming news
+      "https://www.gamespot.com/feeds/news/", // Game reviews
+      "https://www.rockpapershotgun.com/feed", // PC games, indies
+      "https://www.gamesradar.com/rss/", // Gaming guides
+      "https://www.eurogamer.net/feed", // Game news, reviews
+      "https://kotaku.com/rss", // Gaming culture
+      "https://www.destructoid.com/feed/", // Game news, features
+      "https://www.ign.com/rss", // Gaming releases
     ],
 
     "pro-guides-tips": [
-      "https://www.gamepur.com/feed",
-      "https://www.thegamer.com/feed/",
-      "https://dotesports.com/feed",
-      "https://www.pcgamer.com/rss/",
+      "https://www.gamepur.com/feed", // Game guides
+      "https://www.thegamer.com/feed/", // Tips, guides
+      "https://dotesports.com/feed", // Esports news
+      "https://www.pcgamer.com/rss/", // PC gaming tips
     ],
 
     "retro-gaming": [
-      "https://www.timeextension.com/feed/",
-      "https://indieretronews.com/feeds/posts/default?alt=rss",
-      "https://retrododo.com/feed/",
-      "https://www.retrogamer.net/feed/",
-      "https://www.hardcoregaming101.net/feed/",
-      "https://retroblast.com/feed/",
+      "https://www.timeextension.com/feed/", // Retro reviews
+      "https://indieretronews.com/feeds/posts/default?alt=rss", // Retro news
+      "https://retrododo.com/feed/", // Retro hardware
+      "https://www.retrogamer.net/feed/", // Retro magazine
+      "https://www.hardcoregaming101.net/feed/", // Game histories
+      "https://retroblast.com/feed/", // Retro preservation
     ],
 
     "indie-spotlights": [
-      "https://indiegames.com/feed/",
-      "https://www.indiedb.com/rss/games/",
-      "https://www.gamedeveloper.com/rss.xml",
-      "https://warpdoor.com/feed/",
-      "https://alphabetagamer.com/feed/",
-      "https://indiegamesplus.com/feed/",
+      "https://indiegames.com/feed/", // Indie news
+      "https://www.indiedb.com/rss/games/", // Indie launches
+      "https://www.gamedeveloper.com/rss.xml", // Dev insights
+      "https://warpdoor.com/feed/", // Indie projects
+      "https://alphabetagamer.com/feed/", // Indie demos
+      "https://indiegamesplus.com/feed/", // Indie reviews
     ],
 
     "collectors-hub": [
-      "https://www.racketboy.com/feed/",
-      "https://videogamekrieg.com/feed",
-      "https://www.pricecharting.com/blog/feed",
-      "https://www.retrorgb.com/feed/",
-      "https://www.gamingalexandria.com/wp/feed/",
+      "https://www.racketboy.com/feed/", // Collector guides
+      "https://videogamekrieg.com/feed", // Collectible news
+      "https://www.pricecharting.com/blog/feed", // Game pricing
+      "https://www.retrorgb.com/feed/", // Retro hardware mods
+      "https://www.gamingalexandria.com/wp/feed/", // Game preservation
     ],
   },
 };
