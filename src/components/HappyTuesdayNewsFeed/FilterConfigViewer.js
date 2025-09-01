@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+console.log("FilterConfigViewer mounted");
+
 const FilterConfigViewer = () => {
   const [configs, setConfigs] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("tech");

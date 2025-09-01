@@ -28,7 +28,7 @@ import HappyTuesdayNewsFeed from "./components/HappyTuesdayNewsFeed/HappyTuesday
 import desktopData from "./data/desktop";
 import startMenuData from "./data/start";
 import FilterRulesViewer from "./components/HappyTuesdayNewsFeed/FilterRulesViewer";
-//import FilterConfigViewer from "./components/HappyTuesdayNewsFeed/FilterConfigViewer";
+import FilterConfigViewer from "./components/HappyTuesdayNewsFeed/FilterConfigViewer";
 
 // Debug flag - set to false in production to disable most logging
 const DEBUG_LOGGING = process.env.NODE_ENV === "development";
@@ -224,8 +224,52 @@ class DesktopInner extends Component {
             <ClippyProvider defaultAgent="Clippy" />
             {settings.crt && <CRTOverlay />}
           </Theme>
-          {process.env.NODE_ENV !== "production" && <FilterRulesViewer />}
         </NewsletterFunnelManager>
+        {/* Show both debug viewers in development */}
+        {process.env.NODE_ENV !== "production" && (
+          <>
+            <FilterRulesViewer />
+
+            {/* FilterConfigViewer needs a container with proper positioning */}
+            <div
+              style={{
+                position: "fixed",
+                top: "20px",
+                left: "20px",
+                zIndex: 10000,
+                maxWidth: "90vw",
+                maxHeight: "80vh",
+                overflow: "auto",
+              }}
+            >
+              <details>
+                <summary
+                  style={{
+                    cursor: "pointer",
+                    padding: "10px",
+                    backgroundColor: "#3498db",
+                    color: "white",
+                    borderRadius: "4px",
+                    userSelect: "none",
+                  }}
+                >
+                  📋 Show Filter Config Viewer
+                </summary>
+                <div
+                  style={{
+                    marginTop: "10px",
+                    backgroundColor: "white",
+                    border: "2px solid #3498db",
+                    borderRadius: "4px",
+                    padding: "10px",
+                  }}
+                >
+                  <FilterConfigViewer />
+                </div>
+              </details>
+            </div>
+          </>
+        )}
       </MonitorView>
     );
   }

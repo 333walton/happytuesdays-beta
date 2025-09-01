@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+console.log("FilterRulesViewer mounted");
+
 const TOTAL_CACHE_LIMIT = 5242880; // 5MB default
 
 // Helper to recalculate the cache size in bytes

@@ -1652,6 +1652,184 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+/*
+// Get current filter rules with statistics
+app.get("/api/filter-rules", (req, res) => {
+  // Get the default filter config
+  const defaultConfig = getFilterConfig();
+
+  // Transform config into rules format for the viewer
+  const rules = {};
+
+  for (const [category, categoryRules] of Object.entries(defaultConfig)) {
+    rules[category] = {};
+
+    for (const [ruleName, value] of Object.entries(categoryRules)) {
+      // Create a rule object with metadata
+      rules[category][ruleName] = {
+        enabled: value !== false,
+        value: value,
+        description: getRuleDescription(category, ruleName, value),
+      };
+    }
+  }
+
+  res.json({
+    rules: rules,
+    stats: filterStats.getReport(),
+    timestamp: new Date().toISOString(),
+  });
+});*/
+
+// ==============================================================
+// FILTER VIEWER ENDPOINTS - Add these to make the viewers work
+// ==============================================================
+
+// 1. Filter Rules Endpoint (for FilterRulesViewer)
+app.get("/api/filter-rules", (req, res) => {
+  console.log("📋 Filter rules requested");
+
+  try {
+    // Get the default filter config
+    const defaultConfig = getFilterConfig();
+
+    // Transform config into rules format for the viewer
+    const rules = {};
+
+    for (const [category, categoryRules] of Object.entries(defaultConfig)) {
+      rules[category] = {};
+
+      for (const [ruleName, value] of Object.entries(categoryRules)) {
+        rules[category][ruleName] = {
+          enabled: value !== false,
+          value: value,
+          description: getRuleDescription(category, ruleName, value),
+        };
+      }
+    }
+
+    res.json({
+      rules: rules,
+      stats: filterStats.getReport(),
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Error in /api/filter-rules:", error);
+    res.status(500).json({
+      error: "Failed to get filter rules",
+      message: error.message,
+    });
+  }
+});
+
+// 2. Single Category Config Endpoint (fix the existing one)
+app.get("/api/filter-config/:category", (req, res) => {
+  const { category } = req.params;
+  console.log(`📋 Filter config requested for category: ${category}`);
+
+  try {
+    const config = getFilterConfig(category, null);
+
+    res.json({
+      category,
+      subcategory: "none",
+      config,
+      message: `Filter configuration for ${category}`,
+    });
+  } catch (error) {
+    console.error(`Error in /api/filter-config/${category}:`, error);
+    res.status(500).json({
+      error: "Failed to get filter config",
+      message: error.message,
+    });
+  }
+});
+
+// 3. Helper function for rule descriptions
+function getRuleDescription(category, ruleName, value) {
+  const descriptions = {
+    TITLE_RULES: {
+      MIN_LENGTH: `Minimum title length of ${value} characters`,
+      MAX_LENGTH: `Maximum title length of ${value} characters`,
+      NO_ALL_CAPS: "Reject titles in all capital letters",
+      NO_ALL_LOWERCASE: "Reject titles in all lowercase letters",
+      NO_SPAM_PATTERNS: "Block spam-like title patterns",
+      ENGLISH_ONLY: "Only accept English language titles",
+    },
+    CONTENT_RULES: {
+      MIN_DESCRIPTION_LENGTH: `Minimum description length of ${value} characters`,
+      NO_CODE_CONTENT: "Block articles with code snippets",
+      NO_LOWERCASE_START: "Reject descriptions starting with lowercase",
+      NO_SPECIAL_CHAR_START:
+        "Reject descriptions starting with special characters",
+      NO_URLS_IN_DESCRIPTION: "Block descriptions containing URLs",
+      QUALITY_CHECK: "Enable quality validation checks",
+    },
+    SOURCE_RULES: {
+      MAX_PER_SOURCE: `Maximum ${value} articles per source`,
+      MAX_PER_DOMAIN: `Maximum ${value} articles per domain`,
+    },
+    AGE_RULES: {
+      MAX_AGE_DAYS: `Articles must be less than ${value} days old`,
+      MAX_AGE_HOURS: `Articles must be less than ${value} hours old`,
+      PREFER_RECENT: "Prioritize recent articles in sorting",
+    },
+    THUMBNAIL_RULES: {
+      REQUIRED: value ? "Thumbnail image is required" : "Thumbnail optional",
+      USE_DEFAULT_ON_HIGH_QUALITY: value
+        ? "Allow default icon for high-quality articles"
+        : "No default icons",
+      MIN_QUALITY_SCORE_FOR_DEFAULT: `Quality score of ${value} required for default icon`,
+      VALIDATE_REAL_IMAGE: "Verify thumbnail is actual article image",
+    },
+    DEDUPLICATION: {
+      CROSS_FEED: value
+        ? "Remove duplicate articles across feeds"
+        : "Allow duplicates",
+      UNCOMMON_WORDS: value
+        ? "Filter by uncommon word uniqueness"
+        : "No word filtering",
+      FINGERPRINT_LENGTH: `Use ${value} character fingerprint for matching`,
+    },
+    LIMITS: {
+      MAX_ITEMS: `Return maximum of ${value} items per request`,
+      MAX_ITEMS_PER_FEED: `Process maximum of ${value} items per feed`,
+      TARGET_BUFFER: `Build buffer of ${value} items before filtering`,
+    },
+    PROMOTIONAL_KEYWORDS: Array.isArray(value)
+      ? `Block ${value.length} promotional terms`
+      : "Custom promotional filters",
+  };
+
+  return (
+    descriptions[category]?.[ruleName] ||
+    `${ruleName}: ${JSON.stringify(value)}`
+  );
+}
+
+// 4. Debug endpoint to verify all endpoints are working
+app.get("/api/debug/endpoints", (req, res) => {
+  const endpoints = [
+    "/api/health",
+    "/api/filter-rules",
+    "/api/filter-configs",
+    "/api/filter-config/tech",
+    "/api/filter-config/tech/ai-machine-learning",
+    "/api/feeds",
+  ];
+
+  res.json({
+    message: "Available endpoints",
+    endpoints,
+    filterStatsReport: filterStats.getReport(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// ==============================================================
+// END OF FILTER VIEWER ENDPOINTS
+// ==============================================================
+
 // Start server
 const server = app.listen(port, () => {
   console.log(`🚀 RSS Feed Server running at http://localhost:${port}`);
