@@ -15,7 +15,7 @@ const parser = new Parser({
   },
 });
 
-// RSS feed URLs organized by category (expanded based on your app's needs)
+// RSS feed URLs organized by category (your existing feeds)
 const RSS_FEEDS = {
   tech: {
     "ai-machine-learning": [
@@ -31,7 +31,6 @@ const RSS_FEEDS = {
       "https://hai.stanford.edu/news/rss.xml",
       "https://allenai.org/rss.xml",
       "https://venturebeat.com/category/ai/feed/",
-      "https://arxiv-sanity-lite.com/feed/?query=cs.AI",
       "https://www.aitrends.com/feed/",
       "https://blogs.microsoft.com/ai/feed/",
     ],
@@ -263,7 +262,7 @@ const getFeedDisplayName = (url) => {
   }
 };
 
-// Helper functions for validation (using shared config)
+// Helper functions for validation
 const containsCodeOrTechnical = (text) => {
   if (!text) return false;
   const codePatterns = [
@@ -300,11 +299,10 @@ const isSpamTitle = (title) => {
   return spamPatterns.some((pattern) => pattern.test(title));
 };
 
-// CRITICAL: Updated validation functions to use filterConfig
+// Validation functions using filterConfig
 const isValidDescription = (description, title, category, subcategory) => {
   if (!description) return false;
 
-  // Get category-specific config
   const config = getFilterConfig(category, subcategory);
 
   if (description.length < config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH)
@@ -327,7 +325,6 @@ const isValidDescription = (description, title, category, subcategory) => {
 const cleanDescription = (rawDescription, title, category, subcategory) => {
   if (!rawDescription) return "";
 
-  // Get config for this category/subcategory
   const config = getFilterConfig(category, subcategory);
 
   let cleaned = rawDescription.replace(/<[^>]*>/g, " ");
@@ -335,7 +332,6 @@ const cleanDescription = (rawDescription, title, category, subcategory) => {
   cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, "");
   cleaned = cleaned.replace(/\s+/g, " ").trim();
 
-  // Check if code content is allowed for this category
   if (
     containsCodeOrTechnical(cleaned) &&
     config.CONTENT_RULES.NO_CODE_CONTENT
@@ -350,7 +346,44 @@ const cleanDescription = (rawDescription, title, category, subcategory) => {
   return cleaned;
 };
 
-// CRITICAL: Updated parseFeedItem to use filterConfig with category/subcategory
+// Quality scoring function
+const scoreArticleQuality = (item, category, subcategory) => {
+  let score = 0;
+
+  // Base scoring
+  if (item.thumbnail) score += 20;
+  if (item.description && item.description.length > 100) score += 10;
+  if (item.title && item.title.length > 30) score += 5;
+
+  // Age bonus
+  const hoursSincePublished =
+    (Date.now() - new Date(item.pubDate)) / (1000 * 60 * 60);
+  if (hoursSincePublished < 24) score += 10;
+  else if (hoursSincePublished < 72) score += 5;
+
+  // Category-specific bonuses
+  if (
+    category === "tech" &&
+    item.description &&
+    item.description.length > 150
+  ) {
+    score += 5;
+  }
+  if (
+    category === "builder" &&
+    item.title &&
+    /how|guide|tutorial|tips/i.test(item.title)
+  ) {
+    score += 3;
+  }
+  if (category === "art" && item.thumbnail) {
+    score += 5;
+  }
+
+  return score;
+};
+
+// FIXED: Parse feed item with proper category/subcategory parameters
 const parseFeedItem = (item, source, category, subcategory) => {
   // Get filter config for this specific category/subcategory
   const config = getFilterConfig(category, subcategory);
@@ -429,7 +462,7 @@ const parseFeedItem = (item, source, category, subcategory) => {
     ) {
       allowDefaultIcon = true;
     } else {
-      return null; // No thumbnail and doesn't qualify for default icon
+      return null;
     }
   }
 
@@ -438,8 +471,8 @@ const parseFeedItem = (item, source, category, subcategory) => {
     link: item.link || item.guid || "#",
     description,
     thumbnail: thumbnail || null,
-    allowDefaultIcon, // Flag for frontend to show default icon
-    qualityScore, // Include quality score for debugging
+    allowDefaultIcon,
+    qualityScore,
     source: getFeedDisplayName(source),
     sourceUrl: source,
     creator: item.creator || item.author || getFeedDisplayName(source),
@@ -449,44 +482,7 @@ const parseFeedItem = (item, source, category, subcategory) => {
   };
 };
 
-// Quality scoring function that considers category-specific factors
-const scoreArticleQuality = (item, category, subcategory) => {
-  let score = 0;
-
-  // Base scoring
-  if (item.thumbnail) score += 20;
-  if (item.description && item.description.length > 100) score += 10;
-  if (item.title && item.title.length > 30) score += 5;
-
-  // Age bonus
-  const hoursSincePublished =
-    (Date.now() - new Date(item.pubDate)) / (1000 * 60 * 60);
-  if (hoursSincePublished < 24) score += 10;
-  else if (hoursSincePublished < 72) score += 5;
-
-  // Category-specific bonuses
-  if (
-    category === "tech" &&
-    item.description &&
-    item.description.length > 150
-  ) {
-    score += 5;
-  }
-  if (
-    category === "builder" &&
-    item.title &&
-    /how|guide|tutorial|tips/i.test(item.title)
-  ) {
-    score += 3;
-  }
-  if (category === "art" && item.thumbnail) {
-    score += 5; // Art content benefits more from having thumbnails
-  }
-
-  return score;
-};
-
-// OPTIMIZED fetch function with early exit and category-aware filtering
+// FIXED: Fetch function with proper category/subcategory passing
 async function fetchFeedsWithEarlyExit(feedUrls, category, subcategory) {
   const qualifiedItems = [];
   const seen = new Set();
@@ -494,6 +490,7 @@ async function fetchFeedsWithEarlyExit(feedUrls, category, subcategory) {
   let totalProcessed = 0;
 
   console.log(`Starting early-exit processing for ${feedUrls.length} feeds`);
+  console.log(`Category: ${category}, Subcategory: ${subcategory || "none"}`);
   console.log(
     `Target: ${TARGET_BUFFER} items, will process max ${MAX_ITEMS_PER_FEED} per feed`
   );
@@ -525,7 +522,7 @@ async function fetchFeedsWithEarlyExit(feedUrls, category, subcategory) {
         // CHECK during processing
         if (qualifiedItems.length >= TARGET_BUFFER) break;
 
-        // CRITICAL: Parse with category and subcategory for proper config usage
+        // CRITICAL FIX: Pass category and subcategory to parseFeedItem
         const parsed = parseFeedItem(item, feedUrl, category, subcategory);
 
         if (!parsed) continue;
@@ -606,7 +603,7 @@ async function fetchFeedsWithEarlyExit(feedUrls, category, subcategory) {
   return finalItems;
 }
 
-// Main handler
+// Main handler - FIXED with proper parameter passing
 export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -636,7 +633,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // CRITICAL: Get configuration for this specific category/subcategory
+    // Get configuration for this specific category/subcategory
     const config = getFilterConfig(category, subcategory);
 
     // Log the configuration being used for debugging
@@ -665,7 +662,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Use optimized fetch with early exit and category-aware filtering
+    // CRITICAL FIX: Pass category and subcategory to fetchFeedsWithEarlyExit
     const finalItems = await fetchFeedsWithEarlyExit(
       feedUrls,
       category,
@@ -679,7 +676,6 @@ export default async function handler(req, res) {
       subcategory,
       timestamp: new Date().toISOString(),
       success: true,
-      // Include config summary for debugging
       configUsed: {
         maxAgeDays: config.AGE_RULES.MAX_AGE_DAYS,
         minDescLength: config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH,
