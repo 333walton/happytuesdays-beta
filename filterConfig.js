@@ -83,7 +83,7 @@ const CATEGORY_FILTER_CONFIG = {
       MAX_EMOJI_SYMBOLS: 3,
       // NEW: Quality thresholds for diversity rules
       QUALITY_SCORE_THRESHOLD: 0.3,
-      QUALITY_SCORE_NO_THUMBNAIL: 0.5,
+      QUALITY_SCORE_NO_THUMBNAIL: 1.0,
     },
     SOURCE_RULES: {
       MAX_PER_DOMAIN: 3, // Used by diversity rules
@@ -106,7 +106,7 @@ const CATEGORY_FILTER_CONFIG = {
       NO_CONSECUTIVE_SAME_DOMAIN: true,
       WEIGHTED_SHUFFLE: true,
       QUALITY_SCORE_THRESHOLD: 0.3,
-      QUALITY_SCORE_NO_THUMBNAIL: 0.5,
+      QUALITY_SCORE_NO_THUMBNAIL: 1.0,
     },
     LIMITS: {
       MAX_ITEMS: 10,
