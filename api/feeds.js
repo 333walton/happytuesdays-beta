@@ -1,4 +1,4 @@
-// api/feeds.js - Production handler with STRICTER quality controls
+// api/feeds.js - BALANCED handler with quality controls and practical limits
 import Parser from "rss-parser";
 import { getFilterConfig, qualifiesForDefaultIcon } from "../filterConfig.js";
 
@@ -143,10 +143,10 @@ const commonWords = new Set([
   "very",
 ]);
 
-// Track used uncommon words globally to prevent duplicate content
+// Track used uncommon words per session
 const usedUncommonWords = new Set();
 
-// RSS feed URLs organized by category (keeping existing structure)
+// RSS feed URLs (keeping existing structure)
 const RSS_FEEDS = {
   tech: {
     "ai-machine-learning": [
@@ -166,7 +166,6 @@ const RSS_FEEDS = {
       "https://www.aitrends.com/feed/",
       "https://blogs.microsoft.com/ai/feed/",
     ],
-
     "martech-adtech": [
       "https://martech.org/feed/",
       "https://adexchanger.com/feed/",
@@ -179,7 +178,6 @@ const RSS_FEEDS = {
       "https://verve.com/feed",
       "https://adpushup.com/blog/feed",
     ],
-
     "web-dev-devops": [
       "https://css-tricks.com/feed/",
       "https://www.smashingmagazine.com/feed/",
@@ -193,7 +191,6 @@ const RSS_FEEDS = {
       "https://devops.com/feed",
       "https://atlassian.com/blog/devops/feed",
     ],
-
     "cybersecurity-privacy": [
       "https://krebsonsecurity.com/feed/",
       "https://feeds.feedburner.com/TheHackersNews",
@@ -204,7 +201,6 @@ const RSS_FEEDS = {
       "https://blog.talosintelligence.com/feeds/posts/default",
       "https://www.microsoft.com/security/blog/feed/",
     ],
-
     "blockchain-web3": [
       "https://www.coindesk.com/arc/outboundfeeds/rss/",
       "https://decrypt.co/feed",
@@ -216,7 +212,6 @@ const RSS_FEEDS = {
       "https://vitalik.eth.limo/feed.xml",
     ],
   },
-
   builder: {
     "startup-stories": [
       "https://review.firstround.com/rss/",
@@ -228,7 +223,6 @@ const RSS_FEEDS = {
       "https://bothsidesofthetable.com/feed",
       "https://www.startupgrind.com/feed.xml",
     ],
-
     "productivity-hacks": [
       "https://zenhabits.net/feed/",
       "https://jamesclear.com/feed",
@@ -238,7 +232,6 @@ const RSS_FEEDS = {
       "https://calnewport.com/blog/feed/",
       "https://www.asianefficiency.com/feed/",
     ],
-
     "automation-no-code": [
       "https://zapier.com/blog/feeds/latest/",
       "https://bubble.io/blog/rss",
@@ -249,7 +242,6 @@ const RSS_FEEDS = {
       "https://makerpad.co/posts.atom",
       "https://www.producthunt.com/feed/no-code",
     ],
-
     "project-management": [
       "https://blog.asana.com/feed/",
       "https://blog.trello.com/rss",
@@ -260,7 +252,6 @@ const RSS_FEEDS = {
       "https://www.wrike.com/blog/feed/",
       "https://www.pmi.org/rss.xml",
     ],
-
     "momentum-mindset": [
       "https://fs.blog/feed/",
       "https://ryanholiday.net/feed/",
@@ -274,7 +265,6 @@ const RSS_FEEDS = {
       "https://www.mindful.org/feed",
     ],
   },
-
   art: {
     "generative-ai-art": [
       "https://aiartists.org/feed",
@@ -283,7 +273,6 @@ const RSS_FEEDS = {
       "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
       "https://runwayml.com/blog/rss/",
     ],
-
     "ui-ux-trends": [
       "https://www.smashingmagazine.com/feed/",
       "https://uxplanet.org/feed",
@@ -294,7 +283,6 @@ const RSS_FEEDS = {
       "https://www.uxmatters.com/feed.php",
       "https://sidebar.io/feed.xml",
     ],
-
     "color-typography": [
       "https://fontsinuse.com/feed",
       "https://blog.adobe.com/en/publish/creative-cloud.xml",
@@ -302,7 +290,6 @@ const RSS_FEEDS = {
       "https://ilovetypography.com/feed/",
       "https://fonts.googleblog.com/feeds/posts/default",
     ],
-
     "animation-motion": [
       "https://motionographer.com/feed/",
       "https://greensock.com/blog/feed",
@@ -310,7 +297,6 @@ const RSS_FEEDS = {
       "https://lottiefiles.com/blog/feed",
       "https://www.schoolofmotion.com/blog/rss",
     ],
-
     "tutorials-walkthroughs": [
       "https://tympanus.net/codrops/feed/",
       "https://webdesign.tutsplus.com/posts.atom",
@@ -320,7 +306,6 @@ const RSS_FEEDS = {
       "https://www.freecodecamp.org/news/rss/",
     ],
   },
-
   gaming: {
     "daily-roundup": [
       "https://www.polygon.com/rss/index.xml",
@@ -332,14 +317,12 @@ const RSS_FEEDS = {
       "https://www.destructoid.com/feed/",
       "https://www.ign.com/rss",
     ],
-
     "pro-guides-tips": [
       "https://www.gamepur.com/feed",
       "https://www.thegamer.com/feed/",
       "https://dotesports.com/feed",
       "https://www.pcgamer.com/rss/",
     ],
-
     "retro-gaming": [
       "https://www.timeextension.com/feed/",
       "https://indieretronews.com/feeds/posts/default?alt=rss",
@@ -348,7 +331,6 @@ const RSS_FEEDS = {
       "https://www.hardcoregaming101.net/feed/",
       "https://retroblast.com/feed/",
     ],
-
     "indie-spotlights": [
       "https://indiegames.com/feed/",
       "https://www.indiedb.com/rss/games/",
@@ -357,7 +339,6 @@ const RSS_FEEDS = {
       "https://alphabetagamer.com/feed/",
       "https://indiegamesplus.com/feed/",
     ],
-
     "collectors-hub": [
       "https://www.racketboy.com/feed/",
       "https://videogamekrieg.com/feed",
@@ -368,15 +349,14 @@ const RSS_FEEDS = {
   },
 };
 
-// Configuration - EXTREMELY STRICT REQUIREMENTS
+// BALANCED Configuration
 const MAX_ITEMS = 10;
 const MIN_ITEMS_REQUIRED = 5;
-const MAX_ITEMS_PER_FEED = 20;
-const TARGET_BUFFER = 25;
-const MAX_FEEDS_TO_PROCESS = 35; // Process more feeds before giving up
-const TIMEOUT_MS = 8500;
-const MIN_FEEDS_BEFORE_RELAX = 35; // Don't relax until at least 35 feeds processed
-const MIN_QUALITY_FOR_NO_THUMBNAIL = 0.98; // Almost impossible to meet
+const MAX_ITEMS_PER_FEED = 10; // Reduced to prevent timeout
+const TARGET_BUFFER = 20; // Reduced buffer
+const MAX_FEEDS_TO_PROCESS = 30; // Reduced to prevent timeout
+const TIMEOUT_MS = 7500; // Shorter timeout to prevent 504
+const MIN_FEEDS_BEFORE_RELAX = 20; // Relax sooner if needed
 
 // Helper functions
 const getFeedsForCategory = (category) => {
@@ -399,7 +379,7 @@ const getFeedDisplayName = (url) => {
   }
 };
 
-// Shuffle array to randomize feed processing order
+// Shuffle array for randomization
 const shuffleArray = (array) => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -422,26 +402,28 @@ const extractUncommonWords = (text) => {
   return new Set(words);
 };
 
-// Check if article has enough unique uncommon words
-const hasUniqueContent = (title, description) => {
+// Check if article has unique content (BALANCED)
+const hasUniqueContent = (title, description, relaxed = false) => {
+  if (relaxed) return true; // Skip when relaxed
+
   const titleWords = extractUncommonWords(title);
   const descWords = extractUncommonWords(description);
   const allWords = new Set([...titleWords, ...descWords]);
 
-  // Check if at least 3 uncommon words are truly unique (not used before)
+  // Check for minimum unique uncommon words
   let uniqueCount = 0;
   for (const word of allWords) {
     if (!usedUncommonWords.has(word)) {
       uniqueCount++;
+      if (uniqueCount >= 2) break; // Only need 2 unique words
     }
   }
 
-  // Article needs at least 3 unique uncommon words
-  if (uniqueCount < 3) {
+  if (uniqueCount < 2) {
     return false;
   }
 
-  // Add these words to the used set
+  // Add words to used set
   for (const word of allWords) {
     usedUncommonWords.add(word);
   }
@@ -449,10 +431,10 @@ const hasUniqueContent = (title, description) => {
   return true;
 };
 
-// Validation functions with STRICTER requirements
+// Validation functions (BALANCED)
 const containsCodeOrTechnical = (text, relaxed = false) => {
   if (!text) return false;
-  // Never skip code check for non-tech categories
+  if (relaxed) return false; // Skip when relaxed
 
   const codePatterns = [
     /function\s*\(/,
@@ -468,28 +450,55 @@ const containsCodeOrTechnical = (text, relaxed = false) => {
 
 const isLikelyEnglish = (text, relaxed = false) => {
   if (!text) return true;
+  if (relaxed) return true; // Skip when relaxed
 
   const nonLatinPattern = /[^\u0000-\u007F\u0080-\u00FF]/g;
   const matches = text.match(nonLatinPattern) || [];
   const nonLatinRatio = matches.length / text.length;
-  return nonLatinRatio <= 0.2; // Stricter than before
+  return nonLatinRatio <= 0.3;
 };
 
 const isSpamTitle = (title, relaxed = false) => {
   if (!title) return true;
+  if (relaxed) return false; // More lenient when relaxed
 
   const specialChars = title.match(/[^\w\s\-.,!?'"]/g) || [];
   const specialRatio = specialChars.length / title.length;
-  if (specialRatio > 0.2) return true; // Stricter threshold
+  if (specialRatio > 0.25) return true;
 
   const spamPatterns = [
     /\bclick\s*here\b/i,
     /\bfree\s*download\b/i,
     /\byou\s*won't\s*believe\b/i,
-    /\bmust\s*see\b/i,
-    /\bshocking\b/i,
   ];
   return spamPatterns.some((pattern) => pattern.test(title));
+};
+
+// Validate thumbnail URL
+const validateThumbnail = (imgUrl) => {
+  if (!imgUrl || typeof imgUrl !== "string") return false;
+
+  // Block generic/icon images
+  const invalidPatterns = [
+    /favicon/i,
+    /\.ico$/i,
+    /logo/i,
+    /avatar/i,
+    /icon[-_]?\d+x\d+/i,
+    /16x16|32x32|48x48|64x64|128x128/i,
+    /\/icons?\//i,
+    /placeholder/i,
+    /default[-_]?image/i,
+    /no[-_]?image/i,
+  ];
+
+  if (invalidPatterns.some((p) => p.test(imgUrl))) {
+    return false;
+  }
+
+  // Check for valid image extension or path
+  const validImagePattern = /\.(jpg|jpeg|png|webp|gif)($|\?)|\/images?\//i;
+  return validImagePattern.test(imgUrl);
 };
 
 const isValidDescription = (
@@ -503,27 +512,27 @@ const isValidDescription = (
 
   const config = getFilterConfig(category, subcategory);
 
-  // Less relaxation when in relaxed mode
+  // Moderate relaxation
   const minLength = relaxed
-    ? Math.floor(config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH * 0.75) // Only 25% reduction
+    ? Math.floor(config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH * 0.6)
     : config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH;
 
   if (description.length < minLength) {
     return false;
   }
 
-  // Keep most quality checks even when relaxed
-  if (!relaxed) {
-    if (config.CONTENT_RULES.NO_LOWERCASE_START && /^[a-z]/.test(description)) {
-      return false;
-    }
+  // Skip strict checks when relaxed
+  if (relaxed) return true;
 
-    if (
-      config.CONTENT_RULES.NO_SPECIAL_CHAR_START &&
-      /^[^A-Za-z0-9"']/.test(description)
-    ) {
-      return false;
-    }
+  if (config.CONTENT_RULES.NO_LOWERCASE_START && /^[a-z]/.test(description)) {
+    return false;
+  }
+
+  if (
+    config.CONTENT_RULES.NO_SPECIAL_CHAR_START &&
+    /^[^A-Za-z0-9"']/.test(description)
+  ) {
+    return false;
   }
 
   return true;
@@ -553,40 +562,41 @@ const cleanDescription = (rawDescription, title, category, subcategory) => {
   return cleaned;
 };
 
-// Enhanced quality scoring with stricter requirements
+// BALANCED quality scoring
 const scoreArticleQuality = (item, category, subcategory) => {
   let score = 0;
 
-  // Thumbnail is worth much more
-  if (item.thumbnail) score += 0.4;
+  // Thumbnail worth significant points
+  if (item.thumbnail && validateThumbnail(item.thumbnail)) {
+    score += 0.35;
+  }
 
   // Description quality
   if (item.description) {
-    if (item.description.length > 150) score += 0.25;
+    if (item.description.length > 150) score += 0.2;
     else if (item.description.length > 100) score += 0.15;
-    else if (item.description.length > 50) score += 0.05;
+    else if (item.description.length > 50) score += 0.1;
   }
 
   // Title quality
   if (item.title) {
-    if (item.title.length > 40 && item.title.length < 100) score += 0.1;
-    else if (item.title.length > 20) score += 0.05;
+    if (item.title.length > 30 && item.title.length < 100) score += 0.1;
+    else if (item.title.length > 15) score += 0.05;
   }
 
   // Recency bonus
   const hoursSincePublished =
     (Date.now() - new Date(item.pubDate)) / (1000 * 60 * 60);
   if (hoursSincePublished < 24) score += 0.2;
-  else if (hoursSincePublished < 72) score += 0.1;
+  else if (hoursSincePublished < 72) score += 0.15;
   else if (hoursSincePublished < 168) score += 0.05;
 
-  // Category-specific bonuses (reduced)
-  if (category === "tech" && item.description?.length > 150) score += 0.03;
-  if (category === "builder" && /how|guide|tutorial|tips/i.test(item.title))
-    score += 0.03;
-  if (category === "art" && item.thumbnail) score += 0.03;
+  // Category bonuses
+  if (category === "tech" && item.description?.length > 100) score += 0.05;
+  if (category === "builder" && /how|guide|tutorial/i.test(item.title))
+    score += 0.05;
+  if (category === "art" && item.thumbnail) score += 0.05;
 
-  // Normalize to 0-1 range
   return Math.min(1, score);
 };
 
@@ -599,25 +609,6 @@ function extractDomain(url) {
   }
 }
 
-function validateImage(imgUrl) {
-  if (!imgUrl) return false;
-  if (typeof imgUrl !== "string") return false;
-
-  const invalidPatterns = [
-    /favicon/i,
-    /\.ico$/i,
-    /logo/i,
-    /avatar/i,
-    /icon[-_]?\d+x\d+/i,
-    /16x16|32x32|48x48|64x64/i,
-  ];
-
-  return (
-    !invalidPatterns.some((pattern) => pattern.test(imgUrl)) &&
-    imgUrl.length > 5
-  );
-}
-
 function formatDate(dateStr) {
   try {
     return new Date(dateStr).toISOString().split("T")[0];
@@ -626,7 +617,7 @@ function formatDate(dateStr) {
   }
 }
 
-// Weighted shuffle by quality
+// Weighted shuffle
 function weightedShuffle(articles) {
   return articles
     .map((a) => ({
@@ -636,208 +627,7 @@ function weightedShuffle(articles) {
     .sort((a, b) => b.weight - a.weight);
 }
 
-// Get diversity rules from filterConfig
-function getDiversityRules(category, subcategory) {
-  const config = getFilterConfig(category, subcategory);
-
-  return {
-    QUALITY_SCORE_THRESHOLD:
-      config.DIVERSITY_RULES?.QUALITY_SCORE_THRESHOLD || 0.4, // Raised threshold
-    QUALITY_SCORE_NO_THUMBNAIL:
-      config.DIVERSITY_RULES?.QUALITY_SCORE_NO_THUMBNAIL ||
-      MIN_QUALITY_FOR_NO_THUMBNAIL,
-    MAX_PER_DOMAIN: config.DIVERSITY_RULES?.MAX_PER_DOMAIN || 2, // Stricter limit
-    UNIQUE_DATE_PER_DOMAIN:
-      config.DIVERSITY_RULES?.UNIQUE_DATE_PER_DOMAIN !== undefined
-        ? config.DIVERSITY_RULES.UNIQUE_DATE_PER_DOMAIN
-        : true,
-    NO_CONSECUTIVE_SAME_DOMAIN:
-      config.DIVERSITY_RULES?.NO_CONSECUTIVE_SAME_DOMAIN !== undefined
-        ? config.DIVERSITY_RULES.NO_CONSECUTIVE_SAME_DOMAIN
-        : true,
-    WEIGHTED_SHUFFLE:
-      config.DIVERSITY_RULES?.WEIGHTED_SHUFFLE !== undefined
-        ? config.DIVERSITY_RULES.WEIGHTED_SHUFFLE
-        : true,
-  };
-}
-
-// Apply VERY STRICT diversity filters
-function applyDiversityFiltersStrict(
-  articles,
-  category,
-  subcategory,
-  minRequired = 5
-) {
-  const rules = getDiversityRules(category, subcategory);
-
-  console.log(
-    `Applying STRICT diversity filters to ${articles.length} articles`
-  );
-
-  // Step 1: VERY strict quality + thumbnail enforcement
-  let filtered = articles.filter((a) => {
-    // MUST have valid thumbnail unless nearly perfect
-    const hasValidThumbnail = a.thumbnail && validateThumbnail(a.thumbnail);
-
-    if (!hasValidThumbnail && a.qualityScore < 0.98) {
-      return false; // Reject almost all articles without thumbnails
-    }
-
-    // Higher quality threshold overall
-    const qualityThreshold = hasValidThumbnail ? 0.4 : 0.98;
-    return (a.qualityScore || 0) >= qualityThreshold;
-  });
-
-  console.log(`After strict quality filter: ${filtered.length} articles`);
-
-  // Only relax if absolutely necessary
-  if (filtered.length < minRequired) {
-    console.log(
-      `Emergency: Only ${filtered.length} articles, slightly relaxing`
-    );
-    filtered = articles.filter((a) => {
-      const hasValidThumbnail = a.thumbnail && validateThumbnail(a.thumbnail);
-      const minScore = hasValidThumbnail ? 0.35 : 0.95;
-      return (a.qualityScore || 0) >= minScore;
-    });
-  }
-
-  // Step 2: Shuffle weighted by quality
-  let shuffled = weightedShuffle(filtered);
-
-  // Step 3: VERY strict domain caps - max 1-2 per domain
-  const domainCounts = {};
-  const domainDates = {};
-  const capped = [];
-
-  for (let article of shuffled) {
-    const domain = extractDomain(article.link || article.sourceUrl);
-    const pubDate = formatDate(article.pubDate);
-
-    domainCounts[domain] = domainCounts[domain] || 0;
-    domainDates[domain] = domainDates[domain] || new Set();
-
-    // VERY strict domain limits
-    let maxPerDomain = 1; // Start with just 1
-    if (capped.length < minRequired && Object.keys(domainCounts).length > 3) {
-      maxPerDomain = 2; // Allow 2 only if we have diverse sources already
-    }
-
-    if (domainCounts[domain] >= maxPerDomain) {
-      console.log(
-        `DOMAIN CAP: Rejecting article from ${domain} (already have ${domainCounts[domain]})`
-      );
-      continue;
-    }
-
-    // Enforce unique-date-per-domain
-    if (pubDate && domainDates[domain].has(pubDate)) {
-      console.log(`SAME DATE: Rejecting duplicate date article from ${domain}`);
-      continue;
-    }
-
-    capped.push(article);
-    domainCounts[domain]++;
-    if (pubDate) domainDates[domain].add(pubDate);
-  }
-
-  console.log(`After strict domain diversity: ${capped.length} articles`);
-  console.log(`Domain distribution:`, domainCounts);
-
-  // Step 4: Enforce no consecutive same-domain
-  const spaced = [];
-  const deferred = [];
-
-  capped.forEach((article) => {
-    const domain = extractDomain(article.link || article.sourceUrl);
-    const lastArticle = spaced[spaced.length - 1];
-    const lastDomain = lastArticle
-      ? extractDomain(lastArticle.link || lastArticle.sourceUrl)
-      : null;
-
-    if (!lastDomain || lastDomain !== domain) {
-      spaced.push(article);
-    } else {
-      deferred.push(article);
-    }
-  });
-
-  // Add deferred articles between different domains
-  deferred.forEach((article) => {
-    const domain = extractDomain(article.link || article.sourceUrl);
-    let inserted = false;
-
-    for (let i = spaced.length - 1; i > 0; i--) {
-      const prevDomain = extractDomain(
-        spaced[i - 1].link || spaced[i - 1].sourceUrl
-      );
-      const nextDomain = extractDomain(spaced[i].link || spaced[i].sourceUrl);
-
-      if (prevDomain !== domain && nextDomain !== domain) {
-        spaced.splice(i, 0, article);
-        inserted = true;
-        break;
-      }
-    }
-
-    if (!inserted && spaced.length < MAX_ITEMS) {
-      spaced.push(article);
-    }
-  });
-
-  console.log(`After spacing: ${spaced.length} articles`);
-  return spaced;
-}
-
-// Apply diversity filters
-function applyDiversityFilters(
-  articles,
-  category,
-  subcategory,
-  minRequired = 5
-) {
-  return applyDiversityFiltersStrict(
-    articles,
-    category,
-    subcategory,
-    minRequired
-  );
-}
-
-// Validate if image URL is a real article image
-const validateThumbnail = (imgUrl) => {
-  if (!imgUrl || typeof imgUrl !== "string") return false;
-
-  // Block all generic/icon images
-  const invalidPatterns = [
-    /favicon/i,
-    /\.ico$/i,
-    /logo/i,
-    /avatar/i,
-    /icon/i,
-    /placeholder/i,
-    /default/i,
-    /fallback/i,
-    /missing/i,
-    /no-image/i,
-    /emoji/i,
-    /16x16|32x32|48x48|64x64|128x128/i,
-    /\/icons?\//i,
-    /feed.*icon/i,
-    /rss.*icon/i,
-  ];
-
-  // Must have valid image extension or path
-  const validImagePattern = /\.(jpg|jpeg|png|webp|gif)($|\?)|\/images?\//i;
-
-  return (
-    !invalidPatterns.some((p) => p.test(imgUrl)) &&
-    validImagePattern.test(imgUrl)
-  );
-};
-
-// Parse feed item with STRICTER validation
+// Parse feed item (BALANCED)
 const parseFeedItem = (
   item,
   source,
@@ -846,12 +636,11 @@ const parseFeedItem = (
   relaxFilters = false
 ) => {
   const config = getFilterConfig(category, subcategory);
-
   const title = item.title || "Untitled";
 
-  // Less aggressive relaxation
+  // Title validation (balanced)
   const minTitleLength = relaxFilters
-    ? Math.max(8, Math.floor(config.TITLE_RULES.MIN_LENGTH * 0.8))
+    ? Math.max(5, Math.floor(config.TITLE_RULES.MIN_LENGTH * 0.6))
     : config.TITLE_RULES.MIN_LENGTH;
 
   const maxTitleLength = relaxFilters
@@ -862,7 +651,7 @@ const parseFeedItem = (
     return null;
   }
 
-  // Keep most checks even when relaxed
+  // Skip strict checks when relaxed
   if (!relaxFilters) {
     if (
       config.TITLE_RULES.NO_ALL_CAPS &&
@@ -872,17 +661,11 @@ const parseFeedItem = (
       return null;
     }
 
-    if (
-      config.TITLE_RULES.NO_SPAM_PATTERNS &&
-      isSpamTitle(title, relaxFilters)
-    ) {
+    if (isSpamTitle(title, relaxFilters)) {
       return null;
     }
 
-    if (
-      config.TITLE_RULES.ENGLISH_ONLY &&
-      !isLikelyEnglish(title, relaxFilters)
-    ) {
+    if (!isLikelyEnglish(title, relaxFilters)) {
       return null;
     }
   }
@@ -892,7 +675,7 @@ const parseFeedItem = (
     item.pubDate || item.isoDate || item.published || new Date().toISOString();
   const articleAge = Date.now() - new Date(pubDate);
   const maxAgeDays = relaxFilters
-    ? config.AGE_RULES.MAX_AGE_DAYS * 1.5
+    ? config.AGE_RULES.MAX_AGE_DAYS * 2
     : config.AGE_RULES.MAX_AGE_DAYS;
   const maxAge = maxAgeDays * 24 * 60 * 60 * 1000;
 
@@ -900,7 +683,7 @@ const parseFeedItem = (
     return null;
   }
 
-  // Extract thumbnail with strict validation
+  // Extract thumbnail
   let thumbnail = null;
   let thumbnailCandidates = [];
 
@@ -919,14 +702,6 @@ const parseFeedItem = (
     });
   }
 
-  if (
-    item.enclosure &&
-    item.enclosure.url &&
-    item.enclosure.type?.startsWith("image/")
-  ) {
-    thumbnailCandidates.push(item.enclosure.url);
-  }
-
   // Find first valid thumbnail
   for (const candidate of thumbnailCandidates) {
     if (validateThumbnail(candidate)) {
@@ -935,7 +710,7 @@ const parseFeedItem = (
     }
   }
 
-  // Extract and validate description with relaxation parameter
+  // Extract and clean description
   let description =
     item.contentSnippet || item.description || item.summary || "";
   description = cleanDescription(description, title, category, subcategory);
@@ -950,9 +725,9 @@ const parseFeedItem = (
     }
   }
 
-  // Check for unique content using uncommon words
-  if (!relaxFilters && !hasUniqueContent(title, description)) {
-    return null; // Skip articles with too much duplicate content
+  // Check unique content (skip when relaxed)
+  if (!relaxFilters && !hasUniqueContent(title, description, relaxFilters)) {
+    return null;
   }
 
   // Quality scoring
@@ -967,31 +742,29 @@ const parseFeedItem = (
     subcategory
   );
 
-  // EXTREMELY STRICT thumbnail requirements
+  // BALANCED thumbnail requirements
   let allowDefaultIcon = false;
   if (!thumbnail || !validateThumbnail(thumbnail)) {
-    // Almost never allow articles without real thumbnails
-    if (qualityScore >= 0.98) {
-      // Only for essentially perfect articles
+    // High quality threshold for no thumbnail, but not impossible
+    const threshold = relaxFilters ? 0.6 : 0.75;
+
+    if (qualityScore >= threshold) {
       allowDefaultIcon = true;
-      console.log(
-        `RARE: Allowing no-thumbnail article with score ${qualityScore}: ${title}`
-      );
     } else {
-      console.log(
-        `REJECTED: No valid thumbnail for ${title} (score: ${qualityScore})`
-      );
-      return null; // Reject ALL articles without real thumbnails
+      return null; // Reject low quality without thumbnail
     }
   }
 
-  // Skip promotional content
+  // Promotional content check (skip when very relaxed)
   if (!relaxFilters) {
     const promotionalKeywords = config.PROMOTIONAL_KEYWORDS || [];
     const titleLower = title.toLowerCase();
 
     for (const keyword of promotionalKeywords) {
-      if (titleLower.includes(keyword.toLowerCase())) {
+      if (
+        typeof keyword === "string" &&
+        titleLower.includes(keyword.toLowerCase())
+      ) {
         return null;
       }
     }
@@ -1013,7 +786,7 @@ const parseFeedItem = (
   };
 };
 
-// MAIN FETCH WITH STRICTER CONTROLS AND BETTER RANDOMIZATION
+// PROGRESSIVE FETCH WITH BALANCED RELAXATION
 async function fetchFeedsWithProgressiveRelaxation(
   feedUrls,
   category,
@@ -1021,50 +794,36 @@ async function fetchFeedsWithProgressiveRelaxation(
 ) {
   const qualifiedItems = [];
   const seen = new Set();
-  const sourceCounts = new Map();
   const domainCounts = new Map();
   let totalProcessed = 0;
   const startTime = Date.now();
   let relaxFilters = false;
   let feedsProcessed = 0;
 
-  // Clear uncommon words tracker for new fetch
+  // Clear uncommon words tracker
   usedUncommonWords.clear();
 
-  // RANDOMIZE feed order to avoid always starting with same sources
+  // Randomize feed order
   const shuffledFeeds = shuffleArray(feedUrls);
 
-  // Also randomize which feed to start with
-  const startIndex = Math.floor(
-    Math.random() * Math.min(3, shuffledFeeds.length)
-  );
-  const reorderedFeeds = [
-    ...shuffledFeeds.slice(startIndex),
-    ...shuffledFeeds.slice(0, startIndex),
-  ];
-
-  console.log(
-    `Starting fetch for ${reorderedFeeds.length} feeds (randomized order)`
-  );
+  console.log(`Starting progressive fetch for ${shuffledFeeds.length} feeds`);
   console.log(`Category: ${category}, Subcategory: ${subcategory || "none"}`);
-  console.log(
-    `First feeds:`,
-    reorderedFeeds.slice(0, 3).map(getFeedDisplayName)
-  );
 
   const config = getFilterConfig(category, subcategory);
 
-  // Process feeds with less aggressive relaxation
+  // Process feeds with progressive relaxation
   for (
     let i = 0;
-    i < Math.min(reorderedFeeds.length, MAX_FEEDS_TO_PROCESS);
+    i < Math.min(shuffledFeeds.length, MAX_FEEDS_TO_PROCESS);
     i++
   ) {
-    const feedUrl = reorderedFeeds[i];
+    const feedUrl = shuffledFeeds[i];
 
-    // Check timeout
+    // Timeout check
     if (Date.now() - startTime > TIMEOUT_MS) {
-      console.log(`TIMEOUT: Stopping after ${i} feeds`);
+      console.log(
+        `TIMEOUT: Stopping after ${i} feeds (${Date.now() - startTime}ms)`
+      );
       break;
     }
 
@@ -1074,27 +833,31 @@ async function fetchFeedsWithProgressiveRelaxation(
       break;
     }
 
-    // VERY CONSERVATIVE RELAXATION: Only relax after many feeds processed
-    if (feedsProcessed >= 8 && qualifiedItems.length < MIN_ITEMS_REQUIRED) {
+    // Progressive relaxation based on results
+    if (
+      feedsProcessed >= MIN_FEEDS_BEFORE_RELAX &&
+      qualifiedItems.length < MIN_ITEMS_REQUIRED
+    ) {
       if (!relaxFilters) {
         console.log(
-          `MILD RELAXATION: Only ${qualifiedItems.length} items after ${feedsProcessed} feeds`
+          `RELAXING FILTERS: Only ${qualifiedItems.length} items after ${feedsProcessed} feeds`
         );
         relaxFilters = true;
       }
     }
 
     try {
+      const feedStartTime = Date.now();
       const feed = await parser.parseURL(feedUrl);
+      const feedParseTime = Date.now() - feedStartTime;
+
+      console.log(
+        `Feed ${getFeedDisplayName(feedUrl)} parsed in ${feedParseTime}ms`
+      );
+
       feedsProcessed++;
 
       const itemsToProcess = feed.items.slice(0, MAX_ITEMS_PER_FEED);
-
-      console.log(
-        `Processing ${itemsToProcess.length} items from ${getFeedDisplayName(
-          feedUrl
-        )}, relaxed: ${relaxFilters}`
-      );
 
       for (const item of itemsToProcess) {
         totalProcessed++;
@@ -1115,41 +878,26 @@ async function fetchFeedsWithProgressiveRelaxation(
         const key = parsed.guid || parsed.link;
         if (seen.has(key)) continue;
 
-        // VERY STRICT domain limits - max 1 per domain initially
+        // Domain limiting (balanced)
         const domain = extractDomain(parsed.link || feedUrl);
         const currentDomainCount = domainCounts.get(domain) || 0;
 
-        // Start with 1 per domain, only increase if we need more items
-        let maxPerDomain = 1;
-        if (qualifiedItems.length < MIN_ITEMS_REQUIRED && feedsProcessed > 4) {
-          maxPerDomain = 2;
+        // Progressive domain limits
+        let maxPerDomain = 2; // Start with 2
+        if (qualifiedItems.length < MIN_ITEMS_REQUIRED && feedsProcessed > 3) {
+          maxPerDomain = 3; // Allow 3 if struggling
         }
-        if (relaxFilters && qualifiedItems.length < 3) {
-          maxPerDomain = 3;
+        if (relaxFilters) {
+          maxPerDomain = 4; // Allow 4 when relaxed
         }
 
         if (currentDomainCount >= maxPerDomain) {
-          console.log(
-            `DOMAIN LIMIT: Skipping article from ${domain} (already have ${currentDomainCount})`
-          );
           continue;
         }
 
-        // Source limit
-        const sourceCount = sourceCounts.get(parsed.source) || 0;
-        if (sourceCount >= 2) continue;
-
         seen.add(key);
-        sourceCounts.set(parsed.source, sourceCount + 1);
         domainCounts.set(domain, currentDomainCount + 1);
         qualifiedItems.push(parsed);
-
-        console.log(
-          `ACCEPTED: "${parsed.title.substring(
-            0,
-            50
-          )}..." from ${domain} (domain count: ${currentDomainCount + 1})`
-        );
       }
     } catch (error) {
       console.error(`Error fetching ${feedUrl}:`, error.message);
@@ -1159,15 +907,66 @@ async function fetchFeedsWithProgressiveRelaxation(
   console.log(
     `Processed ${totalProcessed} items, qualified ${qualifiedItems.length}`
   );
-  console.log(`Domain distribution:`, Object.fromEntries(domainCounts));
 
-  // NO EMERGENCY MODE - maintain quality standards
+  // If still very few items, try emergency relaxation
+  if (
+    qualifiedItems.length < MIN_ITEMS_REQUIRED &&
+    feedsProcessed < feedUrls.length
+  ) {
+    console.log(
+      `EMERGENCY: Only ${qualifiedItems.length} items, trying emergency fetch`
+    );
+
+    for (
+      let i = feedsProcessed;
+      i < Math.min(feedUrls.length, feedsProcessed + 2);
+      i++
+    ) {
+      if (Date.now() - startTime > TIMEOUT_MS) break;
+
+      try {
+        const feed = await parser.parseURL(shuffledFeeds[i]);
+        const emergencyItems = feed.items.slice(0, 10);
+
+        for (const item of emergencyItems) {
+          if (qualifiedItems.length >= MIN_ITEMS_REQUIRED) break;
+
+          // Very relaxed parsing
+          if (item.title && item.link) {
+            const key = item.guid || item.link;
+            if (!seen.has(key)) {
+              seen.add(key);
+              qualifiedItems.push({
+                title: item.title.substring(0, 200),
+                link: item.link,
+                description: item.description?.substring(0, 200) || item.title,
+                thumbnail: null,
+                allowDefaultIcon: true,
+                qualityScore: 0.3,
+                source: getFeedDisplayName(shuffledFeeds[i]),
+                sourceUrl: shuffledFeeds[i],
+                creator:
+                  item.creator ||
+                  item.author ||
+                  getFeedDisplayName(shuffledFeeds[i]),
+                guid: key,
+                pubDate: item.pubDate || new Date().toISOString(),
+                time: new Date(item.pubDate || Date.now()).toLocaleString(),
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Emergency fetch error:`, error.message);
+      }
+    }
+  }
 
   // Sort by date
   qualifiedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-  // Apply strict diversity filters with even stricter domain limits
-  const diversityFiltered = applyDiversityFiltersStrict(
+  // Apply balanced diversity filters
+  const diversityFiltered = applyDiversityFilters(
     qualifiedItems,
     category,
     subcategory,
@@ -1181,6 +980,100 @@ async function fetchFeedsWithProgressiveRelaxation(
     `Final output: ${finalItems.length} items (min required: ${MIN_ITEMS_REQUIRED})`
   );
   return finalItems;
+}
+
+// Apply diversity filters (BALANCED)
+function applyDiversityFilters(
+  articles,
+  category,
+  subcategory,
+  minRequired = 5
+) {
+  const config = getFilterConfig(category, subcategory);
+
+  console.log(`Applying diversity filters to ${articles.length} articles`);
+
+  // Step 1: Quality filtering (balanced)
+  let filtered = articles.filter((a) => {
+    const hasValidThumbnail = a.thumbnail && validateThumbnail(a.thumbnail);
+
+    // Balanced thresholds
+    const qualityThreshold = hasValidThumbnail ? 0.35 : 0.7;
+    return (a.qualityScore || 0) >= qualityThreshold;
+  });
+
+  console.log(`After quality filter: ${filtered.length} articles`);
+
+  // Relax if needed
+  if (filtered.length < minRequired) {
+    console.log(`Relaxing quality threshold for minimum items`);
+    filtered = articles.filter((a) => (a.qualityScore || 0) >= 0.25);
+  }
+
+  // Step 2: Weighted shuffle
+  let shuffled = weightedShuffle(filtered);
+
+  // Step 3: Domain caps (balanced)
+  const domainCounts = {};
+  const domainDates = {};
+  const capped = [];
+
+  for (let article of shuffled) {
+    const domain = extractDomain(article.link || article.sourceUrl);
+    const pubDate = formatDate(article.pubDate);
+
+    domainCounts[domain] = domainCounts[domain] || 0;
+    domainDates[domain] = domainDates[domain] || new Set();
+
+    // Balanced domain limits
+    let maxPerDomain = 2;
+    if (capped.length < minRequired) {
+      maxPerDomain = 3; // Allow more if needed
+    }
+
+    if (domainCounts[domain] >= maxPerDomain) continue;
+
+    // Check unique date per domain
+    if (
+      pubDate &&
+      domainDates[domain].has(pubDate) &&
+      capped.length >= minRequired
+    ) {
+      continue;
+    }
+
+    capped.push(article);
+    domainCounts[domain]++;
+    if (pubDate) domainDates[domain].add(pubDate);
+  }
+
+  // Step 4: Space out same domains
+  const spaced = [];
+  const deferred = [];
+
+  capped.forEach((article) => {
+    const domain = extractDomain(article.link || article.sourceUrl);
+    const lastArticle = spaced[spaced.length - 1];
+    const lastDomain = lastArticle
+      ? extractDomain(lastArticle.link || lastArticle.sourceUrl)
+      : null;
+
+    if (!lastDomain || lastDomain !== domain) {
+      spaced.push(article);
+    } else {
+      deferred.push(article);
+    }
+  });
+
+  // Insert deferred articles
+  deferred.forEach((article) => {
+    if (spaced.length < MAX_ITEMS) {
+      spaced.push(article);
+    }
+  });
+
+  console.log(`After diversity: ${spaced.length} articles`);
+  return spaced;
 }
 
 // Main handler
@@ -1232,21 +1125,21 @@ export default async function handler(req, res) {
       });
     }
 
-    // Use progressive relaxation fetch with stricter requirements
+    // Use balanced progressive fetch
     const finalItems = await fetchFeedsWithProgressiveRelaxation(
       feedUrls,
       category,
       subcategory
     );
 
-    // Log warning if minimum not met
+    // Ensure minimum items
     if (finalItems.length < MIN_ITEMS_REQUIRED) {
-      console.error(
+      console.warn(
         `WARNING: Only ${finalItems.length} items for ${category}/${subcategory}`
       );
     }
 
-    // Calculate domain diversity metrics
+    // Calculate metrics
     const domainCounts = {};
     finalItems.forEach((item) => {
       const domain = extractDomain(item.link || item.sourceUrl);
@@ -1265,7 +1158,7 @@ export default async function handler(req, res) {
         uniqueDomains: Object.keys(domainCounts).length,
         avgQualityScore:
           finalItems.reduce((sum, item) => sum + (item.qualityScore || 0), 0) /
-          finalItems.length,
+          (finalItems.length || 1),
         withThumbnails: finalItems.filter((item) => item.thumbnail).length,
       },
     });
