@@ -1,4 +1,4 @@
-// api/feeds.js - Production handler with progressive filter relaxation
+// api/feeds.js - Production handler with STRICTER quality controls
 import Parser from "rss-parser";
 import { getFilterConfig, qualifiesForDefaultIcon } from "../filterConfig.js";
 
@@ -15,237 +15,370 @@ const parser = new Parser({
   },
 });
 
-// RSS feed URLs organized by category
+// Common words for uniqueness filtering
+const commonWords = new Set([
+  "the",
+  "be",
+  "to",
+  "of",
+  "and",
+  "a",
+  "in",
+  "that",
+  "have",
+  "i",
+  "it",
+  "for",
+  "not",
+  "on",
+  "with",
+  "he",
+  "as",
+  "you",
+  "do",
+  "at",
+  "this",
+  "but",
+  "his",
+  "by",
+  "from",
+  "they",
+  "we",
+  "say",
+  "her",
+  "she",
+  "or",
+  "an",
+  "will",
+  "my",
+  "one",
+  "all",
+  "would",
+  "there",
+  "their",
+  "what",
+  "so",
+  "up",
+  "out",
+  "if",
+  "about",
+  "who",
+  "get",
+  "which",
+  "go",
+  "me",
+  "when",
+  "make",
+  "can",
+  "like",
+  "time",
+  "no",
+  "just",
+  "him",
+  "know",
+  "take",
+  "people",
+  "into",
+  "year",
+  "your",
+  "good",
+  "some",
+  "could",
+  "them",
+  "see",
+  "other",
+  "than",
+  "then",
+  "now",
+  "look",
+  "only",
+  "come",
+  "its",
+  "over",
+  "think",
+  "also",
+  "back",
+  "after",
+  "use",
+  "two",
+  "how",
+  "our",
+  "work",
+  "first",
+  "well",
+  "way",
+  "even",
+  "new",
+  "want",
+  "because",
+  "any",
+  "these",
+  "give",
+  "day",
+  "most",
+  "us",
+  "is",
+  "was",
+  "are",
+  "been",
+  "has",
+  "had",
+  "were",
+  "said",
+  "did",
+  "been",
+  "have",
+  "has",
+  "had",
+  "will",
+  "would",
+  "could",
+  "should",
+  "may",
+  "might",
+  "must",
+  "can",
+  "shall",
+  "more",
+  "very",
+]);
+
+// Track used uncommon words globally to prevent duplicate content
+const usedUncommonWords = new Set();
+
+// RSS feed URLs organized by category (keeping existing structure)
 const RSS_FEEDS = {
   tech: {
     "ai-machine-learning": [
-      "https://openai.com/news/rss/", // OpenAI news, research
-      "https://cloud.google.com/blog/products/ai-machine-learning/rss/", // Google Cloud AI, ML tools
-      "https://news.mit.edu/topic/artificial-intelligence2/rss.xml", // MIT AI research
-      "https://machinelearningmastery.com/feed/", // ML tutorials, guides
-      "https://www.marktechpost.com/feed/", // AI tools, use cases
-      "https://hnrss.org/newest?q=AI+OR+machine+learning", // Hacker News AI/ML
-      "https://blog.google/technology/ai/rss/", // Google AI updates
-      "https://huggingface.co/blog/feed.xml", // Hugging Face, NLP, transformers
-      "https://www.deeplearning.ai/blog/feed/", // Applied AI, learning
-      "https://hai.stanford.edu/news/rss.xml", // Stanford AI research
-      "https://allenai.org/rss.xml", // AI2 research, datasets
-      "https://venturebeat.com/category/ai/feed/", // AI industry, funding
-      "https://arxiv-sanity-lite.com/feed/?query=cs.AI", // arXiv AI papers
-      "https://www.aitrends.com/feed/", // AI business, adoption
-      "https://blogs.microsoft.com/ai/feed/", // Microsoft AI news
+      "https://openai.com/news/rss/",
+      "https://cloud.google.com/blog/products/ai-machine-learning/rss/",
+      "https://news.mit.edu/topic/artificial-intelligence2/rss.xml",
+      "https://machinelearningmastery.com/feed/",
+      "https://www.marktechpost.com/feed/",
+      "https://hnrss.org/newest?q=AI+OR+machine+learning",
+      "https://blog.google/technology/ai/rss/",
+      "https://huggingface.co/blog/feed.xml",
+      "https://www.deeplearning.ai/blog/feed/",
+      "https://hai.stanford.edu/news/rss.xml",
+      "https://allenai.org/rss.xml",
+      "https://venturebeat.com/category/ai/feed/",
+      "https://arxiv-sanity-lite.com/feed/?query=cs.AI",
+      "https://www.aitrends.com/feed/",
+      "https://blogs.microsoft.com/ai/feed/",
     ],
 
     "martech-adtech": [
-      "https://martech.org/feed/", // Martech news, tools
-      "https://adexchanger.com/feed/", // Ad tech, programmatic
-      "https://marketingland.com/feed/", // Marketing, analytics
-      "https://chiefmartec.com/feed/", // Martech landscape, ops
-      "https://www.marketingtechnews.net/rss.xml", // Martech, digital trends
-      "https://digiday.com/feed/", // Media, marketing policy
-      "https://www.marketingprofs.com/rss/all", // Marketing tips, how-to
-      "https://adtechdaily.com/feed", // Ad ops, campaign strategy
-      "https://verve.com/feed", // Omnichannel ads, privacy
-      "https://adpushup.com/blog/feed", // Ad revenue, optimization
+      "https://martech.org/feed/",
+      "https://adexchanger.com/feed/",
+      "https://marketingland.com/feed/",
+      "https://chiefmartec.com/feed/",
+      "https://www.marketingtechnews.net/rss.xml",
+      "https://digiday.com/feed/",
+      "https://www.marketingprofs.com/rss/all",
+      "https://adtechdaily.com/feed",
+      "https://verve.com/feed",
+      "https://adpushup.com/blog/feed",
     ],
 
     "web-dev-devops": [
-      "https://css-tricks.com/feed/", // CSS, JS tips
-      "https://www.smashingmagazine.com/feed/", // UX, front-end tools
-      "https://web.dev/feed.xml", // Web standards, performance
-      "https://blog.logrocket.com/feed/", // Web dev tutorials
-      "https://www.joshwcomeau.com/rss.xml", // React, CSS deep dives
-      "https://kentcdodds.com/blog/rss.xml", // JS, React, testing
-      "https://dev.to/feed/tag/webdev", // Webdev community
-      "https://blog.cloudflare.com/rss/", // Security, performance
-      "https://github.blog/category/development/feed/", // GitHub dev news
-      "https://devops.com/feed", // DevOps workflows
-      "https://atlassian.com/blog/devops/feed", // DevOps collaboration
+      "https://css-tricks.com/feed/",
+      "https://www.smashingmagazine.com/feed/",
+      "https://web.dev/feed.xml",
+      "https://blog.logrocket.com/feed/",
+      "https://www.joshwcomeau.com/rss.xml",
+      "https://kentcdodds.com/blog/rss.xml",
+      "https://dev.to/feed/tag/webdev",
+      "https://blog.cloudflare.com/rss/",
+      "https://github.blog/category/development/feed/",
+      "https://devops.com/feed",
+      "https://atlassian.com/blog/devops/feed",
     ],
 
     "cybersecurity-privacy": [
-      "https://krebsonsecurity.com/feed/", // Security breaches, threats
-      "https://feeds.feedburner.com/TheHackersNews", // Hacks, vulnerabilities
-      "https://www.darkreading.com/rss.xml", // Enterprise security, threats
-      "https://www.schneier.com/feed/atom/", // Cryptography, privacy
-      "https://www.bleepingcomputer.com/feed/", // Malware, exploits
-      "https://threatpost.com/feed/", // Threat landscape, trends
-      "https://blog.talosintelligence.com/feeds/posts/default", // Cisco threat intel
-      "https://www.microsoft.com/security/blog/feed/", // Microsoft security
+      "https://krebsonsecurity.com/feed/",
+      "https://feeds.feedburner.com/TheHackersNews",
+      "https://www.darkreading.com/rss.xml",
+      "https://www.schneier.com/feed/atom/",
+      "https://www.bleepingcomputer.com/feed/",
+      "https://threatpost.com/feed/",
+      "https://blog.talosintelligence.com/feeds/posts/default",
+      "https://www.microsoft.com/security/blog/feed/",
     ],
 
     "blockchain-web3": [
-      "https://www.coindesk.com/arc/outboundfeeds/rss/", // Crypto news, blockchain
-      "https://decrypt.co/feed", // DeFi, NFTs, crypto
-      "https://cointelegraph.com/rss", // Global crypto news
-      "https://ethereum.org/en/blog/feed.xml", // Ethereum updates
-      "https://blog.chain.link/rss/", // Smart contracts, Chainlink
-      "https://messari.io/rss", // Crypto research, analysis
-      "https://bankless.substack.com/feed", // DeFi, Web3 trends
-      "https://vitalik.eth.limo/feed.xml", // Vitalik blog
+      "https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "https://decrypt.co/feed",
+      "https://cointelegraph.com/rss",
+      "https://ethereum.org/en/blog/feed.xml",
+      "https://blog.chain.link/rss/",
+      "https://messari.io/rss",
+      "https://bankless.substack.com/feed",
+      "https://vitalik.eth.limo/feed.xml",
     ],
   },
 
   builder: {
     "startup-stories": [
-      "https://review.firstround.com/rss/", // Founder stories
-      "https://blog.ycombinator.com/feed/", // YC startups
-      "https://techcrunch.com/category/startups/feed/", // Startup news
-      "https://www.indiehackers.com/feed.xml", // Indie founders
-      "https://sifted.eu/feed/", // European startups
-      "https://venturebeat.com/category/entrepreneur/feed/", // Entrepreneurship
-      "https://bothsidesofthetable.com/feed", // VC insights
-      "https://www.startupgrind.com/feed.xml", // Startup events
+      "https://review.firstround.com/rss/",
+      "https://blog.ycombinator.com/feed/",
+      "https://techcrunch.com/category/startups/feed/",
+      "https://www.indiehackers.com/feed.xml",
+      "https://sifted.eu/feed/",
+      "https://venturebeat.com/category/entrepreneur/feed/",
+      "https://bothsidesofthetable.com/feed",
+      "https://www.startupgrind.com/feed.xml",
     ],
 
     "productivity-hacks": [
-      "https://zenhabits.net/feed/", // Minimalism, habits
-      "https://jamesclear.com/feed", // Atomic habits
-      "https://gettingthingsdone.com/feed/", // GTD method
-      "https://aliabdaal.com/rss/", // Productivity tips
-      "https://tim.blog/feed/", // Tim Ferriss hacks
-      "https://calnewport.com/blog/feed/", // Deep work, focus
-      "https://www.asianefficiency.com/feed/", // Workflow tips
+      "https://zenhabits.net/feed/",
+      "https://jamesclear.com/feed",
+      "https://gettingthingsdone.com/feed/",
+      "https://aliabdaal.com/rss/",
+      "https://tim.blog/feed/",
+      "https://calnewport.com/blog/feed/",
+      "https://www.asianefficiency.com/feed/",
     ],
 
     "automation-no-code": [
-      "https://zapier.com/blog/feeds/latest/", // Automation, integrations
-      "https://bubble.io/blog/rss", // No-code apps
-      "https://www.nocode.tech/feed", // No-code tools
-      "https://blog.airtable.com/rss/", // Airtable automation
-      "https://webflow.com/blog/feed.rss", // Webflow design
-      "https://blog.n8n.io/rss/", // Open-source automation
-      "https://makerpad.co/posts.atom", // No-code projects
-      "https://www.producthunt.com/feed/no-code", // No-code launches
+      "https://zapier.com/blog/feeds/latest/",
+      "https://bubble.io/blog/rss",
+      "https://www.nocode.tech/feed",
+      "https://blog.airtable.com/rss/",
+      "https://webflow.com/blog/feed.rss",
+      "https://blog.n8n.io/rss/",
+      "https://makerpad.co/posts.atom",
+      "https://www.producthunt.com/feed/no-code",
     ],
 
     "project-management": [
-      "https://blog.asana.com/feed/", // Asana tips
-      "https://blog.trello.com/rss", // Trello updates
-      "https://monday.com/blog/feed/", // Monday.com stories
-      "https://www.projectmanager.com/blog/feed", // PM guides
-      "https://blog.clickup.com/feed/", // ClickUp tips
-      "https://www.atlassian.com/blog/feed", // PM tools, news
-      "https://www.wrike.com/blog/feed/", // Wrike updates
-      "https://www.pmi.org/rss.xml", // PM best practices
+      "https://blog.asana.com/feed/",
+      "https://blog.trello.com/rss",
+      "https://monday.com/blog/feed/",
+      "https://www.projectmanager.com/blog/feed",
+      "https://blog.clickup.com/feed/",
+      "https://www.atlassian.com/blog/feed",
+      "https://www.wrike.com/blog/feed/",
+      "https://www.pmi.org/rss.xml",
     ],
 
     "momentum-mindset": [
-      "https://fs.blog/feed/", // Mental models
-      "https://ryanholiday.net/feed/", // Stoicism
-      "https://markmanson.net/feed", // Self-help, EQ
-      "https://sethgodin.typepad.com/seths_blog/atom.xml", // Seth Godin ideas
-      "https://dailystoic.com/feed/", // Stoic practices
-      "https://tim.blog/feed/", // Life hacks
-      "https://jamesclear.com/feed", // Habits, focus
-      "https://waitbutwhy.com/feed", // Life essays
-      "https://feeds.feedburner.com/brainpickings/rss", // Philosophy, literature
-      "https://www.mindful.org/feed", // Mindfulness, wellness
+      "https://fs.blog/feed/",
+      "https://ryanholiday.net/feed/",
+      "https://markmanson.net/feed",
+      "https://sethgodin.typepad.com/seths_blog/atom.xml",
+      "https://dailystoic.com/feed/",
+      "https://tim.blog/feed/",
+      "https://jamesclear.com/feed",
+      "https://waitbutwhy.com/feed",
+      "https://feeds.feedburner.com/brainpickings/rss",
+      "https://www.mindful.org/feed",
     ],
   },
 
   art: {
     "generative-ai-art": [
-      "https://aiartists.org/feed", // AI art showcase
-      "https://www.creativebloq.com/feeds/tag/ai-art", // AI art trends
-      "https://ml.berkeley.edu/blog/feed.xml", // ML + creativity
-      "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", // AI art news
-      "https://runwayml.com/blog/rss/", // Generative AI tools
+      "https://aiartists.org/feed",
+      "https://www.creativebloq.com/feeds/tag/ai-art",
+      "https://ml.berkeley.edu/blog/feed.xml",
+      "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+      "https://runwayml.com/blog/rss/",
     ],
 
     "ui-ux-trends": [
-      "https://www.smashingmagazine.com/feed/", // UX, design trends
-      "https://uxplanet.org/feed", // UX guides
-      "https://alistapart.com/main/feed", // Web standards, design
-      "https://uxdesign.cc/feed", // UX research, critiques
-      "https://www.nngroup.com/feed/rss/", // Usability research
-      "https://www.invisionapp.com/inside-design/feed/", // UI, UX process
-      "https://www.uxmatters.com/feed.php", // UX issues, solutions
-      "https://sidebar.io/feed.xml", // Curated design links
+      "https://www.smashingmagazine.com/feed/",
+      "https://uxplanet.org/feed",
+      "https://alistapart.com/main/feed",
+      "https://uxdesign.cc/feed",
+      "https://www.nngroup.com/feed/rss/",
+      "https://www.invisionapp.com/inside-design/feed/",
+      "https://www.uxmatters.com/feed.php",
+      "https://sidebar.io/feed.xml",
     ],
 
     "color-typography": [
-      "https://fontsinuse.com/feed", // Fonts in use
-      "https://blog.adobe.com/en/publish/creative-cloud.xml", // Adobe creative
-      "https://typographica.org/feed/", // Typeface reviews
-      "https://ilovetypography.com/feed/", // Fonts, typography news
-      "https://fonts.googleblog.com/feeds/posts/default", // Google Fonts
+      "https://fontsinuse.com/feed",
+      "https://blog.adobe.com/en/publish/creative-cloud.xml",
+      "https://typographica.org/feed/",
+      "https://ilovetypography.com/feed/",
+      "https://fonts.googleblog.com/feeds/posts/default",
     ],
 
     "animation-motion": [
-      "https://motionographer.com/feed/", // Animation news
-      "https://greensock.com/blog/feed", // GSAP tutorials
-      "https://www.animatedreview.com/feed/", // Animation reviews
-      "https://lottiefiles.com/blog/feed", // Lottie animations
-      "https://www.schoolofmotion.com/blog/rss", // Motion design tips
+      "https://motionographer.com/feed/",
+      "https://greensock.com/blog/feed",
+      "https://www.animatedreview.com/feed/",
+      "https://lottiefiles.com/blog/feed",
+      "https://www.schoolofmotion.com/blog/rss",
     ],
 
     "tutorials-walkthroughs": [
-      "https://tympanus.net/codrops/feed/", // Creative tutorials
-      "https://webdesign.tutsplus.com/posts.atom", // Design tutorials
-      "https://designmodo.com/feed/", // Design guides
-      "https://www.sitepoint.com/design-ux/feed/", // UI/UX tutorials
-      "https://tutsplus.com/feed/", // Creative tutorials
-      "https://www.freecodecamp.org/news/rss/", // Dev tutorials
+      "https://tympanus.net/codrops/feed/",
+      "https://webdesign.tutsplus.com/posts.atom",
+      "https://designmodo.com/feed/",
+      "https://www.sitepoint.com/design-ux/feed/",
+      "https://tutsplus.com/feed/",
+      "https://www.freecodecamp.org/news/rss/",
     ],
   },
 
   gaming: {
     "daily-roundup": [
-      "https://www.polygon.com/rss/index.xml", // Gaming news
-      "https://www.gamespot.com/feeds/news/", // Game reviews
-      "https://www.rockpapershotgun.com/feed", // PC games, indies
-      "https://www.gamesradar.com/rss/", // Gaming guides
-      "https://www.eurogamer.net/feed", // Game news, reviews
-      "https://kotaku.com/rss", // Gaming culture
-      "https://www.destructoid.com/feed/", // Game news, features
-      "https://www.ign.com/rss", // Gaming releases
+      "https://www.polygon.com/rss/index.xml",
+      "https://www.gamespot.com/feeds/news/",
+      "https://www.rockpapershotgun.com/feed",
+      "https://www.gamesradar.com/rss/",
+      "https://www.eurogamer.net/feed",
+      "https://kotaku.com/rss",
+      "https://www.destructoid.com/feed/",
+      "https://www.ign.com/rss",
     ],
 
     "pro-guides-tips": [
-      "https://www.gamepur.com/feed", // Game guides
-      "https://www.thegamer.com/feed/", // Tips, guides
-      "https://dotesports.com/feed", // Esports news
-      "https://www.pcgamer.com/rss/", // PC gaming tips
+      "https://www.gamepur.com/feed",
+      "https://www.thegamer.com/feed/",
+      "https://dotesports.com/feed",
+      "https://www.pcgamer.com/rss/",
     ],
 
     "retro-gaming": [
-      "https://www.timeextension.com/feed/", // Retro reviews
-      "https://indieretronews.com/feeds/posts/default?alt=rss", // Retro news
-      "https://retrododo.com/feed/", // Retro hardware
-      "https://www.retrogamer.net/feed/", // Retro magazine
-      "https://www.hardcoregaming101.net/feed/", // Game histories
-      "https://retroblast.com/feed/", // Retro preservation
+      "https://www.timeextension.com/feed/",
+      "https://indieretronews.com/feeds/posts/default?alt=rss",
+      "https://retrododo.com/feed/",
+      "https://www.retrogamer.net/feed/",
+      "https://www.hardcoregaming101.net/feed/",
+      "https://retroblast.com/feed/",
     ],
 
     "indie-spotlights": [
-      "https://indiegames.com/feed/", // Indie news
-      "https://www.indiedb.com/rss/games/", // Indie launches
-      "https://www.gamedeveloper.com/rss.xml", // Dev insights
-      "https://warpdoor.com/feed/", // Indie projects
-      "https://alphabetagamer.com/feed/", // Indie demos
-      "https://indiegamesplus.com/feed/", // Indie reviews
+      "https://indiegames.com/feed/",
+      "https://www.indiedb.com/rss/games/",
+      "https://www.gamedeveloper.com/rss.xml",
+      "https://warpdoor.com/feed/",
+      "https://alphabetagamer.com/feed/",
+      "https://indiegamesplus.com/feed/",
     ],
 
     "collectors-hub": [
-      "https://www.racketboy.com/feed/", // Collector guides
-      "https://videogamekrieg.com/feed", // Collectible news
-      "https://www.pricecharting.com/blog/feed", // Game pricing
-      "https://www.retrorgb.com/feed/", // Retro hardware mods
-      "https://www.gamingalexandria.com/wp/feed/", // Game preservation
+      "https://www.racketboy.com/feed/",
+      "https://videogamekrieg.com/feed",
+      "https://www.pricecharting.com/blog/feed",
+      "https://www.retrorgb.com/feed/",
+      "https://www.gamingalexandria.com/wp/feed/",
     ],
   },
 };
 
-// Configuration - ADJUSTED FOR BETTER RESULTS
+// Configuration - EXTREMELY STRICT REQUIREMENTS
 const MAX_ITEMS = 10;
-const MIN_ITEMS_REQUIRED = 5; // Minimum items we must return
-const MAX_ITEMS_PER_FEED = 20; // Process more items per feed
-const TARGET_BUFFER = 25; // Larger buffer to ensure we get enough
-const MAX_FEEDS_TO_PROCESS = 10; // Process more feeds (still safe for Vercel)
-const TIMEOUT_MS = 8500; // 8.5 seconds timeout
+const MIN_ITEMS_REQUIRED = 5;
+const MAX_ITEMS_PER_FEED = 20;
+const TARGET_BUFFER = 25;
+const MAX_FEEDS_TO_PROCESS = 15; // Process more feeds before giving up
+const TIMEOUT_MS = 8500;
+const MIN_FEEDS_BEFORE_RELAX = 8; // Don't relax until at least 8 feeds processed
+const MIN_QUALITY_FOR_NO_THUMBNAIL = 0.98; // Almost impossible to meet
 
-// Helper functions for category/subcategory resolution
+// Helper functions
 const getFeedsForCategory = (category) => {
   const categoryFeeds = RSS_FEEDS[category];
   if (!categoryFeeds) return [];
@@ -266,10 +399,60 @@ const getFeedDisplayName = (url) => {
   }
 };
 
-// Validation functions with RELAXATION LEVELS
+// Shuffle array to randomize feed processing order
+const shuffleArray = (array) => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// Extract uncommon words from text
+const extractUncommonWords = (text) => {
+  if (!text) return new Set();
+
+  const words = text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length > 3 && !commonWords.has(word));
+
+  return new Set(words);
+};
+
+// Check if article has enough unique uncommon words
+const hasUniqueContent = (title, description) => {
+  const titleWords = extractUncommonWords(title);
+  const descWords = extractUncommonWords(description);
+  const allWords = new Set([...titleWords, ...descWords]);
+
+  // Check if at least 3 uncommon words are truly unique (not used before)
+  let uniqueCount = 0;
+  for (const word of allWords) {
+    if (!usedUncommonWords.has(word)) {
+      uniqueCount++;
+    }
+  }
+
+  // Article needs at least 3 unique uncommon words
+  if (uniqueCount < 3) {
+    return false;
+  }
+
+  // Add these words to the used set
+  for (const word of allWords) {
+    usedUncommonWords.add(word);
+  }
+
+  return true;
+};
+
+// Validation functions with STRICTER requirements
 const containsCodeOrTechnical = (text, relaxed = false) => {
   if (!text) return false;
-  if (relaxed) return false; // Skip this check when relaxed
+  // Never skip code check for non-tech categories
 
   const codePatterns = [
     /function\s*\(/,
@@ -285,31 +468,30 @@ const containsCodeOrTechnical = (text, relaxed = false) => {
 
 const isLikelyEnglish = (text, relaxed = false) => {
   if (!text) return true;
-  if (relaxed) return true; // Skip language check when relaxed
 
   const nonLatinPattern = /[^\u0000-\u007F\u0080-\u00FF]/g;
   const matches = text.match(nonLatinPattern) || [];
   const nonLatinRatio = matches.length / text.length;
-  return nonLatinRatio <= 0.3;
+  return nonLatinRatio <= 0.2; // Stricter than before
 };
 
 const isSpamTitle = (title, relaxed = false) => {
   if (!title) return true;
-  if (relaxed) return false; // Be more lenient when relaxed
 
   const specialChars = title.match(/[^\w\s\-.,!?'"]/g) || [];
   const specialRatio = specialChars.length / title.length;
-  if (specialRatio > 0.3) return true; // Increased threshold when not relaxed
+  if (specialRatio > 0.2) return true; // Stricter threshold
 
   const spamPatterns = [
     /\bclick\s*here\b/i,
     /\bfree\s*download\b/i,
     /\byou\s*won't\s*believe\b/i,
+    /\bmust\s*see\b/i,
+    /\bshocking\b/i,
   ];
   return spamPatterns.some((pattern) => pattern.test(title));
 };
 
-// Validation with relaxation
 const isValidDescription = (
   description,
   title,
@@ -321,27 +503,27 @@ const isValidDescription = (
 
   const config = getFilterConfig(category, subcategory);
 
-  // Relax minimum length requirement when needed
+  // Less relaxation when in relaxed mode
   const minLength = relaxed
-    ? Math.floor(config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH * 0.5)
+    ? Math.floor(config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH * 0.75) // Only 25% reduction
     : config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH;
 
   if (description.length < minLength) {
     return false;
   }
 
-  // Skip strict checks when relaxed
-  if (relaxed) return true;
+  // Keep most quality checks even when relaxed
+  if (!relaxed) {
+    if (config.CONTENT_RULES.NO_LOWERCASE_START && /^[a-z]/.test(description)) {
+      return false;
+    }
 
-  if (config.CONTENT_RULES.NO_LOWERCASE_START && /^[a-z]/.test(description)) {
-    return false;
-  }
-
-  if (
-    config.CONTENT_RULES.NO_SPECIAL_CHAR_START &&
-    /^[^A-Za-z0-9"']/.test(description)
-  ) {
-    return false;
+    if (
+      config.CONTENT_RULES.NO_SPECIAL_CHAR_START &&
+      /^[^A-Za-z0-9"']/.test(description)
+    ) {
+      return false;
+    }
   }
 
   return true;
@@ -371,46 +553,44 @@ const cleanDescription = (rawDescription, title, category, subcategory) => {
   return cleaned;
 };
 
-// Quality scoring function - Enhanced for diversity rules
+// Enhanced quality scoring with stricter requirements
 const scoreArticleQuality = (item, category, subcategory) => {
   let score = 0;
 
-  // Thumbnail is now worth more (for diversity rules)
-  if (item.thumbnail) score += 0.3;
+  // Thumbnail is worth much more
+  if (item.thumbnail) score += 0.4;
 
   // Description quality
   if (item.description) {
-    if (item.description.length > 150) score += 0.2;
+    if (item.description.length > 150) score += 0.25;
     else if (item.description.length > 100) score += 0.15;
-    else if (item.description.length > 50) score += 0.1;
+    else if (item.description.length > 50) score += 0.05;
   }
 
   // Title quality
   if (item.title) {
-    if (item.title.length > 40) score += 0.1;
+    if (item.title.length > 40 && item.title.length < 100) score += 0.1;
     else if (item.title.length > 20) score += 0.05;
   }
 
   // Recency bonus
   const hoursSincePublished =
     (Date.now() - new Date(item.pubDate)) / (1000 * 60 * 60);
-  if (hoursSincePublished < 24) score += 0.25;
-  else if (hoursSincePublished < 72) score += 0.15;
+  if (hoursSincePublished < 24) score += 0.2;
+  else if (hoursSincePublished < 72) score += 0.1;
   else if (hoursSincePublished < 168) score += 0.05;
 
-  // Category-specific bonuses
-  if (category === "tech" && item.description?.length > 150) score += 0.05;
+  // Category-specific bonuses (reduced)
+  if (category === "tech" && item.description?.length > 150) score += 0.03;
   if (category === "builder" && /how|guide|tutorial|tips/i.test(item.title))
-    score += 0.05;
-  if (category === "art" && item.thumbnail) score += 0.05;
+    score += 0.03;
+  if (category === "art" && item.thumbnail) score += 0.03;
 
   // Normalize to 0-1 range
   return Math.min(1, score);
 };
 
-// =====================================================
-// DIVERSITY ENFORCEMENT HELPERS
-// =====================================================
+// Domain extraction
 function extractDomain(url) {
   try {
     return new URL(url).hostname.replace(/^www\./, "");
@@ -423,7 +603,6 @@ function validateImage(imgUrl) {
   if (!imgUrl) return false;
   if (typeof imgUrl !== "string") return false;
 
-  // Check for common non-article image patterns
   const invalidPatterns = [
     /favicon/i,
     /\.ico$/i,
@@ -441,13 +620,13 @@ function validateImage(imgUrl) {
 
 function formatDate(dateStr) {
   try {
-    return new Date(dateStr).toISOString().split("T")[0]; // YYYY-MM-DD
+    return new Date(dateStr).toISOString().split("T")[0];
   } catch {
     return null;
   }
 }
 
-// Weighted random shuffle by quality
+// Weighted shuffle by quality
 function weightedShuffle(articles) {
   return articles
     .map((a) => ({
@@ -461,20 +640,13 @@ function weightedShuffle(articles) {
 function getDiversityRules(category, subcategory) {
   const config = getFilterConfig(category, subcategory);
 
-  // Extract diversity rules from config
   return {
     QUALITY_SCORE_THRESHOLD:
-      config.DIVERSITY_RULES?.QUALITY_SCORE_THRESHOLD ||
-      config.CONTENT_RULES?.QUALITY_SCORE_THRESHOLD ||
-      0.3,
+      config.DIVERSITY_RULES?.QUALITY_SCORE_THRESHOLD || 0.4, // Raised threshold
     QUALITY_SCORE_NO_THUMBNAIL:
       config.DIVERSITY_RULES?.QUALITY_SCORE_NO_THUMBNAIL ||
-      config.CONTENT_RULES?.QUALITY_SCORE_NO_THUMBNAIL ||
-      0.5,
-    MAX_PER_DOMAIN:
-      config.DIVERSITY_RULES?.MAX_PER_DOMAIN ||
-      config.SOURCE_RULES?.MAX_PER_DOMAIN ||
-      3,
+      MIN_QUALITY_FOR_NO_THUMBNAIL,
+    MAX_PER_DOMAIN: config.DIVERSITY_RULES?.MAX_PER_DOMAIN || 2, // Stricter limit
     UNIQUE_DATE_PER_DOMAIN:
       config.DIVERSITY_RULES?.UNIQUE_DATE_PER_DOMAIN !== undefined
         ? config.DIVERSITY_RULES.UNIQUE_DATE_PER_DOMAIN
@@ -490,8 +662,8 @@ function getDiversityRules(category, subcategory) {
   };
 }
 
-// Apply diversity filters to collected articles
-function applyDiversityFilters(
+// Apply VERY STRICT diversity filters
+function applyDiversityFiltersStrict(
   articles,
   category,
   subcategory,
@@ -499,35 +671,42 @@ function applyDiversityFilters(
 ) {
   const rules = getDiversityRules(category, subcategory);
 
-  console.log(`Applying diversity filters to ${articles.length} articles`);
-  console.log(`Rules:`, rules);
+  console.log(
+    `Applying STRICT diversity filters to ${articles.length} articles`
+  );
 
-  // Step 1: Quality + Thumbnail enforcement
+  // Step 1: VERY strict quality + thumbnail enforcement
   let filtered = articles.filter((a) => {
-    const hasValidThumbnail = a.thumbnail && validateImage(a.thumbnail);
-    const qualityThreshold = hasValidThumbnail
-      ? rules.QUALITY_SCORE_THRESHOLD
-      : rules.QUALITY_SCORE_NO_THUMBNAIL;
+    // MUST have valid thumbnail unless nearly perfect
+    const hasValidThumbnail = a.thumbnail && validateThumbnail(a.thumbnail);
 
+    if (!hasValidThumbnail && a.qualityScore < 0.98) {
+      return false; // Reject almost all articles without thumbnails
+    }
+
+    // Higher quality threshold overall
+    const qualityThreshold = hasValidThumbnail ? 0.4 : 0.98;
     return (a.qualityScore || 0) >= qualityThreshold;
   });
 
-  console.log(`After quality filter: ${filtered.length} articles`);
+  console.log(`After strict quality filter: ${filtered.length} articles`);
 
-  // If we don't have enough articles, be more lenient
+  // Only relax if absolutely necessary
   if (filtered.length < minRequired) {
     console.log(
-      `Not enough articles (${filtered.length} < ${minRequired}), relaxing quality threshold`
+      `Emergency: Only ${filtered.length} articles, slightly relaxing`
     );
-    filtered = articles.filter(
-      (a) => (a.qualityScore || 0) >= rules.QUALITY_SCORE_THRESHOLD * 0.5
-    );
+    filtered = articles.filter((a) => {
+      const hasValidThumbnail = a.thumbnail && validateThumbnail(a.thumbnail);
+      const minScore = hasValidThumbnail ? 0.35 : 0.95;
+      return (a.qualityScore || 0) >= minScore;
+    });
   }
 
   // Step 2: Shuffle weighted by quality
   let shuffled = weightedShuffle(filtered);
 
-  // Step 3: Enforce domain caps + unique-date-per-domain
+  // Step 3: VERY strict domain caps - max 1-2 per domain
   const domainCounts = {};
   const domainDates = {};
   const capped = [];
@@ -539,21 +718,22 @@ function applyDiversityFilters(
     domainCounts[domain] = domainCounts[domain] || 0;
     domainDates[domain] = domainDates[domain] || new Set();
 
-    // Enforce max-per-domain cap (relax if we need minimum articles)
-    const effectiveMaxPerDomain =
-      capped.length < minRequired
-        ? rules.MAX_PER_DOMAIN * 2
-        : rules.MAX_PER_DOMAIN;
+    // VERY strict domain limits
+    let maxPerDomain = 1; // Start with just 1
+    if (capped.length < minRequired && Object.keys(domainCounts).length > 3) {
+      maxPerDomain = 2; // Allow 2 only if we have diverse sources already
+    }
 
-    if (domainCounts[domain] >= effectiveMaxPerDomain) continue;
+    if (domainCounts[domain] >= maxPerDomain) {
+      console.log(
+        `DOMAIN CAP: Rejecting article from ${domain} (already have ${domainCounts[domain]})`
+      );
+      continue;
+    }
 
-    // Enforce unique-date-per-domain rule (skip if we need minimum)
-    if (
-      rules.UNIQUE_DATE_PER_DOMAIN &&
-      capped.length >= minRequired &&
-      pubDate &&
-      domainDates[domain].has(pubDate)
-    ) {
+    // Enforce unique-date-per-domain
+    if (pubDate && domainDates[domain].has(pubDate)) {
+      console.log(`SAME DATE: Rejecting duplicate date article from ${domain}`);
       continue;
     }
 
@@ -562,59 +742,102 @@ function applyDiversityFilters(
     if (pubDate) domainDates[domain].add(pubDate);
   }
 
-  console.log(`After domain diversity: ${capped.length} articles`);
+  console.log(`After strict domain diversity: ${capped.length} articles`);
+  console.log(`Domain distribution:`, domainCounts);
 
-  // Step 4: Enforce "no consecutive same-domain" (only if we have enough articles)
-  if (rules.NO_CONSECUTIVE_SAME_DOMAIN && capped.length >= minRequired) {
-    const spaced = [];
-    const deferred = [];
+  // Step 4: Enforce no consecutive same-domain
+  const spaced = [];
+  const deferred = [];
 
-    capped.forEach((article) => {
-      const domain = extractDomain(article.link || article.sourceUrl);
-      const lastArticle = spaced[spaced.length - 1];
-      const lastDomain = lastArticle
-        ? extractDomain(lastArticle.link || lastArticle.sourceUrl)
-        : null;
+  capped.forEach((article) => {
+    const domain = extractDomain(article.link || article.sourceUrl);
+    const lastArticle = spaced[spaced.length - 1];
+    const lastDomain = lastArticle
+      ? extractDomain(lastArticle.link || lastArticle.sourceUrl)
+      : null;
 
-      if (!lastDomain || lastDomain !== domain) {
-        spaced.push(article);
-      } else {
-        deferred.push(article);
+    if (!lastDomain || lastDomain !== domain) {
+      spaced.push(article);
+    } else {
+      deferred.push(article);
+    }
+  });
+
+  // Add deferred articles between different domains
+  deferred.forEach((article) => {
+    const domain = extractDomain(article.link || article.sourceUrl);
+    let inserted = false;
+
+    for (let i = spaced.length - 1; i > 0; i--) {
+      const prevDomain = extractDomain(
+        spaced[i - 1].link || spaced[i - 1].sourceUrl
+      );
+      const nextDomain = extractDomain(spaced[i].link || spaced[i].sourceUrl);
+
+      if (prevDomain !== domain && nextDomain !== domain) {
+        spaced.splice(i, 0, article);
+        inserted = true;
+        break;
       }
-    });
+    }
 
-    // Add deferred articles at the end
-    deferred.forEach((article) => {
-      const domain = extractDomain(article.link || article.sourceUrl);
-      let inserted = false;
+    if (!inserted && spaced.length < MAX_ITEMS) {
+      spaced.push(article);
+    }
+  });
 
-      // Try to insert between different domains
-      for (let i = spaced.length - 1; i > 0; i--) {
-        const prevDomain = extractDomain(
-          spaced[i - 1].link || spaced[i - 1].sourceUrl
-        );
-        const nextDomain = extractDomain(spaced[i].link || spaced[i].sourceUrl);
-
-        if (prevDomain !== domain && nextDomain !== domain) {
-          spaced.splice(i, 0, article);
-          inserted = true;
-          break;
-        }
-      }
-
-      if (!inserted) {
-        spaced.push(article);
-      }
-    });
-
-    console.log(`After spacing: ${spaced.length} articles`);
-    return spaced;
-  }
-
-  return capped;
+  console.log(`After spacing: ${spaced.length} articles`);
+  return spaced;
 }
 
-// Parse feed item with RELAXATION PARAMETER
+// Apply diversity filters
+function applyDiversityFilters(
+  articles,
+  category,
+  subcategory,
+  minRequired = 5
+) {
+  return applyDiversityFiltersStrict(
+    articles,
+    category,
+    subcategory,
+    minRequired
+  );
+}
+
+// Validate if image URL is a real article image
+const validateThumbnail = (imgUrl) => {
+  if (!imgUrl || typeof imgUrl !== "string") return false;
+
+  // Block all generic/icon images
+  const invalidPatterns = [
+    /favicon/i,
+    /\.ico$/i,
+    /logo/i,
+    /avatar/i,
+    /icon/i,
+    /placeholder/i,
+    /default/i,
+    /fallback/i,
+    /missing/i,
+    /no-image/i,
+    /emoji/i,
+    /16x16|32x32|48x48|64x64|128x128/i,
+    /\/icons?\//i,
+    /feed.*icon/i,
+    /rss.*icon/i,
+  ];
+
+  // Must have valid image extension or path
+  const validImagePattern = /\.(jpg|jpeg|png|webp|gif)($|\?)|\/images?\//i;
+
+  return (
+    !invalidPatterns.some((p) => p.test(imgUrl)) &&
+    validImagePattern.test(imgUrl)
+  );
+};
+
+// Parse feed item with STRICTER validation
 const parseFeedItem = (
   item,
   source,
@@ -626,19 +849,20 @@ const parseFeedItem = (
 
   const title = item.title || "Untitled";
 
-  // Relax title length requirements when needed
+  // Less aggressive relaxation
   const minTitleLength = relaxFilters
-    ? Math.max(5, Math.floor(config.TITLE_RULES.MIN_LENGTH * 0.5))
+    ? Math.max(8, Math.floor(config.TITLE_RULES.MIN_LENGTH * 0.8))
     : config.TITLE_RULES.MIN_LENGTH;
 
   const maxTitleLength = relaxFilters
-    ? config.TITLE_RULES.MAX_LENGTH * 2
+    ? config.TITLE_RULES.MAX_LENGTH * 1.5
     : config.TITLE_RULES.MAX_LENGTH;
 
-  if (title.length < minTitleLength) return null;
-  if (title.length > maxTitleLength) return null;
+  if (title.length < minTitleLength || title.length > maxTitleLength) {
+    return null;
+  }
 
-  // Skip strict checks when filters are relaxed
+  // Keep most checks even when relaxed
   if (!relaxFilters) {
     if (
       config.TITLE_RULES.NO_ALL_CAPS &&
@@ -663,12 +887,12 @@ const parseFeedItem = (
     }
   }
 
-  // Age validation - relax when needed
+  // Age validation
   const pubDate =
     item.pubDate || item.isoDate || item.published || new Date().toISOString();
   const articleAge = Date.now() - new Date(pubDate);
   const maxAgeDays = relaxFilters
-    ? config.AGE_RULES.MAX_AGE_DAYS * 2
+    ? config.AGE_RULES.MAX_AGE_DAYS * 1.5
     : config.AGE_RULES.MAX_AGE_DAYS;
   const maxAge = maxAgeDays * 24 * 60 * 60 * 1000;
 
@@ -676,32 +900,62 @@ const parseFeedItem = (
     return null;
   }
 
-  // Extract thumbnail
+  // Extract thumbnail with strict validation
   let thumbnail = null;
+  let thumbnailCandidates = [];
+
   if (item["media:thumbnail"]) {
-    thumbnail = item["media:thumbnail"].$
+    const url = item["media:thumbnail"].$
       ? item["media:thumbnail"].$.url
       : item["media:thumbnail"];
+    if (url) thumbnailCandidates.push(url);
   }
 
-  // Extract and validate description with relaxation
+  if (item["media:content"] && Array.isArray(item["media:content"])) {
+    item["media:content"].forEach((media) => {
+      if (media.$ && media.$.medium === "image" && media.$.url) {
+        thumbnailCandidates.push(media.$.url);
+      }
+    });
+  }
+
+  if (
+    item.enclosure &&
+    item.enclosure.url &&
+    item.enclosure.type?.startsWith("image/")
+  ) {
+    thumbnailCandidates.push(item.enclosure.url);
+  }
+
+  // Find first valid thumbnail
+  for (const candidate of thumbnailCandidates) {
+    if (validateThumbnail(candidate)) {
+      thumbnail = candidate;
+      break;
+    }
+  }
+
+  // Extract and validate description with relaxation parameter
   let description =
     item.contentSnippet || item.description || item.summary || "";
   description = cleanDescription(description, title, category, subcategory);
 
-  // Validate description with relaxation parameter
   if (
     !isValidDescription(description, title, category, subcategory, relaxFilters)
   ) {
-    // If relaxed and still no description, create a minimal one
     if (relaxFilters && !description) {
-      description = title; // Use title as description as last resort
+      description = title;
     } else if (!relaxFilters) {
       return null;
     }
   }
 
-  // Quality scoring (normalized 0-1 for diversity rules)
+  // Check for unique content using uncommon words
+  if (!relaxFilters && !hasUniqueContent(title, description)) {
+    return null; // Skip articles with too much duplicate content
+  }
+
+  // Quality scoring
   const qualityScore = scoreArticleQuality(
     {
       title,
@@ -713,28 +967,25 @@ const parseFeedItem = (
     subcategory
   );
 
-  // Relax thumbnail requirements when needed
+  // EXTREMELY STRICT thumbnail requirements
   let allowDefaultIcon = false;
-  if (!thumbnail) {
-    if (relaxFilters) {
-      allowDefaultIcon = true; // Always allow default icon when relaxed
-    } else if (config.THUMBNAIL_RULES.REQUIRED) {
-      if (
-        qualifiesForDefaultIcon(
-          { title, description, thumbnail, pubDate },
-          qualityScore,
-          category,
-          subcategory
-        )
-      ) {
-        allowDefaultIcon = true;
-      } else {
-        return null;
-      }
+  if (!thumbnail || !validateThumbnail(thumbnail)) {
+    // Almost never allow articles without real thumbnails
+    if (qualityScore >= 0.98) {
+      // Only for essentially perfect articles
+      allowDefaultIcon = true;
+      console.log(
+        `RARE: Allowing no-thumbnail article with score ${qualityScore}: ${title}`
+      );
+    } else {
+      console.log(
+        `REJECTED: No valid thumbnail for ${title} (score: ${qualityScore})`
+      );
+      return null; // Reject ALL articles without real thumbnails
     }
   }
 
-  // Skip promotional keyword check when relaxed
+  // Skip promotional content
   if (!relaxFilters) {
     const promotionalKeywords = config.PROMOTIONAL_KEYWORDS || [];
     const titleLower = title.toLowerCase();
@@ -762,7 +1013,7 @@ const parseFeedItem = (
   };
 };
 
-// PROGRESSIVE FETCH WITH FILTER RELAXATION
+// MAIN FETCH WITH STRICTER CONTROLS AND BETTER RANDOMIZATION
 async function fetchFeedsWithProgressiveRelaxation(
   feedUrls,
   category,
@@ -771,19 +1022,45 @@ async function fetchFeedsWithProgressiveRelaxation(
   const qualifiedItems = [];
   const seen = new Set();
   const sourceCounts = new Map();
+  const domainCounts = new Map();
   let totalProcessed = 0;
   const startTime = Date.now();
   let relaxFilters = false;
   let feedsProcessed = 0;
 
-  console.log(`Starting progressive fetch for ${feedUrls.length} feeds`);
+  // Clear uncommon words tracker for new fetch
+  usedUncommonWords.clear();
+
+  // RANDOMIZE feed order to avoid always starting with same sources
+  const shuffledFeeds = shuffleArray(feedUrls);
+
+  // Also randomize which feed to start with
+  const startIndex = Math.floor(
+    Math.random() * Math.min(3, shuffledFeeds.length)
+  );
+  const reorderedFeeds = [
+    ...shuffledFeeds.slice(startIndex),
+    ...shuffledFeeds.slice(0, startIndex),
+  ];
+
+  console.log(
+    `Starting fetch for ${reorderedFeeds.length} feeds (randomized order)`
+  );
   console.log(`Category: ${category}, Subcategory: ${subcategory || "none"}`);
+  console.log(
+    `First feeds:`,
+    reorderedFeeds.slice(0, 3).map(getFeedDisplayName)
+  );
 
   const config = getFilterConfig(category, subcategory);
 
-  // Process feeds with progressive relaxation
-  for (let i = 0; i < Math.min(feedUrls.length, MAX_FEEDS_TO_PROCESS); i++) {
-    const feedUrl = feedUrls[i];
+  // Process feeds with less aggressive relaxation
+  for (
+    let i = 0;
+    i < Math.min(reorderedFeeds.length, MAX_FEEDS_TO_PROCESS);
+    i++
+  ) {
+    const feedUrl = reorderedFeeds[i];
 
     // Check timeout
     if (Date.now() - startTime > TIMEOUT_MS) {
@@ -797,16 +1074,13 @@ async function fetchFeedsWithProgressiveRelaxation(
       break;
     }
 
-    // PROGRESSIVE RELAXATION: If we've processed 3+ feeds with few results, relax filters
-    if (feedsProcessed >= 3 && qualifiedItems.length < MIN_ITEMS_REQUIRED) {
+    // VERY CONSERVATIVE RELAXATION: Only relax after many feeds processed
+    if (feedsProcessed >= 8 && qualifiedItems.length < MIN_ITEMS_REQUIRED) {
       if (!relaxFilters) {
         console.log(
-          `RELAXING FILTERS: Only ${qualifiedItems.length} items after ${feedsProcessed} feeds`
+          `MILD RELAXATION: Only ${qualifiedItems.length} items after ${feedsProcessed} feeds`
         );
         relaxFilters = true;
-
-        // Reset source counts to allow more items per source
-        sourceCounts.clear();
       }
     }
 
@@ -814,11 +1088,7 @@ async function fetchFeedsWithProgressiveRelaxation(
       const feed = await parser.parseURL(feedUrl);
       feedsProcessed++;
 
-      // Process more items when we need them
-      const itemsNeeded = TARGET_BUFFER - qualifiedItems.length;
-      const itemsToProcess = relaxFilters
-        ? feed.items.slice(0, Math.max(MAX_ITEMS_PER_FEED, itemsNeeded))
-        : feed.items.slice(0, MAX_ITEMS_PER_FEED);
+      const itemsToProcess = feed.items.slice(0, MAX_ITEMS_PER_FEED);
 
       console.log(
         `Processing ${itemsToProcess.length} items from ${getFeedDisplayName(
@@ -831,7 +1101,6 @@ async function fetchFeedsWithProgressiveRelaxation(
 
         if (qualifiedItems.length >= TARGET_BUFFER) break;
 
-        // Parse with relaxation flag
         const parsed = parseFeedItem(
           item,
           feedUrl,
@@ -846,18 +1115,41 @@ async function fetchFeedsWithProgressiveRelaxation(
         const key = parsed.guid || parsed.link;
         if (seen.has(key)) continue;
 
-        // Source limit - relax when needed
-        const maxPerSource = relaxFilters
-          ? config.SOURCE_RULES.MAX_PER_DOMAIN * 2
-          : config.SOURCE_RULES.MAX_PER_DOMAIN;
+        // VERY STRICT domain limits - max 1 per domain initially
+        const domain = extractDomain(parsed.link || feedUrl);
+        const currentDomainCount = domainCounts.get(domain) || 0;
 
+        // Start with 1 per domain, only increase if we need more items
+        let maxPerDomain = 1;
+        if (qualifiedItems.length < MIN_ITEMS_REQUIRED && feedsProcessed > 4) {
+          maxPerDomain = 2;
+        }
+        if (relaxFilters && qualifiedItems.length < 3) {
+          maxPerDomain = 3;
+        }
+
+        if (currentDomainCount >= maxPerDomain) {
+          console.log(
+            `DOMAIN LIMIT: Skipping article from ${domain} (already have ${currentDomainCount})`
+          );
+          continue;
+        }
+
+        // Source limit
         const sourceCount = sourceCounts.get(parsed.source) || 0;
-        if (sourceCount >= maxPerSource) continue;
+        if (sourceCount >= 2) continue;
 
-        // Item qualified!
         seen.add(key);
         sourceCounts.set(parsed.source, sourceCount + 1);
+        domainCounts.set(domain, currentDomainCount + 1);
         qualifiedItems.push(parsed);
+
+        console.log(
+          `ACCEPTED: "${parsed.title.substring(
+            0,
+            50
+          )}..." from ${domain} (domain count: ${currentDomainCount + 1})`
+        );
       }
     } catch (error) {
       console.error(`Error fetching ${feedUrl}:`, error.message);
@@ -867,80 +1159,22 @@ async function fetchFeedsWithProgressiveRelaxation(
   console.log(
     `Processed ${totalProcessed} items, qualified ${qualifiedItems.length}`
   );
+  console.log(`Domain distribution:`, Object.fromEntries(domainCounts));
 
-  // If still not enough items, try one more pass with maximum relaxation
-  if (
-    qualifiedItems.length < MIN_ITEMS_REQUIRED &&
-    feedsProcessed < feedUrls.length
-  ) {
-    console.log(
-      `EMERGENCY MODE: Only ${qualifiedItems.length} items, trying emergency fetch`
-    );
+  // NO EMERGENCY MODE - maintain quality standards
 
-    for (
-      let i = feedsProcessed;
-      i < Math.min(feedUrls.length, feedsProcessed + 3);
-      i++
-    ) {
-      if (Date.now() - startTime > TIMEOUT_MS) break;
-
-      try {
-        const feed = await parser.parseURL(feedUrls[i]);
-        const emergencyItems = feed.items.slice(0, 30); // Process many items
-
-        for (const item of emergencyItems) {
-          if (qualifiedItems.length >= MIN_ITEMS_REQUIRED) break;
-
-          // Ultra-relaxed parsing - just need title and link
-          if (item.title && item.link) {
-            const key = item.guid || item.link;
-            if (!seen.has(key)) {
-              seen.add(key);
-              const emergencyItem = {
-                title: item.title.substring(0, 200),
-                link: item.link,
-                description: item.description?.substring(0, 200) || item.title,
-                thumbnail: null,
-                allowDefaultIcon: true,
-                qualityScore: 0.2, // Low but non-zero for diversity rules
-                source: getFeedDisplayName(feedUrls[i]),
-                sourceUrl: feedUrls[i],
-                creator:
-                  item.creator ||
-                  item.author ||
-                  getFeedDisplayName(feedUrls[i]),
-                guid: key,
-                pubDate: item.pubDate || new Date().toISOString(),
-                time: new Date(item.pubDate || Date.now()).toLocaleString(),
-              };
-              // Calculate basic quality score even for emergency items
-              emergencyItem.qualityScore = scoreArticleQuality(
-                emergencyItem,
-                category,
-                subcategory
-              );
-              qualifiedItems.push(emergencyItem);
-            }
-          }
-        }
-      } catch (error) {
-        console.error(`Emergency fetch error:`, error.message);
-      }
-    }
-  }
-
-  // Sort by date first
+  // Sort by date
   qualifiedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-  // Apply diversity filters BEFORE final deduplication
-  const diversityFiltered = applyDiversityFilters(
+  // Apply strict diversity filters with even stricter domain limits
+  const diversityFiltered = applyDiversityFiltersStrict(
     qualifiedItems,
     category,
     subcategory,
     MIN_ITEMS_REQUIRED
   );
 
-  // Take only the required number of items
+  // Take only required number
   const finalItems = diversityFiltered.slice(0, MAX_ITEMS);
 
   console.log(
@@ -998,7 +1232,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Use progressive relaxation fetch
+    // Use progressive relaxation fetch with stricter requirements
     const finalItems = await fetchFeedsWithProgressiveRelaxation(
       feedUrls,
       category,
@@ -1012,7 +1246,7 @@ export default async function handler(req, res) {
       );
     }
 
-    // Calculate domain diversity metrics for logging
+    // Calculate domain diversity metrics
     const domainCounts = {};
     finalItems.forEach((item) => {
       const domain = extractDomain(item.link || item.sourceUrl);
