@@ -20,9 +20,11 @@
     NO_SPECIAL_CHAR_START    - Reject descriptions starting with special chars
     NO_URLS_IN_DESCRIPTION   - Block descriptions with URLs
     QUALITY_CHECK            - Enable quality validation (spam/gibberish/etc.)
+    QUALITY_SCORE_THRESHOLD  - Minimum quality score (0-1) for articles with thumbnails
+    QUALITY_SCORE_NO_THUMBNAIL - Minimum quality score (0-1) for articles without thumbnails
 
   SOURCE_RULES:
-    MAX_PER_SOURCE    - Maximum articles per unique source
+    MAX_PER_SOURCE    - Maximum articles per unique source (deprecated - use MAX_PER_DOMAIN)
     MAX_PER_DOMAIN    - Maximum articles per domain
 
   AGE_RULES:
@@ -41,10 +43,19 @@
     UNCOMMON_WORDS   - Require article word uniqueness (true/false)
     FINGERPRINT_LENGTH - Character length used for deduplication hashing
 
+  DIVERSITY_RULES (NEW):
+    MAX_PER_DOMAIN           - Maximum articles from same domain (overrides SOURCE_RULES.MAX_PER_DOMAIN)
+    UNIQUE_DATE_PER_DOMAIN   - No multiple same-day articles from same source (true/false)
+    NO_CONSECUTIVE_SAME_DOMAIN - Prevent back-to-back articles from same source (true/false)
+    WEIGHTED_SHUFFLE         - Apply quality-weighted randomization (true/false)
+    QUALITY_SCORE_THRESHOLD  - Minimum quality score (0-1) for inclusion
+    QUALITY_SCORE_NO_THUMBNAIL - Higher threshold for articles without images (0-1)
+
   LIMITS:
     MAX_ITEMS            - Maximum items returned per request
     MAX_ITEMS_PER_FEED   - Maximum items processed per feed
     TARGET_BUFFER        - Buffer size built before filtering
+    MIN_ITEMS_REQUIRED   - Minimum items that must be returned
 
   PROMOTIONAL_KEYWORDS:
     Blocks articles containing specified promotional terms
@@ -54,45 +65,54 @@ const CATEGORY_FILTER_CONFIG = {
   // Global defaults (applied unless overridden)
   DEFAULT: {
     TITLE_RULES: {
-      MIN_LENGTH: 10, // Minimum title length of ${value} characters
-      MAX_LENGTH: 110, // Maximum title length of ${value} characters
-      NO_ALL_CAPS: true, // Reject if title is all uppercase
-      NO_ALL_LOWERCASE: true, // Reject if title is all lowercase
-      NO_SPAM_PATTERNS: true, // Reject titles with common spam patterns
-      ENGLISH_ONLY: true, // Accept only English titles
-      NO_PROMOTIONAL_KEYWORDS: true, // Reject titles with promotional keywords
+      MIN_LENGTH: 10,
+      MAX_LENGTH: 110,
+      NO_ALL_CAPS: true,
+      NO_ALL_LOWERCASE: true,
+      NO_SPAM_PATTERNS: true,
+      ENGLISH_ONLY: true,
+      NO_PROMOTIONAL_KEYWORDS: true,
     },
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 30, // Minimum description length of ${value} characters
-      NO_LOWERCASE_START: true, // Reject if description starts with a lowercase letter
-      NO_SPECIAL_CHAR_START: true, // Reject if description starts with special character
-      NO_URLS_IN_DESCRIPTION: true, // Block descriptions containing URLs
-      NO_CODE_CONTENT: true, // Block articles with code snippets
-      QUALITY_CHECK: true, // Enable quality checks (spam, gibberish, etc.)
-      MAX_EMOJI_SYMBOLS: 3, // Maximum of ${value} emoji/symbols allowed in description
+      MIN_DESCRIPTION_LENGTH: 30,
+      NO_LOWERCASE_START: true,
+      NO_SPECIAL_CHAR_START: true,
+      NO_URLS_IN_DESCRIPTION: true,
+      NO_CODE_CONTENT: true,
+      QUALITY_CHECK: true,
+      MAX_EMOJI_SYMBOLS: 3,
+      // NEW: Quality thresholds for diversity rules
+      QUALITY_SCORE_THRESHOLD: 0.3,
+      QUALITY_SCORE_NO_THUMBNAIL: 0.5,
     },
     SOURCE_RULES: {
-      MAX_PER_DOMAIN: 3, //Maximum ${value} articles per domain
-      //SOURCE_DIVERSITY: 3,
+      MAX_PER_DOMAIN: 3, // Used by diversity rules
     },
     AGE_RULES: {
-      MAX_AGE_DAYS: 90, // Default to 14 days
+      MAX_AGE_DAYS: 90,
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
       VALIDATE_REAL_IMAGE: true,
-      //MIN_WIDTH: 100,
-      //MIN_HEIGHT: 100,
-      //USE_DEFAULT_ON_HIGH_QUALITY: true,
-      //MIN_QUALITY_SCORE_FOR_DEFAULT: 35,
     },
     DEDUPLICATION: {
       CROSS_FEED: false,
       UNCOMMON_WORDS: true,
     },
+    // NEW: Diversity rules section
+    DIVERSITY_RULES: {
+      MAX_PER_DOMAIN: 3,
+      UNIQUE_DATE_PER_DOMAIN: true,
+      NO_CONSECUTIVE_SAME_DOMAIN: true,
+      WEIGHTED_SHUFFLE: true,
+      QUALITY_SCORE_THRESHOLD: 0.3,
+      QUALITY_SCORE_NO_THUMBNAIL: 0.5,
+    },
     LIMITS: {
-      MAX_QUESTIONS: 10,
-      HOUR_DISTRIBUTION: 10,
+      MAX_ITEMS: 10,
+      MAX_ITEMS_PER_FEED: 20,
+      TARGET_BUFFER: 25,
+      MIN_ITEMS_REQUIRED: 5,
     },
     PROMOTIONAL_KEYWORDS: [
       "$",
@@ -135,45 +155,57 @@ const CATEGORY_FILTER_CONFIG = {
   // Category-level overrides
   tech: {
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 30, /// CHANGED (was 50) - Lower to allow shorter summaries
+      MIN_DESCRIPTION_LENGTH: 30,
       NO_CODE_CONTENT: false,
+      QUALITY_SCORE_THRESHOLD: 0.35, // Slightly higher for tech
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
       VALIDATE_REAL_IMAGE: true,
     },
+    DIVERSITY_RULES: {
+      MAX_PER_DOMAIN: 2, // More diversity for tech
+      UNIQUE_DATE_PER_DOMAIN: true,
+      NO_CONSECUTIVE_SAME_DOMAIN: true,
+    },
     // Subcategory-specific overrides within tech
     subcategories: {
       "ai-machine-learning": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 20, /// CHANGED (was 40) - Lower for higher inclusion
+          MIN_DESCRIPTION_LENGTH: 20,
           NO_CODE_CONTENT: false,
         },
         LIMITS: {
-          MAX_QUESTIONS: 10, /// CHANGED (was 5) - Allow more questions per feed
+          MAX_QUESTIONS: 10,
         },
       },
       "martech-adtech": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 20, /// CHANGED (was 30) - Lower to match broader filter
+          MIN_DESCRIPTION_LENGTH: 20,
         },
         AGE_RULES: {
-          MAX_AGE_DAYS: 30, /// CHANGED (was 14) - Much older articles are now included
+          MAX_AGE_DAYS: 30,
         },
       },
       "web-dev-devops": {
         CONTENT_RULES: {
           NO_CODE_CONTENT: false,
         },
+        DIVERSITY_RULES: {
+          MAX_PER_DOMAIN: 3, // Allow more from same source for tutorials
+        },
       },
       "cybersecurity-privacy": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 30, /// CHANGED (was 7) - Allow older articles for longer relevance
+          MAX_AGE_DAYS: 30,
         },
       },
       "blockchain-web3": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 20, /// CHANGED (was 40)
+          MIN_DESCRIPTION_LENGTH: 20,
+        },
+        DIVERSITY_RULES: {
+          UNIQUE_DATE_PER_DOMAIN: false, // Crypto sites post multiple updates daily
         },
         PROMOTIONAL_KEYWORDS: [
           "price prediction",
@@ -189,37 +221,45 @@ const CATEGORY_FILTER_CONFIG = {
 
   builder: {
     TITLE_RULES: {
-      MIN_LENGTH: 8, /// CHANGED (was 10) - Allow shorter titles
+      MIN_LENGTH: 8,
       NO_ALL_CAPS: true,
       NO_ALL_LOWERCASE: true,
     },
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 20, /// CHANGED (was 30)
+      MIN_DESCRIPTION_LENGTH: 20,
       NO_SPECIAL_CHAR_START: true,
       NO_URLS_IN_DESCRIPTION: true,
       NO_CODE_CONTENT: true,
       QUALITY_CHECK: true,
       MAX_EMOJI_SYMBOLS: 2,
+      QUALITY_SCORE_THRESHOLD: 0.3,
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
       VALIDATE_REAL_IMAGE: true,
     },
     AGE_RULES: {
-      MAX_AGE_DAYS: 40, /// CHANGED (was 14)
+      MAX_AGE_DAYS: 40,
     },
     DEDUPLICATION: {
       UNCOMMON_WORDS: true,
     },
+    DIVERSITY_RULES: {
+      MAX_PER_DOMAIN: 3,
+      WEIGHTED_SHUFFLE: true,
+    },
     subcategories: {
       "startup-stories": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 20, /// CHANGED (was 40)
+          MIN_DESCRIPTION_LENGTH: 20,
         },
       },
       "productivity-hacks": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 90, /// CHANGED (was 30)
+          MAX_AGE_DAYS: 90,
+        },
+        DIVERSITY_RULES: {
+          MAX_PER_DOMAIN: 4, // Allow more from productivity gurus
         },
       },
       "automation-no-code": {
@@ -229,15 +269,19 @@ const CATEGORY_FILTER_CONFIG = {
       },
       "project-management": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 20, /// CHANGED (was 40)
+          MIN_DESCRIPTION_LENGTH: 20,
         },
       },
       "momentum-mindset": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 90, /// CHANGED (was 60)
+          MAX_AGE_DAYS: 90,
         },
         CONTENT_RULES: {
           QUALITY_CHECK: false,
+        },
+        DIVERSITY_RULES: {
+          MAX_PER_DOMAIN: 4, // Allow more from same philosophical sources
+          UNIQUE_DATE_PER_DOMAIN: false,
         },
       },
     },
@@ -248,10 +292,11 @@ const CATEGORY_FILTER_CONFIG = {
       MIN_LENGTH: 8,
     },
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 20, /// CHANGED (was 40)
+      MIN_DESCRIPTION_LENGTH: 20,
       NO_CODE_CONTENT: true,
       QUALITY_CHECK: true,
       MAX_EMOJI_SYMBOLS: 3,
+      QUALITY_SCORE_THRESHOLD: 0.25, // Lower for art feeds
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
@@ -261,7 +306,12 @@ const CATEGORY_FILTER_CONFIG = {
       UNCOMMON_WORDS: true,
     },
     AGE_RULES: {
-      MAX_AGE_DAYS: 90, /// CHANGED (was 30)
+      MAX_AGE_DAYS: 90,
+    },
+    DIVERSITY_RULES: {
+      MAX_PER_DOMAIN: 3,
+      WEIGHTED_SHUFFLE: true,
+      QUALITY_SCORE_THRESHOLD: 0.25,
     },
     subcategories: {
       "generative-ai-art": {
@@ -274,13 +324,16 @@ const CATEGORY_FILTER_CONFIG = {
           REQUIRED: true,
           VALIDATE_REAL_IMAGE: true,
         },
+        DIVERSITY_RULES: {
+          MAX_PER_DOMAIN: 2, // More diversity for design trends
+        },
       },
       "color-typography": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 10, /// CHANGED (was 30)
+          MIN_DESCRIPTION_LENGTH: 10,
         },
         AGE_RULES: {
-          MAX_AGE_DAYS: 90, /// CHANGED (was 40)
+          MAX_AGE_DAYS: 90,
         },
       },
       "animation-motion": {
@@ -296,39 +349,56 @@ const CATEGORY_FILTER_CONFIG = {
         AGE_RULES: {
           MAX_AGE_DAYS: 90,
         },
+        DIVERSITY_RULES: {
+          MAX_PER_DOMAIN: 4, // Allow more tutorials from same source
+          NO_CONSECUTIVE_SAME_DOMAIN: false,
+        },
       },
     },
   },
 
   gaming: {
     TITLE_RULES: {
-      MIN_LENGTH: 8, /// CHANGED (was 8)
+      MIN_LENGTH: 8,
       NO_ALL_CAPS: true,
     },
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 20, /// CHANGED (was 40)
-      MAX_EMOJI_SYMBOLS: 4, /// CHANGED (was 5)
+      MIN_DESCRIPTION_LENGTH: 20,
+      MAX_EMOJI_SYMBOLS: 4,
       QUALITY_CHECK: false,
+      QUALITY_SCORE_THRESHOLD: 0.25,
     },
     AGE_RULES: {
-      MAX_AGE_DAYS: 90, /// CHANGED (was 14)
+      MAX_AGE_DAYS: 90,
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
       VALIDATE_REAL_IMAGE: true,
     },
+    DIVERSITY_RULES: {
+      MAX_PER_DOMAIN: 4,
+      UNIQUE_DATE_PER_DOMAIN: false, // Gaming sites post multiple reviews/news daily
+      WEIGHTED_SHUFFLE: true,
+    },
     subcategories: {
       "daily-roundup": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 6, /// CHANGED (was 3)
+          MAX_AGE_DAYS: 6,
         },
         CONTENT_RULES: {
           QUALITY_CHECK: true,
+        },
+        DIVERSITY_RULES: {
+          MAX_PER_DOMAIN: 2, // More diversity for daily news
         },
       },
       "pro-guides-tips": {
         AGE_RULES: {
           MAX_AGE_DAYS: 90,
+        },
+        DIVERSITY_RULES: {
+          MAX_PER_DOMAIN: 5, // Allow more guides from same source
+          NO_CONSECUTIVE_SAME_DOMAIN: false,
         },
       },
       "retro-gaming": {
@@ -342,12 +412,18 @@ const CATEGORY_FILTER_CONFIG = {
       },
       "indie-spotlights": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 10, /// CHANGED (was 30)
+          MIN_DESCRIPTION_LENGTH: 10,
+        },
+        DIVERSITY_RULES: {
+          MAX_PER_DOMAIN: 3,
         },
       },
       "collectors-hub": {
         AGE_RULES: {
           MAX_AGE_DAYS: 90,
+        },
+        DIVERSITY_RULES: {
+          UNIQUE_DATE_PER_DOMAIN: true,
         },
       },
     },
@@ -430,9 +506,13 @@ function qualifiesForDefaultIcon(item, qualityScore, category, subcategory) {
     return false;
   }
 
-  return (
-    qualityScore >= (config.THUMBNAIL_RULES.MIN_QUALITY_SCORE_FOR_DEFAULT || 35)
-  );
+  // Use diversity quality threshold if available
+  const minScore =
+    config.DIVERSITY_RULES?.QUALITY_SCORE_NO_THUMBNAIL ||
+    config.THUMBNAIL_RULES.MIN_QUALITY_SCORE_FOR_DEFAULT ||
+    0.5;
+
+  return qualityScore >= minScore;
 }
 
 // Universal export that works in both Node.js and ES6 environments

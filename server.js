@@ -1272,7 +1272,17 @@ const parseFeedItem = async (
   };
 
   // Calculate quality score BEFORE thumbnail check
-  const qualityScore = scoreArticleQuality(tempItem, category, subcategory);
+  //const qualityScore = scoreArticleQuality(tempItem, category, subcategory);
+  const qualityScore = scoreArticleQuality(
+    {
+      title,
+      description,
+      thumbnail,
+      pubDate,
+    },
+    category,
+    subcategory
+  );
 
   // Thumbnail validation with quality-based fallback
   const thumbnail = await extractBestThumbnail(item, source);
@@ -1396,57 +1406,246 @@ const fetchSingleFeed = async (url, timeout = 8000) => {
   });
 };
 
-// Enhanced quality scoring function (keep your existing one but ensure it returns a number)
+// Enhanced quality scoring function (0-1 scale for diversity rules)
 const scoreArticleQuality = (item, category = null, subcategory = null) => {
   let score = 0;
 
-  // Base scoring (your existing logic)
-  if (item.thumbnail) score += 20;
-  if (!containsCodeOrTechnical(item.description)) score += 10;
-  if (
-    isHighQualityDescription(
-      item.description,
-      item.title,
-      category,
-      subcategory
-    )
-  )
-    score += 10;
+  // Thumbnail is now worth more (for diversity rules)
+  if (item.thumbnail) score += 0.3;
 
-  const specialCount = (item.title.match(/[^\w\s\-.,!?'"]/g) || []).length;
-  if (specialCount === 0) score += 5;
+  // Description quality
+  if (item.description) {
+    if (item.description.length > 150) score += 0.2;
+    else if (item.description.length > 100) score += 0.15;
+    else if (item.description.length > 50) score += 0.1;
+  }
 
-  if (item.title && item.title.length > 30) score += 2;
-  if (item.title && !item.title.includes("|")) score += 1;
+  // Title quality
+  if (item.title) {
+    if (item.title.length > 40) score += 0.1;
+    else if (item.title.length > 20) score += 0.05;
+  }
 
-  if (item.description && item.description.length > 100) score += 3;
-  if (item.description && item.description.length > 150) score += 2;
-  if (item.description && !item.description.includes("Read more")) score += 1;
-
+  // Recency bonus
   const hoursSincePublished =
     (Date.now() - new Date(item.pubDate)) / (1000 * 60 * 60);
-  if (hoursSincePublished < 24) score += 5;
-  else if (hoursSincePublished < 72) score += 3;
-  else if (hoursSincePublished < 168) score += 1;
+  if (hoursSincePublished < 24) score += 0.25;
+  else if (hoursSincePublished < 72) score += 0.15;
+  else if (hoursSincePublished < 168) score += 0.05;
 
   // Category-specific bonuses
-  if (
-    category === "tech" &&
-    item.description &&
-    item.description.length > 200
-  ) {
-    score += 5;
+  if (category === "tech" && item.description?.length > 150) score += 0.05;
+  if (category === "builder" && /how|guide|tutorial|tips/i.test(item.title))
+    score += 0.05;
+  if (category === "art" && item.thumbnail) score += 0.05;
+  if (category === "gaming" && item.thumbnail) score += 0.05;
+
+  // Normalize to 0-1 range
+  return Math.min(1, score);
+};
+
+function extractDomain(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
   }
-  if (
-    category === "builder" &&
-    item.title &&
-    /how|guide|tutorial|tips/i.test(item.title)
-  ) {
-    score += 3;
+}
+
+function validateImage(imgUrl) {
+  if (!imgUrl) return false;
+  if (typeof imgUrl !== "string") return false;
+
+  // Check for common non-article image patterns
+  const invalidPatterns = [
+    /favicon/i,
+    /\.ico$/i,
+    /logo/i,
+    /avatar/i,
+    /icon[-_]?\d+x\d+/i,
+    /16x16|32x32|48x48|64x64/i,
+  ];
+
+  return (
+    !invalidPatterns.some((pattern) => pattern.test(imgUrl)) &&
+    imgUrl.length > 5
+  );
+}
+
+function formatDate(dateStr) {
+  try {
+    return new Date(dateStr).toISOString().split("T")[0]; // YYYY-MM-DD
+  } catch {
+    return null;
+  }
+}
+
+// Weighted random shuffle by quality
+function weightedShuffle(articles) {
+  return articles
+    .map((a) => ({
+      ...a,
+      weight: Math.pow(a.qualityScore || 0.5, 2) + Math.random() * 0.1,
+    }))
+    .sort((a, b) => b.weight - a.weight);
+}
+
+// Get diversity rules from filterConfig
+function getDiversityRules(category, subcategory) {
+  const config = getFilterConfig(category, subcategory);
+
+  // Extract diversity rules from config
+  return {
+    QUALITY_SCORE_THRESHOLD:
+      config.DIVERSITY_RULES?.QUALITY_SCORE_THRESHOLD ||
+      config.CONTENT_RULES?.QUALITY_SCORE_THRESHOLD ||
+      0.3,
+    QUALITY_SCORE_NO_THUMBNAIL:
+      config.DIVERSITY_RULES?.QUALITY_SCORE_NO_THUMBNAIL ||
+      config.CONTENT_RULES?.QUALITY_SCORE_NO_THUMBNAIL ||
+      0.5,
+    MAX_PER_DOMAIN:
+      config.DIVERSITY_RULES?.MAX_PER_DOMAIN ||
+      config.SOURCE_RULES?.MAX_PER_DOMAIN ||
+      3,
+    UNIQUE_DATE_PER_DOMAIN:
+      config.DIVERSITY_RULES?.UNIQUE_DATE_PER_DOMAIN !== undefined
+        ? config.DIVERSITY_RULES.UNIQUE_DATE_PER_DOMAIN
+        : true,
+    NO_CONSECUTIVE_SAME_DOMAIN:
+      config.DIVERSITY_RULES?.NO_CONSECUTIVE_SAME_DOMAIN !== undefined
+        ? config.DIVERSITY_RULES.NO_CONSECUTIVE_SAME_DOMAIN
+        : true,
+    WEIGHTED_SHUFFLE:
+      config.DIVERSITY_RULES?.WEIGHTED_SHUFFLE !== undefined
+        ? config.DIVERSITY_RULES.WEIGHTED_SHUFFLE
+        : true,
+  };
+}
+
+// Apply diversity filters to collected articles
+function applyDiversityFilters(
+  articles,
+  category,
+  subcategory,
+  minRequired = 5
+) {
+  const rules = getDiversityRules(category, subcategory);
+
+  console.log(`Applying diversity filters to ${articles.length} articles`);
+  console.log(`Rules:`, rules);
+
+  // Step 1: Quality + Thumbnail enforcement
+  let filtered = articles.filter((a) => {
+    const hasValidThumbnail = a.thumbnail && validateImage(a.thumbnail);
+    const qualityThreshold = hasValidThumbnail
+      ? rules.QUALITY_SCORE_THRESHOLD
+      : rules.QUALITY_SCORE_NO_THUMBNAIL;
+
+    return (a.qualityScore || 0) >= qualityThreshold;
+  });
+
+  console.log(`After quality filter: ${filtered.length} articles`);
+
+  // If we don't have enough articles, be more lenient
+  if (filtered.length < minRequired) {
+    console.log(
+      `Not enough articles (${filtered.length} < ${minRequired}), relaxing quality threshold`
+    );
+    filtered = articles.filter(
+      (a) => (a.qualityScore || 0) >= rules.QUALITY_SCORE_THRESHOLD * 0.5
+    );
   }
 
-  return score;
-};
+  // Step 2: Shuffle weighted by quality (if enabled)
+  let shuffled = rules.WEIGHTED_SHUFFLE ? weightedShuffle(filtered) : filtered;
+
+  // Step 3: Enforce domain caps + unique-date-per-domain
+  const domainCounts = {};
+  const domainDates = {};
+  const capped = [];
+
+  for (let article of shuffled) {
+    const domain = extractDomain(article.link || article.sourceUrl);
+    const pubDate = formatDate(article.pubDate);
+
+    domainCounts[domain] = domainCounts[domain] || 0;
+    domainDates[domain] = domainDates[domain] || new Set();
+
+    // Enforce max-per-domain cap (relax if we need minimum articles)
+    const effectiveMaxPerDomain =
+      capped.length < minRequired
+        ? rules.MAX_PER_DOMAIN * 2
+        : rules.MAX_PER_DOMAIN;
+
+    if (domainCounts[domain] >= effectiveMaxPerDomain) continue;
+
+    // Enforce unique-date-per-domain rule (skip if we need minimum)
+    if (
+      rules.UNIQUE_DATE_PER_DOMAIN &&
+      capped.length >= minRequired &&
+      pubDate &&
+      domainDates[domain].has(pubDate)
+    ) {
+      continue;
+    }
+
+    capped.push(article);
+    domainCounts[domain]++;
+    if (pubDate) domainDates[domain].add(pubDate);
+  }
+
+  console.log(`After domain diversity: ${capped.length} articles`);
+
+  // Step 4: Enforce "no consecutive same-domain" (only if we have enough articles)
+  if (rules.NO_CONSECUTIVE_SAME_DOMAIN && capped.length >= minRequired) {
+    const spaced = [];
+    const deferred = [];
+
+    capped.forEach((article) => {
+      const domain = extractDomain(article.link || article.sourceUrl);
+      const lastArticle = spaced[spaced.length - 1];
+      const lastDomain = lastArticle
+        ? extractDomain(lastArticle.link || lastArticle.sourceUrl)
+        : null;
+
+      if (!lastDomain || lastDomain !== domain) {
+        spaced.push(article);
+      } else {
+        deferred.push(article);
+      }
+    });
+
+    // Add deferred articles at the end
+    deferred.forEach((article) => {
+      const domain = extractDomain(article.link || article.sourceUrl);
+      let inserted = false;
+
+      // Try to insert between different domains
+      for (let i = spaced.length - 1; i > 0; i--) {
+        const prevDomain = extractDomain(
+          spaced[i - 1].link || spaced[i - 1].sourceUrl
+        );
+        const nextDomain = extractDomain(spaced[i].link || spaced[i].sourceUrl);
+
+        if (prevDomain !== domain && nextDomain !== domain) {
+          spaced.splice(i, 0, article);
+          inserted = true;
+          break;
+        }
+      }
+
+      if (!inserted) {
+        spaced.push(article);
+      }
+    });
+
+    console.log(`After spacing: ${spaced.length} articles`);
+    return spaced;
+  }
+
+  return capped;
+}
 
 // SIMPLIFIED API ENDPOINTS using filterConfig
 
@@ -1634,6 +1833,7 @@ app.post("/api/feeds", async (req, res) => {
 
   // OPTIMIZED CONFIGURATION
   const MAX_ITEMS = 10;
+  const MIN_ITEMS = 5; // Minimum items to return
   const MAX_ITEMS_PER_FEED = 10;
   const TARGET_BUFFER = 15;
   const MAX_FEEDS_TO_TRY = 5;
@@ -1714,10 +1914,13 @@ app.post("/api/feeds", async (req, res) => {
           const key = parsedItem.guid || parsedItem.link;
           if (seen.has(key)) continue;
 
+          // Note: Initial domain filtering here is kept minimal
+          // The main diversity filtering happens later
           const baseDomain = getBaseDomain(parsedItem.link);
           if (baseDomain) {
             const domainCount = domainCounter.get(baseDomain) || 0;
-            if (domainCount >= config.SOURCE_RULES.MAX_PER_DOMAIN) continue;
+            // Use a higher limit here since we'll filter more strictly later
+            if (domainCount >= config.SOURCE_RULES.MAX_PER_DOMAIN * 2) continue;
             domainCounter.set(baseDomain, domainCount + 1);
           }
 
@@ -1734,63 +1937,63 @@ app.post("/api/feeds", async (req, res) => {
     );
     console.log(`📊 Qualified items: ${qualifiedItems.length}`);
 
-    // Sort by date
+    // ============================================
+    // NEW DIVERSITY FILTERING SECTION
+    // ============================================
+
+    // Sort by date first
     qualifiedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-    // Final filtering based on config
-    let finalItems = [];
+    // Apply diversity filters to ensure variety and quality
+    const diversityFiltered = applyDiversityFilters(
+      qualifiedItems,
+      category,
+      subcategory,
+      MIN_ITEMS
+    );
 
-    if (config.DEDUPLICATION.UNCOMMON_WORDS === false) {
-      // No uncommon word filtering
-      finalItems = qualifiedItems.slice(0, MAX_ITEMS);
-    } else {
-      // Apply uncommon word deduplication
-      const usedUncommonWords = new Set();
-      const commonWords = new Set([
-        "the",
-        "and",
-        "for",
-        "with",
-        "from",
-        "that",
-        "this",
-        "what",
-        "when",
-        "where",
-        "which",
-        "while",
-        "after",
-        "before",
-        "about",
-      ]);
+    // Take only the required number of items
+    const finalItems = diversityFiltered.slice(0, MAX_ITEMS);
 
-      for (const item of qualifiedItems) {
-        if (finalItems.length >= MAX_ITEMS) break;
+    console.log(
+      `📊 Final items after diversity filtering: ${finalItems.length}`
+    );
 
-        const titleWords = item.title
-          .toLowerCase()
-          .replace(/[^a-z0-9\s]/g, " ")
-          .split(/\s+/)
-          .filter((word) => word.length > 4 && !commonWords.has(word));
+    // Calculate diversity metrics for response
+    const domainCounts = {};
+    const domainSet = new Set();
+    let totalQualityScore = 0;
+    let thumbnailCount = 0;
 
-        const hasDuplicate = titleWords.some((word) =>
-          usedUncommonWords.has(word)
-        );
+    finalItems.forEach((item) => {
+      const domain = extractDomain(item.link || item.sourceUrl);
+      domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+      domainSet.add(domain);
+      totalQualityScore += item.qualityScore || 0;
+      if (item.thumbnail) thumbnailCount++;
+    });
 
-        if (!hasDuplicate) {
-          finalItems.push(item);
-          titleWords.forEach((word) => usedUncommonWords.add(word));
-        }
-      }
-    }
+    const avgQualityScore =
+      finalItems.length > 0
+        ? (totalQualityScore / finalItems.length).toFixed(2)
+        : 0;
 
-    console.log(`📊 Final items: ${finalItems.length}`);
+    // Log diversity metrics
+    console.log(`📊 Diversity metrics:`, {
+      uniqueDomains: domainSet.size,
+      avgQualityScore,
+      withThumbnails: thumbnailCount,
+      domainDistribution: domainCounts,
+    });
 
     const stats = filterStats.getReport();
     console.log(
       `📊 Stats - Processed: ${stats.totalProcessed}, Passed: ${stats.passed}, Rate: ${stats.filterRate}`
     );
 
+    // ============================================
+    // ENHANCED RESPONSE WITH DIVERSITY METRICS
+    // ============================================
     res.json({
       items: finalItems,
       count: finalItems.length,
@@ -1798,6 +2001,15 @@ app.post("/api/feeds", async (req, res) => {
       subcategory,
       config: DEBUG_MODE ? config : undefined,
       stats: DEBUG_MODE ? stats : undefined,
+      // NEW: Include diversity metrics in response
+      diversity: {
+        uniqueDomains: domainSet.size,
+        avgQualityScore: parseFloat(avgQualityScore),
+        withThumbnails: thumbnailCount,
+        domainDistribution: DEBUG_MODE ? domainCounts : undefined,
+        minimumMet: finalItems.length >= MIN_ITEMS,
+      },
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error("Feed fetching error:", error);
@@ -2163,11 +2375,32 @@ module.exports = async (req, res) => {
     }
 
     // Use optimized fetch with early exit - SAME AS DEVELOPMENT SERVER
-    const finalItems = await fetchFeedsWithEarlyExit(
+    const qualifiedItems = await fetchFeedsWithEarlyExit(
       feedUrls,
       category,
       subcategory
     );
+
+    // Sort by date first
+    qualifiedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+    // Apply diversity filters
+    const diversityFiltered = applyDiversityFilters(
+      qualifiedItems,
+      category,
+      subcategory,
+      5 // MIN_ITEMS_REQUIRED
+    );
+
+    // Take only the required number of items
+    const finalItems = diversityFiltered.slice(0, 10); // MAX_ITEMS
+
+    // Calculate diversity metrics
+    const domainCounts = {};
+    finalItems.forEach((item) => {
+      const domain = extractDomain(item.link || item.sourceUrl);
+      domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+    });
 
     return res.status(200).json({
       items: finalItems,
@@ -2176,6 +2409,13 @@ module.exports = async (req, res) => {
       subcategory,
       timestamp: new Date().toISOString(),
       success: true,
+      diversity: {
+        uniqueDomains: Object.keys(domainCounts).length,
+        avgQualityScore:
+          finalItems.reduce((sum, item) => sum + (item.qualityScore || 0), 0) /
+          finalItems.length,
+        withThumbnails: finalItems.filter((item) => item.thumbnail).length,
+      },
       configUsed: {
         maxAgeDays: config.AGE_RULES.MAX_AGE_DAYS,
         minDescLength: config.CONTENT_RULES.MIN_DESCRIPTION_LENGTH,

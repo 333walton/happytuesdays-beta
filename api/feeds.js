@@ -371,22 +371,248 @@ const cleanDescription = (rawDescription, title, category, subcategory) => {
   return cleaned;
 };
 
-// Quality scoring function
+// Quality scoring function - Enhanced for diversity rules
 const scoreArticleQuality = (item, category, subcategory) => {
   let score = 0;
 
-  if (item.thumbnail) score += 20;
-  if (item.description && item.description.length > 50) score += 10;
-  if (item.title && item.title.length > 20) score += 5;
+  // Thumbnail is now worth more (for diversity rules)
+  if (item.thumbnail) score += 0.3;
 
+  // Description quality
+  if (item.description) {
+    if (item.description.length > 150) score += 0.2;
+    else if (item.description.length > 100) score += 0.15;
+    else if (item.description.length > 50) score += 0.1;
+  }
+
+  // Title quality
+  if (item.title) {
+    if (item.title.length > 40) score += 0.1;
+    else if (item.title.length > 20) score += 0.05;
+  }
+
+  // Recency bonus
   const hoursSincePublished =
     (Date.now() - new Date(item.pubDate)) / (1000 * 60 * 60);
-  if (hoursSincePublished < 24) score += 10;
-  else if (hoursSincePublished < 72) score += 5;
-  else if (hoursSincePublished < 168) score += 2;
+  if (hoursSincePublished < 24) score += 0.25;
+  else if (hoursSincePublished < 72) score += 0.15;
+  else if (hoursSincePublished < 168) score += 0.05;
 
-  return score;
+  // Category-specific bonuses
+  if (category === "tech" && item.description?.length > 150) score += 0.05;
+  if (category === "builder" && /how|guide|tutorial|tips/i.test(item.title))
+    score += 0.05;
+  if (category === "art" && item.thumbnail) score += 0.05;
+
+  // Normalize to 0-1 range
+  return Math.min(1, score);
 };
+
+// =====================================================
+// DIVERSITY ENFORCEMENT HELPERS
+// =====================================================
+function extractDomain(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+function validateImage(imgUrl) {
+  if (!imgUrl) return false;
+  if (typeof imgUrl !== "string") return false;
+
+  // Check for common non-article image patterns
+  const invalidPatterns = [
+    /favicon/i,
+    /\.ico$/i,
+    /logo/i,
+    /avatar/i,
+    /icon[-_]?\d+x\d+/i,
+    /16x16|32x32|48x48|64x64/i,
+  ];
+
+  return (
+    !invalidPatterns.some((pattern) => pattern.test(imgUrl)) &&
+    imgUrl.length > 5
+  );
+}
+
+function formatDate(dateStr) {
+  try {
+    return new Date(dateStr).toISOString().split("T")[0]; // YYYY-MM-DD
+  } catch {
+    return null;
+  }
+}
+
+// Weighted random shuffle by quality
+function weightedShuffle(articles) {
+  return articles
+    .map((a) => ({
+      ...a,
+      weight: Math.pow(a.qualityScore || 0.5, 2) + Math.random() * 0.1,
+    }))
+    .sort((a, b) => b.weight - a.weight);
+}
+
+// Get diversity rules from filterConfig
+function getDiversityRules(category, subcategory) {
+  const config = getFilterConfig(category, subcategory);
+
+  // Extract diversity rules from config
+  return {
+    QUALITY_SCORE_THRESHOLD:
+      config.DIVERSITY_RULES?.QUALITY_SCORE_THRESHOLD ||
+      config.CONTENT_RULES?.QUALITY_SCORE_THRESHOLD ||
+      0.3,
+    QUALITY_SCORE_NO_THUMBNAIL:
+      config.DIVERSITY_RULES?.QUALITY_SCORE_NO_THUMBNAIL ||
+      config.CONTENT_RULES?.QUALITY_SCORE_NO_THUMBNAIL ||
+      0.5,
+    MAX_PER_DOMAIN:
+      config.DIVERSITY_RULES?.MAX_PER_DOMAIN ||
+      config.SOURCE_RULES?.MAX_PER_DOMAIN ||
+      3,
+    UNIQUE_DATE_PER_DOMAIN:
+      config.DIVERSITY_RULES?.UNIQUE_DATE_PER_DOMAIN !== undefined
+        ? config.DIVERSITY_RULES.UNIQUE_DATE_PER_DOMAIN
+        : true,
+    NO_CONSECUTIVE_SAME_DOMAIN:
+      config.DIVERSITY_RULES?.NO_CONSECUTIVE_SAME_DOMAIN !== undefined
+        ? config.DIVERSITY_RULES.NO_CONSECUTIVE_SAME_DOMAIN
+        : true,
+    WEIGHTED_SHUFFLE:
+      config.DIVERSITY_RULES?.WEIGHTED_SHUFFLE !== undefined
+        ? config.DIVERSITY_RULES.WEIGHTED_SHUFFLE
+        : true,
+  };
+}
+
+// Apply diversity filters to collected articles
+function applyDiversityFilters(
+  articles,
+  category,
+  subcategory,
+  minRequired = 5
+) {
+  const rules = getDiversityRules(category, subcategory);
+
+  console.log(`Applying diversity filters to ${articles.length} articles`);
+  console.log(`Rules:`, rules);
+
+  // Step 1: Quality + Thumbnail enforcement
+  let filtered = articles.filter((a) => {
+    const hasValidThumbnail = a.thumbnail && validateImage(a.thumbnail);
+    const qualityThreshold = hasValidThumbnail
+      ? rules.QUALITY_SCORE_THRESHOLD
+      : rules.QUALITY_SCORE_NO_THUMBNAIL;
+
+    return (a.qualityScore || 0) >= qualityThreshold;
+  });
+
+  console.log(`After quality filter: ${filtered.length} articles`);
+
+  // If we don't have enough articles, be more lenient
+  if (filtered.length < minRequired) {
+    console.log(
+      `Not enough articles (${filtered.length} < ${minRequired}), relaxing quality threshold`
+    );
+    filtered = articles.filter(
+      (a) => (a.qualityScore || 0) >= rules.QUALITY_SCORE_THRESHOLD * 0.5
+    );
+  }
+
+  // Step 2: Shuffle weighted by quality
+  let shuffled = weightedShuffle(filtered);
+
+  // Step 3: Enforce domain caps + unique-date-per-domain
+  const domainCounts = {};
+  const domainDates = {};
+  const capped = [];
+
+  for (let article of shuffled) {
+    const domain = extractDomain(article.link || article.sourceUrl);
+    const pubDate = formatDate(article.pubDate);
+
+    domainCounts[domain] = domainCounts[domain] || 0;
+    domainDates[domain] = domainDates[domain] || new Set();
+
+    // Enforce max-per-domain cap (relax if we need minimum articles)
+    const effectiveMaxPerDomain =
+      capped.length < minRequired
+        ? rules.MAX_PER_DOMAIN * 2
+        : rules.MAX_PER_DOMAIN;
+
+    if (domainCounts[domain] >= effectiveMaxPerDomain) continue;
+
+    // Enforce unique-date-per-domain rule (skip if we need minimum)
+    if (
+      rules.UNIQUE_DATE_PER_DOMAIN &&
+      capped.length >= minRequired &&
+      pubDate &&
+      domainDates[domain].has(pubDate)
+    ) {
+      continue;
+    }
+
+    capped.push(article);
+    domainCounts[domain]++;
+    if (pubDate) domainDates[domain].add(pubDate);
+  }
+
+  console.log(`After domain diversity: ${capped.length} articles`);
+
+  // Step 4: Enforce "no consecutive same-domain" (only if we have enough articles)
+  if (rules.NO_CONSECUTIVE_SAME_DOMAIN && capped.length >= minRequired) {
+    const spaced = [];
+    const deferred = [];
+
+    capped.forEach((article) => {
+      const domain = extractDomain(article.link || article.sourceUrl);
+      const lastArticle = spaced[spaced.length - 1];
+      const lastDomain = lastArticle
+        ? extractDomain(lastArticle.link || lastArticle.sourceUrl)
+        : null;
+
+      if (!lastDomain || lastDomain !== domain) {
+        spaced.push(article);
+      } else {
+        deferred.push(article);
+      }
+    });
+
+    // Add deferred articles at the end
+    deferred.forEach((article) => {
+      const domain = extractDomain(article.link || article.sourceUrl);
+      let inserted = false;
+
+      // Try to insert between different domains
+      for (let i = spaced.length - 1; i > 0; i--) {
+        const prevDomain = extractDomain(
+          spaced[i - 1].link || spaced[i - 1].sourceUrl
+        );
+        const nextDomain = extractDomain(spaced[i].link || spaced[i].sourceUrl);
+
+        if (prevDomain !== domain && nextDomain !== domain) {
+          spaced.splice(i, 0, article);
+          inserted = true;
+          break;
+        }
+      }
+
+      if (!inserted) {
+        spaced.push(article);
+      }
+    });
+
+    console.log(`After spacing: ${spaced.length} articles`);
+    return spaced;
+  }
+
+  return capped;
+}
 
 // Parse feed item with RELAXATION PARAMETER
 const parseFeedItem = (
@@ -475,7 +701,7 @@ const parseFeedItem = (
     }
   }
 
-  // Quality scoring
+  // Quality scoring (normalized 0-1 for diversity rules)
   const qualityScore = scoreArticleQuality(
     {
       title,
@@ -670,13 +896,13 @@ async function fetchFeedsWithProgressiveRelaxation(
             const key = item.guid || item.link;
             if (!seen.has(key)) {
               seen.add(key);
-              qualifiedItems.push({
+              const emergencyItem = {
                 title: item.title.substring(0, 200),
                 link: item.link,
                 description: item.description?.substring(0, 200) || item.title,
                 thumbnail: null,
                 allowDefaultIcon: true,
-                qualityScore: 0,
+                qualityScore: 0.2, // Low but non-zero for diversity rules
                 source: getFeedDisplayName(feedUrls[i]),
                 sourceUrl: feedUrls[i],
                 creator:
@@ -686,7 +912,14 @@ async function fetchFeedsWithProgressiveRelaxation(
                 guid: key,
                 pubDate: item.pubDate || new Date().toISOString(),
                 time: new Date(item.pubDate || Date.now()).toLocaleString(),
-              });
+              };
+              // Calculate basic quality score even for emergency items
+              emergencyItem.qualityScore = scoreArticleQuality(
+                emergencyItem,
+                category,
+                subcategory
+              );
+              qualifiedItems.push(emergencyItem);
             }
           }
         }
@@ -696,55 +929,22 @@ async function fetchFeedsWithProgressiveRelaxation(
     }
   }
 
-  // Sort by date
+  // Sort by date first
   qualifiedItems.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
 
-  // Final deduplication
-  let finalItems = [];
-  const usedUncommonWords = new Set();
-  const commonWords = new Set([
-    "the",
-    "and",
-    "for",
-    "with",
-    "from",
-    "that",
-    "this",
-    "what",
-    "when",
-    "where",
-    "which",
-    "while",
-    "after",
-    "before",
-    "about",
-  ]);
+  // Apply diversity filters BEFORE final deduplication
+  const diversityFiltered = applyDiversityFilters(
+    qualifiedItems,
+    category,
+    subcategory,
+    MIN_ITEMS_REQUIRED
+  );
 
-  for (const item of qualifiedItems) {
-    if (finalItems.length >= MAX_ITEMS) break;
-
-    // Skip uncommon word dedup if we don't have enough items
-    if (finalItems.length < MIN_ITEMS_REQUIRED) {
-      finalItems.push(item);
-      continue;
-    }
-
-    const titleWords = item.title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, " ")
-      .split(/\s+/)
-      .filter((word) => word.length > 4 && !commonWords.has(word));
-
-    const hasDuplicate = titleWords.some((word) => usedUncommonWords.has(word));
-
-    if (!hasDuplicate) {
-      finalItems.push(item);
-      titleWords.forEach((word) => usedUncommonWords.add(word));
-    }
-  }
+  // Take only the required number of items
+  const finalItems = diversityFiltered.slice(0, MAX_ITEMS);
 
   console.log(
-    `Returning ${finalItems.length} items (min required: ${MIN_ITEMS_REQUIRED})`
+    `Final output: ${finalItems.length} items (min required: ${MIN_ITEMS_REQUIRED})`
   );
   return finalItems;
 }
@@ -812,6 +1012,13 @@ export default async function handler(req, res) {
       );
     }
 
+    // Calculate domain diversity metrics for logging
+    const domainCounts = {};
+    finalItems.forEach((item) => {
+      const domain = extractDomain(item.link || item.sourceUrl);
+      domainCounts[domain] = (domainCounts[domain] || 0) + 1;
+    });
+
     return res.status(200).json({
       items: finalItems,
       count: finalItems.length,
@@ -820,6 +1027,13 @@ export default async function handler(req, res) {
       timestamp: new Date().toISOString(),
       success: true,
       minimumMet: finalItems.length >= MIN_ITEMS_REQUIRED,
+      diversity: {
+        uniqueDomains: Object.keys(domainCounts).length,
+        avgQualityScore:
+          finalItems.reduce((sum, item) => sum + (item.qualityScore || 0), 0) /
+          finalItems.length,
+        withThumbnails: finalItems.filter((item) => item.thumbnail).length,
+      },
     });
   } catch (error) {
     console.error("Feed fetching error:", error);
