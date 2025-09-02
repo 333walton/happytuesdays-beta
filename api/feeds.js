@@ -375,7 +375,7 @@ const MAX_ITEMS_PER_FEED = 20;
 const TARGET_BUFFER = 25;
 const MAX_FEEDS_TO_PROCESS = 35; // Process more feeds before giving up
 const TIMEOUT_MS = 8500;
-const MIN_FEEDS_BEFORE_RELAX = 8; // Don't relax until at least 8 feeds processed
+const MIN_FEEDS_BEFORE_RELAX = 35; // Don't relax until at least 35 feeds processed
 const MIN_QUALITY_FOR_NO_THUMBNAIL = 0.98; // Almost impossible to meet
 
 // Helper functions

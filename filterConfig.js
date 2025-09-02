@@ -121,7 +121,7 @@ const CATEGORY_FILTER_CONFIG = {
       MAX_ITEMS_PER_FEED: 20,
       TARGET_BUFFER: 25,
       MIN_ITEMS_REQUIRED: 5,
-      MIN_FEEDS_BEFORE_RELAX: 6, // NEW: Don't relax too early
+      MIN_FEEDS_BEFORE_RELAX: 35, // NEW: Don't relax too early
     },
     PROMOTIONAL_KEYWORDS: [
       "$",
