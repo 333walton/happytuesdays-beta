@@ -635,7 +635,7 @@ const parseFeedItem = (
   relaxFilters = false
 ) => {
   const config = getFilterConfig(category, subcategory);
-  const title = item.title || "Untitled";
+  const title = (item.title || "Untitled").trim(); // Ensure title is trimmed
 
   // Title validation (balanced)
   const minTitleLength = relaxFilters
@@ -754,23 +754,44 @@ const parseFeedItem = (
     }
   }
 
-  // Promotional content check (skip when very relaxed)
+  // Enhanced promotional content check
   if (!relaxFilters) {
     const promotionalKeywords = config.PROMOTIONAL_KEYWORDS || [];
     const titleLower = title.toLowerCase();
+    const cleanedTitle = title.replace(/\s+/g, " ").trim(); // Normalize whitespace
 
     for (const keyword of promotionalKeywords) {
-      if (
-        typeof keyword === "string" &&
-        titleLower.includes(keyword.toLowerCase())
-      ) {
+      if (typeof keyword === "string") {
+        const keywordLower = keyword.toLowerCase();
+        // Check both normal title and cleaned title
+        if (
+          titleLower.includes(keywordLower) ||
+          cleanedTitle.toLowerCase().includes(keywordLower)
+        ) {
+          return null;
+        }
+      }
+    }
+
+    // Additional check for clickbait patterns
+    const clickbaitPatterns = [
+      /^\s*\n/, // Titles starting with newlines
+      /\n\s*$/, // Titles ending with newlines
+      /^\s{2,}/, // Multiple leading spaces
+      /\s{2,}$/, // Multiple trailing spaces
+      /^[^A-Za-z0-9"']/, // Starting with special chars (except quotes)
+    ];
+
+    for (const pattern of clickbaitPatterns) {
+      if (pattern.test(item.title)) {
+        // Check original title
         return null;
       }
     }
   }
 
   return {
-    title: title,
+    title: title, // Use the trimmed title
     link: item.link || item.guid || "#",
     description,
     thumbnail: thumbnail || null,
