@@ -65,11 +65,11 @@
 // This configuration enforces higher quality standards across all categories
 
 const CATEGORY_FILTER_CONFIG = {
-  // Global defaults with STRICTER requirements
+  // Global defaults with BALANCED requirements
   DEFAULT: {
     TITLE_RULES: {
-      MIN_LENGTH: 15, // Increased from 10
-      MAX_LENGTH: 100, // Reduced from 110
+      MIN_LENGTH: 10, // Reasonable minimum
+      MAX_LENGTH: 100,
       NO_ALL_CAPS: true,
       NO_ALL_LOWERCASE: true,
       NO_SPAM_PATTERNS: true,
@@ -77,51 +77,51 @@ const CATEGORY_FILTER_CONFIG = {
       NO_PROMOTIONAL_KEYWORDS: true,
     },
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 50, // Increased from 30
+      MIN_DESCRIPTION_LENGTH: 30, // Back to reasonable minimum
       NO_LOWERCASE_START: true,
       NO_SPECIAL_CHAR_START: true,
       NO_URLS_IN_DESCRIPTION: true,
       NO_CODE_CONTENT: true,
       QUALITY_CHECK: true,
-      MAX_EMOJI_SYMBOLS: 2, // Reduced from 3
-      // STRICTER quality thresholds
-      QUALITY_SCORE_THRESHOLD: 0.4, // Increased from 0.3
-      QUALITY_SCORE_NO_THUMBNAIL: 0.9, // Increased from 1.0 to 0.9 (nearly perfect)
-      REQUIRE_UNCOMMON_WORDS: true, // NEW: Require unique content
-      MIN_UNCOMMON_WORDS: 3, // NEW: Minimum unique words required
+      MAX_EMOJI_SYMBOLS: 2,
+      // BALANCED quality thresholds
+      QUALITY_SCORE_THRESHOLD: 0.35, // Reasonable threshold
+      QUALITY_SCORE_NO_THUMBNAIL: 0.7, // High but achievable
+      REQUIRE_UNCOMMON_WORDS: true,
+      MIN_UNCOMMON_WORDS: 2, // Reduced from 3
     },
     SOURCE_RULES: {
-      MAX_PER_DOMAIN: 2, // Reduced from 3 for more diversity
+      MAX_PER_DOMAIN: 2, // Allow 2 per domain
     },
     AGE_RULES: {
-      MAX_AGE_DAYS: 60, // Reduced from 90 for fresher content
+      MAX_AGE_DAYS: 90, // Allow older content
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
       VALIDATE_REAL_IMAGE: true,
-      USE_DEFAULT_ON_HIGH_QUALITY: false, // Changed to false - NO defaults
-      MIN_QUALITY_SCORE_FOR_DEFAULT: 0.98, // Nearly impossible threshold
+      USE_DEFAULT_ON_HIGH_QUALITY: true, // Allow defaults for good content
+      MIN_QUALITY_SCORE_FOR_DEFAULT: 0.8, // Achievable threshold
     },
     DEDUPLICATION: {
-      CROSS_FEED: true, // Changed to true
+      CROSS_FEED: false, // Don't dedupe across feeds
       UNCOMMON_WORDS: true,
       FINGERPRINT_LENGTH: 30,
     },
-    // STRICTER diversity rules
+    // BALANCED diversity rules
     DIVERSITY_RULES: {
-      MAX_PER_DOMAIN: 2, // Reduced from 3
+      MAX_PER_DOMAIN: 2,
       UNIQUE_DATE_PER_DOMAIN: true,
       NO_CONSECUTIVE_SAME_DOMAIN: true,
       WEIGHTED_SHUFFLE: true,
-      QUALITY_SCORE_THRESHOLD: 0.4, // Increased from 0.3
-      QUALITY_SCORE_NO_THUMBNAIL: 0.9, // Nearly perfect required
+      QUALITY_SCORE_THRESHOLD: 0.35,
+      QUALITY_SCORE_NO_THUMBNAIL: 0.75,
     },
     LIMITS: {
       MAX_ITEMS: 10,
-      MAX_ITEMS_PER_FEED: 20,
-      TARGET_BUFFER: 25,
+      MAX_ITEMS_PER_FEED: 10,
+      TARGET_BUFFER: 20,
       MIN_ITEMS_REQUIRED: 5,
-      MIN_FEEDS_BEFORE_RELAX: 6, // NEW: Don't relax too early
+      MIN_FEEDS_BEFORE_RELAX: 20,
     },
     PROMOTIONAL_KEYWORDS: [
       "$",
@@ -248,114 +248,134 @@ const CATEGORY_FILTER_CONFIG = {
     },
   },
 
-  // Builder category - Quality content focus
+  // Builder category - BALANCED for better results
   builder: {
     TITLE_RULES: {
-      MIN_LENGTH: 12, // Slightly more lenient
+      MIN_LENGTH: 8, // More lenient
       NO_ALL_CAPS: true,
       NO_ALL_LOWERCASE: true,
     },
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 40, // Increased from 20
+      MIN_DESCRIPTION_LENGTH: 25, // Reduced for better results
       NO_SPECIAL_CHAR_START: true,
       NO_URLS_IN_DESCRIPTION: true,
       NO_CODE_CONTENT: true,
       QUALITY_CHECK: true,
       MAX_EMOJI_SYMBOLS: 2,
-      QUALITY_SCORE_THRESHOLD: 0.4,
-      QUALITY_SCORE_NO_THUMBNAIL: 0.9,
+      QUALITY_SCORE_THRESHOLD: 0.3, // Lower threshold
+      QUALITY_SCORE_NO_THUMBNAIL: 0.8, // More achievable
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
       VALIDATE_REAL_IMAGE: true,
-      MIN_QUALITY_SCORE_FOR_DEFAULT: 0.9,
+      USE_DEFAULT_ON_HIGH_QUALITY: true,
+      MIN_QUALITY_SCORE_FOR_DEFAULT: 0.75, // More reasonable
     },
     AGE_RULES: {
-      MAX_AGE_DAYS: 30, // Reduced from 40
+      MAX_AGE_DAYS: 60, // Allow older content
     },
     DIVERSITY_RULES: {
-      MAX_PER_DOMAIN: 2, // Reduced from 3
+      MAX_PER_DOMAIN: 2, // Allow more per domain
       WEIGHTED_SHUFFLE: true,
-      QUALITY_SCORE_THRESHOLD: 0.4,
+      QUALITY_SCORE_THRESHOLD: 0.3,
     },
     subcategories: {
       "startup-stories": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 50,
-          QUALITY_SCORE_THRESHOLD: 0.45,
+          MIN_DESCRIPTION_LENGTH: 30,
+          QUALITY_SCORE_THRESHOLD: 0.35,
+          QUALITY_SCORE_NO_THUMBNAIL: 0.65,
+        },
+        THUMBNAIL_RULES: {
+          REQUIRED: true,
+          VALIDATE_REAL_IMAGE: true,
+          MIN_QUALITY_SCORE_FOR_DEFAULT: 0.65,
+        },
+        DIVERSITY_RULES: {
+          MAX_PER_DOMAIN: 2, // Allow 2 per domain
+          UNIQUE_DATE_PER_DOMAIN: true,
+          NO_CONSECUTIVE_SAME_DOMAIN: true,
+        },
+        AGE_RULES: {
+          MAX_AGE_DAYS: 30, // Reasonably fresh
         },
       },
       "productivity-hacks": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 60, // Can be older
+          MAX_AGE_DAYS: 90,
         },
         DIVERSITY_RULES: {
-          MAX_PER_DOMAIN: 3, // Allow slightly more
+          MAX_PER_DOMAIN: 3,
         },
       },
       "automation-no-code": {
         CONTENT_RULES: {
           NO_CODE_CONTENT: false,
-          MIN_DESCRIPTION_LENGTH: 40,
+          MIN_DESCRIPTION_LENGTH: 25,
+          QUALITY_SCORE_THRESHOLD: 0.3,
+        },
+        THUMBNAIL_RULES: {
+          MIN_QUALITY_SCORE_FOR_DEFAULT: 0.6,
         },
       },
       "project-management": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 40,
-          QUALITY_SCORE_THRESHOLD: 0.4,
+          MIN_DESCRIPTION_LENGTH: 25,
+          QUALITY_SCORE_THRESHOLD: 0.3,
         },
       },
       "momentum-mindset": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 60,
+          MAX_AGE_DAYS: 90,
         },
         CONTENT_RULES: {
-          QUALITY_CHECK: true, // Changed from false
-          QUALITY_SCORE_THRESHOLD: 0.35,
+          QUALITY_CHECK: true,
+          QUALITY_SCORE_THRESHOLD: 0.3,
         },
         DIVERSITY_RULES: {
           MAX_PER_DOMAIN: 3,
-          UNIQUE_DATE_PER_DOMAIN: true, // Changed to true
+          UNIQUE_DATE_PER_DOMAIN: false,
         },
       },
     },
   },
 
-  // Art category - Visual content priority
+  // Art category - BALANCED for visual content
   art: {
     TITLE_RULES: {
-      MIN_LENGTH: 10,
+      MIN_LENGTH: 8,
     },
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 30,
+      MIN_DESCRIPTION_LENGTH: 20, // Lower minimum
       NO_CODE_CONTENT: true,
       QUALITY_CHECK: true,
       MAX_EMOJI_SYMBOLS: 2,
-      QUALITY_SCORE_THRESHOLD: 0.35, // Increased from 0.25
-      QUALITY_SCORE_NO_THUMBNAIL: 0.95, // Art needs images
+      QUALITY_SCORE_THRESHOLD: 0.3, // Reasonable
+      QUALITY_SCORE_NO_THUMBNAIL: 0.6, // Achievable
     },
     THUMBNAIL_RULES: {
       REQUIRED: true,
       VALIDATE_REAL_IMAGE: true,
-      MIN_QUALITY_SCORE_FOR_DEFAULT: 0.95, // Very high for art
+      USE_DEFAULT_ON_HIGH_QUALITY: true,
+      MIN_QUALITY_SCORE_FOR_DEFAULT: 0.6, // More reasonable
     },
     DEDUPLICATION: {
       UNCOMMON_WORDS: true,
     },
     AGE_RULES: {
-      MAX_AGE_DAYS: 60, // Reduced from 90
+      MAX_AGE_DAYS: 90,
     },
     DIVERSITY_RULES: {
-      MAX_PER_DOMAIN: 2, // Reduced from 3
+      MAX_PER_DOMAIN: 3, // Allow more
       WEIGHTED_SHUFFLE: true,
-      QUALITY_SCORE_THRESHOLD: 0.35,
-      QUALITY_SCORE_NO_THUMBNAIL: 0.95,
+      QUALITY_SCORE_THRESHOLD: 0.3,
+      QUALITY_SCORE_NO_THUMBNAIL: 0.6,
     },
     subcategories: {
       "generative-ai-art": {
         CONTENT_RULES: {
           NO_CODE_CONTENT: false,
-          QUALITY_SCORE_THRESHOLD: 0.4,
+          QUALITY_SCORE_THRESHOLD: 0.3,
         },
       },
       "ui-ux-trends": {
@@ -364,123 +384,124 @@ const CATEGORY_FILTER_CONFIG = {
           VALIDATE_REAL_IMAGE: true,
         },
         DIVERSITY_RULES: {
-          MAX_PER_DOMAIN: 2,
+          MAX_PER_DOMAIN: 3,
         },
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 40,
-          QUALITY_SCORE_THRESHOLD: 0.45,
+          MIN_DESCRIPTION_LENGTH: 25,
+          QUALITY_SCORE_THRESHOLD: 0.35,
         },
       },
       "color-typography": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 30,
+          MIN_DESCRIPTION_LENGTH: 20,
         },
         AGE_RULES: {
-          MAX_AGE_DAYS: 60,
+          MAX_AGE_DAYS: 90,
         },
       },
       "animation-motion": {
         THUMBNAIL_RULES: {
           REQUIRED: true,
           VALIDATE_REAL_IMAGE: true,
-          MIN_QUALITY_SCORE_FOR_DEFAULT: 0.95,
+          MIN_QUALITY_SCORE_FOR_DEFAULT: 0.6,
         },
       },
       "tutorials-walkthroughs": {
         CONTENT_RULES: {
           NO_URLS_IN_DESCRIPTION: true,
-          MIN_DESCRIPTION_LENGTH: 50,
+          MIN_DESCRIPTION_LENGTH: 30,
         },
         AGE_RULES: {
-          MAX_AGE_DAYS: 60,
+          MAX_AGE_DAYS: 90,
         },
         DIVERSITY_RULES: {
           MAX_PER_DOMAIN: 3,
-          NO_CONSECUTIVE_SAME_DOMAIN: true, // Changed to true
+          NO_CONSECUTIVE_SAME_DOMAIN: false,
         },
       },
     },
   },
 
-  // Gaming category - Fresh content focus
+  // Gaming category - OPTIMIZED for speed and results
   gaming: {
     TITLE_RULES: {
-      MIN_LENGTH: 10,
+      MIN_LENGTH: 8, // More lenient
       NO_ALL_CAPS: true,
     },
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 30,
+      MIN_DESCRIPTION_LENGTH: 20, // Lower minimum
       MAX_EMOJI_SYMBOLS: 3,
-      QUALITY_CHECK: true, // Changed from false
-      QUALITY_SCORE_THRESHOLD: 0.35, // Increased from 0.25
-      QUALITY_SCORE_NO_THUMBNAIL: 0.9,
+      QUALITY_CHECK: false, // Disable for speed
+      QUALITY_SCORE_THRESHOLD: 0.25, // Very lenient
+      QUALITY_SCORE_NO_THUMBNAIL: 0.5, // More achievable
     },
     AGE_RULES: {
-      MAX_AGE_DAYS: 60, // Reduced from 90
+      MAX_AGE_DAYS: 90, // Allow older content
     },
     THUMBNAIL_RULES: {
-      REQUIRED: true,
+      REQUIRED: false, // Don't require for gaming
       VALIDATE_REAL_IMAGE: true,
-      MIN_QUALITY_SCORE_FOR_DEFAULT: 0.9,
+      USE_DEFAULT_ON_HIGH_QUALITY: true,
+      MIN_QUALITY_SCORE_FOR_DEFAULT: 0.5, // Lower threshold
     },
     DIVERSITY_RULES: {
-      MAX_PER_DOMAIN: 3, // Reduced from 4
-      UNIQUE_DATE_PER_DOMAIN: true, // Changed to true
+      MAX_PER_DOMAIN: 3, // Allow more
+      UNIQUE_DATE_PER_DOMAIN: false, // Allow multiple same-day
       WEIGHTED_SHUFFLE: true,
-      QUALITY_SCORE_THRESHOLD: 0.35,
+      QUALITY_SCORE_THRESHOLD: 0.25,
     },
     subcategories: {
       "daily-roundup": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 3, // Very fresh for daily
+          MAX_AGE_DAYS: 7, // Week old is fine
         },
         CONTENT_RULES: {
-          QUALITY_CHECK: true,
-          QUALITY_SCORE_THRESHOLD: 0.4,
+          QUALITY_CHECK: false,
+          QUALITY_SCORE_THRESHOLD: 0.25,
         },
         DIVERSITY_RULES: {
-          MAX_PER_DOMAIN: 2,
+          MAX_PER_DOMAIN: 3,
         },
       },
       "pro-guides-tips": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 60,
+          MAX_AGE_DAYS: 90,
         },
         DIVERSITY_RULES: {
-          MAX_PER_DOMAIN: 3, // Reduced from 5
-          NO_CONSECUTIVE_SAME_DOMAIN: true, // Changed to true
+          MAX_PER_DOMAIN: 4,
+          NO_CONSECUTIVE_SAME_DOMAIN: false,
         },
       },
       "retro-gaming": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 60,
+          MAX_AGE_DAYS: 90,
         },
         THUMBNAIL_RULES: {
-          REQUIRED: true,
+          REQUIRED: false,
           VALIDATE_REAL_IMAGE: true,
         },
         CONTENT_RULES: {
-          QUALITY_SCORE_THRESHOLD: 0.35,
+          QUALITY_SCORE_THRESHOLD: 0.25,
         },
       },
       "indie-spotlights": {
         CONTENT_RULES: {
-          MIN_DESCRIPTION_LENGTH: 30,
-          QUALITY_SCORE_THRESHOLD: 0.4,
+          MIN_DESCRIPTION_LENGTH: 20,
+          QUALITY_SCORE_THRESHOLD: 0.3,
         },
         DIVERSITY_RULES: {
-          MAX_PER_DOMAIN: 2, // Reduced from 3
+          MAX_PER_DOMAIN: 3,
         },
       },
       "collectors-hub": {
         AGE_RULES: {
-          MAX_AGE_DAYS: 60,
+          MAX_AGE_DAYS: 90,
         },
         DIVERSITY_RULES: {
-          UNIQUE_DATE_PER_DOMAIN: true,
+          UNIQUE_DATE_PER_DOMAIN: false,
         },
         CONTENT_RULES: {
-          QUALITY_SCORE_THRESHOLD: 0.35,
+          QUALITY_SCORE_THRESHOLD: 0.25,
         },
       },
     },
