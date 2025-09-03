@@ -356,7 +356,6 @@ const MAX_ITEMS_PER_FEED = 10; // Reduced to prevent timeout
 const TARGET_BUFFER = 20; // Reduced buffer
 const MAX_FEEDS_TO_PROCESS = 30; // Reduced to prevent timeout
 const TIMEOUT_MS = 7500; // Shorter timeout to prevent 504
-const MIN_FEEDS_BEFORE_RELAX = 20; // Relax sooner if needed
 
 // Helper functions
 const getFeedsForCategory = (category) => {
@@ -786,7 +785,7 @@ const parseFeedItem = (
   };
 };
 
-// PROGRESSIVE FETCH WITH BALANCED RELAXATION
+// UPDATED: TWO-PASS PROGRESSIVE FETCH WITH BALANCED RELAXATION
 async function fetchFeedsWithProgressiveRelaxation(
   feedUrls,
   category,
@@ -797,7 +796,6 @@ async function fetchFeedsWithProgressiveRelaxation(
   const domainCounts = new Map();
   let totalProcessed = 0;
   const startTime = Date.now();
-  let relaxFilters = false;
   let feedsProcessed = 0;
 
   // Clear uncommon words tracker
@@ -806,12 +804,20 @@ async function fetchFeedsWithProgressiveRelaxation(
   // Randomize feed order
   const shuffledFeeds = shuffleArray(feedUrls);
 
-  console.log(`Starting progressive fetch for ${shuffledFeeds.length} feeds`);
+  console.log(
+    `Starting TWO-PASS progressive fetch for ${shuffledFeeds.length} feeds`
+  );
   console.log(`Category: ${category}, Subcategory: ${subcategory || "none"}`);
 
   const config = getFilterConfig(category, subcategory);
 
-  // Process feeds with progressive relaxation
+  // ========================================
+  // FIRST PASS: Process ALL feeds with STRICT filters
+  // ========================================
+  console.log(
+    `PASS 1: Processing all ${shuffledFeeds.length} feeds with strict filters`
+  );
+
   for (
     let i = 0;
     i < Math.min(shuffledFeeds.length, MAX_FEEDS_TO_PROCESS);
@@ -829,21 +835,10 @@ async function fetchFeedsWithProgressiveRelaxation(
 
     // Check if we have enough items
     if (qualifiedItems.length >= TARGET_BUFFER) {
-      console.log(`SUCCESS: ${qualifiedItems.length} items collected`);
+      console.log(
+        `SUCCESS: ${qualifiedItems.length} items collected in first pass`
+      );
       break;
-    }
-
-    // Progressive relaxation based on results
-    if (
-      feedsProcessed >= MIN_FEEDS_BEFORE_RELAX &&
-      qualifiedItems.length < MIN_ITEMS_REQUIRED
-    ) {
-      if (!relaxFilters) {
-        console.log(
-          `RELAXING FILTERS: Only ${qualifiedItems.length} items after ${feedsProcessed} feeds`
-        );
-        relaxFilters = true;
-      }
     }
 
     try {
@@ -852,7 +847,9 @@ async function fetchFeedsWithProgressiveRelaxation(
       const feedParseTime = Date.now() - feedStartTime;
 
       console.log(
-        `Feed ${getFeedDisplayName(feedUrl)} parsed in ${feedParseTime}ms`
+        `Feed ${i + 1}/${shuffledFeeds.length}: ${getFeedDisplayName(
+          feedUrl
+        )} parsed in ${feedParseTime}ms`
       );
 
       feedsProcessed++;
@@ -864,12 +861,13 @@ async function fetchFeedsWithProgressiveRelaxation(
 
         if (qualifiedItems.length >= TARGET_BUFFER) break;
 
+        // Parse with STRICT filters (relaxFilters = false)
         const parsed = parseFeedItem(
           item,
           feedUrl,
           category,
           subcategory,
-          relaxFilters
+          false // STRICT filters
         );
 
         if (!parsed) continue;
@@ -882,16 +880,8 @@ async function fetchFeedsWithProgressiveRelaxation(
         const domain = extractDomain(parsed.link || feedUrl);
         const currentDomainCount = domainCounts.get(domain) || 0;
 
-        // Progressive domain limits
-        let maxPerDomain = 2; // Start with 2
-        if (qualifiedItems.length < MIN_ITEMS_REQUIRED && feedsProcessed > 3) {
-          maxPerDomain = 3; // Allow 3 if struggling
-        }
-        if (relaxFilters) {
-          maxPerDomain = 4; // Allow 4 when relaxed
-        }
-
-        if (currentDomainCount >= maxPerDomain) {
+        // Start with 2 per domain in first pass
+        if (currentDomainCount >= 2) {
           continue;
         }
 
@@ -905,24 +895,106 @@ async function fetchFeedsWithProgressiveRelaxation(
   }
 
   console.log(
-    `Processed ${totalProcessed} items, qualified ${qualifiedItems.length}`
+    `PASS 1 COMPLETE: Processed ${feedsProcessed}/${shuffledFeeds.length} feeds`
+  );
+  console.log(
+    `PASS 1 RESULTS: ${qualifiedItems.length} qualified items from ${totalProcessed} total items`
   );
 
-  // If still very few items, try emergency relaxation
+  // ========================================
+  // SECOND PASS: Only if we don't have enough items
+  // Re-process feeds with RELAXED filters
+  // ========================================
   if (
     qualifiedItems.length < MIN_ITEMS_REQUIRED &&
-    feedsProcessed < feedUrls.length
+    feedsProcessed === shuffledFeeds.length
   ) {
     console.log(
-      `EMERGENCY: Only ${qualifiedItems.length} items, trying emergency fetch`
+      `PASS 2: Need more items (${qualifiedItems.length} < ${MIN_ITEMS_REQUIRED}), relaxing filters`
     );
 
+    // Clear the uncommon words tracker for second pass
+    usedUncommonWords.clear();
+
+    // Increase domain limits for second pass
+    const relaxedDomainLimit = 4;
+
     for (
-      let i = feedsProcessed;
-      i < Math.min(feedUrls.length, feedsProcessed + 2);
+      let i = 0;
+      i < Math.min(shuffledFeeds.length, MAX_FEEDS_TO_PROCESS);
       i++
     ) {
+      const feedUrl = shuffledFeeds[i];
+
+      // Timeout check
+      if (Date.now() - startTime > TIMEOUT_MS) {
+        console.log(`TIMEOUT: Stopping second pass after ${i} feeds`);
+        break;
+      }
+
+      // Check if we have enough items
+      if (qualifiedItems.length >= MIN_ITEMS_REQUIRED) {
+        console.log(
+          `SUCCESS: ${qualifiedItems.length} items collected after second pass`
+        );
+        break;
+      }
+
+      try {
+        const feed = await parser.parseURL(feedUrl);
+        const itemsToProcess = feed.items.slice(0, MAX_ITEMS_PER_FEED);
+
+        for (const item of itemsToProcess) {
+          if (qualifiedItems.length >= MIN_ITEMS_REQUIRED * 2) break; // Get some buffer
+
+          // Parse with RELAXED filters
+          const parsed = parseFeedItem(
+            item,
+            feedUrl,
+            category,
+            subcategory,
+            true // RELAXED filters
+          );
+
+          if (!parsed) continue;
+
+          // Check if we already have this item
+          const key = parsed.guid || parsed.link;
+          if (seen.has(key)) continue;
+
+          // More lenient domain limiting
+          const domain = extractDomain(parsed.link || feedUrl);
+          const currentDomainCount = domainCounts.get(domain) || 0;
+
+          if (currentDomainCount >= relaxedDomainLimit) {
+            continue;
+          }
+
+          seen.add(key);
+          domainCounts.set(domain, currentDomainCount + 1);
+          qualifiedItems.push(parsed);
+        }
+      } catch (error) {
+        console.error(`Pass 2 error fetching ${feedUrl}:`, error.message);
+      }
+    }
+
+    console.log(
+      `PASS 2 COMPLETE: Now have ${qualifiedItems.length} qualified items`
+    );
+  }
+
+  // ========================================
+  // EMERGENCY FALLBACK: If still very few items
+  // ========================================
+  if (qualifiedItems.length < MIN_ITEMS_REQUIRED) {
+    console.log(
+      `EMERGENCY: Only ${qualifiedItems.length} items after both passes`
+    );
+
+    for (let i = 0; i < Math.min(2, shuffledFeeds.length); i++) {
       if (Date.now() - startTime > TIMEOUT_MS) break;
+      if (qualifiedItems.length >= MIN_ITEMS_REQUIRED) break;
 
       try {
         const feed = await parser.parseURL(shuffledFeeds[i]);
@@ -1125,7 +1197,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Use balanced progressive fetch
+    // Use the new two-pass progressive fetch
     const finalItems = await fetchFeedsWithProgressiveRelaxation(
       feedUrls,
       category,

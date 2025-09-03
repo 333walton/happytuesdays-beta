@@ -43,7 +43,7 @@
     UNCOMMON_WORDS   - Require article word uniqueness (true/false)
     FINGERPRINT_LENGTH - Character length used for deduplication hashing
 
-  DIVERSITY_RULES (NEW):
+  DIVERSITY_RULES:
     MAX_PER_DOMAIN           - Maximum articles from same domain (overrides SOURCE_RULES.MAX_PER_DOMAIN)
     UNIQUE_DATE_PER_DOMAIN   - No multiple same-day articles from same source (true/false)
     NO_CONSECUTIVE_SAME_DOMAIN - Prevent back-to-back articles from same source (true/false)
@@ -59,11 +59,15 @@
 
   PROMOTIONAL_KEYWORDS:
     Blocks articles containing specified promotional terms
+    
+  TWO_PASS_STRATEGY:
+    The system now uses a two-pass approach:
+    PASS 1: Process ALL feeds with strict filters first
+    PASS 2: Only if needed, re-process with relaxed filters
+    This ensures best quality articles from ALL sources before compromising standards
 */
 
-// filterConfig.js - STRICTER Filter Configurations for Higher Quality
-// This configuration enforces higher quality standards across all categories
-
+// filterConfig.js - BALANCED Filter Configurations with Two-Pass Strategy Support
 const CATEGORY_FILTER_CONFIG = {
   // Global defaults with BALANCED requirements
   DEFAULT: {
@@ -77,7 +81,7 @@ const CATEGORY_FILTER_CONFIG = {
       NO_PROMOTIONAL_KEYWORDS: true,
     },
     CONTENT_RULES: {
-      MIN_DESCRIPTION_LENGTH: 30, // Back to reasonable minimum
+      MIN_DESCRIPTION_LENGTH: 30, // Reasonable minimum
       NO_LOWERCASE_START: true,
       NO_SPECIAL_CHAR_START: true,
       NO_URLS_IN_DESCRIPTION: true,
@@ -91,7 +95,7 @@ const CATEGORY_FILTER_CONFIG = {
       MIN_UNCOMMON_WORDS: 2, // Reduced from 3
     },
     SOURCE_RULES: {
-      MAX_PER_DOMAIN: 2, // Allow 2 per domain
+      MAX_PER_DOMAIN: 2, // Allow 2 per domain in first pass
     },
     AGE_RULES: {
       MAX_AGE_DAYS: 90, // Allow older content
@@ -121,7 +125,7 @@ const CATEGORY_FILTER_CONFIG = {
       MAX_ITEMS_PER_FEED: 10,
       TARGET_BUFFER: 20,
       MIN_ITEMS_REQUIRED: 5,
-      MIN_FEEDS_BEFORE_RELAX: 20,
+      // Removed MIN_FEEDS_BEFORE_RELAX - now using two-pass strategy
     },
     PROMOTIONAL_KEYWORDS: [
       "$",
